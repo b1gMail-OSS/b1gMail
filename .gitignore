@@ -1,0 +1,11 @@
+src/admin/templates/cache/
+src/data/
+src/serverlib/config.inc.php
+src/temp/*.tmp
+src/temp/cache/
+src/temp/session/
+src/templates/modern/cache/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

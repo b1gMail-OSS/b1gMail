@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://www.b1gmail.eu">
-    <img width="200" height="200" src="https://www.b1gmail.eu/b1gmaillogo.png">
+    <img width="426" height="213" src="https://www.b1gmail.eu/b1gmaillogo.png">
   </a>
   <br>
   <h1>b1gMail 7.4 OpenSource version</h1>
