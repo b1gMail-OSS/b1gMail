@@ -1,0 +1,183 @@
+<!--
+
+FIELDSET
+{
+	border: 1px solid #999999;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-khtml-border-radius: 5px;
+}
+INPUT,SELECT,TEXTAREA
+{
+	border: 1px solid #CCC;
+	padding: 3px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-khtml-border-radius: 3px;
+}
+SELECT
+{
+	padding: 2px;
+}
+TEXTAREA
+{
+	padding-left: 0px;
+	padding-right: 0px;
+}
+INPUT:focus,SELECT:focus,TEXTAREA:focus
+{
+	border: 1px solid #666;
+	box-shadow: inset 0px 1px 2px #ccc;
+	-moz-box-shadow: inset 0px 1px 2px #ccc;
+	-khtml-box-shadow: inset 0px 1px 2px #ccc;
+}
+.button
+{
+	background-image: url(../../admin/templates/images/header_bg.png);
+	background-position: 0px -32px;
+	color: #FFF;
+	font-weight: bold;
+	font-size: 11px;
+	border: 1px solid #F93;
+	cursor: pointer;
+ 	box-shadow: inset 0px 1px 2px #FC0;
+	-moz-box-shadow: inset 0px 1px 2px #FC0;
+	-khtml-box-shadow: inset 0px 1px 2px #FC0;
+	padding: 2px;
+}
+.button:disabled
+{
+	color: #FFF;
+	background: #DDD;
+	border: 1px solid #CCC;
+	box-shadow: 0px 0px 0px;
+	-moz-box-shadow: 0px 0px 0px;
+	-khtml-box-shadow: 0px 0px 0px;
+}
+.button:focus
+{
+	border: 1px solid #F93;
+	box-shadow: inset 0px 3px 2px #F93;
+	-moz-box-shadow: inset 0px 3px 2px #F93;
+	-khtml-box-shadow: inset 0px 3px 2px #F93;
+}
+
+BODY
+{
+	background-color: #666666;
+	margin: 0px;
+}
+
+#header
+{
+	width: 647px;
+	height: 91px;
+	background-image: url(head.png);
+}
+
+#gradient
+{
+	width: 647px;
+	height: 28px;
+	background-image: url(gradient.png);
+	background-position: right;
+	background-repeat: no-repeat;
+	color: #FFFFFF;
+	font-size: 22px;
+	font-family: arial;
+	font-weight: bold;
+	text-align: right;
+}
+
+#leftshade
+{
+	width: 29px;
+	background-image: url(shade_left.png);	
+}
+
+#rightshade
+{
+	width: 29px;
+	background-image: url(shade_right.png);	
+}
+
+#main
+{
+	width: 647px;
+	text-align: left;
+}
+
+* html blockquote { height: 0; background-color: #FFFFFF!important; }
+
+#content
+{
+	background-color: #FFFFFF;
+	font-family: arial;
+	font-size: 12px;
+	color: #323232;
+	line-height: 17px;
+	margin: 8px;
+}
+
+#license
+{
+	display: block;
+	width: 100%;
+	height: 250px;
+	font-family: arial;
+	font-size: 11px;
+}
+
+.list
+{
+	width: 100%;
+}
+
+.list TH
+{
+	background-color: #EFEFEF;
+	padding: 5px;
+	text-align: left;
+}
+
+.list TD
+{
+	padding: 5px;
+}
+
+LABEL
+{
+	font-weight: bold;
+}
+
+H1
+{
+	font-family: tahoma, arial;
+	font-size: 14px;
+	font-weight: bold;
+	color: #333333;
+	margin: 0px;
+	margin-top: 4px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #DDDDDD;
+}
+H3
+{
+	font-family: arial;
+	font-size: 12px;
+	font-weight: normal;
+	color: #000000;	
+	margin: 0px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+.installLog
+{
+	width: 100%;
+	height: 200px;
+	font-family: courier;
+	font-size: 10px;
+}
+
+//-->

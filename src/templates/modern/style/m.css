@@ -1,0 +1,141 @@
+.bottomLink
+{
+	margin-top: 2em;
+	text-align: center;
+}
+
+.metaList LI LABEL
+{
+}
+
+.metaList LI P
+{
+	margin: auto;
+}
+
+.unreadLink IMG
+{
+	vertical-align: middle;
+	margin-right: 0.5em;
+	margin-left: 1em;
+}
+
+.main-nav .ui-btn .ui-btn-inner
+{
+	padding-top: 32px !important;
+}
+
+.main-nav .ui-btn .ui-icon
+{
+	width: 24px !important;
+	height: 24px !important;
+	margin-left: -12px !important;
+	box-shadow: none !important;
+	-moz-box-shadow: none !important;
+	-webkit-box-shadow: none !important;
+	-webkit-border-radius: 0 !important;
+	border-radius: 0 !important; 
+}
+
+.ui-icon-email
+{
+	background: url(../images/m/nav-mail.png) 50% 50% no-repeat;
+	background-size: 24px 24px;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.ui-icon-contacts
+{
+	background: url(../images/m/nav-contacts.png) 50% 50% no-repeat;
+	background-size: 24px 24px;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.ui-icon-calendar
+{
+	background: url(../images/m/nav-calendar.png) 50% 50% no-repeat;
+	background-size: 24px 24px;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.ui-icon-tasks
+{
+	background: url(../images/m/nav-tasks.png) 50% 50% no-repeat;
+	background-size: 24px 24px;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.ui-icon-webdisk
+{
+	background: url(../images/m/nav-webdisk.png) 50% 50% no-repeat;
+	background-size: 24px 24px;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.listCheckbox
+{
+	position: absolute; 
+    left: 10px; 
+    top: 28%;
+    width: 18px;
+    height: 18px;
+    background: #d9d9d9;
+    border-radius: 3px;
+}
+
+.listCheckbox INPUT
+{
+	display: none;
+}
+
+.listCheckboxText
+{
+	margin: 0 0 0 20px;
+}
+
+.not-checked, .checked
+{
+	background-image: url(../images/m/checkbox.png);
+	background-repeat: no-repeat;
+}
+
+.not-checked
+{
+	background-position: 18px 0;   
+	background-color:#d9d9d9;
+}
+
+.checked
+{
+	background-position: 0 0;   
+	background-color:#6496bc;    
+}
+
+#contactHeading TH.picture DIV
+{
+	background-position: center center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	width: 45px;
+	height: 45px;
+	margin-left: auto;
+	box-shadow: 0 0 5px #333;
+	-moz-box-shadow: 0 0 5px #333;
+	-webkit-box-shadow: 0 0 5px #333;
+}
+
+#contactHeading H2
+{
+	margin: 0;
+	padding-left: 0.5em;
+}

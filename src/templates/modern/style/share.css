@@ -1,0 +1,200 @@
+<!--
+
+BODY
+{
+	text-align: center;
+	margin: 10px;
+	background-color: #EFEFEF;
+}
+
+FORM
+{
+	display: inline;
+}
+
+TD,DIV,P,BODY
+{
+	font-family: tahoma, helvetica, arial;
+	font-size: 12px;
+	color: #333333;
+}
+
+a
+{
+	text-decoration: none;
+}
+
+a:hover
+{
+	text-decoration: none;
+	color: #1C62F4;
+}
+
+INPUT
+{
+	border: 1px inset #666666;
+	font-family: tahoma, helvetica, arial;
+	font-size: 12px;
+	height: 18px;
+}
+
+INPUT:focus
+{
+	background-color: #EFEFEF;
+	border: 1px inset #1C62F4;
+}
+
+.errorMessage
+{
+	border: 1px solid #DDDDDD;
+    background-color: #F3B4B4;
+	padding: 5px;
+	text-align: center;
+	width: 400px;
+}
+
+#mainLayer
+{
+	width: 650px;
+	border: 1px solid #878787;
+}
+
+#toolBar
+{
+	height: 25px;
+	background-image: url(../images/share/toolbar.png);
+}
+
+#contentLayer
+{
+	height: 500px;
+	overflow-x: auto;
+	overflow-y: scroll;
+	text-align: left;
+	background-color: #FFFFFF;
+}
+
+#locationBar
+{
+	padding: 4px;
+	border-top: 1px solid #878787;
+	background-color: #E8E8E8;
+	text-align: left;
+}
+
+#headingTable
+{
+	width: 100%;
+	height: 17px;
+	background-image: url(../images/share/th_bg.png);
+}
+
+#headingTable TH
+{
+	font-size: 10px;
+	text-align: left;
+	padding-left: 10px;
+	vertical-align: middle;
+}
+
+#thTitle
+{
+	border-right: 1px solid #A0A0A0;
+	width: 345px;
+}
+
+#thModified
+{
+	width: 110px;
+	border-right: 1px solid #A0A0A0;
+}
+
+#thSize
+{
+	width: 75px;
+	border-right: 1px solid #A0A0A0;
+}
+
+#contentTable
+{
+	width: 100%;
+}
+
+.trRow1
+{
+	background-color: #FFFFFF;
+}
+
+.trRow2
+{
+	background-color: #EEEEEE;
+}
+
+.tdTitle
+{
+	padding: 2px;
+	padding-left: 6px;
+	width: 347px;
+}
+
+.tdModified
+{
+	padding: 2px;
+	padding-left: 6px;
+	width: 112px;
+}
+
+.tdSize
+{
+	padding: 2px;
+	padding-left: 6px;
+	width: 77px;
+}
+
+.tdActions
+{
+	padding: 2px;
+	padding-left: 6px;
+}
+
+#titleBar
+{
+	font-size: 10px;
+	padding-top: 4px;
+}
+
+#__olBackground
+{
+	background-image: url(../images/overlay.png);
+}
+.__olContainer
+{
+	background-color: #FFFFFF;
+	border-left: 1px solid #DDDDDD;
+	border-right: 1px solid #DDDDDD;
+	border-bottom: 1px solid #DDDDDD;
+}
+.__olContent
+{
+}
+.__olCaption
+{
+	background-image: url(../images/li/list_bg.png);
+	font-weight: normal;
+	height: 20px;
+	padding-top: 5px;
+	text-align: center;
+	border-bottom: 1px solid #DDDDDD;
+}
+.__olShadow
+{
+	background-color: #555555;
+}
+
+#locationBar IMG, #contentTable IMG
+{
+	width: 16px;
+	height: 16px;
+}
+
+//-->

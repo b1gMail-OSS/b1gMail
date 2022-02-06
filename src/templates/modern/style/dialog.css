@@ -1,0 +1,386 @@
+INPUT[type=submit], INPUT[type=button], INPUT[type=reset], BUTTON
+{
+	margin: 2px;
+	font-weight: bold;
+	border: 1px solid #AAA;
+	padding: 2px 4px;
+	color: #333;
+	text-decoration: none;
+
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	border-radius: 6px;
+
+	background-color: #EEE;
+}
+
+INPUT[type=submit]:active, INPUT[type=button]:active, INPUT[type=reset]:active, BUTTON:active
+{
+ 	background: #DDD;
+}
+
+BODY
+{
+	background-color: #FFF;
+}
+
+BODY,TD,DIV,SPAN
+{
+	font-family: tahoma, arial, verdana;
+	font-size: 12px;
+}
+
+FIELDSET
+{
+	border: 1px solid #DDD;
+	border-radius: 8px;
+}
+
+.saveAs
+{
+	text-align: center;
+	vertical-align: middle;
+	height: 34px;
+	padding-bottom: 3px;
+}
+
+INPUT
+{
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+FORM
+{
+	display: inline;
+}
+
+H1
+{
+	margin: 0px;
+	font-size: 14px;
+}
+
+.pathCombo
+{
+	width: 220px;
+}
+
+.fileList
+{
+	width: 100%;
+	height: 300px;
+	border: 1px solid #999999;
+	background-color: #FFFFFF;
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+
+.contentColumn
+{
+	width: 190px;
+	border-right: 1px solid #DDDDDD;
+}
+
+.contentColumnDiv
+{
+	width: 190px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+.contentItem
+{
+	height: 20px;
+	display: block;
+	text-decoration: none;
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+.contentItemActive
+{
+	height: 20px;
+	display: block;
+	text-decoration: none;
+	color: #FFFFFF;
+	background-color: #3875D7;
+}
+
+.addressDiv
+{
+	border: 1px solid #DDDDDD;
+	background-color: #FFFFFF;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	width: 100%;
+}
+
+.addrButton
+{
+	width: 55px;
+	font-size: 11px;
+}
+
+.addressItem
+{
+	display: block;
+	padding-top: 2px;
+	padding-left: 5px;
+	height: 18px;
+	width: 100%;
+	border-bottom: 1px dotted #dddddd;
+	cursor: pointer;
+}
+
+.addressItem a
+{
+	color: #333333;
+}
+
+.addressItemActive
+{
+	display: block;
+	padding-top: 2px;
+	padding-left: 5px;
+	height: 18px;
+	width: 100%;
+	border-bottom: 1px dotted #dddddd;
+	cursor: pointer;
+	background-color: #3875D7;
+	color: #FFFFFF;
+}
+
+.addressItemActive a
+{
+	color: #FFFFFF;
+}
+
+.progressBar
+{
+	height: 14px;
+	background-color: #EEE;
+	text-align: left;
+
+	border: 1px solid #CCC;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+
+	box-shadow: inset 0px 1px 1px #CCC;
+	-webkit-box-shadow: inset 0px 1px 1px #CCC;
+	-moz-box-shadow: inset 0px 1px 1px #CCC;
+	-khtml-box-shadow: inset 0px 1px 1px #CCC;
+
+	overflow: hidden;
+}
+.progressBarValue
+{
+	height: 100%;
+	background-color: #428bca;
+	float: left;
+}
+
+A.hint
+{
+	color: #000;
+	text-decoration: underline;
+	text-decoration-style: dashed;
+	text-decoration-color: #999;
+	cursor: help;
+}
+
+.cycleBG
+{
+	background-image: url(../images/li/tdcycle.png);
+}
+
+.deliveryStatusDiv, .statementDiv
+{
+	border: 1px solid #DDDDDD;
+	background-color: #FFFFFF;
+	overflow-x: auto;
+	overflow-y: scroll;
+	width: 100%;
+	height: 240px;
+	text-align: left;
+}
+
+.statementDiv
+{
+	height: 440px;
+}
+
+TR.balance
+{
+	border-top: 1px solid #DDD;
+	border-bottom: 1px solid #DDD;
+	background-color: #EEE !important;
+}
+
+.listTable
+{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.listTable TD, TH
+{
+	padding: 6px;
+}
+
+.listTable TR:nth-child(odd)
+{
+	background-color: #F9F9F9;
+}
+
+.listTable TH
+{
+	background-color: #EEE;
+	border-bottom: 1px solid #DDD;
+}
+
+.fileListDiv
+{
+	border: 1px solid #DDDDDD;
+	background-color: #FFFFFF;
+	overflow-x: auto;
+	overflow-y: scroll;
+	width: 100%;
+	height: 410px;
+	text-align: left;
+}
+
+.fileListDiv A
+{
+	color: #333;
+	text-decoration: none;
+}
+
+.fileListDiv A:hover
+{
+	color: #999;
+	text-decoration: none;
+}
+
+.fileListDiv TABLE
+{
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.fileListDiv TD
+{
+	padding: 3px;
+	height: 24px;
+}
+
+.fileListTD1
+{
+	background-color: #FFFFFF;
+}
+
+.fileListTD2
+{
+	background-color: #F9F9F9;
+}
+
+.fileListDiv .dtree
+{
+	white-space: nowrap;
+	padding-left: 4px;
+}
+
+.dtree img
+{
+	border: 0px;
+	vertical-align: middle;
+	width: 16px;
+	height: 16px;
+}
+
+.dTreeNode > A > IMG
+{
+	width: 14px;
+	height: 14px;
+	padding-right: 4px;
+}
+
+.fileListDiv .dtree a
+{
+	text-decoration: none;
+}
+
+.fileListDiv .dtree a.node, .dtree a.nodeSel
+{
+	white-space: nowrap;
+	padding: 1px 2px 1px 2px;
+}
+
+.fileListDiv .dtree a.node:hover, .dtree a.nodeSel:hover
+{
+	text-decoration: none;
+}
+
+.fileListDiv .dtree a.nodeSel
+{
+}
+
+.fileListDiv .dtree .clip
+{
+	overflow: hidden;
+}
+
+.fileListDiv .dtree .dTreeNode
+{
+	height: 21px;
+	padding-top: 1px;
+}
+
+.sourceDiv
+{
+	border: 1px solid #DDDDDD;
+	background-color: #FFFFFF;
+	overflow-x: auto;
+	overflow-y: scroll;
+	width: 480px;
+	height: 410px;
+	text-align: left;
+}
+
+.sourceDiv DIV
+{
+	font-family: courier;
+	font-size: 10px;
+}
+
+.foldersDiv
+{
+	border: 1px solid #DDDDDD;
+	background-color: #FFFFFF;
+	overflow-x: auto;
+	overflow-y: scroll;
+	width: 100%;
+	height: 310px;
+	width: 420px;
+	text-align: left;
+	line-height: 20px;
+}
+
+.foldersDiv A
+{
+	color: #000000;
+}
+
+.certContainer
+{
+	border: 1px solid #DDDDDD;
+	background-color: #FFFFFF;
+	overflow-x: auto;
+	overflow-y: scroll;
+	height: 290px;
+	width: 422px;
+	text-align: left;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 5px;
+}
