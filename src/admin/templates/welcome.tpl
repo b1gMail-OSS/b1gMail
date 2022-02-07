@@ -1,17 +1,3 @@
-<fieldset>
-	<legend>b1gMail</legend>
-
-	<table width="100%">
-		<tr>
-			<td rowspan="2" width="40" align="center" valign="top"><img src="{$tpldir}images/about_logo.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1" width="24%">{lng p="version"}:</td>
-			<td class="td2" width="26%">{$version}</td>
-
-			<td colspan="3" rowspan="2">&nbsp;</td>
-		</tr>
-	</table>
-</fieldset>
-
 {if $adminRow.type==0||$adminRow.privileges.overview}
 <fieldset>
 	<legend>{lng p="overview"}</legend>
@@ -23,23 +9,17 @@
 			<td class="td1" width="24%"><a href="users.php?sid={$sid}">{lng p="users"}</a>:</td>
 			<td class="td2" width="26%">{$userCount}</td>
 
-			<td rowspan="3" width="40" align="center" valign="top"><img src="{$tpldir}images/ico_system.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1" width="24%">{lng p="phpversion"}:</td>
-			<td class="td2" width="26%">{$phpVersion}</td>
+			<td rowspan="3" width="40" align="center" valign="top"><img src="{$tpldir}images/about_logo.png" border="0" alt="" width="32" heigh="32" /></td>
+			<td class="td1" width="24%">{lng p="version"}:</td>
+			<td class="td2" width="26%">{$version}</td>
 		</tr>
 		<tr>
 			<td class="td1"><a href="users.php?filter=true&statusNotActivated=true&allGroups=true&sid={$sid}">{lng p="notactivated"}</a>:</td>
 			<td class="td2">{$notActivatedUserCount}</td>
-
-			<td class="td1">{lng p="webserver"}:</td>
-			<td class="td2">{$webserver}</td>
 		</tr>
 		<tr>
 			<td class="td1"><a href="users.php?filter=true&statusLocked=true&allGroups=true&sid={$sid}">{lng p="locked"}</a>:</td>
 			<td class="td2">{$lockedUserCount}</td>
-
-			<td class="td1">{lng p="load"}:</td>
-			<td class="td2">{$loadAvg}</td>
 		</tr>
 
 		<!-- mail stuff -->
@@ -51,23 +31,23 @@
 			<td class="td1">{lng p="emailsize"}:</td>
 			<td class="td2">{if $emailSize!==false}{size bytes=$emailSize}{else}-{/if}</td>
 
-			<td rowspan="3" width="40" align="center" valign="top"><img src="{$tpldir}images/ico_data.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1">{lng p="mysqlversion"}:</td>
-			<td class="td2">{$mysqlVersion}</td>
+			<td rowspan="3" width="40" align="center" valign="top"><img src="{$tpldir}images/ico_system.png" border="0" alt="" width="32" heigh="32" /></td>
+			<td class="td1">{lng p="phpversion"}:</td>
+			<td class="td2">{$phpVersion}</td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="emails"}:</td>
 			<td class="td2">{$emailCount}</td>
 
-			<td class="td1">{lng p="tables"}:</td>
-			<td class="td2">{$tableCount}</td>
+			<td class="td1">{lng p="webserver"}:</td>
+			<td class="td2">{$webserver}</td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="folders"}:</td>
 			<td class="td2">{$folderCount}</td>
 
-			<td class="td1">{lng p="dbsize"}:</td>
-			<td class="td2">{size bytes=$dbSize}</td>
+			<td class="td1">{lng p="load"}:</td>
+			<td class="td2">{$loadAvg}</td>
 		</tr>
 
 		<!-- webdisk stuff -->
@@ -77,15 +57,25 @@
 		<tr>
 			<td rowspan="3" width="40" align="center" valign="top"><img src="{$tpldir}images/ico_disk.png" border="0" alt="" width="32" heigh="32" /></td>
 			<td class="td1">{lng p="disksize"}:</td>
-			<td class="td2" colspan="3">{if $diskSize!==false}{size bytes=$diskSize}{else}-{/if}</td>
+			<td class="td2">{if $diskSize!==false}{size bytes=$diskSize}{else}-{/if}</td>
+			
+			<td rowspan="3" width="40" align="center" valign="top"><img src="{$tpldir}images/ico_data.png" border="0" alt="" width="32" heigh="32" /></td>
+			<td class="td1">{lng p="mysqlversion"}:</td>
+			<td class="td2">{$mysqlVersion}</td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="files"}:</td>
-			<td class="td2" colspan="3">{$diskFileCount}</td>
+			<td class="td2">{$diskFileCount}</td>
+			
+			<td class="td1">{lng p="tables"}:</td>
+			<td class="td2">{$tableCount}</td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="folders"}:</td>
-			<td class="td2" colspan="3">{$diskFolderCount}</td>
+			<td class="td2">{$diskFolderCount}</td>
+			
+			<td class="td1">{lng p="dbsize"}:</td>
+			<td class="td2">{size bytes=$dbSize}</td>
 		</tr>
 	</table>
 </fieldset>
@@ -136,7 +126,7 @@
 </table>
 {/if}
 
-{if $adminRow.type==0}
+{if $adminRow.type == 0 && $notices|@count > 0}
 <fieldset>
 	<legend>{lng p="notices"}</legend>
 
