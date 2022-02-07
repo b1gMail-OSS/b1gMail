@@ -1850,6 +1850,7 @@ $lang_admin['allow_newsletter_optout'] 	= 'Allow newsletter opt-out';
 $lang_admin['gutregged']		= 'Vouchers for registered users';
 $lang_admin['autocancel']		= 'Account deletable by user';
 $lang_admin['maintmode']		= 'Maintenance mode';
+$lang_admin['whitelist']		= 'Access list';
 $lang_admin['maintmodenote']	= 'Maintenance mode is enabled. The b1gMail installation is not accessible for users.';
 $lang_admin['dldate']			= 'Package date';
 $lang_admin['invalidserial']	= 'The serial number you have entered is invalid. Please try again.';

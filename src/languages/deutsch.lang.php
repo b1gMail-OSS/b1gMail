@@ -1795,6 +1795,7 @@ $lang_admin['allow_newsletter_optout'] 	= 'Newsletter-Abmeldung erlauben';
 $lang_admin['gutregged']		= 'Gutscheine für reg. Benutzer';
 $lang_admin['autocancel']		= 'Mitgliedschaft selbst beendbar';
 $lang_admin['maintmode']		= 'Wartungsmodus';
+$lang_admin['whitelist']		= 'Zugangsliste';
 $lang_admin['maintmodenote']	= 'Der Wartungsmodus ist aktiv. Die b1gMail-Installation ist für Benutzer nicht erreichbar.';
 $lang_admin['dldate']			= 'Paket-Datum';
 $lang_admin['invalidserial']	= 'Die angegebene Seriennummer ist ungültig. Bitte versuchen Sie es erneut.';

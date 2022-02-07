@@ -434,17 +434,21 @@ if (!file_exists($templateFolder)) {
 }
 $tpl = _new('Template');
 
-/*
+/**
  * maintenance mode => error
  */
-if (MAINTENANCE_MODE && INTERFACE_MODE) {
-    echo 'System down for maintenance. Please try again later.';
-    exit(1);
-} elseif (MAINTENANCE_MODE) {
-    $tpl->assign('text', $lang_custom['maintenance']);
-    $tpl->display('nli/maintenance.tpl');
-    exit();
+if(MAINTENANCE_MODE && INTERFACE_MODE)
+{
+        echo('System down for maintenance. Please try again later.');
+        exit(1);
 }
+else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], unserialize($bm_prefs['wartung_whitelist_ips'])))
+{
+        $tpl->assign('text', $lang_custom['maintenance']);
+        $tpl->display('nli/maintenance.tpl');
+        exit();
+}
+
 
 /*
  * mobile redirect override
