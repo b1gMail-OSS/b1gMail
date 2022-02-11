@@ -4,7 +4,7 @@
 
 		<table>
 			<tr>
-				<td width="40" valign="top" rowspan="14"><img src="{$tpldir}images/ico_prefs_common.png" border="0" alt="" width="32" height="32" /></td>
+				<td width="40" valign="top" rowspan="13"><img src="{$tpldir}images/ico_prefs_common.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="220">{lng p="projecttitle"}:</td>
 				<td class="td2"><input type="text" name="titel" value="{text allowEmpty=true value=$bm_prefs.titel}" size="36" /></td>
 			</tr>
@@ -48,9 +48,21 @@
 				<td class="td1" width="220">{lng p="compresspages"}?</td>
 				<td class="td2"><input name="compress_pages"{if $bm_prefs.compress_pages=='yes'} checked="checked"{/if} type="checkbox" /></td>
 			</tr>
+		</table>
+	</fieldset>
+	
+	<fieldset>
+		<legend>{lng p="maintmode"}</legend>
+
+		<table>
 			<tr>
+				<td width="40" valign="top" rowspan="2"><img src="{$tpldir}images/ico_prefs_cmd.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="220">{lng p="maintmode"}?</td>
 				<td class="td2"><input name="wartung"{if $bm_prefs.wartung=='yes'} checked="checked"{/if} type="checkbox" /></td>
+			</tr>
+			<tr>
+				<td class="td1" width="220">{lng p="whitelist"}:</td>
+				<td class="td2"><input type="text" name="wartung_whitelist" value="{text allowEmpty=true value=$wartungwhitelist}" size="36" /></td>
 			</tr>
 		</table>
 	</fieldset>
