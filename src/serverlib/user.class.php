@@ -1703,7 +1703,7 @@ class BMUser
 		global $db, $lang_user;
 
 		$aliases = array();
-		$res = $db->Query('SELECT id,email,type FROM {pre}aliase WHERE user=? '
+		$res = $db->Query('SELECT id,email,type,sendername FROM {pre}aliase WHERE user=? '
 							. 'ORDER BY ' . $sortColumn . ' ' . $sortOrder,
 			$this->_id);
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
@@ -1759,7 +1759,11 @@ class BMUser
 		foreach($aliases as $alias)
 			if(($alias['type']&ALIAS_SENDER) != 0
 				&& ($alias['type']&ALIAS_PENDING) == 0)
-					if(trim($this->_row['absendername']) != '')
+					if(trim($alias['sendername']) != '')
+						$senders[] = sprintf('"%s" <%s>',
+										$alias['sendername'],
+										$alias['email']);
+					else if(trim($this->_row['absendername']) != '')
 						$senders[] = sprintf('"%s" <%s>',
 										$this->_row['absendername'],
 										$alias['email']);
