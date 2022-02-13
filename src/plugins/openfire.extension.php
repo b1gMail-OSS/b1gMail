@@ -12,7 +12,6 @@ class modopenfire extends BMPlugin
 	{
 		$this->name					= 'Jabber Openfire-Integration';
 		$this->version				= '1.1.0';
-		$this->designedfor			= '7.3.0';
 		$this->type					= BMPLUGIN_DEFAULT;
 
 		$this->author				= 'Home of the Sebijk.com';
