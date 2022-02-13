@@ -22,12 +22,13 @@
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
+	<link href="clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
 </head>
 
 <body onload="documentLoader()">
 
 	<h1>
-		<img src="plugins/templates/images/news_icon.png" width="16" height="16" align="absmiddle" border="0" alt="" />
+		<i class="fa fa-newspaper-o" aria-hidden="true"></i>
 		{text value=$news.title cut=55}
 	</h1>
 	
