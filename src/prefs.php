@@ -1099,7 +1099,7 @@ else if($_REQUEST['action'] == 'aliases'
 					&& !BMUser::AddressLocked(trim($_REQUEST['email_local']))
 					&& strlen(trim($_REQUEST['email_local'])) >= $bm_prefs['minuserlength'])
 				{
-					$thisUser->AddAlias($emailAddress, ALIAS_SENDER|ALIAS_RECIPIENT);
+					$thisUser->AddAlias($emailAddress, ALIAS_SENDER|ALIAS_RECIPIENT,strip_tags($_REQUEST['email_name']));
 					header('Location: prefs.php?action=aliases&sid=' . session_id());
 					exit();
 				}
@@ -1130,7 +1130,7 @@ else if($_REQUEST['action'] == 'aliases'
 					}
 					else
 					{
-						$thisUser->AddAlias($emailAddress, ALIAS_SENDER);
+						$thisUser->AddAlias($emailAddress, ALIAS_SENDER,strip_tags($_REQUEST['typ_1_email_name']));
 						$tpl->assign('title', $lang_user['addalias']);
 						$tpl->assign('msg', sprintf($lang_user['confirmalias'], DecodeEMail($emailAddress)));
 						$tpl->assign('backLink', 'prefs.php?action=aliases&sid=' . session_id());
@@ -1666,7 +1666,7 @@ else if($_REQUEST['action'] == 'membership')
 			__FILE__,
 			__LINE__);
 		$thisUser->CancelAccount();
-		BMUser::Logout();
+		$thisUser->Logout();
 
 		// delete cookies
 		if(isset($_COOKIE['bm_savedToken']))

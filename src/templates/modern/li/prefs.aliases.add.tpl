@@ -25,6 +25,12 @@
 		
 		<tbody id="tbody_1" style="display:{if !$senderAliases}none{/if};">
 		<tr>
+			<td class="listTableLeft"><label for="typ_1_email_name">{lng p="sendername"}:</label></td>
+			<td class="listTableRight">
+				<input type="text" name="typ_1_email_name" id="typ_1_email_name" value="" size="34"  />
+			</td>
+		</tr>
+		<tr>
 			<td class="listTableLeft">* <label for="typ_1_email">{lng p="email"}:</label></td>
 			<td class="listTableRight">
 				<input type="text" name="typ_1_email" id="typ_1_email" value="" size="34" /><br />
@@ -34,6 +40,12 @@
 		</tbody>
 		
 		<tbody id="tbody_3" style="display:{if $senderAliases}none{/if};">
+		<tr>
+			<td class="listTableLeft"><label for="email_name">{lng p="sendername"}:</label></td>
+			<td class="listTableRight">
+				<input type="text" name="email_name" id="email_name" value="" size="34"  />
+			</td>
+		</tr>
 		<tr>
 			<td class="listTableLeft">* <label for="email_local">{lng p="email"}:</label></td>
 			<td class="listTableRight">
