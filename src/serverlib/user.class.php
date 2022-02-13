@@ -47,7 +47,7 @@ class BMUser
 	 *
 	 * @return BMGroup
 	 */
-	function GetGroup()
+	public function GetGroup()
 	{
 		return(_new('BMGroup', array($this->_row['gruppe'])));
 	}
@@ -58,7 +58,7 @@ class BMUser
 	 * @param $recipientCount Number of recipients
 	 * @return bool
 	 */
-	function MaySendMail($recipientCount)
+	public function MaySendMail($recipientCount)
 	{
 		global $db;
 
@@ -90,7 +90,7 @@ class BMUser
 	 *
 	 * @param $recipientCount Number of recipients
 	 */
-	function AddSendStat($recipientCount)
+	public function AddSendStat($recipientCount)
 	{
 		global $db;
 
@@ -105,7 +105,7 @@ class BMUser
 	 *
 	 * @param int $size Size of email
 	 */
-	function AddRecvStat($size)
+	public function AddRecvStat($size)
 	{
 		global $db;
 
@@ -121,7 +121,7 @@ class BMUser
 	 * @param int $since Start time
 	 * @return int Count
 	 */
-	function GetReceivedMailsCount($since)
+	public function GetReceivedMailsCount($since)
 	{
 		global $db;
 
@@ -140,7 +140,7 @@ class BMUser
 	 * @param int $since Start time
 	 * @return int Size in bytes
 	 */
-	function GetReceivedMailsSize($since)
+	public function GetReceivedMailsSize($since)
 	{
 		global $db;
 
@@ -158,7 +158,7 @@ class BMUser
 	 *
 	 * @return int
 	 */
-	function GetUnreadNotifications()
+	public function GetUnreadNotifications()
 	{
 		global $db;
 
@@ -183,7 +183,7 @@ class BMUser
 	 * @param bool $markRead Whether to mark all notifications as read after fetching them
 	 * @return array
 	 */
-	function GetNotifications($markRead = true)
+	public function GetNotifications($markRead = true)
 	{
 		global $db, $tpl, $lang_custom;
 
@@ -247,7 +247,7 @@ class BMUser
 	 * @param bool $uniqueClass Set to true to remove all previous notifications of the same class
 	 * @return int Notification ID
 	 */
-	function PostNotification($textPhrase, $textParams = array(), $link = '', $icon = '', $date = 0, $expires = 0, $flags = 0, $class = '', $uniqueClass = false)
+	public function PostNotification($textPhrase, $textParams = array(), $link = '', $icon = '', $date = 0, $expires = 0, $flags = 0, $class = '', $uniqueClass = false)
 	{
 		global $db;
 
@@ -285,7 +285,7 @@ class BMUser
 	 *
 	 * @return bool
 	 */
-	function SMSEnabled()
+	public function SMSEnabled()
 	{
 		global $bm_prefs, $db;
 
@@ -313,7 +313,7 @@ class BMUser
 	 * @param int $userID User ID
 	 * @return bool
 	 */
-	static function UpdateBayesValues($nonSpam, $spam, $userID)
+	public static function UpdateBayesValues($nonSpam, $spam, $userID)
 	{
 		global $db;
 
@@ -331,7 +331,7 @@ class BMUser
 	 * @param int $userID
 	 * @return array bayes_nonspam, bayes_spam, bayes_border (%)
 	 */
-	static function GetBayesValues($userID)
+	public static function GetBayesValues($userID)
 	{
 		global $db;
 
@@ -355,7 +355,7 @@ class BMUser
 	 * @param string $value Value
 	 * @return bool
 	 */
-	function SetPref($key, $value)
+	public function SetPref($key, $value)
 	{
 		global $db;
 		$db->Query('REPLACE INTO {pre}userprefs(userID, `key`,`value`) VALUES(?, ?, ?)',
@@ -371,7 +371,7 @@ class BMUser
 	 * @param string $key Key
 	 * @return string
 	 */
-	function GetPref($key)
+	public function GetPref($key)
 	{
 		global $db;
 		$res = $db->Query('SELECT `value` FROM {pre}userprefs WHERE userID=? AND `key`=?',
@@ -396,7 +396,7 @@ class BMUser
 	 * @param string $key Key
 	 * @return bool
 	 */
-	function DeletePref($key)
+	public function DeletePref($key)
 	{
 		global $db;
 
@@ -412,7 +412,7 @@ class BMUser
 	 * @param string $userm
 	 * @return bool
 	 */
-	static function AddressLocked($userm)
+	public static function AddressLocked($userm)
 	{
 		global $db;
 
@@ -463,7 +463,7 @@ class BMUser
 	 * @param string $address
 	 * @return bool
 	 */
-	static function AddressAvailable($address)
+	public static function AddressAvailable($address)
 	{
 		global $db;
 
@@ -484,7 +484,7 @@ class BMUser
 	 * @param string $address
 	 * @return bool
 	 */
-	static function AddressValid($address, $forRegistration = true)
+	public static function AddressValid($address, $forRegistration = true)
 	{
 		@list($preAt, $afterAt) = explode('@', $address);
 		if(preg_match('/^[a-zA-Z0-9&\'\\.\\-_\\+]+@[a-zA-Z0-9.-]+\\.+[a-zA-Z]{2,12}$/', $address) == 1)
@@ -503,7 +503,7 @@ class BMUser
 	 * @param int $recipientCount Recipient count
 	 * @return bool
 	 */
-	function UpdateLastSend($recipientCount = 1)
+	public function UpdateLastSend($recipientCount = 1)
 	{
 		global $db;
 		$db->Query('UPDATE {pre}users SET last_send=?,sent_mails=sent_mails+? WHERE id=?',
@@ -519,7 +519,7 @@ class BMUser
 	 * @param int $mailCount Mail count
 	 * @return bool
 	 */
-	function UpdateLastReceive($mailCount = 1)
+	public function UpdateLastReceive($mailCount = 1)
 	{
 		global $db;
 		$db->Query('UPDATE {pre}users SET received_mails=received_mails+? WHERE id=?',
@@ -534,7 +534,7 @@ class BMUser
 	 * @param int $userID User ID
 	 * @param string $resetKey Reset key
 	 */
-	function ResetPassword($userID, $resetKey)
+	public function ResetPassword($userID, $resetKey)
 	{
 		global $db;
 
@@ -590,7 +590,7 @@ class BMUser
 	 * @param string $email User's E-Mail address
 	 * @return bool
 	 */
-	static function LostPassword($email)
+	public static function LostPassword($email)
 	{
 		global $db, $bm_prefs, $lang_custom;
 
@@ -678,7 +678,7 @@ class BMUser
 	 * @param bool $allowNotification
 	 * @return int User ID
 	 */
-	function CreateAccount($email, $firstname, $surname, $street, $no, $zip, $city, $country, $phone, $fax, $altmail, $mobile_nr, $password, $profilefields = array(), $allowNotification = true, $c_uid = '', $salutation = '', $createLocked = false)
+	public static function CreateAccount($email, $firstname, $surname, $street, $no, $zip, $city, $country, $phone, $fax, $altmail, $mobile_nr, $password, $profilefields = array(), $allowNotification = true, $c_uid = '', $salutation = '', $createLocked = false)
 	{
 		global $db, $bm_prefs, $currentCharset, $currentLanguage, $lang_custom;
 
@@ -691,7 +691,7 @@ class BMUser
 		if(BMUser::AddressAvailable($email)
 			&& BMUser::AddressValid($email))
 		{
-			$defaultGroupRow = BMGroup::Fetch($bm_prefs['std_gruppe']);
+			$defaultGroupRow = (new BMGroup(-1))->Fetch($bm_prefs['std_gruppe']);
 			$instantHTML = $defaultGroupRow['soforthtml'];
 
 			// status?
@@ -885,7 +885,7 @@ class BMUser
 	 * @param string $where Validation context (signup, loggedin)
 	 * @return bool
 	 */
-	function CouponValid($code, $where = '')
+	public static function CouponValid($code, $where = '')
 	{
 		global $db;
 
@@ -926,7 +926,7 @@ class BMUser
 	 * @param string $where Redeem context (signup, loggedin)
 	 * @return bool
 	 */
-	function RedeemCoupon($code, $where = '')
+	public function RedeemCoupon($code, $where = '')
 	{
 		global $db, $lang_user;
 
@@ -1010,7 +1010,7 @@ class BMUser
 	 * @param bool $isAlias Output indicating if $email is an alias
 	 * @return int
 	 */
-	static function GetID($email, $excludeDeleted = false, &$isAlias = null)
+	public static function GetID($email, $excludeDeleted = false, &$isAlias = null)
 	{
 		global $db;
 		$userID = 0;
@@ -1048,7 +1048,7 @@ class BMUser
 	 * @param string $password
 	 * @return mixed false or array
 	 */
-	static function _pluginAuth($email, $passwordMD5, $passwordPlain)
+	private static function _pluginAuth($email, $passwordMD5, $passwordPlain)
 	{
 		global $plugins;
 
@@ -1082,7 +1082,7 @@ class BMUser
 	 * @param string $code Code
 	 * @return bool Success
 	 */
-	function ActivateAccount($id, $code)
+	public static function ActivateAccount($id, $code)
 	{
 		global $db, $bm_prefs;
 
@@ -1127,7 +1127,7 @@ class BMUser
 	 * @param bool $successLog Log successful logins?
 	 * @return string Session-ID
 	 */
-	static function Login($email, $passwordPlain, $createSession = true, $successLog = true, $ValidationCode = '', $skipSalting = false)
+	public static function Login($email, $passwordPlain, $createSession = true, $successLog = true, $ValidationCode = '', $skipSalting = false)
 	{
 		global $db, $currentCharset, $currentLanguage, $bm_prefs;
 
@@ -1343,7 +1343,7 @@ class BMUser
 	 * log out
 	 *
 	 */
-	function Logout()
+	public function Logout()
 	{
 		ModuleFunction('OnLogout', array($_SESSION['bm_userID']));
 
@@ -1364,7 +1364,7 @@ class BMUser
 	 * @param string $email User account e-mail
 	 * @return bool
 	 */
-	static function RequiresValidation($email)
+	public static function RequiresValidation($email)
 	{
 		global $db;
 
@@ -1384,7 +1384,7 @@ class BMUser
 	 * @param string $code Validation code
 	 * @return bool
 	 */
-	function ValidateMobileNo($code)
+	public function ValidateMobileNo($code)
 	{
 		global $db;
 
@@ -1411,7 +1411,7 @@ class BMUser
 	 * @param int $id
 	 * @return array
 	 */
-	function Fetch($id = -1, $re = false)
+	public function Fetch($id = -1, $re = false)
 	{
 		global $db;
 
@@ -1437,7 +1437,7 @@ class BMUser
 	 *
 	 * @return array
 	 */
-	function ReFetch()
+	public function ReFetch()
 	{
 		$this->_row = $this->Fetch(-1, true);
 		return($this->_row);
@@ -1450,7 +1450,7 @@ class BMUser
 	 * @param string $sortOrder
 	 * @return array
 	 */
-	function GetPOP3Accounts($sortColumn = 'p_user', $sortOrder = 'ASC', $activeOnly = false)
+	public function GetPOP3Accounts($sortColumn = 'p_user', $sortOrder = 'ASC', $activeOnly = false)
 	{
 		global $db;
 
@@ -1484,7 +1484,7 @@ class BMUser
 	 * @param int $id
 	 * @return array
 	 */
-	function GetPOP3Account($id)
+	public function GetPOP3Account($id)
 	{
 		global $db;
 
@@ -1511,7 +1511,7 @@ class BMUser
 		return($result);
 	}
 
-	function UpdatePOP3Account($id, $p_host, $p_user, $p_pass, $p_target, $p_port, $p_keep, $p_ssl, $paused)
+	public function UpdatePOP3Account($id, $p_host, $p_user, $p_pass, $p_target, $p_port, $p_keep, $p_ssl, $paused)
 	{
 		global $db;
 
@@ -1541,7 +1541,7 @@ class BMUser
 	 * @param bool $p_ssl
 	 * @return int
 	 */
-	function AddPOP3Account($p_host, $p_user, $p_pass, $p_target, $p_port, $p_keep, $p_ssl = false)
+	public function AddPOP3Account($p_host, $p_user, $p_pass, $p_target, $p_port, $p_keep, $p_ssl = false)
 	{
 		global $db;
 
@@ -1564,7 +1564,7 @@ class BMUser
 	 * @param int $id Account ID
 	 * @return bool
 	 */
-	function DeletePOP3Account($id)
+	public function DeletePOP3Account($id)
 	{
 		global $db;
 
@@ -1591,7 +1591,7 @@ class BMUser
 	 * @param string $sortOrder
 	 * @return array
 	 */
-	function GetSignatures($sortColumn = 'titel', $sortOrder = 'ASC')
+	public function GetSignatures($sortColumn = 'titel', $sortOrder = 'ASC')
 	{
 		global $db, $lang_user;
 
@@ -1612,7 +1612,7 @@ class BMUser
 	 * @param int $signatureID Signature ID
 	 * @return bool
 	 */
-	function DeleteSignature($signatureID)
+	public function DeleteSignature($signatureID)
 	{
 		global $db;
 
@@ -1631,7 +1631,7 @@ class BMUser
 	 * @param int $signatureID Signature ID
 	 * @return array
 	 */
-	function GetSignature($signatureID)
+	public function GetSignature($signatureID)
 	{
 		global $db;
 
@@ -1656,7 +1656,7 @@ class BMUser
 	 * @param string $html HTML
 	 * @return bool
 	 */
-	function UpdateSignature($signatureID, $title, $text, $html)
+	public function UpdateSignature($signatureID, $title, $text, $html)
 	{
 		global $db;
 
@@ -1678,7 +1678,7 @@ class BMUser
 	 * @param string $html HTML
 	 * @return int
 	 */
-	function AddSignature($title, $text, $html)
+	public function AddSignature($title, $text, $html)
 	{
 		global $db;
 
@@ -1698,7 +1698,7 @@ class BMUser
 	 * @param string $sortOrder
 	 * @return array
 	 */
-	function GetAliases($sortColumn = 'email', $sortOrder = 'ASC')
+	public function GetAliases($sortColumn = 'email', $sortOrder = 'ASC')
 	{
 		global $db, $lang_user;
 
@@ -1728,7 +1728,7 @@ class BMUser
 	 *
 	 * @return array
 	 */
-	function GetPossibleSenders()
+	public function GetPossibleSenders()
 	{
 		$senders = array();
 		$aliases = $this->GetAliases();
@@ -1786,7 +1786,7 @@ class BMUser
 	 *
 	 * @return string
 	 */
-	function GetDefaultSender()
+	public function GetDefaultSender()
 	{
 		$senders = $this->GetPossibleSenders();
 		return(isset($senders[$this->_row['defaultSender']])
@@ -1800,7 +1800,7 @@ class BMUser
 	 * @param int $senderID Sender ID (from possible senders table)
 	 * @return bool
 	 */
-	function SetDefaultSender($senderID)
+	public function SetDefaultSender($senderID)
 	{
 		global $db;
 
@@ -1816,7 +1816,7 @@ class BMUser
 	 * @param int $aliasID Alias ID
 	 * @return bool
 	 */
-	function DeleteAlias($aliasID)
+	public function DeleteAlias($aliasID)
 	{
 		global $db;
 
@@ -1866,7 +1866,7 @@ class BMUser
 	 * @param string $code Confirmation code
 	 * @return bool
 	 */
-	function ConfirmAlias($id, $code)
+	public static function ConfirmAlias($id, $code)
 	{
 		global $db;
 
@@ -1920,9 +1920,10 @@ class BMUser
 	 *
 	 * @param string $email Alias e-mail address
 	 * @param int $type Alias type
+	 * @param string $sendername Alias name
 	 * @return in
 	 */
-	function AddAlias($email, $type)
+	public function AddAlias($email, $type, $sendername='')
 	{
 		global $db, $lang_custom, $bm_prefs, $thisUser;
 
@@ -1937,11 +1938,12 @@ class BMUser
 		if($type == (ALIAS_RECIPIENT|ALIAS_SENDER))
 		{
 			// add
-			$db->Query('INSERT INTO {pre}aliase(email,user,type,date) VALUES(?,?,?,?)',
+			$db->Query('INSERT INTO {pre}aliase(email,user,type,date,sendername) VALUES(?,?,?,?,?)',
 				$email,
 				$this->_id,
 				$type,
-				time());
+				time(),
+				$sendername);
 			$id = $db->InsertId();
 
 			// log
@@ -1963,12 +1965,13 @@ class BMUser
 		{
 			// add
 			$code = GenerateRandomKey('aliasCode');
-			$db->Query('INSERT INTO {pre}aliase(email,user,type,code,date) VALUES(?,?,?,?,?)',
+			$db->Query('INSERT INTO {pre}aliase(email,user,type,code,date,sendername) VALUES(?,?,?,?,?,?)',
 				$email,
 				$this->_id,
 				$type|ALIAS_PENDING,
 				$code,
-				time());
+				time(),
+				$sendername);
 			$id = $db->InsertId();
 
 			// send mail
@@ -2013,7 +2016,7 @@ class BMUser
 	 *
 	 * @return int
 	 */
-	function GetUsedMonthSMS()
+	public function GetUsedMonthSMS()
 	{
 		global $db;
 
@@ -2031,7 +2034,7 @@ class BMUser
 	 *
 	 * @return int
 	 */
-	static function GetUserCount()
+	public static function GetUserCount()
 	{
 		global $db;
 
@@ -2048,7 +2051,7 @@ class BMUser
 	 * @param bool $withMembers Include members?
 	 * @return array
 	 */
-	function GetWorkgroups($withMembers = false)
+	public function GetWorkgroups($withMembers = false)
 	{
 		return(BMWorkgroup::GetSimpleWorkgroupList($this->_id, $withMembers));
 	}
@@ -2058,7 +2061,7 @@ class BMUser
 	 *
 	 * @return int
 	 */
-	function GetBalance()
+	public function GetBalance()
 	{
 		$group = $this->GetGroup();
 		$groupRow = $group->Fetch();
@@ -2077,7 +2080,7 @@ class BMUser
 	 * @param int $when Timestamp (0 = now)
 	 * @return int Credits
 	 */
-	function GetStaticBalance($when = 0)
+	public function GetStaticBalance($when = 0)
 	{
 		global $db;
 
@@ -2100,7 +2103,7 @@ class BMUser
 	 * @param int $credits Credits
 	 * @return int -1 = failed, 0 = ok, but no smsend ID, > 0 = smsend ID
 	 */
-	function Debit($credits, $description = 'Unknown')
+	public function Debit($credits, $description = 'Unknown')
 	{
 		global $db;
 
@@ -2172,7 +2175,7 @@ class BMUser
 	 * @param string $sortOrder Sort order (ASC|DESC)
 	 * @return array
 	 */
-	function GetTransactions($from, $to, $sortBy = 'date', $sortOrder = 'ASC')
+	public function GetTransactions($from, $to, $sortBy = 'date', $sortOrder = 'ASC')
 	{
 		global $db, $lang_user;
 
@@ -2203,7 +2206,7 @@ class BMUser
 	 *
 	 * @return bool
 	 */
-	function CancelAccount()
+	public function CancelAccount()
 	{
 		global $db;
 
@@ -2219,7 +2222,7 @@ class BMUser
 	 *
 	 * @return array $active, $subject, $text
 	 */
-	function GetAutoresponder()
+	public function GetAutoresponder()
 	{
 		global $db;
 
@@ -2244,7 +2247,7 @@ class BMUser
 	 * @param string $lastSend Last mail address
 	 * @return bool
 	 */
-	function SetAutoresponderLastSend($lastSend)
+	public function SetAutoresponderLastSend($lastSend)
 	{
 		global $db;
 
@@ -2262,7 +2265,7 @@ class BMUser
 	 * @param string $text Text
 	 * @return int
 	 */
-	function SetAutoresponder($active, $subject, $text)
+	public function SetAutoresponder($active, $subject, $text)
 	{
 		global $db;
 
@@ -2296,7 +2299,7 @@ class BMUser
 	 *
 	 * @return int
 	 */
-	function GetSpamIndexSize()
+	public function GetSpamIndexSize()
 	{
 		global $db;
 
@@ -2313,7 +2316,7 @@ class BMUser
 	 *
 	 * @return bool
 	 */
-	function ResetSpamIndex()
+	public function ResetSpamIndex()
 	{
 		global $db;
 
@@ -2332,7 +2335,7 @@ class BMUser
 	 * @param int $action Virus action
 	 * @return bool
 	 */
-	function SetAntivirusSettings($active, $action)
+	public function SetAntivirusSettings($active, $action)
 	{
 		global $db;
 		$db->Query('UPDATE {pre}users SET virusfilter=?, virusaction=? WHERE id=?',
@@ -2352,7 +2355,7 @@ class BMUser
 	 * @param bool $addressbookNoSpam Mark as NON-spam when sender is in the address book?
 	 * @return bool
 	 */
-	function SetAntispamSettings($active, $action, $unspamMe, $bayesBorder = false, $addressbookNoSpam)
+	public function SetAntispamSettings($active, $action, $unspamMe, $bayesBorder = false, $addressbookNoSpam)
 	{
 		global $db;
 		$db->Query('UPDATE {pre}users SET spamfilter=?, spamaction=?, unspamme=?, addressbook_nospam=?'
@@ -2371,7 +2374,7 @@ class BMUser
 	 *
 	 * @return array
 	 */
-	function GetFilters($sortColumn = 'orderpos', $sortOrder = 'ASC')
+	public function GetFilters($sortColumn = 'orderpos', $sortOrder = 'ASC')
 	{
 		global $db;
 
@@ -2394,7 +2397,7 @@ class BMUser
 	 * @param int $id Filter ID
 	 * @param int $direction Direction (-1 = up, 1 = down)
 	 */
-	function MoveFilter($id, $direction)
+	public function MoveFilter($id, $direction)
 	{
 		global $db;
 
@@ -2444,7 +2447,7 @@ class BMUser
 	 * @param int $id Filter ID
 	 * @return array
 	 */
-	function GetFilter($id)
+	public function GetFilter($id)
 	{
 		global $db;
 
@@ -2468,7 +2471,7 @@ class BMUser
 	 * @param bool $active Active?
 	 * @return int
 	 */
-	function AddFilter($title, $active)
+	public function AddFilter($title, $active)
 	{
 		global $db;
 
@@ -2508,7 +2511,7 @@ class BMUser
 	 * @param int $flags Filter flags
 	 * @return bool
 	 */
-	function UpdateFilter($id, $title, $active, $link, $flags = 0)
+	public function UpdateFilter($id, $title, $active, $link, $flags = 0)
 	{
 		global $db;
 
@@ -2528,7 +2531,7 @@ class BMUser
 	 * @param int $id Filter ID
 	 * @return bool
 	 */
-	function DeleteFilter($id)
+	public function DeleteFilter($id)
 	{
 		global $db;
 
@@ -2551,7 +2554,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return array
 	 */
-	function GetFilterConditions($filterID)
+	public function GetFilterConditions($filterID)
 	{
 		global $db;
 
@@ -2572,7 +2575,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return bool
 	 */
-	function DeleteFilterCondition($conditionID, $filterID)
+	public function DeleteFilterCondition($conditionID, $filterID)
 	{
 		global $db;
 
@@ -2588,7 +2591,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return int
 	 */
-	function AddFilterCondition($filterID)
+	public function AddFilterCondition($filterID)
 	{
 		global $db;
 
@@ -2610,7 +2613,7 @@ class BMUser
 	 * @param string $val Value
 	 * @return bool
 	 */
-	function UpdateFilterCondition($conditionID, $filterID, $field, $op, $val)
+	public function UpdateFilterCondition($conditionID, $filterID, $field, $op, $val)
 	{
 		global $db;
 
@@ -2629,7 +2632,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return array
 	 */
-	function GetFilterActions($filterID)
+	public function GetFilterActions($filterID)
 	{
 		global $db;
 
@@ -2650,7 +2653,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return bool
 	 */
-	function DeleteFilterAction($actionID, $filterID)
+	public function DeleteFilterAction($actionID, $filterID)
 	{
 		global $db;
 
@@ -2666,7 +2669,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return int
 	 */
-	function AddFilterAction($filterID)
+	public function AddFilterAction($filterID)
 	{
 		global $db;
 
@@ -2687,7 +2690,7 @@ class BMUser
 	 * @param string $val Value
 	 * @return bool
 	 */
-	function UpdateFilterAction($actionID, $filterID, $op, $val, $textVal)
+	public function UpdateFilterAction($actionID, $filterID, $op, $val, $textVal)
 	{
 		global $db;
 
@@ -2706,7 +2709,7 @@ class BMUser
 	 * @param int $filterID Filter ID
 	 * @return bool
 	 */
-	function IncFilter($filterID)
+	public function IncFilter($filterID)
 	{
 		global $db;
 
@@ -2735,7 +2738,7 @@ class BMUser
 	 * @param bool $conversationView
 	 * @return bool
 	 */
-	function UpdateCommonSettings($inboxRefresh, $instantHTML, $firstDayOfWeek, $dateFormat, $senderName, $defaultSender, $rePrefix, $fwdPrefix, $mailToSMS, $forwardEnabled, $forwardTo, $forwardDelete, $enablePreview, $conversationView, $newsletterOptIn, $plaintextCourier, $replyQuote, $hotkeys, $attCheck, $searchDetailsDefault, $preferredLanguage,
+	public function UpdateCommonSettings($inboxRefresh, $instantHTML, $firstDayOfWeek, $dateFormat, $senderName, $defaultSender, $rePrefix, $fwdPrefix, $mailToSMS, $forwardEnabled, $forwardTo, $forwardDelete, $enablePreview, $conversationView, $newsletterOptIn, $plaintextCourier, $replyQuote, $hotkeys, $attCheck, $searchDetailsDefault, $preferredLanguage,
 		$notifySound, $notifyEMail, $notifyBirthday, $autoSaveDrafts, $autoSaveDraftsInterval)
 	{
 		global $db, $bm_prefs;
@@ -2780,7 +2783,7 @@ class BMUser
 	 * @param bool $noHistory No history?
 	 * @return bool
 	 */
-	function UpdateContactData($userRow, $profileFields, $noHistory = false, $userID = 0, $passwordPlain = false)
+	public function UpdateContactData($userRow, $profileFields, $noHistory = false, $userID = 0, $passwordPlain = false)
 	{
 		global $db, $bm_prefs;
 
@@ -2921,7 +2924,7 @@ class BMUser
 	 *
 	 * @return string
 	 */
-	function BuildVCard()
+	public function BuildVCard()
 	{
 		if(!class_exists('VCardBuilder'))
 			include(B1GMAIL_DIR . 'serverlib/vcard.class.php');
@@ -2951,7 +2954,7 @@ class BMUser
 	 *
 	 * @return array
 	 */
-	function GetRootCertificates()
+	public function GetRootCertificates()
 	{
 		global $db;
 
@@ -2973,7 +2976,7 @@ class BMUser
 	 * @param int $type Certificate type
 	 * @return mixed Array with certificate info or false on error
 	 */
-	function GetCertificateForAddress($email, $type = CERTIFICATE_TYPE_PUBLIC)
+	public function GetCertificateForAddress($email, $type = CERTIFICATE_TYPE_PUBLIC)
 	{
 		global $db;
 
@@ -2996,7 +2999,7 @@ class BMUser
 	 *
 	 * @return array
 	 */
-	function GetKeyRing($sortColumn = 'certificateid', $sortOrder = 'ASC', $type = CERTIFICATE_TYPE_PUBLIC)
+	public function GetKeyRing($sortColumn = 'certificateid', $sortOrder = 'ASC', $type = CERTIFICATE_TYPE_PUBLIC)
 	{
 		global $db;
 
@@ -3017,7 +3020,7 @@ class BMUser
 	 * @param string $pemData PEM data
 	 * @return mixed Certificate hash or false on error
 	 */
-	function StoreCertificate($pemData, $certType = CERTIFICATE_TYPE_PUBLIC)
+	public function StoreCertificate($pemData, $certType = CERTIFICATE_TYPE_PUBLIC)
 	{
 		global $db;
 
@@ -3090,7 +3093,7 @@ class BMUser
 	 * @param string $pass Password for PKCS12 file
 	 * @return mixed String with PKCS12 data or false on error
 	 */
-	function ExportPrivateCertificateAsPKCS12($hash, $pass)
+	public function ExportPrivateCertificateAsPKCS12($hash, $pass)
 	{
 		$result = false;
 
@@ -3126,7 +3129,7 @@ class BMUser
 	 * @param array $chainCerts Chain certs array
 	 * @return mixed Certificate hash or false on error
 	 */
-	function StorePrivateCertificate($certData, $keyData, $pw, $chainCerts = false)
+	public function StorePrivateCertificate($certData, $keyData, $pw, $chainCerts = false)
 	{
 		if($certData && $keyData && strlen($certData) > 5 && strlen($keyData) > 5)
 		{
@@ -3181,7 +3184,7 @@ class BMUser
 	 * @param string $hash Certificate hash
 	 * @return bool
 	 */
-	function DeleteCertificateByHash($hash, $type = 0)
+	public function DeleteCertificateByHash($hash, $type = 0)
 	{
 		global $db;
 
@@ -3208,7 +3211,7 @@ class BMUser
 	 * @param string $hash Certificate hash
 	 * @param array $certs Chain certs
 	 */
-	function SetChainCerts($hash, $certs)
+	public function SetChainCerts($hash, $certs)
 	{
 		$this->SetPref('ChainCerts_' . $hash, serialize($certs));
 	}
@@ -3219,7 +3222,7 @@ class BMUser
 	 * @param string $hash Certificate hash
 	 * @return array
 	 */
-	function GetChainCerts($hash)
+	public function GetChainCerts($hash)
 	{
 		$result = @unserialize($this->GetPref('ChainCerts_' . $hash));
 		return(is_array($result) ? $result : false);
@@ -3231,7 +3234,7 @@ class BMUser
 	 * @param array $recipients Recipient list
 	 * @return array
 	 */
-	function GetRecipientsWithMissingCertificate($recipients, $type = CERTIFICATE_TYPE_PUBLIC)
+	public function GetRecipientsWithMissingCertificate($recipients, $type = CERTIFICATE_TYPE_PUBLIC)
 	{
 		global $db;
 
@@ -3260,7 +3263,7 @@ class BMUser
 	 * @param string $hash Certificate hash
 	 * @return array
 	 */
-	function GetCertificateByHash($hash)
+	public function GetCertificateByHash($hash)
 	{
 		global $db;
 
@@ -3283,7 +3286,7 @@ class BMUser
 	 *
 	 * @return string
 	 */
-	function GetXORSalt()
+	public function GetXORSalt()
 	{
 		$salt = $this->GetPref('XORKeySalt');
 
@@ -3320,7 +3323,7 @@ class BMUser
 	 * @param string $pw Plaintext password
 	 * @return bool
 	 */
-	function SetPrivateKeyPassword($certID, $pw)
+	public function SetPrivateKeyPassword($certID, $pw)
 	{
 		if(!isset($_SESSION['bm_xorCryptKey']))
 			return(false);
@@ -3336,7 +3339,7 @@ class BMUser
 	 *
 	 * @return string Plaintext password
 	 */
-	function GetPrivateKeyPassword($certID)
+	public function GetPrivateKeyPassword($certID)
 	{
 		if(!isset($_SESSION['bm_xorCryptKey']))
 			return(false);
@@ -3354,7 +3357,7 @@ class BMUser
 	 *
 	 * @return array
 	 */
-	function GetPrivateKeyPasswords()
+	public function GetPrivateKeyPasswords()
 	{
 		global $db;
 
@@ -3382,7 +3385,7 @@ class BMUser
 	 * @param array $in Input (hash => pw)
 	 * @return bool
 	 */
-	function SetPrivateKeyPasswords($in)
+	public function SetPrivateKeyPasswords($in)
 	{
 		if(!isset($_SESSION['bm_xorCryptKey']))
 			return(false);
@@ -3402,7 +3405,7 @@ class BMUser
 	 * @param int $certID Certificate hash
 	 * @param string $data PEM data
 	 */
-	function SetPrivateKey($certID, $data)
+	public function SetPrivateKey($certID, $data)
 	{
 		$this->SetPref('PrivateKey_' . $certID, $data);
 	}
@@ -3413,7 +3416,7 @@ class BMUser
 	 * @param string $certID Certificate hash
 	 * @return string PEM data
 	 */
-	function GetPrivateKey($certID)
+	public function GetPrivateKey($certID)
 	{
 		return($this->GetPref('PrivateKey_' . $certID));
 	}
@@ -3425,7 +3428,7 @@ class BMUser
 	 * @param string $sortOrder Sort order
 	 * @return array
 	 */
-	function GetOrderList($sortColumn = 'created', $sortOrder = 'DESC')
+	public function GetOrderList($sortColumn = 'created', $sortOrder = 'DESC')
 	{
 		global $db, $bm_prefs;
 
@@ -3469,7 +3472,7 @@ class BMUser
 	 * @param int $orderID Order ID
 	 * @return array
 	 */
-	function GetOrder($orderID)
+	public function GetOrder($orderID)
 	{
 		global $db;
 
@@ -3492,7 +3495,7 @@ class BMUser
 	 * @param int $orderID Order ID
 	 * @return string
 	 */
-	function GetOrderInvoice($orderID)
+	public function GetOrderInvoice($orderID)
 	{
 		global $db;
 
@@ -3515,7 +3518,7 @@ class BMUser
 	*
 	* @return array
 	*/
-	function GetUserDomains()
+	public static function GetUserDomains()
 	{
 		global $db;
 
@@ -3539,7 +3542,7 @@ class BMUser
 	 * @param string $passwordPlain Plaintext password
  	 * @return string Encrypted password (cookie token)
  	 */
-	function SaveLogin($passwordPlain)
+	public static function SaveLogin($passwordPlain)
 	{
 		global $db;
 
@@ -3569,7 +3572,7 @@ class BMUser
 	 * @param string $token Cookie token
 	 * @return string
 	 */
-	function LoadLogin($token)
+	public static function LoadLogin($token)
 	{
 		global $db;
 
@@ -3602,7 +3605,7 @@ class BMUser
 	 *
 	 * @param string $token Cookie token
 	 */
-	function DeleteSavedLogin($token)
+	public static function DeleteSavedLogin($token)
 	{
 		global $db;
 

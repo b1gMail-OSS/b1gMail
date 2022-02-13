@@ -555,7 +555,7 @@ else if($_REQUEST['action'] == 'sendMail')
  */
 else if($_REQUEST['action'] == 'logout')
 {
-	BMUser::Logout();
+	$thisUser->Logout();
 	header('Location: ./index.php');
 	exit();
 }
