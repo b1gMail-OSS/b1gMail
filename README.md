@@ -22,14 +22,15 @@ on Windows can be achieved with a WSL setup.
 In order to install a development environment, proceed as follows:
 1. Clone the repository
 2. Go to `src/serverlib/` and copy `config.default.inc.php` to `config.inc.php` and copy `version.default.inc.php` to `version.inc.php`.
-3. Open the folder `src` in your web browser, e.g. `http://localhost/b1gMail/src/`
-4. Follow the setup instructs
+3. Remove the file `lock` in `src/setup/`
+4. Open the folder `src` in your web browser, e.g. `http://localhost/b1gMail/src/`
+5. Follow the setup instructs
 
 ## Staying up to date
 When pulling new changes from the server, you will need to update your database
-structure in case it changed. In order to do so, log in to the ACP of your b1gMail
-development copy, go to "Tools" -> "Optimize" and chose "Check structure". Let
-the ACP fix any issues it found.
+structure in case it changed. In order to do so, you can use the `tools/db_sync.php`
+script or log in to the ACP of your b1gMail development copy, go to "Tools" -> "Optimize" 
+and chose "Check structure". Let the ACP fix any issues it found.
 
 ## Contributing
 You want to contribute to the b1gMail code? Great! In order to do so, it's

@@ -25,7 +25,7 @@ require '../serverlib/config.inc.php';
 require '../serverlib/version.inc.php';
 
 // target version
-$target_version = '7.4.1-Beta1';
+$target_version = '7.4.1-Beta2';
 
 // known versions
 $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0.0',
@@ -33,7 +33,7 @@ $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0
                         '7.2.0-Beta1', '7.2.0-Beta2', '7.2.0-Beta3', '7.2.0',
                         '7.3.0-Beta1', '7.3.0-Beta2', '7.3.0-Beta3', '7.3.0-Beta4',
                         '7.3.0-Beta5', '7.3.0-Beta6', '7.3.0',
-                        '7.4.0-Beta1', '7.4.0-Beta2', '7.4.0-Beta3', '7.4.0-Beta4', '7.4.0', ];
+                        '7.4.0-Beta1', '7.4.0-Beta2', '7.4.0-Beta3', '7.4.0-Beta4', '7.4.0', '7.4.1-Beta1'];
 
 // steps
 define('STEP_SELECT_LANGUAGE', 0);
