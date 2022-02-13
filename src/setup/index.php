@@ -674,7 +674,7 @@ elseif ($step == STEP_INSTALL) {
             fclose($fp);
 
             // create config file
-            $configFile = sprintf("<?php\n// Generated %s\n\$mysql = array(\n\t'host'\t\t=> '%s',\n\t'user'\t\t=> '%s',\n\t'pass'\t\t=> '%s',\n\t'db'\t\t=> '%s',\n\t'prefix'\t=> '%s'\n);\ndefine('B1GMAIL_SIGNKEY', '%s');\ndefine('DB_PREFIX', '%s');\n?>",
+            $configFile = sprintf("<?php\n// Generated %s\n\$mysql = array(\n\t'host'\t\t=> '%s',\n\t'user'\t\t=> '%s',\n\t'pass'\t\t=> '%s',\n\t'db'\t\t=> '%s',\n\t'prefix'\t=> '%s'\n);\ndefine('B1GMAIL_SIGNKEY', '%s');\ndefine('DB_CHARSET', '%s');\n?>",
                 date('r'),
                 addslashes($_REQUEST['mysql_host']),
                 addslashes($_REQUEST['mysql_user']),

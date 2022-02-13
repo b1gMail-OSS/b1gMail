@@ -679,62 +679,6 @@ elseif ($step == STEP_UPDATE_STEP) {
         // remove outdated root certificates
         mysqli_query($connection, 'DELETE FROM '.$mysql['prefix'].'certificates WHERE `type`=0 AND `userid`=0 AND `validto`<'.time());
 
-        // convert updated language files?
-        if (isset($bm_prefs['db_is_utf8']) && $bm_prefs['db_is_utf8'] == 1) {
-            $langFiles = ['../languages/deutsch.lang.php', '../languages/english.lang.php'];
-            foreach ($langFiles as $file) {
-                if (!file_exists($file)) {
-                    continue;
-                }
-
-                $info = GetLanguageInfo($file);
-                if (!isset($info['charset'])) {
-                    continue;
-                }
-
-                $charset = strtolower($info['charset']);
-                if ($charset == 'utf8' || $charset == 'utf-8') {
-                    continue;
-                }
-
-                // read file contents
-                $fp = @fopen($file, 'rb+');
-                if (!$fp || !is_resource($fp)) {
-                    echo 'Failed to convert language file to UTF-8: '.$file."\n";
-                    continue;
-                }
-                $contents = fread($fp, filesize($file));
-
-                // convert contents to utf-8
-                $contents = ConvertEncoding($contents, $charset, 'UTF-8');
-
-                // manipulate locales
-                $locales = [];
-                $oldLocales = explode('|', $info['locale']);
-                foreach ($oldLocales as $locale) {
-                    $locale = preg_replace('/\..*/i', '.UTF-8', $locale);
-                    if (!in_array($locale, $locales)) {
-                        $locales[] = $locale;
-                    }
-                }
-
-                // manipulate lang def line
-                $newLangDef = sprintf('// b1gMailLang::%s::%s::%s::%s::UTF-8::%s',
-                    $info['title'],
-                    $info['author'],
-                    $info['authorMail'],
-                    $info['authorWeb'],
-                    implode('|', $locales));
-                $contents = str_replace($info['langDefLine'], $newLangDef."\n".'// Converted to UTF-8 by setup/update.php at '.date('r'), $contents);
-
-                // save
-                fseek($fp, 0, SEEK_SET);
-                ftruncate($fp, 0);
-                fwrite($fp, $contents);
-                fclose($fp);
-            }
-        }
-
         echo 'OK:DONE';
     }
 
