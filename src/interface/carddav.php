@@ -41,7 +41,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 			'uri'				=> 'main',
 			'principaluri'		=> $os->getPrincipalURI(),
 			'{DAV:}displayname'	=> 'Addressbook',
-			'{' . Sabre\CardDAV\Plugin::NS_CARDDAV . '}supported-address-data' => new Sabre\CardDAV\Property\SupportedAddressData()
+			'{' . Sabre\CardDAV\Plugin::NS_CARDDAV . '}supported-address-data' => new Sabre\CardDAV\Xml\Property\SupportedAddressData()
 		);
 
 		return($result);

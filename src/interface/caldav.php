@@ -46,7 +46,7 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 			'uri'				=> 'calendar',
 			'principaluri'		=> $os->getPrincipalURI(),
 			'{DAV:}displayname'	=> 'Calendar',
-			'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Property\SupportedCalendarComponentSet(array('VEVENT'))
+			'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VEVENT'))
 		);
 
 		$groupList = $os->calendar->GetGroups();
@@ -60,7 +60,7 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 				'uri'				=> !empty($group['dav_uri']) ? $group['dav_uri'] : 'calendar-' . $key,
 				'principaluri'		=> $os->getPrincipalURI(),
 				'{DAV:}displayname'	=> $group['title'],
-				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Property\SupportedCalendarComponentSet(array('VEVENT'))
+				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VEVENT'))
 			);
 		}
 
@@ -72,7 +72,7 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 				'uri'				=> !empty($list['dav_uri']) ? $list['dav_uri'] : 'tasklist-' . $list['tasklistid'],
 				'principaluri'		=> $os->getPrincipalURI(),
 				'{DAV:}displayname'	=> $list['title'],
-				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Property\SupportedCalendarComponentSet(array('VTODO'))
+				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VTODO'))
 			);
 		}
 
@@ -85,8 +85,8 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 
 		$key = '{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set';
 
-		if(!isset($properties[$key]) || !($properties[$key] instanceof Sabre\CalDAV\Property\SupportedCalendarComponentSet))
-			throw new Sabre\DAV\Exception('The ' . $key . ' property must be of type: \Sabre\CalDAV\Property\SupportedCalendarComponentSet');
+		if(!isset($properties[$key]) || !($properties[$key] instanceof Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet))
+			throw new Sabre\DAV\Exception('The ' . $key . ' property must be of type: \Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet');
 
 		$type = strtoupper(implode(',', $properties[$key]->getValue()));
 
@@ -892,7 +892,7 @@ $caldavBackend		= new BMCalDAVBackend;
 
 $nodes = array(
 	new \Sabre\CalDAV\Principal\Collection($principalBackend),
-	new \Sabre\CalDAV\CalendarRootNode($principalBackend, $caldavBackend)
+	new \Sabre\CalDAV\CalendarRoot($principalBackend, $caldavBackend)
 );
 
 $server = new DAV\Server($nodes);
