@@ -142,8 +142,15 @@ class BMCaptchaGenerator
 			$xArea = $this->letterW - $w;
 			$yArea = $this->letterH - $h;
 
+			if($xArea < 0) { // Workaround for PHP 8, detecting if xArea is negative
+				$x_mtrand = mt_rand($xArea/2, ($xArea/2)*-1);
+			}
+			else {
+				$x_mtrand = mt_rand(($xArea/2)*-1, $xArea/2);
+			}
+
 			$x = max($this->borderSpacing, $this->borderSpacing *2 + $i*$this->letterW
-					+ @mt_rand(($xArea/2)*-1, $xArea/2));
+					+ $x_mtrand);
 			$y = ($this->h-2*$this->borderSpacing)/2 - $h/2
 					+ @mt_rand(($yArea/2)*-1, $yArea/2);
 
