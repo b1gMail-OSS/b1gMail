@@ -41,7 +41,7 @@ class BMCaptchaGenerator
 	 * @param string $code
 	 * @return BMCaptchaGenerator
 	 */
-	function __construct($code)
+	public function __construct($code)
 	{
 		$this->fontPath			= B1GMAIL_DIR . 'res/fonts/';
 		$this->bgPath			= B1GMAIL_DIR . 'res/bg/';
@@ -61,7 +61,7 @@ class BMCaptchaGenerator
 	 * read fonts
 	 *
 	 */
-	function _readFonts()
+	private function _readFonts()
 	{
 		$this->fontList = array();
 		$d = dir($this->fontPath);
@@ -75,7 +75,7 @@ class BMCaptchaGenerator
 	 * read backgrounds
 	 *
 	 */
-	function _readBGs()
+	private function _readBGs()
 	{
 		$this->bgList = array();
 		$d = dir($this->bgPath);
@@ -89,7 +89,7 @@ class BMCaptchaGenerator
 	 * generate captcha
 	 *
 	 */
-	function _generateCaptcha()
+	private function _generateCaptcha()
 	{
 		$this->img 		= imagecreatetruecolor($this->w, $this->h);
 		$this->white 	= imagecolorallocate($this->img, 255, 255, 255);
@@ -105,7 +105,7 @@ class BMCaptchaGenerator
 	 * draw background
 	 *
 	 */
-	function _drawBG()
+	private function _drawBG()
 	{
 		// get random bg
 		$bgFile = $this->_randomBG();
@@ -129,7 +129,7 @@ class BMCaptchaGenerator
 	 * place letters
 	 *
 	 */
-	function _placeLetters()
+	private function _placeLetters()
 	{
 		for($i=0; $i<strlen($this->code); $i++)
 		{
@@ -142,7 +142,7 @@ class BMCaptchaGenerator
 			$xArea = $this->letterW - $w;
 			$yArea = $this->letterH - $h;
 
-			$x = max($this->borderSpacing, $this->borderSpacing + $i*$this->letterW
+			$x = max($this->borderSpacing, $this->borderSpacing *2 + $i*$this->letterW
 					+ @mt_rand(($xArea/2)*-1, $xArea/2));
 			$y = ($this->h-2*$this->borderSpacing)/2 - $h/2
 					+ @mt_rand(($yArea/2)*-1, $yArea/2);
@@ -158,7 +158,7 @@ class BMCaptchaGenerator
 	 * @param string $letter
 	 * @return resource
 	 */
-	function _generateLetter($letter, $baseColor = false)
+	private function _generateLetter($letter, $baseColor = false)
 	{
 		$angleRange	= ceil(($this->perturbation/10) * 45);
 
@@ -208,7 +208,7 @@ class BMCaptchaGenerator
 	 *
 	 * @return string
 	 */
-	function _randomFont()
+	private function _randomFont()
 	{
 		return($this->fontList[ mt_rand(0, count($this->fontList)-1) ]);
 	}
@@ -218,12 +218,12 @@ class BMCaptchaGenerator
 	 *
 	 * @return string
 	 */
-	function _randomBG()
+	private function _randomBG()
 	{
 		return($this->bgList[ mt_rand(0, count($this->bgList)-1) ]);
 	}
 
-	function _drawPerturbation()
+	private function _drawPerturbation()
 	{
 		$points = mt_rand($this->perturbation*25, $this->perturbation*100);
 		for($i=0; $i<$points; $i++)
@@ -235,7 +235,7 @@ class BMCaptchaGenerator
 	 * draw border
 	 *
 	 */
-	function _drawBorder()
+	private function _drawBorder()
 	{
 		imagerectangle($this->img, 0, 0, $this->w-1, $this->h-1, $this->black);
 	}
@@ -244,7 +244,7 @@ class BMCaptchaGenerator
 	 * output
 	 *
 	 */
-	function Output()
+	public function Output()
 	{
 		$this->_generateCaptcha();
 		header('Content-Type: image/png');
