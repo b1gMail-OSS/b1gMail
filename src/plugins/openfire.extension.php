@@ -1,25 +1,37 @@
 <?php
 /*
- * Copyright (c) 2007 - 2008, Home of the Sebijk.com
- * http://www.sebijk.com
+ * b1gMail Openfire Integration plugin
+ * (c) Home of the Sebijk.com
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
  */
 class modopenfire extends BMPlugin
 {	
 	/*
 	* Eigenschaften des Plugins
 	*/
-	function modopenfire()
+	function __construct()
 	{
 		$this->name					= 'Jabber Openfire-Integration';
-		$this->version				= '1.1.0';
+		$this->version				= '1.1.1';
 		$this->type					= BMPLUGIN_DEFAULT;
 
 		$this->author				= 'Home of the Sebijk.com';
 		$this->web					= 'http://www.sebijk.com';
 		$this->mail					= 'sebijk@web.de';
-
-		$this->update_url			= 'http://my.b1gmail.com/update_service/';
-		$this->website				= 'http://my.b1gmail.com/details/69/';
 
 		$this->admin_pages			=  true;
 		$this->admin_page_title		= 'Openfire-Integration';

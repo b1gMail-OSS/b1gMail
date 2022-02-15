@@ -20,7 +20,7 @@
  */
 class RemoveIPPlugin extends BMPlugin 
 {
-	function RemoveIPPlugin()
+	function __construct()
 	{
 		$this->type				= BMPLUGIN_DEFAULT;
 		$this->name				= 'RemoveIP Plugin';
