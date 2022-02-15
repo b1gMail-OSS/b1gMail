@@ -39,7 +39,7 @@ class CSVReader
 	 * @param resource $fp File pointer to CSV file
 	 * @return CSVReader
 	 */
-	function __construct($fp, $encoding = 'UTF-8')
+	public function __construct($fp, $encoding = 'UTF-8')
 	{
 		$this->_encoding = $encoding;
 		$this->_fp = $fp;
@@ -51,7 +51,7 @@ class CSVReader
 	 *
 	 * @return array
 	 */
-	function FetchRow()
+	public function FetchRow()
 	{
 		return(isset($this->_data[++$this->_rp]) ? $this->_generate_assoc_row($this->_rp) : false);
 	}
@@ -61,7 +61,7 @@ class CSVReader
 	 *
 	 * @return array
 	 */
-	function Fields()
+	public function Fields()
 	{
 		return($this->_data[0]);
 	}
@@ -71,7 +71,7 @@ class CSVReader
 	 *
 	 * @return int
 	 */
-	function NumFields()
+	public function NumFields()
 	{
 		return(count($this->_data[0]));
 	}
@@ -82,7 +82,7 @@ class CSVReader
 	 * @param int $index Row index
 	 * @return array
 	 */
-	function _generate_assoc_row($index)
+	private function _generate_assoc_row($index)
 	{
 		$result = array();
 		$row = $this->_data[$index];
@@ -103,7 +103,7 @@ class CSVReader
 	 * @param resource $fp File pointer
 	 * @return array
 	 */
-	function _parse_file($fp)
+	private function _parse_file($fp)
 	{
 		$rows = array(array(''));
 		$inString = false;

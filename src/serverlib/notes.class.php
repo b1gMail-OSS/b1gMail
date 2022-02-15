@@ -35,7 +35,7 @@ class BMNotes
 	 * @param int $userID User ID
 	 * @return BMNotes
 	 */
-	function __construct($userID)
+	public function __construct($userID)
 	{
 		$this->_userID = $userID;
 	}
@@ -48,7 +48,7 @@ class BMNotes
 	 * @param int $limit Entry limit
 	 * @return array
 	 */
-	function GetNoteList($sortColumn = 'date', $sortOrder = 'ASC', $limit = -1)
+	public function GetNoteList($sortColumn = 'date', $sortOrder = 'ASC', $limit = -1)
 	{
 		global $db;
 
@@ -71,7 +71,7 @@ class BMNotes
 	 * @param int $id Note ID
 	 * @return array
 	 */
-	function GetNote($id)
+	public function GetNote($id)
 	{
 		global $db;
 
@@ -92,7 +92,7 @@ class BMNotes
 	 * @param int $id Note ID
 	 * @return bool
 	 */
-	function Delete($id)
+	public function Delete($id)
 	{
 		global $db;
 
@@ -109,7 +109,7 @@ class BMNotes
 	 * @param string $text Text
 	 * @return int
 	 */
-	function Add($priority, $text)
+	public function Add($priority, $text)
 	{
 		global $db;
 
@@ -129,7 +129,7 @@ class BMNotes
 	 * @param string $text New test
 	 * @return bool
 	 */
-	function Change($id, $priority, $text)
+	public function Change($id, $priority, $text)
 	{
 		global $db;
 
