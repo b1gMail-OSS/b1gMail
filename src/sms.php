@@ -225,12 +225,13 @@ else if($_REQUEST['action'] == 'outbox')
 	$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 					? $_REQUEST['order']
 					: 'desc';
+	$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 	// page output
 	$tpl->assign('pageTitle', $lang_user['smsoutbox']);
 	$tpl->assign('outbox', $sms->GetOutbox($sortColumn, $sortOrder));
 	$tpl->assign('sortColumn', $sortColumn);
-	$tpl->assign('sortOrder', $sortOrder);
+	$tpl->assign('sortOrder', $sortOrderFA);
 	$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 	$tpl->assign('pageContent', 'li/sms.outbox.tpl');
 	$tpl->display('li/index.tpl');

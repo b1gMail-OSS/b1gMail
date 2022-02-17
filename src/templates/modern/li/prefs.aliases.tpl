@@ -16,11 +16,11 @@
 		<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'alias');" /></th>
 		<th>
 			<a href="prefs.php?sid={$sid}&action=aliases&sort=email&order={$sortOrderInv}">{lng p="alias"}</a>
-			{if $sortColumn=='email'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="220">
 			<a href="prefs.php?sid={$sid}&action=aliases&sort=type&order={$sortOrderInv}">{lng p="type"}</a>
-			{if $sortColumn=='type'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='type'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="55">&nbsp;</th>
 	</tr>

@@ -70,6 +70,7 @@ if($_REQUEST['action'] == 'start')
 	$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 					? $_REQUEST['order']
 					: 'desc';
+	$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 	// note list
 	$noteList = $notes->GetNoteList($sortColumn, $sortOrder);
@@ -79,7 +80,7 @@ if($_REQUEST['action'] == 'start')
 		$tpl->assign('showID', (int)$_REQUEST['show']);
 	$tpl->assign('noteList', $noteList);
 	$tpl->assign('sortColumn', $sortColumn);
-	$tpl->assign('sortOrder', $sortOrder);
+	$tpl->assign('sortOrder', $sortOrderFA);
 	$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 	$tpl->assign('pageContent', 'li/organizer.notes.tpl');
 	$tpl->display('li/index.tpl');

@@ -311,6 +311,7 @@ else if($_REQUEST['action'] == 'groups')
 		$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 						? $_REQUEST['order']
 						: 'asc';
+		$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 		// group list
 		$groups = $calendar->GetGroups($sortColumn, $sortOrder);
@@ -319,7 +320,7 @@ else if($_REQUEST['action'] == 'groups')
 		$tpl->assign('haveGroups', count($groups) > 1);
 		$tpl->assign('groups', $groups);
 		$tpl->assign('sortColumn', $sortColumn);
-		$tpl->assign('sortOrder', $sortOrder);
+		$tpl->assign('sortOrder', $sortOrderFA);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('pageContent', 'li/organizer.calendar.groups.tpl');
 		$tpl->display('li/index.tpl');

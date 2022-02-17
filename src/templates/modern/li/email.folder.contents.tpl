@@ -38,22 +38,22 @@
 		<th width="20%">
 		{if $folderID!=-2}
 			<a href="email.php?folder={$folderID}&sid={$sid}&sort=von&order={$sortOrderInv}">{lng p="from"}</a>
-			{if $sortColumn=='von'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='von'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		{else}
 			<a href="email.php?folder={$folderID}&sid={$sid}&sort=an&order={$sortOrderInv}">{lng p="to"}</a>
-			{if $sortColumn=='an'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='an'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		{/if}</th>
 		<th>
 			<a href="email.php?folder={$folderID}&sid={$sid}&sort=betreff&order={$sortOrderInv}">{lng p="subject"}</a>
-			{if $sortColumn=='betreff'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='betreff'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="130">
 			<a href="email.php?folder={$folderID}&sid={$sid}&sort=fetched&order={$sortOrderInv}">{lng p="date"}</a>
-			{if $sortColumn=='fetched'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='fetched'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="65">
 			<a href="email.php?folder={$folderID}&sid={$sid}&sort=size&order={$sortOrderInv}">{lng p="size"}</a>
-			{if $sortColumn=='size'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='size'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="70">&nbsp;</th>
 	</tr>

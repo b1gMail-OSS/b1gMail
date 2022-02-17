@@ -15,15 +15,15 @@
 					<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1);" /></th>
 					<th width="80">
 						<a href="organizer.notes.php?sid={$sid}&sort=priority&order={$sortOrderInv}">{lng p="priority"}</a>
-						{if $sortColumn=='priority'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+						{if $sortColumn=='priority'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 					</th>
 					<th width="150">
 						<a href="organizer.notes.php?sid={$sid}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
-						{if $sortColumn=='date'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+						{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 					</th>
 					<th>
 						<a href="organizer.notes.php?sid={$sid}&sort=text&order={$sortOrderInv}">{lng p="text"}</a>
-						{if $sortColumn=='text'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}					
+						{if $sortColumn=='text'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}					
 					</th>
 					<th width="55">&nbsp;</th>
 				</tr>

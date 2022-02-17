@@ -16,18 +16,18 @@
 		<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'pop3');" /></th>
 		<th>
 			<a href="prefs.php?sid={$sid}&action=extpop3&sort=p_user&order={$sortOrderInv}">{lng p="username"}</a>
-			{if $sortColumn=='p_user'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='p_user'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th>
 			<a href="prefs.php?sid={$sid}&action=extpop3&sort=p_host&order={$sortOrderInv}">{lng p="host"}</a>
-			{if $sortColumn=='p_host'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='p_host'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="60">
 			{lng p="paused"}?
 		</th>
 		<th width="220">
 			<a href="prefs.php?sid={$sid}&action=extpop3&sort=last_fetch&order={$sortOrderInv}">{lng p="lastfetch"}</a>
-			{if $sortColumn=='last_fetch'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='last_fetch'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="55">&nbsp;</th>
 	</tr>

@@ -13,15 +13,15 @@
 		<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'sms');" /></th>
 		<th>
 			<a href="sms.php?action=outbox&sid={$sid}&sort=from&order={$sortOrderInv}">{lng p="from"}</a>
-			{if $sortColumn=='from'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='from'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th>
 			<a href="sms.php?action=outbox&sid={$sid}&sort=to&order={$sortOrderInv}">{lng p="to"}</a>
-			{if $sortColumn=='to'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='to'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="160">
 			<a href="sms.php?action=outbox&sid={$sid}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
-			{if $sortColumn=='date'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="35">&nbsp;</th>
 	</tr>

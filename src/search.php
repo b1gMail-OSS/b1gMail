@@ -147,6 +147,7 @@ if($_REQUEST['action'] == 'search')
 	$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 					? $_REQUEST['order']
 					: 'desc';
+	$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 	// perform search
 	if(strlen($q) >= 3)
@@ -204,7 +205,7 @@ if($_REQUEST['action'] == 'search')
 
 		// show results
 		$tpl->assign('sortColumn', $sortColumn);
-		$tpl->assign('sortOrder', $sortOrder);
+		$tpl->assign('sortOrder', $sortOrderFA);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('pageNo', $pageNo);
 		$tpl->assign('pageCount', $pageCount);

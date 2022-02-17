@@ -379,6 +379,8 @@ if($_REQUEST['action'] == 'folder')
 	$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 					? $_REQUEST['order']
 					: 'desc';
+	$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
+	
 
 	// get mail list
 	$mailList = $mailbox->GetMailList($folderID,
@@ -409,7 +411,7 @@ if($_REQUEST['action'] == 'folder')
 											$folderID, $sortColumn, $sortOrder, $pageNo));
 	$tpl->assign('mailList', $mailList);
 	$tpl->assign('sortColumn', $sortColumn);
-	$tpl->assign('sortOrder', $sortOrder);
+	$tpl->assign('sortOrder', $sortOrderFA);
 	$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 	if(isset($folderList[$folderID]))
 	{

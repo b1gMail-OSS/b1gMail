@@ -13,11 +13,11 @@
 		<th class="listTableHead" width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'group');" /></th>
 		<th class="listTableHead">
 			<a href="organizer.calendar.php?action=groups&sid={$sid}&sort=title&order={$sortOrderInv}">{lng p="title"}</a>
-			{if $sortColumn=='title'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='title'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="listTableHead" width="120">
 			<a href="organizer.calendar.php?action=groups&sid={$sid}&sort=color&order={$sortOrderInv}">{lng p="color"}</a>
-			{if $sortColumn=='color'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+			{if $sortColumn=='color'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="listTableHead" width="55">&nbsp;</th>
 	</tr>

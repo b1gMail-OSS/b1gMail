@@ -22,13 +22,13 @@
 	<tr>
 		<th colspan="2">&nbsp;</th>
 		<th><a href="#" onclick="changeSearchSort('title','{$sortOrderInv}');">{lng p="title"}</a>
-			{if $sortColumn=='title'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}</th>
+			{if $sortColumn=='title'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 		<th><a href="#" onclick="changeSearchSort('date','{$sortOrderInv}');">{lng p="date"}</a>
-			{if $sortColumn=='date'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}</th>
+			{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 		<th><a href="#" onclick="changeSearchSort('size','{$sortOrderInv}');">{lng p="size"}</a>
-			{if $sortColumn=='size'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}</th>
+			{if $sortColumn=='size'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 		<th><a href="#" onclick="changeSearchSort('score','{$sortOrderInv}');">{lng p="relevance"}</a>
-			{if $sortColumn=='score'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}</th>
+			{if $sortColumn=='score'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 	</tr>
 	
 	{if $results}

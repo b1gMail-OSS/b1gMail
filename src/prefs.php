@@ -1195,6 +1195,7 @@ else if($_REQUEST['action'] == 'aliases'
 		$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 						? $_REQUEST['order']
 						: 'asc';
+		$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 		// alias list
 		$aliasList = $thisUser->GetAliases($sortColumn, $sortOrder);
@@ -1204,7 +1205,7 @@ else if($_REQUEST['action'] == 'aliases'
 		$tpl->assign('aliasUsage', sprintf($lang_user['aliasusage'], count($aliasList), $groupRow['aliase']));
 		$tpl->assign('aliasList', $aliasList);
 		$tpl->assign('sortColumn', $sortColumn);
-		$tpl->assign('sortOrder', $sortOrder);
+		$tpl->assign('sortOrder', $sortOrderFA);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('pageContent', 'li/prefs.aliases.tpl');
 		$tpl->display('li/index.tpl');
@@ -1385,6 +1386,7 @@ else if($_REQUEST['action'] == 'extpop3')
 		$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 						? $_REQUEST['order']
 						: 'asc';
+		$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 		// account list
 		$accountList = $thisUser->GetPOP3Accounts($sortColumn, $sortOrder);
@@ -1394,7 +1396,7 @@ else if($_REQUEST['action'] == 'extpop3')
 		$tpl->assign('accountUsage', sprintf($lang_user['pop3usage'], count($accountList), $groupRow['ownpop3']));
 		$tpl->assign('accountList', $accountList);
 		$tpl->assign('sortColumn', $sortColumn);
-		$tpl->assign('sortOrder', $sortOrder);
+		$tpl->assign('sortOrder', $sortOrderFA);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('pageContent', 'li/prefs.extpop3.tpl');
 		$tpl->display('li/index.tpl');
@@ -1808,6 +1810,7 @@ else if($_REQUEST['action'] == 'keyring'
 		$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
 						? $_REQUEST['order']
 						: 'asc';
+		$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
 		// get key ring
 		$ownCerts 		= $thisUser->GetKeyRing($sortColumn, $sortOrder, CERTIFICATE_TYPE_PRIVATE);
@@ -1817,7 +1820,7 @@ else if($_REQUEST['action'] == 'keyring'
 		$tpl->assign('uploadCerts', $groupRow['upload_certificates'] == 'yes');
 		$tpl->assign('issueCerts', $groupRow['issue_certificates'] == 'yes');
 		$tpl->assign('sortColumn', $sortColumn);
-		$tpl->assign('sortOrder', $sortOrder);
+		$tpl->assign('sortOrder', $sortOrderFA);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('now', time());
 		$tpl->assign('ownCerts', $ownCerts);

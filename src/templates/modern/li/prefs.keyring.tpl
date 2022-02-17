@@ -13,15 +13,15 @@
 				<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'cert');" /></th>
 				<th>
 					<a href="prefs.php?sid={$sid}&action=keyring&sort=cn&order={$sortOrderInv}">{lng p="name"}</a>
-					{if $sortColumn=='cn'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+					{if $sortColumn=='cn'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
 					<a href="prefs.php?sid={$sid}&action=keyring&sort=email&order={$sortOrderInv}">{lng p="email"}</a>
-					{if $sortColumn=='email'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+					{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
 					<a href="prefs.php?sid={$sid}&action=keyring&sort=validto&order={$sortOrderInv}">{lng p="validto"}</a>
-					{if $sortColumn=='validto'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+					{if $sortColumn=='validto'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th width="70">&nbsp;</th>
 			</tr>
@@ -102,15 +102,15 @@
 				<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f2, 'cert');" /></th>
 				<th>
 					<a href="prefs.php?sid={$sid}&action=keyring&sort=cn&order={$sortOrderInv}">{lng p="name"}</a>
-					{if $sortColumn=='cn'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+					{if $sortColumn=='cn'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
 					<a href="prefs.php?sid={$sid}&action=keyring&sort=email&order={$sortOrderInv}">{lng p="email"}</a>
-					{if $sortColumn=='email'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+					{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
 					<a href="prefs.php?sid={$sid}&action=keyring&sort=validto&order={$sortOrderInv}">{lng p="validto"}</a>
-					{if $sortColumn=='validto'}<img src="{$tpldir}images/li/{$sortOrder}.gif" border="0" alt="" align="absmiddle" />{/if}
+					{if $sortColumn=='validto'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th width="70">&nbsp;</th>
 			</tr>
