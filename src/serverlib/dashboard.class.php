@@ -19,204 +19,211 @@
  *
  */
 
-if(!defined('B1GMAIL_INIT'))
-	die('Directly calling this file is not supported');
+if (!defined('B1GMAIL_INIT')) {
+    die('Directly calling this file is not supported');
+}
 
 /**
- * dashboard class
+ * dashboard class.
  */
 class BMDashboard
 {
-	var $_type;
+    private $_type;
 
-	/**
-	 * constructor
-	 *
-	 * @param int $type Dashboard type (BMWIDGET_*-constant)
-	 * @return BMDashboard
-	 */
-	function __construct($type)
-	{
-		$this->_type = $type;
-	}
+    /**
+     * constructor.
+     *
+     * @param int $type Dashboard type (BMWIDGET_*-constant)
+     *
+     * @return BMDashboard
+     */
+    public function __construct($type)
+    {
+        $this->_type = $type;
+    }
 
-	/**
-	 * get array of shown widgets
-	 *
-	 * @param string $widgetOrder Widget order string
-	 * @return array
-	 */
-	function getWidgetArray($widgetOrder)
-	{
-		global $plugins;
+    /**
+     * get array of shown widgets.
+     *
+     * @param string $widgetOrder Widget order string
+     *
+     * @return array
+     */
+    public function getWidgetArray($widgetOrder)
+    {
+        global $plugins;
 
-		$widgetList = explode(',', str_replace(';', ',', $widgetOrder));
-		$tplWidgets = array();
-		$widgets = $plugins->getWidgetsSuitableFor($this->_type);
-		foreach($widgets as $widget)
-		{
-			if(in_array($widget, $widgetList))
-			{
-				$plugins->callFunction('renderWidget', $widget);
-				$tplWidgets[$widget] = array(
-					'template'		=> $plugins->pluginResourcePath($plugins->getParam('widgetTemplate', $widget), $widget, 'template'),
-					'hasPrefs'		=> $plugins->getParam('widgetPrefs', $widget),
-					'prefsW'		=> (int)$plugins->getParam('widgetPrefsWidth', $widget),
-					'prefsH'		=> (int)$plugins->getParam('widgetPrefsHeight', $widget),
-					'icon'			=> $plugins->getParam('widgetIcon', $widget) !== false
-										? './plugins/templates/images/' . $plugins->getParam('widgetIcon', $widget)
-										: '',
-					'title'			=> $plugins->getParam('widgetTitle', $widget)
-				);
-			}
-		}
+        $widgetList = explode(',', str_replace(';', ',', $widgetOrder));
+        $tplWidgets = [];
+        $widgets = $plugins->getWidgetsSuitableFor($this->_type);
+        foreach ($widgets as $widget) {
+            if (in_array($widget, $widgetList)) {
+                $plugins->callFunction('renderWidget', $widget);
+                $tplWidgets[$widget] = [
+                    'template' => $plugins->pluginResourcePath($plugins->getParam('widgetTemplate', $widget), $widget, 'template'),
+                    'hasPrefs' => $plugins->getParam('widgetPrefs', $widget),
+                    'prefsW' => (int) $plugins->getParam('widgetPrefsWidth', $widget),
+                    'prefsH' => (int) $plugins->getParam('widgetPrefsHeight', $widget),
+                    'icon' => $plugins->getParam('widgetIcon', $widget) !== false
+                                        ? './plugins/templates/images/'.$plugins->getParam('widgetIcon', $widget)
+                                        : '',
+                    'title' => $plugins->getParam('widgetTitle', $widget),
+                ];
+            }
+        }
 
-		return($tplWidgets);
-	}
+        return $tplWidgets;
+    }
 
-	/**
-	 * check widget order string
-	 *
-	 * @param string $widgetOrder Order string
-	 * @return bool
-	 */
-	function checkWidgetOrder($widgetOrder)
-	{
-		global $plugins;
+    /**
+     * check widget order string.
+     *
+     * @param string $widgetOrder Order string
+     *
+     * @return bool
+     */
+    public function checkWidgetOrder($widgetOrder)
+    {
+        global $plugins;
 
-		$widgets = $plugins->getWidgetsSuitableFor($this->_type);
-		$widgetList = explode(',', str_replace(';', ',', $widgetOrder));
+        $widgets = $plugins->getWidgetsSuitableFor($this->_type);
+        $widgetList = explode(',', str_replace(';', ',', $widgetOrder));
 
-		foreach($widgetList as $widget)
-			if($widget != '' && !in_array($widget, $widgets))
-				return(false);
+        foreach ($widgetList as $widget) {
+            if ($widget != '' && !in_array($widget, $widgets)) {
+                return false;
+            }
+        }
 
-		return(true);
-	}
+        return true;
+    }
 
-	/**
-	 * widget sort callback for uasort()
-	 *
-	 * @param array $a
-	 * @param array $b
-	 * @return number
-	 */
-	function _sortWidgets($a, $b)
-	{
-		return(strcmp($a['title'], $b['title']));
-	}
+    /**
+     * widget sort callback for uasort().
+     *
+     * @param array $a
+     * @param array $b
+     *
+     * @return number
+     */
+    private function _sortWidgets($a, $b)
+    {
+        return strcmp($a['title'], $b['title']);
+    }
 
-	/**
-	 * get all possible widgets suitable for this dashboard
-	 *
-	 * @param string $widgetOrder Current order string
-	 * @return array
-	 */
-	function getPossibleWidgets($widgetOrder)
-	{
-		global $plugins;
+    /**
+     * get all possible widgets suitable for this dashboard.
+     *
+     * @param string $widgetOrder Current order string
+     *
+     * @return array
+     */
+    public function getPossibleWidgets($widgetOrder)
+    {
+        global $plugins;
 
-		$possibleWidgets = $plugins->getWidgetsSuitableFor($this->_type);
-		$activeWidgets = explode(',', str_replace(';', ',', $widgetOrder));
+        $possibleWidgets = $plugins->getWidgetsSuitableFor($this->_type);
+        $activeWidgets = explode(',', str_replace(';', ',', $widgetOrder));
 
-		$myWidgets = array();
-		foreach($possibleWidgets as $widget)
-		{
-			$myWidgets[$widget] = array(
-				'icon'			=> $plugins->getParam('widgetIcon', $widget) !== false
-									? './plugins/templates/images/' . $plugins->getParam('widgetIcon', $widget)
-									: '',
-				'title'		=> $plugins->getParam('widgetTitle', $widget),
-				'active'	=> in_array($widget, $activeWidgets)
-			);
-		}
+        $myWidgets = [];
+        foreach ($possibleWidgets as $widget) {
+            $myWidgets[$widget] = [
+                'icon' => $plugins->getParam('widgetIcon', $widget) !== false
+                                    ? './plugins/templates/images/'.$plugins->getParam('widgetIcon', $widget)
+                                    : '',
+                'title' => $plugins->getParam('widgetTitle', $widget),
+                'active' => in_array($widget, $activeWidgets),
+            ];
+        }
 
-		uasort($myWidgets, array($this, '_sortWidgets'));
+        uasort($myWidgets, [$this, '_sortWidgets']);
 
-		return($myWidgets);
-	}
+        return $myWidgets;
+    }
 
-	/**
-	 * shows widgets preferences
-	 *
-	 * @param string $widgetName Widget name
-	 */
-	function showWidgetPrefs($widgetName)
-	{
-		global $plugins, $tpl;
+    /**
+     * shows widgets preferences.
+     *
+     * @param string $widgetName Widget name
+     */
+    public function showWidgetPrefs($widgetName)
+    {
+        global $plugins, $tpl;
 
-		$allWidgets = array_merge($plugins->getWidgetsSuitableFor(BMWIDGET_ORGANIZER),
-								  $plugins->getWidgetsSuitableFor(BMWIDGET_START));
+        $allWidgets = array_merge($plugins->getWidgetsSuitableFor(BMWIDGET_ORGANIZER),
+                                  $plugins->getWidgetsSuitableFor(BMWIDGET_START));
 
-		if(in_array($widgetName, $allWidgets)
-		   && $plugins->getParam('widgetPrefs', $widgetName))
-		{
-			$tpl->assign('widgetPrefsURL', sprintf('start.php?action=showWidgetPrefs&name=%s&sid=%s',
-												   $widgetName,
-												   session_id()));
-			$plugins->callFunction('renderWidgetPrefs', $widgetName);
-		}
-	}
+        if (in_array($widgetName, $allWidgets)
+           && $plugins->getParam('widgetPrefs', $widgetName)) {
+            $tpl->assign('widgetPrefsURL', sprintf('start.php?action=showWidgetPrefs&name=%s&sid=%s',
+                                                   $widgetName,
+                                                   session_id()));
+            $plugins->callFunction('renderWidgetPrefs', $widgetName);
+        }
+    }
 
-	/**
-	 * generate new order string from posted customize form
-	 *
-	 * @param string $widgetOrder Current order string
-	 * @return string New order string
-	 */
-	function generateOrderStringFromPostForm($widgetOrder)
-	{
-		global $plugins;
+    /**
+     * generate new order string from posted customize form.
+     *
+     * @param string $widgetOrder Current order string
+     *
+     * @return string New order string
+     */
+    public function generateOrderStringFromPostForm($widgetOrder)
+    {
+        global $plugins;
 
-		$possibleWidgets = $plugins->getWidgetsSuitableFor($this->_type);
+        $possibleWidgets = $plugins->getWidgetsSuitableFor($this->_type);
 
-		// get al activated widgets
-		$newOrder = '';
-		$newWidgets = array();
-		foreach($_POST as $key=>$val)
-			if(substr($key, 0, 7) == 'widget_'
-				&& in_array(substr($key, 7), $possibleWidgets))
-				$newWidgets[] = substr($key, 7);
+        // get al activated widgets
+        $newOrder = '';
+        $newWidgets = [];
+        foreach ($_POST as $key => $val) {
+            if (substr($key, 0, 7) == 'widget_'
+                && in_array(substr($key, 7), $possibleWidgets)) {
+                $newWidgets[] = substr($key, 7);
+            }
+        }
 
-		// explode old order string
-		$rows = explode(';', $widgetOrder);
-		$newRows = array();
+        // explode old order string
+        $rows = explode(';', $widgetOrder);
+        $newRows = [];
 
-		// remove deactivated widgets
-		foreach($rows as $row)
-		{
-			$cols = explode(',', $row);
+        // remove deactivated widgets
+        foreach ($rows as $row) {
+            $cols = explode(',', $row);
 
-			foreach($cols as $col)
-				if($col != '' && !in_array($col, $newWidgets))
-					$newOrder .= ',';
-				else
-				{
-					$newOrder .= $col . ',';
-					if($col != '')
-						unset($newWidgets[array_search($col, $newWidgets)]);
-				}
+            foreach ($cols as $col) {
+                if ($col != '' && !in_array($col, $newWidgets)) {
+                    $newOrder .= ',';
+                } else {
+                    $newOrder .= $col.',';
+                    if ($col != '') {
+                        unset($newWidgets[array_search($col, $newWidgets)]);
+                    }
+                }
+            }
 
-			$newOrder = substr($newOrder, 0, -1) . ';';
-		}
+            $newOrder = substr($newOrder, 0, -1).';';
+        }
 
-		// add new activated widgets
-		$i = 0;
-		foreach($newWidgets as $widget)
-		{
-			$i++;
-			$newOrder .= $widget . ',';
+        // add new activated widgets
+        $i = 0;
+        foreach ($newWidgets as $widget) {
+            ++$i;
+            $newOrder .= $widget.',';
 
-			if($i%3 == 0)
-				$newOrder = substr($newOrder, 0, -1) . ';';
-		}
+            if ($i % 3 == 0) {
+                $newOrder = substr($newOrder, 0, -1).';';
+            }
+        }
 
-		// trim empty lines and trailing characters
-		$newOrder = preg_replace('/;$/', '', $newOrder);
-		$newOrder = str_replace(';,,;', ';', $newOrder);
-		$newOrder = preg_replace('/^,,;/', '', $newOrder);
-		$newOrder = preg_replace('/;,,$/', '', $newOrder);
+        // trim empty lines and trailing characters
+        $newOrder = preg_replace('/;$/', '', $newOrder);
+        $newOrder = str_replace(';,,;', ';', $newOrder);
+        $newOrder = preg_replace('/^,,;/', '', $newOrder);
+        $newOrder = preg_replace('/;,,$/', '', $newOrder);
 
-		return($newOrder);
-	}
+        return $newOrder;
+    }
 }
