@@ -817,7 +817,7 @@ class BMCalendar
 		if($userID == -1)
 		{
 			if($this->_userID != $userRow['id'])
-				$userRow	= BMUser::Fetch($this->_userID);
+				$userRow	= BMUser::staticFetch($this->_userID);
 			$firstDay		= $userRow['c_firstday'];
 			$datesStart 	= mktime(0, 0, 0, $month, 1, $year);
 			$datesEnd 		= mktime(23, 59, 59, $month, $daysInMonth, $year);
@@ -828,7 +828,7 @@ class BMCalendar
 		else
 		{
 			if($userID != $userRow['id'])
-				$userRow	= BMUser::Fetch($userID);
+				$userRow	= BMUser::staticFetch($userID);
 			$firstDay		= $userRow['c_firstday'];
 			$userCalendar 	= _new('BMCalendar', array($userID));
 			$datesStart 	= mktime(0, 0, 0, $month, 1, $year);

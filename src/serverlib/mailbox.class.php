@@ -1886,7 +1886,7 @@ class BMMailbox
 
 		// TODO: shared folders
 
-		$userInfo = BMUser::Fetch($this->_userID);
+		$userInfo = BMUser::staticFetch($this->_userID);
 
 		// select new mails
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}mails WHERE '

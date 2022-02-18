@@ -445,7 +445,7 @@ class BMWebdisk
 		}
 		else
 		{
-			$userRow = BMUser::Fetch($this->_userID);
+			$userRow = BMUser::staticFetch($this->_userID);
 			$info = array(
 					'id'		=> 0,
 					'type'		=> WEBDISK_ITEM_FOLDER,

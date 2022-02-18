@@ -1170,7 +1170,7 @@ class BMUser
 				if(isset($pluginAuth['profile'])
 					&& $row['gesperrt'] == 'no')
 				{
-					$theOldUserRow = $theUserRow = BMUser::Fetch($row['id']);
+					$theOldUserRow = $theUserRow = BMUser::staticFetch($row['id']);
 
 					$theUserRow['passwort'] = md5($password.$row['passwort_salt']);
 					foreach($pluginAuth['profile'] as $key=>$val)
@@ -1422,6 +1422,27 @@ class BMUser
 				return($this->_row);
 		}
 
+		$res = $db->Query('SELECT * FROM {pre}users WHERE id=?',
+			$id);
+		if($res->RowCount() == 0)
+			return(false);
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		return($row);
+	}
+
+	/**
+	 * fetch a user row (static function)
+	 *
+	 * @param int $id
+	 * @return array
+	 */
+	public static function staticFetch($id)
+	{
+		global $db;
+		if(!isset($id)) 
+			return false;
 		$res = $db->Query('SELECT * FROM {pre}users WHERE id=?',
 			$id);
 		if($res->RowCount() == 0)

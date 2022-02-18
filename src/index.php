@@ -1009,7 +1009,7 @@ else if($_REQUEST['action'] == 'completeAddressBookEntry'
 			$book->InvalidateSelfCompleteInvitation($contactID, $key);
 
 			// send mail
-			$userData = BMUser::Fetch($contactData['user']);
+			$userData = BMUser::staticFetch($contactData['user']);
 			$vars = array(
 				'vorname'	=> $contactData['vorname'],
 				'nachname'	=> $contactData['nachname']
