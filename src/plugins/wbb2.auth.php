@@ -1,10 +1,21 @@
 <?php
 /*
  * b1gMail wbb2 auth plugin
- * (c) 2002-2008 B1G Software and (c) 2009 IND-InterNetDienst Schlei
- * 
- * Redistribution of this code without explicit permission
- * is forbidden!
+ * (c) 2021 Patrick Schlangen et al, (c) 2009 IND-InterNetDienst Schlei
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
 
@@ -23,25 +34,37 @@ class wbb2AuthPlugin extends BMPlugin
 	 */
 	function __construct()
 	{
-		// extract version
-		sscanf('$Revision: 1.0 $', chr(36) . 'Revision: %d.%d ' . chr(36),
-			$vMajor,
-			$vMinor);
 		
 		// plugin info
 		$this->name					= 'wbb2 Authentication Plugin';
-		$this->author			    = 'IND-InterNetDienst Schlei';
+		$this->author			    = 'b1gMail Project, IND-InterNetDienst Schlei';
 		$this->web					= 'http://www.ind.de/';
 		$this->mail					= 'b1gmail.com@ind.de';
-		$this->version				= sprintf('%d.%d', $vMajor, $vMinor);
-		$this->designedfor			= '7.1.0';
+		$this->version				= '1.0.1';
 		$this->type             	= BMPLUGIN_DEFAULT;
 		$this->update_url       	= 'http://my.b1gmail.com/update_service/';
 		
 		// admin pages
 		$this->admin_pages				= true;
 		$this->admin_page_title			= 'wbb2-Auth';
+		$this->admin_page_icon		= "wbb2.png";
 	}
+
+
+	/**
+ 	 * get list of domains
+ 	 *
+ 	 * @return array
+ 	 */
+	  private function _getDomains()
+	  {
+		  global $bm_prefs;
+  
+		  if(function_exists('GetDomainList'))
+			  return GetDomainList();
+		  else
+			  return explode(':', $bm_prefs['domains']);
+	  }
 	
 	/**
 	 * installation routine
@@ -102,7 +125,7 @@ class wbb2AuthPlugin extends BMPlugin
         	// Domainliste ggf. neu erstellen, wenn Registrierung ueber UserDomain nicht mehr gewuenscht
 		if($wbb2_prefs['enableReg']==0)
 		{
-        		$domains = explode(':', $bm_prefs['domains']);
+        		$domains = $this->_getDomains();
 
 	        	foreach($domains as $domain) {
 	        		if($domain != $wbb2_prefs['userDomain'])
@@ -151,7 +174,7 @@ class wbb2AuthPlugin extends BMPlugin
 				$wbb2DB = new DB($mysql);
 				
 				// search user
-				$res = $wbb2DB->Query('SELECT `userID`,`password`,`sha1_password`,`email` FROM ' . $wbb2_prefs['mysqlPrefix'] . 'users WHERE `username`=? AND `activation`=1 AND `blocked`=0',
+				$res = $wbb2DB->Query('SELECT userid,password,email FROM ' . $wbb2_prefs['mysqlPrefix'] . 'users WHERE username=? AND activation=1 AND blocked=0',
 					$userName);
 				if($res->RowCount() == 0)
 					return(false);
@@ -303,7 +326,7 @@ class wbb2AuthPlugin extends BMPlugin
 		$res->Free();
 			
 		// assign
-		$tpl->assign('domains', explode(':', $bm_prefs['domains']));
+		$tpl->assign('domains', $this->_getDomains());
 		$tpl->assign('wbb2_prefs', $wbb2_prefs);
 		$tpl->assign('pageURL', $this->_adminLink());
 		$tpl->assign('page', $this->_templatePath('wbb2auth.plugin.prefs.tpl'));
