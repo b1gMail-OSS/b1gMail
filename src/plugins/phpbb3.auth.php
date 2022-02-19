@@ -45,7 +45,23 @@ class phpBB3AuthPlugin extends BMPlugin
 		// admin pages
 		$this->admin_pages			= true;
 		$this->admin_page_title		= 'phpBB3-Auth';
+		$this->admin_page_icon		= "phpbb32.png";
 	}
+
+	/**
+ 	 * get list of domains
+ 	 *
+ 	 * @return array
+ 	 */
+	  private function _getDomains()
+	  {
+		  global $bm_prefs;
+  
+		  if(function_exists('GetDomainList'))
+			  return GetDomainList();
+		  else
+			  return explode(':', $bm_prefs['domains']);
+	  }
 
 	/**
 	 * installation routine
@@ -270,7 +286,7 @@ class phpBB3AuthPlugin extends BMPlugin
 		$res->Free();
 
 		// assign
-		$tpl->assign('domains', explode(':', $bm_prefs['domains']));
+		$tpl->assign('domains', $this->_getDomains());
 		$tpl->assign('phpbb3_prefs', $phpbb3_prefs);
 		$tpl->assign('pageURL', $this->_adminLink());
 		$tpl->assign('page', $this->_templatePath('phpbb3auth.plugin.prefs.tpl'));

@@ -1,7 +1,7 @@
 <?php
 /*
- * b1gMail jfChat auth plugin
- * (c) 2021 Patrick Schlangen et al
+ * MyBB auth plugin
+ * (c) 2022 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,31 +20,30 @@
  */
 
 /**
- * jfChat plugin
+ * MyBB auth plugin
  *
  */
-class jfChatAuthPlugin extends BMPlugin
+class MyBBAuthPlugin extends BMPlugin
 {
-	var $_uidFormat = 'jfC:%s';
+	var $_uidFormat = 'MyBB:%d';
 
 	/**
 	 * constructor
 	 *
-	 * @return jfChatAuthPlugin
+	 * @return MyBBAuthPlugin
 	 */
-	function __construct()
+	public function __construct()
 	{
 		// plugin info
 		$this->type					= BMPLUGIN_DEFAULT;
-		$this->name					= 'jfChat Authentication Plugin';
+		$this->name					= 'MyBB Authentication PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->web					= 'https://www.b1gmail.org/';
-		$this->mail					= 'info@b1gmail.org';
-		$this->version				= '1.2';
+		$this->version				= '1.0';
 
 		// admin pages
 		$this->admin_pages			= true;
-		$this->admin_page_title		= 'jfChat-Auth';
+		$this->admin_page_title		= 'MyBB-Auth';
+		$this->admin_page_icon		= "mybb32.png";
 	}
 
 	/**
@@ -67,23 +66,23 @@ class jfChatAuthPlugin extends BMPlugin
 	 *
 	 * @return bool
 	 */
-	function Install()
+	public function Install()
 	{
 		global $db, $bm_prefs;
 
 		// create prefs table
-		$db->Query('CREATE TABLE {pre}jfchat_plugin_prefs(enableAuth tinyint(4) NOT NULL DEFAULT 0, mysqlHost varchar(128) NOT NULL, mysqlUser varchar(128) NOT NULL, mysqlPass varchar(128) NOT NULL, mysqlDB varchar(128) NOT NULL, mysqlPrefix varchar(128) NOT NULL, userDomain varchar(128) NOT NULL)');
+		$db->Query('CREATE TABLE {pre}mybb_plugin_prefs(enableAuth tinyint(4) NOT NULL DEFAULT 0, mysqlHost varchar(128) NOT NULL, mysqlUser varchar(128) NOT NULL, mysqlPass varchar(128) NOT NULL, mysqlDB varchar(128) NOT NULL, mysqlPrefix varchar(128) NOT NULL, userDomain varchar(128) NOT NULL)');
 
 		// insert initial row
 		list($domain) = explode(':', $bm_prefs['domains']);
-		$db->Query('REPLACE INTO {pre}jfchat_plugin_prefs(enableAuth, mysqlHost, mysqlUser, mysqlPass, mysqlDB, mysqlPrefix, userDomain) VALUES'
+		$db->Query('REPLACE INTO {pre}mybb_plugin_prefs(enableAuth, mysqlHost, mysqlUser, mysqlPass, mysqlDB, mysqlPrefix, userDomain) VALUES'
 					. '(?,?,?,?,?,?,?)',
 			0,
 			'localhost',
-			'jfchat-user',
+			'MyBB-user',
 			'password',
-			'jfchat',
-			'fwc_',
+			'MyBB',
+			'mybb_',
 			$domain);
 
 		return(true);
@@ -94,12 +93,12 @@ class jfChatAuthPlugin extends BMPlugin
 	 *
 	 * @return bool
 	 */
-	function Uninstall()
+	public function Uninstall()
 	{
 		global $db;
 
 		// drop prefs table
-		$db->Query('DROP TABLE {pre}jfchat_plugin_prefs');
+		$db->Query('DROP TABLE {pre}mybb_plugin_prefs');
 
 		return(true);
 	}
@@ -112,50 +111,52 @@ class jfChatAuthPlugin extends BMPlugin
 	 * @param string $passwordMD5
 	 * @return array
 	 */
-	function OnAuthenticate($userName, $userDomain, $passwordMD5, $passwordPlain = '')
+	public function OnAuthenticate($userName, $userDomain, $passwordMD5, $passwordPlain = '')
 	{
 		global $db, $bm_prefs;
 
 		// get config
-		$res = $db->Query('SELECT * FROM {pre}jfchat_plugin_prefs LIMIT 1');
-		$jfchat_prefs = $res->FetchArray();
+		$res = $db->Query('SELECT * FROM {pre}mybb_plugin_prefs LIMIT 1');
+		$mybb_prefs = $res->FetchArray();
 		$res->Free();
 
 		// enabled?
-		if($jfchat_prefs['enableAuth'] != 1)
+		if($mybb_prefs['enableAuth'] != 1)
 			return(false);
 
 		// our domain?
-		if(strtolower($userDomain) != strtolower($jfchat_prefs['userDomain']))
+		if(strtolower($userDomain) != strtolower($mybb_prefs['userDomain']))
 			return(false);
 
-		// connect to jfChat DB
-		$mysql = @mysqli_connect($jfchat_prefs['mysqlHost'], $jfchat_prefs['mysqlUser'], $jfchat_prefs['mysqlPass'], true);
+		// connect to MyBB DB
+		$mysql = @mysqli_connect($mybb_prefs['mysqlHost'], $mybb_prefs['mysqlUser'], $mybb_prefs['mysqlPass'], $mybb_prefs['mysqlDB']);
+		
 		if($mysql)
 		{
-			if(mysqli_select_db($jfchat_prefs['mysqlDB'], $mysql))
+			if(mysqli_select_db($mysql, $mybb_prefs['mysqlDB']))
 			{
-				$jfchatDB = new DB($mysql);
+				$MyBBDB = new DB($mysql);
 
 				// search user
-				$res = $jfchatDB->Query('SELECT `username`,`password`,`emailadresse`,`wohnort` FROM ' . $jfchat_prefs['mysqlPrefix'] . 'registry WHERE `username`=?',
+				$res = $MyBBDB->Query('SELECT uid,salt,password,email FROM ' . $mybb_prefs['mysqlPrefix'] . 'users WHERE username=?',
 					$userName);
 				if($res->RowCount() == 0)
 					return(false);
 				$row = $res->FetchArray(MYSQLI_ASSOC);
 				$res->Free();
-
+				
 				// check password
-				if($row['password'] === $passwordMD5)
+				if($row['password'] === md5(md5($row['salt']).$passwordMD5))
 				{
-					$uid = sprintf($this->_uidFormat, $row['username']);
+					$uid = 'MyBB:' . $row['uid'];
 					$myUserName = sprintf('%s@%s', $userName, $userDomain);
 
 					// create user in b1gMail?
 					if(BMUser::GetID($myUserName) == 0)
 					{
-						PutLog(sprintf('Creating b1gMail user for jfChat user <%s>',
-							$userName),
+						PutLog(sprintf('Creating b1gMail user for MyBB user <%s> (%d)',
+							$userName,
+							$row['uid']),
 							PRIO_PLUGIN,
 							__FILE__,
 							__LINE__);
@@ -165,11 +166,11 @@ class jfChatAuthPlugin extends BMPlugin
 							'',
 							'',
 							'',
-							$row['wohnort'],
+							'',
 							$bm_prefs['std_land'],
 							'',
 							'',
-							$row['emailadresse'],
+							$row['email'],
 							'',
 							$passwordMD5,
 							array(),
@@ -181,8 +182,7 @@ class jfChatAuthPlugin extends BMPlugin
 					$result = array(
 						'uid'		=> $uid,
 						'profile'	=> array(
-							'altmail'		=> $row['emailadresse'],
-							'ort'			=> $row['wohnort']
+							'altmail'	=> $row['email']
 						)
 					);
 					return($result);
@@ -191,16 +191,16 @@ class jfChatAuthPlugin extends BMPlugin
 					return(false);
 			}
 			else
-				PutLog('Failed to select jfChat db',
+				PutLog('Failed to select MyBB db',
 					PRIO_PLUGIN,
 					__FILE__,
 					__LINE__);
 
-			unset($jfchatDB);
+			unset($MyBBDB);
 			mysqli_close($mysql);
 		}
 		else
-			PutLog('MySQL connection to jfChat db failed',
+			PutLog('MySQL connection to MyBB db failed',
 				PRIO_PLUGIN,
 				__FILE__,
 				__LINE__);
@@ -212,14 +212,14 @@ class jfChatAuthPlugin extends BMPlugin
 	 * user page handler
 	 *
 	 */
-	function FileHandler($file, $action)
+	public function FileHandler($file, $action)
 	{
 		global $userRow;
 
 		if(!isset($userRow) || !is_array($userRow))
 			return(false);
 
-		if(strpos($userRow['uid'], substr($this->_uidFormat, 0, strpos($this->_uidFormat, ':')+1)) === false || $userRow['vorname'] != '' || $userRow['nachname'] != '')
+		if(strpos($userRow['uid'], 'MyBB:') === false || $userRow['vorname'] != '' || $userRow['nachname'] != '')
 			return(false);
 
 		$file = strtolower($file);
@@ -237,7 +237,7 @@ class jfChatAuthPlugin extends BMPlugin
 	 * admin handler
 	 *
 	 */
-	function AdminHandler()
+	public function AdminHandler()
 	{
 		global $tpl, $plugins, $lang_admin;
 
@@ -262,14 +262,14 @@ class jfChatAuthPlugin extends BMPlugin
 	 * admin prefs page
 	 *
 	 */
-	function _prefsPage()
+	private function _prefsPage()
 	{
 		global $tpl, $db, $bm_prefs;
 
 		// save?
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'save')
 		{
-			$db->Query('UPDATE {pre}jfchat_plugin_prefs SET enableAuth=?,mysqlHost=?,mysqlUser=?,mysqlPass=?,mysqlDB=?,mysqlPrefix=?,userDomain=?',
+			$db->Query('UPDATE {pre}mybb_plugin_prefs SET enableAuth=?,mysqlHost=?,mysqlUser=?,mysqlPass=?,mysqlDB=?,mysqlPrefix=?,userDomain=?',
 				isset($_REQUEST['enableAuth']) ? 1 : 0,
 				$_REQUEST['mysqlHost'],
 				$_REQUEST['mysqlUser'],
@@ -280,20 +280,20 @@ class jfChatAuthPlugin extends BMPlugin
 		}
 
 		// get config
-		$res = $db->Query('SELECT * FROM {pre}jfchat_plugin_prefs LIMIT 1');
-		$jfchat_prefs = $res->FetchArray();
+		$res = $db->Query('SELECT * FROM {pre}mybb_plugin_prefs LIMIT 1');
+		$mybb_prefs = $res->FetchArray();
 		$res->Free();
 
 		// assign
 		$tpl->assign('domains', $this->_getDomains());
-		$tpl->assign('jfchat_prefs', $jfchat_prefs);
+		$tpl->assign('mybb_prefs', $mybb_prefs);
 		$tpl->assign('pageURL', $this->_adminLink());
-		$tpl->assign('page', $this->_templatePath('jfchatauth.plugin.prefs.tpl'));
+		$tpl->assign('page', $this->_templatePath('mybbauth.plugin.prefs.tpl'));
 	}
 }
 
 /**
  * register plugin
  */
-$plugins->registerPlugin('jfChatAuthPlugin');
+$plugins->registerPlugin('MyBBAuthPlugin');
 ?>

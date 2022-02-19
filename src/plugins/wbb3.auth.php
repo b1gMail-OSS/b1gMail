@@ -154,10 +154,10 @@ class WBB3AuthPlugin extends BMPlugin
 			return(false);
 
 		// connect to wbb3 DB
-		$mysql = @mysqli_connect($wbb3_prefs['mysqlHost'], $wbb3_prefs['mysqlUser'], $wbb3_prefs['mysqlPass'], true);
+		$mysql = @mysqli_connect($wbb3_prefs['mysqlHost'], $wbb3_prefs['mysqlUser'], $wbb3_prefs['mysqlPass'], $wbb3_prefs['mysqlDB']);
 		if($mysql)
 		{
-			if(mysqli_select_db($wbb3_prefs['mysqlDB'], $mysql))
+			if(mysqli_select_db($mysql, $wbb3_prefs['mysqlDB']))
 			{
 				$wbb3DB = new DB($mysql);
 

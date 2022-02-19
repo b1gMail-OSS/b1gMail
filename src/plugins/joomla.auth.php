@@ -131,10 +131,10 @@ class JoomlaAuthPlugin extends BMPlugin
 			return(false);
 
 		// connect to joomla! DB
-		$mysql = @mysqli_connect($joomla_prefs['mysqlHost'], $joomla_prefs['mysqlUser'], $joomla_prefs['mysqlPass'], true);
+		$mysql = @mysqli_connect($joomla_prefs['mysqlHost'], $joomla_prefs['mysqlUser'], $joomla_prefs['mysqlPass'], $joomla_prefs['mysqlDB']);
 		if($mysql)
 		{
-			if(mysqli_select_db($joomla_prefs['mysqlDB'], $mysql))
+			if(mysqli_select_db($mysql, $joomla_prefs['mysqlDB']))
 			{
 				$joomlaDB = new DB($mysql);
 

@@ -45,7 +45,23 @@ class Koobi7AuthPlugin extends BMPlugin
 		// admin pages
 		$this->admin_pages			= true;
 		$this->admin_page_title		= 'Koobi7-Auth';
+		$this->admin_page_icon		= "koobi32.png";
 	}
+
+	/**
+ 	 * get list of domains
+ 	 *
+ 	 * @return array
+ 	 */
+	  private function _getDomains()
+	  {
+		  global $bm_prefs;
+  
+		  if(function_exists('GetDomainList'))
+			  return GetDomainList();
+		  else
+			  return explode(':', $bm_prefs['domains']);
+	  }
 
 	/**
 	 * installation routine
@@ -302,7 +318,7 @@ class Koobi7AuthPlugin extends BMPlugin
 		$res->Free();
 
 		// assign
-		$tpl->assign('domains', explode(':', $bm_prefs['domains']));
+		$tpl->assign('domains', $this->_getDomains());
 		$tpl->assign('koobi7_prefs', $koobi7_prefs);
 		$tpl->assign('pageURL', $this->_adminLink());
 		$tpl->assign('page', $this->_templatePath('koobi7auth.plugin.prefs.tpl'));

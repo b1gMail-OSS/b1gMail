@@ -42,8 +42,24 @@ class VBulletinAuthPlugin extends BMPlugin
 
 		// admin pages
 		$this->admin_pages			= true;
-		$this->admin_page_title		= 'VBulletin-Auth';
+		$this->admin_page_title		= 'vBulletin-Auth';
+		$this->admin_page_icon		= "vbulletin32.png";
 	}
+
+	/**
+ 	 * get list of domains
+ 	 *
+ 	 * @return array
+ 	 */
+	private function _getDomains()
+	  {
+		  global $bm_prefs;
+  
+		  if(function_exists('GetDomainList'))
+			  return GetDomainList();
+		  else
+			  return explode(':', $bm_prefs['domains']);
+	  }
 
 	/**
 	 * installation routine
@@ -113,10 +129,10 @@ class VBulletinAuthPlugin extends BMPlugin
 			return(false);
 
 		// connect to vBulletin DB
-		$mysql = @mysqli_connect($vb_prefs['mysqlHost'], $vb_prefs['mysqlUser'], $vb_prefs['mysqlPass'], true);
+		$mysql = @mysqli_connect($vb_prefs['mysqlHost'], $vb_prefs['mysqlUser'], $vb_prefs['mysqlPass'], $vb_prefs['mysqlDB']);
 		if($mysql)
 		{
-			if(mysqli_select_db($vb_prefs['mysqlDB'], $mysql))
+			if(mysqli_select_db($mysql, $vb_prefs['mysqlDB']))
 			{
 				$vbDB = new DB($mysql);
 
@@ -268,7 +284,7 @@ class VBulletinAuthPlugin extends BMPlugin
 		$res->Free();
 
 		// assign
-		$tpl->assign('domains', explode(':', $bm_prefs['domains']));
+		$tpl->assign('domains', $this->_getDomains());
 		$tpl->assign('vb_prefs', $vb_prefs);
 		$tpl->assign('pageURL', $this->_adminLink());
 		$tpl->assign('page', $this->_templatePath('vbauth.plugin.prefs.tpl'));
