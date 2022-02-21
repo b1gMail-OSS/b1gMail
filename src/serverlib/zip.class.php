@@ -19,220 +19,220 @@
  *
  */
 
-if(!defined('B1GMAIL_INIT'))
-	die('Directly calling this file is not supported');
+if (!defined('B1GMAIL_INIT')) {
+    die('Directly calling this file is not supported');
+}
 
 /**
- * ZIP class
- *
+ * ZIP class.
  */
 class BMZIP
 {
-	/**
-	 * b1gZIP stream (used if b1gZIP is installed)
-	 *
-	 * @var resource
-	 */
-	var $_b1gzip_stream;
+    /**
+     * b1gZIP stream (used if b1gZIP is installed).
+     *
+     * @var resource
+     */
+    private $_b1gzip_stream;
 
-	/**
-	 * output stream
-	 *
-	 * @var resource
-	 */
-	var $_fp;
+    /**
+     * output stream.
+     *
+     * @var resource
+     */
+    private $_fp;
 
-	/**
-	 * central directory structure
-	 *
-	 * @var array
-	 */
-	var $_centralDirStruct;
+    /**
+     * central directory structure.
+     *
+     * @var array
+     */
+    private $_centralDirStruct;
 
-	/**
-	 * constructor
-	 *
-	 * @param resource $fp Output stream
-	 * @return BMZIP
-	 */
-	function __construct($fp)
-	{
-		// output stream
-		$this->_fp = $fp;
+    /**
+     * constructor.
+     *
+     * @param resource $fp Output stream
+     *
+     * @return BMZIP
+     */
+    public function __construct($fp)
+    {
+        // output stream
+        $this->_fp = $fp;
 
-		// use b1gZIP?
-		if(function_exists('b1gzip_create')
-			&& function_exists('b1gzip_add')
-			&& function_exists('b1gzip_final'))
-		{
-			$this->_b1gzip_stream = b1gzip_create();
-		}
-		else
-		{
-			$this->_b1gzip_stream = false;
-			$this->_centralDirStruct = array();
-		}
-	}
+        // use b1gZIP?
+        if (function_exists('b1gzip_create')
+            && function_exists('b1gzip_add')
+            && function_exists('b1gzip_final')) {
+            $this->_b1gzip_stream = b1gzip_create();
+        } else {
+            $this->_b1gzip_stream = false;
+            $this->_centralDirStruct = [];
+        }
+    }
 
-	/**
-	 * add a file to ZIP file
-	 *
-	 * @param string $fileName File name
-	 * @param string $zipFileName File name in ZIP file
-	 * @return bool
-	 */
-	function AddFile($fileName, $zipFileName = false)
-	{
-		$fileFP = @fopen($fileName, 'rb');
-		if($fileFP)
-		{
-			$result = $this->AddFileByFP($fileFP, $fileName, $zipFileName);
-			fclose($fileFP);
-			return($result);
-		}
-		else
-			return(false);
-	}
+    /**
+     * add a file to ZIP file.
+     *
+     * @param string $fileName    File name
+     * @param string $zipFileName File name in ZIP file
+     *
+     * @return bool
+     */
+    public function AddFile($fileName, $zipFileName = false)
+    {
+        $fileFP = @fopen($fileName, 'rb');
+        if ($fileFP) {
+            $result = $this->AddFileByFP($fileFP, $fileName, $zipFileName);
+            fclose($fileFP);
 
-	/**
-	 * add a file to ZIP file by file pointer
-	 *
-	 * @param resource $fileFP
-	 * @param string $fileName
-	 * @param string $zipFileName
-	 * @return bool
-	 */
-	function AddFileByFP($fileFP, $fileName, $zipFileName = false)
-	{
-		if(!$zipFileName)
-			$zipFileName = basename($fileName);
+            return $result;
+        } else {
+            return false;
+        }
+    }
 
-		// read file
-		fseek($fileFP, 0, SEEK_SET);
-		$fileData = '';
-		while(is_resource($fileFP) && !feof($fileFP))
-			$fileData .= @fread($fileFP, 4096);
-		$uncompressedSize = strlen($fileData);
+    /**
+     * add a file to ZIP file by file pointer.
+     *
+     * @param resource $fileFP
+     * @param string   $fileName
+     * @param string   $zipFileName
+     *
+     * @return bool
+     */
+    public function AddFileByFP($fileFP, $fileName, $zipFileName = false)
+    {
+        if (!$zipFileName) {
+            $zipFileName = basename($fileName);
+        }
 
-		// use b1gZIP
-		if($this->_b1gzip_stream)
-		{
-			b1gzip_add($this->_b1gzip_stream, $fileData, $zipFileName);
-			return(true);
-		}
+        // read file
+        fseek($fileFP, 0, SEEK_SET);
+        $fileData = '';
+        while (is_resource($fileFP) && !feof($fileFP)) {
+            $fileData .= @fread($fileFP, 4096);
+        }
+        $uncompressedSize = strlen($fileData);
 
-		// or own implementation
-		else
-		{
-			// compute crc32
-			$crc32 = crc32($fileData);
-			$compressedData = gzcompress($fileData);
-			unset($fileData);
-			$compressedData = substr($compressedData, 2, -4);
-			$compressedSize = strlen($compressedData);
+        // use b1gZIP
+        if ($this->_b1gzip_stream) {
+            b1gzip_add($this->_b1gzip_stream, $fileData, $zipFileName);
 
-			// write file header
-			$this->_beginFile($crc32, $compressedSize, $uncompressedSize, $zipFileName);
-			fwrite($this->_fp, $compressedData);
-		}
+            return true;
+        }
 
-		return(false);
-	}
+        // or own implementation
+        else {
+            // compute crc32
+            $crc32 = crc32($fileData);
+            $compressedData = gzcompress($fileData);
+            unset($fileData);
+            $compressedData = substr($compressedData, 2, -4);
+            $compressedSize = strlen($compressedData);
 
-	/**
-	 * begin file
-	 *
-	 * @param int $crc32
-	 * @param int $compressedSize
-	 * @param int $uncompressedSize
-	 * @param string $fileName
-	 */
-	function _beginFile($crc32, $compressedSize, $uncompressedSize, $fileName)
-	{
-		// local header
-		$header = pack('VvvvvvVVVvv',
-			0x04034b50,
-			0x0014,
-			0x0,
-			0x0008,
-			(date('H') << 11) | (date('i') << 5) | round(date('s')/2, 0),
-			(date('Y')-1980 << 9) | (date('m') << 5) | date('d'),
-			$crc32,
-			$compressedSize,
-			$uncompressedSize,
-			strlen($fileName),
-			0x0);
-		$offset = ftell($this->_fp);
-		fwrite($this->_fp, $header);
-		fwrite($this->_fp, $fileName);
+            // write file header
+            $this->_beginFile($crc32, $compressedSize, $uncompressedSize, $zipFileName);
+            fwrite($this->_fp, $compressedData);
+        }
 
-		// central dir struct entry
-		$entry = pack('VvvvvvvVVVvvvvvVV',
-			0x02014b50,
-			0x0,
-			0x0014,
-			0x0,
-			0x0008,
-			(date('H') << 11) | (date('i') << 5) | round(date('s')/2, 0),
-			(date('Y')-1980 << 9) | (date('m') << 5) | date('d'),
-			$crc32,
-			$compressedSize,
-			$uncompressedSize,
-			strlen($fileName),
-			0x0,
-			0x0,
-			0x0,
-			0x0,
-			32,
-			$offset);
-		$entry .= $fileName;
-		$this->_centralDirStruct[] = $entry;
-	}
+        return false;
+    }
 
-	/**
-	 * finish zip file
-	 *
-	 * @return int Size
-	 */
-	function Finish()
-	{
-		// use b1gZIP?
-		if($this->_b1gzip_stream)
-		{
-			$zipData = b1gzip_final($this->_b1gzip_stream);
-			fwrite($this->_fp, $zipData);
-			fseek($this->_fp, 0, SEEK_SET);
-			return(strlen($zipData));
-		}
+    /**
+     * begin file.
+     *
+     * @param int    $crc32
+     * @param int    $compressedSize
+     * @param int    $uncompressedSize
+     * @param string $fileName
+     */
+    private function _beginFile($crc32, $compressedSize, $uncompressedSize, $fileName)
+    {
+        // local header
+        $header = pack('VvvvvvVVVvv',
+            0x04034b50,
+            0x0014,
+            0x0,
+            0x0008,
+            (date('H') << 11) | (date('i') << 5) | round(date('s') / 2, 0),
+            (date('Y') - 1980 << 9) | (date('m') << 5) | date('d'),
+            $crc32,
+            $compressedSize,
+            $uncompressedSize,
+            strlen($fileName),
+            0x0);
+        $offset = ftell($this->_fp);
+        fwrite($this->_fp, $header);
+        fwrite($this->_fp, $fileName);
 
-		// or own implementation
-		else
-		{
-			// write central dir struct
-			$offset = ftell($this->_fp);
-			$dLength = 0;
-			foreach($this->_centralDirStruct as $item)
-			{
-				fwrite($this->_fp, $item);
-				$dLength += strlen($item);
-			}
+        // central dir struct entry
+        $entry = pack('VvvvvvvVVVvvvvvVV',
+            0x02014b50,
+            0x0,
+            0x0014,
+            0x0,
+            0x0008,
+            (date('H') << 11) | (date('i') << 5) | round(date('s') / 2, 0),
+            (date('Y') - 1980 << 9) | (date('m') << 5) | date('d'),
+            $crc32,
+            $compressedSize,
+            $uncompressedSize,
+            strlen($fileName),
+            0x0,
+            0x0,
+            0x0,
+            0x0,
+            32,
+            $offset);
+        $entry .= $fileName;
+        $this->_centralDirStruct[] = $entry;
+    }
 
-			// write footer
-			$footer = pack('VvvvvVVv',
-				0x06054b50,
-				0x0,
-				0x0,
-				count($this->_centralDirStruct),
-				count($this->_centralDirStruct),
-				$dLength,
-				$offset,
-				0x0);
-			fwrite($this->_fp, $footer);
+    /**
+     * finish zip file.
+     *
+     * @return int Size
+     */
+    public function Finish()
+    {
+        // use b1gZIP?
+        if ($this->_b1gzip_stream) {
+            $zipData = b1gzip_final($this->_b1gzip_stream);
+            fwrite($this->_fp, $zipData);
+            fseek($this->_fp, 0, SEEK_SET);
 
-			// return
-			$len = ftell($this->_fp);
-			fseek($this->_fp, 0, SEEK_SET);
-			return($len);
-		}
-	}
+            return strlen($zipData);
+        }
+
+        // or own implementation
+        else {
+            // write central dir struct
+            $offset = ftell($this->_fp);
+            $dLength = 0;
+            foreach ($this->_centralDirStruct as $item) {
+                fwrite($this->_fp, $item);
+                $dLength += strlen($item);
+            }
+
+            // write footer
+            $footer = pack('VvvvvVVv',
+                0x06054b50,
+                0x0,
+                0x0,
+                count($this->_centralDirStruct),
+                count($this->_centralDirStruct),
+                $dLength,
+                $offset,
+                0x0);
+            fwrite($this->_fp, $footer);
+
+            // return
+            $len = ftell($this->_fp);
+            fseek($this->_fp, 0, SEEK_SET);
+
+            return $len;
+        }
+    }
 }
