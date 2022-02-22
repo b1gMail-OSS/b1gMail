@@ -550,7 +550,7 @@ class BMToolInterface
 
 		$result = array(
 			'title'		=> $bm_prefs['titel'],
-			'domains'	=> explode(':', $bm_prefs['domains'])
+			'domains'	=> $domains
 		);
 
 		return($result);

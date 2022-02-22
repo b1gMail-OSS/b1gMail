@@ -778,7 +778,8 @@ class BMCalendar
 			if($c == 7)
 			{
 				$html .= '	</tr>' . "\n";
-				if($arrayKey != array_pop(array_keys($days)))
+				$day_array_keys = array_keys($days);
+				if($arrayKey != array_pop($day_array_keys))
 					$html .= '	<tr>' . "\n";
 				$c = 0;
 			}
