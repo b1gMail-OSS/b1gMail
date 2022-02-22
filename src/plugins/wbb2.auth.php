@@ -40,7 +40,7 @@ class wbb2AuthPlugin extends BMPlugin
 		$this->author			    = 'b1gMail Project, IND-InterNetDienst Schlei';
 		$this->web					= 'http://www.ind.de/';
 		$this->mail					= 'b1gmail.com@ind.de';
-		$this->version				= '1.0.1';
+		$this->version				= '1.0.3';
 		$this->type             	= BMPLUGIN_DEFAULT;
 		$this->update_url       	= 'http://my.b1gmail.com/update_service/';
 		
@@ -109,36 +109,6 @@ class wbb2AuthPlugin extends BMPlugin
 		return(true);
 	}
 	
-	function BeforeDisplayTemplate($template) 
-	{
-		global $db, $bm_prefs, $tpl;
-
-		// get config
-		$res = $db->Query('SELECT * FROM {pre}wbb2_plugin_prefs LIMIT 1');
-		$wbb2_prefs = $res->FetchArray();
-		$res->Free();
-
-		// sind wir nicht in der SignUp Page oder NeuerAlias Page?
-		if($tpl->_tpl_vars['page'] != 'nli/signup.tpl' && $tpl->_tpl_vars['pageContent'] != 'li/prefs.aliases.add.tpl')
-			return(false);
-
-        	// Domainliste ggf. neu erstellen, wenn Registrierung ueber UserDomain nicht mehr gewuenscht
-		if($wbb2_prefs['enableReg']==0)
-		{
-        		$domains = $this->_getDomains();
-
-	        	foreach($domains as $domain) {
-	        		if($domain != $wbb2_prefs['userDomain'])
-	        			$newDomains[] = $domain;
-	        	}
-
-			$newDomainlist = implode(':', $newDomains);
-			$tpl->assign('domainList', 		explode(':', $newDomainlist));
-		}
-
-	}
-
-
 	/**
 	 * authentication handler
 	 *
@@ -148,7 +118,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 * @return array
 	 */
 
-	function OnAuthenticate($userName, $userDomain, $passwordMD5, $passwordPlain)
+	public function OnAuthenticate($userName, $userDomain, $passwordMD5, $passwordPlain = '')
 	{
 		global $db, $bm_prefs;
 		
