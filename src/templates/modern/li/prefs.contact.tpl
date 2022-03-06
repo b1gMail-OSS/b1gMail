@@ -54,21 +54,21 @@
 		{if $f_strasse!="n"}<tr>
 			<td class="listTableLeft">{if $f_strasse=="p"}*{/if} <label for="strasse">{lng p="streetnr"}</label>:</td>
 			<td class="listTableRight">
-				<input type="text" name="strasse" id="strasse" value="{text value=$strasse allowEmpty=true}" size="35" />
-				<input type="text" name="hnr" id="hnr" value="{text value=$hnr allowEmpty=true}" size="6" />
+				<input type="text" name="strasse" id="strasse" value="{text value=$strasse allowEmpty=true}" size="35" {if $f_strasse=="p"}required{/if} />
+				<input type="text" name="hnr" id="hnr" value="{text value=$hnr allowEmpty=true}" size="6" {if $f_strasse=="p"}required{/if} />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">{if $f_strasse=="p"}*{/if} <label for="plz">{lng p="zipcity"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="plz" id="plz" value="{text value=$plz allowEmpty=true}" size="6" />
-				<input type="text" name="ort" id="ort" value="{text value=$ort allowEmpty=true}" size="35" />
+				<input type="text" name="plz" id="plz" value="{text value=$plz allowEmpty=true}" size="6" {if $f_strasse=="p"}required{/if} />
+				<input type="text" name="ort" id="ort" value="{text value=$ort allowEmpty=true}" size="35" {if $f_strasse=="p"}required{/if} />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">{if $f_strasse=="p"}*{/if} <label for="land">{lng p="country"}:</label></td>
 			<td class="listTableRight">
-				<select name="land" id="land">
+				<select name="land" id="land" {if $f_strasse=="p"}required{/if}>
 					{foreach from=$countryList item=country key=id}
 					<option value="{$id}"{if $land==$id} selected="selected"{/if}>{$country}</option>
 					{/foreach}
@@ -78,13 +78,13 @@
 		{if $f_telefon!="n"}<tr>
 			<td class="listTableLeft">{if $f_telefon=="p"}*{/if} <label for="tel">{lng p="phone"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="tel" id="tel" value="{text value=$tel allowEmpty=true}" size="35" />
+				<input type="tel" name="tel" id="tel" value="{text value=$tel allowEmpty=true}" size="35" {if $f_telefon=="p"}required{/if} />
 			</td>
 		</tr>{/if}
 		{if $f_fax!="n"}<tr>
 			<td class="listTableLeft">{if $f_fax=="p"}*{/if} <label for="fax">{lng p="fax"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="fax" id="fax" value="{text value=$fax allowEmpty=true}" size="35" />
+				<input type="tel" name="fax" id="fax" value="{text value=$fax allowEmpty=true}" size="35" {if $f_fax=="p"}required{/if} />
 			</td>
 		</tr>{/if}
 		{if $f_mail2sms_nummer!="n"}<tr>

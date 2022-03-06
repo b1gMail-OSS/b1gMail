@@ -111,25 +111,25 @@
 		<tr>
 			<td class="listTableLeft"><label for="email">{lng p="email"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="email" id="email" value="{if $smarty.request.email}{text value=$smarty.request.email}{else}{text value=$contact.email allowEmpty=true}{/if}" size="30" />
+				<input type="email" name="email" id="email" value="{if $smarty.request.email}{text value=$smarty.request.email}{else}{text value=$contact.email allowEmpty=true}{/if}" size="30" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="tel">{lng p="phone"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="tel" id="tel" value="{text value=$contact.tel allowEmpty=true}" size="30" />
+				<input type="tel" name="tel" id="tel" value="{text value=$contact.tel allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="fax">{lng p="fax"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="fax" id="fax" value="{text value=$contact.fax allowEmpty=true}" size="30" />
+				<input type="tel" name="fax" id="fax" value="{text value=$contact.fax allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="handy">{lng p="mobile"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="handy" id="handy" value="{text value=$contact.handy allowEmpty=true}" size="30" />
+				<input type="tel" name="handy" id="handy" value="{text value=$contact.handy allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		
@@ -168,25 +168,25 @@
 		<tr>
 			<td class="listTableLeft"><label for="work_email">{lng p="email"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="work_email" id="work_email" value="{text value=$contact.work_email allowEmpty=true}" size="30" />
+				<input type="email" name="work_email" id="work_email" value="{text value=$contact.work_email allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="tel">{lng p="phone"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="work_tel" id="work_tel" value="{text value=$contact.work_tel allowEmpty=true}" size="30" />
+				<input type="tel" name="work_tel" id="work_tel" value="{text value=$contact.work_tel allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="fax">{lng p="fax"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="work_fax" id="work_fax" value="{text value=$contact.work_fax allowEmpty=true}" size="30" />
+				<input type="tel" name="work_fax" id="work_fax" value="{text value=$contact.work_fax allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="work_handy">{lng p="mobile"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="work_handy" id="work_handy" value="{text value=$contact.work_handy allowEmpty=true}" size="30" />
+				<input type="tel" name="work_handy" id="work_handy" value="{text value=$contact.work_handy allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		
@@ -207,7 +207,7 @@
 		<tr>
 			<td class="listTableLeft"><label for="web">{lng p="web"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="web" id="web" value="{text value=$contact.web allowEmpty=true}" size="30" />
+				<input type="url" name="web" id="web" value="{text value=$contact.web allowEmpty=true}" size="30" />
 			</td>
 		</tr>
 		<tr>

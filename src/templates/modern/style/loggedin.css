@@ -1138,7 +1138,7 @@ BODY
 	margin: 0px;
 }
 
-INPUT[type=text], INPUT[type=password]
+INPUT[type=text], INPUT[type=password], INPUT[type=email], INPUT[type=search], INPUT[type=tel], INPUT[type=url]
 {
 	border: 1px solid #CCC;
 	min-height: 20px;

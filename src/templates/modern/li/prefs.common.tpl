@@ -288,7 +288,7 @@
 			<td class="listTableLeft"><label for="forward_to">{lng p="forwarding"}?</label></td>
 			<td class="listTableRight">
 				<input type="checkbox" name="forward" id="forward"{if $forward=='yes'} checked="checked"{/if} />
-					{lng p="to2"} <input type="text" name="forward_to" id="forward_to" value="{email value=$forward_to}" style="width:200px;" onkeypress="EBID('forward').checked=true;" /><br />
+					{lng p="to2"} <input type="email" name="forward_to" id="forward_to" value="{email value=$forward_to}" style="width:200px;" onkeypress="EBID('forward').checked=true;" /><br />
 				<input type="checkbox" name="forward_delete" id="forward_delete"{if $forward_delete=='yes'} checked="checked"{/if} />
 					<label for="forward_delete">{lng p="deleteforwarded"}</label>
 			</td>
