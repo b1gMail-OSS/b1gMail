@@ -19,140 +19,146 @@
  *
  */
 
-if(!defined('B1GMAIL_INIT'))
-	die('Directly calling this file is not supported');
+if (!defined('B1GMAIL_INIT')) {
+    die('Directly calling this file is not supported');
+}
 
-if(!class_exists('BMMail'))
-	include(B1GMAIL_DIR . 'serverlib/mail.class.php');
-if(!class_exists('BMMailbox'))
-	include(B1GMAIL_DIR . 'serverlib/mailbox.class.php');
+if (!class_exists('BMMail')) {
+    include B1GMAIL_DIR.'serverlib/mail.class.php';
+}
+if (!class_exists('BMMailbox')) {
+    include B1GMAIL_DIR.'serverlib/mailbox.class.php';
+}
 
 /**
- * mail threader
+ * mail threader.
  */
 class BMMailThreader
 {
-	var $_messages;
-	var $_userID;
-	var $_userObject;
+    public $_messages;
+    public $_userID;
+    public $_userObject;
 
-	/**
-	 * constructor
-	 *
-	 * @param int $userID User ID
-	 * @return BMMailThreader
-	 */
-	function __construct($userID, &$userObject)
-	{
-		$this->_userID = (int)$userID;
-		$this->_userObject = &$userObject;
-	}
+    /**
+     * constructor.
+     *
+     * @param int $userID User ID
+     *
+     * @return BMMailThreader
+     */
+    public function __construct($userID, &$userObject)
+    {
+        $this->_userID = (int) $userID;
+        $this->_userObject = &$userObject;
+    }
 
-	/**
-	 * process a set of references
-	 *
-	 * @param array $refs References
-	 * @param int $level Base level
-	 * @param string $base Base message ID
-	 */
-	function _processReferences($refs, $level, $base)
-	{
-		global $db;
+    /**
+     * process a set of references.
+     *
+     * @param array  $refs  References
+     * @param int    $level Base level
+     * @param string $base  Base message ID
+     */
+    private function _processReferences($refs, $level, $base)
+    {
+        global $db;
 
-		// base in refs?
-		if(!in_array($base, $refs))
-			return;
+        // base in refs?
+        if (!in_array($base, $refs)) {
+            return;
+        }
 
-		// search base
-		$baseKey = array_search($base, $refs);
+        // search base
+        $baseKey = array_search($base, $refs);
 
-		// process refs
-		foreach($refs as $i=>$ref)
-			if(!isset($this->_messages[$ref]))
-			{
-				$thisLevel = $i+($level-$baseKey);
-				$this->_messages[$ref] = array('level' => $thisLevel);
+        // process refs
+        foreach ($refs as $i => $ref) {
+            if (!isset($this->_messages[$ref])) {
+                $thisLevel = $i + ($level - $baseKey);
+                $this->_messages[$ref] = ['level' => $thisLevel];
 
-				// find messages related to this message
-				$res = $db->Query('SELECT refs,msg_id FROM {pre}mails WHERE refs LIKE ? AND userid=?',
-					'%'.$ref.'%',
-					$this->_userID);
-				while($row = $res->FetchArray(MYSQLI_ASSOC))
-				{
-					$this->_processReferences(array_merge(ExtractMessageIDs($row['refs']), array($row['msg_id'])),
-						$thisLevel,
-						$ref);
-				}
-				$res->Free();
-			}
-	}
+                // find messages related to this message
+                $res = $db->Query('SELECT refs,msg_id FROM {pre}mails WHERE refs LIKE ? AND userid=?',
+                    '%'.$ref.'%',
+                    $this->_userID);
+                while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+                    $this->_processReferences(array_merge(ExtractMessageIDs($row['refs']), [$row['msg_id']]),
+                        $thisLevel,
+                        $ref);
+                }
+                $res->Free();
+            }
+        }
+    }
 
-	/**
-	 * normalize levels
-	 *
-	 */
-	function _normalizeLevels()
-	{
-		$smallestLevel = 0;
-		foreach($this->_messages as $val)
-			if($val['level'] < $smallestLevel)
-				$smallestLevel = $val['level'];
+    /**
+     * normalize levels.
+     */
+    private function _normalizeLevels()
+    {
+        $smallestLevel = 0;
+        foreach ($this->_messages as $val) {
+            if ($val['level'] < $smallestLevel) {
+                $smallestLevel = $val['level'];
+            }
+        }
 
-		foreach($this->_messages as $key=>$val)
-			$this->_messages[$key]['level'] += abs($smallestLevel);
-	}
+        foreach ($this->_messages as $key => $val) {
+            $this->_messages[$key]['level'] += abs($smallestLevel);
+        }
+    }
 
-	/**
-	 * fetch messages
-	 *
-	 */
-	function _fetchMessages()
-	{
-		global $db;
+    /**
+     * fetch messages.
+     */
+    private function _fetchMessages()
+    {
+        global $db;
 
-		$res = $db->Query('SELECT id,von,betreff,datum,msg_id FROM {pre}mails WHERE userid=? AND msg_id IN ?',
-			$this->_userID,
-			array_keys($this->_messages));
-		while($row = $res->FetchArray(MYSQLI_ASSOC))
-		{
-			$this->_messages[$row['msg_id']] = array(
-				'id'			=> $row['id'],
-				'level'			=> $this->_messages[$row['msg_id']]['level'],
-				'from_name'		=> ExtractMailName($row['von']),
-				'from_mail'		=> ExtractMailAddress($row['von']),
-				'date'			=> $row['datum'],
-				'subject'		=> $row['betreff']
-			);
-		}
-		$res->Free();
-	}
+        $res = $db->Query('SELECT id,von,betreff,datum,msg_id FROM {pre}mails WHERE userid=? AND msg_id IN ?',
+            $this->_userID,
+            array_keys($this->_messages));
+        while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+            $this->_messages[$row['msg_id']] = [
+                'id' => $row['id'],
+                'level' => $this->_messages[$row['msg_id']]['level'],
+                'from_name' => ExtractMailName($row['von']),
+                'from_mail' => ExtractMailAddress($row['von']),
+                'date' => $row['datum'],
+                'subject' => $row['betreff'],
+            ];
+        }
+        $res->Free();
+    }
 
-	/**
-	 * get thread of a certain mail
-	 *
-	 * @param int $mailID Mail ID
-	 * @return array
-	 */
-	function GetThread($mailID)
-	{
-		global $db;
+    /**
+     * get thread of a certain mail.
+     *
+     * @param int $mailID Mail ID
+     *
+     * @return array
+     */
+    public function GetThread($mailID)
+    {
+        global $db;
 
-		// get message info
-		$res = $db->Query('SELECT refs,msg_id FROM {pre}mails WHERE id=? AND userid=?',
-			(int)$mailID,
-			$this->_userID);
-		if($res->RowCount() == 0)
-			return(array());
-		$mailRow = $res->FetchArray(MYSQLI_ASSOC);
-		$res->Free();
+        // get message info
+        $res = $db->Query('SELECT refs,msg_id FROM {pre}mails WHERE id=? AND userid=?',
+            (int) $mailID,
+            $this->_userID);
+        if ($res->RowCount() == 0) {
+            return [];
+        }
+        $mailRow = $res->FetchArray(MYSQLI_ASSOC);
+        $res->Free();
 
-		// run
-		$this->_messages = array();
-		$this->_processReferences(array_merge(ExtractMessageIDs($mailRow['refs']), array($mailRow['msg_id'])), 0, $mailRow['msg_id']);
-		$this->_fetchMessages();
-		$this->_normalizeLevels();
+        // run
+        $this->_messages = [];
+        $this->_processReferences(array_merge(ExtractMessageIDs($mailRow['refs']), [$mailRow['msg_id']]), 0, $mailRow['msg_id']);
+        $this->_fetchMessages();
+        $this->_normalizeLevels();
 
-		// return
-		return($this->_messages);
-	}
+        // return
+        return $this->_messages;
+    }
 }
