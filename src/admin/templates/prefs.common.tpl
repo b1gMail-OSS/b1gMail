@@ -137,13 +137,6 @@
 				<td class="td2"><input type="checkbox" name="structstorage"{if $bm_prefs.structstorage=='yes'&&!$safemode} checked="checked"{/if}{if $safemode} disabled="disabled"{/if} /></td>
 			</tr>
 		</table>
-
-		{if $safemode}
-		<p>
-			<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-			{lng p="structsafewarn"}
-		</p>
-		{/if}
 	</fieldset>
 
 	<fieldset>

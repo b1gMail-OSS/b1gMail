@@ -159,7 +159,6 @@ if($_REQUEST['action'] == 'common')
 
 	// assign
 	$tpl->assign('wartungwhitelist', $whitelist);
-	$tpl->assign('safemode',  ini_get('safe_mode'));
 	$tpl->assign('languages', $languages);
 	$tpl->assign('countries', CountryList());
 	$tpl->assign('page', 'prefs.common.tpl');
