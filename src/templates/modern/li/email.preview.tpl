@@ -174,6 +174,8 @@
 		{lng p="delete"}
 	</button>{/if}
 
+	{hook id="email.preview.tpl:afterButtons"}
+
 </div>
 
 {if $folderID==-3}

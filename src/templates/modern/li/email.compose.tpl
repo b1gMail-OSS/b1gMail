@@ -106,6 +106,7 @@
 					</button>
 				</td>
 			</tr>
+			{hook id="email.compose.tpl:beforemailSendOptions"}
 			<tr>
 				<th>&nbsp;</th>
 				<td class="mailSendOptions" colspan="2">

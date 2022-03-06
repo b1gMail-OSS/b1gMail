@@ -145,6 +145,8 @@
 			{lng p="delete"}
 		</button>{/if}
 
+		{hook id="email.read.tpl:afterButtons"}
+
 		{if $nextID}<button type="button" onclick="document.location.href='email.read.php?id={$nextID}&sid={$sid}';">
 			&raquo;
 		</button>{/if}
