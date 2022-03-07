@@ -4,7 +4,7 @@
 	
 		<table>
 			<tr>
-				<td width="40" valign="top" rowspan="3"><img src="{$tpldir}images/ico_prefs_email.png" border="0" alt="" width="32" height="32" /></td>				
+				<td width="40" valign="top" rowspan="4"><img src="{$tpldir}images/ico_prefs_email.png" border="0" alt="" width="32" height="32" /></td>				
 				<td class="td1" width="220">{lng p="storein"}:</td>
 				<td class="td2"><select name="blobstorage_provider">
 					<option value="0"{if $bm_prefs.blobstorage_provider==0} selected="selected"{/if}>{lng p="filesystem"} ({lng p="separatefiles"})</option>
@@ -27,6 +27,15 @@
 					<label>
 						<input name="fts_bg_indexing"{if $bm_prefs.fts_bg_indexing=='yes'} checked="checked"{/if} type="checkbox" />
 						{lng p="fts_bg_indexing"}
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="td1">{lng p="exturl"}:</td>
+				<td class="td2">
+					<label>
+						<input name="exturl_warning"{if $bm_prefs.exturl_warning=='yes'} checked="checked"{/if} type="checkbox" />
+						{lng p="exturl_warning"}
 					</label>
 				</td>
 			</tr>

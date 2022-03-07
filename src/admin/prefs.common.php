@@ -152,8 +152,10 @@ if($_REQUEST['action'] == 'common')
 	
 	// maintenance whitelist
 	$whitelist = NULL;
-	foreach (unserialize($bm_prefs['wartung_whitelist_ips']) as $whiteip) {
-		$whitelist .= $whiteip .', ';
+	if(!empty($bm_prefs['wartung_whitelist_ips'])) {
+		foreach (unserialize($bm_prefs['wartung_whitelist_ips']) as $whiteip) {
+			$whitelist .= $whiteip .', ';
+		}
 	}
 	$whitelist = rtrim($whitelist, ', ');
 

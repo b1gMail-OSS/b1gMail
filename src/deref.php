@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail
- * Copyright (c) 2021 Patrick Schlangen et al
+ * Copyright (c) 2021 Patrick Schlangen et al, 2022 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -53,7 +53,12 @@ $sepPos = strpos($url, '?');
 if($sepPos !== false)
 {
 	$targetURL = substr($url, $sepPos+1);
-	$tpl->assign('url', HTMLFormat($targetURL));
+	$tpl->assign('pref_exturl_warning', $bm_prefs['exturl_warning']);
+	if($bm_prefs['exturl_warning']=='no') {
+		$tpl->assign('url', HTMLFormat($targetURL));
+	}
+	else {
+		$tpl->assign('exturlwarningurl', sprintf($lang_custom['deref'], '<a href="{$url}" rel="noreferrer nofollow noopener">'.HTMLFormat($targetURL).'</a>'));
+	}
 	$tpl->display('nli/deref.tpl');
 }
-?>

@@ -73,10 +73,11 @@ if($_REQUEST['action'] == 'common')
 {
 	if(isset($_REQUEST['save']))
 	{
-		$db->Query('UPDATE {pre}prefs SET blobstorage_provider=?, blobstorage_compress=?, fts_bg_indexing=?',
+		$db->Query('UPDATE {pre}prefs SET blobstorage_provider=?, blobstorage_compress=?, fts_bg_indexing=?, exturl_warning=?',
 			$_REQUEST['blobstorage_provider'],
 			isset($_REQUEST['blobstorage_compress']) ? 'yes' : 'no',
-			isset($_REQUEST['fts_bg_indexing']) ? 'yes' : 'no');
+			isset($_REQUEST['fts_bg_indexing']) ? 'yes' : 'no',
+			isset($_REQUEST['exturl_warning']) ? 'yes' : 'no');
 		ReadConfig();
 	}
 
