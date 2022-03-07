@@ -68,6 +68,12 @@
 		<td class="listTableRightDesc">{lng p="invoiceaddress"}</td>
 	</tr>
 	<tr>
+		<td class="listTableLeft">* <label for="company">{lng p="company"}</label>:</td>
+		<td class="listTableRight">
+			<input type="text" name="company" id="company" value="{text value=$_pf.company allowEmpty=true}" size="35" />
+		</td>
+	</tr>
+	<tr>
 		<td class="listTableLeft">* <label for="vorname">{lng p="firstname"}</label>/<label for="nachname">{lng p="surname"}</label>:</td>
 		<td class="listTableRight">
 			<input type="text" name="vorname" id="vorname" value="{text value=$_pf.vorname allowEmpty=true}" size="22" />
@@ -96,6 +102,12 @@
 				<option value="{$id}"{if $_pf.land==$id} selected="selected"{/if}>{$country.land}</option>
 				{/foreach}
 			</select>
+		</td>
+	</tr>
+	<tr>
+		<td class="listTableLeft">* <label for="taxid">{lng p="taxid"}</label>:</td>
+		<td class="listTableRight">
+			<input type="text" name="taxid" id="taxid" value="{text value=$_pf.taxid allowEmpty=true}" size="35" />
 		</td>
 	</tr>
 {/if}

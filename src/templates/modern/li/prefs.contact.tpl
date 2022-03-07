@@ -37,13 +37,19 @@
 		<tr>
 			<td class="listTableLeft">* <label for="vorname">{lng p="firstname"}</label>:</td>
 			<td class="listTableRight">
-				<input type="text" name="vorname" id="vorname" value="{text value=$vorname allowEmpty=true}" size="35" />
+				<input type="text" name="vorname" id="vorname" value="{text value=$vorname allowEmpty=true}" size="35" required />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">* <label for="nachname">{lng p="surname"}</label>:</td>
 			<td class="listTableRight">
-				<input type="text" name="nachname" id="nachname" value="{text value=$nachname allowEmpty=true}" size="35" />
+				<input type="text" name="nachname" id="nachname" value="{text value=$nachname allowEmpty=true}" size="35" required />
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft"><label for="company">{lng p="company"}</label>:</td>
+			<td class="listTableRight">
+				<input type="text" name="company" id="company" value="{text value=$company allowEmpty=true}" size="35" />
 			</td>
 		</tr>
 		
@@ -101,9 +107,15 @@
 		{if $f_alternativ!="n"}<tr>
 			<td class="listTableLeft">{if $f_alternativ=="p"}*{/if} <label for="altmail">{lng p="altmail2"}:</label></td>
 			<td class="listTableRight">	
-				<input type="text" name="altmail" id="altmail" value="{text value=$altmail allowEmpty=true}" size="35" />
+				<input type="email" name="altmail" id="altmail" value="{text value=$altmail allowEmpty=true}" size="35" {if $f_alternativ=="p"}required{/if} />
 			</td>
 		</tr>{/if}
+		<tr>
+			<td class="listTableLeft"><label for="taxid">{lng p="taxid"}</label>:</td>
+			<td class="listTableRight">
+				<input type="text" name="taxid" id="taxid" value="{text value=$taxid allowEmpty=true}" size="35" />
+			</td>
+		</tr>
 		{foreach from=$profileFields item=profileField}
 		{assign var=fieldID value=$profileField.id}
 		<tr>

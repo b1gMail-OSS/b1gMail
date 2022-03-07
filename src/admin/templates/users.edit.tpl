@@ -36,6 +36,10 @@
 						<td class="td2"><input type="text" name="nachname" value="{text value=$user.nachname allowEmpty=true}" style="width:85%;" /></td>
 					</tr>
 					<tr>
+						<td class="td1">{lng p="company"}:</td>
+						<td class="td2"><input type="text" name="company" value="{text value=$user.company allowEmpty=true}" style="width:85%;" /></td>
+					</tr>
+					<tr>
 						<td class="td1">{lng p="streetno"}:</td>
 						<td class="td2"><input type="text" name="strasse" value="{text value=$user.strasse allowEmpty=true}" style="width:55%;" />
 										<input type="text" name="hnr" value="{text value=$user.hnr allowEmpty=true}" style="width:15%;" /></td>
@@ -68,6 +72,10 @@
 					<tr>
 						<td class="td1">{lng p="altmail"}:</td>
 						<td class="td2"><input type="text" name="altmail" value="{email value=$user.altmail}" style="width:85%;" /></td>
+					</tr>
+					<tr>
+						<td class="td1">{lng p="taxid"}:</td>
+						<td class="td2"><input type="text" name="taxid" value="{text value=$user.taxid}" style="width:85%;" /></td>
 					</tr>
 
 					{foreach from=$profileFields item=profileField}

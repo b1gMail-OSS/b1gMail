@@ -84,6 +84,27 @@
 					</div>
 
 					<hr />
+					<!-- firma + taxid -->
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="control-label" for="company">
+									{lng p="company"}									
+								</label>
+								<input type="text" class="form-control" required="true" name="company" id="company" value="{text value=$_pf.company allowEmpty=true}" />
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="control-label" for="taxid">
+									{lng p="taxid"}
+								</label>
+								<input type="text" class="form-control" required="true" name="taxid" id="taxid" value="{text value=$_pf.taxid allowEmpty=true}" />
+							</div>
+						</div>
+					</div>
+					<!-- firma + taxid -->
+					<hr />
 
 					<div class="row">
 						<div class="col-md-8">

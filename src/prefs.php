@@ -258,6 +258,10 @@ else if($_REQUEST['action'] == 'contact')
 		if(strlen($userRow['nachname']) < 2)
 			$invalidFields[] = 'nachname';
 
+		// firma + taxid
+		$userRow['company'] = trim($_POST['company']);
+		$userRow['taxid'] = trim($_POST['taxid']);
+
 		// salutation
 		if($bm_prefs['f_anrede'] != 'n')
 		{
@@ -527,6 +531,8 @@ else if($_REQUEST['action'] == 'contact')
 	$tpl->assign('fax',					$userRow['fax']);
 	$tpl->assign('altmail',				$userRow['altmail']);
 	$tpl->assign('mail2sms_nummer',		$userRow['mail2sms_nummer']);
+	$tpl->assign('company',				$userRow['company']);
+	$tpl->assign('taxid',				$userRow['taxid']);
 
 	// profile fields
 	$profileFields = array();

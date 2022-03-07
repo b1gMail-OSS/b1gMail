@@ -221,6 +221,8 @@ $lang_custom['notify_date']		= 'Termin: <strong>%s</strong>';
 $lang_custom['notify_newemail']	= '<strong>%d</strong> neue E-Mail(s): %s';
 $lang_custom['notify_email']	= 'E-Mail eingetroffen von <strong>%s</strong>: %s';
 $lang_custom['notify_birthday'] = '<strong>%s</strong> wird heute <strong>%d Jahre</strong> alt!';
+$lang_custom['deref'] 			= 'Den Link, den Sie angeklickt haben, leitet Sie auf <br /><br /> %s <br /><br />weiter. <br /><br />
+		                           Falls Sie diese Seite nicht besuchen m&ouml;chten, schlie&szlig;en Sie dieses Fenster.';
 
 /**
  * User phrases
@@ -235,11 +237,11 @@ $lang_user['pleasechose']		= 'Bitte wählen';
 $lang_user['home']				= 'Home';
 $lang_user['plans']				= 'Tarife';
 $lang_user['required']			= 'erforderlich';
-$lang_user['street']			= 'Stra&szlig;e';
+$lang_user['street']			= 'Straße';
 $lang_user['nr']				= 'Nr.';
 $lang_user['wishaddressandpw']	= 'Name, Wunschadresse und Passwort';
 $lang_user['accepttos']			= 'Ich akzeptiere die';
-$lang_user['completesignup']	= 'Registrierung abschlie&szlig;en';
+$lang_user['completesignup']	= 'Registrierung abschließen';
 $lang_user['next']				= 'Weiter';
 $lang_user['pleasewait']		= 'Bitte warten...';
 $lang_user['readcertmail']		= 'Einschreiben lesen';
@@ -311,7 +313,7 @@ $lang_user['notmembertxt']		= 'Sichern Sie sich Ihre kostenlose E-Mail-Adresse m
 $lang_user['contactinfo']		= 'Kontaktinformationen';
 $lang_user['firstname']			= 'Vorname';
 $lang_user['surname']			= 'Nachname';
-$lang_user['streetnr']			= 'Stra&szlig;e/Nr.';
+$lang_user['streetnr']			= 'Straße/Nr.';
 $lang_user['zipcity']			= 'PLZ/Ort';
 $lang_user['zip']				= 'PLZ';
 $lang_user['city']				= 'Ort';
@@ -1064,7 +1066,7 @@ $lang_user['times']				= 'mal';
 $lang_user['endless']			= 'endlos';
 $lang_user['repeatcount']		= 'Wiederholen';
 $lang_user['interval']			= 'Intervall';
-$lang_user['besides']			= 'au&szlig;er';
+$lang_user['besides']			= 'außer';
 $lang_user['at']				= 'am';
 $lang_user['ofthemonth']		= 'des Monats';
 $lang_user['first']				= 'ersten';
@@ -1098,6 +1100,10 @@ $lang_user['smsvalidation2_text'] = 'Bitte geben Sie den Freischalt-Code ein, de
 $lang_user['pleasevalidate']	= 'Bitte hinterlegen Sie in Ihren Kontakt-Informationen im Bereich &quot;Einstellungen&quot; Ihre Handy-Nummer, um die SMS-Funktion freizuschalten.';
 $lang_user['invalidsmscode']	= 'Der eingegebene Freischalt-Code ist nicht korrekt. Bitte versuchen Sie es erneut.';
 
+// other
+$lang_user['taxid'] 			= 'USt-ID';
+$lang_user['yourtaxid'] 		= 'Ihre USt-ID';
+$lang_user['redirect_note']		= 'Weiterleitungshinweis';
 /**
  * Admin phrases
  */
@@ -1535,7 +1541,7 @@ $lang_admin['usage']			= 'Nutzung';
 $lang_admin['aliases']			= 'Aliase';
 $lang_admin['firstname']		= 'Vorname';
 $lang_admin['lastname']			= 'Nachname';
-$lang_admin['streetno']			= 'Stra&szlig;e/Nr.';
+$lang_admin['streetno']			= 'Straße/Nr.';
 $lang_admin['zipcity']			= 'PLZ/Ort';
 $lang_admin['tel']				= 'Telefon';
 $lang_admin['fax']				= 'Fax';
@@ -2137,3 +2143,8 @@ $lang_admin['sum']				= 'Summe';
 $lang_admin['invoice']			= 'Rechnung';
 $lang_admin['at_activation']	= 'Erstellen bei Aktivierung';
 $lang_admin['at_order']			= 'Erstellen bei Bestellung';
+$lang_admin['exturl']			= 'externer Link';
+$lang_admin['exturl_warning']	= 'Vor Betreten eines externen Links warnen';
+$lang_admin['text_deref']		= 'Warnung, wenn externer Link besucht wird';
+$lang_admin['company']			= 'Firma';
+$lang_admin['taxid'] 			= 'USt-ID';

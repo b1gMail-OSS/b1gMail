@@ -225,6 +225,8 @@ $lang_custom['notify_date']		= 'Appointment: <strong>%s</strong>';
 $lang_custom['notify_newemail']	= '<strong>%d</strong> new email(s): %s';
 $lang_custom['notify_email']	= 'Email received from <strong>%s</strong>: %s';
 $lang_custom['notify_birthday']	= 'Today <strong>%s</strong> turned <strong>%d years</strong>!';
+$lang_custom['deref'] 			= 'The page you were on is trying to send you to  <br /><br /> %s. <br /><br />
+								   If you do not want to visit that page, you can close this window.';
 
 /**
  * User phrases
@@ -1102,6 +1104,10 @@ $lang_user['smsvalidation2_text'] = 'Please enter the activation code we sent to
 $lang_user['pleasevalidate']	= 'Please enter your cellphone number at your contact details (at &quot;Preferences&quot;) in order to activate the SMS functions.';
 $lang_user['invalidsmscode']	= 'The activation code is invalid. Please double-check your input and try again.';
 
+// other
+$lang_user['taxid'] 			= 'VAT';
+$lang_user['yourtaxid'] 		= 'Your VAT';
+$lang_user['redirect_note']		= 'Redirect notice';
 /**
  * Admin phrases
  */
@@ -2142,3 +2148,8 @@ $lang_admin['cert_caerr_format']	= 'Certificate or key file are in an invalid fo
 $lang_admin['cert_caerr_purpose']	= 'The certificate is not suitable for issuing S/MIME certificates.';
 $lang_admin['cert_caerr_pkcheck']	= 'The private key does not fit to the certificate or the password is wrong.';
 $lang_admin['sum']				= 'Sum';
+$lang_admin['exturl']			= 'external Link';
+$lang_admin['exturl_warning']	= 'Show a Warning site before access an external Link';
+$lang_admin['text_deref']		= 'Warning, if external url is visited';
+$lang_admin['company']			= 'Company';
+$lang_admin['taxid'] 			= 'VAT';

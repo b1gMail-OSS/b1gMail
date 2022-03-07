@@ -378,11 +378,12 @@ if($_REQUEST['action'] == 'users')
 			$res->Free();
 
 			// update common stuff
-			$db->Query('UPDATE {pre}users SET profilfelder=?, email=?, vorname=?, nachname=?, strasse=?, hnr=?, plz=?, ort=?, land=?, tel=?, fax=?, mail2sms_nummer=?, altmail=?, gruppe=?, gesperrt=?, notes=?, re=?, fwd=?, mail2sms=?, forward=?, forward_to=?, `newsletter_optin`=?, datumsformat=?, absendername=?, anrede=?, saliase=?, mailspace_add=?, diskspace_add=?, traffic_add=? WHERE id=?',
+			$db->Query('UPDATE {pre}users SET profilfelder=?, email=?, vorname=?, nachname=?, company=?, strasse=?, hnr=?, plz=?, ort=?, land=?, tel=?, fax=?, taxid=?, mail2sms_nummer=?, altmail=?, gruppe=?, gesperrt=?, notes=?, re=?, fwd=?, mail2sms=?, forward=?, forward_to=?, `newsletter_optin`=?, datumsformat=?, absendername=?, anrede=?, saliase=?, mailspace_add=?, diskspace_add=?, traffic_add=? WHERE id=?',
 				serialize($profileData),
 				EncodeEMail($_REQUEST['email']),
 				$_REQUEST['vorname'],
 				$_REQUEST['nachname'],
+				$_REQUEST['company'],
 				$_REQUEST['strasse'],
 				$_REQUEST['hnr'],
 				$_REQUEST['plz'],
@@ -390,6 +391,7 @@ if($_REQUEST['action'] == 'users')
 				$_REQUEST['land'],
 				$_REQUEST['tel'],
 				$_REQUEST['fax'],
+				$_REQUEST['taxid'],
 				$_REQUEST['mail2sms_nummer'],
 				EncodeEMail($_REQUEST['altmail']),
 				$_REQUEST['gruppe'],
