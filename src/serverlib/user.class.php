@@ -2833,6 +2833,8 @@ class BMUser
 						'mail2sms_nummer'	=> $this->_row['mail2sms_nummer'],
 						'altmail'			=> $this->_row['altmail'],
 						'profilfelder'		=> $this->_row['profilfelder'],
+						'company'			=> $this->_row['company'],
+						'taxid'				=> $this->_row['taxid'],
 						'changeDate'		=> time()
 					);
 					$contactHistory = serialize($contactHistory);
@@ -2859,7 +2861,7 @@ class BMUser
 			}
 
 			// store data
-			$db->Query('UPDATE {pre}users SET vorname=?, nachname=?, strasse=?, hnr=?, plz=?, ort=?, land=?, tel=?, fax=?, mail2sms_nummer=?, altmail=?, profilfelder=?, passwort=?, contactHistory=?, sms_validation=?, anrede=? WHERE id=?',
+			$db->Query('UPDATE {pre}users SET vorname=?, nachname=?, strasse=?, hnr=?, plz=?, ort=?, land=?, tel=?, fax=?, mail2sms_nummer=?, altmail=?, profilfelder=?, passwort=?, company=?, taxid=?, contactHistory=?, sms_validation=?, anrede=? WHERE id=?',
 				$userRow['vorname'],
 				$userRow['nachname'],
 				$userRow['strasse'],
@@ -2873,6 +2875,8 @@ class BMUser
 				$userRow['altmail'],
 				serialize($profileFields),
 				$userRow['passwort'],
+				$userRow['company'],
+				$userRow['taxid'],
 				$contactHistory,
 				$userID != 0
 					? 0
@@ -2962,6 +2966,7 @@ class BMUser
 			'tel'			=> $this->_row['tel'],
 			'fax'			=> $this->_row['fax'],
 			'handy'			=> $this->_row['mail2sms_nummer'],
+			'firma'			=> $this->_row['company'],
 			'email'			=> ExtractMailAddress($this->GetDefaultSender())
 		);
 

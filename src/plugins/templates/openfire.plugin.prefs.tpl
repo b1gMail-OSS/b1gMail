@@ -34,4 +34,4 @@
 	</form>
 </fieldset>
 
-<center><p /><font size="1">b1gMail Openfire-Integration &copy; 2007 - 2008, <a href="http://www.sebijk.com" target="_blank">Home of the Sebijk.com</a></font></center>
+<center><p /><font size="1">b1gMail Openfire-Integration &copy; <a href="http://www.sebijk.com" target="_blank" rel="noreferrer">Home of the Sebijk.com</a></font></center>

@@ -130,6 +130,8 @@ class BMPayment
 		$pf['plz']				= $userRow['plz'];
 		$pf['ort']				= $userRow['ort'];
 		$pf['land']				= $userRow['land'];
+		$pf['company']			= $userRow['company'];
+		$pf['taxid']			= $userRow['taxid'];
 
 		$tpl->assign('_pf', $pf);
 	}
@@ -629,6 +631,8 @@ class BMPayment
 			$pf['ort']				= $_POST['ort'];
 			$pf['land']				= $_POST['land'];
 			$pf['paymentMethod']	= $_POST['paymentMethod'];
+			$pf['company']			= $_POST['company'];
+			$pf['taxid']			= $_POST['taxid'];
 
 			$pf['invalidFields']	= $invalidFields;
 			$pf['dateFields']		= $dateFields;
@@ -647,8 +651,8 @@ class BMPayment
 			else
 				$vkCode = '';
 
-			$db->Query('INSERT INTO {pre}orders(`userid`,`vkcode`,`cart`,`paymethod`,`paymethod_params`,`amount`,`tax`,`inv_firstname`,`inv_lastname`,`inv_street`,`inv_no`,`inv_zip`,`inv_city`,`inv_country`,`created`,`status`) VALUES '
-					   . '(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+			$db->Query('INSERT INTO {pre}orders(`userid`,`vkcode`,`cart`,`paymethod`,`paymethod_params`,`amount`,`tax`,`inv_firstname`,`inv_lastname`,`inv_street`,`inv_no`,`inv_zip`,`inv_city`,`inv_country`,`inv_firma`,`inv_taxid`,`created`,`status`) VALUES '
+					   . '(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
 					   $userID,
 					   $vkCode,
 					   serialize($cart),
@@ -663,6 +667,8 @@ class BMPayment
 					   $bm_prefs['sendrg'] == 'yes' ? $_POST['plz'] : '',
 					   $bm_prefs['sendrg'] == 'yes' ? $_POST['ort'] : '',
 					   $_POST['land'],
+					   $bm_prefs['sendrg'] == 'yes' ? $_POST['company'] : '',
+					   $bm_prefs['sendrg'] == 'yes' ? $_POST['taxid'] : '',
 					   time(),
 					   ORDER_STATUS_CREATED);
 			$orderId = $db->InsertId();
@@ -814,6 +820,8 @@ class BMPayment
 		$rgTpl->assign('land', 		isset($countryList[$orderRow['inv_country']])
 										? $countryList[$orderRow['inv_country']]
 										: '');
+		$rgTpl->assign('company', 	$orderRow['inv_company']);
+		$rgTpl->assign('taxid', 	$orderRow['inv_taxid']);
 
 		// bank account info
 		$rgTpl->assign('ktonr', 		$bm_prefs['vk_kto_nr']);

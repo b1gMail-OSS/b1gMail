@@ -86,6 +86,7 @@ function setNotificationCount(count)
 		EBID('notifyCount').innerHTML = (count > 99) ? '99' : count;
 		EBID('notifyCount').style.display = '';
 		notificationCount = count;
+		favicon.badge(count);
 
 		if(newNotifications)
 		{
@@ -100,6 +101,7 @@ function setNotificationCount(count)
 	else
 	{
 		notificationCount = 0;
+		favicon.badge(0);
 
 		EBID('notifyCount').style.display = 'none';
 		EBID('notifyIcon').className = EBID('notifyIcon').className.replace(' animated', '');

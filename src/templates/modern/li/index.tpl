@@ -29,6 +29,15 @@
 	<script src="clientlib/dtree.js?{fileDateSig file="../../clientlib/dtree.js"}" type="text/javascript"></script>
 	<script src="clientlib/overlay.js?{fileDateSig file="../../clientlib/overlay.js"}" type="text/javascript"></script>
 	<script src="clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
+	<script src="clientlib/favicon.min.js?{fileDateSig file="../../clientlib/favicon.min.js"}" type="text/javascript"></script>
+	<script type="text/javascript">
+	{literal}
+	var favicon=new Favico({
+			animation:'fade'
+		});
+	{/literal}
+	{if $bmUnreadNotifications!=0}favicon.badge({number value=$bmUnreadNotifications min=0 max=99});{/if}
+	</script>
 	<!--[if lt IE 9]>
 	<script defer type="text/javascript" src="clientlib/IE9.js"></script>
 	<![endif]-->
@@ -146,7 +155,7 @@
 									<td width="22" height="26" align="right"><i id="searchSpinner" style="display:none;" class="fa fa-spinner fa-pulse fa-fw"></i></td>
 									<td align="right" width="70">{lng p="search"}: &nbsp;</td>
 									<td align="center">
-										<input id="searchField" name="searchField" style="width:90%" onkeypress="searchFieldKeyPress(event,{if $searchDetailsDefault}true{else}false{/if})" />
+										<input type="search" id="searchField" name="searchField" style="width:90%" onkeypress="searchFieldKeyPress(event,{if $searchDetailsDefault}true{else}false{/if})" />
 									</td>
 								</tr>
 							</table>
