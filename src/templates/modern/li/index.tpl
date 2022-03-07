@@ -29,7 +29,7 @@
 	<script src="clientlib/dtree.js?{fileDateSig file="../../clientlib/dtree.js"}" type="text/javascript"></script>
 	<script src="clientlib/overlay.js?{fileDateSig file="../../clientlib/overlay.js"}" type="text/javascript"></script>
 	<script src="clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
-	<script src="clientlib/favicon.min.js?{fileDateSig file="../../clientlib/favicon.min.js"}" type="text/javascript"></script>
+	<script src="clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
 	<script type="text/javascript">
 	{literal}
 	var favicon=new Favico({
