@@ -18,42 +18,5 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
-
-include('../serverlib/init.inc.php');
-
-/**
- * file handler for modules
- */
-ModuleFunction('FileHandler',
-	array(substr(__FILE__, strlen(__DIR__)+1),
-	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
-
-/**
- * check referer
- */
-if(!isset($_SERVER['HTTP_REFERER'])
-	|| strpos(strtolower($_SERVER['HTTP_REFERER']), strtolower($_SERVER['HTTP_HOST'])) === false)
-{
-	if($bm_prefs['cookie_lock'] == 'yes')
-	{
-		$ok = false;
-		foreach($_COOKIE as $key=>$val)
-			if(substr($key, 0, strlen('sessionSecret_')) == 'sessionSecret_')
-				$ok = true;
-		if(!$ok)
-			die('Access denied');
-	}
-}
-
-/**
- * deref code
- */
-$url = $_SERVER['REQUEST_URI'];
-$sepPos = strpos($url, '?');
-if($sepPos !== false)
-{
-	$targetURL = substr($url, $sepPos+1);
-	$tpl->assign('url', HTMLFormat($targetURL));
-	$tpl->display('nli/deref.tpl');
-}
-?>
+chdir('..');
+require_once './deref.php';
