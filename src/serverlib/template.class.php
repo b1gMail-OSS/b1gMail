@@ -278,14 +278,16 @@ class Template extends Smarty
                 ];
             }
 
-            $pageTabs = array_merge($pageTabs, [
-                'organizer' => [
-                    'icon' => 'organizer',
-                    'faIcon' => 'fa-calendar',
-                    'link' => 'organizer.php?sid=',
-                    'text' => $lang_user['organizer'],
-                    'order' => 400,
-                ], ]);
+            if($groupRow['organizer']=="yes") {
+                $pageTabs = array_merge($pageTabs, [
+                    'organizer' => [
+                        'icon' => 'organizer',
+                        'faIcon' => 'fa-calendar',
+                        'link' => 'organizer.php?sid=',
+                        'text' => $lang_user['organizer'],
+                        'order' => 400,
+                    ], ]);
+            }
 
             if ($groupRow['webdisk'] + $userRow['diskspace_add'] > 0) {
                 $pageTabs = array_merge($pageTabs, [

@@ -32,6 +32,14 @@ ModuleFunction('FileHandler',
 	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
 
 /**
+ * organizer enabled?
+ */
+if($groupRow['organizer']=='no')
+{
+	header('Location: start.php?sid=' . session_id());
+	exit();
+}
+/**
  * default action = start
  */
 $tpl->addJSFile('li', $tpl->tplDir . 'js/organizer.js');

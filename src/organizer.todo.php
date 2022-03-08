@@ -29,7 +29,14 @@ RequestPrivileges(PRIVILEGES_USER);
 ModuleFunction('FileHandler',
 	array(substr(__FILE__, strlen(__DIR__)+1),
 	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
-
+/**
+ * organizer enabled?
+ */
+if($groupRow['organizer']=='no')
+{
+	header('Location: start.php?sid=' . session_id());
+	exit();
+}
 /**
  * default action = start
  */
