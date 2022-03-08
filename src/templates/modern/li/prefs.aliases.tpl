@@ -34,6 +34,7 @@
 		<td class="{if $sortColumn=='email'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<i class="fa fa-user-o" aria-hidden="true"></i> {email value=$alias.email}</td>
 		<td class="{if $sortColumn=='type'}listTableTDActive{else}{$class}{/if}">&nbsp;{$alias.typeText}</td>
 		<td class="{$class}" nowrap="nowrap">
+			<a href="prefs.php?action=aliases&do=edit&id={$aliasID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
 			<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=aliases&do=delete&id={$aliasID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>

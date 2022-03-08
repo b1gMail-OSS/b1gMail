@@ -1108,6 +1108,8 @@ $lang_user['invalidsmscode']	= 'The activation code is invalid. Please double-ch
 $lang_user['taxid'] 			= 'VAT';
 $lang_user['yourtaxid'] 		= 'Your VAT';
 $lang_user['redirect_note']		= 'Redirect notice';
+$lang_user['login_with_alias']	= 'Allow Login with Alias';
+$lang_user['editalias']			= 'Edit alias';
 /**
  * Admin phrases
  */

@@ -1104,6 +1104,8 @@ $lang_user['invalidsmscode']	= 'Der eingegebene Freischalt-Code ist nicht korrek
 $lang_user['taxid'] 			= 'USt-ID';
 $lang_user['yourtaxid'] 		= 'Ihre USt-ID';
 $lang_user['redirect_note']		= 'Weiterleitungshinweis';
+$lang_user['login_with_alias']	= 'Login mit Alias erlauben';
+$lang_user['editalias']			= 'Alias bearbeiten';
 /**
  * Admin phrases
  */

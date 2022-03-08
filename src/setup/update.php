@@ -671,6 +671,8 @@ elseif ($step == STEP_UPDATE_STEP) {
             }
             mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'staaten SET is_eu = \'no\' WHERE id = 37'); // GB is not in EU anymore
             mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'staaten SET land = \'Eswatini\' WHERE id = 117'); // Rename Swasiland to Eswatini
+            mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'gruppen SET organizer = \'yes\''); // Allow organizer to all groups (default)
+            mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'aliase SET login = \'no\''); // No login with alias (default)
         }
 
         // add new root certificates

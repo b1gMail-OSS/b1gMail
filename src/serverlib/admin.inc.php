@@ -171,7 +171,7 @@ function AdminAllowed($priv)
 function AdminRequirePrivilege($priv)
 {
     if (!AdminAllowed($priv)) {
-        DisplayError(0x02, 'Unauthorized', 'You are not authrized to view or change this dataset or page. Possible reasons are too few permissions or an expired session.',
+        DisplayError(0x02, 'Unauthorized', 'You are not authorized to view or change this dataset or page. Possible reasons are too few permissions or an expired session.',
             sprintf("Requested privileges:\n%s",
                 $priv),
             __FILE__,

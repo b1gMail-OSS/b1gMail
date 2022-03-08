@@ -157,6 +157,11 @@
 						<td colspan="2">&nbsp;</td>
 					</tr>
 					<tr>
+						<td class="td1">{lng p="organizer"}?</td>
+						<td class="td2"><input type="checkbox" name="organizer"{if $group.organizer=='yes'} checked="checked"{/if} /></td>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+					<tr>
 						<td class="td1">{lng p="smtp"}?</td>
 						<td class="td2"><input type="checkbox" name="smtp"{if $group.smtp=='yes'} checked="checked"{/if} /></td>
 						<td class="td1">{lng p="pop3"}?</td>

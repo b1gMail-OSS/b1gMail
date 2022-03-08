@@ -1138,13 +1138,20 @@ class BMUser
 		$password = LooksLikeMD5Hash($passwordPlain) ? $passwordPlain : md5($passwordPlain);
 
 		// try plugin authentication first
-		$pluginAuth = BMUSer::_pluginAuth($email, $password, $passwordPlain);
+		$pluginAuth = BMUser::_pluginAuth($email, $password, $passwordPlain);
 
 		// no plugin auth
 		if(!is_array($pluginAuth))
 		{
 			// get user ID
-			$userID = BMUser::GetID($email);
+			$userID = BMUser::GetID($email,false,$isAlias);
+			$aliaslogin='no';
+			if($isAlias === true) { // Check if alias login is allowed
+				$res = $db->Query('SELECT login FROM {pre}aliase WHERE user=? AND email=? LIMIT 1',
+				$userID,$email);
+				list($aliaslogin) = $res->FetchArray(MYSQLI_NUM);
+				if($aliaslogin=='no') $userID=0; // Set userID to empty
+			}
 			$res = $db->Query('SELECT id,gesperrt,passwort,passwort_salt,email,last_login_attempt,sms_validation_code,ip,lastlogin,preferred_language,last_timezone FROM {pre}users WHERE id=? LIMIT 1',
 				$userID);
 			$row = $res->FetchArray();
@@ -1724,7 +1731,7 @@ class BMUser
 		global $db, $lang_user;
 
 		$aliases = array();
-		$res = $db->Query('SELECT id,email,type,sendername FROM {pre}aliase WHERE user=? '
+		$res = $db->Query('SELECT id,email,type,sendername,login FROM {pre}aliase WHERE user=? '
 							. 'ORDER BY ' . $sortColumn . ' ' . $sortOrder,
 			$this->_id);
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
@@ -1944,7 +1951,7 @@ class BMUser
 	 * @param string $sendername Alias name
 	 * @return in
 	 */
-	public function AddAlias($email, $type, $sendername='')
+	public function AddAlias($email, $type, $sendername='',$aliaslogin='no')
 	{
 		global $db, $lang_custom, $bm_prefs, $thisUser;
 
@@ -1959,12 +1966,13 @@ class BMUser
 		if($type == (ALIAS_RECIPIENT|ALIAS_SENDER))
 		{
 			// add
-			$db->Query('INSERT INTO {pre}aliase(email,user,type,date,sendername) VALUES(?,?,?,?,?)',
+			$db->Query('INSERT INTO {pre}aliase(email,user,type,date,sendername,login) VALUES(?,?,?,?,?,?)',
 				$email,
 				$this->_id,
 				$type,
 				time(),
-				$sendername);
+				$sendername,
+				$aliaslogin);
 			$id = $db->InsertId();
 
 			// log

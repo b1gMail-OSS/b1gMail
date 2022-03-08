@@ -1084,6 +1084,18 @@ else if($_REQUEST['action'] == 'aliases'
 	}
 
 	//
+	// edit
+	//
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'edit' && isset($_REQUEST['id']))
+	{
+		$aliases = $thisUser->GetAliases();
+		$alias = $aliases[(int)$_REQUEST['id']];
+		$tpl->assign('alias', $alias);
+		$tpl->assign('pageContent', 'li/prefs.aliases.edit.tpl');
+		$tpl->display('li/index.tpl');
+	}
+
+	//
 	// create
 	//
 	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'create'
@@ -1105,7 +1117,8 @@ else if($_REQUEST['action'] == 'aliases'
 					&& !BMUser::AddressLocked(trim($_REQUEST['email_local']))
 					&& strlen(trim($_REQUEST['email_local'])) >= $bm_prefs['minuserlength'])
 				{
-					$thisUser->AddAlias($emailAddress, ALIAS_SENDER|ALIAS_RECIPIENT,strip_tags($_REQUEST['email_name']));
+					$thisUser->AddAlias($emailAddress, ALIAS_SENDER|ALIAS_RECIPIENT,
+					strip_tags($_REQUEST['email_name']),isset($_REQUEST['email_login']) ? 'yes' : 'no');
 					header('Location: prefs.php?action=aliases&sid=' . session_id());
 					exit();
 				}
@@ -1167,8 +1180,18 @@ else if($_REQUEST['action'] == 'aliases'
 	//
 	else
 	{
+		// update?
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'update'
+			&& isset($_REQUEST['id']))
+		{
+			$db->Query('UPDATE {pre}aliase SET sendername=?,login=? WHERE id=? AND user=?',
+			strip_tags($_REQUEST['email_name']),
+			isset($_REQUEST['email_login']) ? 'yes' : 'no',
+			(int)$_REQUEST['id'],
+			$userRow['id']);
+		}
 		// delete?
-		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
+		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['id']))
 		{
 			if($userRow['defaultSender'] == 10+$_REQUEST['id']*2

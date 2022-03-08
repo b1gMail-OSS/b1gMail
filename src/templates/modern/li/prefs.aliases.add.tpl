@@ -58,6 +58,13 @@
 				<span id="addressAvailabilityIndicator"></span>
 			</td>
 		</tr>
+		<tr>
+			<td class="listTableLeft">&nbsp;</td>
+			<td class="listTableRight">
+				<input type="checkbox" name="email_login" id="email_login"  />
+				<label for="email_login">{lng p="login_with_alias"}</label>
+			</td>
+		</tr>
 		</tbody>
 		
 		<tr>

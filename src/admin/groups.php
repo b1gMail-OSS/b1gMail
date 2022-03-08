@@ -147,7 +147,7 @@ if($_REQUEST['action'] == 'groups')
 			if($_REQUEST['traffic'] > 0)
 				$_REQUEST['traffic'] *= 1024*1024;
 
-			$db->Query('UPDATE {pre}gruppen SET titel=?, soforthtml=?, sms_monat=?, storage=?, webdisk=?, maxsize=?, anlagen=?, traffic=?, wd_member_kbs=?, wd_open_kbs=?, send_limit_count=?, send_limit_time=?, ownpop3=?, ownpop3_interval=?, selfpop3_check=?, aliase=?, sms_pre=?, mail2sms=?, wap=?, sms_ownfrom=?, checker=?, tbx_webdisk=?, tbx_smsmanager=?, ads=?, share=?, pop3=?, smtp=?, responder=?, imap=?, forward=?, webdav=?, saliase=?, sms_price_per_credit=?, sms_from=?, sms_sig=?, signatur=?, smsvalidation=?, allow_newsletter_optout=?, smime=?, issue_certificates=?, upload_certificates=?, max_recps=?, sender_aliases=?, syncml=?, organizerdav=?, ftsearch=?, notifications=?, maildeliverystatus=?, abuseprotect=?, mail_send_code=?, sms_send_code=?, auto_save_drafts=? WHERE id=?',
+			$db->Query('UPDATE {pre}gruppen SET titel=?, soforthtml=?, sms_monat=?, storage=?, webdisk=?, maxsize=?, anlagen=?, traffic=?, wd_member_kbs=?, wd_open_kbs=?, send_limit_count=?, send_limit_time=?, ownpop3=?, ownpop3_interval=?, selfpop3_check=?, aliase=?, sms_pre=?, mail2sms=?, wap=?, sms_ownfrom=?, checker=?, tbx_webdisk=?, tbx_smsmanager=?, ads=?, share=?, pop3=?, smtp=?, responder=?, imap=?, forward=?, webdav=?, saliase=?, sms_price_per_credit=?, sms_from=?, sms_sig=?, signatur=?, smsvalidation=?, allow_newsletter_optout=?, smime=?, issue_certificates=?, upload_certificates=?, max_recps=?, sender_aliases=?, syncml=?, organizerdav=?, ftsearch=?, notifications=?, maildeliverystatus=?, abuseprotect=?, mail_send_code=?, sms_send_code=?, auto_save_drafts=?,organizer=? WHERE id=?',
 				$_REQUEST['titel'],
 				isset($_REQUEST['soforthtml']) ? 'yes' : 'no',
 				$_REQUEST['sms_monat'],
@@ -200,6 +200,7 @@ if($_REQUEST['action'] == 'groups')
 				isset($_REQUEST['mail_send_code']) ? 'yes' : 'no',
 				isset($_REQUEST['sms_send_code']) ? 'yes' : 'no',
 				isset($_REQUEST['auto_save_drafts']) ? 'yes' : 'no',
+				isset($_REQUEST['organizer']) ? 'yes' : 'no',
 				$_REQUEST['id']);
 			$cacheManager->Delete('group:' . $_REQUEST['id']);
 
