@@ -58,7 +58,7 @@ if($sepPos !== false)
 		$tpl->assign('url', HTMLFormat($targetURL));
 	}
 	else {
-		$tpl->assign('exturlwarningurl', sprintf($lang_custom['deref'], '<a href="{$url}" rel="noreferrer nofollow noopener">'.HTMLFormat($targetURL).'</a>'));
+		$tpl->assign('exturlwarningurl', sprintf($lang_custom['deref'], '<a href="'.HTMLFormat($targetURL).'" rel="noreferrer nofollow noopener">'.HTMLFormat($targetURL).'</a>'));
 	}
 	$tpl->display('nli/deref.tpl');
 }
