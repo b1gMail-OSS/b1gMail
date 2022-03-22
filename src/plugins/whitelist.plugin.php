@@ -20,16 +20,13 @@
  */
 
 /**
- * whitelist plugin
- *
+ * whitelist plugin.
  */
 class WhitelistPlugin extends BMPlugin
 {
-	function __construct()
-	{
-		global $lang_admin;
-
-		// plugin info
+    public function __construct()
+    {
+        // plugin info
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'Whitelist';
 		$this->author				= 'b1gMail Project';
@@ -37,59 +34,58 @@ class WhitelistPlugin extends BMPlugin
 		$this->mail					= 'info@b1gmail.org';
 		$this->version				= '1.1';
 
-		// group option
-		$this->RegisterGroupOption('whitelist',
-			FIELD_CHECKBOX,
-			'Whitelist?');
-	}
+        // group option
+        $this->RegisterGroupOption('whitelist',
+            FIELD_CHECKBOX,
+            'Whitelist?');
+    }
 
-	function OnReceiveMail(&$mail, &$mailbox, &$user)
-	{
-		global $db;
+    public function OnReceiveMail(&$mail, &$mailbox, &$user)
+    {
+        global $db;
 
-		// check input data
-		if(!is_object($mail) || !is_object($user))
-		{
-			PutLog('WhitelistPlugin: $mail or $user invalid', PRIO_DEBUG, __FILE__, __LINE__);
-			return(BM_OK);
-		}
+        // check input data
+        if (!is_object($mail) || !is_object($user)) {
+            PutLog('WhitelistPlugin: $mail or $user invalid', PRIO_DEBUG, __FILE__, __LINE__);
 
-		// check if whitelist is enabled for user's group
-		$userGroupID = $user->_row['gruppe'];
-		if(!$this->GetGroupOptionValue('whitelist', $userGroupID))
-			return(BM_OK);
+            return BM_OK;
+        }
 
-		// lookup sender addresses in addressbook
-		$from = ExtractMailAddresses($mail->GetHeaderValue('from'));
-		$res = $db->Query('SELECT COUNT(*) FROM {pre}adressen WHERE `user`=? AND (`email` IN ? OR `work_email` IN ?)',
-			$user->_id,
-			$from,
-			$from);
-		list($addressBookEntryCount) = $res->FetchArray(MYSQLI_NUM);
-		$res->Free();
+        // check if whitelist is enabled for user's group
+        $userGroupID = $user->_row['gruppe'];
+        if (!$this->GetGroupOptionValue('whitelist', $userGroupID)) {
+            return BM_OK;
+        }
 
-		// return
-		if($addressBookEntryCount > 0)
-		{
-			PutLog(sprintf('WhitelistPlugin: Accepted email for user #%d', $user->_id),
-				PRIO_DEBUG,
-				__FILE__,
-				__LINE__);
-			return(BM_OK);
-		}
-		else
-		{
-			PutLog(sprintf('WhitelistPlugin: Rejected email for user #%d', $user->_id),
-				PRIO_DEBUG,
-				__FILE__,
-				__LINE__);
-			return(BM_BLOCK);
-		}
-	}
+        // lookup sender addresses in addressbook
+        $from = ExtractMailAddresses($mail->GetHeaderValue('from'));
+        $res = $db->Query('SELECT COUNT(*) FROM {pre}adressen WHERE `user`=? AND (`email` IN ? OR `work_email` IN ?)',
+            $user->_id,
+            $from,
+            $from);
+        list($addressBookEntryCount) = $res->FetchArray(MYSQLI_NUM);
+        $res->Free();
+
+        // return
+        if ($addressBookEntryCount > 0) {
+            PutLog(sprintf('WhitelistPlugin: Accepted email for user #%d', $user->_id),
+                PRIO_DEBUG,
+                __FILE__,
+                __LINE__);
+
+            return BM_OK;
+        } else {
+            PutLog(sprintf('WhitelistPlugin: Rejected email for user #%d', $user->_id),
+                PRIO_DEBUG,
+                __FILE__,
+                __LINE__);
+
+            return BM_BLOCK;
+        }
+    }
 }
 
-/**
+/*
  * register plugin
  */
 $plugins->registerPlugin('WhitelistPlugin');
-?>

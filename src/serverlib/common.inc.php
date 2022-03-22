@@ -852,7 +852,9 @@ function HTMLFormat($in, $allowDoubleEncoding = false, $allowEncodingRepair = tr
 
 	if($allowEncodingRepair && strlen($in) > 0 && strlen($res) == 0 && function_exists('mb_detect_encoding'))
 	{
-		$in = @mb_convert_encoding($in, $currentCharset, mb_detect_encoding($in));
+		$fromEncoding = mb_detect_encoding($in); //FIXME: Better detection of invalid Encoding
+		if($fromEncoding === FALSE) $fromEncoding='UTF-8'; // Uncaught ValueError: mb_convert_encoding(): Argument #3 ($from_encoding) must specify at least one encoding
+		$in = @mb_convert_encoding($in, $currentCharset, $fromEncoding);
 		return(HTMLFormat($in, $allowDoubleEncoding, false));
 	}
 
@@ -1901,7 +1903,7 @@ function formatEMailText($in, $html = true, $mobile = false)
 		foreach($bmLinks as $i=>$link)
 		{
 			$in = str_replace(sprintf(':::_b1gMailLink:%d_:::', $i),
-							  sprintf('<a href="deref.php?%s" target="_blank" rel="noopener noreferrer">%s</a>', $link, $link),
+							  sprintf('<a href="deref.php?%s" title="%s" target="_blank" rel="noopener noreferrer">%s</a>', $link, $link, $link),
 							  $in);
 		}
 	}
@@ -2691,7 +2693,9 @@ function ZIPCheck($plz, $ort, $staat)
 	if(file_exists($plzfile))
 	{
 		$fp = fopen($plzfile, 'r');
-		$inh = fread($fp, filesize($plzfile));
+		$plz_filesize = filesize($plzfile);
+		if ($plz_filesize == 0) return(false);
+		$inh = fread($fp, $plz_filesize);
 		fclose($fp);
 
 		$pos = strpos($inh, $hash);						# In der PLZ-Datei nach dem PLZ/Ort-Paar suchen
