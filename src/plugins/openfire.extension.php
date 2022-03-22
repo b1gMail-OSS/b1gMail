@@ -26,7 +26,7 @@ class modopenfire extends BMPlugin
     public function __construct()
     {
         $this->name					= 'Jabber Openfire-Integration';
-		$this->version				= '1.1.1';
+		$this->version				= '1.1.2';
 		$this->type					= BMPLUGIN_DEFAULT;
 
 		$this->author				= 'Home of the Sebijk.com';
@@ -45,14 +45,19 @@ class modopenfire extends BMPlugin
     {
         global $db;
 
-        // create mod_openfire table utf8
-        $db->Query('CREATE TABLE `{pre}mod_openfire` (
-			`enableAuth` tinyint(1) NOT NULL,
-			`secretkey` varchar(255) NOT NULL,
-			`domain` varchar(255) NOT NULL,
-			`port` int(10) NOT NULL,
-			`https` tinyint(1) NOT NULL
-			) ENGINE=MyISAM;');
+        $DatabaseStructure = [
+            '{pre}mod_openfire' => [
+                'fields' => [
+                    ['enableAuth', 'tinyint(1)', 'NO'],
+                    ['secretkey', 'varchar(255)', 'NO'],
+                    ['domain', 'varchar(255)', 'NO'],
+                    ['port', 'int(10)', 'NO'],
+                    ['https', 'tinyint(1)', 'NO'],
+                ],
+                'indexes' => [],
+            ],
+        ];
+        SyncDBStruct($DatabaseStructure);
 
         $db->Query('REPLACE INTO {pre}mod_openfire (enableAuth, secretkey, domain, port, https) VALUES (?,?,?,?,?);',
             (int) 0,
@@ -189,7 +194,7 @@ class modopenfire extends BMPlugin
         }
     }
 
-    public function _getUrl()
+    private function _getUrl()
     {
         global $db;
 
@@ -206,7 +211,7 @@ class modopenfire extends BMPlugin
         return $http_modus.'://'.$jabber_row['domain'].':'.$jabber_row['port'].'/plugins/userService/userservice?secret='.$jabber_row['secretkey'];
     }
 
-    public function _enableAuth()
+    private function _enableAuth()
     {
         global $db;
 
@@ -221,7 +226,7 @@ class modopenfire extends BMPlugin
         return false;
     }
 
-    public function _sendhttp($url)
+    private function _sendhttp($url)
     {
         if (!class_exists('BMHTTP')) {
             include B1GMAIL_DIR.'serverlib/http.class.php';
@@ -231,7 +236,7 @@ class modopenfire extends BMPlugin
         $result = $http->DownloadToString();
     }
 
-    public function _toRawUrl($text)
+    private function _toRawUrl($text)
     {
         global $bm_prefs;
 
