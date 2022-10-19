@@ -32,7 +32,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 *
 	 * @return wbb2AuthPlugin
 	 */
-	function __construct()
+	public function __construct()
 	{
 		
 		// plugin info
@@ -71,7 +71,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 *
 	 * @return bool
 	 */
-	function Install()
+	public function Install()
 	{
 		global $db, $bm_prefs;
 
@@ -99,7 +99,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 *
 	 * @return bool
 	 */
-	function Uninstall()
+	public function Uninstall()
 	{
 		global $db;
 		
@@ -222,7 +222,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 * user page handler
 	 * 
 	 */
-	function FileHandler($file, $action)
+	public function FileHandler($file, $action)
 	{
 		global $userRow;
 		
@@ -247,7 +247,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 * admin handler
 	 *
 	 */
-	function AdminHandler()
+	public function AdminHandler()
 	{
 		global $tpl, $plugins, $lang_admin;
 		
@@ -272,7 +272,7 @@ class wbb2AuthPlugin extends BMPlugin
 	 * admin prefs page
 	 *
 	 */
-	function _prefsPage()
+	public function _prefsPage()
 	{
 		global $tpl, $db, $bm_prefs;
 		
@@ -307,4 +307,3 @@ class wbb2AuthPlugin extends BMPlugin
  * register plugin
  */
 $plugins->registerPlugin('wbb2AuthPlugin');
-?>
