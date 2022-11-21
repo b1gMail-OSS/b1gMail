@@ -25,7 +25,7 @@
 	<input type="hidden" name="actionToken" value="{$actionToken}" />
 	<input type="hidden" name="do" id="do" value="" />
 	<input type="hidden" name="reference" id="reference" value="{$reference}" />
-	<input type="hidden" name="baseDraftID" id="baseDraftID" value="{if $mail.isAutoSavedDraft}{$mail.baseDraftID}{/if}" />
+	<input type="hidden" name="baseDraftID" id="baseDraftID" value="{if array_key_exists('isAutoSavedDraft', $mail)}{$mail.baseDraftID}{/if}" />
 	
 	{if $latestDraft}
 	<div class="draftNote" id="draftNote">

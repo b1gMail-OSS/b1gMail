@@ -5,7 +5,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	{if $robotsNoIndex}<meta name="robots" content="noindex" />{/if}
+	{if isset($robotsNoIndex)}<meta name="robots" content="noindex" />{/if}
 
 	<title>{$service_title}{if $pageTitle} - {text value=$pageTitle}{/if}</title>
 
@@ -15,8 +15,8 @@
 	<link rel="stylesheet" type="text/css" href="{$tpldir}style/notloggedin.css?{fileDateSig file="style/notloggedin.css"}" />
 
 	<!--[if lt IE 9]>
-	<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<script src="clientlib/html5shiv.min.js"></script>
+	<script src="clientlib/respond.min.js"></script>
 	<![endif]-->
 
 	<script type="text/javascript">

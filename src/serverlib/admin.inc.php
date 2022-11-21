@@ -24,6 +24,7 @@ include '../serverlib/init.inc.php';
 if (defined('TOOLBOX_SERVER')) {
     $toolbox_serverurl = TOOLBOX_SERVER;
 }
+else $toolbox_serverurl = '';
 
 // tables
 $customTextsHTML = [

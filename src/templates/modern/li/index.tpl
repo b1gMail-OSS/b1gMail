@@ -175,7 +175,7 @@
 			<div class="arrow"></div>
 			<div class="inner">
 			{foreach from=$newMenu item=item}
-				{if $item.sep}
+				{if array_key_exists('sep', $item)}
 				<div class="mailMenuSep"></div>
 				{else}
 				<a class="mailMenuItem" href="{$item.link}{$sid}"><i class="fa {$item.faIcon}" aria-hidden="true"></i> {$item.text}...</a>

@@ -278,7 +278,7 @@ class Template extends Smarty
                 ];
             }
 
-            if($groupRow['organizer']=="yes") {
+            if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
                 $pageTabs = array_merge($pageTabs, [
                     'organizer' => [
                         'icon' => 'organizer',
@@ -289,7 +289,7 @@ class Template extends Smarty
                     ], ]);
             }
 
-            if ($groupRow['webdisk'] + $userRow['diskspace_add'] > 0) {
+            if (array_key_exists('webdisk', $groupRow) && $groupRow['webdisk'] + $userRow['diskspace_add'] > 0) {
                 $pageTabs = array_merge($pageTabs, [
                     'webdisk' => [
                         'icon' => 'webdisk',
