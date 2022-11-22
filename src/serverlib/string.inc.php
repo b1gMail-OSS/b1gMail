@@ -241,7 +241,7 @@ function _urlencode($str)
 	global $currentCharset;
 
 	if(strtolower($currentCharset) == 'utf-8' || strtolower($currentCharset) == 'utf8')
-		return(urlencode(utf8_decode($str)));
+		return(urlencode(CharsetDecode($str, false, 'iso-8859-1')));
 	return(urlencode($str));
 }
 
@@ -250,7 +250,7 @@ function _urldecode($str)
 	global $currentCharset;
 
 	if(strtolower($currentCharset) == 'utf-8' || strtolower($currentCharset) == 'utf8')
-		return(utf8_encode(urldecode($str)));
+		return(CharsetDecode(urldecode($str), 'iso-8859-1'));
 	return(urldecode($str));
 }
 
@@ -329,7 +329,7 @@ function CharsetDecode($text, $charset = false, $destCharset = false)
 		else if($newText = @iconv($charset, $myCharset, $text))
 			$text = $newText;
 	}
-	else
+	else if(function_exists('utf8_encode'))
 	{
 		switch($charset)
 		{

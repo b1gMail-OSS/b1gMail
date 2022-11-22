@@ -3403,9 +3403,6 @@ class FaxPlugin extends BMPlugin
 		if(function_exists('CharsetDecode'))
 			return(CharsetDecode($in, false, 'ISO-8859-15'));
 
-		if(in_array(strtolower($urrentCharset), array('utf8', 'utf-8')) && function_exists('utf8_decode'))
-			return(utf8_decode($in));
-
 		return($in);
 	}
 }

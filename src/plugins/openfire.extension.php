@@ -26,7 +26,7 @@ class modopenfire extends BMPlugin
     public function __construct()
     {
         $this->name					= 'Jabber Openfire-Integration';
-		$this->version				= '1.1.2';
+		$this->version				= '1.1.3';
 		$this->type					= BMPLUGIN_DEFAULT;
 
 		$this->author				= 'Home of the Sebijk.com';
@@ -241,7 +241,7 @@ class modopenfire extends BMPlugin
         global $bm_prefs;
 
         if (!$bm_prefs['db_is_utf8']) {
-            $text = utf8_encode($text);
+			$text = CharsetDecode($text, 'ISO-8859-1');
         }
 
         return rawurlencode($text);
