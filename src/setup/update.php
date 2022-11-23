@@ -187,7 +187,7 @@ elseif ($step == STEP_SYSTEMCHECK) {
 	</table>
 
 	<?php
-    if ($showDbMailsNote) {
+    if (!empty($showDbMailsNote)) {
         ?>
 		<br />
 		<p>
