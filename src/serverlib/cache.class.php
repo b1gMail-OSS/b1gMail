@@ -353,7 +353,13 @@ class BMCache_memcache extends BMCache
 		$memcacheServers = explode(';', $bm_prefs['memcache_servers']);
 		if(class_exists('Memcache') || class_exists('Memcached'))
 		{
-			if(count($memcacheServers) > 0 && trim($memcacheServers[0]) != '')
+			if((int)str_replace('.', '', phpversion()) >= 800) { // In PHP 8 we will disable memcached
+				PutLog('PHP 8 or higher detected. memcache is disabled. Please choose an other cache method or contribute your code changes to the community.',
+						PRIO_WARNING,
+						__FILE__,
+						__LINE__);
+			}
+			else if(count($memcacheServers) > 0 && trim($memcacheServers[0]) != '')
 			{
 				if(class_exists('Memcache'))
 				{
