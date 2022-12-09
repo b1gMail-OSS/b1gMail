@@ -15,20 +15,20 @@
 		<tr>
 			<td class="listTableLeft">* <label for="titel">{lng p="title"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="titel" id="titel" value="{text value=$signature.titel allowEmpty=true}" style="width:100%;" />
+				<input type="text" name="titel" id="titel" value="{if isset($signature.titel)}{text value=$signature.titel allowEmpty=true}{/if}" style="width:100%;" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="text">{lng p="plaintext"}:</label></td>
 			<td class="listTableRight">
-				<textarea name="text" id="text" style="width:100%;height:150px;">{text value=$signature.text allowEmpty=true}</textarea>
+				<textarea name="text" id="text" style="width:100%;height:150px;">{if isset($signature.text)}{text value=$signature.text allowEmpty=true}{/if}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="html">{lng p="htmltext"}:</label></td>
 			<td class="listTableRight">
 				<div style="border:1px solid #DDDDDD;">
-					<textarea name="html" id="html" style="width:100%;height:150px;">{if $signature}{text value=$signature.html allowEmpty=true}{/if}</textarea>
+					<textarea name="html" id="html" style="width:100%;height:150px;">{if isset($signature)}{text value=$signature.html allowEmpty=true}{/if}</textarea>
 					<script src="./clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
 					<script type="text/javascript" src="./clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
 					<script>

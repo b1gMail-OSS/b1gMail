@@ -78,7 +78,7 @@
 <script>
 <!--
 	registerLoadAction('initVSep()');
-{if $showID}
+{if isset($showID)}
 	registerLoadAction('previewNote(\'{$sid}\', \'{$showID}\')');
 {/if}
 //-->

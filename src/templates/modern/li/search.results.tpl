@@ -1,5 +1,5 @@
 <table width="100%" cellspacing="0" cellpadding="0">
-{if $results}
+{if isset($results)}
 {foreach from=$results item=resultCat}
 {assign var=first value=true}
 {foreach from=$resultCat.results item=result}

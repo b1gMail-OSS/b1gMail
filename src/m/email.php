@@ -36,6 +36,7 @@ $folderList = $mailbox->GetFolderList(true);
  * assign
  */
 $tpl->assign('activeTab', 'email');
+$tpl->assign('isDialog',  false);
 
 /**
  * default action = inbox

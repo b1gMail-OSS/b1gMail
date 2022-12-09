@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	{if isset($robotsNoIndex)}<meta name="robots" content="noindex" />{/if}
 
-	<title>{$service_title}{if $pageTitle} - {text value=$pageTitle}{/if}</title>
+	<title>{$service_title}{if isset($pageTitle)} - {text value=$pageTitle}{/if}</title>
 
 	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
 

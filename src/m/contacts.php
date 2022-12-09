@@ -33,6 +33,7 @@ $book = _new('BMAddressbook', array($userRow['id']));
  * assign
  */
 $tpl->assign('activeTab', 	'contacts');
+$tpl->assign('isDialog',  false);
 
 /**
  * default action

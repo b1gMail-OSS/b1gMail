@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-{if $errorStep}
+{if isset($errorStep)}
 <div class="note">
 	{$errorInfo}
 </div>
@@ -157,7 +157,7 @@
 	</table>
 </form>
 
-{if $errorStep}
+{if isset($errorStep)}
 <script>
 <!--
 {foreach from=$invalidFields item=field}

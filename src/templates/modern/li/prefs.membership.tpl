@@ -9,7 +9,7 @@
 
 <form action="prefs.php?action=membership&do=changePW&sid={$sid}" method="post">
 <h2>{lng p="changepw"}</h2>
-{if $errorStep}
+{if isset($errorStep)}
 <div class="note">
 	{$errorInfo}
 </div>

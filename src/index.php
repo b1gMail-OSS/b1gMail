@@ -1477,5 +1477,8 @@ if(isset($_COOKIE['bm_savedUser']))
 	header('Cache-Control: no-cache');
 	$tpl->assign('welcomeBack', sprintf($lang_user['welcomeback'], $_COOKIE['bm_savedUser']));
 }
+else {
+	$tpl->assign('welcomeBack', FALSE);
+}
 
 $tpl->display('nli/index.tpl');

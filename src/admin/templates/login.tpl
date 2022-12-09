@@ -20,13 +20,13 @@
 <body onload="EBID('username').focus();" id="loginBody">
 	
 	<form action="index.php?action=login" method="post" autocomplete="off">
-		{if $jump}<input type="hidden" id="jump" name="jump" value="{text value=$jump allowEmpty=true}" />{/if}
+		{if isset($jump)}<input type="hidden" id="jump" name="jump" value="{text value=$jump allowEmpty=true}" />{/if}
 		<input type="hidden" name="timezone" id="timezone" value="{$timezone}" />
 		
 		<div id="loginBox1">
 			<div id="loginBox2">
 				<div id="loginBox3">
-					{if $error}<div class="loginError">{$error}</div>{/if}
+					{if isset($error)}<div class="loginError">{$error}</div>{/if}
 				
 					<div id="loginLogo">
 						<img src="templates/images/logo_letter.png" style="width:90px;height:53px;" border="0" alt="" />

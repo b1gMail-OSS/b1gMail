@@ -40,6 +40,7 @@ $usedSpace 		= $webdisk->GetUsedSpace();
  */
 $tpl->assign('activeTab', 	'webdisk');
 $tpl->assign('folderID', 	$folderID);
+$tpl->assign('isDialog',  false);
 if(count($folderPath) > 1)
 {
 	$parentFolder = end(array_slice($folderPath, -2, 1));

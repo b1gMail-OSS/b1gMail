@@ -6,7 +6,7 @@
 <input type="hidden" name="singleID" id="singleID" value="" />
 {if $queryString}<input type="hidden" name="query" id="query" value="{text value=$queryString}" />{/if}
 
-{if $searchQuery}
+{if isset($searchQuery)}
 <fieldset>
 	<legend>{lng p="search"}</legend>
 

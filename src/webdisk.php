@@ -853,6 +853,7 @@ else if($_REQUEST['action'] == 'dndUpload'
 		$msg = $lang_user['notraffic'];
 	}
 
+	http_response_code(400);
 	echo $msg;
 }
 

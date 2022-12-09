@@ -18,11 +18,11 @@
 						{lng p="contactform"}
 					</div>
 					<div class="panel-body">
-						{if $success}
+						{if isset($success)}
 						<div class="alert alert-success" role="alert"><strong>{lng p="thankyou"}.</strong> {lng p="cform_sent"}</div>
 						{else}
 					
-						{if $errorMsg}<div class="alert alert-danger" role="alert"><strong>{lng p="error"}:</strong> {$errorMsg}</div>{/if}
+						{if isset($errorMsg)}<div class="alert alert-danger" role="alert"><strong>{lng p="error"}:</strong> {$errorMsg}</div>{/if}
 
 						{if $contactform_name}<div class="form-group">
 							<label class="control-label" for="name">
@@ -31,7 +31,7 @@
 							</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-								<input type="text" class="form-control" required="true" name="name" id="name" value="{text value=$smarty.post.name allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="name" id="name" value="{if isset($smarty.post.name)}{text value=$smarty.post.name allowEmpty=true}{/if}" />
 							</div>
 						</div>{/if}
 						<div class="form-group">
@@ -41,7 +41,7 @@
 							</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-								<input type="text" class="form-control" required="true" name="email" id="email" value="{text value=$smarty.post.email allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="email" id="email" value="{if isset($smarty.post.email)}{text value=$smarty.post.email allowEmpty=true}{/if}" />
 							</div>
 						</div>
 						{if $contactform_subject}<div class="form-group">
@@ -52,7 +52,7 @@
 							<select class="form-control" id="subject" name="subject">
 								<option value="">--- {lng p="pleasechose"} ---</option>
 								{foreach from=$contactform_subjects item=subject}
-								<option value="{text value=$subject}"{if $smarty.post.subject==$subject} selected="selected"{/if}>{text value=$subject}</option>
+								<option value="{text value=$subject}"{if isset($smarty.post.subject) && $smarty.post.subject==$subject} selected="selected"{/if}>{text value=$subject}</option>
 								{/foreach}
 							</select>
 						</div>{/if}
@@ -61,7 +61,7 @@
 								{lng p="message"}
 								<span class="required">{lng p="required"}</span>
 							</label>
-							<textarea class="form-control" name="text" id="text" rows="6" required="true">{text value=$smarty.post.text allowEmpty=true}</textarea>
+							<textarea class="form-control" name="text" id="text" rows="6" required="true">{if isset($smarty.post.text)}{text value=$smarty.post.text allowEmpty=true}{/if}</textarea>
 						</div>
 						<div class="row">
 							{if $captchaInfo.hasOwnInput}
@@ -95,7 +95,7 @@
 					</div>
 				</div>
 
-				{if $invalidFields}<script>
+				{if isset($invalidFields)}<script>
 				<!--
 					$(document).ready(function() {ldelim}
 					{foreach from=$invalidFields item=field}

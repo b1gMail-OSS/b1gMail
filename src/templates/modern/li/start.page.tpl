@@ -36,6 +36,6 @@
 	dc.order = '{$widgetOrder}';
 	dc.onOrderChanged = startBoardOrderChanged;
 	dc.run();
-	{if $autoSetPreviewPos}autoSetPreviewPos();{/if}
+	{if isset($autoSetPreviewPos)}autoSetPreviewPos();{/if}
 //-->
 </script>

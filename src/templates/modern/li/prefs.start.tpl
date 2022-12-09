@@ -13,7 +13,7 @@
 	<tr>
 		<td width="55" height="62" valign="top">
 			<a href="prefs.php?action={$item}&sid={$sid}">
-				{if $prefsIcons[$item]}
+				{if isset($prefsIcons[$item])}
 					<img src="{$prefsIcons[$item]}" width="48" height="48" style="margin-right: 3px;" border="0" alt="" align="absmiddle" />
 				{else}
 					<i class="fa {if $item=='autoresponder'}fa-reply{elseif $item=='aliases'}fa-user{elseif $item=='common'}fa-cogs{elseif $item=='antispam'}fa-ban{elseif $item=='antivirus'}fa-bug{elseif $item=='antivirus'}fa-bug{elseif $item=='orders'}fa-shopping-cart{elseif $item=='faq'}fa-question-circle-o{elseif $item=='filters'}fa-filter{elseif $item=='coupons'}fa-id-badge{elseif $item=='membership'}fa-id-card-o{elseif $item=='extpop3'}fa-compress{elseif $item=='keyring'}fa-key{elseif $item=='signatures'}fa-quote-right{elseif $item=='software'}fa-download{elseif $item=='contact'}fa-user-o{else}{$item}{/if} fa-4x" aria-hidden="true"></i>
@@ -46,7 +46,7 @@
 				</tr>
 				<tr>
 					<td class="listTableIconSide">
-						{if $prefsIcons[$item]}
+						{if isset($prefsIcons[$item])}
 							<img src="{$prefsIcons[$item]}" width="48" height="48" style="margin-right: 3px;" border="0" alt="" align="absmiddle" />
 						{else}
 							<i class="fa {if $item=='autoresponder'}fa-reply{elseif $item=='aliases'}fa-user{elseif $item=='common'}fa-cogs{elseif $item=='antispam'}fa-ban{elseif $item=='antivirus'}fa-bug{elseif $item=='antivirus'}fa-bug{elseif $item=='orders'}fa-shopping-cart{elseif $item=='faq'}fa-question-circle-o{elseif $item=='filters'}fa-filter{elseif $item=='coupons'}fa-id-badge{elseif $item=='membership'}fa-id-card-o{elseif $item=='extpop3'}fa-compress{elseif $item=='keyring'}fa-key{elseif $item=='signatures'}fa-quote-right{elseif $item=='software'}fa-download{elseif $item=='contact'}fa-user-o{else}{$item}{/if} fa-4x" aria-hidden="true"></i>

@@ -7,7 +7,7 @@
 		<td>{progressBar value=$spaceUsed max=$spaceLimit width=100}</td>
 		<td><small>&nbsp; {size bytes=$spaceUsed} / {size bytes=$spaceLimit} {lng p="used"}</small></td>
 		
-		{if $enablePreview}
+		{if isset($enablePreview)}
 		<td width="15">&nbsp;</td>
 		<td><img align="absmiddle" src="{$tpldir}images/li/tb_sep.gif" border="0" alt="" /></td>
 		<td><small>&nbsp; {lng p="preview"}: &nbsp;</small></td>

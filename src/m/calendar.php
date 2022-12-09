@@ -35,6 +35,7 @@ $calendar = _new('BMCalendar', array($userRow['id']));
  * assign
  */
 $tpl->assign('activeTab', 	'calendar');
+$tpl->assign('isDialog',  false);
 
 /**
  * default action

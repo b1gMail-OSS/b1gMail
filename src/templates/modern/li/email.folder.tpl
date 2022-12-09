@@ -1,4 +1,4 @@
-{if $enablePreview}
+{if isset($enablePreview)}
 	{if $narrow}
 		<div id="hSep1">
 			<div id="folderMailArea">

@@ -33,6 +33,7 @@ $todo = _new('BMTodo', array($userRow['id']));
  * assign
  */
 $tpl->assign('activeTab', 	'tasks');
+$tpl->assign('isDialog',  false);
 
 /**
  * default action = inbox

@@ -75,7 +75,7 @@
 							<li><a href="prefs.countries.php?sid={$sid}"><img src="./templates/images/country.png" />{lng p="countries"}</a></li>
 							<li><a href="prefs.widgetlayouts.php?sid={$sid}"><img src="./templates/images/wlayout_add.png" />{lng p="widgetlayouts"}</a></li>
 							<li><a href="prefs.payments.php?sid={$sid}"><img src="./templates/images/ico_prefs_payments.png" />{lng p="payments"}</a></li>
-							{if $toolbox_serverurl!=''}<li><a href="toolbox.php?sid={$sid}"><img src="./templates/images/toolbox.png" />{lng p="toolbox"}</a></li>{/if}
+							{if !empty($toolbox_serverurl)}<li><a href="toolbox.php?sid={$sid}"><img src="./templates/images/toolbox.png" />{lng p="toolbox"}</a></li>{/if}
 						</ul>
 					</li>
 					{/if}

@@ -1,7 +1,7 @@
 <div id="contentHeader">
 	<div class="left">
 		<i class="fa fa-tasks" aria-hidden="true"></i>
-		{if $task}{lng p="edittask"}{else}{lng p="addtask"}{/if}
+		{if isset($task)}{lng p="edittask"}{else}{lng p="addtask"}{/if}
 	</div>
 </div>
 
@@ -51,10 +51,10 @@
 			<td class="listTableLeft"><label for="akt_status">{lng p="status"}:</label></td>
 			<td class="listTableRight">
 				<select name="akt_status" id="akt_status">
-					<option value="16"{if $task && $task.akt_status==16} selected="selected"{/if}>{lng p="taskst_16"}</option>
-					<option value="32"{if $task && $task.akt_status==32} selected="selected"{/if}>{lng p="taskst_32"}</option>
-					<option value="64"{if $task && $task.akt_status==64} selected="selected"{/if}>{lng p="taskst_64"}</option>
-					<option value="128"{if $task && $task.akt_status==128} selected="selected"{/if}>{lng p="taskst_128"}</option>
+					<option value="16"{if isset($task) && $task.akt_status==16} selected="selected"{/if}>{lng p="taskst_16"}</option>
+					<option value="32"{if isset($task) && $task.akt_status==32} selected="selected"{/if}>{lng p="taskst_32"}</option>
+					<option value="64"{if isset($task) && $task.akt_status==64} selected="selected"{/if}>{lng p="taskst_64"}</option>
+					<option value="128"{if isset($task) && $task.akt_status==128} selected="selected"{/if}>{lng p="taskst_128"}</option>
 				</select>
 			</td>
 		</tr>
@@ -71,7 +71,7 @@
 		<tr>
 			<td class="listTableLeft"><label for="comments">{lng p="comment"}:</label></td>
 			<td class="listTableRight">
-				<textarea class="textInput" name="comments" id="comments">{text value=$task.comments allowEmpty=true}</textarea>
+				<textarea class="textInput" name="comments" id="comments">{if isset($task.comments)}{text value=$task.comments allowEmpty=true}{/if}</textarea>
 			</td>
 		</tr>
 		<tr>

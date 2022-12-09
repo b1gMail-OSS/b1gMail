@@ -29,6 +29,11 @@ if(isset($_COOKIE['noMobileRedirect']))
 	setcookie('noMobileRedirect', false, time()-TIME_ONE_HOUR, '/');
 	unset($_COOKIE['noMobileRedirect']);
 }
+/**
+ * assign
+ */
+$tpl->assign('activeTab', 	false);
+$tpl->assign('isDialog',  false);
 
 /**
  * default action = login

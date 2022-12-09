@@ -2,7 +2,7 @@
 <html lang="{lng p="langCode"}">
 
 <head>
-    <title>{if $pageTitle}{text value=$pageTitle} - {/if}{$service_title}</title>
+    <title>{if isset($pageTitle)}{text value=$pageTitle} - {/if}{$service_title}</title>
 
 	<!-- meta -->
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
@@ -73,10 +73,10 @@
 			</div>
 
 			<div class="toolbar">
-				{if $pageToolbarFile}
+				{if isset($pageToolbarFile)}
 				{comment text="including $pageToolbarFile"}
 				{include file="$pageToolbarFile"}
-				{elseif $pageToolbar}
+				{elseif isset($pageToolbar)}
 				{$pageToolbar}
 				{else}
 				&nbsp;
