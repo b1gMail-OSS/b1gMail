@@ -1,7 +1,7 @@
 <form action="{$pageURL}&sid={$sid}&action=common&save=true" method="post" onsubmit="spin(this)">
 	<fieldset>
 		<legend>{lng p="bms_userarea"}</legend>
-	
+
 		<table width="100%">
 			<tr>
 				<td align="left" rowspan="4" valign="top" width="40"><img src="{$tpldir}images/ico_users.png" border="0" alt="" width="32" height="32" /></td>
@@ -39,7 +39,7 @@
 
 	<fieldset>
 		<legend>{lng p="bms_logging"}</legend>
-	
+
 		<table width="100%">
 			<tr>
 				<td align="left" rowspan="5" valign="top" width="40"><img src="../plugins/templates/images/bms_logging.png" border="0" alt="" width="32" height="32" /></td>
@@ -71,10 +71,10 @@
 			</tr>
 		</table>
 	</fieldset>
-	
+
 	<fieldset>
 		<legend>{lng p="bms_failban"}</legend>
-	
+
 		<table width="100%">
 			<tr>
 				<td align="left" rowspan="5" valign="top" width="40"><img src="../plugins/templates/images/bms_untrusted.png" border="0" alt="" width="32" height="32" /></td>
@@ -113,7 +113,7 @@
 
 	<fieldset>
 		<legend>{lng p="bms_tls_ssl"}</legend>
-	
+
 		<table width="100%">
 			<tr>
 				<td align="left" valign="top" width="40" rowspan="4"><img src="{$tpldir}images/ico_prefs_ssl.png" border="0" alt="" width="32" height="32" /></td>
@@ -153,46 +153,6 @@
 		</table>
 	</fieldset>
 
-	<fieldset>
-		<legend>{lng p="license"}</legend>
-	
-		<table width="100%">
-			<tr>
-				<td align="left" rowspan="5" valign="top" width="40"><img src="{$tpldir}images/ico_license.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="200">{lng p="status"}:</td>
-				<td class="td2">
-					{if $bms_prefs.licstate==2}
-					<font color="red">{lng p="bms_expired"}</font>
-					{elseif $bms_prefs.licstate==0}
-					<font color="red">{lng p="bms_invalid"}</font>
-					{elseif $bms_prefs.licstate==1}
-					<font color="darkgreen">{lng p="bms_valid"}
-						{if $bms_prefs.lic_valid_until<=0}
-						({lng p="unlimited"})
-						{else}
-						({lng p="bms_until"} {date timestamp=$bms_prefs.lic_valid_until dayonly=true})
-						{/if}
-					</font>
-					{else}
-					{lng p="bms_validating"}
-					{/if}
-				</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="features"}:</td>
-				<td class="td2">{text value=$features}</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="version"}:</td>
-				<td class="td2">{text value=$bms_prefs.core_version}</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="licensekey"}:</td>
-				<td class="td2"><input type="text" name="license" value="{text value=$bms_prefs.license allowEmpty=true}" size="32" style="width:95%;" /></td>
-			</tr>
-		</table>
-	</fieldset>
-	
 	<p>
 		<div style="float:right" class="buttons">
 			<input class="button" type="submit" value=" {lng p="save"} " />

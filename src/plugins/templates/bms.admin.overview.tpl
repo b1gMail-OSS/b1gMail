@@ -4,27 +4,10 @@
 	<table width="100%">
 		<tr>
 			<td rowspan="2" width="40" align="center" valign="top"><img src="../plugins/templates/images/bms_logo.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1" width="24%">{lng p="version"} ({lng p="bms_adminplugin"}):</td>
-			<td class="td2" width="26%">{$adminVersion}</td>
-
-			<td rowspan="2" width="40" align="center" valign="top"><img src="{$tpldir}images/ico_license.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1" width="24%">{lng p="bms_licstatus"}:</td>
-			<td class="td2" width="26%">
-					<a href="{$pageURL}&action=common&sid={$sid}">{if $bms_prefs.licstate==2}
-					<font color="red">{lng p="bms_expired"}</font>
-					{elseif $bms_prefs.licstate==0}
-					<font color="red">{lng p="bms_invalid"}</font>
-					{elseif $bms_prefs.licstate==1}
-					<font color="darkgreen">{lng p="bms_valid"}</font>
-					{else}
-					{lng p="bms_validating"}
-					{/if}</a>
-			</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="version"} ({lng p="bms_core"}):</td>
+			<td class="td1" width="20%">{lng p="version"} ({lng p="bms_adminplugin"}):</td>
+			<td class="td2">{$adminVersion}</td>
+			<td class="td1" width="20%">{lng p="version"} ({lng p="bms_core"}):</td>
 			<td class="td2">{if $coreVersion}{$coreVersion}{else}<i>({lng p="unknown"})</i>{/if}</td>
-			<td colspan="2">&nbsp;</td>
 		</tr>
 	</table>
 </fieldset>
