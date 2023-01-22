@@ -133,7 +133,7 @@ class BMCalendar
      *
      * @return array
      */
-    public function _dateFor($row, $time, $start, $end)
+    public static function _dateFor($row, $time, $start, $end)
     {
         $row['enddate'] = min($end, ($row['enddate'] - $row['startdate']) + $time);
         $row['startdate'] = max($start, $time);
