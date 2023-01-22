@@ -491,7 +491,7 @@ class BMCalendar
                             $end,
                             $start);
         while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
-            $dates = BMCalendar::_getOccurencesInTimeframe($row, $start, $end);
+            $dates = self::_getOccurencesInTimeframe($row, $start, $end);
             if (count($dates) > 0) {
                 $remindDates = array_merge($remindDates, $dates);
             }
