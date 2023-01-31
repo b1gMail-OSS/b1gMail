@@ -27,7 +27,7 @@
 	<input type="hidden" name="reference" id="reference" value="{$reference}" />
 	<input type="hidden" name="baseDraftID" id="baseDraftID" value="{if array_key_exists('isAutoSavedDraft', $mail)}{$mail.baseDraftID}{/if}" />
 	
-	{if $latestDraft}
+	{if isset($latestDraft)}
 	<div class="draftNote" id="draftNote">
 		<div>
 			{lng p="drafttext"}
@@ -56,7 +56,7 @@
 			</tr>
 			<tr>
 				<th>* <label for="to">{lng p="to"}:</label></th>
-				<td><input type="text" name="to" id="to" value="{text allowEmpty=true value=$mail.to}" style="width:100%;" /></td>
+				<td><input type="text" name="to" id="to" value="{if isset($mail.to)}{text allowEmpty=true value=$mail.to}{/if}" style="width:100%;" /></td>
 				<td>
 					<span id="addrDiv_to">
 						<button onclick="javascript:openAddressbook('{$sid}','email')" type="button">
@@ -68,28 +68,28 @@
 			</tr>
 			<tr>
 				<th>
-					<a href="javascript:advancedOptions('fields', 'right', 'bottom', '{$tpldir}');composeSizer(true);">{if !$mail.replyto && !$mail.bcc}<i class="fa fa-caret-right" id="advanced_fields_arrow" aria-hidden="true"></i>{else}<i class="fa fa-caret-down" id="advanced_fields_arrow" aria-hidden="true"></i>{/if}</a> &nbsp;
+					<a href="javascript:advancedOptions('fields', 'right', 'bottom', '{$tpldir}');composeSizer(true);">{if empty($mail.replyto) && empty($mail.bcc)}<i class="fa fa-caret-right" id="advanced_fields_arrow" aria-hidden="true"></i>{else}<i class="fa fa-caret-down" id="advanced_fields_arrow" aria-hidden="true"></i>{/if}</a> &nbsp;
 					<label for="cc">{lng p="cc"}:</label></th>
-				<td><input type="text" name="cc" id="cc" value="{text allowEmpty=true value=$mail.cc}" style="width:100%;" /></td>
+				<td><input type="text" name="cc" id="cc" value="{if isset($mail.cc)}{text allowEmpty=true value=$mail.cc}{/if}" style="width:100%;" /></td>
 				<td>&nbsp;</td>
 			</tr>
 			
-			<tbody id="advanced_fields_body" style="display:{if !$mail.replyto && !$mail.bcc}none{/if};">
+			<tbody id="advanced_fields_body" style="display:{if empty($mail.replyto) && empty($mail.bcc)}none{/if};">
 			<tr>
 				<th><label for="bcc">{lng p="bcc"}:</label></th>
-				<td><input type="text" name="bcc" id="bcc" value="{text allowEmpty=true value=$mail.bcc}" style="width:100%;" /></td>
+				<td><input type="text" name="bcc" id="bcc" value="{if isset($mail.bcc)}{text allowEmpty=true value=$mail.bcc}{/if}" style="width:100%;" /></td>
 				<td>&nbsp;</td>
 			</tr>
 			<tr>
 				<th><label for="replyto">{lng p="replyto"}:</label></th>
-				<td><input type="text" name="replyto" id="replyto" value="{text allowEmpty=true value=$mail.replyto}" style="width:100%;" /></td>
+				<td><input type="text" name="replyto" id="replyto" value="{if isset($mail.replyto)}{text allowEmpty=true value=$mail.replyto}{/if}" style="width:100%;" /></td>
 				<td>&nbsp;</td>
 			</tr>
 			</tbody>
 			
 			<tr>
 				<th>* <label for="subject">{lng p="subject"}:</label></th>
-				<td><input type="text" name="subject" id="subject" value="{text allowEmpty=true value=$mail.subject}" onchange="beginDraftAutoSave()" style="width:100%;" /></td>
+				<td><input type="text" name="subject" id="subject" value="{if isset($mail.subject)}{text allowEmpty=true value=$mail.subject}{/if}" onchange="beginDraftAutoSave()" style="width:100%;" /></td>
 				<td>&nbsp;</td>
 			</tr>
 			
@@ -201,7 +201,7 @@
 			<i class="fa fa-save"></i>
 			{lng p="savedraft"}
 		</button>
-		<button class="primary" type="button" id="sendButton" onclick="if(!checkComposeForm(document.forms.f1, {if $attCheck}true{else}false{/if}, '{lng p="att_keywords"}')) return(false); EBID('do').value='sendMail';editor.submit();checkSMIME('{if $captchaInfo&&!$captchaInfo.hasOwnAJAXCheck}checkSafeCode(\'{$captchaInfo.failAction}\',\'submitComposeForm();\');{else}submitComposeForm();{/if}');">
+		<button class="primary" type="button" id="sendButton" onclick="if(!checkComposeForm(document.forms.f1, {if $attCheck}true{else}false{/if}, '{lng p="att_keywords"}')) return(false); EBID('do').value='sendMail';editor.submit();checkSMIME('{if isset($captchaInfo)&&!$captchaInfo.hasOwnAJAXCheck}checkSafeCode(\'{$captchaInfo.failAction}\',\'submitComposeForm();\');{else}submitComposeForm();{/if}');">
 			<i class="fa fa-send"></i>
 			{lng p="sendmail2"}
 		</button>
