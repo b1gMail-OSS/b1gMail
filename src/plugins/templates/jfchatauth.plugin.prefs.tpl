@@ -10,23 +10,23 @@
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="host"}:</td>
-			<td class="td2"><input type="text" name="mysqlHost" value="{text value=$jfchat_prefs.mysqlHost}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlHost" value="{if isset($jfchat_prefs.mysqlHost)}{text value=$jfchat_prefs.mysqlHost}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="user"}:</td>
-			<td class="td2"><input type="text" name="mysqlUser" value="{text value=$jfchat_prefs.mysqlUser}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlUser" value="{if isset($jfchat_prefs.mysqlUser)}{text value=$jfchat_prefs.mysqlUser}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="password"}:</td>
-			<td class="td2"><input type="password" name="mysqlPass" value="{text value=$jfchat_prefs.mysqlPass}" size="36" /></td>
+			<td class="td2"><input type="password" name="mysqlPass" value="{if isset($jfchat_prefs.mysqlPass)}{text value=$jfchat_prefs.mysqlPass}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="db"}:</td>
-			<td class="td2"><input type="text" name="mysqlDB" value="{text value=$jfchat_prefs.mysqlDB}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlDB" value="{if isset($jfchat_prefs.mysqlDB)}{text value=$jfchat_prefs.mysqlDB}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL Prefix:</td>
-			<td class="td2"><input type="text" name="mysqlPrefix" value="{text value=$jfchat_prefs.mysqlPrefix allowEmpty=true}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlPrefix" value="{if isset($jfchat_prefs.mysqlPrefix)}{text value=$jfchat_prefs.mysqlPrefix allowEmpty=true}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="user"}-{lng p="domain"}:</td>

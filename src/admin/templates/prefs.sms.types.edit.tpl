@@ -6,7 +6,7 @@
 			<tr>
 				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/type32.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="title"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="titel" value="{text value=$type.titel}" /></td>
+				<td class="td2"><input type="text" style="width:85%;" name="titel" value="{if isset($type.titel)}{text value=$type.titel}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="gateway"}:</td>
@@ -19,7 +19,7 @@
 			</tr>
 			<tr>
 				<td class="td1">{lng p="type"}:</td>
-				<td class="td2"><input type="text" size="6" name="typ" value="{text value=$type.typ allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" size="6" name="typ" value="{if isset($type.typ)}{text value=$type.typ allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="price"}:</td>

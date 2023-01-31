@@ -14,7 +14,7 @@
 		<tr>
 			<td class="listTableLeft">* <label for="titel">{lng p="title"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="titel" id="titel" value="{text value=$folder.titel allowEmpty=true}" style="width:100%;" />
+				<input type="text" name="titel" id="titel" value="{if isset($folder.titel)}{text value=$folder.titel allowEmpty=true}{/if}" style="width:100%;" />
 			</td>
 		</tr>
 		<tr>

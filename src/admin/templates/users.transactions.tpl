@@ -4,7 +4,7 @@
 <input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
 <input type="hidden" name="singleAction" id="singleAction" value="" />
 <input type="hidden" name="singleID" id="singleID" value="" />
-{if $queryString}<input type="hidden" name="query" id="query" value="{text value=$queryString}" />{/if}
+{if !empty($queryString)}<input type="hidden" name="query" id="query" value="{text value=$queryString}" />{/if}
 
 <fieldset>
 	<legend>{lng p="transactions"} ({email value=$user.email}, #{$user.id})</legend>

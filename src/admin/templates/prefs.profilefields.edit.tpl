@@ -6,11 +6,11 @@
 			<tr>
 				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/field32.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="field"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="feld" value="{text value=$field.feld allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" style="width:85%;" name="feld" value="{if isset($field.feld)}{text value=$field.feld allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="validityrule"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="rule" value="{text value=$field.rule allowEmpty=true}" />
+				<td class="td2"><input type="text" style="width:85%;" name="rule" value="{if isset($field.rule)}{text value=$field.rule allowEmpty=true}{/if}" />
 					<br /><small>{lng p="pfrulenote"}</small></td>
 			</tr>
 			<tr>
@@ -36,7 +36,7 @@
 			</tr>
 			<tr>
 				<td class="td1">{lng p="options"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="extra" value="{text value=$field.extra allowEmpty=true}" />
+				<td class="td2"><input type="text" style="width:85%;" name="extra" value="{if isset($field.extra)}{text value=$field.extra allowEmpty=true}{/if}" />
 					<br /><small>{lng p="optionsdesc"}</small></td>
 			</tr>
 		</table>

@@ -6,11 +6,11 @@
 			<tr>
 				<td width="40" valign="top" rowspan="5"><img src="{$tpldir}images/rule32.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="field"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="field" value="{text value=$rule.field}" /></td>
+				<td class="td2"><input type="text" style="width:85%;" name="field" value="{if isset($rule.field)}{text value=$rule.field}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="expression"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="expression" value="{text value=$rule.expression allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" style="width:85%;" name="expression" value="{if isset($rule.expression)}{text value=$rule.expression allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="action"}:</td>

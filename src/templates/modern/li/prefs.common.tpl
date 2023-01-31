@@ -43,7 +43,7 @@
 		<tr>
 			<td class="listTableLeft"><label for="datumsformat">{lng p="dateformat"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="datumsformat" id="datumsformat" value="{text value=$datumsformat}" style="width:250px;" />
+				<input type="text" name="datumsformat" id="datumsformat" value="{if isset($datumsformat)}{text value=$datumsformat}{/if}" style="width:250px;" />
 			</td>
 		</tr>
 		<tr>
@@ -145,7 +145,7 @@
 		<tr>
 			<td class="listTableLeft"><label for="absendername">{lng p="sendername"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="absendername" id="absendername" value="{text value=$absendername allowEmpty=true}" style="width:350px;" />
+				<input type="text" name="absendername" id="absendername" value="{if isset($absendername)}{text value=$absendername allowEmpty=true}{/if}" style="width:350px;" />
 			</td>
 		</tr>
 		<tr>

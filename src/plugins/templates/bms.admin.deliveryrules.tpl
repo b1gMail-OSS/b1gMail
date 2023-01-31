@@ -26,14 +26,14 @@
 						<option value="2"{if $rule.rule_subject==2} selected="selected"{/if}>{lng p="bms_recipient"}</option>
 						<option value="0"{if $rule.rule_subject==0} selected="selected"{/if}>{lng p="bms_recpdomain"}</option>
 					</select></td>
-				<td><input type="text" name="rules[{$ruleID}][rule]" value="{text value=$rule.rule allowEmpty=true}" size="16" /></td>
+				<td><input type="text" name="rules[{$ruleID}][rule]" value="{if isset($rule.rule)}{text value=$rule.rule allowEmpty=true}{/if}" size="16" /></td>
 				<td><select name="rules[{$ruleID}][target]">
 						<option value="0"{if $rule.target==0} selected="selected"{/if}>{lng p="bms_target_0"}</option>
 						<option value="1"{if $rule.target==1} selected="selected"{/if}>{lng p="bms_redirecttosendmail"}</option>
 						<option value="2"{if $rule.target==2} selected="selected"{/if}>{lng p="bms_redirecttosmtprelay"}</option>
 						<option value="3"{if $rule.target==3} selected="selected"{/if}>{lng p="bms_target_3"}</option>
 					</select></td>
-				<td><input type="text" name="rules[{$ruleID}][target_param]" value="{text value=$rule.target_param allowEmpty=true}" size="16" /></td>
+				<td><input type="text" name="rules[{$ruleID}][target_param]" value="{if isset($rule.target_param)}{text value=$rule.target_param allowEmpty=true}{/if}" size="16" /></td>
 				<td>
 					<input type="checkbox" name="rules[{$ruleID}][flags][]" value="1" id="rule{$ruleID}_flag1"{if $rule.flags&1} checked="checked"{/if} />
 						<label for="rule{$ruleID}_flag1">{lng p="bms_flag_ci"}</label><br />

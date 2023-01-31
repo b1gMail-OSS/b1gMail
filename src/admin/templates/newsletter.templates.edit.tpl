@@ -6,7 +6,7 @@
 		<tr>
 			<td width="40" valign="top" rowspan="7"><img src="{$tpldir}images/newsletter.png" border="0" alt="" width="32" height="32" /></td>
 			<td class="td1" width="120">{lng p="title"}:</td>
-			<td class="td2"><input type="text" id="subject" name="title" value="{text value=$tpl.title allowEmpty=true}" size="42" /></td>
+			<td class="td2"><input type="text" id="subject" name="title" value="{if isset($tpl.title)}{text value=$tpl.title allowEmpty=true}{/if}" size="42" /></td>
 		</tr>
 		<tr>
 			<td class="td1" >{lng p="mode"}:</td>
@@ -20,11 +20,11 @@
 		</tr>
 		<tr>
 			<td class="td1">{lng p="from"}:</td>
-			<td class="td2"><input type="text" id="from" name="from" value="{text value=$tpl.from allowEmpty=true}" size="42" /></td>
+			<td class="td2"><input type="text" id="from" name="from" value="{if isset($tpl.from)}{text value=$tpl.from allowEmpty=true}{/if}" size="42" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="subject"}:</td>
-			<td class="td2"><input type="text" id="subject" name="subject" value="{text value=$tpl.subject allowEmpty=true}" size="42" /></td>
+			<td class="td2"><input type="text" id="subject" name="subject" value="{if isset($tpl.subject)}{text value=$tpl.subject allowEmpty=true}{/if}" size="42" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="priority"}:</td>

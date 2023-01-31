@@ -8,7 +8,7 @@
 	<form id="taskForm" action="tasks.php?do=save&id={$task.id}&list={$task.tasklistid}&sid={$sid}" method="post">
 		<div data-role="fieldcontain">
 			<label for="title">{lng p="title"}:</label>
-			<input type="text" name="titel" id="title" value="{text value=$task.titel allowEmpty=true}"  />
+			<input type="text" name="titel" id="title" value="{if isset($task.titel)}{text value=$task.titel allowEmpty=true}{/if}"  />
 		</div>
 
 		<div data-role="fieldcontain">

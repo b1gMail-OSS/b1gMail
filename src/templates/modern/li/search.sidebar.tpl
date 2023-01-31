@@ -9,7 +9,7 @@
 	<table>
 		<tr>
 			<td width="16"><i class="fa fa-search" aria-hidden="true"></i></td>
-			<td><input type="text" name="q" id="q" style="width: 150px;" value="{text value=$q allowEmpty=true}" /></td>
+			<td><input type="text" name="q" id="q" style="width: 150px;" value="{if isset($q)}{text value=$q allowEmpty=true}{/if}" /></td>
 		</tr>
 	</table>
 </center>

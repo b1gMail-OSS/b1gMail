@@ -35,7 +35,7 @@
 							<label class="control-label" for="vorname">
 								{lng p="firstname"}
 							</label>
-							<input type="text" class="form-control" id="vorname" name="vorname" value="{text value=$contact.vorname allowEmpty=true}" disabled="disabled" />
+							<input type="text" class="form-control" id="vorname" name="vorname" value="{if isset($contact.vorname)}{text value=$contact.vorname allowEmpty=true}{/if}" disabled="disabled" />
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -43,7 +43,7 @@
 							<label class="control-label" for="nachname">
 								{lng p="surname"}
 							</label>
-							<input type="text" class="form-control" id="nachname" name="nachname" value="{text value=$contact.nachname allowEmpty=true}" disabled="disabled" />
+							<input type="text" class="form-control" id="nachname" name="nachname" value="{if isset($contact.nachname)}{text value=$contact.nachname allowEmpty=true}{/if}" disabled="disabled" />
 						</div>
 					</div>
 				</div>
@@ -62,7 +62,7 @@
 							<label class="control-label" for="strassenr">
 								{lng p="streetnr"}
 							</label>
-							<input type="text" class="form-control" id="strassenr" name="strassenr" value="{text value=$contact.strassenr allowEmpty=true}" />
+							<input type="text" class="form-control" id="strassenr" name="strassenr" value="{if isset($contact.strassenr)}{text value=$contact.strassenr allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -72,7 +72,7 @@
 							<label class="control-label" for="plz">
 								{lng p="zip"}
 							</label>
-							<input type="text" class="form-control" id="plz" name="plz" value="{text value=$contact.plz allowEmpty=true}" />
+							<input type="text" class="form-control" id="plz" name="plz" value="{if isset($contact.plz)}{text value=$contact.plz allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-8">
@@ -80,7 +80,7 @@
 							<label class="control-label" for="ort">
 								{lng p="city"}
 							</label>
-							<input type="text" class="form-control" id="ort" name="ort" value="{text value=$contact.ort allowEmpty=true}" />
+							<input type="text" class="form-control" id="ort" name="ort" value="{if isset($contact.ort)}{text value=$contact.ort allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -90,7 +90,7 @@
 							<label class="control-label" for="land">
 								{lng p="country"}
 							</label>
-							<input type="text" class="form-control" id="land" name="land" value="{text value=$contact.land allowEmpty=true}" />
+							<input type="text" class="form-control" id="land" name="land" value="{if isset($contact.land)}{text value=$contact.land allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -100,7 +100,7 @@
 							<label class="control-label" for="email">
 								{lng p="email"}
 							</label>
-							<input type="text" class="form-control" id="email" name="email" value="{text value=$contact.email allowEmpty=true}" />
+							<input type="text" class="form-control" id="email" name="email" value="{if isset($contact.email)}{text value=$contact.email allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -110,7 +110,7 @@
 							<label class="control-label" for="tel">
 								{lng p="phone"}
 							</label>
-							<input type="text" class="form-control" id="tel" name="tel" value="{text value=$contact.tel allowEmpty=true}" />
+							<input type="text" class="form-control" id="tel" name="tel" value="{if isset($contact.tel)}{text value=$contact.tel allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -118,7 +118,7 @@
 							<label class="control-label" for="fax">
 								{lng p="fax"}
 							</label>
-							<input type="text" class="form-control" id="fax" name="fax" value="{text value=$contact.fax allowEmpty=true}" />
+							<input type="text" class="form-control" id="fax" name="fax" value="{if isset($contact.fax)}{text value=$contact.fax allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -128,7 +128,7 @@
 							<label class="control-label" for="handy">
 								{lng p="mobile"}
 							</label>
-							<input type="text" class="form-control" id="handy" name="handy" value="{text value=$contact.handy allowEmpty=true}" />
+							<input type="text" class="form-control" id="handy" name="handy" value="{if isset($contact.handy)}{text value=$contact.handy allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -150,7 +150,7 @@
 							<label class="control-label" for="work_strassenr">
 								{lng p="streetnr"}
 							</label>
-							<input type="text" class="form-control" id="work_strassenr" name="work_strassenr" value="{text value=$contact.work_strassenr allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_strassenr" name="work_strassenr" value="{if isset($contact.work_strassenr)}{text value=$contact.work_strassenr allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -160,7 +160,7 @@
 							<label class="control-label" for="work_plz">
 								{lng p="zip"}
 							</label>
-							<input type="text" class="form-control" id="work_plz" name="work_plz" value="{text value=$contact.work_plz allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_plz" name="work_plz" value="{if isset($contact.work_plz)}{text value=$contact.work_plz allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-8">
@@ -168,7 +168,7 @@
 							<label class="control-label" for="work_ort">
 								{lng p="city"}
 							</label>
-							<input type="text" class="form-control" id="work_ort" name="work_ort" value="{text value=$contact.work_ort allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_ort" name="work_ort" value="{if isset($contact.work_ort)}{text value=$contact.work_ort allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -178,7 +178,7 @@
 							<label class="control-label" for="work_land">
 								{lng p="country"}
 							</label>
-							<input type="text" class="form-control" id="work_land" name="work_land" value="{text value=$contact.work_land allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_land" name="work_land" value="{if isset($contact.work_land)}{text value=$contact.work_land allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -188,7 +188,7 @@
 							<label class="control-label" for="work_email">
 								{lng p="email"}
 							</label>
-							<input type="text" class="form-control" id="work_email" name="work_email" value="{text value=$contact.work_email allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_email" name="work_email" value="{if isset($contact.work_email)}{text value=$contact.work_email allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -198,7 +198,7 @@
 							<label class="control-label" for="work_tel">
 								{lng p="phone"}
 							</label>
-							<input type="text" class="form-control" id="work_tel" name="work_tel" value="{text value=$contact.work_tel allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_tel" name="work_tel" value="{if isset($contact.work_tel)}{text value=$contact.work_tel allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -206,7 +206,7 @@
 							<label class="control-label" for="work_fax">
 								{lng p="fax"}
 							</label>
-							<input type="text" class="form-control" id="work_fax" name="work_fax" value="{text value=$contact.work_fax allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_fax" name="work_fax" value="{if isset($contact.work_fax)}{text value=$contact.work_fax allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -216,7 +216,7 @@
 							<label class="control-label" for="work_handy">
 								{lng p="mobile"}
 							</label>
-							<input type="text" class="form-control" id="work_handy" name="work_handy" value="{text value=$contact.work_handy allowEmpty=true}" />
+							<input type="text" class="form-control" id="work_handy" name="work_handy" value="{if isset($contact.work_handy)}{text value=$contact.work_handy allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -238,7 +238,7 @@
 							<label class="control-label" for="firma">
 								{lng p="company"}
 							</label>
-							<input type="text" class="form-control" id="firma" name="firma" value="{text value=$contact.firma allowEmpty=true}" />
+							<input type="text" class="form-control" id="firma" name="firma" value="{if isset($contact.firma)}{text value=$contact.firma allowEmpty=true}{/if}" />
 						</div>
 					</div>
 					<div class="col-md-6">
@@ -246,7 +246,7 @@
 							<label class="control-label" for="position">
 								{lng p="position"}
 							</label>
-							<input type="text" class="form-control" id="position" name="position" value="{text value=$contact.position allowEmpty=true}" />
+							<input type="text" class="form-control" id="position" name="position" value="{if isset($contact.position)}{text value=$contact.position allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>
@@ -256,7 +256,7 @@
 							<label class="control-label" for="web">
 								{lng p="web"}
 							</label>
-							<input type="text" class="form-control" id="web" name="web" value="{text value=$contact.web allowEmpty=true}" />
+							<input type="text" class="form-control" id="web" name="web" value="{if isset($contact.web)}{text value=$contact.web allowEmpty=true}{/if}" />
 						</div>
 					</div>
 				</div>

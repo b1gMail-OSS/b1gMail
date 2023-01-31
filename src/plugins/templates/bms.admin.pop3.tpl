@@ -6,7 +6,7 @@
 			<tr>
 				<td align="left" rowspan="4" valign="top" width="40"><img src="../plugins/templates/images/bms_common.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="200">{lng p="bms_greeting"}:</td>
-				<td class="td2"><input type="text" name="pop3greeting" value="{text value=$bms_prefs.pop3greeting allowEmpty=true}" size="32" style="width:95%;" /></td>
+				<td class="td2"><input type="text" name="pop3greeting" value="{if isset($bms_prefs.pop3greeting)}{text value=$bms_prefs.pop3greeting allowEmpty=true}{/if}" size="32" style="width:95%;" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_timeout"}:</td>

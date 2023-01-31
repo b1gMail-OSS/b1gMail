@@ -32,7 +32,7 @@
 			<tr>
 				<td class="td1">{lng p="bms_control_addr"}:</td>
 				<td class="td2">
-					<input type="text" name="control_addr" value="{text value=$bms_prefs.control_addr allowEmpty=true}" size="16" />
+					<input type="text" name="control_addr" value="{if isset($bms_prefs.control_addr)}{text value=$bms_prefs.control_addr allowEmpty=true}{/if}" size="16" />
 					<a href="#" onclick="alert('{lng p="bms_control_addr_help"}');"><img src="{$tpldir}images/info.png" border="0" alt="{lng p="help"}" /></a>
 				</td>
 			</tr>
@@ -61,7 +61,7 @@
 			<tr>
 				<td align="left" valign="top" width="40" rowspan="2"><img src="../plugins/templates/images/bms_inbound.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="200">{lng p="bms_php_path"}:</td>
-				<td class="td2"><input type="text" name="php_path" value="{text value=$bms_prefs.php_path allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="php_path" value="{if isset($bms_prefs.php_path)}{text value=$bms_prefs.php_path allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_reuseprocess"}?</td>
@@ -88,14 +88,14 @@
 			<tr>
 				<td>&nbsp;</td>
 				<td class="td1">{lng p="sendmailpath"}:</td>
-				<td class="td2"><input type="text" name="outbound_sendmail_path" value="{text value=$bms_prefs.outbound_sendmail_path allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="outbound_sendmail_path" value="{if isset($bms_prefs.outbound_sendmail_path)}{text value=$bms_prefs.outbound_sendmail_path allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 			</tbody>
 			<tbody id="outbound_smtp_prefs" style="display:{if $bms_prefs.outbound_target!=1}none{/if};">
 			<tr>
 				<td rowspan="5">&nbsp;</td>
 				<td class="td1">{lng p="smtphost"}:</td>
-				<td class="td2"><input type="text" name="outbound_smtp_relay_host" value="{text value=$bms_prefs.outbound_smtp_relay_host allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="outbound_smtp_relay_host" value="{if isset($bms_prefs.outbound_smtp_relay_host)}{text value=$bms_prefs.outbound_smtp_relay_host allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="smtpport"}:</td>
@@ -136,7 +136,7 @@
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_signature_sep"}:</td>
-				<td class="td2"><input type="text" name="outbound_signature_sep" value="{text value=$bms_prefs.outbound_signature_sep allowEmpty=true}" size="54" /></td>
+				<td class="td2"><input type="text" name="outbound_signature_sep" value="{if isset($bms_prefs.outbound_signature_sep)}{text value=$bms_prefs.outbound_signature_sep allowEmpty=true}{/if}" size="54" /></td>
 			</tr>
 		</table>
 		{/if}

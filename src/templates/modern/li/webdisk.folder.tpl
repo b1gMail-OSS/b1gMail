@@ -14,8 +14,8 @@
 	
 	{if $isShared}
 	<form action="email.compose.php?sid={$sid}" method="post" name="mailForm">
-		<input type="hidden" name="subject" value="{text value=$shareMailSubject allowEmpty=true}" />
-		<textarea name="text" style="display:none">{text value=$shareMail allowEmpty=true}</textarea>
+		<input type="hidden" name="subject" value="{if isset($shareMailSubject)}{text value=$shareMailSubject allowEmpty=true}{/if}" />
+		<textarea name="text" style="display:none">{if isset($shareMail)}{text value=$shareMail allowEmpty=true}{/if}</textarea>
 	</form>
 	{/if}
 	

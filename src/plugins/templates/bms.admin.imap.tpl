@@ -6,7 +6,7 @@
 			<tr>
 				<td align="left" rowspan="6" valign="top" width="40"><img src="../plugins/templates/images/bms_common.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="200">{lng p="bms_greeting"}:</td>
-				<td class="td2"><input type="text" name="imapgreeting" value="{text value=$bms_prefs.imapgreeting allowEmpty=true}" size="32" style="width:95%;" /></td>
+				<td class="td2"><input type="text" name="imapgreeting" value="{if isset($bms_prefs.imapgreeting)}{text value=$bms_prefs.imapgreeting allowEmpty=true}{/if}" size="32" style="width:95%;" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_timeout"}:</td>
@@ -56,19 +56,19 @@
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_folder_sent"}:</td>
-				<td class="td2"><input type="text" name="imap_folder_sent" value="{text value=$bms_prefs.imap_folder_sent allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="imap_folder_sent" value="{if isset($bms_prefs.imap_folder_sent)}{text value=$bms_prefs.imap_folder_sent allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_folder_spam"}:</td>
-				<td class="td2"><input type="text" name="imap_folder_spam" value="{text value=$bms_prefs.imap_folder_spam allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="imap_folder_spam" value="{if isset($bms_prefs.imap_folder_spam)}{text value=$bms_prefs.imap_folder_spam allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_folder_drafts"}:</td>
-				<td class="td2"><input type="text" name="imap_folder_drafts" value="{text value=$bms_prefs.imap_folder_drafts allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="imap_folder_drafts" value="{if isset($bms_prefs.imap_folder_drafts)}{text value=$bms_prefs.imap_folder_drafts allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="bms_folder_trash"}:</td>
-				<td class="td2"><input type="text" name="imap_folder_trash" value="{text value=$bms_prefs.imap_folder_trash allowEmpty=true}" size="32" /></td>
+				<td class="td2"><input type="text" name="imap_folder_trash" value="{if isset($bms_prefs.imap_folder_trash)}{text value=$bms_prefs.imap_folder_trash allowEmpty=true}{/if}" size="32" /></td>
 			</tr>
 		</table>
 	</fieldset>
@@ -110,9 +110,9 @@
 			<tr>
 				<td class="td1" width="200">{lng p="bms_serverport"}:</td>
 				<td class="td2">
-					<input type="text" name="apns_host" value="{text value=$bms_prefs.apns_host allowEmpty=true}" size="32" />
+					<input type="text" name="apns_host" value="{if isset($bms_prefs.apns_host)}{text value=$bms_prefs.apns_host allowEmpty=true}{/if}" size="32" />
 					:
-					<input type="text" name="apns_port" value="{text value=$bms_prefs.apns_port allowEmpty=true}" size="6" />
+					<input type="text" name="apns_port" value="{if isset($bms_prefs.apns_port)}{text value=$bms_prefs.apns_port allowEmpty=true}{/if}" size="6" />
 				</td>
 			</tr>
 			<tr>

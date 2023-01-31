@@ -21,7 +21,7 @@
 		<tr>
 			<td class="listTableLeft">* <label for="p_host">{lng p="pop3server"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="p_host" id="p_host" value="{text value=$account.p_host allowEmpty=true}" size="48" />
+				<input type="text" name="p_host" id="p_host" value="{if isset($account.p_host)}{text value=$account.p_host allowEmpty=true}{/if}" size="48" />
 			</td>
 		</tr>
 		<tr>
@@ -35,13 +35,13 @@
 		<tr>
 			<td class="listTableLeft">* <label for="p_user">{lng p="username"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="p_user" id="p_user" value="{text value=$account.p_user allowEmpty=true}" size="48" />
+				<input type="text" name="p_user" id="p_user" value="{if isset($account.p_user)}{text value=$account.p_user allowEmpty=true}{/if}" size="48" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">* <label for="p_pass">{lng p="password"}:</label></td>
 			<td class="listTableRight">
-				<input type="password" name="p_pass" id="p_pass" value="{text value=$account.p_pass allowEmpty=true}" size="24" />
+				<input type="password" name="p_pass" id="p_pass" value="{if isset($account.p_pass)}{text value=$account.p_pass allowEmpty=true}{/if}" size="24" />
 			</td>
 		</tr>
 		<tr>

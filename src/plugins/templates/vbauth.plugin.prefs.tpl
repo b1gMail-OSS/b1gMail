@@ -10,23 +10,23 @@
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="host"}:</td>
-			<td class="td2"><input type="text" name="mysqlHost" value="{text value=$vb_prefs.mysqlHost}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlHost" value="{if isset($vb_prefs.mysqlHost)}{text value=$vb_prefs.mysqlHost}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="user"}:</td>
-			<td class="td2"><input type="text" name="mysqlUser" value="{text value=$vb_prefs.mysqlUser}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlUser" value="{if isset($vb_prefs.mysqlUser)}{text value=$vb_prefs.mysqlUser}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="password"}:</td>
-			<td class="td2"><input type="password" name="mysqlPass" value="{text value=$vb_prefs.mysqlPass}" size="36" /></td>
+			<td class="td2"><input type="password" name="mysqlPass" value="{if isset($vb_prefs.mysqlPass)}{text value=$vb_prefs.mysqlPass}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="db"}:</td>
-			<td class="td2"><input type="text" name="mysqlDB" value="{text value=$vb_prefs.mysqlDB}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlDB" value="{if isset($vb_prefs.mysqlDB)}{text value=$vb_prefs.mysqlDB}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL Prefix:</td>
-			<td class="td2"><input type="text" name="mysqlPrefix" value="{text value=$vb_prefs.mysqlPrefix allowEmpty=true}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlPrefix" value="{if isset($vb_prefs.mysqlPrefix)}{text value=$vb_prefs.mysqlPrefix allowEmpty=true}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="user"}-{lng p="domain"}:</td>

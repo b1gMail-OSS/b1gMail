@@ -11,7 +11,7 @@
 			</tr>
 			<tr>
 				<td class="td1" width="160">{lng p="category"}:</td>
-				<td class="td2"><input type="text" name="category" size="36" value="{text value=$ad.category allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" name="category" size="36" value="{if isset($ad.category)}{text value=$ad.category allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1" width="160">{lng p="weight"}:</td>

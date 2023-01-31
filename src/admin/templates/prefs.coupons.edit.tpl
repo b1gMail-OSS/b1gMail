@@ -7,7 +7,7 @@
 				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/coupon32.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="code"}:</td>
 				<td class="td2">
-					<input type="text" name="code" value="{text value=$coupon.code}" style="width:85%;" />
+					<input type="text" name="code" value="{if isset($coupon.code)}{text value=$coupon.code}{/if}" style="width:85%;" />
 				</td>
 			</tr>
 			<tr>
@@ -16,7 +16,7 @@
 					<input type="checkbox" onchange="EBID('count').value=this.checked?'-1':'0';"{if $coupon.anzahl==-1} checked="checked"{/if} id="count_unlim" />
 					<label for="count_unlim"><b>{lng p="unlimited"}</b></label>
 					{lng p="or"}
-					<input type="text" size="6" name="anzahl" id="count" value="{text value=$coupon.anzahl}" onkeyup="EBID('count_unlim').checked=this.value=='-1';" />
+					<input type="text" size="6" name="anzahl" id="count" value="{if isset($coupon.anzahl)}{text value=$coupon.anzahl}{/if}" onkeyup="EBID('count_unlim').checked=this.value=='-1';" />
 				</td>
 			</tr>
 			<tr>

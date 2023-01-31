@@ -20,13 +20,13 @@
 		<tr>
 			<td class="listTableLeft">* <label for="title">{lng p="title"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="title" id="title" value="{text value=$eDate.title allowEmpty=true}" size="34" style="width:100%;" />
+				<input type="text" name="title" id="title" value="{if isset($eDate.title)}{text value=$eDate.title allowEmpty=true}{/if}" size="34" style="width:100%;" />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="location">{lng p="location"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="location" id="location" value="{text value=$eDate.location allowEmpty=true}" size="34" style="width:60%;" />
+				<input type="text" name="location" id="location" value="{if isset($eDate.location)}{text value=$eDate.location allowEmpty=true}{/if}" size="34" style="width:60%;" />
 			</td>
 		</tr>
 		<tr>
@@ -239,7 +239,7 @@
 		<tr>
 			<td class="listTableLeft">{lng p="attendees"}:</td>
 			<td class="listTableRight">
-				<input type="hidden" name="attendees" value="{text value=$attendees allowEmpty=true}" id="attendees" />
+				<input type="hidden" name="attendees" value="{if isset($attendees)}{text value=$attendees allowEmpty=true}{/if}" id="attendees" />
 				<div id="attendeeList"></div>
 				<div>
 					<a href="javascript:addAttendee('{$sid}')"><i class="fa fa-calendar-plus-o" aria-hidden="true"></i> {lng p="add"}</a>

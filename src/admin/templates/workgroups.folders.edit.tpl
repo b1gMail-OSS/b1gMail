@@ -6,7 +6,7 @@
 			<tr>
 				<td width="40" valign="top" rowspan="2"><img src="{$tpldir}images/workgroup_mail32.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="130">{lng p="title"}:</td>
-				<td class="td2"><input type="text" name="titel" value="{text value=$folder.titel}" style="width:85%;" /></td>
+				<td class="td2"><input type="text" name="titel" value="{if isset($folder.titel)}{text value=$folder.titel}{/if}" style="width:85%;" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="itemsperpage"}:</td>

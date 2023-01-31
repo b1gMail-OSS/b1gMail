@@ -96,7 +96,7 @@
 			<tr>
 				<th>{lng p="attachments"}:</th>
 				<td>
-					<input type="hidden" name="attachments" value="{text value=$mail.attachments allowEmpty=true}" id="attachments" />
+					<input type="hidden" name="attachments" value="{if isset($mail.attachments)}{text value=$mail.attachments allowEmpty=true}{/if}" id="attachments" />
 					<div id="attachmentList"></div>
 				</td>
 				<td valign="top">

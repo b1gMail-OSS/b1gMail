@@ -8,8 +8,8 @@
 <input type="hidden" name="queryAction" value="show" />
 {if $smarty.post.queryTypeLogin}<input type="hidden" name="queryTypeLogin" value="on" />{/if}
 {if $smarty.post.queryTypeGroups}<input type="hidden" name="queryTypeGroups" value="on" />{/if}
-{if $smarty.post.loginDays}<input type="hidden" name="loginDays" value="{text value=$smarty.post.loginDays allowEmpty=true}" />{/if}
-{foreach from=$smarty.post.groups item=item key=key}<input type="hidden" name="groups[{$key}]" value="{text value=$item allowEmpty=true}" />{/foreach}
+{if $smarty.post.loginDays}<input type="hidden" name="loginDays" value="{if isset($smarty.post.loginDays)}{text value=$smarty.post.loginDays allowEmpty=true}{/if}" />{/if}
+{foreach from=$smarty.post.groups item=item key=key}<input type="hidden" name="groups[{$key}]" value="{if isset($item)}{text value=$item allowEmpty=true}{/if}" />{/foreach}
 
 <fieldset>
 	<legend>{lng p="inactiveusers"}</legend>

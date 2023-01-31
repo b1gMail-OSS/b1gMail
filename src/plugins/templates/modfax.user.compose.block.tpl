@@ -78,7 +78,7 @@
 					</tr>
 					<tr>
 						<td><strong><label for="block_#_phone">{lng p="phone"}:</label></strong> &nbsp;</td>
-						<td><input type="text" style="width:350px;" name="block[#][cover][phone]" id="block_#_phone" value="{text value=$userRow.tel}" /></td>
+						<td><input type="text" style="width:350px;" name="block[#][cover][phone]" id="block_#_phone" value="{if isset($userRow.tel)}{text value=$userRow.tel}{/if}" /></td>
 					</tr>
 					<tr>
 						<td><strong><label>{lng p="modfax_remark"}:</label></strong> &nbsp;</td>

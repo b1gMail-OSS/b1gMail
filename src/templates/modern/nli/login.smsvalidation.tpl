@@ -1,7 +1,7 @@
 <form action="index.php?action=login" method="post">
 <input type="hidden" name="do" value="login" />
-<input type="hidden" name="email_full" value="{text value=$email}" />
-<input type="hidden" name="passwordMD5" value="{text value=$password}" />
+<input type="hidden" name="email_full" value="{if isset($email)}{text value=$email}{/if}" />
+<input type="hidden" name="passwordMD5" value="{if isset($password)}{text value=$password}{/if}" />
 {if $savelogin}<input type="hidden" name="savelogin" value="true" />{/if}
 
 	<div class="container">

@@ -8,7 +8,7 @@
 				<table width="100%">
 					<tr>
 						<td class="td1" width="160">{lng p="title"}:</td>
-						<td class="td2"><input type="text" name="titel" value="{text value=$group.titel allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="titel" value="{if isset($group.titel)}{text value=$group.titel allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="htmlview"}?</td>
@@ -235,11 +235,11 @@
 					</tr>
 					<tr>
 						<td class="td1" width="160">{lng p="smsfrom"}:</td>
-						<td class="td2"><input type="text" name="sms_from" value="{text value=$group.sms_from allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="sms_from" value="{if isset($group.sms_from)}{text value=$group.sms_from allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="smssig"}:</td>
-						<td class="td2"><input type="text" name="sms_sig" value="{text value=$group.sms_sig allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="sms_sig" value="{if isset($group.sms_sig)}{text value=$group.sms_sig allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="mailsig"}:</td>
@@ -266,7 +266,7 @@
 							{elseif $fieldInfo.type==2}
 								<input type="checkbox" name="{$fieldKey}" value="1"{if $fieldInfo.value} checked="checked"{/if} />
 							{elseif $fieldInfo.type==1}
-								<input type="text" style="width:85%;" name="{$fieldKey}" value="{text value=$fieldInfo.value allowEmpty=true}" />
+								<input type="text" style="width:85%;" name="{$fieldKey}" value="{if isset($fieldInfo.value)}{text value=$fieldInfo.value allowEmpty=true}{/if}" />
 							{/if}
 					</tr>
 					{/foreach}

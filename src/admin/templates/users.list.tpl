@@ -4,7 +4,7 @@
 <input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
 <input type="hidden" name="singleAction" id="singleAction" value="" />
 <input type="hidden" name="singleID" id="singleID" value="" />
-{if $queryString}<input type="hidden" name="query" id="query" value="{text value=$queryString}" />{/if}
+{if !empty($queryString)}<input type="hidden" name="query" id="query" value="{text value=$queryString}" />{/if}
 
 {if isset($searchQuery)}
 <fieldset>
@@ -128,7 +128,7 @@
 			</td>
 			<td colspan="3" class="td2">
 				{foreach from=$fields item=field key=fieldID}
-					<input type="checkbox" name="field_{$fieldID}" id="field_{$fieldID}"{if $field.checked} checked="checked"{/if} />
+					<input type="checkbox" name="field_{$fieldID}" id="field_{$fieldID}"{if !empty($field.checked)} checked="checked"{/if} />
 						<label for="field_{$fieldID}"><b>{text value=$field.feld}</b></label><br />
 				{/foreach}
 			</td>

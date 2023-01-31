@@ -65,7 +65,7 @@
 			<tr>
 				<td class="td1">{lng p="search"}:</td>
 				<td class="td2">
-						<input type="text" name="q" value="{text value=$q allowEmpty=true}" size="36" style="width:85%;" />
+						<input type="text" name="q" value="{if isset($q)}{text value=$q allowEmpty=true}{/if}" size="36" style="width:85%;" />
 				</td>
 			</tr>
 		</table>

@@ -6,8 +6,8 @@
 			<b>{lng p="error"}</b>
 			<br />{$msg}
 			<br /><br />
-			<input type="button" value="&laquo; {lng p="back"}" onclick="{if !$backLink}history.back(){else}document.location.href='{$backLink}'{/if};" />
-			{if $otherButton}<input type="button" value="{text value=$otherButton.caption}" onclick="document.location.href='{$otherButton.href}';" />{/if}
+			<input type="button" value="&laquo; {lng p="back"}" onclick="{if empty($backLink)}history.back(){else}document.location.href='{$backLink}'{/if};" />
+			{if !empty($otherButton)}<input type="button" value="{text value=$otherButton.caption}" onclick="document.location.href='{$otherButton.href}';" />{/if}
 		</td>
 	</tr>
 </table>

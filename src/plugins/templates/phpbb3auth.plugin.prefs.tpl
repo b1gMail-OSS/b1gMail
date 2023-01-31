@@ -10,23 +10,23 @@
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="host"}:</td>
-			<td class="td2"><input type="text" name="mysqlHost" value="{text value=$phpbb3_prefs.mysqlHost}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlHost" value="{if isset($phpbb3_prefs.mysqlHost)}{text value=$phpbb3_prefs.mysqlHost}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="user"}:</td>
-			<td class="td2"><input type="text" name="mysqlUser" value="{text value=$phpbb3_prefs.mysqlUser}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlUser" value="{if isset($phpbb3_prefs.mysqlUser)}{text value=$phpbb3_prefs.mysqlUser}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="password"}:</td>
-			<td class="td2"><input type="password" name="mysqlPass" value="{text value=$phpbb3_prefs.mysqlPass}" size="36" /></td>
+			<td class="td2"><input type="password" name="mysqlPass" value="{if isset($phpbb3_prefs.mysqlPass)}{text value=$phpbb3_prefs.mysqlPass}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL {lng p="db"}:</td>
-			<td class="td2"><input type="text" name="mysqlDB" value="{text value=$phpbb3_prefs.mysqlDB}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlDB" value="{if isset($phpbb3_prefs.mysqlDB)}{text value=$phpbb3_prefs.mysqlDB}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">MySQL Prefix:</td>
-			<td class="td2"><input type="text" name="mysqlPrefix" value="{text value=$phpbb3_prefs.mysqlPrefix allowEmpty=true}" size="36" /></td>
+			<td class="td2"><input type="text" name="mysqlPrefix" value="{if isset($phpbb3_prefs.mysqlPrefix)}{text value=$phpbb3_prefs.mysqlPrefix allowEmpty=true}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="user"}-{lng p="domain"}:</td>

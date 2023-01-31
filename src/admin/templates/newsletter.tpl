@@ -75,7 +75,7 @@
 		</tr>
 		<tr>
 			<td class="td1">{lng p="from"}:</td>
-			<td class="td2"><input type="text" id="from" name="from" value="{text value=$from}" size="42" /></td>
+			<td class="td2"><input type="text" id="from" name="from" value="{if isset($from)}{text value=$from}{/if}" size="42" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="subject"}:</td>

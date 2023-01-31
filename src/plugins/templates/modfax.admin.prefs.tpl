@@ -20,7 +20,7 @@
 		<table>
 			<tr>
 				<td class="td1" width="220">{lng p="modfax_country_prefix"}:</td>
-				<td class="td2"><input type="text" name="default_country_prefix" value="{text value=$faxPrefs.default_country_prefix allowEmpty=true}" size="8" /></td>
+				<td class="td2"><input type="text" name="default_country_prefix" value="{if isset($faxPrefs.default_country_prefix)}{text value=$faxPrefs.default_country_prefix allowEmpty=true}{/if}" size="8" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="defaultgateway"}:</td>
@@ -32,11 +32,11 @@
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_fromname"}:</td>
-				<td class="td2"><input type="text" name="default_name" value="{text value=$faxPrefs.default_name allowEmpty=true}" size="36" /></td>
+				<td class="td2"><input type="text" name="default_name" value="{if isset($faxPrefs.default_name)}{text value=$faxPrefs.default_name allowEmpty=true}{/if}" size="36" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_fromno"}:</td>
-				<td class="td2"><input type="text" name="default_no" value="{text value=$faxPrefs.default_no allowEmpty=true}" size="28" /></td>
+				<td class="td2"><input type="text" name="default_no" value="{if isset($faxPrefs.default_no)}{text value=$faxPrefs.default_no allowEmpty=true}{/if}" size="28" /></td>
 			</tr>
 		</table>
 	</fieldset>

@@ -17,8 +17,8 @@
 			<td align="center"><img src="../plugins/templates/images/modfax_gateway.png" border="0" alt="" width="16" height="16" /></td>
 			<td>{text value=$gateway.title}</td>
 			<td>{if $gateway.protocol==1}{lng p="modfax_email"}{else}{lng p="modfax_http"}{/if}</td>
-			<td><input type="text" name="gateways[{$gateway.faxgateid}][user]" value="{text value=$gateway.user allowEmpty=true}" style="width:90%;" /></td>
-			<td><input type="password" name="gateways[{$gateway.faxgateid}][pass]" value="{text value=$gateway.pass allowEmpty=true}" style="width:90%;" /></td>
+			<td><input type="text" name="gateways[{$gateway.faxgateid}][user]" value="{if isset($gateway.user)}{text value=$gateway.user allowEmpty=true}{/if}" style="width:90%;" /></td>
+			<td><input type="password" name="gateways[{$gateway.faxgateid}][pass]" value="{if isset($gateway.pass)}{text value=$gateway.pass allowEmpty=true}{/if}" style="width:90%;" /></td>
 		</tr>
 		{/foreach}
 	</table>

@@ -16,7 +16,7 @@
 		<tr>
 			<td class="listTableLeft">* <label for="title">{lng p="title"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="title" id="title" value="{text value=$group.title allowEmpty=true}" size="34" style="width:100%;" />
+				<input type="text" name="title" id="title" value="{if isset($group.title)}{text value=$group.title allowEmpty=true}{/if}" size="34" style="width:100%;" />
 			</td>
 		</tr>
 		<tr>

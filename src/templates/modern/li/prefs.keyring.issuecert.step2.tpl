@@ -9,7 +9,7 @@
 
 <form name="f1" method="post" action="prefs.php?action=keyring&do=issuePrivateCertificate&sid={$sid}">
 	<input type="hidden" name="step" value="3" />
-	<input type="hidden" name="address" value="{text value=$address}" />
+	<input type="hidden" name="address" value="{if isset($address)}{text value=$address}{/if}" />
 
 	<table class="listTable">
 		<tr>

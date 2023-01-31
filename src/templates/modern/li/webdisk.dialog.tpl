@@ -26,7 +26,7 @@
 		{if $type=='save'}
 		<tr>
 			<td colspan="2" class="saveAs">
-				{lng p="saveas"}: <input type="text" name="filename" id="filename" value="{text value=$filename allowEmpty=true}" size="30" />
+				{lng p="saveas"}: <input type="text" name="filename" id="filename" value="{if isset($filename)}{text value=$filename allowEmpty=true}{/if}" size="30" />
 			</td>
 		</tr>
 		{else}

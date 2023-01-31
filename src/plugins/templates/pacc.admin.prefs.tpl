@@ -10,7 +10,7 @@
 			<tr>
 				<td class="td1">{lng p="pacc_update_notification"}:</td>
 				<td class="td2">
-					<input id="send_update_notification" name="send_update_notification"{if $pacc_prefs.send_update_notification=='yes'} checked="checked"{/if} type="checkbox" /> <input type="text" name="update_notification_days" value="{text value=$pacc_prefs.update_notification_days allowEmpty=true}" size="4" /> {lng p="pacc_before_expiration"}<br />
+					<input id="send_update_notification" name="send_update_notification"{if $pacc_prefs.send_update_notification=='yes'} checked="checked"{/if} type="checkbox" /> <input type="text" name="update_notification_days" value="{if isset($pacc_prefs.update_notification_days)}{text value=$pacc_prefs.update_notification_days allowEmpty=true}{/if}" size="4" /> {lng p="pacc_before_expiration"}<br />
 					<input id="update_notification_altmail" name="update_notification_altmail"{if $pacc_prefs.update_notification_altmail=='yes'} checked="checked"{/if} type="checkbox" />
 					<label for="update_notification_altmail">{lng p="pacc_update_notification_altmail"}</label>
 				</td>

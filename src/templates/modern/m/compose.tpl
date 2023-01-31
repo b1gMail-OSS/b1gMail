@@ -21,17 +21,17 @@
 		
 		<div data-role="fieldcontain">
 			<label for="to">{lng p="to"}:</label>
-			<input type="text" name="to" id="to" value="{text value=$mail.to allowEmpty=true}"  />
+			<input type="text" name="to" id="to" value="{if isset($mail.to)}{text value=$mail.to allowEmpty=true}{/if}"  />
 		</div>
 		
 		<div data-role="fieldcontain">
 			<label for="cc">{lng p="cc"}:</label>
-			<input type="text" name="cc" id="cc" value="{text value=$mail.cc allowEmpty=true}"  />
+			<input type="text" name="cc" id="cc" value="{if isset($mail.cc)}{text value=$mail.cc allowEmpty=true}{/if}"  />
 		</div>
 		
 		<div data-role="fieldcontain">
 			<label for="subject">{lng p="subject"}:</label>
-			<input type="text" name="subject" id="subject" value="{text value=$mail.subject allowEmpty=true}"  />
+			<input type="text" name="subject" id="subject" value="{if isset($mail.subject)}{text value=$mail.subject allowEmpty=true}{/if}"  />
 		</div>
 		
 		<textarea name="text" style="min-height:200px;">{$mail.text}</textarea>

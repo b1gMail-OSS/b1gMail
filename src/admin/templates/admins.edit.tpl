@@ -7,15 +7,15 @@
 			<tr>
 				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/ico_users.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="220">{lng p="username"}:</td>
-				<td class="td2"><input type="text" size="28" id="username" name="username" value="{text value=$admin.username}" /></td>
+				<td class="td2"><input type="text" size="28" id="username" name="username" value="{if isset($admin.username)}{text value=$admin.username}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="firstname"}:</td>
-				<td class="td2"><input type="text" size="36" id="firstname" name="firstname" value="{text value=$admin.firstname allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" size="36" id="firstname" name="firstname" value="{if isset($admin.firstname)}{text value=$admin.firstname allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="lastname"}:</td>
-				<td class="td2"><input type="text" size="36" id="lastname" name="lastname" value="{text value=$admin.lastname allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" size="36" id="lastname" name="lastname" value="{if isset($admin.lastname)}{text value=$admin.lastname allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="type"}:</td>

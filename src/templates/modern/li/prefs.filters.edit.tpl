@@ -14,7 +14,7 @@
 		<tr>
 			<td class="listTableLeft">* <label for="titel">{lng p="title"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="title" id="titel" value="{text value=$filter.title}" style="width:100%;" />
+				<input type="text" name="title" id="titel" value="{if isset($filter.title)}{text value=$filter.title}{/if}" style="width:100%;" />
 			</td>
 		</tr>
 		<tr>

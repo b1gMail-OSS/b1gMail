@@ -21,7 +21,7 @@
 		</tr>
 		<tr>
 			<td class="listTableLeft"><label for="password">{lng p="password"}:</label></td>
-			<td class="listTableRight"><input type="password" id="password" name="sharePW" value="{text value=$folderPW allowEmpty=true}" size="30" /></td>
+			<td class="listTableRight"><input type="password" id="password" name="sharePW" value="{if isset($folderPW)}{text value=$folderPW allowEmpty=true}{/if}" size="30" /></td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">&nbsp;</td>

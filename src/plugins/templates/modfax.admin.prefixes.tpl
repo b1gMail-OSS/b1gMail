@@ -57,7 +57,7 @@
 			<tr>
 				<td width="40" valign="top" rowspan="5"><img src="../plugins/templates/images/modfax_prefix.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="modfax_country_prefix"}:</td>
-				<td class="td2"><input type="text" size="8" name="country_prefix" value="{text value=$faxPrefs.default_country_prefix allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" size="8" name="country_prefix" value="{if isset($faxPrefs.default_country_prefix)}{text value=$faxPrefs.default_country_prefix allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_prefix"}:</td>

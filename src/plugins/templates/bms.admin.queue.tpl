@@ -111,7 +111,7 @@
 		<tr>
 			<td class="td1" width="80">{lng p="searchfor"}:</td>
 			<td class="td2">
-				<input type="text" name="query" size="36" value="{text value=$query allowEmpty=true}" />
+				<input type="text" name="query" size="36" value="{if isset($query)}{text value=$query allowEmpty=true}{/if}" />
 			</td>
 		</tr>
 	</table>

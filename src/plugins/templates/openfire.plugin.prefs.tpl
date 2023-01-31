@@ -11,19 +11,19 @@
 		</tr>
 		<tr>
 			<td class="td1">{lng p="openfire_domain"}:</td>
-			<td class="td2"><input type="text" name="openfire_domain" value="{text value=$openfire_prefs.domain}" size="36" /></td>
+			<td class="td2"><input type="text" name="openfire_domain" value="{if isset($openfire_prefs.domain)}{text value=$openfire_prefs.domain}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="openfire_port"}:</td>
-			<td class="td2"><input type="text" name="openfire_port" value="{text value=$openfire_prefs.port}" size="36" /></td>
+			<td class="td2"><input type="text" name="openfire_port" value="{if isset($openfire_prefs.port)}{text value=$openfire_prefs.port}{/if}" size="36" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="openfire_https"}?</td>
-			<td class="td2"><input name="openfire_https"{if $openfire_prefs.https} checked="checked"{/if} type="checkbox" /></td>
+			<td class="td2"><input name="openfire_https"{if !empty($openfire_prefs.https)} checked="checked"{/if} type="checkbox" /></td>
 		</tr>
 		<tr>
 			<td class="td1">{lng p="openfire_secretkey"}:</td>
-			<td class="td2"><input type="text" name="openfire_userservice_secretkey" value="{text value=$openfire_prefs.secretkey}" size="36" /></td>
+			<td class="td2"><input type="text" name="openfire_userservice_secretkey" value="{if isset($openfire_prefs.secretkey)}{text value=$openfire_prefs.secretkey}{/if}" size="36" /></td>
 		</tr>
 	</table>
 	<p>

@@ -8,7 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="prefs.php?action=aliases&do=update&sid={$sid}">
-	<input type="hidden" name="id" value="{text value=$alias.id}" />
+	<input type="hidden" name="id" value="{if isset($alias.id)}{text value=$alias.id}{/if}" />
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="editalias"}</th>
@@ -18,13 +18,13 @@
 		<tr>
 			<td class="listTableLeft"><label for="email_name">{lng p="sendername"}:</label></td>
 			<td class="listTableRight">
-				<input type="text" name="email_name" id="email_name" value="{text value=$alias.sendername allowEmpty=true}" size="34"  />
+				<input type="text" name="email_name" id="email_name" value="{if isset($alias.sendername)}{text value=$alias.sendername allowEmpty=true}{/if}" size="34"  />
 			</td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">* <label for="email">{lng p="email"}:</label></td>
 			<td class="listTableRight">
-				<input type="email" name="email" id="email" value="{text value=$alias.email}" size="34" disabled /><br />
+				<input type="email" name="email" id="email" value="{if isset($alias.email)}{text value=$alias.email}{/if}" size="34" disabled /><br />
 			</td>
 		</tr>
 		<tr>

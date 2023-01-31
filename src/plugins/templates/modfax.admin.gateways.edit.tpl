@@ -6,7 +6,7 @@
 			<tr>
 				<td width="40" valign="top" rowspan="4"><img src="../plugins/templates/images/modfax_gateway.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="title"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" id="title" name="title" value="{text value=$gateway.title allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" style="width:85%;" id="title" name="title" value="{if isset($gateway.title)}{text value=$gateway.title allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_numberformat"}:</td>
@@ -38,19 +38,19 @@
 				<td width="40" rowspan="5">&nbsp;</td>
 				<td class="td1">{lng p="modfax_emailfrom"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="email_from" name="email_from" value="{text value=$prefs.from allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="email_from" name="email_from" value="{if isset($prefs.from)}{text value=$prefs.from allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_emailto"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="email_to" name="email_to" value="{text value=$prefs.to allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="email_to" name="email_to" value="{if isset($prefs.to)}{text value=$prefs.to allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_emailsubject"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="email_subject" name="email_subject" value="{text value=$prefs.subject allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="email_subject" name="email_subject" value="{if isset($prefs.subject)}{text value=$prefs.subject allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
@@ -62,7 +62,7 @@
 			<tr>
 				<td class="td1">{lng p="modfax_emailpdffile"}:</td>
 				<td class="td2">
-					<input type="text" style="width:35%;" id="email_pdffile" name="email_pdffile" value="{text value=$prefs.pdffile allowEmpty=true}" />
+					<input type="text" style="width:35%;" id="email_pdffile" name="email_pdffile" value="{if isset($prefs.pdffile)}{text value=$prefs.pdffile allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			</tbody>
@@ -72,7 +72,7 @@
 				<td width="40" rowspan="3">&nbsp;</td>
 				<td class="td1">{lng p="modfax_httpurl"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="http_url" name="http_url" value="{text value=$prefs.url allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="http_url" name="http_url" value="{if isset($prefs.url)}{text value=$prefs.url allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
@@ -84,7 +84,7 @@
 			<tr>
 				<td class="td1">{lng p="returnvalue"}:</td>
 				<td class="td2">
-					<input type="text" style="width:35%;" id="http_returnvalue" name="http_returnvalue" value="{text value=$prefs.returnvalue allowEmpty=true}" />
+					<input type="text" style="width:35%;" id="http_returnvalue" name="http_returnvalue" value="{if isset($prefs.returnvalue)}{text value=$prefs.returnvalue allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			</tbody>
@@ -110,19 +110,19 @@
 				<td width="40" rowspan="5">&nbsp;</td>
 				<td class="td1">{lng p="modfax_emailfrom"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="status_emailfrom" name="status_emailfrom" value="{text value=$status_prefs.emailfrom allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="status_emailfrom" name="status_emailfrom" value="{if isset($status_prefs.emailfrom)}{text value=$status_prefs.emailfrom allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_emailto"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="status_emailto" name="status_emailto" value="{text value=$status_prefs.emailto allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="status_emailto" name="status_emailto" value="{if isset($status_prefs.emailto)}{text value=$status_prefs.emailto allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_emailsubject"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="status_emailsubject" name="status_emailsubject" value="{text value=$status_prefs.emailsubject allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="status_emailsubject" name="status_emailsubject" value="{if isset($status_prefs.emailsubject)}{text value=$status_prefs.emailsubject allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
@@ -132,7 +132,7 @@
 						<option value="subject"{if $status_prefs.code_field=='subject'} selected="selected"{/if}>{lng p="subject"}</fieldset>
 						<option value="text"{if $status_prefs.code_field=='text'} selected="selected"{/if}>{lng p="text"}</fieldset>
 					</select>
-					<input type="text" size="32" id="status_code_regex" name="status_code_regex" value="{text value=$status_prefs.code_regex allowEmpty=true}" />
+					<input type="text" size="32" id="status_code_regex" name="status_code_regex" value="{if isset($status_prefs.code_regex)}{text value=$status_prefs.code_regex allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
@@ -142,7 +142,7 @@
 						<option value="subject"{if $status_prefs.success_field=='subject'} selected="selected"{/if}>{lng p="subject"}</fieldset>
 						<option value="text"{if $status_prefs.success_field=='text'} selected="selected"{/if}>{lng p="text"}</fieldset>
 					</select>
-					<input type="text" size="32" id="status_success_regex" name="status_success_regex" value="{text value=$status_prefs.success_regex allowEmpty=true}" />
+					<input type="text" size="32" id="status_success_regex" name="status_success_regex" value="{if isset($status_prefs.success_regex)}{text value=$status_prefs.success_regex allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			</tbody>
@@ -152,19 +152,19 @@
 				<td width="40" rowspan="3">&nbsp;</td>
 				<td class="td1">{lng p="modfax_statuscode_param"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="status_code_param" name="status_code_param" value="{text value=$status_prefs.code_param allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="status_code_param" name="status_code_param" value="{if isset($status_prefs.code_param)}{text value=$status_prefs.code_param allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_result_param"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="status_result_param" name="status_result_param" value="{text value=$status_prefs.result_param allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="status_result_param" name="status_result_param" value="{if isset($status_prefs.result_param)}{text value=$status_prefs.result_param allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="modfax_success_from"}:</td>
 				<td class="td2">
-					<input type="text" style="width:60%;" id="status_result_regex" name="status_result_regex" value="{text value=$status_prefs.result_regex allowEmpty=true}" />
+					<input type="text" style="width:60%;" id="status_result_regex" name="status_result_regex" value="{if isset($status_prefs.result_regex)}{text value=$status_prefs.result_regex allowEmpty=true}{/if}" />
 				</td>
 			</tr>
 			</tbody>
@@ -175,11 +175,11 @@
 			<tr>
 				<td width="40" rowspan="2">&nbsp;</td>
 				<td class="td1">{lng p="user"}:</td>
-				<td class="td2"><input type="text" size="36" id="user" name="user" value="{text value=$gateway.user allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" size="36" id="user" name="user" value="{if isset($gateway.user)}{text value=$gateway.user allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="password"}:</td>
-				<td class="td2"><input type="password" autocomplete="off" size="36" id="pass" name="pass" value="{text value=$gateway.pass allowEmpty=true}" /></td>
+				<td class="td2"><input type="password" autocomplete="off" size="36" id="pass" name="pass" value="{if isset($gateway.pass)}{text value=$gateway.pass allowEmpty=true}{/if}" /></td>
 			</tr>
 		</table>
 	

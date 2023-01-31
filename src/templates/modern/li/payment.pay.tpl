@@ -71,7 +71,7 @@
 			<p><center>
 				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" name="ppForm">
 					<input type="hidden" name="cmd" value="_xclick" />
-					<input type="hidden" name="business" value="{text value=$_pf.payPalMail}" />
+					<input type="hidden" name="business" value="{if isset($_pf.payPalMail)}{text value=$_pf.payPalMail}{/if}" />
 					<input type="hidden" name="item_name" value="{$_pf.itemName}" />
 					<input type="hidden" name="item_number" value="{$_pf.invoiceNo}" />
 					<input type="hidden" name="invoice" value="{$_pf.orderID}" />
@@ -100,7 +100,7 @@
 				<input type="hidden" name="transaction_id" value="{$_pf.orderID}" />
 				<input type="hidden" name="return_url" value="{$_pf.returnURL}" />
 				<input type="hidden" name="cancel_url" value="{$_pf.returnURL}" />
-				<input type="hidden" name="pay_to_email" value="{text value=$_pf.skrillMail}" />
+				<input type="hidden" name="pay_to_email" value="{if isset($_pf.skrillMail)}{text value=$_pf.skrillMail}{/if}" />
 				<input type="hidden" name="status_url" value="{$_pf.notifyURL}" />
 				<input type="hidden" name="language" value="{lng p="langCode"}" />
 				<input type="hidden" name="amount" value="{$_pf.amountEN}" />
