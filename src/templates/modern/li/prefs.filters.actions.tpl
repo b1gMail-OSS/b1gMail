@@ -55,7 +55,7 @@
 		
 		<span id="mailValue_{$action.id}" style="display:none;">
 			{lng p="to2"}
-			<input type="text" name="mail_val_{$action.id}" value="{text value=$action.text_val allowEmpty=true}" size="24" />
+			<input type="text" name="mail_val_{$action.id}" value="{if isset($action.text_val)}{text value=$action.text_val allowEmpty=true}{/if}" size="24" />
 		</span>
 		
 		<span id="draftValue_{$action.id}" style="display:none;">

@@ -72,7 +72,7 @@
 								<td>{$prefDetails.title}</td>
 								<td>
 									{if $prefDetails.type==1}
-									<input type="text" name="types[{$apTypeID}][prefs][{$prefKey}]" value="{text value=$prefDetails.value}" style="width:100px;" class="smallInput" />
+									<input type="text" name="types[{$apTypeID}][prefs][{$prefKey}]" value="{if isset($prefDetails.value)}{text value=$prefDetails.value}{/if}" style="width:100px;" class="smallInput" />
 									{/if}
 								</td>
 							</tr>

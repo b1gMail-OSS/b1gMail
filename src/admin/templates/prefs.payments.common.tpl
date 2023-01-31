@@ -11,12 +11,12 @@
 			</tr>
 			<tr>
 				<td class="td1">{lng p="pay_notification"}:</td>
-				<td class="td2"><input id="send_pay_notification" name="send_pay_notification"{if $bm_prefs.send_pay_notification=='yes'} checked="checked"{/if} type="checkbox" /><label for="send_pay_notification"> {lng p="to2"}: </label><input type="text" name="pay_notification_to" value="{text value=$bm_prefs.pay_notification_to allowEmpty=true}" size="24" /></td>
+				<td class="td2"><input id="send_pay_notification" name="send_pay_notification"{if $bm_prefs.send_pay_notification=='yes'} checked="checked"{/if} type="checkbox" /><label for="send_pay_notification"> {lng p="to2"}: </label><input type="text" name="pay_notification_to" value="{if isset($bm_prefs.pay_notification_to)}{text value=$bm_prefs.pay_notification_to allowEmpty=true}{/if}" size="24" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="sysmailsender"}:</td>
 				<td class="td2">
-					"<input type="text" name="pay_emailfrom" value="{text value=$bm_prefs.pay_emailfrom allowEmpty=true}" size="14" />"
+					"<input type="text" name="pay_emailfrom" value="{if isset($bm_prefs.pay_emailfrom)}{text value=$bm_prefs.pay_emailfrom allowEmpty=true}{/if}" size="14" />"
 					&lt;<input type="text" name="pay_emailfromemail" value="{email value=$bm_prefs.pay_emailfromemail}" size="22" />&gt;
 				</td>
 			</tr>

@@ -23,7 +23,7 @@
 			<td style="text-align:center;"><input type="checkbox" name="domains[{$domain.domain}][in_login]"{if $domain.in_login} checked="checked"{/if} /></td>
 			<td style="text-align:center;"><input type="checkbox" name="domains[{$domain.domain}][in_signup]"{if $domain.in_signup} checked="checked"{/if} /></td>
 			<td style="text-align:center;"><input type="checkbox" name="domains[{$domain.domain}][in_aliases]"{if $domain.in_aliases} checked="checked"{/if} /></td>
-			<td><input type="text" name="domains[{$domain.domain}][pos]" value="{text value=$domain.pos allowEmpty=true}" size="6" /></td>
+			<td><input type="text" name="domains[{$domain.domain}][pos]" value="{if isset($domain.pos)}{text value=$domain.pos allowEmpty=true}{/if}" size="6" /></td>
 			<td>
 				<a href="prefs.common.php?action=domains&delete={$domain.urlDomain}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="edit"}" width="16" height="16" /></a>
 			</td>

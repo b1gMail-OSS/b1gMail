@@ -42,7 +42,7 @@
 					{elseif $fieldInfo.type==2}
 						<input type="checkbox" name="prefs[{$key}][{$fieldKey}]" value="1"{if $fieldInfo.value} checked="checked"{/if} />
 					{elseif $fieldInfo.type==1}
-						<input type="text" style="width:85%;" name="prefs[{$key}][{$fieldKey}]" value="{text value=$fieldInfo.value allowEmpty=true}" />
+						<input type="text" style="width:85%;" name="prefs[{$key}][{$fieldKey}]" value="{if isset($fieldInfo.value)}{text value=$fieldInfo.value allowEmpty=true}{/if}" />
 					{/if}
 				</td>
 			</tr>

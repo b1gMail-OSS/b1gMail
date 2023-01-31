@@ -148,7 +148,7 @@
 				<td class="td2">
 					<input type="checkbox" id="logs_autodelete" name="logs_autodelete"{if $bm_prefs.logs_autodelete=='yes'} checked="checked"{/if} />
 					<label for="logs_autodelete">{lng p="enableolder"}</label>
-					<input type="number" name="logs_autodelete_days" value="{text value=$bm_prefs.logs_autodelete_days}" size="4" min="1" step="1" />
+					<input type="number" name="logs_autodelete_days" value="{if isset($bm_prefs.logs_autodelete_days)}{text value=$bm_prefs.logs_autodelete_days}{/if}" size="4" min="1" step="1" />
 					{lng p="days"}<br />
 					<input type="checkbox" id="logs_autodelete_archive" name="logs_autodelete_archive"{if $bm_prefs.logs_autodelete_archive=='yes'} checked="checked"{/if} />
 					<label for="logs_autodelete_archive">{lng p="savearc"}</label>

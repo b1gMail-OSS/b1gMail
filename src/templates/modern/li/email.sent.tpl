@@ -32,10 +32,10 @@
 					{foreach from=$addrMails item=item key=i}
 					{cycle values="listTableTR,listTableTR2" assign="class"}
 					<tr class="{$class}">
-						<td><input type="checkbox" name="addr[{$i}][email]" value="{text value=$item.email}" id="addr_{$i}" checked="checked" /></td>
+						<td><input type="checkbox" name="addr[{$i}][email]" value="{if isset($item.email)}{text value=$item.email}{/if}" id="addr_{$i}" checked="checked" /></td>
 						<td><label for="addr_{$i}">{text value=$item.email cut=35}</label></td>
-						<td><input type="text" name="addr[{$i}][firstname]" value="{text value=$item.firstname allowEmpty=true}" style="width:95%;" /></td>
-						<td><input type="text" name="addr[{$i}][lastname]" value="{text value=$item.lastname allowEmpty=true}" style="width:95%;" /></td>
+						<td><input type="text" name="addr[{$i}][firstname]" value="{if isset($item.firstname)}{text value=$item.firstname allowEmpty=true}{/if}" style="width:95%;" /></td>
+						<td><input type="text" name="addr[{$i}][lastname]" value="{if isset($item.lastname)}{text value=$item.lastname allowEmpty=true}{/if}" style="width:95%;" /></td>
 						<td><input type="text" name="addr[{$i}][company]" style="width:95%;" /></td>
 					</tr>
 					{/foreach}
@@ -45,20 +45,20 @@
 				<table class="listTable">
 					<tr>
 						<td class="listTableHead" colspan="2">
-							<input type="checkbox" name="addr[{$i}][email]" value="{text value=$item.email}" id="addr_{$i}" checked="checked" />
+							<input type="checkbox" name="addr[{$i}][email]" value="{if isset($item.email)}{text value=$item.email}{/if}" id="addr_{$i}" checked="checked" />
 							<label for="addr_{$i}">{text value=$item.email}</label>
 						</td>
 					</tr>
 					<tr>
 						<td class="listTableLeft"><label>{lng p="firstname"}:</label></td>
 						<td class="listTableRight">
-							<input type="text" name="addr[{$i}][firstname]" value="{text value=$item.firstname allowEmpty=true}" size="30" />
+							<input type="text" name="addr[{$i}][firstname]" value="{if isset($item.firstname)}{text value=$item.firstname allowEmpty=true}{/if}" size="30" />
 						</td>
 					</tr>
 					<tr>
 						<td class="listTableLeft"><label>{lng p="surname"}:</label></td>
 						<td class="listTableRight">
-							<input type="text" name="addr[{$i}][lastname]" value="{text value=$item.lastname allowEmpty=true}" size="30" />
+							<input type="text" name="addr[{$i}][lastname]" value="{if isset($item.lastname)}{text value=$item.lastname allowEmpty=true}{/if}" size="30" />
 						</td>
 					</tr>
 					<tr>

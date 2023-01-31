@@ -161,11 +161,11 @@
 		<tr>
 			<td class="listTableLeft"><label for="re">{lng p="defaults"} (1):</label></td>
 			<td class="listTableRight">
-				<i class="fa fa-id-card-o" aria-hidden="true"></i> <input type="checkbox" name="composeDefaults[attachVCard]" id="attachVCard"{if $composeDefaults.attachVCard} checked="checked"{/if} /> <label for="attachVCard">{lng p="attachvc"}</label>
+				<i class="fa fa-id-card-o" aria-hidden="true"></i> <input type="checkbox" name="composeDefaults[attachVCard]" id="attachVCard"{if isset($composeDefaults.attachVCard)} checked="checked"{/if} /> <label for="attachVCard">{lng p="attachvc"}</label>
 				&nbsp;
-				<i class="fa fa-certificate" aria-hidden="true"></i> <input type="checkbox" name="composeDefaults[certMail]" id="certMail"{if $composeDefaults.certMail} checked="checked"{/if} /> <label for="certMail">{lng p="certmail"}</label>
+				<i class="fa fa-certificate" aria-hidden="true"></i> <input type="checkbox" name="composeDefaults[certMail]" id="certMail"{if isset($composeDefaults.certMail)} checked="checked"{/if} /> <label for="certMail">{lng p="certmail"}</label>
 				&nbsp;
-				<i class="fa fa-bullhorn" aria-hidden="true"></i> <input type="checkbox" name="composeDefaults[mailConfirmation]" id="mailConfirmation"{if $composeDefaults.mailConfirmation} checked="checked"{/if} /> <label for="mailConfirmation">{lng p="mailconfirmation"}</label>
+				<i class="fa fa-bullhorn" aria-hidden="true"></i> <input type="checkbox" name="composeDefaults[mailConfirmation]" id="mailConfirmation"{if isset($composeDefaults.mailConfirmation)} checked="checked"{/if} /> <label for="mailConfirmation">{lng p="mailconfirmation"}</label>
 
 			</td>
 		</tr>

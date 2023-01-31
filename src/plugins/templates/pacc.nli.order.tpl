@@ -69,7 +69,7 @@
 									{lng p="firstname"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="vorname" id="vorname" value="{text value=$_pf.vorname allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="vorname" id="vorname" value="{if isset($_pf.vorname)}{text value=$_pf.vorname allowEmpty=true}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -78,7 +78,7 @@
 									{lng p="surname"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="nachname" id="nachname" value="{text value=$_pf.nachname allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="nachname" id="nachname" value="{if isset($_pf.nachname)}{text value=$_pf.nachname allowEmpty=true}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -91,7 +91,7 @@
 								<label class="control-label" for="company">
 									{lng p="company"}									
 								</label>
-								<input type="text" class="form-control" required="true" name="company" id="company" value="{text value=$_pf.company allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="company" id="company" value="{if isset($_pf.company)}{text value=$_pf.company allowEmpty=true}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -99,7 +99,7 @@
 								<label class="control-label" for="taxid">
 									{lng p="taxid"}
 								</label>
-								<input type="text" class="form-control" required="true" name="taxid" id="taxid" value="{text value=$_pf.taxid allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="taxid" id="taxid" value="{if isset($_pf.taxid)}{text value=$_pf.taxid allowEmpty=true}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -113,7 +113,7 @@
 									{lng p="street"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="strasse" id="strasse" value="{text value=$_pf.strasse allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="strasse" id="strasse" value="{if isset($_pf.strasse)}{text value=$_pf.strasse allowEmpty=true}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -122,7 +122,7 @@
 									{lng p="nr"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="hnr" id="hnr" value="{text value=$_pf.hnr allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="hnr" id="hnr" value="{if isset($_pf.hnr)}{text value=$_pf.hnr allowEmpty=true}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -133,7 +133,7 @@
 									{lng p="zip"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="plz" id="plz" value="{text value=$_pf.plz allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="plz" id="plz" value="{if isset($_pf.plz)}{text value=$_pf.plz allowEmpty=true}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-8">
@@ -142,7 +142,7 @@
 									{lng p="city"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="ort" id="ort" value="{text value=$_pf.ort allowEmpty=true}" />
+								<input type="text" class="form-control" required="true" name="ort" id="ort" value="{if isset($_pf.ort)}{text value=$_pf.ort allowEmpty=true}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -208,7 +208,7 @@
 										{if $field.oblig}<span class="required">{lng p="required"}</span>{/if}
 									</label>{/if}
 									{if $field.type==1}
-										<input class="form-control" type="text" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="{text value=$smarty.post.fields.$methodID.$fieldID allowEmpty=true}" size="40" />
+										<input class="form-control" type="text" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="{if isset($smarty.post.fields.$methodID.$fieldID)}{text value=$smarty.post.fields.$methodID.$fieldID allowEmpty=true}{/if}" size="40" />
 									{elseif $field.type==2}
 									<label class="control-label">
 										<input type="checkbox" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="true"{if $smarty.post.fields.$methodID.$fieldID} checked="checked"{/if} />
@@ -217,14 +217,14 @@
 									{elseif $field.type==4}
 										<select class="form-control" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}">
 											{foreach from=$field.options item=fieldOption}
-											<option value="{text value=$fieldOption allowEmpty=true}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} selected="selected"{/if}>{text value=$fieldOption}</option>
+											<option value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} selected="selected"{/if}>{text value=$fieldOption}</option>
 											{/foreach}
 										</select>
 									{elseif $field.type==8}
 										{foreach from=$field.options key=fieldOptionID item=fieldOption}
 										<div class="radio">
 											<label>
-												<input type="radio" name="fields[{$methodID}][{$fieldID}]" value="{text value=$fieldOption allowEmpty=true}" id="field_{$methodID}_{$fieldID}_{$fieldOptionID}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} checked="checked"{/if} />
+												<input type="radio" name="fields[{$methodID}][{$fieldID}]" value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}" id="field_{$methodID}_{$fieldID}_{$fieldOptionID}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} checked="checked"{/if} />
 												<label for="field_{$methodID}_{$fieldID}_{$fieldOptionID}">{text value=$fieldOption}</label>
 											</label>
 										</div>

@@ -14,9 +14,9 @@
 			
 			{foreach from=$possibleWidgets key=widget item=info}
 			<tr>
-				<td class="listTableLeft"><input type="checkbox" id="widget_{$widget}" name="widget_{$widget}"{if $info.active} checked="checked"{/if} /></td>
+				<td class="listTableLeft"><input type="checkbox" id="widget_{$widget}" name="widget_{$widget}"{if !empty($info.active)} checked="checked"{/if} /></td>
 				<td class="listTableRight">
-					<label for="widget_{$widget}">{if $info.icon}<img src="{$info.icon}" border="0" alt="" width="16" height="16" /> {/if}{$info.title}</label>
+					<label for="widget_{$widget}">{if !empty($info.icon)}<img src="{$info.icon}" border="0" alt="" width="16" height="16" /> {/if}{$info.title}</label>
 				</td>
 			</tr>
 			{/foreach}

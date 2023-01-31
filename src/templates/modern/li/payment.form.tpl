@@ -11,22 +11,22 @@
 	<tr>
 		<td class="listTableLeft">* <label for="vorname">{lng p="firstname"}</label>/<label for="nachname">{lng p="surname"}</label>:</td>
 		<td class="listTableRight">
-			<input type="text" name="vorname" id="vorname" value="{text value=$_pf.vorname allowEmpty=true}" size="22" />
-			<input type="text" name="nachname" id="nachname" value="{text value=$_pf.nachname allowEmpty=true}" size="22" />
+			<input type="text" name="vorname" id="vorname" value="{if isset($_pf.vorname)}{text value=$_pf.vorname allowEmpty=true}{/if}" size="22" />
+			<input type="text" name="nachname" id="nachname" value="{if isset($_pf.nachname)}{text value=$_pf.nachname allowEmpty=true}{/if}" size="22" />
 		</td>
 	</tr>
 	<tr>
 		<td class="listTableLeft">* <label for="strasse">{lng p="streetnr"}</label>:</td>
 		<td class="listTableRight">
-			<input type="text" name="strasse" id="strasse" value="{text value=$_pf.strasse allowEmpty=true}" size="35" />
-			<input type="text" name="hnr" id="hnr" value="{text value=$_pf.hnr allowEmpty=true}" size="6" />
+			<input type="text" name="strasse" id="strasse" value="{if isset($_pf.strasse)}{text value=$_pf.strasse allowEmpty=true}{/if}" size="35" />
+			<input type="text" name="hnr" id="hnr" value="{if isset($_pf.hnr)}{text value=$_pf.hnr allowEmpty=true}{/if}" size="6" />
 		</td>
 	</tr>
 	<tr>
 		<td class="listTableLeft">* <label for="plz">{lng p="zipcity"}:</label></td>
 		<td class="listTableRight">
-			<input type="text" name="plz" id="plz" value="{text value=$_pf.plz allowEmpty=true}" size="6" />
-			<input type="text" name="ort" id="ort" value="{text value=$_pf.ort allowEmpty=true}" size="35" />
+			<input type="text" name="plz" id="plz" value="{if isset($_pf.plz)}{text value=$_pf.plz allowEmpty=true}{/if}" size="6" />
+			<input type="text" name="ort" id="ort" value="{if isset($_pf.ort)}{text value=$_pf.ort allowEmpty=true}{/if}" size="35" />
 		</td>
 	</tr>
 {/if}
@@ -71,18 +71,18 @@
 			</td>
 			<td class="listTableRight">
 			{if $field.type==1}
-				<input type="text" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="{text value=$smarty.post.fields.$methodID.$fieldID allowEmpty=true}" size="40" />
+				<input type="text" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="{if isset($smarty.post.fields.$methodID.$fieldID)}{text value=$smarty.post.fields.$methodID.$fieldID allowEmpty=true}{/if}" size="40" />
 			{elseif $field.type==2}
 				<input type="checkbox" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="true"{if $smarty.post.fields.$methodID.$fieldID} checked="checked"{/if} />
 			{elseif $field.type==4}
 				<select name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}">
 					{foreach from=$field.options item=fieldOption}
-					<option value="{text value=$fieldOption allowEmpty=true}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} selected="selected"{/if}>{text value=$fieldOption}</option>
+					<option value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} selected="selected"{/if}>{text value=$fieldOption}</option>
 					{/foreach}
 				</select>
 			{elseif $field.type==8}
 				{foreach from=$field.options key=fieldOptionID item=fieldOption}
-					<input type="radio" name="fields[{$methodID}][{$fieldID}]" value="{text value=$fieldOption allowEmpty=true}" id="field_{$methodID}_{$fieldID}_{$fieldOptionID}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} checked="checked"{/if} />
+					<input type="radio" name="fields[{$methodID}][{$fieldID}]" value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}" id="field_{$methodID}_{$fieldID}_{$fieldOptionID}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} checked="checked"{/if} />
 					<label for="field_{$methodID}_{$fieldID}_{$fieldOptionID}">{text value=$fieldOption}</label>
 				{/foreach}
 			{elseif $field.type==32}

@@ -7,7 +7,7 @@
 			<tr>
 				<td width="40" valign="top" rowspan="3"><img src="{$tpldir}images/ico_pay_banktransfer.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="180">{lng p="title"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="title" value="{text value=$row.title allowEmpty=true}" /></td>
+				<td class="td2"><input type="text" style="width:85%;" name="title" value="{if isset($row.title)}{text value=$row.title allowEmpty=true}{/if}" /></td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="enable"}?</td>
@@ -43,16 +43,16 @@
 			{assign var=lastPos value=$field.pos}
 			<tr class="{$class}">
 				<td><img src="{$tpldir}images/field.png" border="0" alt="" width="16" height="16" /></td>
-				<td><input type="text" style="width: 90%;" name="fields[{$fieldID}][title]" value="{text value=$field.title allowEmpty=true}" /></td>
+				<td><input type="text" style="width: 90%;" name="fields[{$fieldID}][title]" value="{if isset($field.title)}{text value=$field.title allowEmpty=true}{/if}" /></td>
 				<td><select name="fields[{$fieldID}][type]">
 				{foreach from=$fieldTypeTable key=id item=text}
 					<option value="{$id}"{if $id==$field.type} selected="selected"{/if}>{$text}</option>
 				{/foreach}
 				</select></td>
-				<td><input type="text" style="width: 90%;" name="fields[{$fieldID}][options]" value="{text value=$field.options allowEmpty=true}" /></td>
+				<td><input type="text" style="width: 90%;" name="fields[{$fieldID}][options]" value="{if isset($field.options)}{text value=$field.options allowEmpty=true}{/if}" /></td>
 				<td style="text-align:center;"><input type="checkbox" name="fields[{$fieldID}][oblig]"{if $field.oblig} checked="checked"{/if} /></td>
-				<td><input type="text" style="width: 90%;" name="fields[{$fieldID}][rule]" value="{text value=$field.rule allowEmpty=true}" /></td>
-				<td><input type="text" name="fields[{$fieldID}][pos]" value="{text value=$field.pos allowEmpty=true}" size="5" /></td>
+				<td><input type="text" style="width: 90%;" name="fields[{$fieldID}][rule]" value="{if isset($field.rule)}{text value=$field.rule allowEmpty=true}{/if}" /></td>
+				<td><input type="text" name="fields[{$fieldID}][pos]" value="{if isset($field.pos)}{text value=$field.pos allowEmpty=true}{/if}" size="5" /></td>
 				<td style="text-align:center;"><input type="checkbox" name="fields[{$fieldID}][delete]" /></td>
 			</tr>
 			{/foreach}

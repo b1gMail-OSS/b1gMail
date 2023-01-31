@@ -29,25 +29,25 @@
 					</tr>
 					<tr>
 						<td class="td1">{lng p="firstname"}:</td>
-						<td class="td2"><input type="text" name="vorname" value="{text value=$user.vorname allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="vorname" value="{if isset($user.vorname)}{text value=$user.vorname allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="lastname"}:</td>
-						<td class="td2"><input type="text" name="nachname" value="{text value=$user.nachname allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="nachname" value="{if isset($user.nachname)}{text value=$user.nachname allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="company"}:</td>
-						<td class="td2"><input type="text" name="company" value="{text value=$user.company allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="company" value="{if isset($user.company)}{text value=$user.company allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="streetno"}:</td>
-						<td class="td2"><input type="text" name="strasse" value="{text value=$user.strasse allowEmpty=true}" style="width:55%;" />
-										<input type="text" name="hnr" value="{text value=$user.hnr allowEmpty=true}" style="width:15%;" /></td>
+						<td class="td2"><input type="text" name="strasse" value="{if isset($user.strasse)}{text value=$user.strasse allowEmpty=true}{/if}" style="width:55%;" />
+										<input type="text" name="hnr" value="{if isset($user.hnr)}{text value=$user.hnr allowEmpty=true}{/if}" style="width:15%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="zipcity"}:</td>
-						<td class="td2"><input type="text" name="plz" value="{text value=$user.plz allowEmpty=true}" style="width:20%;" />
-										<input type="text" name="ort" value="{text value=$user.ort allowEmpty=true}" style="width:50%;" /></td>
+						<td class="td2"><input type="text" name="plz" value="{if isset($user.plz)}{text value=$user.plz allowEmpty=true}{/if}" style="width:20%;" />
+										<input type="text" name="ort" value="{if isset($user.ort)}{text value=$user.ort allowEmpty=true}{/if}" style="width:50%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="country"}:</td>
@@ -59,15 +59,15 @@
 					</tr>
 					<tr>
 						<td class="td1">{lng p="tel"}:</td>
-						<td class="td2"><input type="text" name="tel" value="{text value=$user.tel allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="tel" value="{if isset($user.tel)}{text value=$user.tel allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="fax"}:</td>
-						<td class="td2"><input type="text" name="fax" value="{text value=$user.fax allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="fax" value="{if isset($user.fax)}{text value=$user.fax allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="cellphone"}:</td>
-						<td class="td2"><input type="text" name="mail2sms_nummer" value="{text value=$user.mail2sms_nummer allowEmpty=true}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="mail2sms_nummer" value="{if isset($user.mail2sms_nummer)}{text value=$user.mail2sms_nummer allowEmpty=true}{/if}" style="width:85%;" /></td>
 					</tr>
 					<tr>
 						<td class="td1">{lng p="altmail"}:</td>
@@ -75,7 +75,7 @@
 					</tr>
 					<tr>
 						<td class="td1">{lng p="taxid"}:</td>
-						<td class="td2"><input type="text" name="taxid" value="{text value=$user.taxid}" style="width:85%;" /></td>
+						<td class="td2"><input type="text" name="taxid" value="{if isset($user.taxid)}{text value=$user.taxid}{/if}" style="width:85%;" /></td>
 					</tr>
 
 					{foreach from=$profileFields item=profileField}
@@ -84,18 +84,18 @@
 						<td class="td1">{$profileField.title}:</td>
 						<td class="td2">
 							{if $profileField.type==1}
-								<input type="text" name="field_{$profileField.id}" value="{text value=$profileField.value allowEmpty=true}" style="width:85%;" />
+								<input type="text" name="field_{$profileField.id}" value="{if isset($profileField.value)}{text value=$profileField.value allowEmpty=true}{/if}" style="width:85%;" />
 							{elseif $profileField.type==2}
 								<input type="checkbox" name="field_{$profileField.id}"{if $profileField.value} checked="checked"{/if} />
 							{elseif $profileField.type==4}
 								<select name="field_{$profileField.id}">
 								{foreach from=$profileField.extra item=item}
-									<option value="{text value=$item allowEmpty=true}"{if $profileField.value==$item} selected="selected"{/if}>{text value=$item allowEmpty=true}</option>
+									<option value="{if isset($item allowEmpty=true}"{if $profileField.value==$item} selected="selected"{/if}>{text value=$item)}{text value=$item allowEmpty=true}"{if $profileField.value==$item} selected="selected"{/if}>{text value=$item allowEmpty=true}{/if}</option>
 								{/foreach}
 								</select>
 							{elseif $profileField.type==8}
 								{foreach from=$profileField.extra item=item}
-									<input type="radio" id="field_{$profileField.id}_{$item}" name="field_{$profileField.id}" value="{text value=$item allowEmpty=true}"{if $profileField.value==$item} checked="checked"{/if} />
+									<input type="radio" id="field_{$profileField.id}_{$item}" name="field_{$profileField.id}" value="{if isset($item)}{text value=$item allowEmpty=true}{/if}"{if $profileField.value==$item} checked="checked"{/if} />
 									<label for="field_{$profileField.id}_{$item}"><b>{$item}</b></label> &nbsp;
 								{/foreach}
 							{elseif $profileField.type==32}
@@ -270,8 +270,8 @@
 					<table width="100%">
 						<tr>
 							<td class="td1" width="160">{lng p="re"}/{lng p="fwd"}:</td>
-							<td class="td2"><input type="text" name="re" value="{text value=$user.re allowEmpty=true}" style="width:35%;" />
-											<input type="text" name="fwd" value="{text value=$user.fwd allowEmpty=true}" style="width:35%;" /></td>
+							<td class="td2"><input type="text" name="re" value="{if isset($user.re)}{text value=$user.re allowEmpty=true}{/if}" style="width:35%;" />
+											<input type="text" name="fwd" value="{if isset($user.fwd)}{text value=$user.fwd allowEmpty=true}{/if}" style="width:35%;" /></td>
 						</tr>
 						<tr>
 							<td class="td1">{lng p="mail2sms"}:</td>
@@ -300,11 +300,11 @@
 						</tr>
 						<tr>
 							<td class="td1">{lng p="dateformat"}:</td>
-							<td class="td2"><input type="text" name="datumsformat" value="{text value=$user.datumsformat allowEmpty=true}" style="width:85%;" /></td>
+							<td class="td2"><input type="text" name="datumsformat" value="{if isset($user.datumsformat)}{text value=$user.datumsformat allowEmpty=true}{/if}" style="width:85%;" /></td>
 						</tr>
 						<tr>
 							<td class="td1">{lng p="sendername"}:</td>
-							<td class="td2"><input type="text" name="absendername" value="{text value=$user.absendername allowEmpty=true}" style="width:85%;" /></td>
+							<td class="td2"><input type="text" name="absendername" value="{if isset($user.absendername)}{text value=$user.absendername allowEmpty=true}{/if}" style="width:85%;" /></td>
 						</tr>
 					</table>
 				</div>

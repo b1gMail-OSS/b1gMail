@@ -47,13 +47,13 @@
 				<option value="5" {if $condition.op==5}selected="selected" {/if}>{lng p="startswith"}</option>
 				<option value="6" {if $condition.op==6}selected="selected" {/if}>{lng p="endswith"}</option>
 			</select>
-			<input type="text" size="20" name="text_val_{$condition.id}" value="{text value=$condition.val allowEmpty=true}" />
+			<input type="text" size="20" name="text_val_{$condition.id}" value="{if isset($condition.val)}{text value=$condition.val allowEmpty=true}{/if}" />
 		</span>
 		
 		<span id="attComparison_{$condition.id}" style="display:none;">
 			<!-- op: 1 -->{lng p="contains"} 
 			
-			<input type="text" size="20" name="att_val_{$condition.id}" value="{text value=$condition.val allowEmpty=true}" />
+			<input type="text" size="20" name="att_val_{$condition.id}" value="{if isset($condition.val)}{text value=$condition.val allowEmpty=true}{/if}" />
 		</span>
 		
 		<span id="boolComparison_{$condition.id}" style="display:none;">
