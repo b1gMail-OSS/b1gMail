@@ -156,7 +156,7 @@
 
 {hook id="email.compose.tpl:foot"}
 
-{if $captchaInfo}
+{if isset($captchaInfo)}
 <div id="safecodeFooter"{if $captchaInfo.heightHint} style="height:{$captchaInfo.heightHint};"{/if}>
 	<table cellpadding="0" style="margin-left:auto;margin-right:auto;">
 		<tr>

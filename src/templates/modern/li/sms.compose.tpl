@@ -69,7 +69,7 @@
 				</td>
 			</tr>
 			
-			{if $captchaInfo}
+			{if isset($captchaInfo)}
 			<tr>
 				<td class="listTableLeft">&nbsp;</td>
 				<td class="listTableRight" id="captchaContainer">
