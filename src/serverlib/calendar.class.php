@@ -374,7 +374,7 @@ class BMCalendar
      *
      * @return bool
      */
-    public function _sendNotification($date)
+    private static function _sendNotification($date)
     {
         global $db, $bm_prefs;
 
