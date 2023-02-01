@@ -81,7 +81,7 @@ class StringUtil {
         $encoding = mb_detect_encoding($input, ['UTF-8', 'ISO-8859-1'], true);
 
         if ($encoding === 'ISO-8859-1') {
-            return utf8_encode($input);
+            return mb_convert_encoding($input, 'UTF-8', 'ISO-8859-1');
         } else {
             return $input;
         }

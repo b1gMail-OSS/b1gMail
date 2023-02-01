@@ -431,13 +431,8 @@ function decodePath($path) {
 function decodePathSegment($path) {
 
     $path = rawurldecode($path);
-    $encoding = mb_detect_encoding($path, ['UTF-8', 'ISO-8859-1']);
-
-    switch ($encoding) {
-
-        case 'ISO-8859-1' :
-            $path = utf8_encode($path);
-
+    if (!mb_check_encoding($path, 'UTF-8') && mb_check_encoding($path, 'ISO-8859-1')) {
+        $path = mb_convert_encoding($path, 'UTF-8', 'ISO-8859-1');
     }
 
     return $path;

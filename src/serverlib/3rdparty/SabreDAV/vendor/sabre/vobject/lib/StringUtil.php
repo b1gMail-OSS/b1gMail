@@ -43,14 +43,12 @@ class StringUtil {
 
         switch($encoding) {
             case 'ISO-8859-1' :
-                $newStr = utf8_encode($str);
+                //$newStr = utf8_encode($str);
+                $newStr = mb_convert_encoding($str, 'UTF-8', 'ISO-8859-1');
                 break;
-            /* Unreachable code. Not sure yet how we can improve this
-             * situation.
             case 'WINDOWS-1252' :
-                $newStr = iconv('cp1252', 'UTF-8', $str);
+                $newStr = mb_convert_encoding($str, 'UTF-8', 'WINDOWS-1252');
                 break;
-             */
             default :
                  $newStr = $str;
 
