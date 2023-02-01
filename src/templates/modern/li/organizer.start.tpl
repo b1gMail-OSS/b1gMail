@@ -21,7 +21,7 @@
 	</div>
 </div></div>
 
-<script src="./clientlib/dragcontainer.js" type="text/javascript"></script>
+<script src="./clientlib/dragcontainer.js?{fileDateSig file="../../clientlib/dragcontainer.js"}" type="text/javascript"></script>
 <script>
 <!--
 	currentSID = '{$sid}';

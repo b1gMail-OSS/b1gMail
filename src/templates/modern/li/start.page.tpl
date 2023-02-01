@@ -28,7 +28,7 @@
 	{hook id="start.page.tpl:foot"}
 </div></div>
 
-<script src="./clientlib/dragcontainer.js" type="text/javascript"></script>
+<script src="./clientlib/dragcontainer.js?{fileDateSig file="../../clientlib/dragcontainer.js"}" type="text/javascript"></script>
 <script>
 <!--
 	currentSID = '{$sid}';

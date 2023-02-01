@@ -36,7 +36,7 @@ class VBulletinAuthPlugin extends BMPlugin
 	{
 		// plugin info
 		$this->type					= BMPLUGIN_DEFAULT;
-		$this->name					= 'VBulletin Authentication PlugIn';
+		$this->name					= 'vBulletin Authentication PlugIn';
 		$this->author				= 'b1gMail Project';
 		$this->version				= '1.8';
 

@@ -31,7 +31,7 @@
 					<div align="left">
 						{if !$groups}<small>{lng p="nogroups"}</small>{else}
 						{foreach from=$groups item=group key=groupID}
-							<input type="checkbox" id="group_{$groupID}" name="group_{$groupID}"{if $group.member} checked="checked"{/if} />
+							<input type="checkbox" id="group_{$groupID}" name="group_{$groupID}"{if !empty($group.member)} checked="checked"{/if} />
 							<label for="group_{$groupID}">{text value=$group.title cut=18}</label><br />
 						{/foreach}
 						{/if}
@@ -213,7 +213,7 @@
 		<tr>
 			<td class="listTableLeft">{lng p="birthday"}:</td>
 			<td class="listTableRight">	
-				{if isset($contact.geburtsdatum)}
+				{if !empty($contact.geburtsdatum)}
 				{html_select_date time=$contact.geburtsdatum year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="geburtsdatum_" field_order="DMY"}
 				{else}
 				{html_select_date time="---" year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="geburtsdatum_" field_order="DMY"}
@@ -236,6 +236,6 @@
 	</table>
 </form>
 
-{$jsCode}
+{if !empty($jsCode)}{$jsCode}{/if}
 
 </div></div>

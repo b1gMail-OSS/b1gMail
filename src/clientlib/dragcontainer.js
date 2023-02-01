@@ -51,23 +51,23 @@ function dragContainer(elem, cols, instanceName)
 	}
 
 	this.run = function()
-	{
-		// create table
-		var colWidth = Math.floor(100/this.cols);
-		var tableCode = '<table class="dragTable" onmouseup="' + this.instanceName + '.parentMouseUp(event)" onmousemove="' + this.instanceName + '.parentMouseMove(event)">';
-		tableCode += '<tr>';
-		for(var col=0; col<this.cols; col++)
-			tableCode += '<td id="' + this.name + 'col_' + col + '" class="dragTableColumn" width="' + colWidth + '%">&nbsp;</td>';
-		tableCode += '</tr>';
-		tableCode += '</table>';
-		tableCode += '<div class="dragItem" onmouseup="' + this.instanceName + '.parentMouseUp(event)" onmousemove="' + this.instanceName + '.parentMouseMove(event)" id="' + this.name + 'dc" style="display:none;position:absolute;top:0px;left:0px;"></div>';
+    {
+        // create table
+        var colWidth = Math.floor(100/this.cols);
+        var tableCode = '<div class="dragTable" onmouseup="' + this.instanceName + '.parentMouseUp(event)" onmousemove="' + this.instanceName + '.parentMouseMove(event)">';
+        //tableCode += '<tr>';
+        for(var col=0; col<this.cols; col++)
+            tableCode += '<div id="' + this.name + 'col_' + col + '" class="dragTableColumn">&nbsp;</div>';
+        //tableCode += '</tr>';
+        tableCode += '</div>';
+        tableCode += '<div class="dragItem" onmouseup="' + this.instanceName + '.parentMouseUp(event)" onmousemove="' + this.instanceName + '.parentMouseMove(event)" id="' + this.name + 'dc" style="display:none;position:absolute;top:0px;left:0px;"></div>';
 
-		// render table
-		this.parentContainer.innerHTML = tableCode;
+        // render table
+        this.parentContainer.innerHTML = tableCode;
 
-		// create dock items
-		this.createDockItems();
-	}
+        // create dock items
+        this.createDockItems();
+    }
 
 	this.parseOrder = function(o)
 	{

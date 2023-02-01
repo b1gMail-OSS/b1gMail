@@ -1,7 +1,7 @@
 <fieldset>
 	<legend>{$msgTitle}</legend>
 	
-	{if $msgIcon}
+	{if !empty($msgIcon)}
 	<table>
 		<tr>
 			<td width="36" valign="top"><img src="{$tpldir}images/{$msgIcon}.png" border="0" alt="" width="32" height="32" /></td>
@@ -12,7 +12,7 @@
 	{$msgText}
 	{/if}
 	
-	{if $backLink}
+	{if !empty($backLink)}
 	<p align="right">
 		<input class="button" type="button" onclick="document.location.href='{$backLink}sid={$sid}';" value=" {lng p="back"} " />
 	</p>
@@ -23,7 +23,7 @@
 	{/if}
 </fieldset>
 
-{if $reloadMenu}
+{if isset($reloadMenu)}
 <script>
 <!--
 	parent.frames['menu'].location.href = 'main.php?action=menu&item=4&sid={$sid}';

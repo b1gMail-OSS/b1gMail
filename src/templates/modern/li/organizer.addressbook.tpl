@@ -78,7 +78,7 @@
 					<tr id="addr_{$addressID}">
 						{if $templatePrefs.showCheckboxes}
 						<td style="text-align:center;width:24px;">
-							<input type="checkbox" id="selecTable_{$mailID}" />
+							<input type="checkbox" id="selecTable_{$addressID}" />
 						</td>
 						{/if}
 						<td class="{$class}">
