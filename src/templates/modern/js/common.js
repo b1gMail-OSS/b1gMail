@@ -687,7 +687,7 @@ function checkAddressAvailability()
 
 	var address = EBID('email_local').value + '@' + EBID('email_domain').value;
 	EBID('addressAvailabilityIndicator').innerHTML = '<i class="fa fa-spinner fa-pulse fa-fw"></i>';
-	MakeXMLRequest('index.php?action=checkAddressAvailability&address=' + encodeURI(address), _checkAddressAvailability);
+	MakeXMLRequest('index.php?action=checkAddressAvailability&address=' + encodeURI(address) + '&sid=' + currentSID, _checkAddressAvailability);
 }
 
 function getTZOffset()

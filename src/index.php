@@ -702,6 +702,57 @@ else if($_REQUEST['action'] == 'checkAddressAvailability')
 {
 	if(!isset($_GET['address']))
 		exit();
+	if (isset($_REQUEST['sid']) && RequestPrivileges(PRIVILEGES_USER, true)) {
+		// Do nothing
+	}
+	else if($bm_prefs['regenabled'] == 'yes' && ($bm_prefs['user_count_limit'] == 0 || BMUser::GetUserCount() < $bm_prefs['user_count_limit']))
+	{
+		// dnsbl check
+		$isInDNSBL = false;
+		if($row[0] == 0 && $bm_prefs['signup_dnsbl_enable'] == 'yes' && $bm_prefs['signup_dnsbl'] != '')
+		{
+			$reverseIP = implode('.', array_reverse(explode('.', $_SERVER['REMOTE_ADDR'])));
+			$dnsblLists = explode(':', $bm_prefs['signup_dnsbl']);
+			foreach($dnsblLists as $dnsblHostname)
+			{
+				if(strpos($dnsblHostname, '.') === false)
+					continue;
+
+				$lookup = $reverseIP . '.' . strtolower($dnsblHostname);
+				if(substr($lookup, -1) != '.')
+					$lookup .= '.';
+
+				if(@gethostbyname($lookup) != $lookup)
+				{
+					$isInDNSBL = true;
+
+					PutLog(sprintf('User IP <%s> is in DNSBL <%s>',
+						$_SERVER['REMOTE_ADDR'],
+						$dnsblHostname),
+						PRIO_DEBUG,
+						__FILE__,
+						__LINE__);
+
+					break;
+				}
+			}
+		}
+
+		if($row[0] != 0)
+		{
+			http_response_code(400);
+			exit();
+		}
+		else if($isInDNSBL && $bm_prefs['signup_dnsbl_action'] == 'block')
+		{
+			http_response_code(400);
+			exit();
+		}
+	}
+	else {
+		RequestPrivileges(PRIVILEGES_USER);
+	}
+	
 
 	$address = EncodeEMail($_GET['address']);
 
