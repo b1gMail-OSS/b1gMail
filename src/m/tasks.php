@@ -25,6 +25,13 @@ if(!class_exists('BMTodo'))
 RequestPrivileges(PRIVILEGES_USER | PRIVILEGES_MOBILE);
 
 /**
+ * file handler for modules
+ */
+ModuleFunction('FileHandlerMobile',
+	array(substr(__FILE__, strlen(__DIR__)+1),
+	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+
+/**
  * todo interface
  */
 $todo = _new('BMTodo', array($userRow['id']));

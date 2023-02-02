@@ -27,6 +27,13 @@ if(!class_exists('BMZIP'))
 RequestPrivileges(PRIVILEGES_USER | PRIVILEGES_MOBILE);
 
 /**
+ * file handler for modules
+ */
+ModuleFunction('FileHandlerMobile',
+	array(substr(__FILE__, strlen(__DIR__)+1),
+	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+
+/**
  * open webdisk
  */
 $webdisk 		= _new('BMWebdisk', array($userRow['id']));

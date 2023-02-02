@@ -27,6 +27,13 @@ if(!class_exists('BMMailBuilder'))
 RequestPrivileges(PRIVILEGES_USER | PRIVILEGES_MOBILE);
 
 /**
+ * file handler for modules
+ */
+ModuleFunction('FileHandlerMobile',
+	array(substr(__FILE__, strlen(__DIR__)+1),
+	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+
+/**
  * open mailbox
  */
 $mailbox = _new('BMMailbox', array($userRow['id'], $userRow['email'], $thisUser));

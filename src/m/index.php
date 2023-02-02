@@ -22,6 +22,13 @@
 include('../serverlib/init.inc.php');
 
 /**
+ * file handler for modules
+ */
+ModuleFunction('FileHandlerMobile',
+	array(substr(__FILE__, strlen(__DIR__)+1),
+	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+
+/**
  * delete no redirect cookie, if exists
  */
 if(isset($_COOKIE['noMobileRedirect']))

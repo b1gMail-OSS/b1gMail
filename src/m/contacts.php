@@ -25,6 +25,13 @@ if(!class_exists('BMAddressbook'))
 RequestPrivileges(PRIVILEGES_USER | PRIVILEGES_MOBILE);
 
 /**
+ * file handler for modules
+ */
+ModuleFunction('FileHandlerMobile',
+	array(substr(__FILE__, strlen(__DIR__)+1),
+	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+
+/**
  * addressbook interface
  */
 $book = _new('BMAddressbook', array($userRow['id']));

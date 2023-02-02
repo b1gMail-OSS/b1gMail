@@ -401,6 +401,13 @@ class BMPlugin
     }
 
     /**
+     * user page handler for mobile interface.
+     */
+    public function FileHandlerMobile($file, $action)
+    {
+    }
+
+    /**
      * admin page handler.
      */
     public function AdminHandler()

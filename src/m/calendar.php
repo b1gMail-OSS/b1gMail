@@ -27,6 +27,13 @@ if(!class_exists('BMAddressbook'))
 RequestPrivileges(PRIVILEGES_USER | PRIVILEGES_MOBILE);
 
 /**
+ * file handler for modules
+ */
+ModuleFunction('FileHandlerMobile',
+	array(substr(__FILE__, strlen(__DIR__)+1),
+	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+
+/**
  * calendar interface
  */
 $calendar = _new('BMCalendar', array($userRow['id']));
