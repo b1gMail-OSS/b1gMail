@@ -1,6 +1,6 @@
 <form method="post" action="users.php?do=edit&id={$user.id}&save=true&sid={$sid}" onsubmit="spin(this)">
 
-{if isset($msg)}
+{if !empty($msg)}
 <center style="margin:1em;">
 	<div class="note">
 		{$msg}
@@ -90,7 +90,7 @@
 							{elseif $profileField.type==4}
 								<select name="field_{$profileField.id}">
 								{foreach from=$profileField.extra item=item}
-									<option value="{if isset($item allowEmpty=true}"{if $profileField.value==$item} selected="selected"{/if}>{text value=$item)}{text value=$item allowEmpty=true}"{if $profileField.value==$item} selected="selected"{/if}>{text value=$item allowEmpty=true}{/if}</option>
+									<option value="{text value=$item allowEmpty=true}"{if $profileField.value==$item} selected="selected"{/if}>{text value=$item allowEmpty=true}</option>
 								{/foreach}
 								</select>
 							{elseif $profileField.type==8}
