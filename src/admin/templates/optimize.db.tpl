@@ -1,7 +1,7 @@
 <fieldset>
 	<legend>{lng p="db"}</legend>
 	
-	{if $execute}
+	{if isset($execute)}
 		<table class="list">
 		<tr>
 			<th>&nbsp;</th>

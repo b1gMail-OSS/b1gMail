@@ -1,4 +1,4 @@
-{if !$smarty.get.tableOnly}<form name="f1" action="email.php?do=action&{$folderString}&sid={$sid}" onsubmit="transferSelectedMailIDs()" method="post">
+{if empty($smarty.get.tableOnly)}<form name="f1" action="email.php?do=action&{$folderString}&sid={$sid}" onsubmit="transferSelectedMailIDs()" method="post">
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
 <div id="contentHeader">
@@ -8,7 +8,7 @@
 	</div>
 
 	<div class="right">
-		{if $folderInfo.type!='intellifolder'&&!$folderInfo.readonly}
+		{if isset($folderInfo.type)&&$folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
 		<button onclick="showFolderMenu(event);" type="button">
 			<i class="fa fa-gears fa-lg"></i>
 		</button>
@@ -18,7 +18,7 @@
 			<i class="fa fa-refresh fa-lg"></i>
 		</button>
 
-		{if !$folderInfo.readonly}<button onclick="folderViewOptions({$folderID});" type="button">
+		{if empty($folderInfo.readonly)}<button onclick="folderViewOptions({$folderID});" type="button">
 			<i class="fa fa-desktop fa-lg"></i>
 		</button>{/if}
 	</div>
@@ -39,7 +39,8 @@
 	{if $mailList}
 	{assign var=first value=true}
 	{foreach from=$mailList key=mailID item=mail}
-	{assign var=mailGroupID value=$mail.groupID}
+	{if isset($mail.groupID)}{assign var=mailGroupID value=$mail.groupID}
+	{else}{assign var=mailGroupID value=0}{/if}
 	{cycle values="listTableTR,listTableTR2" assign="class"}
 
 	{if $mailID<0}
@@ -90,7 +91,7 @@
 	{/if}
 
 </table>
-{if !$smarty.get.tableOnly}
+{if empty($smarty.get.tableOnly)}
 
 </div>
 
@@ -100,13 +101,13 @@
 			<option value="-">------ {lng p="selaction"} ------</option>
 
 			<optgroup label="{lng p="actions"}">
-			{if !$folderInfo.readonly}<option value="delete">{lng p="delete"}</option>{/if}
+			{if empty($folderInfo.readonly)}<option value="delete">{lng p="delete"}</option>{/if}
 				<option value="forward">{lng p="forward"}</option>
 				<option value="download">{lng p="download"}</option>
 				{hook id="email.folder.tpl:mailSelect.actions"}
 			</optgroup>
 
-			{if !$folderInfo.readonly}<optgroup label="{lng p="flags"}">
+			{if empty($folderInfo.readonly)}<optgroup label="{lng p="flags"}">
 				<option value="markread">{lng p="markread"}</option>
 				<option value="markunread">{lng p="markunread"}</option>
 				<option value="mark">{lng p="mark"}</option>
