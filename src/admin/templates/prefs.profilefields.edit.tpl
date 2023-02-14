@@ -2,47 +2,60 @@
 	<legend>{lng p="edit"}</legend>
 	
 	<form action="prefs.profilefields.php?do=edit&id={$field.id}&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
-		<table width="100%">
-			<tr>
-				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/field32.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="150">{lng p="field"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="feld" value="{if isset($field.feld)}{text value=$field.feld allowEmpty=true}{/if}" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="validityrule"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="rule" value="{if isset($field.rule)}{text value=$field.rule allowEmpty=true}{/if}" />
-					<br /><small>{lng p="pfrulenote"}</small></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="type"}:</td>
-				<td class="td2"><select name="typ">
-				{foreach from=$fieldTypeTable key=id item=text}
-					<option value="{$id}"{if $field.typ==$id} selected="selected"{/if}>{$text}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="oblig"}?</td>
-				<td class="td2"><input type="checkbox" name="pflicht"{if $field.pflicht=='yes'} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="show"}:</td>
-				<td class="td2">
-					<input type="checkbox" name="show_signup" id="show_signup"{if $field.show_signup=='yes'} checked="checked"{/if} />
-					<label for="show_signup">{lng p="signup"}</label><br />
-					<input type="checkbox" name="show_li" id="show_li"{if $field.show_li=='yes'} checked="checked"{/if} />
-					<label for="show_li">{lng p="li"}</label>
-				</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="options"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="extra" value="{if isset($field.extra)}{text value=$field.extra allowEmpty=true}{/if}" />
-					<br /><small>{lng p="optionsdesc"}</small></td>
-			</tr>
-		</table>
-	
-		<p align="right">
-			<input class="button" type="submit" value=" {lng p="save"} " />
-		</p>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="field"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="feld" value="{if isset($field.feld)}{text value=$field.feld allowEmpty=true}{/if}" placeholder="{lng p="field"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="validityrule"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="rule" value="{if isset($field.rule)}{text value=$field.rule allowEmpty=true}{/if}" placeholder="{lng p="validityrule"}">
+				<small>{lng p="pfrulenote"}</small>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="type"}</label>
+			<div class="col-sm-10">
+				<select name="typ" class="form-select">
+					{foreach from=$fieldTypeTable key=id item=text}
+						<option value="{$id}"{if $field.typ==$id} selected="selected"{/if}>{$text}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="oblig"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="pflicht"{if $field.pflicht=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="show"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="show_signup"{if $field.show_signup=='yes'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="signup"}</span>
+				</label>
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="show_li"{if $field.show_li=='yes'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="li"}</span>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="options"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="extra" value="{if isset($field.extra)}{text value=$field.extra allowEmpty=true}{/if}" placeholder="{lng p="options"}">
+				<small>{lng p="optionsdesc"}</small>
+			</div>
+		</div>
+
+		<div class="text-end">
+			<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
+		</div>
 	</form>
 </fieldset>

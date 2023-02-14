@@ -1,44 +1,47 @@
-<form action="admins.php?changePassword=true&sid={$sid}" method="post" onsubmit="spin(this)" autocomplete="off">
-	<fieldset>
-		<legend>{lng p="loggedinas"}</legend>
-	
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="3"><img src="{$tpldir}images/ico_users.png" border="0" alt="" width="32" height="32" /></td>				
-				<td class="td1" width="220">{lng p="username"}:</td>
-				<td class="td2">{text value=$adminRow.username}</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="name"}:</td>
-				<td class="td2">{text value=$adminRow.firstname}
-								{text value=$adminRow.lastname}</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="status"}:</td>
-				<td class="td2">{if $adminRow.type==0}{lng p="superadmin"}{else}{lng p="admin"}{/if}</td>
-			</tr>
-		</table>
-	</fieldset>
-	
-	<fieldset>
-		<legend>{lng p="password"}</legend>
-	
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="2"><img src="{$tpldir}images/ico_prefs_login.png" border="0" alt="" width="32" height="32" /></td>				
-				<td class="td1" width="220">{lng p="newpassword"}:</td>
-				<td class="td2"><input type="password" name="newpw1" size="36" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="newpassword"} ({lng p="repeat"}):</td>
-				<td class="td2"><input type="password" name="newpw2" size="36" /></td>
-			</tr>
-		</table>
-	</fieldset>
-	
-	<p>
-		<div style="float:right" class="buttons">
-			<input class="button" type="submit" value=" {lng p="save"} " />
-		</div>
-	</p>
-</form>
+<div class="row">
+	<div class="col-md-6">
+		<fieldset>
+			<legend>{lng p="loggedinas"}</legend>
+
+			<div class="mb-3 row">
+				<label class="col-sm-4 col-form-label">{lng p="username"}</label>
+				<div class="col-sm-8">
+					<div class="form-control-plaintext">{text value=$adminRow.username}</div>
+				</div>
+			</div>
+			<div class="mb-3 row">
+				<label class="col-sm-4 col-form-label">{lng p="name"}</label>
+				<div class="col-sm-8">
+					<div class="form-control-plaintext">{text value=$adminRow.firstname} {text value=$adminRow.lastname}</div>
+				</div>
+			</div>
+			<div class="mb-3 row">
+				<label class="col-sm-4 col-form-label">{lng p="status"}</label>
+				<div class="col-sm-8">
+					<div class="form-control-plaintext">{if $adminRow.type==0}{lng p="superadmin"}{else}{lng p="admin"}{/if}</div>
+				</div>
+			</div>
+		</fieldset>
+	</div>
+	<div class="col-md-6">
+		<fieldset>
+			<legend>{lng p="password"}</legend>
+
+			<form action="admins.php?changePassword=true&sid={$sid}" method="post" onsubmit="spin(this)" autocomplete="off">
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="newpassword"}</label>
+					<div class="col-sm-8">
+						<input type="password" class="form-control" name="newpw1" placeholder="{lng p="newpassword"}">
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="newpassword"} ({lng p="repeat"})</label>
+					<div class="col-sm-8">
+						<input type="password" class="form-control" name="newpw2" placeholder="{lng p="newpassword"} ({lng p="repeat"})">
+					</div>
+				</div>
+				<div class="text-end"><input class="btn btn-primary" type="submit" value="{lng p="save"}" /></div>
+			</form>
+		</fieldset>
+	</div>
+</div>

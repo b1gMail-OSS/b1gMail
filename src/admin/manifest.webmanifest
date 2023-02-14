@@ -1,0 +1,32 @@
+{
+    "theme_color": "#1d273b",
+    "background_color": "#f1f5f9",
+    "display": "standalone",
+    "scope": "/",
+    "start_url": "/",
+    "name": "b1gMail ACP",
+    "short_name": "ACP",
+    "description": "b1gMail Administration (ACP)",
+    "icons": [
+        {
+            "src": "/admin/templates/images/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/admin/templates/images/icon-256x256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "/admin/templates/images/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        },
+        {
+            "src": "/admin/templates/images/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

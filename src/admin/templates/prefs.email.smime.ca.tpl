@@ -1,67 +1,65 @@
 <form action="prefs.email.php?action=smime&do=editca&set=true&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
-<fieldset>
-	<legend>{lng p="info"}</legend>
-	
-	<table>
-		<tr>
-			<td width="36" valign="top"><img src="{$tpldir}images/info32.png" border="0" alt="" width="32" height="32" /></td>
-			<td valign="top">{lng p="cert_ca_info"}</td>
-		</tr>
-	</table>
-</fieldset>
+	<fieldset>
+		<legend>{lng p="info"}</legend>
 
-<fieldset>
-	<legend>{lng p="cert_ca_current"}</legend>
-	
-	{if $certInfo}
-	<table width="90%">
-		<tr>
-			<td align="left" rowspan="2" valign="top" width="40"><img src="{$tpldir}images/cert32.png" border="0" alt="" width="32" height="32" /></td>
-			<td class="td1" width="220">{lng p="cert_ca"}:</td>
-			<td class="td2">{text value=$certInfo.subject.CN}</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="validity"}:</td>
-			<td class="td2">
-				{if !$validCert}<font color="red">{/if}{lng p="from"} {date timestamp=$certInfo.validFrom_time_t dayonly=true}<br />
-				{lng p="to"} {date timestamp=$certInfo.validTo_time_t dayonly=true}{if !$validCert}</font>{/if}
-			</td>
-		</tr>
-	</table>
-	{else}
-		<center><i>({lng p="cert_noca"})</i></center>
-	{/if}
-</fieldset>
+		<div class="alert alert-info">{lng p="cert_ca_info"}</div>
+	</fieldset>
 
-<fieldset>
-	<legend>{lng p="cert_ca_import"}</legend>
-		
-	<table width="90%">
-		<tr>
-			<td align="left" rowspan="2" valign="top" width="40"><img src="{$tpldir}images/certadd32.png" border="0" alt="" width="32" height="32" /></td>
-			<td class="td1" width="220">{lng p="cert_ca_cert"}:</td>
-			<td class="td2">
-				<div style="float:left;">{lng p="cert_ca_file_pem"}:<br />
-				<input type="file" name="cert_ca_pem" style="width:280px;" /><br />
-				{lng p="cert_ca_file_key"}:<br />
-				<input type="file" name="cert_ca_key" style="width:280px;" />
-			</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="cert_ca_pass"}:</td>
-			<td class="td2"><input type="password" name="cert_ca_pass" value="" size="36" autocomplete="off" /></td>
-		</tr>
-	</table>
-</fieldset>
+	<fieldset>
+		<legend>{lng p="cert_ca_current"}</legend>
 
-<p>
-	<div style="float:left;" class="buttons">
-		<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='prefs.email.php?action=smime&sid={$sid}';" />
+		{if $certInfo}
+			<div class="mb-3 row">
+				<label class="col-sm-2 col-form-label">{lng p="cert_ca"}</label>
+				<div class="col-sm-10">
+					<div class="form-control-plaintext" style="font-weight: bold;">{text value=$certInfo.subject.CN}</div>
+				</div>
+			</div>
+			<div class="mb-3 row">
+				<label class="col-sm-2 col-form-label">{lng p="validity"}</label>
+				<div class="col-sm-10">
+					<div class="form-control-plaintext" style="font-weight: bold;">
+						{if !$validCert}<p class="text-red">{/if}{lng p="from"} {date timestamp=$certInfo.validFrom_time_t dayonly=true}<br />
+							{lng p="to"} {date timestamp=$certInfo.validTo_time_t dayonly=true}{if !$validCert}</p>{/if}
+					</div>
+				</div>
+			</div>
+		{else}
+			<div class="alert alert-muted">({lng p="cert_noca"})</div>
+		{/if}
+	</fieldset>
+
+	<fieldset>
+		<legend>{lng p="cert_ca_import"}</legend>
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="cert_ca_cert"}</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<span class="input-group-text">{lng p="cert_ca_file_pem"}</span>
+					<input type="file" name="cert_ca_pem" class="form-control" />
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">&nbsp;</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<span class="input-group-text">{lng p="cert_ca_file_key"}</span>
+					<input type="file" name="cert_ca_key" class="form-control" />
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="cert_ca_pass"}</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="cert_ca_pass" value="" placeholder="{lng p="cert_ca_pass"}" autocomplete="off">
+			</div>
+		</div>
+	</fieldset>
+
+	<div class="row">
+		<div class="col-md-6"><input class="btn btn-muted" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='prefs.email.php?action=smime&sid={$sid}';" /></div>
+		<div class="col-md-6 text-end"><input class="btn btn-primary" type="submit" value="{lng p="import"}" /></div>
 	</div>
-	
-	<div style="float:right;" class="buttons">
-		<input class="button" type="submit" value=" {lng p="import"} " />
-	</div>
-</p>
-
 </form>
