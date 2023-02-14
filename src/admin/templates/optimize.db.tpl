@@ -1,130 +1,136 @@
 <fieldset>
 	<legend>{lng p="db"}</legend>
-	
-	{if isset($execute)}
-		<table class="list">
-		<tr>
-			<th>&nbsp;</th>
-			<th>{lng p="table"}</th>
-			<th>{lng p="query"}</th>
-			<th width="100">{lng p="status"}</th>
-		</tr>
-		{foreach from=$result item=table}
-		{cycle values="td1,td2" name=class assign=class}
-		<tr class="{$class}">
-			<td width="20"><img src="{$tpldir}images/db_table.png" border="0" alt="" width="16" height="16" /></td>
-			<td>{$table.table}</td>
-			<td><code>{$table.query}</code></td>
-			<td align="right">{if $table.type!='status' && $table.type!='info' && $table.type!='note'}
-				<img align="absmiddle" src="{$tpldir}images/error.png" width="16" height="16" alt="" border="0" />
-				{lng p="error"}
-			{else}
-				<img align="absmiddle" src="{$tpldir}images/ok.png" width="16" height="16" alt="" border="0" />
-				{lng p="success"}
-			{/if}</td>
-		</tr>
-		{/foreach}
-		</table>
-		
-		<p align="right">
-			<input class="button" type="button" value=" {lng p="back"} " onclick="document.location.href='optimize.php?sid={$sid}';" />
-		</p>
+
+	<div class="alert alert-warning">{lng p="dbwarn"}</div>
+
+	{if $execute}
+		<div class="card">
+			<div class="table-responsive">
+				<table class="table table-vcenter table-striped">
+					<thead>
+					<tr>
+						<th>{lng p="table"}</th>
+						<th>{lng p="query"}</th>
+						<th style="width: 100px;">{lng p="status"}</th>
+					</tr>
+					</thead>
+					<tbody>
+					{foreach from=$result item=table}
+						{cycle values="td1,td2" name=class assign=class}
+						<tr class="{$class}">
+							<td>{$table.table}</td>
+							<td><code>{$table.query}</code></td>
+							<td class="text-nowrap text-end">
+								{if $table.type!='status' && $table.type!='info' && $table.type!='note'}
+									<i class="fa-regular fa-circle-xmark text-red"></i>
+									{lng p="error"}
+								{else}
+									<i class="fa-regular fa-circle-check text-green"></i>
+									{lng p="success"}
+								{/if}
+							</td>
+						</tr>
+					{/foreach}
+					</tbody>
+				</table>
+			</div>
+			<div class="card-footer text-end">
+				<input class="btn btn-sm btn-primary" type="button" value="{lng p="back"}" onclick="document.location.href='optimize.php?sid={$sid}';" />
+			</div>
+		</div>
 	{elseif $executeStruct}
-	<form action="optimize.php?do=repairStruct&sid={$sid}" method="post" onsubmit="spin(this)">
-		<table class="list">
-		<tr>
-			<th>&nbsp;</th>
-			<th>{lng p="table"}</th>
-			<th width="120">{lng p="exists"}</th>
-			<th width="120">{lng p="structstate"}</th>
-			<th width="120">{lng p="status"}</th>
-		</tr>
-		{foreach from=$result item=table}
-		{cycle values="td1,td2" name=class assign=class}
-		<tr class="{$class}">
-			<td width="20"><img src="{$tpldir}images/db_table.png" border="0" alt="" width="16" height="16" /></td>
-			<td>{$table.table}</td>
-			<td>{if $table.exists}{lng p="yes"}{else}{lng p="no"}{/if}</td>
-			<td>{$table.missing} / {$table.invalid}</td>
-			<td align="right">{if !$table.exists || $table.missing || $table.invalid}
-				<img align="absmiddle" src="{$tpldir}images/error.png" width="16" height="16" alt="" border="0" />
-				{lng p="error"}
-			{else}
-				<img align="absmiddle" src="{$tpldir}images/ok.png" width="16" height="16" alt="" border="0" />
-				{lng p="ok"}
-			{/if}</td>
-		</tr>
-		{/foreach}
-		</table>
-		
-		<p>
-			<div style="float:left;">
-				{if $repair}<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-				{lng p="dbwarn"}{/if}
-			</div>
-			<div style="float:right;">
-				<input class="button" type="button" value=" {lng p="back"} " onclick="document.location.href='optimize.php?sid={$sid}';" />
-				{if $repair}<input class="button" type="submit" value=" {lng p="repairstruct"} " />{/if}
-			</div>
-		</p>
-	</form>
-	{else}
-	<form action="optimize.php?sid={$sid}&do=execute" method="post" onsubmit="spin(this)">
-		<table>
-			<tr>
-				<td>{lng p="tables"}:</td>
-				<td>{lng p="action"}:</td>
-			</tr>
-			<tr>
-				<td valign="top"><select size="10" name="tables[]" multiple="multiple">
-				{foreach from=$tables item=table}
-					<option value="{$table}" selected="selected">{$table}</option>
-				{/foreach}
-				</select></td>
-				<td valign="top">
-					<table>
+		<form action="optimize.php?do=repairStruct&sid={$sid}" method="post" onsubmit="spin(this)">
+
+			{if $repair}<div class="alert alert-warning">{lng p="dbwarn"}</div>{/if}
+
+			<div class="card">
+				<div class="table-responsive">
+					<table class="table table-vcenter table-striped">
+						<thead>
 						<tr>
-							<td valign="top" width="20" align="center"><input type="radio" id="op_optimize" name="operation" value="optimize" checked="checked" /></td>
-							<td valign="top"><img src="{$tpldir}images/db_optimize.png" border="0" alt="" width="32" height="32" /></td>
-							<td><label for="op_optimize"><b>{lng p="op_optimize"}</b></label><br />
-								{lng p="op_optimize_desc"}</td>
+							<th>{lng p="table"}</th>
+							<th style="width: 120px;">{lng p="exists"}</th>
+							<th style="width: 120px;">{lng p="structstate"}</th>
+							<th style="width: 120px;">{lng p="status"}</th>
 						</tr>
-						<tr>
-							<td colspan="3">
-								&nbsp;
-							</td>
-						</tr>
-						<tr>
-							<td valign="top" width="20" align="center"><input type="radio" id="op_repair" name="operation" value="repair" /></td>
-							<td valign="top"><img src="{$tpldir}images/db_repair.png" border="0" alt="" width="32" height="32" /></td>
-							<td><label for="op_repair"><b>{lng p="op_repair"}</b></label><br />
-								{lng p="op_repair_desc"}</td>
-						</tr>
-						<tr>
-							<td colspan="3">
-								&nbsp;
-							</td>
-						</tr>
-						<tr>
-							<td valign="top" width="20" align="center"><input type="radio" id="op_struct" name="operation" value="struct" /></td>
-							<td valign="top"><img src="{$tpldir}images/db_struct.png" border="0" alt="" width="32" height="32" /></td>
-							<td><label for="op_struct"><b>{lng p="op_struct"}</b></label><br />
-								{lng p="op_struct_desc"}</td>
-						</tr>
+						</thead>
+						<tbody>
+						{foreach from=$result item=table}
+							{cycle values="td1,td2" name=class assign=class}
+							<tr class="{$class}">
+								<td>{$table.table}</td>
+								<td>{if $table.exists}{lng p="yes"}{else}{lng p="no"}{/if}</td>
+								<td>{$table.missing} / {$table.invalid}</td>
+								<td class="text-nowrap text-end">
+									{if !$table.exists || $table.missing || $table.invalid}
+										<i class="fa-regular fa-circle-xmark text-red"></i>
+										{lng p="error"}
+									{else}
+										<i class="fa-regular fa-circle-check text-green"></i>
+										{lng p="ok"}
+									{/if}
+								</td>
+							</tr>
+						{/foreach}
+						</tbody>
 					</table>
-				</td>
-			</tr>
-		</table>
-		
-		<p>
-			<div style="float:left;">
-				<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-				{lng p="dbwarn"}
+				</div>
+				<div class="card-footer">
+					<div class="row">
+						<div class="col-md-6">{if $repair}<input class="btn btn-sm btn-warning" type="submit" value="{lng p="repairstruct"}" />{/if}</div>
+						<div class="col-md-6 text-end"><input class="btn btn-sm btn-primary" type="button" value=" {lng p="back"} " onclick="document.location.href='optimize.php?sid={$sid}';" /></div>
+					</div>
+				</div>
 			</div>
-			<div style="float:right;">
-				<input class="button" type="submit" value=" {lng p="execute"} " />
+		</form>
+	{else}
+		<form action="optimize.php?sid={$sid}&do=execute" method="post" onsubmit="spin(this)">
+			<div class="row">
+				<div class="col-md-4">
+					<div class="mb-3">
+						<label class="col-sm-4 col-form-label">{lng p="tables"}</label>
+						<select size="10" name="tables[]" multiple="multiple" class="form-select">
+							{foreach from=$tables item=table}
+								<option value="{$table}" selected="selected">{$table}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+				<div class="col-md-8">
+					<div class="mb-3">
+						<label class="col-sm-4 col-form-label">{lng p="action"}</label>
+						<div class="mb-3">
+							<div class="form-selectgroup form-selectgroup-boxes d-flex flex-column">
+								<label class="form-selectgroup-item flex-fill">
+									<input class="form-selectgroup-input" type="radio" id="op_optimize" name="operation" value="optimize" checked="checked">
+									<div class="form-selectgroup-label d-flex align-items-center p-3">
+										<div class="me-3"><span class="form-selectgroup-check"></span></div>
+										<div>{lng p="op_optimize"}<br /><small>{lng p="op_optimize_desc"}</small></div>
+									</div>
+								</label>
+								<label class="form-selectgroup-item flex-fill">
+									<input class="form-selectgroup-input" type="radio" id="op_repair" name="operation" value="repair">
+									<div class="form-selectgroup-label d-flex align-items-center p-3">
+										<div class="me-3"><span class="form-selectgroup-check"></span></div>
+										<div>{lng p="op_repair"}<br /><small>{lng p="op_repair_desc"}</small></div>
+									</div>
+								</label>
+								<label class="form-selectgroup-item flex-fill">
+									<input class="form-selectgroup-input" type="radio" id="op_struct" name="operation" value="struct">
+									<div class="form-selectgroup-label d-flex align-items-center p-3">
+										<div class="me-3"><span class="form-selectgroup-check"></span></div>
+										<div>{lng p="op_struct"}<br /><small>{lng p="op_struct_desc"}</small></div>
+									</div>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
-		</p>
-	</form>
+
+			<div class="text-end">
+				<input class="btn btn-primary" type="submit" value=" {lng p="execute"} " />
+			</div>
+		</form>
 	{/if}
 </fieldset>
