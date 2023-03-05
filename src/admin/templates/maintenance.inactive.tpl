@@ -1,74 +1,72 @@
 <fieldset>
 	<legend>{lng p="inactiveusers"}</legend>
-	
+
+	<div class="alert alert-warning">{lng p="undowarn"}</div>
+
 	<form action="maintenance.php?do=exec&sid={$sid}" method="post" onsubmit="spin(this)">
-		<table>
-			<tr>
-				<td width="40" valign="top"><img src="{$tpldir}images/user_inactive32.png" border="0" alt="" width="32" height="32" /></td>
-				<td valign="top">
-					<p>
-						{lng p="activity_desc1"}
-					</p>
-					
-					<blockquote>
-						<table>
-							<tr>
-								<td width="20" valign="top"><input type="checkbox" id="queryTypeLogin" name="queryTypeLogin" checked="checked" /></td>
-								<td><label for="queryTypeLogin"><b>{lng p="notloggedinsince"}</b></label><br />
-									<input type="text" size="6" name="loginDays" value="90" /> {lng p="days"}<br /><br /></td>
-							</tr>
-							<tr>
-								<td width="20" valign="top"><input type="checkbox" id="queryTypeGroups" name="queryTypeGroups" checked="checked" /></td>
-								<td><label for="queryTypeGroups"><b>{lng p="whobelongtogrps"}</b></label><br />
-									{foreach from=$groups item=group key=groupID}
-										<input type="checkbox" name="groups[{$groupID}]" id="group_{$groupID}" checked="checked" />
-											<label for="group_{$groupID}"><b>{text value=$group.title}</b></label><br />
-									{/foreach}</td>
-							</tr>
-						</table>
-					</blockquote>
-					
-					<p>
-						{lng p="activity_desc2"}
-					</p>
-					
-					<blockquote>
-						<table>
-							<tr>
-								<td width="20" valign="top"><input type="radio" id="queryActionShow" name="queryAction" value="show" checked="checked" /></td>
-								<td><label for="queryActionShow"><b>{lng p="showlist"}</b></label></td>
-							</tr>
-							<tr>
-								<td width="20" valign="top"><input type="radio" id="queryActionLock" name="queryAction" value="lock" /></td>
-								<td><label for="queryActionLock"><b>{lng p="lock"}</b></label></td>
-							</tr>
-							<tr>
-								<td width="20" valign="top"><input type="radio" id="queryActionMove" name="queryAction" value="move" /></td>
-								<td><label for="queryActionMove"><b>{lng p="movetogroup"}:</b></label><br />
-									<select name="moveGroup">
+
+		<p>{lng p="activity_desc1"}</p>
+
+		<div class="mb-3 row">
+			<div class="col-sm-12">
+				<div class="input-group mb-2">
+                        <span class="input-group-text">
+                        	<input class="form-check-input m-0" type="checkbox" id="queryTypeLogin" name="queryTypeLogin" checked="checked">
+                        </span>
+					<span class="input-group-text">{lng p="notloggedinsince"}</span>
+					<input type="text" class="form-control" name="loginDays" value="90">
+					<span class="input-group-text">{lng p="days"}</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<div class="col-sm-12" style="padding-left: 22px;">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" id="queryTypeGroups" name="queryTypeGroups" checked="checked">
+					<span class="form-check-label">{lng p="whobelongtogrps"}</span>
+				</label>
+			</div>
+			<div class="col-sm-12" style="padding-left: 30px;">
+				{foreach from=$groups item=group key=groupID}
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="contactform_name"{if $bm_prefs.contactform_name=='yes'} checked="checked"{/if}>
+					<span class="form-check-label">{text value=$group.title}</span>
+				</label>
+				{/foreach}
+			</div>
+		</div>
+
+		<p>{lng p="activity_desc2"}</p>
+		<div class="mb-3 row">
+			<div class="col-sm-12">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" id="queryActionShow" name="queryAction" value="show" checked="checked">
+					<span class="form-check-label">{lng p="showlist"}</span>
+				</label>
+				<label class="form-check">
+					<input class="form-check-input" type="radio" id="queryActionLock" name="queryAction" value="lock">
+					<span class="form-check-label">{lng p="lock"}</span>
+				</label>
+				<label class="form-check">
+					<input class="form-check-input" type="radio" id="queryActionMove" name="queryAction" value="move">
+					<span class="form-check-label">{lng p="movetogroup"}</span>
+					<span class="form-check-label">
+						<select name="moveGroup" class="form-select">
 									{foreach from=$groups item=groupItem}
 										<option value="{$groupItem.id}">{text value=$groupItem.title}</option>
 									{/foreach}
-									</select></td>
-							</tr>
-							<tr>
-								<td width="20" valign="top"><input type="radio" id="queryActionDelete" name="queryAction" value="delete" /></td>
-								<td><label for="queryActionDelete"><b>{lng p="delete"}</b></label></td>
-							</tr>
-						</table>
-					</blockquote>
-				</td>
-			</tr>
-		</table>
-		
-		<p>
-			<div style="float:left;">
-				<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-				{lng p="undowarn"}
+									</select>
+					</span>
+				</label>
+				<label class="form-check">
+					<input class="form-check-input" type="radio" id="queryActionDelete" name="queryAction" value="delete">
+					<span class="form-check-label">{lng p="delete"}</span>
+				</label>
 			</div>
-			<div style="float:right;">
-				<input class="button" type="submit" value=" {lng p="execute"} " />
-			</div>
-		</p>
+		</div>
+
+		<div class="text-end">
+			<input class="btn btn-warning" type="submit" value="{lng p="execute"}" />
+		</div>
 	</form>
 </fieldset>

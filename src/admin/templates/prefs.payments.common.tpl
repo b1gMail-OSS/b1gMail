@@ -2,178 +2,225 @@
 	<fieldset>
 		<legend>{lng p="payments"}</legend>
 
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="4"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="220">{lng p="currency"}:</td>
-				<td class="td2"><input type="text" name="currency" value="{$bm_prefs.currency}" size="8" /></td>
-				<td class="td">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="pay_notification"}:</td>
-				<td class="td2"><input id="send_pay_notification" name="send_pay_notification"{if $bm_prefs.send_pay_notification=='yes'} checked="checked"{/if} type="checkbox" /><label for="send_pay_notification"> {lng p="to2"}: </label><input type="text" name="pay_notification_to" value="{if isset($bm_prefs.pay_notification_to)}{text value=$bm_prefs.pay_notification_to allowEmpty=true}{/if}" size="24" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="sysmailsender"}:</td>
-				<td class="td2">
-					"<input type="text" name="pay_emailfrom" value="{if isset($bm_prefs.pay_emailfrom)}{text value=$bm_prefs.pay_emailfrom allowEmpty=true}{/if}" size="14" />"
-					&lt;<input type="text" name="pay_emailfromemail" value="{email value=$bm_prefs.pay_emailfromemail}" size="22" />&gt;
-				</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="vat"}:</td>
-				<td class="td2">
-					<select name="mwst">
-						<option value="add"{if $bm_prefs.mwst=='add'} selected="selected"{/if}>{lng p="vat_add"}</option>
-						<option value="enthalten"{if $bm_prefs.mwst=='enthalten'} selected="selected"{/if}>{lng p="vat_enthalten"}</option>
-						<option value="nomwst"{if $bm_prefs.mwst=='nomwst'} selected="selected"{/if}>{lng p="vat_nomwst"}</option>
-					</select>
-					<small>
-						&nbsp; {lng p="vatratenotice"} <a href="prefs.countries.php?sid={$sid}">{lng p="countries"}</a>.
-					</small>
-				</td>
-			</tr>
-		</table>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="currency"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="currency" value="{$bm_prefs.currency}" placeholder="{lng p="currency"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="pay_notification"}</label>
+			<div class="col-sm-10">
+				<div class="input-group mb-2">
+                        <span class="input-group-text">
+                        	<input class="form-check-input m-0" type="checkbox" name="send_pay_notification"{if $bm_prefs.send_pay_notification=='yes'} checked="checked"{/if}>
+                        </span>
+					<span class="input-group-text">{lng p="to2"}:</span>
+					<input type="text" class="form-control" name="pay_notification_to" value="{if isset($bm_prefs.pay_notification_to)}{text value=$bm_prefs.pay_notification_to allowEmpty=true}{/if}" placeholder="{lng p="pay_notification"}">
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="sysmailsender"}</label>
+			<div class="col-sm-10">
+				<div class="input-group mb-2">
+					<span class="input-group-text">"</span>
+					<input type="text" class="form-control" name="pay_emailfrom" value="{if isset($bm_prefs.pay_emailfrom)}{text value=$bm_prefs.pay_emailfrom allowEmpty=true}{/if}" placeholder="{lng p="name"}">
+					<span class="input-group-text">" <</span>
+					<input type="text" class="form-control" name="pay_emailfromemail" value="{email value=$bm_prefs.pay_emailfromemail}" placeholder="{lng p="email"}">
+					<span class="input-group-text">></span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="vat"}</label>
+			<div class="col-sm-10">
+				<select name="mwst" class="form-select">
+					<option value="add"{if $bm_prefs.mwst=='add'} selected="selected"{/if}>{lng p="vat_add"}</option>
+					<option value="enthalten"{if $bm_prefs.mwst=='enthalten'} selected="selected"{/if}>{lng p="vat_enthalten"}</option>
+					<option value="nomwst"{if $bm_prefs.mwst=='nomwst'} selected="selected"{/if}>{lng p="vat_nomwst"}</option>
+				</select>
+				<small>{lng p="vatratenotice"} <a href="prefs.countries.php?sid={$sid}">{lng p="countries"}</a>.</small>
+			</div>
+		</div>
 	</fieldset>
 
 	<fieldset>
 		<legend>PayPal</legend>
 
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="3"><img src="{$tpldir}images/ico_pay_paypal.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="220">{lng p="enablechrgpaypal"}?</td>
-				<td class="td2"><input name="enable_paypal"{if $bm_prefs.enable_paypal=='yes'} checked="checked"{/if} type="checkbox" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="default"}?</td>
-				<td class="td2"><input type="radio" name="default_paymethod" value="1"{if $bm_prefs.default_paymethod==1} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1" width="220">{lng p="paypalacc"}:</td>
-				<td class="td2"><input type="text" name="paypal_mail" value="{$bm_prefs.paypal_mail}" size="36" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-		</table>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enablechrgpaypal"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enable_paypal"{if $bm_prefs.enable_paypal=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="default_paymethod" value="1"{if $bm_prefs.default_paymethod==1} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="paypalacc"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="paypal_mail" value="{$bm_prefs.paypal_mail}" placeholder="{lng p="paypalacc"}">
+			</div>
+		</div>
 	</fieldset>
 
 	<fieldset>
 		<legend>sofort&uuml;berweisung.de</legend>
 
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="7"><img src="{$tpldir}images/ico_pay_su.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="220">{lng p="enablechrgsu"}?</td>
-				<td class="td2"><input name="enable_su"{if $bm_prefs.enable_su=='yes'} checked="checked"{/if} id="su_enable" type="checkbox" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="default"}?</td>
-				<td class="td2"><input type="radio" name="default_paymethod" value="2"{if $bm_prefs.default_paymethod==2} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="sukdnr"}:</td>
-				<td class="td2"><input type="text" name="su_kdnr" value="{$bm_prefs.su_kdnr}" id="su_kdnr" size="24" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="suprjnr"}:</td>
-				<td class="td2"><input type="text" name="su_prjnr" value="{$bm_prefs.su_prjnr}" id="su_prjnr" size="24" /></td>
-				<td class="td2" style="padding-left:10px;">
-					<input class="button" type="button" value=" {lng p="su_createnew"} " onclick="window.open('about:blank','suWindow','width=990,height=800,scrollbars=yes,location=yes,menubar=yes,resizable=yes,status=yes,toolbar=yes');EBID('suForm').submit();" />
-				</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="suprjpass"}:</td>
-				<td class="td2"><input type="text" name="su_prjpass" value="{$bm_prefs.su_prjpass}" id="su_prjpass" size="24" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="sunotifypass"}:</td>
-				<td class="td2"><input type="text" name="su_notifypass" value="{$bm_prefs.su_notifypass}" id="su_notifypass" size="24" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="suinputcheck"}?</td>
-				<td class="td2"><input name="su_inputcheck"{if $bm_prefs.su_inputcheck=='yes'} checked="checked"{/if} id="su_inputcheck" type="checkbox" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-		</table>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enablechrgsu"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enable_su"{if $bm_prefs.enable_su=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="default_paymethod" value="2"{if $bm_prefs.default_paymethod==2} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="sukdnr"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="su_kdnr" value="{$bm_prefs.su_kdnr}" placeholder="{lng p="sukdnr"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="suprjnr"}</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input type="text" class="form-control" name="su_prjnr" value="{$bm_prefs.su_prjnr}" placeholder="{lng p="suprjnr"}">
+					<input class="btn btn-muted" type="button" value=" {lng p="su_createnew"} " onclick="window.open('about:blank','suWindow','width=990,height=800,scrollbars=yes,location=yes,menubar=yes,resizable=yes,status=yes,toolbar=yes');EBID('suForm').submit();" />
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="suprjpass"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="su_prjpass" value="{$bm_prefs.su_prjpass}" placeholder="{lng p="suprjpass"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="sunotifypass"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="su_notifypass" value="{$bm_prefs.su_notifypass}" placeholder="{lng p="sunotifypass"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="suinputcheck"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="su_inputcheck"{if $bm_prefs.su_inputcheck=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
 	</fieldset>
 
 	<fieldset>
 		<legend>Skrill (Moneybookers)</legend>
 
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="4"><img src="{$tpldir}images/ico_pay_skrill.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="220">{lng p="enablechrgskrill"}?</td>
-				<td class="td2"><input name="enable_skrill"{if $bm_prefs.enable_skrill=='yes'} checked="checked"{/if} type="checkbox" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="default"}?</td>
-				<td class="td2"><input type="radio" name="default_paymethod" value="1"{if $bm_prefs.default_paymethod==3} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="skrillacc"}:</td>
-				<td class="td2"><input type="text" name="skrill_mail" value="{$bm_prefs.skrill_mail}" size="36" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="skrillsecret"}:</td>
-				<td class="td2"><input type="text" name="skrill_secret" value="{$bm_prefs.skrill_secret}" id="skrill_secret" size="24" /></td>
-				<td class="td2">&nbsp;</td>
-			</tr>
-		</table>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enablechrgskrill"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enable_skrill"{if $bm_prefs.enable_skrill=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="default_paymethod" value="3"{if $bm_prefs.default_paymethod==3} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="skrillacc"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="skrill_mail" value="{$bm_prefs.skrill_mail}" placeholder="{lng p="skrillacc"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="skrillsecret"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="skrill_secret" value="{$bm_prefs.skrill_secret}" placeholder="{lng p="skrillsecret"}">
+			</div>
+		</div>
 	</fieldset>
 
 	<fieldset>
 		<legend>{lng p="banktransfer"}</legend>
 
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="8"><img src="{$tpldir}images/ico_pay_banktransfer.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="220">{lng p="enablebanktransfer"}?</td>
-				<td class="td2"><input name="enable_vk"{if $bm_prefs.enable_vk=='yes'} checked="checked"{/if} type="checkbox" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="default"}?</td>
-				<td class="td2"><input type="radio" name="default_paymethod" value="0"{if $bm_prefs.default_paymethod==0} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="kto_inh"}:</td>
-				<td class="td2"><input type="text" name="vk_kto_inh" value="{text allowEmpty=true value=$bm_prefs.vk_kto_inh}" size="24" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="kto_nr"}:</td>
-				<td class="td2"><input type="text" name="vk_kto_nr" value="{text allowEmpty=true value=$bm_prefs.vk_kto_nr}" size="24" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="kto_blz"}:</td>
-				<td class="td2"><input type="text" name="vk_kto_blz" value="{text allowEmpty=true value=$bm_prefs.vk_kto_blz}" size="24" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="kto_inst"}:</td>
-				<td class="td2"><input type="text" name="vk_kto_inst" value="{text allowEmpty=true value=$bm_prefs.vk_kto_inst}" size="24" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="kto_iban"}:</td>
-				<td class="td2"><input type="text" name="vk_kto_iban" value="{text allowEmpty=true value=$bm_prefs.vk_kto_iban}" size="24" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="kto_bic"}:</td>
-				<td class="td2"><input type="text" name="vk_kto_bic" value="{text allowEmpty=true value=$bm_prefs.vk_kto_bic}" size="24" /></td>
-			</tr>
-		</table>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enablebanktransfer"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enable_vk"{if $bm_prefs.enable_vk=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="default_paymethod" value="0"{if $bm_prefs.default_paymethod==0} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="kto_inh"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="vk_kto_inh" value="{text allowEmpty=true value=$bm_prefs.vk_kto_inh}" placeholder="{lng p="kto_inh"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="kto_nr"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="vk_kto_nr" value="{text allowEmpty=true value=$bm_prefs.vk_kto_nr}" placeholder="{lng p="kto_nr"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="kto_blz"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="vk_kto_blz" value="{text allowEmpty=true value=$bm_prefs.vk_kto_blz}" placeholder="{lng p="kto_blz"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="kto_inst"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="vk_kto_inst" value="{text allowEmpty=true value=$bm_prefs.vk_kto_inst}" placeholder="{lng p="kto_inst"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="kto_iban"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="vk_kto_iban" value="{text allowEmpty=true value=$bm_prefs.vk_kto_iban}" placeholder="{lng p="kto_iban"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="kto_bic"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="vk_kto_bic" value="{text allowEmpty=true value=$bm_prefs.vk_kto_bic}" placeholder="{lng p="kto_bic"}">
+			</div>
+		</div>
 	</fieldset>
 
-	<p>
-		<div style="float:right" class="buttons">
-			<input class="button" type="submit" value=" {lng p="save"} " />
-		</div>
-	</p>
+	<div class="text-end">
+		<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
+	</div>
 </form>
 
 <form action="https://www.sofort-ueberweisung.de/payment/createNew/" method="post" target="suWindow" id="suForm">

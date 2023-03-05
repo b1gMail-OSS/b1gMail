@@ -1,15 +1,7 @@
 <fieldset>
 	<legend>{lng p="newsletter"}</legend>
-	
-	<center>
-		<br />
-		
-		<img src="{$tpldir}images/load_32.gif" border="0" alt="" /><br /><br />
-		{lng p="sendingletter"}<br />
-		<span id="status">0 / {$recpCount}</span>
-		
-		<br /><br />
-	</center>
+
+	<div class="alert alert-info">{lng p="sendingletter"}: <span id="status">0 / {$recpCount}</span></div>
 </fieldset>
 
 <script type="text/javascript">
