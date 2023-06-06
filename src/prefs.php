@@ -1355,7 +1355,13 @@ else if($_REQUEST['action'] == 'extpop3')
 		&& IsPOSTRequest())
 	{
 		$_REQUEST['p_user'] = str_replace(array("\n", "\r"), '', $_REQUEST['p_user']);
-		$_REQUEST['p_pass'] = str_replace(array("\n", "\r"), '', $_REQUEST['p_pass']);
+		if(empty($_REQUEST['p_pass'])) {
+			$account = $thisUser->GetPOP3Account((int)$_REQUEST['id']);
+			$_REQUEST['p_pass'] = $account['p_pass'];
+		}
+		else {
+			$_REQUEST['p_pass'] = str_replace(array("\n", "\r"), '', $_REQUEST['p_pass']);
+		}
 
 		if(CheckPOP3Login($_REQUEST['p_host'], (int)$_REQUEST['p_port'], $_REQUEST['p_user'], $_REQUEST['p_pass'], isset($_REQUEST['p_ssl'])))
 		{

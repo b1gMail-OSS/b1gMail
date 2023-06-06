@@ -96,7 +96,6 @@ function checkPOP3AccountForm(form)
 {
 	if(form.elements['p_host'].value.length < 2
 		|| form.elements['p_user'].value.length < 2
-		|| form.elements['p_pass'].value.length < 2
 		|| form.elements['p_port'].value.length < 1)
 	{
 		alert(lang['fillin']);
