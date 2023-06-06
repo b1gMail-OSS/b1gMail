@@ -1869,7 +1869,6 @@ $lang_admin['smsreplyabs']		= 'SMS-to-Mail-Absender';
 $lang_admin['datastorage']		= 'Datei-Speicherung';
 $lang_admin['structstorage']	= 'Strukturierte Speicherung';
 $lang_admin['dynnorecvrules']	= 'Die Empfänger-Bestimmung ist auf &quot;Empfangs-Regeln verwenden&quot; eingestellt, es sind aber keine Empfangs-Regeln vorhanden. E-Mail-Empfang ist nicht möglich. Bitte stellen Sie die Empfänger-Bestimmung auf &quot;Automatisch&quot; um oder legen Sie Empfangs-Regeln an.';
-$lang_admin['structsafewarn']	= 'Der PHP-SafeMode ist aktiviert. Die Aktivierung der strukturierten Datei-Speicherung kann zu Datenverlusten führen. Es wird dringend geraten, die strukturierte Speicherung nicht zu aktivieren!';
 $lang_admin['structrec']	 	= 'Der PHP-SafeMode ist deaktiviert. Unter diesen Umständen führt die strukturierte Datei-Speicherung zur Verbesserung der Performance. Die Aktivierung der strukturierten Speicherung wird empfohlen.';
 $lang_admin['dnsblreq']			= 'Erforderliche positive Tests';
 $lang_admin['croninterval']		= 'Minimales Cronjob-Intervall';

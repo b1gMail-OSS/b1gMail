@@ -189,11 +189,6 @@ if($_REQUEST['action'] == 'welcome')
 	else if(!is_writeable(B1GMAIL_DATA_DIR))
 		$notices[] = array('type'	=> 'error',
 							'text'	=> sprintf($lang_admin['dataperms'], B1GMAIL_DATA_DIR));
-	// struct storage?
-	if($bm_prefs['structstorage'] == 'yes' && ini_get('safe_mode'))
-		$notices[] = array('type'	=> 'error',
-							'text'	=> $lang_admin['structsafewarn'],
-							'link'	=> 'prefs.common.php?');
 
 	// dynamic recipient detection but no receive rules
 	if($bm_prefs['recipient_detection'] == 'dynamic')
@@ -291,7 +286,7 @@ if($_REQUEST['action'] == 'welcome')
 							'link'	=> 'prefs.common.php?');
 
 	// struct storage recommended?
-	if($bm_prefs['structstorage'] == 'no' && !ini_get('safe_mode'))
+	if($bm_prefs['structstorage'] == 'no')
 		$notices[] = array('type'	=> 'info',
 							'text'	=> $lang_admin['structrec'],
 							'link'	=> 'prefs.common.php?');
