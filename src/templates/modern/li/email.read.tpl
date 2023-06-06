@@ -240,7 +240,7 @@
 {hook id="email.read.tpl:afterText"}
 
 <div id="afterText">
-{if $vcards}
+{if isset($vcards)}
 <p>
 {foreach from=$vcards item=card key=key}
 	<div class="mailBox"><table width="100%">
