@@ -50,19 +50,19 @@
 			<input type="checkbox" name="items[{$resultCat.name}][]" id="checkbox_{$resultCatID}_{$resultID}" value="{$result.id}"{if !$resultCat.massActions} disabled="disabled"{/if} onchange="toggleResultMassActions(document.forms.f1, {$resultCatID});" />
 		</td>
 		<td width="24">
-			<i class="fa {if $result.icon}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
+			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
 		</td>
 		<td nowrap="nowrap" style="padding:4px;">
 			<a title="{text value=$result.title}" href="{if $result.extLink}{$result.extLink}{else}{$result.link}sid={$sid}{/if}"{if $result.extLink} target="_blank"{/if}>
 				<div style="text-overflow:ellipsis;overflow:hidden;{if $result.bold}font-weight:bold;{/if}{if $result.strike}text-decoration:line-through;{/if}">
 					{text value=$result.title}
 				</div>
-				{if $result.excerpt}<div style="color:#777;text-overflow:ellipsis;overflow:hidden;">{$result.excerpt}</div>{/if}
+				{if !empty($result.excerpt)}<div style="color:#777;text-overflow:ellipsis;overflow:hidden;">{$result.excerpt}</div>{/if}
 			</a>
 		</td>
-		<td width="130"><span style="{if $result.bold}font-weight:bold;{/if}{if $result.strike}text-decoration:line-through;{/if}">{if $result.date}{date timestamp=$result.date nice=true}{/if}</span></td>
-		<td width="75"><span style="{if $result.bold}font-weight:bold;{/if}{if $result.strike}text-decoration:line-through;{/if}">{if $result.size||$result.size===0}{size bytes=$result.size}{/if}</span></td>
-		<td style="text-align:center;">{if $result.score}{$result.score} %{else}-{/if}</td>
+		<td width="130"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if $result.strike}text-decoration:line-through;{/if}">{if $result.date}{date timestamp=$result.date nice=true}{/if}</span></td>
+		<td width="75"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if $result.strike}text-decoration:line-through;{/if}">{if $result.size||$result.size===0}{size bytes=$result.size}{/if}</span></td>
+		<td style="text-align:center;">{if !empty($result.score)}{$result.score} %{else}-{/if}</td>
 	</tr>
 	{/foreach}
 	{if $resultCat.massActions}
