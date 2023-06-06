@@ -33,7 +33,7 @@
 	</tr>
 	</thead>
 	
-	{if $sysFolderList}
+	{if !empty($sysFolderList)}
 	<tr>
 		<td colspan="7" class="folderGroup">
 			<a style="display:block;" href="javascript:toggleGroup('sys');">&nbsp;<img id="groupImage_sys" src="{$tpldir}images/contract.png" width="11" height="11" border="0" align="absmiddle" alt="" />
@@ -46,7 +46,7 @@
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" disabled="disabled" /></td>
 		<td class="{$class}" nowrap="nowrap">&nbsp;<a href="email.php?sid={$sid}&folder={$folderID}"><i class="fa {if $folder.type == 'inbox'}fa-inbox{elseif $folder.type == 'outbox'}fa-inbox{elseif $folder.type == 'drafts'}fa-envelope{elseif $folder.type == 'spam'}fa-ban{elseif $folder.type == 'trash'}fa-trash-o{elseif $folder.type == 'intellifolder'}fa-folder{else}fa-folder-o{/if}" aria-hidden="true"></i> {text value=$folder.titel cut=25}</a></td>
-		<td class="{$class}" nowrap="nowrap">&nbsp;{text value=$folder.parent cut=15}</td>
+		<td class="{$class}" nowrap="nowrap">&nbsp;{if isset($folder.parent)}{text value=$folder.parent cut=15}{/if}</td>
 		<td class="{$class}" nowrap="nowrap" style="text-align:center;">
 			{size bytes=$folder.size}
 		</td>
@@ -84,7 +84,7 @@
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="folder_{$folderID}" name="folder_{$folderID}" /></td>
 		<td class="{if $sortColumn=='titel'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="email.php?sid={$sid}&folder={$folderID}">{if $folder.intelligent==1}<i class="fa fa-folder" aria-hidden="true"></i>{else}<i class="fa fa-folder-o" aria-hidden="true"></i>{/if} {text value=$folder.titel cut=25}</a></td>
-		<td class="{if $sortColumn=='parent'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{text value=$folder.parent cut=15}</td>
+		<td class="{if $sortColumn=='parent'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{if isset($folder.parent)}{text value=$folder.parent cut=15}{/if}</td>
 		<td class="{$class}" nowrap="nowrap" style="text-align:center;">
 			{if $folder.intelligent}-{else}{size bytes=$folder.size}{/if}
 		</td>
