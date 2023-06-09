@@ -5,8 +5,8 @@
 {foreach from=$resultCat.results item=result}
 	<tr>
 		<td class="resultLeft" height="20" width="90">{if $first}{assign var=first value=false}{text value=$resultCat.title}{else}&nbsp;{/if}</td>
-		<td class="resultRight" onclick="{if $result.extLink}window.open('{$result.extLink}');{else}document.location.href='{$result.link}sid={$sid}';{/if}parent.hideSearchPopup(true);" title="{text value=$result.excerpt allowEmpty=true stripTags=true}">
-			<i class="fa {if $result.icon}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
+		<td class="resultRight" onclick="{if !empty($result.extLink)}window.open('{$result.extLink}');{else}document.location.href='{$result.link}sid={$sid}';{/if}parent.hideSearchPopup(true);" title="{if isset($result.excerpt)}{text value=$result.excerpt allowEmpty=true stripTags=true}{/if}">
+			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
 			{text value=$result.title cut=25}
 		</td>
 	</tr>

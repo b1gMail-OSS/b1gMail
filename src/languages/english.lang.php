@@ -1919,7 +1919,6 @@ $lang_admin['mail2smsabs']		= 'Mail-to-SMS sender';
 $lang_admin['smsreplyabs']		= 'SMS-to-mail sender';
 $lang_admin['datastorage']		= 'Data storage';
 $lang_admin['structstorage']	= 'Structured storage';
-$lang_admin['structsafewarn']	= 'The PHP safe mode is enabled. Enabling structured data storage may lead to data loss. It is strongly advised that structured data storage is not enabled!';
 $lang_admin['structrec']	 	= 'The PHP safe mode is disabled. Under these circumstances the structured data storage will enhance performance. Enabling the structured data storage is recommended.';
 $lang_admin['dnsblreq']			= 'Required positive tests';
 $lang_admin['croninterval']		= 'Minimum cronjob interval';

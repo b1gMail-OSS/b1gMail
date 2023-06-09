@@ -72,7 +72,7 @@
 	{/if}
 	<tr>
 		<td colspan="{if $templatePrefs.showCheckboxes}7{else}6{/if}" class="folderGroup">
-			<a style="display:block;cursor:pointer;" onclick="toggleGroup({$mailID},'{$mail.groupID}');">&nbsp;<img id="groupImage_{$mailID}" src="{$tpldir}images/{if $smarty.cookies.toggleGroup.$mailGroupID=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
+			<a style="display:block;cursor:pointer;" onclick="toggleGroup({$mailID},'{if isset($mail.groupID)}{$mail.groupID}{/if}');">&nbsp;<img id="groupImage_{$mailID}" src="{$tpldir}images/{if $smarty.cookies.toggleGroup.$mailGroupID=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
 			&nbsp;{$mail.text} {if $mail.date && $mail.date!=-1}({date timestamp=$mail.date dayonly=true}){/if}</a>
 		</td>
 	</tr>

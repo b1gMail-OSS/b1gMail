@@ -169,7 +169,7 @@
 		{lng p="print"}
 	</button>
 	
-	{if !$folderInfo.readonly}<button type="button" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} deleteMail({$mailID});">
+	{if !isset($folderInfo.readonly)}<button type="button" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} deleteMail({$mailID});">
 		<i class="fa fa-remove"></i>
 		{lng p="delete"}
 	</button>{/if}

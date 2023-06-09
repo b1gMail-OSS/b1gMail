@@ -48,23 +48,23 @@
 			</div>
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li{if $smarty.request.action=='login'} class="active"{/if}><a href="index.php">{lng p="home"}</a></li>
+					<li{if isset($smarty.request.action) && $smarty.request.action=='login'} class="active"{/if}><a href="index.php">{lng p="home"}</a></li>
 				{foreach from=$pluginUserPages item=item}{if $item.top&&$item.after=='login'}
 					<li{if $item.active} class="active"{/if}><a href="{$item.link}">{$item.text}</a></li>
 				{/if}{/foreach}
-					{if $_regEnabled||(!$templatePrefs.hideSignup)}<li{if $smarty.request.action=='signup'} class="active"{/if}><a href="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup">{lng p="signup"}</a></li>{/if}
+					{if $_regEnabled||(!$templatePrefs.hideSignup)}<li{if isset($smarty.request.action) && $smarty.request.action=='signup'} class="active"{/if}><a href="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup">{lng p="signup"}</a></li>{/if}
 				{foreach from=$pluginUserPages item=item}{if $item.top&&$item.after=='signup'}
 					<li{if $item.active} class="active"{/if}><a href="{$item.link}">{$item.text}</a></li>
 				{/if}{/foreach}
-					<li{if $smarty.request.action=='faq'} class="active"{/if}><a href="index.php?action=faq">{lng p="faq"}</a></li>
+					<li{if isset($smarty.request.action) && $smarty.request.action=='faq'} class="active"{/if}><a href="index.php?action=faq">{lng p="faq"}</a></li>
 				{foreach from=$pluginUserPages item=item}{if $item.top&&$item.after=='faq'}
 					<li{if $item.active} class="active"{/if}><a href="{$item.link}">{$item.text}</a></li>
 				{/if}{/foreach}
-					<li{if $smarty.request.action=='tos'} class="active"{/if}><a href="index.php?action=tos">{lng p="tos"}</a></li>
+					<li{if isset($smarty.request.action) && $smarty.request.action=='tos'} class="active"{/if}><a href="index.php?action=tos">{lng p="tos"}</a></li>
 				{foreach from=$pluginUserPages item=item}{if $item.top&&(!$item.after||$item.after=='tos')}
 					<li{if $item.active} class="active"{/if}><a href="{$item.link}">{$item.text}</a></li>
 				{/if}{/foreach}
-					<li{if $smarty.request.action=='imprint'} class="active"{/if}><a href="index.php?action=imprint">{lng p="contact"}</a></li>
+					<li{if isset($smarty.request.action) && $smarty.request.action=='imprint'} class="active"{/if}><a href="index.php?action=imprint">{lng p="contact"}</a></li>
 				</ul>
 				<form action="{if $ssl_login_enable||($welcomeBack&&$smarty.cookies.bm_savedSSL)}{$ssl_url}{/if}index.php?action=login" method="post" id="loginFormPopover">
 					<input type="hidden" name="do" value="login" />

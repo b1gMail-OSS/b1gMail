@@ -39,9 +39,9 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="listTableLeft">* <label for="p_pass">{lng p="password"}:</label></td>
+			<td class="listTableLeft"><label for="p_pass">{lng p="password"}:</label></td>
 			<td class="listTableRight">
-				<input type="password" name="p_pass" id="p_pass" value="{if isset($account.p_pass)}{text value=$account.p_pass allowEmpty=true}{/if}" size="24" />
+				<input type="password" name="p_pass" id="p_pass" placeholder="****" size="24" />
 			</td>
 		</tr>
 		<tr>
