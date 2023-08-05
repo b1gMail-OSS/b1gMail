@@ -107,7 +107,7 @@
 						<ul>
 							{if $adminRow.type==0}<li><a href="plugins.php?sid={$sid}"><img src="./templates/images/plugin.png" />{lng p="plugins"}</a></li>{/if}
 							{foreach from=$pluginMenuItems item=pluginInfo key=plugin}
-							{if $adminRow.type==0||$adminRow.privileges.plugins.$plugin}
+							{if $adminRow.type==0||isset($adminRow.privileges.plugins.$plugin)}
 							<li><a href="plugin.page.php?sid={$sid}&plugin={$plugin}" ><img src="{if $pluginInfo.icon}../plugins/templates/images/{$pluginInfo.icon}{else}./templates/images/wlayout_add.png{/if}" />{$pluginInfo.title}</a></li>
 							{/if}
 							{/foreach}
@@ -129,7 +129,7 @@
 				{foreach from=$tabs item=tab}
 				<li{if $tab.active} class="active"{/if}>
 					<a href="{$tab.link}sid={$sid}">
-						<img src="{if $tab.relIcon}./templates/images/{$tab.relIcon}{elseif $tab.icon}{$tab.icon}{else}./templates/images/ico_prefs_misc.png{/if}" border="0" alt="" />
+						<img src="{if !empty($tab.relIcon)}./templates/images/{$tab.relIcon}{elseif $tab.icon}{$tab.icon}{else}./templates/images/ico_prefs_misc.png{/if}" border="0" alt="" />
 						{$tab.title}
 					</a>
 				</li>
