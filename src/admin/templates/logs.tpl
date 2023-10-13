@@ -46,19 +46,19 @@
 			<tr>
 				<td class="td1">{lng p="priority"}:</td>
 				<td class="td2">
-					<input type="checkbox"{if $prio[8]} checked="checked"{/if} name="prio[8]" id="prio8" />
+					<input type="checkbox"{if isset($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8" />
 					<label for="prio8"><img src="{$tpldir}images/debug.png" border="0" alt="" width="16" height="16" /></label> &nbsp; 
 					
-					<input type="checkbox"{if $prio[2]} checked="checked"{/if} name="prio[2]" id="prio2" />
+					<input type="checkbox"{if isset($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2" />
 					<label for="prio2"><img src="{$tpldir}images/info.png" border="0" alt="" width="16" height="16" /></label> &nbsp; 
 					
-					<input type="checkbox"{if $prio[1]} checked="checked"{/if} name="prio[1]" id="prio1" />
+					<input type="checkbox"{if isset($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1" />
 					<label for="prio1"><img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" /></label> &nbsp; 
 					
-					<input type="checkbox"{if $prio[4]} checked="checked"{/if} name="prio[4]" id="prio4" />
+					<input type="checkbox"{if isset($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4" />
 					<label for="prio4"><img src="{$tpldir}images/error.png" border="0" alt="" width="16" height="16" /></label> &nbsp; 
 					
-					<input type="checkbox"{if $prio[16]} checked="checked"{/if} name="prio[16]" id="prio16" />
+					<input type="checkbox"{if isset($prio[16])} checked="checked"{/if} name="prio[16]" id="prio16" />
 					<label for="prio16"><img src="{$tpldir}images/plugin.png" border="0" alt="" width="16" height="16" /></label>
 				</td>
 			</tr>

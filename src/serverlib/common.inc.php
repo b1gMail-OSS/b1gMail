@@ -1702,7 +1702,7 @@ function categorizeDate($date)
 		$ts[$a] = array(
 			'from' 	=> $last,
 			'to'	=> $last+86400,
-			'text' 	=> _strftime('%A', $last),
+			'text' 	=> date('l', $last),
 			'date' 	=> $last
 		);
 	}
@@ -3519,7 +3519,7 @@ function b1gMailShutdown()
  * @param string $file
  * @param int $line
  */
-function DisplayError($number, $title, $description, $text = false, $file, $line)
+function DisplayError($number, $title, $description, $text = false, $file = '', $line = '')
 {
 	if(INTERFACE_MODE)
 	{

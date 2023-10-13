@@ -48,9 +48,9 @@
 			<td><img src="{$tpldir}images/phrases.png" border="0" alt="" width="16" height="16" /></td>
 			<td><a name="{$text.key}" />{$text.title}<br /><small>{text value=$text.key}</small></td>
 			<td>
-				{if $customTextsHTML[$text.key]}<div style="border: 1px solid #DDDDDD;background-color:#FFFFFF;">{/if}
-				<textarea onfocus="this.style.height='240px';" onblur="this.style.height='100px';" style="width:99%;height:{if $customTextsHTML[$text.key]}350{else}100{/if}px;" name="text-{$text.key}" id="text-{$text.key}">{text value=$text.text allowEmpty=true}</textarea>
-				{if $customTextsHTML[$text.key]}
+				{if isset($customTextsHTML[$text.key])}<div style="border: 1px solid #DDDDDD;background-color:#FFFFFF;">{/if}
+				<textarea onfocus="this.style.height='240px';" onblur="this.style.height='100px';" style="width:99%;height:{if isset($customTextsHTML[$text.key])}350{else}100{/if}px;" name="text-{$text.key}" id="text-{$text.key}">{text value=$text.text allowEmpty=true}</textarea>
+				{if isset($customTextsHTML[$text.key])}
 				</div>
 				<script>
 				<!--

@@ -1,28 +1,28 @@
 <div id="contentHeader">
 	<div class="left">
 		<i class="fa fa-address-book-o" aria-hidden="true"></i>
-		{if isset($contact)}{lng p="editcontact"}{else}{lng p="addcontact"}{/if}
+		{if isset($contact) && $contact}{lng p="editcontact"}{else}{lng p="addcontact"}{/if}
 	</div>
 </div>
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f1" method="post" action="organizer.addressbook.php?action={if $contact}saveContact&id={$contact.id}{else}createContact{/if}&sid={$sid}" onsubmit="return(checkContactForm(this));">
+<form name="f1" method="post" action="organizer.addressbook.php?action={if isset($contact) && $contact}saveContact&id={$contact.id}{else}createContact{/if}&sid={$sid}" onsubmit="return(checkContactForm(this));">
 	<input type="hidden" id="submitAction" name="submitAction" value="" />
 	<table class="listTable">
 		<tr>
-			<th class="listTableHead" colspan="3"> {if isset($contact)}{lng p="editcontact"}{else}{lng p="addcontact"}{/if}</th>
+			<th class="listTableHead" colspan="3"> {if isset($contact) && $contact}{lng p="editcontact"}{else}{lng p="addcontact"}{/if}</th>
 		</tr>
 		<tr>
 			<td class="listTableLeftDesc"><i class="fa fa-address-card-o" aria-hidden="true"></i></td>
 			<td class="listTableRightDesc">{lng p="common"}</td>
 			
-			<td class="listTableRightest" rowspan="26" width="180">				
+			<td class="listTableRightest" rowspan="26" width="220">				
 				<fieldset>
 					<legend>{lng p="userpicture"}</legend>
 					<input type="hidden" name="pictureFile" id="pictureFile" value="" />
 					<input type="hidden" name="pictureMime" id="pictureMime" value="" />
-					<br /><center><div id="pictureDiv" style="background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url({if empty($contact.picture)}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if}); width: 80px; height: 80px;"><a href="javascript:addrUserPicture({if $contact}{$contact.id}{else}-1{/if});"><img src="{$tpldir}images/li/pic_frame.gif" width="80" height="80" border="0" alt="" /></a></div></center>
+					<br /><center><div id="pictureDiv" style="background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url({if !isset($contact) || !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if}); width: 80px; height: 80px;"><a href="javascript:addrUserPicture({if isset($contact) && $contact}{$contact.id}{else}-1{/if});"><img src="{$tpldir}images/li/pic_frame.gif" width="80" height="80" border="0" alt="" /></a></div></center>
 					<br /><small>{lng p="changepicbyclick"}</small>
 				</fieldset>
 				<small><br /></small>				
@@ -44,7 +44,7 @@
 				<fieldset>
 					<legend>{lng p="features"}</legend>
 					<div align="left">
-						{if isset($contact)}
+						{if isset($contact) && $contact}
 							<a href="javascript:addrFunction('exportVCF');"><i class="fa fa-address-card-o" aria-hidden="true"></i> {lng p="exportvcf"}</a><br />
 							<a href="javascript:addrFunction('selfComplete');"><i class="fa fa-check-square-o" aria-hidden="true"></i> {lng p="complete"}</a><br />
 							<a href="javascript:addrFunction('intelliFolder');"><i class="fa fa-folder" aria-hidden="true"></i> {lng p="convfolder"}</a><br />
@@ -62,8 +62,8 @@
 			<td class="listTableRight">
 				<select name="anrede" id="anrede">
 					<option value=""{if empty($contact.anrede)} selected="selected"{/if}>&nbsp;</option>
-					<option value="frau"{if $contact.anrede=='frau'} selected="selected"{/if}>{lng p="mrs"}</option>
-					<option value="herr"{if $contact.anrede=='herr'} selected="selected"{/if}>{lng p="mr"}</option>
+					<option value="frau"{if isset($contact) && $contact.anrede=='frau'} selected="selected"{/if}>{lng p="mrs"}</option>
+					<option value="herr"{if isset($contact) && $contact.anrede=='herr'} selected="selected"{/if}>{lng p="mr"}</option>
 				</select>
 			</td>
 		</tr>
@@ -83,7 +83,7 @@
 						<td>{lng p="priv"}</td>
 						<td align="right">
 							<label for="default_priv">{lng p="default"}</label>
-							<input type="radio" name="default" id="default_priv" value="priv"{if $contact.default_address!=2} checked="checked"{/if} />
+							<input type="radio" name="default" id="default_priv" value="priv"{if !isset($contact) || $contact.default_address!=2} checked="checked"{/if} />
 						</td>
 					</tr>
 				</table>

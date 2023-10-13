@@ -36,7 +36,11 @@ function Strip4ByteChars($in)
 
 	}
 	else if(in_array(strtolower($currentCharset), array('utf8', 'utf-8')))
-		return preg_replace('/[\x{10000}-\x{10FFFF}]/u', ' ', $in);
+        // It is possible that the provided string is actually not an UTF8 string. In this case, preg_replace will return null.
+        $result = preg_replace('/[\x{10000}-\x{10FFFF}]/u', ' ', $in);
+        if (!is_null($result)) {
+            return $result;
+        }
 
 	return $in;
 }

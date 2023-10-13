@@ -761,7 +761,7 @@ class BMCalendar
         $html .= sprintf('		<th class="Caption" colspan="7"><a href="organizer.calendar.php?view=month&date=%d&sid=%s">%s</a></th>'."\n",
             mktime(0, 0, 0, $month, 1, $year),
             session_id(),
-            _strftime('%B %Y', mktime(0, 0, 0, $month, 1, $year)));
+            date('F Y', mktime(0, 0, 0, $month, 1, $year)));
         $html .= '	</tr>'."\n";
 
         // column headings

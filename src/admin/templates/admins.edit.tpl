@@ -36,7 +36,7 @@
 				<td class="td1" width="220">{lng p="areas"}:</td>
 				<td class="td2">
 					{foreach from=$permsTable item=permTitle key=permName}
-					<input type="checkbox" name="perms[{$permName}]" value="1" id="perm_{$permName}"{if $admin.perms.$permName} checked="checked"{/if} />
+					<input type="checkbox" name="perms[{$permName}]" value="1" id="perm_{$permName}"{if isset($admin.perms.$permName) &&  $admin.perms.$permName} checked="checked"{/if} />
 					<label for="perm_{$permName}" style="font-weight:bold;">{$permTitle}</label><br />
 					{/foreach}
 				</td>
@@ -45,7 +45,7 @@
 				<td class="td1">{lng p="plugins"}:</td>
 				<td class="td2">
 					{foreach from=$pluginList item=pluginTitle key=pluginName}
-					<input type="checkbox" name="perms[plugins][{$pluginName}]" value="1" id="plugin_{$pluginName}"{if $admin.perms.plugins.$pluginName} checked="checked"{/if} />
+					<input type="checkbox" name="perms[plugins][{$pluginName}]" value="1" id="plugin_{$pluginName}"{if isset($admin.perms.plugins.$pluginName) && $admin.perms.plugins.$pluginName} checked="checked"{/if} />
 					<label for="plugin_{$pluginName}" style="font-weight:bold;">{text value=$pluginTitle}</label><br />
 					{/foreach}
 				</td>

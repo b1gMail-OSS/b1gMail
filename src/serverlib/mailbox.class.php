@@ -799,7 +799,7 @@ class BMMailbox
 	 *
 	 * @return array
 	 */
-	function GetDropdownFolderList($parent = -1, &$result, $level = 0, $more = 0, $includeShared = true)
+	function GetDropdownFolderList($parent = -1, &$result = null, $level = 0, $more = 0, $includeShared = true)
 	{
 		global $db, $lang_user;
 

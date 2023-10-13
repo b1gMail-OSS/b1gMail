@@ -22,20 +22,20 @@
 	<tr>
 		<th colspan="2">&nbsp;</th>
 		<th><a href="#" onclick="changeSearchSort('title','{$sortOrderInv}');">{lng p="title"}</a>
-			{if $sortColumn=='title'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
+			{if isset($sortColumn) && $sortColumn=='title'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 		<th><a href="#" onclick="changeSearchSort('date','{$sortOrderInv}');">{lng p="date"}</a>
-			{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
+			{if isset($sortColumn) && $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 		<th><a href="#" onclick="changeSearchSort('size','{$sortOrderInv}');">{lng p="size"}</a>
-			{if $sortColumn=='size'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
+			{if isset($sortColumn) && $sortColumn=='size'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 		<th><a href="#" onclick="changeSearchSort('score','{$sortOrderInv}');">{lng p="relevance"}</a>
-			{if $sortColumn=='score'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
+			{if isset($sortColumn) && $sortColumn=='score'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
 	</tr>
 	
-	{if $results}
+	{if isset($results)}
 	{foreach from=$results item=resultCat key=resultCatID}
 	<tr>
 		<td width="24" align="center" class="folderGroup">
-			<input type="checkbox"{if !$resultCat.massActions} disabled="disabled"{else} onclick="checkAll(this.checked, document.forms.f1, 'checkbox_{$resultCatID}_');toggleResultMassActions(document.forms.f1, {$resultCatID});"{/if} />
+			<input type="checkbox"{if !isset($resultCat.massActions) || !$resultCat.massActions} disabled="disabled"{else} onclick="checkAll(this.checked, document.forms.f1, 'checkbox_{$resultCatID}_');toggleResultMassActions(document.forms.f1, {$resultCatID});"{/if} />
 		</td>
 		<td colspan="5" class="folderGroup">
 			<a style="display:block;" href="javascript:toggleGroup({$resultCatID});">&nbsp;<img id="groupImage_{$resultCatID}" src="{$tpldir}images/contract.png" width="11" height="11" border="0" align="absmiddle" alt="" />
@@ -47,7 +47,7 @@
 	{cycle values="listTableTR,listTableTR2" assign="class"}
 	<tr class="{$class}">
 		<td width="24" align="center">
-			<input type="checkbox" name="items[{$resultCat.name}][]" id="checkbox_{$resultCatID}_{$resultID}" value="{$result.id}"{if !$resultCat.massActions} disabled="disabled"{/if} onchange="toggleResultMassActions(document.forms.f1, {$resultCatID});" />
+			<input type="checkbox" name="items[{$resultCat.name}][]" id="checkbox_{$resultCatID}_{$resultID}" value="{$result.id|default:''}"{if !isset($resultCat.massActions) || !$resultCat.massActions} disabled="disabled"{/if} onchange="toggleResultMassActions(document.forms.f1, {$resultCatID});" />
 		</td>
 		<td width="24">
 			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
@@ -65,7 +65,7 @@
 		<td style="text-align:center;">{if !empty($result.score)}{$result.score} %{else}-{/if}</td>
 	</tr>
 	{/foreach}
-	{if $resultCat.massActions}
+	{if isset($resultCat.massActions) && $resultCat.massActions}
 	
 	<tr style="display:none;" id="massActions_{$resultCatID}">
 		<td colspan="6" class="listTableFoot" style="border-bottom:3px double #CCC;">
