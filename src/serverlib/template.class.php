@@ -24,53 +24,63 @@ if (!defined('B1GMAIL_INIT')) {
 }
 
 /**
- * smarty.
+ * smarty
  */
-include B1GMAIL_DIR.'serverlib/3rdparty/smarty/Smarty.class.php';
+include B1GMAIL_DIR . 'serverlib/3rdparty/smarty/Smarty.class.php';
 
 /**
- * template class (extends smarty).
+ * template class (extends smarty)
  */
-class Template extends Smarty
-{
-    public $_cssFiles;
-    public $_jsFiles;
-    public $tplDir;
-    public $reassignFolderList = false;
-    public $hookTable = [];
+class Template extends Smarty {
+    var $_cssFiles, $_jsFiles;
+    var $tplDir;
+    var $reassignFolderList = false;
+    var $hookTable = [];
 
     /**
-     * constructor.
+     * constructor
      *
      * @return Template
      */
-    public function __construct()
-    {
+    function __construct() {
         global $bm_prefs, $lang_user, $lang_info;
+
+        parent::__construct();
 
         $this->_cssFiles = ['nli' => [], 'li' => [], 'admin' => []];
         $this->_jsFiles = ['nli' => [], 'li' => [], 'admin' => []];
 
         // template & cache directories
         if (ADMIN_MODE) {
-            $this->template_dir = B1GMAIL_DIR.'admin/templates/';
-            $this->compile_dir = B1GMAIL_DIR.'admin/templates/cache/';
+            $this->setTemplateDir(B1GMAIL_DIR . 'admin/templates/');
+            $this->setCompileDir(B1GMAIL_DIR . 'admin/templates/cache/');
             $this->assign('tpldir', $this->tplDir = './templates/');
         } else {
-            $this->template_dir = B1GMAIL_DIR.'templates/'.$bm_prefs['template'].'/';
-            $this->compile_dir = B1GMAIL_DIR.'templates/'.$bm_prefs['template'].'/cache/';
-            $this->assign('tpldir', $this->tplDir = B1GMAIL_REL.'templates/'.$bm_prefs['template'].'/');
+            $this->setTemplateDir(
+                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/',
+            );
+            $this->setCompileDir(
+                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/',
+            );
+            $this->assign(
+                'tpldir',
+                $this->tplDir =
+                    B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/',
+            );
         }
 
         // variables
         $this->assign('service_title', HTMLFormat($bm_prefs['titel']));
         $this->assign('charset', $lang_info['charset']);
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
-            $this->assign('selfurl', str_replace('http://', 'https://', $bm_prefs['selfurl']));
+            $this->assign(
+                'selfurl',
+                str_replace('http://', 'https://', $bm_prefs['selfurl']),
+            );
         } else {
             $this->assign('selfurl', $bm_prefs['selfurl']);
         }
-        $this->assign('_tpldir', 'templates/'.$bm_prefs['template'].'/');
+        $this->assign('_tpldir', 'templates/' . $bm_prefs['template'] . '/');
         $this->assign('_tplname', $bm_prefs['template']);
         $this->assign('_regEnabled', $bm_prefs['regenabled'] == 'yes');
         $this->assign('serverTZ', date('Z'));
@@ -83,42 +93,56 @@ class Template extends Smarty
             }
             $this->assign('_safePost', $_safePost);
         }
+        else {
+            $this->assign('_safePost', array()); // Workaround for signup.tpl, give empty array
+        }
 
         // functions
-        $this->register_function('banner', 'TemplateBanner');
-        $this->register_function('lng', 'TemplateLang');
-        $this->register_function('comment', 'TemplateComment');
-        $this->register_function('date', 'TemplateDate');
-        $this->register_function('size', 'TemplateSize');
-        $this->register_function('text', 'TemplateText');
-        $this->register_function('domain', 'TemplateDomain');
-        $this->register_function('email', 'TemplateEMail');
-        $this->register_function('progressBar', 'TemplateProgressBar');
-        $this->register_function('miniCalendar', 'TemplateMiniCalendar');
-        $this->register_function('fileSelector', 'TemplateFileSelector');
-        $this->register_function('pageNav', 'TemplatePageNav');
-        $this->register_function('addressList', 'TemplateAddressList');
-        $this->register_function('storeTime', 'TemplateStoreTime');
-        $this->register_function('halfHourToTime', 'TemplateHalfHourToTime');
-        $this->register_function('implode', 'TemplateImplode');
-        $this->register_function('mobileNr', 'TemplateMobileNr');
-        $this->register_function('hook', 'TemplateHook');
-        $this->register_function('fileDateSig', 'TemplateFileDateSig');
-        $this->register_function('number', 'TemplateNumber');
-        $this->register_function('fieldDate', 'TemplateFieldDate');
+        $this->registerPlugin('function', 'banner', 'TemplateBanner');
+        $this->registerPlugin('function', 'lng', 'TemplateLang');
+        $this->registerPlugin('function', 'comment', 'TemplateComment');
+        $this->registerPlugin('function', 'date', 'TemplateDate');
+        $this->registerPlugin('function', 'size', 'TemplateSize');
+        $this->registerPlugin('function', 'text', 'TemplateText');
+        $this->registerPlugin('function', 'domain', 'TemplateDomain');
+        $this->registerPlugin('function', 'email', 'TemplateEMail');
+        $this->registerPlugin('function', 'progressBar', 'TemplateProgressBar');
+        $this->registerPlugin(
+            'function',
+            'miniCalendar',
+            'TemplateMiniCalendar',
+        );
+        $this->registerPlugin(
+            'function',
+            'fileSelector',
+            'TemplateFileSelector',
+        );
+        $this->registerPlugin('function', 'pageNav', 'TemplatePageNav');
+        $this->registerPlugin('function', 'addressList', 'TemplateAddressList');
+        $this->registerPlugin('function', 'storeTime', 'TemplateStoreTime');
+        $this->registerPlugin(
+            'function',
+            'halfHourToTime',
+            'TemplateHalfHourToTime',
+        );
+        $this->registerPlugin('function', 'implode', 'TemplateImplode');
+        $this->registerPlugin('function', 'mobileNr', 'TemplateMobileNr');
+        $this->registerPlugin('function', 'hook', 'TemplateHook');
+        $this->registerPlugin('function', 'fileDateSig', 'TemplateFileDateSig');
+        $this->registerPlugin('function', 'number', 'TemplateNumber');
+        $this->registerPlugin('function', 'fieldDate', 'TemplateFieldDate');
 
         // module handler
         ModuleFunction('OnCreateTemplate', [&$this]);
     }
 
     /**
-     * register with a template hook.
+     * register with a template hook
      *
-     * @param string $id  Hook ID
+     * @param string $id Hook ID
      * @param string $tpl File name of template to be included
      */
-    public function registerHook($id, $tpl)
-    {
+    function registerHook($id, $tpl) {
         if (!isset($this->hookTable[$id])) {
             $this->hookTable[$id] = [$tpl];
         } else {
@@ -127,20 +151,18 @@ class Template extends Smarty
     }
 
     /**
-     * adds a JS file to be included in the page.
+     * adds a JS file to be included in the page
      *
      * @param string $area Area (nli/li/admin)
      * @param string $file Filename
      */
-    public function addJSFile($area, $file)
-    {
+    function addJSFile($area, $file) {
         if (isset($this->_jsFiles[$area])) {
             if (!in_array($file, $this->_jsFiles[$area])) {
-                if (file_exists($file)) {
-                    $file .= '?'.substr(md5(filemtime($file)), 0, 6);
+                if (file_Exists($file)) {
+                    $file .= '?' . substr(md5(filemtime($file)), 0, 6);
                 }
                 $this->_jsFiles[$area][] = $file;
-
                 return true;
             }
         }
@@ -149,17 +171,15 @@ class Template extends Smarty
     }
 
     /**
-     * adds a CSS file to be included in the page.
+     * adds a CSS file to be included in the page
      *
      * @param string $area Area (nli/li/admin)
      * @param string $file Filename
      */
-    public function addCSSFile($area, $file)
-    {
+    function addCSSFile($area, $file) {
         if (isset($this->_cssFiles[$area])) {
             if (!in_array($file, $this->_cssFiles[$area])) {
                 $this->_cssFiles[$area][] = $file;
-
                 return true;
             }
         }
@@ -167,9 +187,21 @@ class Template extends Smarty
         return false;
     }
 
-    public function fetch($resource_name, $cache_id = null, $compile_id = null, $display = false)
-    {
-        global $thisUser, $userRow, $groupRow, $lang_user, $plugins, $bm_prefs, $adminRow, $currentLanguage;
+    function createTemplate(
+        $template,
+        $cache_id = null,
+        $compile_id = null,
+        $parent = null,
+        $do_clone = true
+    ) {
+        global $thisUser,
+            $userRow,
+            $groupRow,
+            $lang_user,
+            $plugins,
+            $bm_prefs,
+            $adminRow,
+            $currentLanguage;
 
         $this->assign('templatePrefs', GetTemplatePrefs($bm_prefs['template']));
 
@@ -184,15 +216,26 @@ class Template extends Smarty
             $pluginMenuItems = [];
             foreach ($plugins->_plugins as $className => $pluginInfo) {
                 if ($plugins->getParam('admin_pages', $className)) {
-                    $pluginMenuItems[$className] = ['title' => $plugins->getParam('admin_page_title', $className),
-                                                            'icon' => $plugins->getParam('admin_page_icon', $className), ];
+                    $pluginMenuItems[$className] = [
+                        'title' => $plugins->getParam(
+                            'admin_page_title',
+                            $className,
+                        ),
+                        'icon' => $plugins->getParam(
+                            'admin_page_icon',
+                            $className,
+                        ),
+                    ];
                 }
             }
 
             asort($pluginMenuItems);
             $this->assign('pluginMenuItems', $pluginMenuItems);
 
-            $this->assign('isGerman', strpos(strtolower($currentLanguage), 'deutsch') !== false);
+            $this->assign(
+                'isGerman',
+                strpos(strtolower($currentLanguage), 'deutsch') !== false,
+            );
         }
 
         // tabs
@@ -226,7 +269,8 @@ class Template extends Smarty
                 [
                     'icon' => 'ico_addressbook',
                     'faIcon' => 'fa-address-book-o',
-                    'link' => 'organizer.addressbook.php?action=addContact&sid=',
+                    'link' =>
+                        'organizer.addressbook.php?action=addContact&sid=',
                     'text' => $lang_user['contact'],
                     'order' => 500,
                 ],
@@ -278,16 +322,17 @@ class Template extends Smarty
                 ];
             }
 
-            if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
-                $pageTabs = array_merge($pageTabs, [
-                    'organizer' => [
-                        'icon' => 'organizer',
-                        'faIcon' => 'fa-calendar',
-                        'link' => 'organizer.php?sid=',
-                        'text' => $lang_user['organizer'],
-                        'order' => 400,
-                    ], ]);
-            }
+        if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
+            $pageTabs = array_merge($pageTabs, [
+                'organizer' => [
+                    'icon' => 'organizer',
+                    'faIcon' => 'fa-calendar',
+                    'link' => 'organizer.php?sid=',
+                    'text' => $lang_user['organizer'],
+                    'order' => 400,
+                ],
+            ]);
+        }
 
             if (array_key_exists('webdisk', $groupRow) && $groupRow['webdisk'] + $userRow['diskspace_add'] > 0) {
                 $pageTabs = array_merge($pageTabs, [
@@ -297,7 +342,8 @@ class Template extends Smarty
                         'link' => 'webdisk.php?sid=',
                         'text' => $lang_user['webdisk'],
                         'order' => 500,
-                    ], ]);
+                    ],
+                ]);
 
                 $newMenu[] = [
                     'sep' => true,
@@ -312,12 +358,19 @@ class Template extends Smarty
                 ];
             }
 
-            $moduleResult = $plugins->callFunction('getUserPages', false, true, [true]);
+            $moduleResult = $plugins->callFunction(
+                'getUserPages',
+                false,
+                true,
+                [true],
+            );
             foreach ($moduleResult as $userPages) {
                 $pageTabs = array_merge($pageTabs, $userPages);
             }
 
-            $moduleResult = $plugins->callFunction('getNewMenu', false, true, [true]);
+            $moduleResult = $plugins->callFunction('getNewMenu', false, true, [
+                true,
+            ]);
             foreach ($moduleResult as $newEntries) {
                 $newMenu = array_merge($newMenu, $newEntries);
             }
@@ -329,7 +382,8 @@ class Template extends Smarty
                     'link' => 'prefs.php?sid=',
                     'text' => $lang_user['prefs'],
                     'order' => 600,
-                ], ]);
+                ],
+            ]);
 
             // sort by order
             if (is_array($tabOrder = @unserialize($bm_prefs['taborder']))) {
@@ -352,20 +406,39 @@ class Template extends Smarty
             $this->assign('pageTabsCount', count($pageTabs));
             $this->assign('newMenu', $newMenu);
             $this->assign('_userEmail', $userRow['email']);
-            $this->assign('searchDetailsDefault', $userRow['search_details_default'] == 'yes');
-            $this->assign('ftsBGIndexing', $bm_prefs['fts_bg_indexing'] == 'yes' && $groupRow['ftsearch'] == 'yes' && FTS_SUPPORT);
+            $this->assign(
+                'searchDetailsDefault',
+                $userRow['search_details_default'] == 'yes',
+            );
+            $this->assign(
+                'ftsBGIndexing',
+                $bm_prefs['fts_bg_indexing'] == 'yes' &&
+                    $groupRow['ftsearch'] == 'yes' &&
+                    FTS_SUPPORT,
+            );
 
             if ($groupRow['notifications'] == 'yes') {
-                $this->assign('bmUnreadNotifications', $thisUser->GetUnreadNotifications());
+                $this->assign(
+                    'bmUnreadNotifications',
+                    $thisUser->GetUnreadNotifications(),
+                );
                 $this->assign('bmNotifyInterval', $bm_prefs['notify_interval']);
-                $this->assign('bmNotifySound', $userRow['notify_sound'] == 'yes');
+                $this->assign(
+                    'bmNotifySound',
+                    $userRow['notify_sound'] == 'yes',
+                );
             }
         }
 
         // pugin pages (not logged in)
         else {
             $menu = [];
-            $moduleResult = $plugins->callFunction('getUserPages', false, true, [false]);
+            $moduleResult = $plugins->callFunction(
+                'getUserPages',
+                false,
+                true,
+                [false],
+            );
             foreach ($moduleResult as $userPages) {
                 $menu = array_merge($menu, $userPages);
             }
@@ -377,27 +450,31 @@ class Template extends Smarty
             global $mailbox;
 
             if (isset($mailbox) && is_object($mailbox)) {
-                list(, $pageMenu) = $mailbox->GetPageFolderList();
+                [, $pageMenu] = $mailbox->GetPageFolderList();
                 $this->assign('folderList', $pageMenu);
             }
         }
 
-        ModuleFunction('BeforeDisplayTemplate', [$resource_name, &$this]);
+        ModuleFunction('BeforeDisplayTemplate', [$template, &$this]);
 
         $this->assign('_cssFiles', $this->_cssFiles);
         $this->assign('_jsFiles', $this->_jsFiles);
 
         StartPageOutput();
-
-        return Smarty::fetch($resource_name, $cache_id, $compile_id, $display);
+        return parent::createTemplate(
+            $template,
+            $cache_id,
+            $compile_id,
+            $parent,
+            $do_clone,
+        );
     }
 }
 
 /**
- * helper functions.
+ * helper functions
  */
-function TemplateTabSort($a, $b)
-{
+function TemplateTabSort($a, $b) {
     $aOrder = isset($a['order']) ? $a['order'] : 599;
     $bOrder = isset($b['order']) ? $b['order'] : 599;
 
@@ -411,52 +488,53 @@ function TemplateTabSort($a, $b)
 }
 
 /**
- * functions registered with smarty.
+ * functions registered with smarty
  */
-function TemplateFileDateSig($params, &$smarty)
-{
-    $fileName = $smarty->template_dir.$params['file'];
+function TemplateFileDateSig($params, $smarty) {
+    $fileName = $smarty->template_dir[0] . $params['file'];
     if (!file_exists($fileName)) {
         return '';
     }
     $time = filemtime($fileName);
-
     return substr(md5($time), 0, 6);
 }
-function TemplateBanner($params, &$smarty)
-{
+function TemplateBanner($params, $smarty) {
     global $db, $groupRow;
 
     if (isset($groupRow) && is_array($groupRow) && $groupRow['ads'] == 'no') {
         return '';
     }
 
-    if (isset($params['category']) && (($category = trim($params['category'])) != '')) {
-        $res = $db->Query('SELECT id,code FROM {pre}ads WHERE paused=? AND category=? ORDER BY (views/weight) ASC LIMIT 1',
+    if (
+        isset($params['category']) &&
+        ($category = trim($params['category'])) != ''
+    ) {
+        $res = $db->Query(
+            'SELECT id,code FROM {pre}ads WHERE paused=? AND category=? ORDER BY (views/weight) ASC LIMIT 1',
             'no',
-            $category);
+            $category,
+        );
     } else {
-        $res = $db->Query('SELECT id,code FROM {pre}ads WHERE paused=? ORDER BY (views/weight) ASC LIMIT 1',
-            'no');
+        $res = $db->Query(
+            'SELECT id,code FROM {pre}ads WHERE paused=? ORDER BY (views/weight) ASC LIMIT 1',
+            'no',
+        );
     }
     if ($res->RowCount() == 1) {
-        list($bannerID, $bannerCode) = $res->FetchArray(MYSQLI_NUM);
+        [$bannerID, $bannerCode] = $res->FetchArray(MYSQLI_NUM);
         $res->Free();
 
-        $db->Query('UPDATE {pre}ads SET views=views+1 WHERE id=?',
-            $bannerID);
+        $db->Query('UPDATE {pre}ads SET views=views+1 WHERE id=?', $bannerID);
 
         return $bannerCode;
     }
 
     return '';
 }
-function TemplateImplode($params, &$smarty)
-{
+function TemplateImplode($params, $smarty) {
     return implode($params['glue'], $params['pieces']);
 }
-function TemplateLang($params, &$smarty)
-{
+function TemplateLang($params, $smarty) {
     global $lang_user, $lang_client, $lang_admin;
 
     $phrase = $params['p'];
@@ -469,10 +547,9 @@ function TemplateLang($params, &$smarty)
         return $lang_user[$phrase];
     }
 
-    return '#UNKNOWN_PHRASE('.$phrase.')#';
+    return '#UNKNOWN_PHRASE(' . $phrase . ')#';
 }
-function TemplateHalfHourToTime($params, &$smarty)
-{
+function TemplateHalfHourToTime($params, $smarty) {
     $value = $params['value'];
 
     if (isset($params['dateStart'])) {
@@ -482,7 +559,7 @@ function TemplateHalfHourToTime($params, &$smarty)
             0,
             date('m', $params['dateStart']),
             date('d', $parmas['dateStart']),
-            date('Y', $params['dateStart'])
+            date('Y', $params['dateStart']),
         );
     }
 
@@ -492,16 +569,13 @@ function TemplateHalfHourToTime($params, &$smarty)
         return sprintf('%d:%02d', ($value - 1) / 2, 30);
     }
 }
-function TemplateComment($params, &$smarty)
-{
+function TemplateComment($params, $smarty) {
     if (!DEBUG) {
         return '';
     }
-
-    return '<!-- '.$params['text'].' -->';
+    return '<!-- ' . $params['text'] . ' -->';
 }
-function TemplateDate($params, &$smarty)
-{
+function TemplateDate($params, $smarty) {
     global $userRow, $bm_prefs, $lang_user;
 
     if (isset($params['nozero']) && $params['timestamp'] == 0) {
@@ -522,13 +596,33 @@ function TemplateDate($params, &$smarty)
     $diff = time() - $ts;
     if (isset($params['elapsed'])) {
         if ($diff >= 0 && $diff < TIME_ONE_MINUTE) {
-            $elapsed = sprintf($diff == 1 ? $lang_user['elapsed_second'] : $lang_user['elapsed_seconds'], $diff);
+            $elapsed = sprintf(
+                $diff == 1
+                    ? $lang_user['elapsed_second']
+                    : $lang_user['elapsed_seconds'],
+                $diff,
+            );
         } elseif ($diff >= TIME_ONE_MINUTE && $diff < TIME_ONE_HOUR) {
-            $elapsed = sprintf(round($diff / TIME_ONE_MINUTE, 0) == 1 ? $lang_user['elapsed_minute'] : $lang_user['elapsed_minutes'], round($diff / TIME_ONE_MINUTE, 0));
+            $elapsed = sprintf(
+                round($diff / TIME_ONE_MINUTE, 0) == 1
+                    ? $lang_user['elapsed_minute']
+                    : $lang_user['elapsed_minutes'],
+                round($diff / TIME_ONE_MINUTE, 0),
+            );
         } elseif ($diff >= TIME_ONE_HOUR && $diff < TIME_ONE_DAY) {
-            $elapsed = sprintf(round($diff / TIME_ONE_HOUR, 0) == 1 ? $lang_user['elapsed_hour'] : $lang_user['elapsed_hours'], round($diff / TIME_ONE_HOUR, 0));
+            $elapsed = sprintf(
+                round($diff / TIME_ONE_HOUR, 0) == 1
+                    ? $lang_user['elapsed_hour']
+                    : $lang_user['elapsed_hours'],
+                round($diff / TIME_ONE_HOUR, 0),
+            );
         } elseif ($diff >= TIME_ONE_DAY) {
-            $elapsed = sprintf(round($diff / TIME_ONE_DAY, 0) == 1 ? $lang_user['elapsed_day'] : $lang_user['elapsed_days'], round($diff / TIME_ONE_DAY, 0));
+            $elapsed = sprintf(
+                round($diff / TIME_ONE_DAY, 0) == 1
+                    ? $lang_user['elapsed_day']
+                    : $lang_user['elapsed_days'],
+                round($diff / TIME_ONE_DAY, 0),
+            );
         } else {
             $elapsed = '';
         }
@@ -537,43 +631,43 @@ function TemplateDate($params, &$smarty)
     }
 
     if (isset($params['dayonly'])) {
-        return date('d.m.Y', $ts).$elapsed;
-    } elseif (isset($params['format'])) {
-        return _strftime($params['format'], $ts);
+        return date('d.m.Y', $ts) . $elapsed;
     } elseif (isset($params['short'])) {
         if (date('d.m.Y', $ts) == date('d.m.Y')) {
             return date('H:i', $ts);
-        } elseif ($ts > time() - 6 * TIME_ONE_DAY) {
-            return _strftime('%A', $ts);
         } else {
             return date('d.m.y', $ts);
         }
     } elseif (!isset($params['nice'])) {
-        return date($format, $ts).$elapsed;
+        return date($format, $ts) . $elapsed;
     } else {
         $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
 
         if ($ts >= $today && $ts <= $today + TIME_ONE_DAY) {
-            return sprintf('%s, %s', $lang_user['today'], date('H:i:s', $ts)).$elapsed;
+            return sprintf('%s, %s', $lang_user['today'], date('H:i:s', $ts)) .
+                $elapsed;
         } elseif ($ts >= $today - 86400 && $ts < $today) {
-            return sprintf('%s, %s', $lang_user['yesterday'], date('H:i:s', $ts)).$elapsed;
+            return sprintf(
+                '%s, %s',
+                $lang_user['yesterday'],
+                date('H:i:s', $ts),
+            ) . $elapsed;
         } else {
-            return date($format, $ts).$elapsed;
+            return date($format, $ts) . $elapsed;
         }
     }
 }
-function TemplateSize($params, &$smarty)
-{
+function TemplateSize($params, $smarty) {
     global $lang_user;
 
     $size = $params['bytes'];
 
     if ($size == -1) {
-        return '<i>'.$lang_user['unlimited'].'</i>';
+        return '<i>' . $lang_user['unlimited'] . '</i>';
     }
 
     if ($size < 1024) {
-        return (int) $size.' B';
+        return (int) $size . ' B';
     } elseif ($size < 1024 * 1024) {
         return sprintf('%.2f KB', round($size / 1024, 2));
     } elseif ($size < 1024 * 1024 * 1024) {
@@ -582,22 +676,27 @@ function TemplateSize($params, &$smarty)
         return sprintf('%.2f GB', round($size / 1024 / 1024 / 1024, 2));
     }
 }
-function cutHTML($str, $length, $add = '')
-{
+function cutHTML($str, $length, $add = '') {
     // no &#;-entities -> use substr
-    if (!preg_match('/\&#([x0-9]*);/', $str)
-        && !preg_match('/\&([a-zA-Z]*);/', $str)) {
-        return _strlen($str) > $length ? _substr($str, 0, $length - _strlen($add)).$add : $str;
+    if (
+        !preg_match('/\&#([x0-9]*);/', $str) &&
+        !preg_match('/\&([a-zA-Z]*);/', $str)
+    ) {
+        return _strlen($str) > $length
+            ? _substr($str, 0, $length - _strlen($add)) . $add
+            : $str;
     }
 
     // otherwise use the complicated way
     $tooLong = false;
     $result = [];
-    for ($i = 0; $i < strlen($str); ++$i) {
+    for ($i = 0; $i < strlen($str); $i++) {
         $match = false;
-        if (strlen($str) - $i > 3
-            && (preg_match('/^\&#([x0-9]*);/', substr($str, $i), $match)
-                || preg_match('/^\&([a-zA-Z]*);/', substr($str, $i), $match))) {
+        if (
+            strlen($str) - $i > 3 &&
+            (preg_match('/^\&#([x0-9]*);/', substr($str, $i), $match) ||
+                preg_match('/^\&([a-zA-Z]*);/', substr($str, $i), $match))
+        ) {
             $result[] = $match[0];
             $i += strlen($match[0]) - 1;
         } else {
@@ -611,13 +710,13 @@ function cutHTML($str, $length, $add = '')
     }
 
     if ($tooLong) {
-        return implode('', array_slice($result, 0, $length - strlen($add))).$add;
+        return implode('', array_slice($result, 0, $length - strlen($add))) .
+            $add;
     } else {
         return implode('', $result);
     }
 }
-function TemplateFieldDate($params, &$smarty)
-{
+function TemplateFieldDate($params, $smarty) {
     global $bm_prefs;
 
     $val = $params['value'];
@@ -630,15 +729,14 @@ function TemplateFieldDate($params, &$smarty)
         return '-';
     }
 
-    list($y, $m, $d) = $parts;
+    [$y, $m, $d] = $parts;
     if ($y == 0 || $m == 0 || $d == 0) {
         return '-';
     }
 
     return sprintf('%02d.%02d.%04d', $d, $m, $y);
 }
-function TemplateNumber($params, &$smarty)
-{
+function TemplateNumber($params, $smarty) {
     $no = (int) $params['value'];
     if (isset($params['min'])) {
         $no = max($params['min'], $no);
@@ -646,26 +744,20 @@ function TemplateNumber($params, &$smarty)
     if (isset($params['max'])) {
         $no = min($params['max'], $no);
     }
-
     return $no;
 }
-function TemplateDomain($params, &$smarty)
-{
+function TemplateDomain($params, $smarty) {
     $domain = $params['value'];
-
     return HTMLFormat(DecodeDomain($domain));
 }
-function TemplateEMail($params, &$smarty)
-{
+function TemplateEMail($params, $smarty) {
     $email = DecodeEMail($params['value']);
     if (isset($params['cut'])) {
         $email = cutHTML($email, $params['cut'], '...');
     }
-
     return HTMLFormat($email);
 }
-function TemplateText($params, &$smarty)
-{
+function TemplateText($params, $smarty) {
     $text = $params['value'];
 
     if (isset($params['ucFirst'])) {
@@ -694,34 +786,73 @@ function TemplateText($params, &$smarty)
     if (isset($params['noentities'])) {
         return $text;
     } else {
-        $text = HTMLFormat($text, isset($params['allowDoubleEnc']) && $params['allowDoubleEnc']);
-
+        $text = HTMLFormat(
+            $text,
+            isset($params['allowDoubleEnc']) && $params['allowDoubleEnc'],
+        );
         return $text;
     }
 }
-function TemplateAddressList($params, &$smarty)
-{
+function TemplateAddressList($params, $smarty) {
     $list = '';
     $short = isset($params['short']);
 
     foreach ($params['list'] as $addressItem) {
         if ($short) {
             if (isset($params['simple'])) {
-                $list .= '; '.trim(HTMLFormat($addressItem['name']) != '' ? HTMLFormat($addressItem['name']) : HTMLFormat(DecodeEMail($addressItem['mail'])));
+                $list .=
+                    '; ' .
+                    trim(
+                        HTMLFormat($addressItem['name']) != ''
+                            ? HTMLFormat($addressItem['name'])
+                            : HTMLFormat(DecodeEMail($addressItem['mail'])),
+                    );
             } else {
-                $list .= sprintf(' <a class="mailAddressLink" href="javascript:void(0);" onclick="currentEMail=\'%s\';showAddressMenu(event);">%s</a>',
+                $list .= sprintf(
+                    ' <a class="mailAddressLink" href="javascript:void(0);" onclick="currentEMail=\'%s\';showAddressMenu(event);">%s</a>',
                     addslashes(DecodeEMail($addressItem['mail'])),
-                    trim(HTMLFormat($addressItem['name']) != '' ? HTMLFormat($addressItem['name']) : HTMLFormat(DecodeEMail($addressItem['mail']))));
+                    trim(
+                        HTMLFormat($addressItem['name']) != ''
+                            ? HTMLFormat($addressItem['name'])
+                            : HTMLFormat(DecodeEMail($addressItem['mail'])),
+                    ),
+                );
             }
         } else {
             if (isset($params['simple'])) {
-                $list .= '; '.trim(HTMLFormat($addressItem['name']).' '.(trim($addressItem['name']) != '' ? '&lt;'.HTMLFormat(DecodeEMail($addressItem['mail'])).'&gt;'
-                            : HTMLFormat(DecodeEMail($addressItem['mail']))));
+                $list .=
+                    '; ' .
+                    trim(
+                        HTMLFormat($addressItem['name']) .
+                            ' ' .
+                            (trim($addressItem['name']) != ''
+                                ? '&lt;' .
+                                    HTMLFormat(
+                                        DecodeEMail($addressItem['mail']),
+                                    ) .
+                                    '&gt;'
+                                : HTMLFormat(
+                                    DecodeEMail($addressItem['mail']),
+                                )),
+                    );
             } else {
-                $list .= sprintf(' <a class="mailAddressLink" href="javascript:void(0);" onclick="currentEMail=\'%s\';showAddressMenu(event);">%s</a>',
+                $list .= sprintf(
+                    ' <a class="mailAddressLink" href="javascript:void(0);" onclick="currentEMail=\'%s\';showAddressMenu(event);">%s</a>',
                     DecodeEMail(addslashes($addressItem['mail'])),
-                    trim(HTMLFormat($addressItem['name']).' '.(trim($addressItem['name']) != '' ? '&lt;'.HTMLFormat(DecodeEMail($addressItem['mail'])).'&gt;'
-                    : HTMLFormat(DecodeEMail($addressItem['mail'])))));
+                    trim(
+                        HTMLFormat($addressItem['name']) .
+                            ' ' .
+                            (trim($addressItem['name']) != ''
+                                ? '&lt;' .
+                                    HTMLFormat(
+                                        DecodeEMail($addressItem['mail']),
+                                    ) .
+                                    '&gt;'
+                                : HTMLFormat(
+                                    DecodeEMail($addressItem['mail']),
+                                )),
+                    ),
+                );
             }
         }
     }
@@ -732,8 +863,7 @@ function TemplateAddressList($params, &$smarty)
 
     return trim($list);
 }
-function TemplateProgressBar($params, &$smarty)
-{
+function TemplateProgressBar($params, $smarty) {
     $value = $params['value'];
     $max = $params['max'];
     $width = $params['width'];
@@ -742,83 +872,90 @@ function TemplateProgressBar($params, &$smarty)
     if ($max == 0) {
         $valueWidth = 0;
     } else {
-        $valueWidth = $width / $max * $value;
+        $valueWidth = ($width / $max) * $value;
     }
 
-    return sprintf('<div class="progressBar" id="pb_%s" style="width:%dpx;"><div class="progressBarValue" id="pb_%s_value" style="width:%dpx;"></div></div>',
+    return sprintf(
+        '<div class="progressBar" id="pb_%s" style="width:%dpx;"><div class="progressBarValue" id="pb_%s_value" style="width:%dpx;"></div></div>',
         $name,
         $width,
         $name,
-        min($width - 2, $valueWidth));
+        min($width - 2, $valueWidth),
+    );
 }
-function TemplateMiniCalendar($params, &$smarty)
-{
+function TemplateMiniCalendar($params, $smarty) {
     global $userRow;
     if (!isset($userRow)) {
         return 'Not logged in';
     }
     if (!class_exists('BMCalendar')) {
-        include B1GMAIL_DIR.'serverlib/calendar.class.php';
+        include B1GMAIL_DIR . 'serverlib/calendar.class.php';
     }
     $calendar = _new('BMCalendar', [$userRow['id']]);
-
     return $calendar->GenerateMiniCalendar(-1, -1);
 }
-function TemplateFileSelector($params, &$smarty)
-{
+function TemplateFileSelector($params, $smarty) {
     global $lang_user, $groupRow;
 
     $name = $params['name'];
     $size = isset($params['size']) ? (int) $params['size'] : 30;
 
-    return sprintf('<table width="100%%" cellspacing="1" cellpadding="0">'
-                .'<tr>'
-                .'<td width="10"><select onchange="changeFileSelectorSource(this, \'%s\')">'
-                .'<option value="local">%s</option>'
-                .((isset($groupRow) && is_array($groupRow) && $groupRow['webdisk'] > 0) ?
-                                                '<option value="webdisk">%s</option>' : '<!-- %s -->')
-                .'</select></td>'
-                .'<td width="5">&nbsp;</td>'
-                .'<td><div id="fileSelector_local_%s" style="display:;"><input type="file" id="localFile_%s" name="localFile_%s%s" size="%d" style="width: 100%%;"%s /></div>'
-                .'<div id="fileSelector_webdisk_%s" style="display:none;"><input type="hidden" name="webdiskFile_%s_id" id="webdiskFile_%s_id" value="" /><input type="text" id="webdiskFile_%s" name="webdiskFile_%s" size="%d" readonly="readonly" /> <input onclick="webdiskDialog(\'%s\', \'open\', \'webdiskFile_%s\')" type="button" value="..." /></div></td>'
-                .'</tr>'
-                .'</table>',
-                $name,
-                $lang_user['localfile'],
-                $lang_user['webdiskfile'],
-                $name,
-                $name,
-                $name,
-                isset($params['multiple']) ? '[]' : '',
-                $size,
-                isset($params['multiple']) ? ' multiple="multiple"' : '',
-                $name,
-                $name,
-                $name,
-                $name,
-                $name,
-                $size,
-                session_id(),
-                $name);
+    return sprintf(
+        '<table width="100%%" cellspacing="1" cellpadding="0">' .
+            '<tr>' .
+            '<td width="10"><select onchange="changeFileSelectorSource(this, \'%s\')">' .
+            '<option value="local">%s</option>' .
+            (isset($groupRow) && is_array($groupRow) && $groupRow['webdisk'] > 0
+                ? '<option value="webdisk">%s</option>'
+                : '<!-- %s -->') .
+            '</select></td>' .
+            '<td width="5">&nbsp;</td>' .
+            '<td><div id="fileSelector_local_%s" style="display:;"><input type="file" id="localFile_%s" name="localFile_%s%s" size="%d" style="width: 100%%;"%s /></div>' .
+            '<div id="fileSelector_webdisk_%s" style="display:none;"><input type="hidden" name="webdiskFile_%s_id" id="webdiskFile_%s_id" value="" /><input type="text" id="webdiskFile_%s" name="webdiskFile_%s" size="%d" readonly="readonly" /> <input onclick="webdiskDialog(\'%s\', \'open\', \'webdiskFile_%s\')" type="button" value="..." /></div></td>' .
+            '</tr>' .
+            '</table>',
+        $name,
+        $lang_user['localfile'],
+        $lang_user['webdiskfile'],
+        $name,
+        $name,
+        $name,
+        isset($params['multiple']) ? '[]' : '',
+        $size,
+        isset($params['multiple']) ? ' multiple="multiple"' : '',
+        $name,
+        $name,
+        $name,
+        $name,
+        $name,
+        $size,
+        session_id(),
+        $name,
+    );
 }
-function TemplatePageNav($params, &$smarty)
-{
+function TemplatePageNav($params, $smarty) {
     $tpl_on = $params['on'];
     $tpl_off = $params['off'];
     $aktuelle_seite = $params['page'];
     $anzahl_seiten = $params['pages'];
     $ret = '';
 
-    $seiten = [$aktuelle_seite - 3,
+    $seiten = [
+        $aktuelle_seite - 3,
         $aktuelle_seite - 2,
         $aktuelle_seite - 1,
         $aktuelle_seite,
         $aktuelle_seite + 1,
         $aktuelle_seite + 2,
-        $aktuelle_seite + 3, ];
+        $aktuelle_seite + 3,
+    ];
 
     if ($aktuelle_seite > 1) {
-        $ret .= str_replace('.t', '&lt;&lt;', str_replace('.s', ($aktuelle_seite - 1), $tpl_off));
+        $ret .= str_replace(
+            '.t',
+            '&lt;&lt;',
+            str_replace('.s', $aktuelle_seite - 1, $tpl_off),
+        );
     }
 
     foreach ($seiten as $key => $val) {
@@ -832,62 +969,66 @@ function TemplatePageNav($params, &$smarty)
     }
 
     if ($aktuelle_seite < $anzahl_seiten) {
-        $ret .= str_replace('.t', '&gt;&gt;', str_replace('.s', ($aktuelle_seite + 1), $tpl_off));
+        $ret .= str_replace(
+            '.t',
+            '&gt;&gt;',
+            str_replace('.s', $aktuelle_seite + 1, $tpl_off),
+        );
     }
 
     return $ret;
 }
-function TemplateStoreTime($params, &$smarty)
-{
+function TemplateStoreTime($params, $smarty) {
     global $lang_user;
 
     $time = $params['value'];
 
     if ($time == 86400) {
-        return '1 '.$lang_user['days'];
+        return '1 ' . $lang_user['days'];
     } elseif ($time == 172800) {
-        return '2 '.$lang_user['days'];
+        return '2 ' . $lang_user['days'];
     } elseif ($time == 432000) {
-        return '5 '.$lang_user['days'];
+        return '5 ' . $lang_user['days'];
     } elseif ($time == 604800) {
-        return '7 '.$lang_user['days'];
+        return '7 ' . $lang_user['days'];
     } elseif ($time == 1209600) {
-        return '2 '.$lang_user['weeks'];
+        return '2 ' . $lang_user['weeks'];
     } elseif ($time == 2419200) {
-        return '4 '.$lang_user['weeks'];
+        return '4 ' . $lang_user['weeks'];
     } elseif ($time == 4828400) {
-        return '2 '.$lang_user['months'];
+        return '2 ' . $lang_user['months'];
     } else {
         return '-';
     }
 }
-function TemplateHook($params, &$smarty)
-{
+function TemplateHook($params, $smarty) {
     $result = '';
 
     if (DEBUG && isset($_REQUEST['_showHooks'])) {
-        $result .= '<div>#'.$params['id'].'</div>';
+        $result .= '<div>#' . $params['id'] . '</div>';
     }
 
     if (DEBUG) {
-        $result .= '<!-- hook('.$params['id'].') -->';
+        $result .= '<!-- hook(' . $params['id'] . ') -->';
     }
 
-    if (isset($smarty->hookTable) && is_array($smarty->hookTable)
-       && isset($smarty->hookTable[$params['id']])) {
+    if (
+        isset($smarty->hookTable) &&
+        is_array($smarty->hookTable) &&
+        isset($smarty->hookTable[$params['id']])
+    ) {
         foreach ($smarty->hookTable[$params['id']] as $file) {
             $result .= $smarty->fetch($file);
         }
     }
 
     if (DEBUG) {
-        $result .= '<!-- /hook('.$params['id'].') -->';
+        $result .= '<!-- /hook(' . $params['id'] . ') -->';
     }
 
     return $result;
 }
-function TemplateMobileNr($params, &$smarty)
-{
+function TemplateMobileNr($params, $smarty) {
     global $groupRow;
 
     $value = isset($params['value']) ? $params['value'] : '';
@@ -900,36 +1041,49 @@ function TemplateMobileNr($params, &$smarty)
         $entries = explode(':', $groupRow['sms_pre']);
         foreach ($entries as $entry) {
             if (trim($entry) != '') {
-                if (substr($value, 0, strlen($entry)) == $entry && !$haveValue) {
-                    $preOptions .= sprintf('<option value="%s" selected="selected">%s</option>',
+                if (
+                    substr($value, 0, strlen($entry)) == $entry &&
+                    !$haveValue
+                ) {
+                    $preOptions .= sprintf(
+                        '<option value="%s" selected="selected">%s</option>',
                         $entry,
-                        $entry);
+                        $entry,
+                    );
                     $value = substr($value, strlen($entry));
                     $haveValue = true;
                 } else {
-                    $preOptions .= sprintf('<option value="%s">%s</option>',
+                    $preOptions .= sprintf(
+                        '<option value="%s">%s</option>',
                         $entry,
-                        $entry);
+                        $entry,
+                    );
                 }
             }
         }
 
-        return sprintf('<table width="%s" cellspacing="0" cellpadding="0">'
-                    .'<tr>'
-                    .'<td width="1" nowrap="nowrap"><nobr>(<select name="%s_pre" id="%s_pre">%s</select>)&nbsp;</nobr></td>'
-                    .'<td><input type="text" name="%s_no" id="%s_no" style="width:100%%;" value="%s" /></td>'
-                    .'</tr>'
-                    .'</table>',
+        return sprintf(
+            '<table width="%s" cellspacing="0" cellpadding="0">' .
+                '<tr>' .
+                '<td width="1" nowrap="nowrap"><nobr>(<select name="%s_pre" id="%s_pre">%s</select>)&nbsp;</nobr></td>' .
+                '<td><input type="text" name="%s_no" id="%s_no" style="width:100%%;" value="%s" /></td>' .
+                '</tr>' .
+                '</table>',
             $size,
-            $name, $name,
+            $name,
+            $name,
             $preOptions,
-            $name, $name,
-            $value);
+            $name,
+            $name,
+            $value,
+        );
     } else {
-        return sprintf('<input type="text" name="%s" id="%s" style="width:%s;" value="%s" />',
+        return sprintf(
+            '<input type="text" name="%s" id="%s" style="width:%s;" value="%s" />',
             $name,
             $name,
             $size,
-            HTMLFormat($value));
+            HTMLFormat($value),
+        );
     }
 }
