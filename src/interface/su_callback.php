@@ -20,7 +20,7 @@
  */
 
 define('INTERFACE_MODE', true);
-include('../serverlib/init.inc.php');
+require '../serverlib/init.inc.php';
 include('../serverlib/payment.class.php');
 
 PutLog('SU-Callback: Called',

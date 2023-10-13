@@ -19,7 +19,7 @@
  *
  */
 
-include('../serverlib/init.inc.php');
+require '../serverlib/init.inc.php';
 if(!class_exists('BMCalendar'))
 	include('../serverlib/calendar.class.php');
 if(!class_exists('BMAddressbook'))

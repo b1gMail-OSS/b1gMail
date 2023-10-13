@@ -22,7 +22,7 @@
 define('INTERFACE_MODE', 		true);
 define('WEBDAV_ALT_TIMESTAMP', 	1411119133);
 
-include('../serverlib/init.inc.php');
+require '../serverlib/init.inc.php';
 include('../serverlib/dav.inc.php');
 include('../serverlib/webdisk.class.php');
 

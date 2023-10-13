@@ -19,7 +19,7 @@
  *
  */
 
-include('../serverlib/init.inc.php');
+require '../serverlib/init.inc.php';
 if(!class_exists('BMAddressbook'))
 	include('../serverlib/addressbook.class.php');
 RequestPrivileges(PRIVILEGES_USER | PRIVILEGES_MOBILE);

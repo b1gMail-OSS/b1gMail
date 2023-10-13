@@ -19,7 +19,7 @@
  *
  */
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 include('./serverlib/webdisk.class.php');
 include('./serverlib/zip.class.php');
 include('./serverlib/unzip.class.php');
