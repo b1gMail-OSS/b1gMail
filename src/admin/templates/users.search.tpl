@@ -29,6 +29,9 @@
 								<label for="searchIn_telfaxmobile"><b>{lng p="tel"} / {lng p="fax"} / {lng p="cellphone"}</b></label></td>
 						</tr>
 						<tr>
+							<td><input type="checkbox" name="searchIn[absendername]" id="searchIn_absendername" checked="checked" />
+							<label for="searchIn_absendername"><b>{lng p="sendername"}</b></label>
+							</td>
 							<td><input type="checkbox" id="searchIn_all" checked="checked" onchange="invertSelection(document.forms.f1,'searchIn',true,this.checked)" />
 								<label for="searchIn_all"><b>{lng p="all"}</b></label></td>
 							<td colspan="2">&nbsp;</td>

@@ -277,7 +277,7 @@ if($_REQUEST['action'] == 'users')
 
 		// do the query!
 		$users = array();
-		$res = $db->Query('SELECT id,email,vorname,nachname,strasse,hnr,plz,ort,gruppe,gesperrt,lastlogin,profilfelder ' . $theQuery . ' '
+		$res = $db->Query('SELECT id,email,vorname,nachname,strasse,hnr,plz,ort,gruppe,gesperrt,lastlogin,profilfelder,absendername ' . $theQuery . ' '
 					. 'ORDER BY ' . $sortBy . ' '
 					. $sortOrder . ' '
 					. 'LIMIT ' . $startPos . ',' . $perPage);
@@ -903,6 +903,8 @@ else if($_REQUEST['action'] == 'search')
 				$fields = array_merge($fields, array('strasse', 'hnr', 'plz', 'ort', 'land'));
 			else if($field == 'telfaxmobile')
 				$fields = array_merge($fields, array('tel', 'fax', 'mail2sms_nummer'));
+			else if($field == 'absendername')
+                $fields[] = 'absendername';
 		}
 
 		// build query string
