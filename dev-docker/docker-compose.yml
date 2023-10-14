@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  php:
+    build: .
+    networks:
+      - default
+    ports:
+      - '5000:80'
+    volumes:
+      - ../src:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mariadb
+    networks:
+      - default
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: b1gmail
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - '3306:3306'
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5
+    ports:
+      - '3100:80'
+    depends_on:
+      - db
