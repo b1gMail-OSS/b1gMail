@@ -119,7 +119,7 @@ class BMWorkgroup
      *
      * @return int
      */
-    public function GetIDbyMail($email)
+    public static function GetIDbyMail($email)
     {
         global $db;
 
