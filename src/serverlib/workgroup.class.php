@@ -145,7 +145,7 @@ class BMWorkgroup
      *
      * @return array
      */
-    public function GetMembers($id = -1, $excludeDeleted = true)
+    public static function GetMembers($id = -1, $excludeDeleted = true)
     {
         global $db;
 
@@ -172,6 +172,7 @@ class BMWorkgroup
      * @param int $groupID
      *
      * @return bool
+     * @TODO: currently unused function
      */
     public function UserInGroup($userID, $groupID)
     {
@@ -206,6 +207,7 @@ class BMWorkgroup
      * @param int $id
      *
      * @return string
+     * @TODO: currently unused function
      */
     public function GetTitle($id)
     {
