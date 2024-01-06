@@ -280,7 +280,7 @@
 
 </div></div>
 
-<div class="contentBottomLayer" id="bottomLayer_attachments" style="display:{if $smarty.get.openConversationView||$notes||!$attachments}none{/if};">
+<div class="contentBottomLayer" id="bottomLayer_attachments" style="display:{if !empty($smarty.get.openConversationView)||$notes||!$attachments}none{/if};">
 	<div class="contentHeader">
 		<div class="left">
 			<input type="checkbox" style="margin-left:-0.5em;" id="allChecker" onclick="checkAll(this.checked, document.forms.attachmentsForm, 'att');" />
@@ -342,7 +342,7 @@
 </div>
 
 {if $conversationView}
-<div class="contentBottomLayer" id="bottomLayer_conversation" style="display:{if !$smarty.get.openConversationView}none{/if};">
+<div class="contentBottomLayer" id="bottomLayer_conversation" style="display:{if empty($smarty.get.openConversationView)}none{/if};">
 	<div class="contentHeader">
 		<div class="left">
 			<i class="fa fa-comment"></i>
@@ -361,7 +361,7 @@
 </div>
 {/if}
 
-<div class="contentBottomLayer" id="bottomLayer_props" style="display:{if !$notes||$smarty.get.openConversationView}none{/if};">
+<div class="contentBottomLayer" id="bottomLayer_props" style="display:{if !$notes||!empty($smarty.get.openConversationView)}none{/if};">
 	<div class="contentHeader">
 		<div class="left">
 			<i class="fa fa-tags"></i>

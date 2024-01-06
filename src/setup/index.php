@@ -20,7 +20,7 @@
  */
 
 // init
-include './common.inc.php';
+require './common.inc.php';
 
 //  operations per call
 define('CALL_OPS', 50);

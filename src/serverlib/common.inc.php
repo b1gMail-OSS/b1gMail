@@ -2677,7 +2677,7 @@ function ZIPCheck($plz, $ort, $staat)
 	global $currentCharset;
 
 	if(in_array(strtolower($currentCharset), array('utf8', 'utf-8')))
-		$ort = CharsetDecode($text, false, 'ISO-8859-1');
+		$ort = CharsetDecode($ort, false, 'ISO-8859-1');
 
 	$strip_chars = array(',', ';', '-', '?', ':', '?', '1', ' ', 'ä', 'Ä', 'ö', 'Ö', 'ü', 'Ü', "ae", "oe", "ue", "AE", "OE", "UE", "Ae", "Oe","Ue");
 

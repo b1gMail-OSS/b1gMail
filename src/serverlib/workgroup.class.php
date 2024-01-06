@@ -145,13 +145,9 @@ class BMWorkgroup
      *
      * @return array
      */
-    public static function GetMembers($id = -1, $excludeDeleted = true)
+    public static function GetMembers($id, $excludeDeleted = true)
     {
         global $db;
-
-        if ($id == -1) {
-            $id = $this->_id;
-        }
 
         $members = [];
         $res = $db->Query('SELECT {pre}users.id AS id, {pre}users.email AS email FROM {pre}users,{pre}workgroups_member WHERE {pre}users.id={pre}workgroups_member.user AND {pre}workgroups_member.workgroup=?'
