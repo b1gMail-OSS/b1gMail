@@ -32,7 +32,7 @@ class AccountMirror extends BMPlugin
 		$this->web					= 'https://www.b1gmail.org/';
 		$this->mail					= 'info@b1gmail.org';
 		$this->version				= '1.4';
-		$this->designedfor			= '7.2.0';
+		$this->designedfor			= '7.4.0';
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
 		$this->website				= 'https://www.b1gmail.org/';
@@ -190,6 +190,11 @@ class AccountMirror extends BMPlugin
 				$tpl->assign('page', 		'msg.tpl');
 				return;
 			}
+			$db->Query('INSERT INTO {pre}mod_accountmirror(`userid`,`mirror_to`,`begin`,`end`) VALUES(?,?,?,?)',
+				$userID,
+				$mirrorTo,
+				$begin,
+				$end);
 		}
 
 		if(isset($_REQUEST['delete']))
