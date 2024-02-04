@@ -176,7 +176,7 @@ function AdminRequirePrivilege($priv)
             sprintf("Requested privileges:\n%s",
                 $priv),
             __FILE__,
-            __LINE__);
+            __LINE__, 401);
         exit();
     }
 }

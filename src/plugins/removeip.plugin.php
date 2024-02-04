@@ -25,7 +25,7 @@ class RemoveIPPlugin extends BMPlugin
 		$this->type				= BMPLUGIN_DEFAULT;
 		$this->name				= 'RemoveIP Plugin';
 		$this->author			= 'b1gMail Project';
-		$this->version			= '1.0.0';
+		$this->version			= '1.0.1';
 	}
 	
 	public function AfterInit()
@@ -39,6 +39,8 @@ class RemoveIPPlugin extends BMPlugin
 		$bm_prefs['reg_iplock']	= 0;
 		// disable IP lock
 		$bm_prefs['ip_lock']	= 0;
+		// disable write X-Sender IP (> 7.4)
+		$bm_prefs['write_xsenderip'] = 'no';
 	}
 }
 

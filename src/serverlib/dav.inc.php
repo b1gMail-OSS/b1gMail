@@ -27,7 +27,8 @@ if(PHPNumVersion() < 540)
 	DisplayError(0x18, 'PHP version too old', 'b1gMail DAV features require PHP 5.4 or newer.',
 		sprintf("Installed PHP version:\n%s", phpversion()),
 		__FILE__,
-		__LINE__);
+		__LINE__,
+		500);
 	exit();
 }
 
