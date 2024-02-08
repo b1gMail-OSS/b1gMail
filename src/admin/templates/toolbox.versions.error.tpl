@@ -1,22 +1,18 @@
 <fieldset>
 	<legend>{lng p="error"}</legend>
-	
-	<table>
-		<tr>
-			<td width="36" valign="top"><img src="{$tpldir}images/error32.png" border="0" alt="" width="32" height="32" /></td>
-			<td valign="top">
-				{lng p="toolboxfileerr"}
-				
-				<ul>
+
+	<div class="mb-3 row">
+		<label class="col-sm-4 col-form-label">{lng p="toolboxfileerr"}</label>
+		<div class="col-sm-8">
+			<ul>
 				{foreach from=$fileErrors item=item}
 					<li>{text value=$item[0]} &raquo; {text value=$item[1]}</li>
 				{/foreach}
-				</ul>
-			</td>
-		</tr>
-	</table>
+			</ul>
+		</div>
+	</div>
 </fieldset>
 
-<p align="right" class="buttons">
-	<input class="button" type="button" onclick="document.location.href='toolbox.php?do=editVersionConfig&versionid={$versionID}&sid={$sid}';" value=" {lng p="back"} " />
-</p>
+<div class="text-end">
+	<input class="btn btn-primary" type="button" onclick="document.location.href='toolbox.php?do=editVersionConfig&versionid={$versionID}&sid={$sid}';" value=" {lng p="back"} " />
+</div>

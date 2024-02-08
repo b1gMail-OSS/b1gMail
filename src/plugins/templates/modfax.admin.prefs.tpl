@@ -1,82 +1,104 @@
 <form action="{$pageURL}&action=prefs&save=true&sid={$sid}" method="post" id="prefsForm" onsubmit="spin(this)">
 	<fieldset>
 		<legend>{lng p="common"}</legend>
-		
-		<table>
-			<tr>
-				<td class="td1" width="220">{lng p="safecode"}?</td>
-				<td class="td2"><input type="checkbox" name="send_safecode"{if $faxPrefs.send_safecode} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="modfax_refund_on_error"}?</td>
-				<td class="td2"><input type="checkbox" name="refund_on_error"{if $faxPrefs.refund_on_error} checked="checked"{/if} /></td>
-			</tr>
-		</table>
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="safecode"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="send_safecode"{if $faxPrefs.send_safecode} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="modfax_refund_on_error"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="refund_on_error"{if $faxPrefs.refund_on_error} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
 	</fieldset>
 	
 	<fieldset>
 		<legend>{lng p="defaults"}</legend>
-		
-		<table>
-			<tr>
-				<td class="td1" width="220">{lng p="modfax_country_prefix"}:</td>
-				<td class="td2"><input type="text" name="default_country_prefix" value="{if isset($faxPrefs.default_country_prefix)}{text value=$faxPrefs.default_country_prefix allowEmpty=true}{/if}" size="8" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="defaultgateway"}:</td>
-				<td class="td2"><select name="default_faxgateid">
-				{foreach from=$gateways item=gwTitle key=gwID}
-					<option value="{$gwID}"{if $gwID==$faxPrefs.default_faxgateid} selected="selected"{/if}>{text value=$gwTitle}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="modfax_fromname"}:</td>
-				<td class="td2"><input type="text" name="default_name" value="{if isset($faxPrefs.default_name)}{text value=$faxPrefs.default_name allowEmpty=true}{/if}" size="36" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="modfax_fromno"}:</td>
-				<td class="td2"><input type="text" name="default_no" value="{if isset($faxPrefs.default_no)}{text value=$faxPrefs.default_no allowEmpty=true}{/if}" size="28" /></td>
-			</tr>
-		</table>
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="modfax_country_prefix"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="default_country_prefix" value="{if isset($faxPrefs.default_country_prefix)}{text value=$faxPrefs.default_country_prefix allowEmpty=true}{/if}" placeholder="{lng p="modfax_country_prefix"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="defaultgateway"}</label>
+			<div class="col-sm-10">
+				<select name="default_faxgateid" class="form-select">
+					{foreach from=$gateways item=gwTitle key=gwID}
+						<option value="{$gwID}"{if $gwID==$faxPrefs.default_faxgateid} selected="selected"{/if}>{text value=$gwTitle}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="modfax_fromname"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="default_name" value="{if isset($faxPrefs.default_name)}{text value=$faxPrefs.default_name allowEmpty=true}{/if}" placeholder="{lng p="modfax_fromname"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="modfax_fromno"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="default_no" value="{if isset($faxPrefs.default_no)}{text value=$faxPrefs.default_no allowEmpty=true}{/if}" placeholder="{lng p="modfax_country_prefix"}">
+			</div>
+		</div>
 	</fieldset>
 	
 	<fieldset>
 		<legend>{lng p="modfax_perms"}</legend>
-		
-		<table>
-			<tr>
-				<td class="td1" width="220">{lng p="modfax_allow_ownname"}?</td>
-				<td class="td2"><input type="checkbox" name="allow_ownname"{if $faxPrefs.allow_ownname} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="modfax_allow_ownno"}?</td>
-				<td class="td2"><input type="checkbox" name="allow_ownno"{if $faxPrefs.allow_ownno} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="modfax_allow_pdf"}?</td>
-				<td class="td2"><input type="checkbox" name="allow_pdf"{if $faxPrefs.allow_pdf} checked="checked"{/if} /></td>
-			</tr>
-		</table>
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="modfax_allow_ownname"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="allow_ownname"{if $faxPrefs.allow_ownname} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="modfax_allow_ownno"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="allow_ownno"{if $faxPrefs.allow_ownno} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="modfax_allow_pdf"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="allow_pdf"{if $faxPrefs.allow_pdf} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
 	</fieldset>
 	
 	<fieldset>
 		<legend>{lng p="modfax_faxtpl"}</legend>
-		
-		<table>
+
 		{foreach from=$tplBlocks item=block key=blockID}
-			<tr>
-				<td class="td1" width="220">{lng p="modfax_block"} {$blockID+1}:</td>
-				<td class="td2"><select name="tpl_blocks[{$blockID}]">
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="modfax_block"} {$blockID+1}</label>
+			<div class="col-sm-10">
+				<select name="tpl_blocks[{$blockID}]" class="form-select">
 					<option value="-1"{if $block==-1} selected="selected"{/if}>--------</option>
 					<option value="0"{if $block==0} selected="selected"{/if}>{lng p="modfax_textblock"}</option>
 					<option value="1"{if $block==1} selected="selected"{/if}>{lng p="modfax_pagebreak"}</option>
 					<option value="2"{if $block==2} selected="selected"{/if}>{lng p="modfax_cover"}</option>
 					<option value="3"{if $block==3} selected="selected"{/if}>{lng p="modfax_pdffile"}</option>
-				</select></td>
-			</tr>
+				</select>
+			</div>
+		</div>
 		{/foreach}
-		</table>
 	</fieldset>
 	
 	<p>

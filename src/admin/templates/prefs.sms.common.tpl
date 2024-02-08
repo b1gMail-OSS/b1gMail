@@ -1,88 +1,104 @@
 <form action="prefs.sms.php?save=true&sid={$sid}" method="post" onsubmit="spin(this)" id="prefsForm">
-	<fieldset>
-		<legend>{lng p="gateway"}</legend>
-	
-		<table>
-			<tr>
-				<td align="left" valign="top" width="40"><img src="{$tpldir}images/gateway32.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="220">{lng p="defaultgateway"}:</td>
-				<td class="td2"><select name="sms_gateway">
-				{foreach from=$gateways item=gateway}
-					<option value="{$gateway.id}"{if $gateway.id==$bm_prefs.sms_gateway} selected="selected"{/if}>{text value=$gateway.titel}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-		</table>
-	</fieldset>
-	
-	<fieldset>
-		<legend>{lng p="charge"}</legend>
-		
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="2"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="" width="32" height="32" /></td>				
-				<td class="td1" width="220">{lng p="enablesmscharge"}?</td>
-				<td class="td2"><input name="sms_enable_charge"{if $bm_prefs.sms_enable_charge=='yes'} checked="checked"{/if} type="checkbox" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="minamount"}:</td>
-				<td class="td2"><input type="text" name="charge_min_amount" value="{$bm_prefs.charge_min_amount}" size="8" /> {text value=$bm_prefs.currency}</td>
-			</tr>
-		</table>
-	</fieldset>
-	
+	<div class="row">
+		<div class="col-md-6">
+			<fieldset>
+				<legend>{lng p="gateway"}</legend>
+
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="defaultgateway"}</label>
+					<div class="col-sm-8">
+						<select name="sms_gateway" class="form-select">
+							{foreach from=$gateways item=gateway}
+								<option value="{$gateway.id}"{if $gateway.id==$bm_prefs.sms_gateway} selected="selected"{/if}>{text value=$gateway.titel}</option>
+							{/foreach}
+						</select>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+		<div class="col-md-6">
+			<fieldset>
+				<legend>{lng p="charge"}</legend>
+
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-check-label">{lng p="enablesmscharge"}</label>
+					<div class="col-sm-8">
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="sms_enable_charge"{if $bm_prefs.sms_enable_charge=='yes'} checked="checked"{/if}>
+						</label>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="minamount"}</label>
+					<div class="col-sm-8">
+						<div class="input-group mb-2">
+							<input type="text" class="form-control" name="charge_min_amount" value="{$bm_prefs.charge_min_amount}" placeholder="{lng p="croninterval"}">
+							<span class="input-group-text">{text value=$bm_prefs.currency}</span>
+						</div>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+
 	<fieldset>
 		<legend>{lng p="common"}</legend>
-	
-		<table>
-			<tr>
-				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/ico_prefs_misc.png" border="0" alt="" width="32" height="32" /></td>				
-				<td class="td1" width="220">{lng p="clndrsmsabs"}:</td>
-				<td class="td2"><input type="text" name="clndr_sms_abs" value="{$bm_prefs.clndr_sms_abs}" size="36" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="clndr_sms_type"}:</td>
-				<td class="td2"><select name="clndr_sms_type">
-					<option value="0">({lng p="defaulttype"})</option>
-				{foreach from=$types item=type}
-					<option value="{$type.id}"{if $type.id==$bm_prefs.clndr_sms_type} selected="selected"{/if}>{text value=$type.titel}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-			<tr>
-				<td class="td1" width="220">{lng p="mail2smsabs"}:</td>
-				<td class="td2"><input type="text" name="mail2sms_abs" value="{$bm_prefs.mail2sms_abs}" size="36" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="mail2sms_type"}:</td>
-				<td class="td2"><select name="mail2sms_type">
-					<option value="0">({lng p="defaulttype"})</option>
-				{foreach from=$types item=type}
-					<option value="{$type.id}"{if $type.id==$bm_prefs.mail2sms_type} selected="selected"{/if}>{text value=$type.titel}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="smsreplyabs"}:</td>
-				<td class="td2"><input type="text" name="smsreply_abs" value="{$bm_prefs.smsreply_abs}" size="36" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="smsvalidation_type"}:</td>
-				<td class="td2"><select name="smsvalidation_type">
-					<option value="0">({lng p="defaulttype"})</option>
-				{foreach from=$types item=type}
-					<option value="{$type.id}"{if $type.id==$bm_prefs.smsvalidation_type} selected="selected"{/if}>{text value=$type.titel}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-		</table>
-	</fieldset>
-	
-	<p>
-		<div style="float:right" class="buttons">
-			<input class="button" type="submit" value=" {lng p="save"} " />
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="clndrsmsabs"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="clndr_sms_abs" value="{$bm_prefs.clndr_sms_abs}" placeholder="{lng p="clndrsmsabs"}">
+			</div>
 		</div>
-	</p>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="clndr_sms_type"}</label>
+			<div class="col-sm-10">
+				<select name="clndr_sms_type" class="form-select">
+					<option value="0">({lng p="defaulttype"})</option>
+					{foreach from=$types item=type}
+						<option value="{$type.id}"{if $type.id==$bm_prefs.clndr_sms_type} selected="selected"{/if}>{text value=$type.titel}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="mail2smsabs"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="mail2sms_abs" value="{$bm_prefs.mail2sms_abs}" placeholder="{lng p="mail2smsabs"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="mail2sms_type"}</label>
+			<div class="col-sm-10">
+				<select name="mail2sms_type" class="form-select">
+					<option value="0">({lng p="defaulttype"})</option>
+					{foreach from=$types item=type}
+						<option value="{$type.id}"{if $type.id==$bm_prefs.mail2sms_type} selected="selected"{/if}>{text value=$type.titel}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="smsreplyabs"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="smsreply_abs" value="{$bm_prefs.smsreply_abs}" placeholder="{lng p="smsreplyabs"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="smsvalidation_type"}</label>
+			<div class="col-sm-10">
+				<select name="smsvalidation_type" class="form-select">
+					<option value="0">({lng p="defaulttype"})</option>
+					{foreach from=$types item=type}
+						<option value="{$type.id}"{if $type.id==$bm_prefs.smsvalidation_type} selected="selected"{/if}>{text value=$type.titel}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+
+		<div class="text-end">
+			<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
+		</div>
 </form>
 
 <form action="https://www.sofort-ueberweisung.de/payment/createNew/" method="post" target="suWindow" id="suForm">

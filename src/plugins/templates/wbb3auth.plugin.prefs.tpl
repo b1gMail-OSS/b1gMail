@@ -2,59 +2,72 @@
 	<legend>{lng p="prefs"}</legend>
 	
 	<form action="{$pageURL}&sid={$sid}&do=save" method="post" onsubmit="spin(this)">
-	<table>
-		<tr>
-			<td align="left" rowspan="8" valign="top" width="40"><img src="../plugins/templates/images/wbb32.png" border="0" alt="" width="32" height="32" /></td>
-			<td class="td1" width="160">{lng p="enable"}?</td>
-			<td class="td2"><input name="enableAuth"{if $wbb3_prefs.enableAuth} checked="checked"{/if} type="checkbox" /></td>
-		</tr>
-		<tr>
-			<td class="td1">MySQL {lng p="host"}:</td>
-			<td class="td2"><input type="text" name="mysqlHost" value="{if isset($wbb3_prefs.mysqlHost)}{text value=$wbb3_prefs.mysqlHost}{/if}" size="36" /></td>
-		</tr>
-		<tr>
-			<td class="td1">MySQL {lng p="user"}:</td>
-			<td class="td2"><input type="text" name="mysqlUser" value="{if isset($wbb3_prefs.mysqlUser)}{text value=$wbb3_prefs.mysqlUser}{/if}" size="36" /></td>
-		</tr>
-		<tr>
-			<td class="td1">MySQL {lng p="password"}:</td>
-			<td class="td2"><input type="password" name="mysqlPass" value="{if isset($wbb3_prefs.mysqlPass)}{text value=$wbb3_prefs.mysqlPass}{/if}" size="36" /></td>
-		</tr>
-		<tr>
-			<td class="td1">MySQL {lng p="db"}:</td>
-			<td class="td2"><input type="text" name="mysqlDB" value="{if isset($wbb3_prefs.mysqlDB)}{text value=$wbb3_prefs.mysqlDB}{/if}" size="36" /></td>
-		</tr>
-		<tr>
-			<td class="td1">MySQL Prefix:</td>
-			<td class="td2"><input type="text" name="mysqlPrefix" value="{if isset($wbb3_prefs.mysqlPrefix)}{text value=$wbb3_prefs.mysqlPrefix allowEmpty=true}{/if}" size="36" /></td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="user"}-{lng p="domain"}:</td>
-			<td class="td2"><select name="userDomain">
-			{foreach from=$domains item=domain}
-				<option value="{$domain}"{if $wbb3_prefs.userDomain==$domain} selected="selected"{/if}>{$domain}</option>
-			{/foreach}
-			</select></td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="groups"}:</td>
-			<td class="td2">
-				<input type="checkbox" name="allGroups" id="allGroups"{if $wbb3_prefs.userGroups==''} checked="checked"{/if} onclick="EBID('groups').style.display=this.checked?'none':'';" />
-				<label for="allGroups" style="font-weight:bold;">{lng p="all"}</label><br />
-				
-				<div id="groups" style="display:{if $wbb3_prefs.userGroups==''}none{/if};">
-					{foreach from=$groups item=group key=groupID}
-					<input type="checkbox" name="groups[]" value="{$groupID}" id="group_{$groupID}"{if $group.active} checked="checked"{/if} />
-					<label for="group_{$groupID}">{text value=$group.groupName}</label><br />
-					{/foreach}
-				</div>
-			</td>
-		</tr>
-	</table>
-	<p>
-		<div style="float:right;">
-			<input class="button" type="submit" value=" {lng p="save"} " />
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enable"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enableAuth"{if $wbb3_prefs.enableAuth} checked="checked"{/if}>
+				</label>
+			</div>
 		</div>
-	</p>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">MySQL {lng p="host"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="mysqlHost" value="{if isset($wbb3_prefs.mysqlHost)}{text value=$wbb3_prefs.mysqlHost}{/if}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">MySQL {lng p="user"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="mysqlUser" value="{if isset($wbb3_prefs.mysqlUser)}{text value=$wbb3_prefs.mysqlUser}{/if}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">MySQL {lng p="password"}</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="mysqlPass" value="{if isset($wbb3_prefs.mysqlPass)}{text value=$wbb3_prefs.mysqlPass}{/if}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">MySQL {lng p="db"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="mysqlDB" value="{if isset($wbb3_prefs.mysqlDB)}{text value=$wbb3_prefs.mysqlDB}{/if}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">MySQL Prefix</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="mysqlPrefix" value="{if isset($wbb3_prefs.mysqlPrefix)}{text value=$wbb3_prefs.mysqlPrefix allowEmpty=true}{/if}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="user"}-{lng p="domain"}</label>
+			<div class="col-sm-10">
+				<select name="userDomain" class="form-select">
+					{foreach from=$domains item=domain}
+						<option value="{$domain}"{if $wbb3_prefs.userDomain==$domain} selected="selected"{/if}>{$domain}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="groups"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="allGroups" id="allGroups"{if $wbb3_prefs.userGroups==''} checked="checked"{/if} onclick="EBID('groups').style.display=this.checked?'none':'';">
+					<span class="form-check-label">{lng p="all"}</span>
+				</label>
+				{foreach from=$groups item=group key=groupID}
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="groups[]" value="{$groupID}" id="group_{$groupID}"{if $group.active} checked="checked"{/if}>
+					<span class="form-check-label">{text value=$group.groupName}</span>
+				</label>
+				{/foreach}
+			</div>
+		</div>
+
+		<div class="text-end">
+			<input type="submit" class="btn btn-primary" value="{lng p="save"}" />
+		</div>
 	</form>
 </fieldset>

@@ -2,33 +2,43 @@
 	<legend>{lng p="edit"}</legend>
 	
 	<form action="prefs.ads.php?do=edit&save=true&id={$ad.id}&sid={$sid}" method="post" onsubmit="spin(this);">
-		<table width="100%">
-			<tr>
-				<td width="40" valign="top" rowspan="5"><img src="{$tpldir}images/ad32.png" border="0" alt="" width="32" height="32" /></td>
-				<td colspan="2" style="border: 1px solid #DDDDDD;background-color:#FFFFFF;">
-					<textarea name="code" id="code" class="plainTextArea" style="width:100%;height:120px;font-family:courier;">{$ad.code}</textarea>
-				</td>
-			</tr>
-			<tr>
-				<td class="td1" width="160">{lng p="category"}:</td>
-				<td class="td2"><input type="text" name="category" size="36" value="{if isset($ad.category)}{text value=$ad.category allowEmpty=true}{/if}" /></td>
-			</tr>
-			<tr>
-				<td class="td1" width="160">{lng p="weight"}:</td>
-				<td class="td2"><input type="text" name="weight" size="4" value="{$ad.weight}" />%</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="paused"}?</td>
-				<td class="td2"><input type="checkbox" name="paused"{if $ad.paused} checked="checked"{/if} /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="comment"}:</td>
-				<td class="td2"><textarea style="width:100%;height:65px;" name="comments">{text allowEmpty=true value=$ad.comments}</textarea></td>
-			</tr>
-		</table>
-	
-		<p align="right">
-			<input class="button" type="submit" value=" {lng p="save"} " />
-		</p>
+		<div class="mb-3 row">
+			<div class="col-sm-12">
+				<textarea name="code" id="code" class="form-control" style="font-family:courier;">{$ad.code}</textarea>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="category"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="category" value="{if isset($ad.category)}{text value=$ad.category allowEmpty=true}{/if}" placeholder="{lng p="category"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="weight"}</label>
+			<div class="col-sm-10">
+				<div class="input-group mb-2">
+					<input type="text" class="form-control" name="weight" value="{$ad.weight}" placeholder="{lng p="weight"}">
+					<span class="input-group-text">%</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="paused"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="paused"{if $ad.paused} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="comment"}</label>
+			<div class="col-sm-10">
+				<textarea class="form-control" name="comments" placeholder="{lng p="comment"}">{text allowEmpty=true value=$ad.comments}</textarea>
+			</div>
+		</div>
+
+		<div class="text-end">
+			<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
+		</div>
 	</form>
 </fieldset>

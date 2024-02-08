@@ -37,7 +37,7 @@
 				<small>{date timestamp=$item.date nice=true}</td>
 			<td><a title="{text value=$item.to}">{text value=$item.to cut=25}</a></td>
 			<td>{size bytes=$item.size}</td>
-			<td>{if !empty($item.active)}{lng p="active"}{else}{if $item.last_attempt==0}-{else}{date timestamp=$item.last_attempt nice=true}{/if}{/if}{if $item.last_attempt!=0}<br /><small>{$item.attempts} {lng p="bms_attempts"}</small>{/if}</td>
+			<td>{if isset($item.active)}{lng p="active"}{else}{if $item.last_attempt==0}-{else}{date timestamp=$item.last_attempt nice=true}{/if}{/if}{if $item.last_attempt!=0}<br /><small>{$item.attempts} {lng p="bms_attempts"}</small>{/if}</td>
 			<td>
 				<a href="{$pageURL}&action=msgqueue&do=showQueueItem&id={$item.id}&sid={$sid}" title="{lng p="show"}"><img src="../plugins/templates/images/bms_show.png" border="0" alt="{lng p="show"}" width="16" height="16" /></a>
 				{if $queueRunning}<a href="{$pageURL}&action=msgqueue&do=downloadQueueItem&id={$item.id}&sid={$sid}" title="{lng p="bms_download"}" target="_blank"><img src="../plugins/templates/images/bms_download.png" border="0" alt="{lng p="bms_download"}" width="16" height="16" /></a>{/if}
