@@ -20,7 +20,7 @@
  */
 
 // init
-include './common.inc.php';
+require './common.inc.php';
 
 //  operations per call
 define('CALL_OPS', 50);
@@ -108,7 +108,7 @@ define('STEP_UPDATE_DONE', 109);
 define('DB_INSTALL_PREFIX', 'bm60_');
 
 // target version
-$target_version = '7.4.1-Beta3';
+$target_version = '7.4.1-RC1';
 
 // invoice
 $defaultInvoice = file_get_contents("./rgtemplate.tpl");
@@ -457,7 +457,7 @@ elseif ($step == STEP_INSTALL) {
     include './data/rootcerts.data.php';
 
     // prepare structure
-    $databaseStructure = unserialize(base64_decode($databaseStructure));
+    $databaseStructure = json_decode($databaseStructure, JSON_OBJECT_AS_ARRAY);
 
     // sanitize input
     if (substr($_REQUEST['url'], -1) != '/') {
@@ -552,7 +552,7 @@ elseif ($step == STEP_INSTALL) {
                             SQLEscape('postmaster@'.EncodeDomain($firstDomain), $connection),
                             'BMPlugin_Widget_Welcome,BMPlugin_Widget_EMail,BMPlugin_Widget_Websearch;BMPlugin_Widget_Mailspace,,BMPlugin_Widget_Quicklinks;BMPlugin_Widget_Webdiskspace,,',
                             'BMPlugin_Widget_Websearch,BMPlugin_Widget_Calendar,BMPlugin_Widget_Notes;,BMPlugin_Widget_Tasks,',
-                            !ini_get('safe_mode') ? 'yes' : 'no',
+                            'yes',
                             SQLEscape('a:8:{s:5:"mails";s:2:"on";s:11:"attachments";s:2:"on";s:3:"sms";s:2:"on";s:8:"calendar";s:2:"on";s:5:"tasks";s:2:"on";s:11:"addressbook";s:2:"on";s:5:"notes";s:2:"on";s:7:"webdisk";s:2:"on";}', $connection),
                             $utf8Mode ? 1 : 0,
                             $defaultInvoice,

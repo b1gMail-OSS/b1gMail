@@ -24,8 +24,12 @@ require './common.inc.php';
 require '../serverlib/config.inc.php';
 require '../serverlib/version.inc.php';
 
+if(file_exists(__DIR__."/lock_update")) {
+    die("Lockfile detected. Please remove the file lock_update if you want rerun.");
+}
+
 // target version
-$target_version = '7.4.1-Beta4';
+$target_version = '7.4.1-RC1';
 
 // known versions
 $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0.0',
@@ -34,7 +38,7 @@ $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0
                         '7.3.0-Beta1', '7.3.0-Beta2', '7.3.0-Beta3', '7.3.0-Beta4',
                         '7.3.0-Beta5', '7.3.0-Beta6', '7.3.0',
                         '7.4.0-Beta1', '7.4.0-Beta2', '7.4.0-Beta3', '7.4.0-Beta4', '7.4.0', 
-                        '7.4.1-Beta1', '7.4.1-Beta2', '7.4.1-Beta3'];
+                        '7.4.1-Beta1', '7.4.1-Beta2', '7.4.1-Beta3', '7.4.1-Beta4'];
 
 // steps
 define('STEP_SELECT_LANGUAGE', 0);
@@ -299,7 +303,7 @@ elseif ($step == STEP_UPDATE_STEP) {
     elseif ($do == 'struct2') {
         include '../serverlib/database.struct.php';
 
-        $databaseStructure = unserialize(base64_decode($databaseStructure));
+        $databaseStructure = json_decode($databaseStructure);
         $queries = SyncDBStruct($connection, $databaseStructure, true, isset($bm_prefs['db_is_utf8']) && $bm_prefs['db_is_utf8'] == 1);
 
         if (count($queries) == 0) {
@@ -822,6 +826,13 @@ elseif ($step == STEP_UPDATE_STEP) {
         $fp = fopen('../serverlib/version.inc.php', 'w');
         fwrite($fp, sprintf('<?php define(\'B1GMAIL_VERSION\', $b1gmail_version = \'%s\'); ?>', $target_version));
         fclose($fp);
+
+        if(is_writable('./'))
+        {
+            $lock = @fopen('./lock_update', 'w');
+            $written = @fwrite($lock, '1');
+            @fclose($lock);
+        }
 
         echo 'OK:DONE';
     }

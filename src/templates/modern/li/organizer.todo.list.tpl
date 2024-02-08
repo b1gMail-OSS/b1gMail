@@ -7,7 +7,7 @@
 		<th>
 			{lng p="title"}				
 		</th>
-		<th width="120">
+		<th width="140">
 			{lng p="due"}
 		</th>
 		<th width="100">
@@ -18,12 +18,12 @@
 	
 	<tr style="height:auto;">
 		<td colspan="6" class="folderGroup">
-			<a style="display:block;cursor:pointer;" onclick="toggleGroup(0,'todo0');">&nbsp;<img id="groupImage_0" src="{$tpldir}images/{if $smarty.cookies.toggleGroup.todo0=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
+			<a style="display:block;cursor:pointer;" onclick="toggleGroup(0,'todo0');">&nbsp;<img id="groupImage_0" src="{$tpldir}images/{if isset($smarty.cookies.toggleGroup.todo0) && $smarty.cookies.toggleGroup.todo0=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
 			&nbsp;{lng p="undonetasks"}</a>
 		</td>
 	</tr>
 	
-	<tbody id="group_0" style="display:{if $smarty.cookies.toggleGroup.todo0=='closed'}none{/if};">
+	<tbody id="group_0" style="display:{if isset($smarty.cookies.toggleGroup.todo0) && $smarty.cookies.toggleGroup.todo0=='closed'}none{/if};">
 
 	{foreach from=$todoList key=taskID item=task}{if $task.akt_status!=64}
 	{cycle values="listTableTD,listTableTD2" assign="class"}
@@ -67,7 +67,7 @@
 	
 	</tbody>
 	
-	{if $haveDoneTasks}
+	{if isset($haveDoneTasks)}
 	<tr style="height:auto;">
 		<td colspan="6" class="folderGroup">
 			<a style="display:block;cursor:pointer;" onclick="toggleGroup(1,'todo1');">&nbsp;<img id="groupImage_1" src="{$tpldir}images/{if $smarty.cookies.toggleGroup.todo1=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />

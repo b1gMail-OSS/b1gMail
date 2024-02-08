@@ -19,7 +19,7 @@
  *
  */
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 include('./serverlib/notes.class.php');
 include('./serverlib/todo.class.php');
 RequestPrivileges(PRIVILEGES_USER);

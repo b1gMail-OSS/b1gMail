@@ -58,7 +58,7 @@ if($_REQUEST['action'] == 'db')
 		{
 			// read default structure
 			include('../serverlib/database.struct.php');
-			$databaseStructure = unserialize(base64_decode($databaseStructure));
+			$databaseStructure = json_decode($databaseStructure, JSON_OBJECT_AS_ARRAY);
 
 			// get tables
 			$defaultTables = array();
@@ -184,7 +184,7 @@ if($_REQUEST['action'] == 'db')
 	{
 		// read default structure
 		include('../serverlib/database.struct.php');
-		$databaseStructure = unserialize(base64_decode($databaseStructure));
+		$databaseStructure = json_decode($databaseStructure, JSON_OBJECT_AS_ARRAY);
 		$executedQueries = SyncDBStruct($databaseStructure);
 
 		// assign

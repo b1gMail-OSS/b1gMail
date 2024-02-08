@@ -119,7 +119,7 @@ class BMWorkgroup
      *
      * @return int
      */
-    public function GetIDbyMail($email)
+    public static function GetIDbyMail($email)
     {
         global $db;
 
@@ -145,13 +145,9 @@ class BMWorkgroup
      *
      * @return array
      */
-    public function GetMembers($id = -1, $excludeDeleted = true)
+    public static function GetMembers($id, $excludeDeleted = true)
     {
         global $db;
-
-        if ($id == -1) {
-            $id = $this->_id;
-        }
 
         $members = [];
         $res = $db->Query('SELECT {pre}users.id AS id, {pre}users.email AS email FROM {pre}users,{pre}workgroups_member WHERE {pre}users.id={pre}workgroups_member.user AND {pre}workgroups_member.workgroup=?'
@@ -172,6 +168,7 @@ class BMWorkgroup
      * @param int $groupID
      *
      * @return bool
+     * @TODO: currently unused function
      */
     public function UserInGroup($userID, $groupID)
     {
@@ -206,6 +203,7 @@ class BMWorkgroup
      * @param int $id
      *
      * @return string
+     * @TODO: currently unused function
      */
     public function GetTitle($id)
     {

@@ -19,7 +19,7 @@
  *
  */
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 include('./serverlib/sms.class.php');
 RequestPrivileges(PRIVILEGES_USER);
 

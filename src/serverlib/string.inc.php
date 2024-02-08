@@ -36,7 +36,11 @@ function Strip4ByteChars($in)
 
 	}
 	else if(in_array(strtolower($currentCharset), array('utf8', 'utf-8')))
-		return preg_replace('/[\x{10000}-\x{10FFFF}]/u', ' ', $in);
+        // It is possible that the provided string is actually not an UTF8 string. In this case, preg_replace will return null.
+        $result = preg_replace('/[\x{10000}-\x{10FFFF}]/u', ' ', $in);
+        if (!is_null($result)) {
+            return $result;
+        }
 
 	return $in;
 }
@@ -132,13 +136,10 @@ function _wordwrap($str, $width = 75, $break = null, $cut = null)
 	$result = '';
 	$shouldBreak = false;
 	$strLen = _strlen($str);
-	$pcreUTF8 = function_exists('preg_split')
-					&& ((SERVER_WINDOWS && PHPNumVersion() >= 423)
-						|| (!SERVER_WINDOWS && PHPNumVersion() >= 410));
 
 	// it is _way_ faster to use preg_split to split the string
 	// into characters than to use _substr / mb_substr
-	if(in_array(strtolower($currentCharset), array('utf8', 'utf-8')) && $pcreUTF8)
+	if(in_array(strtolower($currentCharset), array('utf8', 'utf-8')) && function_exists('preg_split'))
 	{
 		$processed = 0;
 		while($processed < $strLen)

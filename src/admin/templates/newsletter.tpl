@@ -28,7 +28,7 @@
 					<div class="col-sm-8">
 						{foreach from=$groups item=group key=groupID}
 							<label class="form-check">
-								<input class="form-check-input" type="checkbox" name="group_{$groupID}" id="group_{$groupID}"{if !$smarty.get.toGroup||$smarty.get.toGroup==$groupID} checked="checked"{/if} onclick="determineNewsletterRecipients()">
+								<input class="form-check-input" type="checkbox" name="group_{$groupID}" id="group_{$groupID}"{if !isset($smarty.get.toGroup) || !$smarty.get.toGroup || $smarty.get.toGroup==$groupID}checked="checked"{/if} onclick="determineNewsletterRecipients()">
 								<span class="form-check-label">{text value=$group.title}</span>
 							</label>
 						{/foreach}
@@ -121,14 +121,12 @@
 			<div class="col-sm-12">
 				<textarea name="emailText" id="emailText" class="plainTextArea"></textarea>
 				<script src="../clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
-				<script type="text/javascript" src="../clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
+				<script src="../clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
 				<script>
-					<!--
 					var editor = new htmlEditor('emailText');
 					editor.height = 400;
 					editor.init();
 					registerLoadAction('editor.start()');
-					//-->
 				</script>
 			</div>
 		</div>
@@ -160,8 +158,6 @@
 </form>
 
 <script>
-	<!--
 	var newsletterMode = 'export';
 	registerLoadAction('determineNewsletterRecipients()');
-	//-->
 </script>

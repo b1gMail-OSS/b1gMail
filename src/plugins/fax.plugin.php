@@ -3544,9 +3544,10 @@ function _FaxPluginCreateFPDISubclass()
 			$this->SetFillColor(255, 255, 255);
 
 			// draw
+			if(function_exists('CharsetDecode')) $this->signatureArray['text'] = CharsetDecode($this->signatureArray['text'], false, 'ISO-8859-15');
 			$this->MultiCell(0,
 				($this->signatureArray['fontsize']/$this->k)*1.5,
-				FaxPlugin::_pdfStr($this->signatureArray['text']),
+				$this->signatureArray['text'],
 				$border,
 				$this->signatureArray['align'],
 				true);

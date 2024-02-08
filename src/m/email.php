@@ -19,7 +19,7 @@
  *
  */
 
-include('../serverlib/init.inc.php');
+require '../serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('../serverlib/mailbox.class.php');
 if(!class_exists('BMMailBuilder'))

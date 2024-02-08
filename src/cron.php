@@ -19,8 +19,8 @@
  *
  */
 
-include './serverlib/init.inc.php';
-include './serverlib/pop3gateway.class.php';
+require './serverlib/init.inc.php';
+require './serverlib/pop3gateway.class.php';
 include './serverlib/userpop3gateway.class.php';
 include './serverlib/calendar.class.php';
 
@@ -70,7 +70,7 @@ if ($bm_prefs['last_cron'] < time() - $bm_prefs['cron_interval']) {
     }
     register_shutdown_function('ReleaseCronLock');
 
-    include './serverlib/cron.inc.php';
+    require './serverlib/cron.inc.php';
 
     // update last cron run time
     $db->Query('UPDATE {pre}prefs SET last_cron=?',

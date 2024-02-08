@@ -8,7 +8,7 @@
 	</div>
 
 	<div class="right">
-		{if $folderInfo.type!='intellifolder'&&!$folderInfo.readonly}
+		{if $folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
 		<button onclick="showFolderMenu(event);" type="button">
 			<i class="fa fa-gears fa-lg"></i>
 			{lng p="folderactions"}
@@ -20,7 +20,7 @@
 			{lng p="refresh"}
 		</button>
 
-		{if !$folderInfo.readonly}<button onclick="folderViewOptions({$folderID});" type="button">
+		{if empty($folderInfo.readonly)}<button onclick="folderViewOptions({$folderID});" type="button">
 			<i class="fa fa-desktop fa-lg"></i>
 			{lng p="viewoptions"}
 		</button>{/if}
@@ -59,10 +59,14 @@
 	</tr>
 	</thead>
 
-	{if $mailList}
+	{if isset($mailList)}
 	{assign var=first value=true}
 	{foreach from=$mailList key=mailID item=mail}
+	{if isset($mail.groupID)}
 	{assign var=mailGroupID value=$mail.groupID}
+	{else}
+	{assign var=mailGroupID value=''}
+	{/if}
 	{cycle values="listTableTR,listTableTR2" assign="class"}
 
 	{if $mailID<0}
@@ -72,11 +76,11 @@
 	{/if}
 	<tr>
 		<td colspan="{if $templatePrefs.showCheckboxes}7{else}6{/if}" class="folderGroup">
-			<a style="display:block;cursor:pointer;" onclick="toggleGroup({$mailID},'{if isset($mail.groupID)}{$mail.groupID}{/if}');">&nbsp;<img id="groupImage_{$mailID}" src="{$tpldir}images/{if $smarty.cookies.toggleGroup.$mailGroupID=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
-			&nbsp;{$mail.text} {if $mail.date && $mail.date!=-1}({date timestamp=$mail.date dayonly=true}){/if}</a>
+			<a style="display:block;cursor:pointer;" onclick="toggleGroup({$mailID},'{if isset($mail.groupID)}{$mail.groupID}{/if}');">&nbsp;<img id="groupImage_{$mailID}" src="{$tpldir}images/{if isset($smarty.cookies.toggleGroup.$mailGroupID) && $smarty.cookies.toggleGroup.$mailGroupID=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
+			&nbsp;{$mail.text} {if isset($mail.date) && $mail.date!=-1}({date timestamp=$mail.date dayonly=true}){/if}</a>
 		</td>
 	</tr>
-	<tbody id="group_{$mailID}" style="display:{if $smarty.cookies.toggleGroup.$mailGroupID=='closed'}none{/if};">
+	<tbody id="group_{$mailID}" style="display:{if isset($smarty.cookies.toggleGroup.$mailGroupID) && $smarty.cookies.toggleGroup.$mailGroupID=='closed'}none{/if};">
 	{assign var=first value=false}
 	{else}
 	<tr _draggable="true" _ondragstart="mailDragStart(event,{$mailID})" class="{$class}" id="mail_{$mailID}_ntr" _onmousedown="return mailMouseDown(event,{$mailID});" _onmouseup="mailMouseUp(event,{$mailID});" {if $folderID==-3}_ondblclick="document.location.href='email.compose.php?redirect={$mailID}&sid={$sid}';"{else}_ondblclick="document.location.href='email.read.php?id={$mailID}&sid={$sid}';"{/if} _oncontextmenu="return(false);">
@@ -129,13 +133,13 @@
 			<option value="-">------ {lng p="selaction"} ------</option>
 
 			<optgroup label="{lng p="actions"}">
-				{if !$folderInfo.readonly}<option value="delete">{lng p="delete"}</option>{/if}
+				{if empty($folderInfo.readonly)}<option value="delete">{lng p="delete"}</option>{/if}
 				<option value="forward">{lng p="forward"}</option>
 				<option value="download">{lng p="download"}</option>
 				{hook id="email.folder.tpl:mailSelect.actions"}
 			</optgroup>
 
-			{if !$folderInfo.readonly}<optgroup label="{lng p="flags"}">
+			{if empty($folderInfo.readonly)}<optgroup label="{lng p="flags"}">
 				<option value="markread">{lng p="markread"}</option>
 				<option value="markunread">{lng p="markunread"}</option>
 				<option value="mark">{lng p="mark"}</option>

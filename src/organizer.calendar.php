@@ -19,7 +19,7 @@
  *
  */
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 include('./serverlib/todo.class.php');
 include('./serverlib/calendar.class.php');
 include('./serverlib/addressbook.class.php');
@@ -146,7 +146,7 @@ if($_REQUEST['action'] == 'start')
 	if($viewMode == 'day')
 	{
 		$dates = $calendar->GetDatesForTimeframe($dateStart, $dateEnd, $group);
-		$tpl->assign('weekDay', _strftime('%A', $dateStart));
+		$tpl->assign('weekDay', date('l', $dateStart));
 		$tpl->assign('calWeek', date(date('o') == 'o' ? 'W/Y' : 'W/o', $dateStart));
 		$tpl->assign('dates', $dates);
 		$tpl->assign('pageContent', 'li/organizer.calendar.dayview.tpl');

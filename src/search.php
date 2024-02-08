@@ -19,7 +19,7 @@
  *
  */
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 RequestPrivileges(PRIVILEGES_USER);
 
 /**
@@ -204,9 +204,9 @@ if($_REQUEST['action'] == 'search')
 		}
 
 		// show results
+		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('sortColumn', $sortColumn);
 		$tpl->assign('sortOrder', $sortOrderFA);
-		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('pageNo', $pageNo);
 		$tpl->assign('pageCount', $pageCount);
 		$tpl->assign('results', $results);

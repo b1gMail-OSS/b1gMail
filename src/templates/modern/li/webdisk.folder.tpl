@@ -25,7 +25,7 @@
 	<input type="hidden" name="selectedWebdiskItems" id="selectedWebdiskItems" value="" />
 	
 	<div class="scrollContainer withBottomBar noSelect" id="wdDnDArea">
-	{if $upload}
+	{if isset($upload)}
 		<fieldset style="margin-top:1em;">
 			<legend>{lng p="uploadfiles"}</legend>
 			<table width="100%">
@@ -119,21 +119,20 @@
 	
 	{hook id="webdisk.folder.tpl:foot"}
 	
-	{if !$smarty.post.inline}
+	{if !isset($smarty.post.inline)}
 	<script src="./clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
 	
 	<script>
-	<!--
 	{if $hotkeys}
 		registerLoadAction('registerWebdiskFolderHotkeyHandler()');
 	{/if}
 		initDnDUpload(EBID('mainContent'), 'webdisk.php?sid='+currentSID+'&folder={$folderID}&action=dndUpload', function() {literal}{{/literal} document.location.href='webdisk.php?sid='+currentSID+'&folder={$folderID}'; {literal}}{/literal});
 		currentWebdiskFolderID = {$folderID};
 		var treeID = webdiskGetTreeIDbyFolderID({$folderID});
-		if(treeID > 0)
+		if(treeID > 0) {
 			webdisk_d.openTo(treeID);
+		}
 		initWDSel();
-	//-->
 	</script>
 	{/if}
 

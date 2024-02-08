@@ -16,24 +16,6 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-md-6">
-			<div class="row">
-				<label class="col-sm-4 col-form-label">{lng p="bms_licstatus"}</label>
-				<div class="col-sm-8">
-					<div class="form-control-plaintext">
-						<a href="{$pageURL}&action=common&sid={$sid}">{if $bms_prefs.licstate==2}
-								<p class="text-red">{lng p="bms_expired"}</font>
-							{elseif $bms_prefs.licstate==0}
-								<p class="text-red">{lng p="bms_invalid"}</p>
-							{elseif $bms_prefs.licstate==1}
-								<p class="text-green">{lng p="bms_valid"}</p>
-							{else}
-								{lng p="bms_validating"}
-							{/if}</a>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
 </fieldset>
 
@@ -157,5 +139,3 @@
 		</table>
 	</div>
 {/if}
-
-<!--<script src="https://service.b1gmail.org/b1gmailserver/updates/?do=noticeJS&adminVersion={$adminVersion}&coreVersion={$coreVersion}&lang={$lang}"></script>-->

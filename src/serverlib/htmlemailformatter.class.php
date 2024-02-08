@@ -142,7 +142,7 @@ if(class_exists('DOMDocument'))
 
 				if($lcName == 'href' && preg_match('~^(http|https|ftp)://~i', $val))
 				{
-					$val = ($this->replyMode ? '' : 'deref.php?') . $val;
+					$val = ($this->replyMode ? '' : 'deref.php?') . str_replace('#','%23',$val);
 					$allow = true;
 				}
 				else if($lcName == 'href' && preg_match('~^mailto:~i', $val))

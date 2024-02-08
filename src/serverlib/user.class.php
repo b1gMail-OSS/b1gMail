@@ -534,7 +534,7 @@ class BMUser
 	 * @param int $userID User ID
 	 * @param string $resetKey Reset key
 	 */
-	public function ResetPassword($userID, $resetKey)
+	public static function ResetPassword($userID, $resetKey)
 	{
 		global $db;
 
@@ -2384,7 +2384,7 @@ class BMUser
 	 * @param bool $addressbookNoSpam Mark as NON-spam when sender is in the address book?
 	 * @return bool
 	 */
-	public function SetAntispamSettings($active, $action, $unspamMe, $bayesBorder = false, $addressbookNoSpam)
+	public function SetAntispamSettings($active, $action, $unspamMe, $bayesBorder = false, $addressbookNoSpam = false)
 	{
 		global $db;
 		$db->Query('UPDATE {pre}users SET spamfilter=?, spamaction=?, unspamme=?, addressbook_nospam=?'

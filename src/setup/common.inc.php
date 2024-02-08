@@ -61,7 +61,7 @@ function EncodeDomain($domain)
 {
 	if(function_exists('idn_to_ascii'))
 	{
-		$domain = CharsetDecode($domain, false, 'utf8');
+		$domain = ConvertEncoding($domain, 'iso-8859-1', 'utf-8');
 		return idn_to_ascii($domain);
 	}
 	return $domain;

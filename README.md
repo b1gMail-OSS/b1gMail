@@ -17,7 +17,8 @@ A big thanks goes to b1gMail founder Patrick Schlangen. He released b1gMail as f
 ## Getting started
 It is recommended to install the b1gMail developer copy on a local web server,
 e.g. standard Apache/PHP/MySQL on Linux or Wamp on Windows. Even better results
-on Windows can be achieved with a WSL setup.
+on Windows can be achieved with a WSL setup. If you use Docker, you can also 
+use our docker template in `docker-dev`.
 
 In order to install a development environment, proceed as follows:
 1. Clone the repository

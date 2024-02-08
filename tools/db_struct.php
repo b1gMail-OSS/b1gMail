@@ -70,11 +70,10 @@ foreach($tables as $table)
 }
 
 // output
-$structure = serialize($structure);
-$structure = base64_encode($structure);
-$structure = wordwrap($structure, 75, "'\n\t. '", true);
+$structure = json_encode($structure, JSON_PRETTY_PRINT);
 echo '<div style="float:right;"><h3>Export-Daten</h3>';
-echo '<textarea cols=90 rows=40 readonly=readonly>$databaseStructure = ' . sprintf('% 66s', "// checksum: " . md5($structure)) . "\n\t" . '  \'' . $structure . '\';</textarea>';
+echo '<br>checksum (SHA256):'.hash('sha256', $structure).'<br>';
+echo '<textarea cols=90 rows=40 readonly=readonly>'. $structure . '</textarea>';
 echo '</div>';
 
 // clean up

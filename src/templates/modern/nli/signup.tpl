@@ -8,7 +8,7 @@
 		<input type="hidden" name="transPostVars" value="true" />
 		<input type="hidden" name="codeID" value="{$codeID}" />
 	
-		{if $errorStep}<div class="alert alert-danger" role="alert"><strong>{lng p="error"}:</strong> {$errorInfo}</div>{/if}
+		{if isset($errorStep)}<div class="alert alert-danger" role="alert"><strong>{lng p="error"}:</strong> {$errorInfo}</div>{/if}
 
 		{hook id="nli:signup.tpl:formStart"}
 
@@ -33,8 +33,8 @@
 								</label>
 								<select{if $f_anrede=="p"} required="required"{/if} class="form-control" name="salutation" id="salutation">
 									<option value="">&nbsp;</option>
-									<option value="herr"{if $_safePost.salutation=='herr'} selected="selected"{/if}>{lng p="mr"}</option>
-									<option value="frau"{if $_safePost.salutation=='frau'} selected="selected"{/if}>{lng p="mrs"}</option>
+									<option value="herr"{if isset($_safePost.salutation) && $_safePost.salutation=='herr'} selected="selected"{/if}>{lng p="mr"}</option>
+									<option value="frau"{if isset($_safePost.salutation) && $_safePost.salutation=='frau'} selected="selected"{/if}>{lng p="mrs"}</option>
 								</select>
 							</div>
 						</div>
@@ -48,7 +48,7 @@
 									{lng p="firstname"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="firstname" id="firstname" value="{$_safePost.firstname}" />
+								<input type="text" class="form-control" required="true" name="firstname" id="firstname" value="{if isset($_safePost.firstname)}{$_safePost.firstname}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -57,7 +57,7 @@
 									{lng p="surname"}
 									<span class="required">{lng p="required"}</span>
 								</label>
-								<input type="text" class="form-control" required="true" name="surname" id="surname" value="{$_safePost.surname}" />
+								<input type="text" class="form-control" required="true" name="surname" id="surname" value="{if isset($_safePost.surname)}{$_safePost.surname}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -70,12 +70,12 @@
 								<label class="control-label" for="email_local">{lng p="wishaddress"}</label>
 								<div class="input-group">
 									<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-									<input type="text" name="email_local" id="email_local" class="form-control" required="true" value="{$_safePost.email_local}" />
+									<input type="text" name="email_local" id="email_local" class="form-control" required="true" value="{if isset($_safePost.email_local)}{$_safePost.email_local}{/if}" />
 									<div class="input-group-btn">
-										<input type="hidden" name="email_domain" id="email_domain" data-bind="email-domain" value="{if $_safePost.email_domain}{$_safePost.email_domain}{else}{domain value=$domainListSignup[0]}{/if}" />
-										<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span data-bind="label">@{if !$_safePost.email_domain}{domain value=$domainListSignup[0]}{else}{$_safePost.email_domain}{/if}</span> <span class="caret"></span></button>
+										<input type="hidden" name="email_domain" id="email_domain" data-bind="email-domain" value="{if isset($_safePost.email_domain)} && $_safePost.email_domain}{$_safePost.email_domain}{else}{domain value=$domainListSignup[0]}{/if}" />
+										<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span data-bind="label">@{if empty($_safePost.email_domain)}{domain value=$domainListSignup[0]}{else}{$_safePost.email_domain}{/if}</span> <span class="caret"></span></button>
 										<ul class="dropdown-menu dropdown-menu-right domainMenu" role="menu">
-											{foreach from=$domainListSignup item=domain key=key}<li{if (!$_safePost.email_domain&&$key==0)||$_safePost.email_domain==$domain} class="active"{/if}><a href="#">@{domain value=$domain}</a></li>{/foreach}
+											{foreach from=$domainListSignup item=domain key=key}<li{if (empty($_safePost.email_domain)&&$key==0)||$_safePost.email_domain==$domain} class="active"{/if}><a href="#">@{domain value=$domain}</a></li>{/foreach}
 										</ul>
 									</div>
 								</div>
@@ -109,7 +109,7 @@
 						</div>
 					</div>
 
-					{if !$errorStep}<button class="btn btn-success pull-right" data-role="next-block" type="button">
+					{if isset($errorStep)}<button class="btn btn-success pull-right" data-role="next-block" type="button">
 						{lng p="next"} <span class="glyphicon glyphicon-chevron-right"></span>
 					</button>{/if}
 				</div>
@@ -129,18 +129,18 @@
 							<div class="form-group">
 								<label class="control-label" for="street">
 									{lng p="street"}
-									{if $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
+									{if isset($f_strasse) && $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_strasse=="p"} required="true"{/if} name="street" id="street" value="{$_safePost.street}" />
+								<input type="text" class="form-control"{if isset($f_strasse) && $f_strasse=="p"} required="true"{/if} name="street" id="street" value="{if isset($_safePost.street)}{$_safePost.street}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-4">
 							<div class="form-group">
 								<label class="control-label" for="no">
 									{lng p="nr"}
-									{if $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
+									{if isset($f_strasse) && $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_strasse=="p"} required="true"{/if} name="no" id="no" value="{$_safePost.no}" />
+								<input type="text" class="form-control"{if isset($f_strasse) && $f_strasse=="p"} required="true"{/if} name="no" id="no" value="{if isset($_safePost.no)}{$_safePost.no}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -149,18 +149,18 @@
 							<div class="form-group">
 								<label class="control-label" for="zip">
 									{lng p="zip"}
-									{if $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
+									{if isset($f_strasse) && $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_strasse=="p"} required="true"{/if} name="zip" id="zip" value="{$_safePost.zip}" />
+								<input type="text" class="form-control"{if isset($f_strasse) && $f_strasse=="p"} required="true"{/if} name="zip" id="zip" value="{if isset($_safePost.zip)}{$_safePost.zip}{/if}" />
 							</div>
 						</div>
 						<div class="col-md-8">
 							<div class="form-group">
 								<label class="control-label" for="city">
 									{lng p="city"}
-									{if $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
+									{if isset($f_strasse) && $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_strasse=="p"} required="true"{/if} name="city" id="city" value="{$_safePost.city}" />
+								<input type="text" class="form-control"{if isset($f_strasse) && $f_strasse=="p"} required="true"{/if} name="city" id="city" value="{if isset($_safePost.city)}{$_safePost.city}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -169,7 +169,7 @@
 							<div class="form-group">
 								<label class="control-label" for="country">
 									{lng p="country"}
-									{if $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
+									{if isset($f_strasse) && $f_strasse=="p"}<span class="required">{lng p="required"}</span>{/if}
 								</label>
 								<select class="form-control" name="country" id="country">
 									{foreach from=$countryList item=country key=id}
@@ -203,38 +203,38 @@
 							<div class="form-group">
 								<label class="control-label" for="phone">
 									{lng p="phone"}
-									{if $f_telefon=='p'}<span class="required">{lng p="required"}</span>{/if}
+									{if isset($f_telefon) && $f_telefon=='p'}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_telefon=='p'} required="true"{/if} name="phone" id="phone" value="{$_safePost.phone}" />
+								<input type="text" class="form-control"{if isset($f_telefon) && $f_telefon=='p'} required="true"{/if} name="phone" id="phone" value="{if isset($_safePost.phone)}{$_safePost.phone}{/if}" />
 							</div>
 						</div>
 						{/if}
-						{if $f_fax!='n'}
+						{if isset($f_fax) && $f_fax!='n'}
 						<div class="col-md-6">
 							<div class="form-group">
 								<label class="control-label" for="fax">
 									{lng p="fax"}
 									{if $f_fax=='p'}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_fax=='p'} required="true"{/if} name="fax" id="fax" value="{$_safePost.fax}" />
+								<input type="text" class="form-control"{if isset($f_fax) && $f_fax=='p'} required="true"{/if} name="fax" id="fax" value="{if isset($_safePost.fax)}{$_safePost.fax}{/if}" />
 							</div>
 						</div>
 						{/if}
-						{if $f_mail2sms_nummer!='n'}
+						{if isset($f_mail2sms_nummer) && $f_mail2sms_nummer!='n'}
 						<div class="col-md-6">
 							<div class="form-group">
 								<label class="control-label" for="mail2sms_nummer">
 									{lng p="mobile"}
 									{if $f_mail2sms_nummer=='p'}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="text" class="form-control"{if $f_mail2sms_nummer=='p'} required="true"{/if} name="mail2sms_nummer" id="mail2sms_nummer" value="{$_safePost.mail2sms_nummer}" />
+								<input type="text" class="form-control"{if $f_mail2sms_nummer=='p'} required="true"{/if} name="mail2sms_nummer" id="mail2sms_nummer" value="{if isset($_safePost.mail2sms_nummer)}{$_safePost.mail2sms_nummer}{/if}" />
 							</div>
 						</div>
 						{/if}
 					</div>
 					{/if}
 
-					{if $f_alternativ!='n'}
+					{if isset($f_alternativ) && $f_alternativ!='n'}
 					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">
@@ -242,7 +242,7 @@
 									{lng p="altmail2"}
 									{if $f_alternativ=='p'}<span class="required">{lng p="required"}</span>{/if}
 								</label>
-								<input type="email" class="form-control"{if $f_alternativ=='p'} required="true"{/if} name="altmail" id="altmail" value="{$_safePost.altmail}" />
+								<input type="email" class="form-control"{if $f_alternativ=='p'} required="true"{/if} name="altmail" id="altmail" value="{if isset($_safePost.altmail)}{$_safePost.altmail}{/if}" />
 							</div>
 						</div>
 					</div>
@@ -270,34 +270,34 @@
 					<div class="row">
 						<div class="col-md-6">
 							<div class="form-group">
-								{if $feld.typ!=2}<label class="control-label" for="{$fieldName}">
+								{if isset($feld.typ) && $feld.typ!=2}<label class="control-label" for="{$fieldName}">
 									{$feld.feld}
 									{if $feld.pflicht}<span class="required">{lng p="required"}</span>{/if}
 								</label>{/if}
 
-								{if $feld.typ==1}
-								<input{if $feld.pflicht} required="true"{/if} class="form-control" name="{$fieldName}" id="{$fieldName}" value="{$_safePost[$fieldName]}" type="text" />
-								{elseif $feld.typ==2}
+								{if isset($feld.typ) && $feld.typ==1}
+								<input{if $feld.pflicht} required="true"{/if} class="form-control" name="{$fieldName}" id="{$fieldName}" value="{if isset($_safePost[$fieldName])}{$_safePost[$fieldName]}{/if}" type="text" />
+								{elseif isset($feld.typ) && $feld.typ==2}
 								<label class="control-label">
 									<input type="checkbox" name="{$fieldName}" id="{$fieldName}"{if $_safePost[$fieldName]} checked="checked"{/if} />
 									{$feld.feld}
 								</label>
-								{elseif $feld.typ==4}
+								{elseif isset($feld.typ) && $feld.typ==4}
 								<select class="form-control" name="{$fieldName}" id="{$fieldName}">
 									{foreach from=$feld.extra item=item}
-									<option value="{$item}"{if $_safePost[$fieldName]==$item} selected="selected"{/if}>{$item}</option>
+									<option value="{$item}"{if isset($_safePost[$fieldName]) && $_safePost[$fieldName]==$item} selected="selected"{/if}>{$item}</option>
 									{/foreach}
 								</select>
-								{elseif $feld.typ==8}
+								{elseif isset($feld.typ) && $feld.typ==8}
 									{foreach from=$feld.extra item=item}
 									<div class="radio">
 										<label>
-											<input type="radio" id="{$fieldName}_{$item}" name="{$fieldName}" value="{$item}"{if $_safePost[$fieldName]==$item} checked="checked"{/if} />
+											<input type="radio" id="{$fieldName}_{$item}" name="{$fieldName}" value="{$item}"{if isset($_safePost[$fieldName]) && $_safePost[$fieldName]==$item} checked="checked"{/if} />
 											{$item}
 										</label> 
 									</div>
 									{/foreach}
-								{else if $feld.typ==32}
+								{else if isset($feld.typ) && $feld.typ==32}
 									<div>{if $feld.pflicht}{assign var="all_extra" value='required="true"'}{else}{assign var="all_extra" value=""}{/if}{if $dateFields[$fieldName]}
 									{html_select_date time=$dateFields[$fieldName] year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="$fieldName" field_order="DMY" class="form-control" style="width:auto;display:inline-block;" all_extra="$all_extra"}
 									{else}
@@ -331,7 +331,7 @@
 								<label class="control-label" for="code">
 									{lng p="code"}
 								</label>
-								<input type="text" class="form-control" value="{$_safePost.code}" name="code" id="code" data-toggle="tooltip" data-placement="bottom" title="{lng p="signuptxt_code"}" />
+								<input type="text" class="form-control" value="{if isset($_safePost.code)}{$_safePost.code}{/if}" name="code" id="code" data-toggle="tooltip" data-placement="bottom" title="{lng p="signuptxt_code"}" />
 							</div>
 						</div>
 					</div>
@@ -344,7 +344,7 @@
 		</div>
 		{/if}
 
-		{if $f_safecode!='n'}
+		{if isset($f_safecode) && $f_safecode!='n'}
 		<div class="panel panel-default">
 			<div class="panel-heading panel-title">
 				<span class="glyphicon glyphicon-flag"></span>
@@ -392,7 +392,7 @@
 
 		<div class="form-group">
 			<label class="control-label">
-				<input type="checkbox" name="tos" value="true"{if $_safePost.tos=='true'} checked="checked"{/if} />
+				<input type="checkbox" name="tos" value="true"{if isset($_safePost.tos) && $_safePost.tos=='true'} checked="checked"{/if} />
 				{lng p="accepttos"}
 				<a href="#" data-toggle="modal" data-target="#tosModal">{lng p="tos"}</a>
 			</label>
@@ -442,11 +442,11 @@
 <script>
 <!--
 	$(document).ready(function() {ldelim}
-	{if $errorStep}
+	{if isset($errorStep)}
 	{foreach from=$invalidFields item=field}
 	markFieldAsInvalid('{$field}');
 	{/foreach}
-	{if $f_safecode!='n'}
+	{if isset($f_safecode) && $f_safecode!='n'}
 	markFieldAsInvalid('safecode');
 	{/if}
 	markFieldAsInvalid('pass1');

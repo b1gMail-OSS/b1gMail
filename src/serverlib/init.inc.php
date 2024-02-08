@@ -309,7 +309,7 @@ if (DEBUG) {
     error_reporting(0);
 } else {
     error_reporting(E_ERROR | E_WARNING | E_PARSE);
-}
+    }
 assert_options(ASSERT_WARNING, DEBUG ? 1 : 0);
 
 /**
@@ -415,21 +415,24 @@ if (!file_exists($templateFolder)) {
     DisplayError(0x06, 'Template not found', 'The requested template folder does not exist.',
         sprintf("Template:\n%s", $bm_prefs['template']),
         __FILE__,
-        __LINE__);
+        __LINE__,
+        500);
     exit();
 } elseif (!file_exists($templateFolder.'cache/')) {
     // 0x07
     DisplayError(0x07, 'Template cache folder not found', 'The requested template does not have a cache folder.',
         sprintf("Template:\n%s", $bm_prefs['template']),
         __FILE__,
-        __LINE__);
+        __LINE__,
+        500);
     exit();
 } elseif (!is_writeable($templateFolder.'cache/')) {
     // 0x08
     DisplayError(0x08, 'Template cache folder not writeable', 'The requested template\'s cache folder is not writeable.',
         sprintf("Template:\n%s", $bm_prefs['template']),
         __FILE__,
-        __LINE__);
+        __LINE__,
+        500);
     exit();
 }
 $tpl = _new('Template');

@@ -226,52 +226,6 @@
 		</div>
 	</fieldset>
 
-	<fieldset>
-		<legend>{lng p="license"}</legend>
-
-		<div class="row">
-			<label class="col-sm-2 col-form-label">{lng p="status"}</label>
-			<div class="col-sm-10">
-				<div class="form-control-plaintext">
-					{if $bms_prefs.licstate==2}
-						<p class="text-red">{lng p="bms_expired"}</p>
-					{elseif $bms_prefs.licstate==0}
-						<p class="text-red">{lng p="bms_invalid"}</p>
-					{elseif $bms_prefs.licstate==1}
-						<p class="text-green">
-							{lng p="bms_valid"}
-							{if $bms_prefs.lic_valid_until<=0}
-								({lng p="unlimited"})
-							{else}
-								({lng p="bms_until"} {date timestamp=$bms_prefs.lic_valid_until dayonly=true})
-							{/if}
-						</p>
-					{else}
-						{lng p="bms_validating"}
-					{/if}
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<label class="col-sm-2 col-form-label">{lng p="features"}</label>
-			<div class="col-sm-10">
-				<div class="form-control-plaintext">{text value=$features}</div>
-			</div>
-		</div>
-		<div class="row">
-			<label class="col-sm-2 col-form-label">{lng p="version"}</label>
-			<div class="col-sm-10">
-				<div class="form-control-plaintext">{text value=$bms_prefs.core_version}</div>
-			</div>
-		</div>
-		<div class="row">
-			<label class="col-sm-2 col-form-label">{lng p="licensekey"}</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" name="license" value="{text value=$bms_prefs.license allowEmpty=true}" placeholder="{lng p="licensekey"}">
-			</div>
-		</div>
-	</fieldset>
-
 	<div class="text-end">
 		<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
 	</div>

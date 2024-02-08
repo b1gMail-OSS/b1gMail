@@ -168,7 +168,8 @@ class DB
                         mysqli_errno($handle),
                         mysqli_error($handle)),
                     __FILE__,
-                    __LINE__);
+                    __LINE__,
+                    500);
                 die();
             } elseif (DEBUG) {
                 // debug mode -> error page!
@@ -179,7 +180,8 @@ class DB
                         mysqli_errno($handle),
                         mysqli_error($handle)),
                     __FILE__,
-                    __LINE__);
+                    __LINE__,
+                    500);
             }
             PutLog("MySQL-Error at '".$_SERVER['SCRIPT_NAME']."': '".mysqli_error($handle)."', tried to execute '".$query."'", PRIO_ERROR, __FILE__, __LINE__);
             if (DEBUG) {

@@ -1,7 +1,6 @@
 <form action="users.php?action=search&do=search&sid={$sid}" method="post" onsubmit="spin(this)" name="f1">
 	<fieldset>
 		<legend>{lng p="search"}</legend>
-
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="searchfor"}</label>
 			<div class="col-sm-10">
@@ -42,6 +41,10 @@
 				<label class="form-check">
 					<input class="form-check-input" type="checkbox" name="searchIn[telfaxmobile]" id="searchIn_telfaxmobile" checked="checked">
 					<span class="form-check-label">{lng p="tel"} / {lng p="fax"} / {lng p="cellphone"}</span>
+				</label>
+        <label class="form-check">
+					<input class="form-check-input" type="checkbox" name="searchIn[absendername]" id="searchIn_absendername" checked="checked">
+					<span class="form-check-label">{lng p="sendername"}</span>
 				</label>
 			</div>
 		</div>

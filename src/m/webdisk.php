@@ -19,7 +19,7 @@
  *
  */
 
-include('../serverlib/init.inc.php');
+require '../serverlib/init.inc.php';
 if(!class_exists('BMWebdisk'))
 	include('../serverlib/webdisk.class.php');
 if(!class_exists('BMZIP'))

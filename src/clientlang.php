@@ -41,7 +41,7 @@ if(isset($_COOKIE['bm_language'])
 	}
 }
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 if(isset($_REQUEST['sid']) && trim($_REQUEST['sid']) != '')
 	RequestPrivileges(PRIVILEGES_USER, true) || RequestPrivileges(PRIVILEGES_ADMIN, true);
 

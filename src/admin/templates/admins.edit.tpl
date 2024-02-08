@@ -63,10 +63,9 @@
 				<div>
 					{foreach from=$permsTable item=permTitle key=permName}
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="perms[{$permName}]" value="1" id="perm_{$permName}"{if $admin.perms.$permName} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="perms[{$permName}]" value="1" id="perm_{$permName}"{if isset($admin.perms.$permName) &&  $admin.perms.$permName} checked="checked"{/if}>
 							<span class="form-check-label">{$permTitle}</span>
 						</label>
-					{/foreach}
 				</div>
 			</div>
 			<div class="col-md-6">
@@ -75,7 +74,7 @@
 				<div>
 					{foreach from=$pluginList item=pluginTitle key=pluginName}
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="perms[plugins][{$pluginName}]" value="1" id="plugin_{$pluginName}"{if $admin.perms.plugins.$pluginName} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="perms[plugins][{$pluginName}]" value="1" id="plugin_{$pluginName}"{if isset($admin.perms.plugins.$pluginName) && $admin.perms.plugins.$pluginName} checked="checked"{/if}>
 							<span class="form-check-label">{text value=$pluginTitle}</span>
 						</label>
 					{/foreach}

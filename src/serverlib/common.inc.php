@@ -1649,7 +1649,8 @@ function _new($class, $args = array())
 				? sprintf("Original class name:\n%s\n\nOverridden class name:\n%s\n\nOverridden by plugin:\n%s", $origClass, $class, $replacingModule)
 				: sprintf("Class name:\n%s", $class),
 			__FILE__,
-			__LINE__);
+			__LINE__,
+			500);
 		die();
 	}
 
@@ -1702,7 +1703,7 @@ function categorizeDate($date)
 		$ts[$a] = array(
 			'from' 	=> $last,
 			'to'	=> $last+86400,
-			'text' 	=> _strftime('%A', $last),
+			'text' 	=> date('l', $last),
 			'date' 	=> $last
 		);
 	}
@@ -2627,7 +2628,8 @@ function RequestPrivileges($privileges, $return = false)
 					$privileges,
 					isset($_SESSION['bm_userLoggedIn']) && $_SESSION['bm_userLoggedIn'] ? 'Yes' : 'No'),
 				__FILE__,
-				__LINE__);
+				__LINE__,
+				401);
 		}
 		else
 		{
@@ -2677,7 +2679,7 @@ function ZIPCheck($plz, $ort, $staat)
 	global $currentCharset;
 
 	if(in_array(strtolower($currentCharset), array('utf8', 'utf-8')))
-		$ort = CharsetDecode($text, false, 'ISO-8859-1');
+		$ort = CharsetDecode($ort, false, 'ISO-8859-1');
 
 	$strip_chars = array(',', ';', '-', '?', ':', '?', '1', ' ', 'ä', 'Ä', 'ö', 'Ö', 'ü', 'Ü', "ae", "oe", "ue", "AE", "OE", "UE", "Ae", "Oe","Ue");
 
@@ -2979,7 +2981,8 @@ function ModuleFunction($function, $args = false)
 		DisplayError(0x17, 'Illegal plugin handler call', 'b1gMail tried to call a plugin handler before the plugin system was intialized.',
 			sprintf("Function:\n%s", $function),
 			__FILE__,
-			__LINE__);
+			__LINE__,
+			500);
 		die();
 	}
 }
@@ -3233,7 +3236,8 @@ function ReadLanguage()
 			DisplayError(0x03, 'Language file not found', 'The requested language file and the default language file do not exist.',
 				sprintf("Language file:\n%s", $bm_prefs['language'] . '.lang.php'),
 				__FILE__,
-				__LINE__);
+				__LINE__,
+				500);
 			exit();
 		}
 	}
@@ -3259,7 +3263,8 @@ function ReadLanguage()
 			DisplayError(0x04, 'Language file invalid', 'Parse error while including requested language file (corrupt file?).',
 				sprintf("Language file:\n%s", $language . '.lang.php'),
 				__FILE__,
-				__LINE__);
+				__LINE__,
+				500);
 			exit();
 		}
 
@@ -3518,9 +3523,11 @@ function b1gMailShutdown()
  * @param string $text
  * @param string $file
  * @param int $line
+ * @param int $httpcode
  */
-function DisplayError($number, $title, $description, $text = false, $file, $line)
+function DisplayError($number, $title, $description, $text = false, $file = '', $line = '', $httpcode=400)
 {
+	http_response_code($httpcode);
 	if(INTERFACE_MODE)
 	{
 		if(isset($_SERVER['HTTP_USER_AGENT']))
@@ -3638,7 +3645,8 @@ function ConnectDB()
 			$error == 1 || !$mysqlHandle ? mysqli_connect_errno() : mysqli_errno($mysqlHandle),
 			$error == 1 || !$mysqlHandle ? mysqli_connect_error() : mysqli_error($mysqlHandle)),
 		__FILE__,
-		__LINE__);
+		__LINE__,
+		500);
 	exit();
 }
 

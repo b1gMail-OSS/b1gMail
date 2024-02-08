@@ -1,23 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
-    <title>{text value=$date.title}</title>
+  <title>{text value=$date.title}</title>
     
-	<!-- meta -->
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
-	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$tpldir}res/favicon.png" />
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
-	<!-- client scripts -->
-	<script src="clientlang.php" type="text/javascript"></script>
-	<script src="clientlib/overlay.js" type="text/javascript"></script>
-	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
-	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
-	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
+	<script src="clientlang.php"></script>
+	<script src="{$tpldir}clientlib/overlay.js"></script>
+	<script src="{$tpldir}js/common.js"></script>
+	<script src="{$tpldir}js/loggedin.js"></script>
+	<script src="{$tpldir}js/dialog.js"></script>
 </head>
 
 <body>
@@ -52,11 +49,11 @@
 			</tr>
 			<tr>
 				<td><b>{lng p="reminder"}:</b> &nbsp;</td>
-				<td><input type="checkbox"{if ($date.flags&(2|4|8))} checked="checked"{/if} disabled="disabled" /></td>
+				<td><input type="checkbox" {if (isset($date.flags) && (($date.flags&2) || ($date.flags&4) || $date.flags&8))} checked="checked"{/if} disabled="disabled" /></td>
 			</tr>
 			<tr>
 				<td><b>{lng p="repeating"}:</b> &nbsp;</td>
-				<td><input type="checkbox"{if $date.repeat_flags!=0} checked="checked"{/if} disabled="disabled" /></td>
+				<td><input type="checkbox" {if $date.repeat_flags!=0} checked="checked"{/if} disabled="disabled" /></td>
 			</tr>
 		</table>
 	</fieldset>

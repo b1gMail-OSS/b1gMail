@@ -71,23 +71,23 @@
 					<label class="col-sm-2 col-form-label">{lng p="priority"}</label>
 					<div class="col-sm-10">
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox"{if $prio[8]} checked="checked"{/if} name="prio[8]" id="prio8">
+							<input class="form-check-input" type="checkbox"{if isset($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8">
 							<span class="form-check-label"><i class="fa-solid fa-bug text-danger"></i></span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox"{if $prio[2]} checked="checked"{/if} name="prio[2]" id="prio2">
+							<input class="form-check-input" type="checkbox"{if isset($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2">
 							<span class="form-check-label"><i class="fa-solid fa-circle-info text-info"></i></span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox"{if $prio[1]} checked="checked"{/if} name="prio[1]" id="prio1">
+							<input class="form-check-input" type="checkbox"{if isset($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1">
 							<span class="form-check-label"><i class="fa-solid fa-triangle-exclamation text-warning"></i></span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox"{if $prio[4]} checked="checked"{/if} name="prio[4]" id="prio4">
+							<input class="form-check-input" type="checkbox"{if isset($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4">
 							<span class="form-check-label"><i class="fa-regular fa-circle-xmark text-red"></i></span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox"{if $prio[16]} checked="checked"{/if} name="prio[16]" id="prio16">
+							<input class="form-check-input" type="checkbox"{if isset($prio[16])} checked="checked"{/if} name="prio[16]" id="prio16">
 							<span class="form-check-label"><i class="fa-solid fa-puzzle-piece text-cyan"></i></span>
 						</label>
 					</div>

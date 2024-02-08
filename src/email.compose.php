@@ -19,7 +19,7 @@
  *
  */
 
-include('./serverlib/init.inc.php');
+require './serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('./serverlib/mailbox.class.php');
 include('./serverlib/addressbook.class.php');
@@ -174,7 +174,7 @@ if($_REQUEST['action'] == 'compose')
 			else
 				$mail['to'] = DecodeEMail($sourceMail->GetHeaderValue('from'));
 			if(($origTo = ExtractMailAddress($sourceMail->GetHeaderValue('to'))) != ''
-				&& (new BMWorkgroup($id))->GetIDbyMail($origTo) != 0)
+				&& BMWorkgroup::GetIDbyMail($origTo) != 0)
 				$mail['replyto'] = DecodeEMail($origTo);
 
 			if(isset($_REQUEST['all']))
