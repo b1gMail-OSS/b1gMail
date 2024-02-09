@@ -193,9 +193,10 @@ class BMCaptcha
 		if(!($p instanceof BMCaptchaProviderInterface))
 		{
 			DisplayError(0x19, 'Invalid captcha provider', 'Captcha providers must implement the BMCaptchaProviderInterface interface.',
-				sprintf("File: %\nProvider:\n%s", $file, $class, 500),
+				sprintf("File: %\nProvider:\n%s", $file, $class),
 				__FILE__,
-				__LINE__);
+				__LINE__,
+				500);
 			exit();
 		}
 		$p->setInternalName($provider);
