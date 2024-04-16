@@ -303,7 +303,7 @@ elseif ($step == STEP_UPDATE_STEP) {
     elseif ($do == 'struct2') {
         include '../serverlib/database.struct.php';
 
-        $databaseStructure = json_decode($databaseStructure);
+        $databaseStructure = json_decode($databaseStructure, JSON_OBJECT_AS_ARRAY);
         $queries = SyncDBStruct($connection, $databaseStructure, true, isset($bm_prefs['db_is_utf8']) && $bm_prefs['db_is_utf8'] == 1);
 
         if (count($queries) == 0) {
