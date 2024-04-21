@@ -47,7 +47,19 @@ create a merge request to the main repository and we will review it.
   in the update script (it should be executed when updating to the next major version)
 
 ## Migrating from the commercial to the GPL version
-look at b1gMail Wiki.
+Its important to make a backup of `serverlib/init.inc.php` first. Then upload the files from src to your b1gMail folder. After call `/setup/update.php`.
+Alternatively delete in serverlib the file `version.inc.php` and rename `version.default.inc.php` to `version.inc.php`, upload `tools/db_sync.php` and 
+call `db_sync.php` (maybe you have to change the require path before). In both cases the setup folder must be deleted afterwards.
 
+Open the `serverlib/init.inc.php`, which you backed up. Copy the this value `define('B1GMAIL_SIGNKEY', ''); //Here add signkey from serverlib/init.inc.php` 
+to your `serverlib/config.inc.php`. If you want still use the Toolbox from commercial version, copy these lines to `serverlib/config.inc.php`:
+
+`define('B1GMAIL_DLDATE', ''); //Here add dldate from serverlib/init.inc.php`
+`define('B1GMAIL_LICDOMAIN', ''); //Here add licdomain from serverlib/init.inc.php`
+`define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');`
+`define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');`
+`define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');`
+
+More information: https://www.b1gmail.eu/
 ## Installation
 look at b1gMail Wiki.
