@@ -54,11 +54,11 @@ call `db_sync.php` (maybe you have to change the require path before). In both c
 Open the `serverlib/init.inc.php`, which you backed up. Copy the this value `define('B1GMAIL_SIGNKEY', ''); //Here add signkey from serverlib/init.inc.php` 
 to your `serverlib/config.inc.php`. If you want still use the Toolbox from commercial version, copy these lines to `serverlib/config.inc.php`:
 
-`define('B1GMAIL_DLDATE', ''); //Here add dldate from serverlib/init.inc.php`
-`define('B1GMAIL_LICDOMAIN', ''); //Here add licdomain from serverlib/init.inc.php`
-`define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');`
-`define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');`
-`define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');`
+`define('B1GMAIL_DLDATE', ''); //Here add dldate from serverlib/init.inc.php`  
+`define('B1GMAIL_LICDOMAIN', ''); //Here add licdomain from serverlib/init.inc.php`  
+`define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');`  
+`define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');`  
+`define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');`  
 
 More information: https://www.b1gmail.eu/
 ## Installation
