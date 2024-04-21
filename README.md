@@ -16,7 +16,7 @@ A big thanks goes to b1gMail founder Patrick Schlangen. He released b1gMail as f
 
 ## Getting started
 It is recommended to install the b1gMail developer copy on a local web server,
-e.g. standard Apache/PHP/MySQL on Linux or Wamp on Windows. Even better results
+e.g. standard Apache/PHP/MariaDB on Linux or Wamp on Windows. Even better results
 on Windows can be achieved with a WSL setup. If you use Docker, you can also 
 use our docker template in `docker-dev`.
 
@@ -26,6 +26,9 @@ In order to install a development environment, proceed as follows:
 3. Remove the file `lock` in `src/setup/`
 4. Open the folder `src` in your web browser, e.g. `http://localhost/b1gMail/src/`
 5. Follow the setup instructs
+
+### System requirements
+PHP 5.4 is minimum requirement. MariaDB as Database is recommended.
 
 ## Staying up to date
 When pulling new changes from the server, you will need to update your database
@@ -57,6 +60,9 @@ to your `serverlib/config.inc.php`. If you want still use the Toolbox from comme
 `define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');`  
 `define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');`  
 `define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');`  
+
+### Plugins from 7.4.0 and older
+A lot of plugins will work, but they are maybe not compatible with PHP 8 and higher. Before upgrade check the compatibility first. b1gMail 7.4.1 itself is compatible with PHP 8 and higher.
 
 More information: https://www.b1gmail.eu/
 ## Installation
