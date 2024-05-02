@@ -108,7 +108,7 @@ define('STEP_UPDATE_DONE', 109);
 define('DB_INSTALL_PREFIX', 'bm60_');
 
 // target version
-$target_version = '7.4.1-RC1';
+$target_version = '7.4.1-RC2';
 
 // invoice
 $defaultInvoice = file_get_contents("./rgtemplate.tpl");
