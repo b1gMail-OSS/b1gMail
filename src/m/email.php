@@ -207,8 +207,13 @@ else if($_REQUEST['action'] == 'attachment'
 				header('Content-Type: ' . $part['content-type'] . '; charset=' . $part['charset']);
 			else
 				header('Content-Type: ' . $part['content-type']);
-			header(sprintf('Content-Disposition: %s; filename="%s"',
-						isset($_REQUEST['view']) ? 'inline' : 'attachment',
+			// 2024-05-02 Check if it is a viewable type
+			$viewable_or_attachment = 'attachment';
+			if(isset($_REQUEST['view']) && in_array(strtolower($part['content-type']), $VIEWABLE_TYPES)) {
+				$viewable_or_attachment = 'inline';
+			}
+			// 2024-05-02 End Check if it is a viewable type
+			header(sprintf('Content-Disposition: %s; filename="%s"',$viewable_or_attachment,
 						addslashes($part['filename'])));
 
 			$attData = &$part['body'];
