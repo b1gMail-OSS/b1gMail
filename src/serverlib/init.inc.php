@@ -259,7 +259,7 @@ define('TRANSACTION_BOOKED', 1);
 define('TRANSACTION_CANCELLED', 2);
 define('BMSFLAG_IS_SPAM', 1);
 define('BMSFLAG_IS_INFECTED', 2);
-$VIEWABLE_TYPES = ['text/html', 'image/jpeg', 'image/gif',
+$VIEWABLE_TYPES = ['image/jpeg', 'image/gif',
                         'image/png', 'image/jpg', 'image/pjpeg',
                         'application/pdf', 'text/plain', ];
 
