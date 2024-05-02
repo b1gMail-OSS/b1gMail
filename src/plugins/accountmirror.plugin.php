@@ -31,7 +31,7 @@ class AccountMirror extends BMPlugin
 		$this->author				= 'b1gMail Project';
 		$this->web					= 'https://www.b1gmail.org/';
 		$this->mail					= 'info@b1gmail.org';
-		$this->version				= '1.4';
+		$this->version				= '1.4.1';
 		$this->designedfor			= '7.4.0';
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
@@ -48,7 +48,7 @@ class AccountMirror extends BMPlugin
 		{
 			$lang_admin['am_notice1']			= 'Die Verwendung dieses Plugins ist nur unter strenger Einhaltung der entsprechenden Gesetze, insbesondere der Datenschutzbestimmungen, gestattet.';
 			$lang_admin['am_notice2']			= 'Es wird keinerlei Funktionsgarantie oder Garantie f&uuml;r die Eignung zu einem bestimmten Zweck &uuml;bernommen. Spiegelungen k&ouml;nnen unter Umst&auml;nden z.B. unvollst&auml;ndig oder fehlerhaft sein.';
-			$lang_admin['am_notice3']			= 'Die Spiegelung erfolgt nur f&uuml;r das Ereignis &quot;E-Mail im Account gespeichert&quot;, z.B. bei Empfang einer E-Mail. Andere Ereignisse, z.B. Markierung, Verschiebung, L&ouml;schung von E-Mails werden nicht gespiegelt. Es erfolgt keine Spiegelung/Ber&uuml;cksichtigung der Ordnerstruktur (mit Ausnahme von System-Ordnern). Andere Daten, z.B. Webdisk oder Adressbuch/Kalender, werden nicht gespiegelt. Die Spiegelung erfolgt nur f&uuml;r E-Mails, die im Zeitraum der Spiegelma&szlig;nahme gespeichert werden.';
+			$lang_admin['am_notice3']			= 'Die Spiegelung erfolgt nur für das Ereignis &quot;E-Mail im Account gespeichert&quot;, z.B. bei Empfang einer E-Mail. Andere Ereignisse, z.B. Markierung, Verschiebung, L&ouml;schung von E-Mails werden nicht gespiegelt. Es erfolgt keine Spiegelung/Ber&uuml;cksichtigung der Ordnerstruktur (mit Ausnahme von System-Ordnern). Andere Daten, z.B. Webdisk oder Adressbuch/Kalender, werden nicht gespiegelt. Die Spiegelung erfolgt nur f&uuml;r E-Mails, die im Zeitraum der Spiegelmaßnahme gespeichert werden.';
 			$lang_admin['am_notice4']			= 'Der Spiegel-Ziel-Account sollte <em>mindestens</em> doppelt so viel Speicher zur Verf&uuml;gung haben wie der Quell-Account.';
 			$lang_admin['am_notice5']			= 'Im Spiegel-Ziel-Account sollten keine Filterregeln, Autoresponder oder andere Benachrichtigungsfunktionen oder Funktionen, die auf den Empfang einer E-Mail reagieren, aktiviert sein.';
 			$lang_admin['am_mirrorings']		= 'Spiegelungen';
@@ -56,14 +56,15 @@ class AccountMirror extends BMPlugin
 			$lang_admin['am_dest']				= 'Ziel';
 			$lang_admin['am_timeframe']			= 'Zeitraum';
 			$lang_admin['am_errors']			= 'Fehler';
-			$lang_admin['am_add']				= 'Spiegelung hinzuf&uuml;gen';
+			$lang_admin['am_add']				= 'Spiegelung hinzufügen';
 			$lang_admin['am_accemail']			= 'Account-Haupt-E-Mail-Adresse';
 			$lang_admin['am_from']				= 'ab';
 			$lang_admin['am_to']				= 'bis';
 			$lang_admin['am_error_0']			= 'Der Quelle-/Ziel-Account wurde nicht gefunden. Bitte geben Sie die prim&auml;re E-Mail-Adresse des jeweiligen Accounts korrekt an.';
 			$lang_admin['am_error_1']			= 'Ein Account kann nicht in sich selbst gespiegelt werden.';
-			$lang_admin['am_error_2']			= 'Der Ziel-Account darf nicht die Quelle einer anderen Spiegelma&szlig;nahme sein.';
+			$lang_admin['am_error_2']			= 'Der Ziel-Account darf nicht die Quelle einer anderen Spiegelmaßnahme sein.';
 			$lang_admin['am_error_3']			= 'Der Endzeitpunkt darf nicht vor dem Anfangszeitpunkt liegen.';
+			$lang_admin['am_reason']			= 'Grund';
 		}
 		else
 		{
@@ -85,6 +86,7 @@ class AccountMirror extends BMPlugin
 			$lang_admin['am_error_1']			= 'You cannot mirror an account to itself.';
 			$lang_admin['am_error_2']			= 'The target account may not be the source account of another mirroring.';
 			$lang_admin['am_error_3']			= 'The end time may not be before the start time.';
+			$lang_admin['am_reason']			= 'Reason';
 		}
 	}
 
@@ -93,23 +95,25 @@ class AccountMirror extends BMPlugin
 		global $db;
 
 		// db struct
-		$databaseStructure =                      // checksum: da0bba6e13cd8b6e5adcd3e795c8d844
-			  'YToxOntzOjIyOiJibTYwX21vZF9hY2NvdW50bWlycm9yIjthOjI6e3M6NjoiZmllbGRzIjthOjc'
-			. '6e2k6MDthOjY6e2k6MDtzOjg6Im1pcnJvcmlkIjtpOjE7czo3OiJpbnQoMTEpIjtpOjI7czoyOi'
-			. 'JOTyI7aTozO3M6MzoiUFJJIjtpOjQ7TjtpOjU7czoxNDoiYXV0b19pbmNyZW1lbnQiO31pOjE7Y'
-			. 'To2OntpOjA7czo2OiJ1c2VyaWQiO2k6MTtzOjc6ImludCgxMSkiO2k6MjtzOjI6Ik5PIjtpOjM7'
-			. 'czozOiJNVUwiO2k6NDtzOjE6IjAiO2k6NTtzOjA6IiI7fWk6MjthOjY6e2k6MDtzOjk6Im1pcnJ'
-			. 'vcl90byI7aToxO3M6NzoiaW50KDExKSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O3M6MT'
-			. 'oiMCI7aTo1O3M6MDoiIjt9aTozO2E6Njp7aTowO3M6NToiYmVnaW4iO2k6MTtzOjc6ImludCgxN'
-			. 'CkiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjE6IjAiO2k6NTtzOjA6IiI7fWk6NDth'
-			. 'OjY6e2k6MDtzOjM6ImVuZCI7aToxO3M6NzoiaW50KDE0KSI7aToyO3M6MjoiTk8iO2k6MztzOjA'
-			. '6IiI7aTo0O3M6MToiMCI7aTo1O3M6MDoiIjt9aTo1O2E6Njp7aTowO3M6MTA6Im1haWxfY291bn'
-			. 'QiO2k6MTtzOjc6ImludCgxMSkiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjE6IjAiO'
-			. '2k6NTtzOjA6IiI7fWk6NjthOjY6e2k6MDtzOjExOiJlcnJvcl9jb3VudCI7aToxO3M6NzoiaW50'
-			. 'KDExKSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O3M6MToiMCI7aTo1O3M6MDoiIjt9fXM'
-			. '6NzoiaW5kZXhlcyI7YToyOntzOjc6IlBSSU1BUlkiO2E6MTp7aTowO3M6ODoibWlycm9yaWQiO3'
-			. '1zOjY6InVzZXJpZCI7YToxOntpOjA7czo2OiJ1c2VyaWQiO319fX0=';
-		$databaseStructure = unserialize(base64_decode($databaseStructure));
+		$databaseStructure = [
+			'bm60_mod_accountmirror' => [
+			  'fields' => [
+			  ['mirrorid', 'int(11)','NO','PRI',NULL,'auto_increment'],
+			  ['userid','int(11)','NO','MUL',0],
+			  ['mirror_to', 'int(11)','NO'],
+			  ['begin', 'int(14)','NO'],
+			  ['end', 'int(14)','NO'],
+			  ['mail_count', 'int(11)','NO'],
+			  ['error_count', 'int(11)','NO'],
+			  ['reason', 'varchar(255)','NO']
+			  ],
+			  'indexes' => [
+				'PRIMARY' => ['mirrorid'],
+				'userid' => ['userid']
+			  ]	  
+			]
+		];
+		  
 
 		// sync struct
 		SyncDBStruct($databaseStructure);
@@ -146,6 +150,7 @@ class AccountMirror extends BMPlugin
 		{
 			$userID = BMUser::GetID($_POST['email_source']);
 			$mirrorTo = BMUser::GetID($_POST['email_dest']);
+			$reason = !empty($_REQUEST['reason']) ? $_POST['reason']:'';
 
 			if($userID == 0 || $mirrorTo == 0)
 			{
@@ -190,11 +195,12 @@ class AccountMirror extends BMPlugin
 				$tpl->assign('page', 		'msg.tpl');
 				return;
 			}
-			$db->Query('INSERT INTO {pre}mod_accountmirror(`userid`,`mirror_to`,`begin`,`end`) VALUES(?,?,?,?)',
+			$db->Query('INSERT INTO {pre}mod_accountmirror(`userid`,`mirror_to`,`begin`,`end`,`reason`) VALUES(?,?,?,?,?)',
 				$userID,
 				$mirrorTo,
 				$begin,
-				$end);
+				$end,
+				$reason);
 		}
 
 		if(isset($_REQUEST['delete']))

@@ -11,6 +11,7 @@
 				<th>{lng p="am_timeframe"}</th>
 				<th width="65">{lng p="emails"}</th>
 				<th width="65">{lng p="am_errors"}</th>
+				<th>{lng p="am_reason"}</th>
 				<th width="35">&nbsp;</th>
 			</tr>
 			
@@ -34,6 +35,7 @@
 				</td>
 				<td>{$item.mail_count}</td>
 				<td>{$item.error_count}</td>
+				<td>{$item.reason}</td>
 				<td>
 					<a href="{$pageURL}&delete={$item.mirrorid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
 				</td>
@@ -41,7 +43,7 @@
 			{/foreach}
 		
 			<tr>
-				<td class="footer" colspan="8">
+				<td class="footer" colspan="9">
 					<div style="float:left;">
 						{lng p="action"}: <select name="massAction" class="smallInput">
 							<option value="-">------------</option>
@@ -66,7 +68,7 @@
 	<form action="{$pageURL}&sid={$sid}&add=true" method="post" onsubmit="spin(this)">
 		<table width="100%">
 			<tr>
-				<td width="40" valign="top" rowspan="4"><img src="../plugins/templates/images/accountmirror_add.png" border="0" alt="" width="32" height="32" /></td>
+				<td width="40" valign="top" rowspan="5"><img src="../plugins/templates/images/accountmirror_add.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="150">{lng p="am_source"}:</td>
 				<td class="td2">
 					<input type="text" size="35" name="email_source" value="" />
@@ -98,6 +100,12 @@
 					{lng p="or"}
 					{html_select_date prefix="bis" end_year="+5" field_order="DMY" field_separator="."}, 
 					{html_select_time prefix="bis" display_seconds=false}
+				</td>
+			</tr>
+			<tr>
+				<td class="td1">{lng p="am_reason"}:</td>
+				<td class="td2">
+					<input type="text" size="35" name="am_reason" value="" />
 				</td>
 			</tr>
 		</table>
