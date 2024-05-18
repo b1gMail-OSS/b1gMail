@@ -290,6 +290,11 @@ if($_REQUEST['action'] == 'welcome')
 		$notices[] = array('type'	=> 'info',
 							'text'	=> $lang_admin['structrec'],
 							'link'	=> 'prefs.common.php?');
+	// still latin mode?
+	if(empty($bm_prefs['db_is_utf8']))
+		$notices[] = array('type'	=> 'warning',
+							'text'	=> $lang_admin['latinmodenote'],
+							'link'	=> '../setup/utf8convert.php?');
 
 	// gd?
 	if(!function_exists('imagecreate'))

@@ -19,7 +19,7 @@
  *
  */
 
-// b1gMailLang::Deutsch (Sie)::b1gMail Project::info@b1gmail.org::http://www.b1g.de/::UTF-8::de_DE.UTF-8|de_DE|de_DE@euro|de|ge|deu|deu_deu|ger::de
+// b1gMailLang::Deutsch (Sie)::b1gMail Project::info@b1gmail.org::http://www.b1gmail.eu/::UTF-8::de_DE.UTF-8|de_DE|de_DE@euro|de|ge|deu|deu_deu|ger::de
 
 /**
  * Client phrases
@@ -229,8 +229,8 @@ $lang_custom['deref'] 			= 'Den Link, den Sie angeklickt haben, leitet Sie auf <
  */
 
 $lang_user['weekdays']			= 'SMDMDFS';														// sunday through saturday
-$lang_user['weekdays_long']		= array('So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.');			// sunday through saturday
-$lang_user['full_weekdays']		= array('Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag');
+$lang_user['weekdays_long']		= ['So.', 'Mo.', 'Di.', 'Mi.', 'Do.', 'Fr.', 'Sa.'];			// sunday through saturday
+$lang_user['full_weekdays']		= ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
 // phrases for new nli layout
 $lang_user['pleasechose']		= 'Bitte wählen';
@@ -2149,3 +2149,4 @@ $lang_admin['exturl_warning']	= 'Vor Betreten eines externen Links warnen';
 $lang_admin['text_deref']		= 'Warnung, wenn externer Link besucht wird';
 $lang_admin['company']			= 'Firma';
 $lang_admin['taxid'] 			= 'USt-ID';
+$lang_admin['latinmodenote']    = 'Ihre Datenbank liegt noch im Latin1-Format vor. Um zukünftig Updates zu erhalten, müssen Sie mit der <a href="../setup/utf8convert.php">UTF-8-Konvertierung</a> fortfahren.';
