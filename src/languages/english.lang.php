@@ -2155,3 +2155,4 @@ $lang_admin['text_deref']		= 'Warning, if external url is visited';
 $lang_admin['company']			= 'Company';
 $lang_admin['taxid'] 			= 'VAT';
 $lang_admin['latinmodenote']    = 'Your database is still in Latin1 format / ISO charset. To get updates in the future you have to convert the database in <a href="../setup/utf8convert.php">UTF-8</a>.';
+$lang_admin['bzip2']			= 'The <code>bz2</code> php extension is not available. If you want compress the logfiles you should install this extension soon.';

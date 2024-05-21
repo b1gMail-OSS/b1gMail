@@ -43,7 +43,7 @@
 		<td>
 			<select name="date_Week">
 				{section name=w start=1 loop=53 step=1}
-				<option value="{$smarty.section.w.index}"{if $smarty.section.w.index==$calWeekNo} selected="selected"{/if}>{lng p="cw"} {$smarty.section.w.index}</option>
+				<option value="{$smarty.section.w.index}"{if isset($calWeekNo) && $smarty.section.w.index==$calWeekNo} selected="selected"{/if}>{lng p="cw"} {$smarty.section.w.index}</option>
 				{/section}
 			</select>
 			{html_select_date prefix="date_" time=$date start_year="-5" end_year="+5" field_order="Y"}

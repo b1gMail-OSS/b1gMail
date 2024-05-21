@@ -2150,3 +2150,4 @@ $lang_admin['text_deref']		= 'Warnung, wenn externer Link besucht wird';
 $lang_admin['company']			= 'Firma';
 $lang_admin['taxid'] 			= 'USt-ID';
 $lang_admin['latinmodenote']    = 'Ihre Datenbank liegt noch im Latin1-Format vor. Um zukünftig Updates zu erhalten, müssen Sie mit der <a href="../setup/utf8convert.php">UTF-8-Konvertierung</a> fortfahren.';
+$lang_admin['bzip2']			= 'Die <code>bz2</code>-PHP-Erweiterung ist nicht installiert. Um Logdateien zu komprimieren, sollten Sie möglichst diese Erweiterung nachinstallieren.';

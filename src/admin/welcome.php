@@ -310,6 +310,10 @@ if($_REQUEST['action'] == 'welcome')
 	if(!function_exists('mb_convert_encoding') && !function_exists('iconv'))
 		$notices[] = array('type'	=> 'info',
 							'text'	=> $lang_admin['mbstring']);
+	// bzip2?
+	if(!function_exists('bzopen'))
+		$notices[] = array('type'	=> 'info',
+							'text'	=> $lang_admin['bzip2']);
 
 	// debug mode?
 	if(DEBUG)

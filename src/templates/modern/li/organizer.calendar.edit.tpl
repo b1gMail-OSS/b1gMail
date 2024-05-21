@@ -188,9 +188,9 @@
 						<td>
 							<input type="checkbox" name="reminder_notify" id="reminderNotify"{if !$eDate||($eDate.flags&8)} checked="checked"{/if} /> 
 								<label for="reminderNotify">{lng p="bynotify"}</label><br />
-							<input type="checkbox" name="reminder_email" id="reminderEMail"{if $eDate.flags&2} checked="checked"{/if} /> 
+							<input type="checkbox" name="reminder_email" id="reminderEMail"{if isset($eDate)&& $eDate.flags&2} checked="checked"{/if} /> 
 								<label for="reminderEMail">{lng p="byemail"}</label><br />
-							{if $smsEnabled}<input type="checkbox" name="reminder_sms" id="reminderSMS"{if $eDate.flags&4} checked="checked"{/if} />
+							{if $smsEnabled}<input type="checkbox" name="reminder_sms" id="reminderSMS"{if isset($eDate)&& $eDate.flags&4} checked="checked"{/if} />
 								<label for="reminderSMS">{lng p="bysms"}</label>{/if}
 						</td>
 						<td width="20">
