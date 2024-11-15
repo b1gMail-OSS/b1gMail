@@ -130,11 +130,11 @@
 			<tr>
 				<td width="40" valign="top" rowspan="2"><img src="{$tpldir}images/ico_prefs_storage.png" border="0" alt="" width="32" height="32" /></td>
 				<td class="td1" width="220">{lng p="datafolder"}:</td>
-				<td class="td2"><input type="text" name="datafolder" value="{text allowEmpty=true value=$bm_prefs.datafolder}" size="36" /></td>
+				<td class="td2"><input type="text" name="datafolder" value="{if isset($bm_prefs.datafolder)}{text allowEmpty=true value=$bm_prefs.datafolder}{/if}" size="36" /></td>
 			</tr>
 			<tr>
 				<td class="td1" width="220">{lng p="structstorage"}:</td>
-				<td class="td2"><input type="checkbox" name="structstorage"{if $bm_prefs.structstorage=='yes'&&!$safemode} checked="checked"{/if}{if $safemode} disabled="disabled"{/if} /></td>
+				<td class="td2"><input type="checkbox" name="structstorage"{if $bm_prefs.structstorage=='yes' checked="checked"{/if} /></td>
 			</tr>
 		</table>
 	</fieldset>

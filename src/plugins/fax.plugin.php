@@ -367,7 +367,7 @@ class FaxPlugin extends BMPlugin
 			$db->Query('INSERT INTO {pre}modfax_prefixes(`prefixid`,`country_prefix`,`prefix`,`faxgateid`,`price_firstpage`,`price_nextpages`) VALUES(\'15\',\'49\',\'12\',\'-1\',\'3\',\'2\')');
 			$db->Query('INSERT INTO {pre}modfax_prefixes(`prefixid`,`country_prefix`,`prefix`,`faxgateid`,`price_firstpage`,`price_nextpages`) VALUES(\'14\',\'49\',\'11\',\'-1\',\'0\',\'0\')');
 			$db->Query('INSERT INTO {pre}modfax_prefixes(`prefixid`,`country_prefix`,`prefix`,`faxgateid`,`price_firstpage`,`price_nextpages`) VALUES(\'13\',\'49\',\'10\',\'-1\',\'0\',\'0\')');
-			$db->Query('INSERT INTO {pre}modfax_signatures(`signatureid`,`groups`,`paused`,`weight`,`counter`,`fontname`,`fontsize`,`align`,`style`,`text`,`showon`,`margin`) VALUES(\'1\',\'*\',\'0\',\'100\',\'0\',\'arial\',\'8\',\'L\',\'13\',\'powered by b1gMail\r\nhttps://www.b1gmail.org/\',\'11\',\'25\')');
+			$db->Query('INSERT INTO {pre}modfax_signatures(`signatureid`,`groups`,`paused`,`weight`,`counter`,`fontname`,`fontsize`,`align`,`style`,`text`,`showon`,`margin`) VALUES(\'1\',\'*\',\'0\',\'100\',\'0\',\'arial\',\'8\',\'L\',\'13\',\'powered by b1gMail\r\nhttps://www.b1gmail.eu/\',\'11\',\'25\')');
 			$db->Query('INSERT INTO {pre}modfax_prefs(`allow_ownname`,`allow_ownno`,`allow_pdf`,`default_name`,`default_no`,`send_safecode`,`default_country_prefix`,`default_faxgateid`,`refund_on_error`) VALUES(\'1\',\'1\',\'1\',\'\',\'\',\'0\',\'49\',\'2\',\'1\')');
 		}
 
