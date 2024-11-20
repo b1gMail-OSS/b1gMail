@@ -134,7 +134,7 @@
 			</tr>
 			<tr>
 				<td class="td1" width="220">{lng p="structstorage"}:</td>
-				<td class="td2"><input type="checkbox" name="structstorage"{if $bm_prefs.structstorage=='yes' checked="checked"{/if} /></td>
+				<td class="td2"><input type="checkbox" name="structstorage"{if $bm_prefs.structstorage=='yes'} checked="checked"{/if} /></td>
 			</tr>
 		</table>
 	</fieldset>
