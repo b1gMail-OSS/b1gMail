@@ -643,3 +643,6 @@ function GetLanguageInfo($fileName)
 	}
 	return($result);
 }
+
+// target version
+$target_version = '7.4.1';
