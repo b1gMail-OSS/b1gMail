@@ -39,7 +39,7 @@
 					{if $adminRow.type==0}
 					<a href="welcome.php?action=phpinfo&sid={$sid}"><img src="{$tpldir}images/phpinfo.png" border="0" alt="" /> {lng p="phpinfo"}</a>
 					{/if}
-					<a href="javascript:showHelp();"><img src="{$tpldir}images/help.png" border="0" alt="" /> {lng p="help"}</a>
+					<!--<a href="javascript:showHelp();"><img src="{$tpldir}images/help.png" border="0" alt="" /> {lng p="help"}</a>-->
 					<a href="admins.php?sid={$sid}"><img src="{$tpldir}images/user_active.png" border="0" alt="" /> {text value=$adminRow.username}</a>
 					<a href="index.php?sid={$sid}&action=logout" onclick="return confirm('{lng p="logoutquestion"}');"><img src="{$tpldir}images/logout.png" border="0" alt="" /> {lng p="logout"}</a>
 				</div>
