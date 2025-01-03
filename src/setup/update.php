@@ -61,7 +61,10 @@ mysqli_free_result($result);
 // convert current version to int
 if (strpos($b1gmail_version, '-Beta') !== false) {
     $numVersion = str_replace('-Beta', '.', $b1gmail_version);
-} else {
+}elseif (strpos($b1gmail_version, '-RC') !== false) {
+    $numVersion = str_replace('-RC', '.', $b1gmail_version);
+}
+ else {
     $numVersion = $b1gmail_version.'.9';
 }
 $numVersion = (int) str_replace('.', '', $numVersion);
