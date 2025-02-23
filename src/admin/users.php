@@ -226,7 +226,7 @@ if($_REQUEST['action'] == 'users')
 		// search?
 		if(isset($_REQUEST['query']))
 		{
-			$query = unserialize($_REQUEST['query']);
+			$query = json_decode($_REQUEST['query']);
 
 			if(is_array($query) && count($query) == 2
 				&& is_array($query[1]) && is_string($query[0])
@@ -908,7 +908,7 @@ else if($_REQUEST['action'] == 'search')
 		}
 
 		// build query string
-		$queryString = serialize(array(trim($_REQUEST['q']), $fields));
+		$queryString = json_encode(array(trim($_REQUEST['q']), $fields));
 		header('Location: users.php?query=' . urlencode($queryString) . '&sid='  . session_id());
 		exit();
 	}
@@ -1034,4 +1034,3 @@ else if($_REQUEST['action'] == 'create')
 $tpl->assign('tabs', $tabs);
 $tpl->assign('title', $lang_admin['usersgroups'] . ' &raquo; ' . $lang_admin['users']);
 $tpl->display('page.tpl');
-?>
