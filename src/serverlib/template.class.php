@@ -26,12 +26,12 @@ if (!defined('B1GMAIL_INIT')) {
 /**
  * smarty
  */
-include B1GMAIL_DIR . 'serverlib/3rdparty/smarty/Smarty.class.php';
+include B1GMAIL_DIR . 'serverlib/3rdparty/smarty/libs/Smarty.class.php';
 
 /**
  * template class (extends smarty)
  */
-class Template extends Smarty {
+class Template extends Smarty\Smarty {
     var $_cssFiles, $_jsFiles;
     var $tplDir;
     var $reassignFolderList = false;
@@ -57,15 +57,15 @@ class Template extends Smarty {
             $this->assign('tpldir', $this->tplDir = './templates/');
         } else {
             $this->setTemplateDir(
-                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/'
+                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/',
             );
             $this->setCompileDir(
-                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/'
+                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/',
             );
             $this->assign(
                 'tpldir',
                 $this->tplDir =
-                    B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/'
+                    B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/',
             );
         }
 
@@ -75,7 +75,7 @@ class Template extends Smarty {
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             $this->assign(
                 'selfurl',
-                str_replace('http://', 'https://', $bm_prefs['selfurl'])
+                str_replace('http://', 'https://', $bm_prefs['selfurl']),
             );
         } else {
             $this->assign('selfurl', $bm_prefs['selfurl']);
@@ -115,7 +115,7 @@ class Template extends Smarty {
         $this->registerPlugin(
             'function',
             'fileSelector',
-            'TemplateFileSelector'
+            'TemplateFileSelector',
         );
         $this->registerPlugin('function', 'pageNav', 'TemplatePageNav');
         $this->registerPlugin('function', 'addressList', 'TemplateAddressList');
@@ -188,12 +188,11 @@ class Template extends Smarty {
     }
 
     function createTemplate(
-        $template,
+        $template_name,
         $cache_id = null,
         $compile_id = null,
-        $parent = null,
-        $do_clone = true
-    ) {
+        $parent = null
+    ): Smarty\Template {
         global $thisUser,
             $userRow,
             $groupRow,
@@ -450,23 +449,22 @@ class Template extends Smarty {
             global $mailbox;
 
             if (isset($mailbox) && is_object($mailbox)) {
-                list(, $pageMenu) = $mailbox->GetPageFolderList();
+                [, $pageMenu] = $mailbox->GetPageFolderList();
                 $this->assign('folderList', $pageMenu);
             }
         }
 
-        ModuleFunction('BeforeDisplayTemplate', [$template, &$this]);
+        ModuleFunction('BeforeDisplayTemplate', [$template_name, &$this]);
 
         $this->assign('_cssFiles', $this->_cssFiles);
         $this->assign('_jsFiles', $this->_jsFiles);
 
         StartPageOutput();
         return parent::createTemplate(
-            $template,
+            $template_name,
             $cache_id,
             $compile_id,
-            $parent,
-            $do_clone
+            $parent
         );
     }
 }
@@ -521,7 +519,7 @@ function TemplateBanner($params, $smarty) {
         );
     }
     if ($res->RowCount() == 1) {
-        list($bannerID, $bannerCode) = $res->FetchArray(MYSQLI_NUM);
+        [$bannerID, $bannerCode] = $res->FetchArray(MYSQLI_NUM);
         $res->Free();
 
         $db->Query('UPDATE {pre}ads SET views=views+1 WHERE id=?', $bannerID);
@@ -729,7 +727,7 @@ function TemplateFieldDate($params, $smarty) {
         return '-';
     }
 
-    list($y, $m, $d) = $parts;
+    [$y, $m, $d] = $parts;
     if ($y == 0 || $m == 0 || $d == 0) {
         return '-';
     }
