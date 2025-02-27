@@ -66,7 +66,7 @@
 {lng p="pacc_prefs_intro"}
 
 <h2>{lng p="pacc_activesubscription"}</h2>
-{if $activeSubscription}
+{if !empty($activeSubscription)}
 <table class="listTable">
 	<tr>
 		<th class="listTableHead" colspan="2"> {lng p="pacc_activesubscription"}</th>

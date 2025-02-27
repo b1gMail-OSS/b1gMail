@@ -101,7 +101,7 @@ class BMPayment
 	 * @param $title Payment form title
 	 * @param $amount Payment amount
 	 */
-	function PreparePaymentForm(&$tpl, $title, $amount, $userRow = false)
+	public static function PreparePaymentForm(&$tpl, $title, $amount, $userRow = false)
 	{
 		global $bm_prefs, $thisUser, $lang_user;
 
