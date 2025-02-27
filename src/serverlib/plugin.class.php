@@ -142,7 +142,7 @@ class BMPlugin
             urlencode($this->internal_name),
             urlencode(B1GMAIL_VERSION));
         $http = _new('BMHTTP', [$queryURL]);
-        $queryResult = @unserialize($http->DownloadToString());
+        $queryResult = @json_decode($http->DownloadToString(), true);
 
         if (!is_array($queryResult) || !isset($queryResult['latestVersion'])
             || $queryResult['internalName'] != $this->internal_name) {
