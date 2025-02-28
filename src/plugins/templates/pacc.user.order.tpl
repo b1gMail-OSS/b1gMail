@@ -105,7 +105,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td class="listTableLeft">* <label for="taxid">{lng p="taxid"}</label>:</td>
+		<td class="listTableLeft"><label for="taxid">{lng p="taxid"}</label>:</td>
 		<td class="listTableRight">
 			<input type="text" name="taxid" id="taxid" value="{if isset($_pf.taxid)}{text value=$_pf.taxid allowEmpty=true}{/if}" size="35" />
 		</td>

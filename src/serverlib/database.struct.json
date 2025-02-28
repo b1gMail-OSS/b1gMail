@@ -3553,7 +3553,7 @@
                 ""
             ],
             [
-                "company",
+                "inv_company",
                 "varchar(128)",
                 "NO",
                 "",
