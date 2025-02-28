@@ -544,7 +544,7 @@ elseif ($step == STEP_INSTALL) {
                             SQLEscape($dataFolder, $connection),
                             SQLEscape($selfFolder, $connection),
                             $hostName,
-                            'ix.dnsbl.manitu.net:zen.spamhaus.org',
+                            'zen.spamhaus.org',
                             'dnsbl.tornevall.org',
                             SQLEscape('postmaster@'.EncodeDomain($firstDomain), $connection),
                             'BMPlugin_Widget_Welcome,BMPlugin_Widget_EMail,BMPlugin_Widget_Websearch;BMPlugin_Widget_Mailspace,,BMPlugin_Widget_Quicklinks;BMPlugin_Widget_Webdiskspace,,',
