@@ -651,7 +651,7 @@ class BMPayment
 			else
 				$vkCode = '';
 
-			$db->Query('INSERT INTO {pre}orders(`userid`,`vkcode`,`cart`,`paymethod`,`paymethod_params`,`amount`,`tax`,`inv_firstname`,`inv_lastname`,`inv_street`,`inv_no`,`inv_zip`,`inv_city`,`inv_country`,`inv_firma`,`inv_taxid`,`created`,`status`) VALUES '
+			$db->Query('INSERT INTO {pre}orders(`userid`,`vkcode`,`cart`,`paymethod`,`paymethod_params`,`amount`,`tax`,`inv_firstname`,`inv_lastname`,`inv_street`,`inv_no`,`inv_zip`,`inv_city`,`inv_country`,`inv_company`,`inv_taxid`,`created`,`status`) VALUES '
 					   . '(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
 					   $userID,
 					   $vkCode,
@@ -833,7 +833,7 @@ class BMPayment
 
 		// set input resource
 		$bmPayment = _new('BMPayment');
-		$rgTpl->register_resource('prefsdb', array(&$bmPayment, '__tpl_getTemplate', '__tpl_getTimestamp', '__tpl_getSecure', '__tpl_getTrusted'));
+		$rgTpl->registerResource('prefsdb', array(&$bmPayment, '__tpl_getTemplate', '__tpl_getTimestamp', '__tpl_getSecure', '__tpl_getTrusted'));
 
 		// generate invoice
 		$invoice = $rgTpl->fetch('prefsdb:rgtemplate');
