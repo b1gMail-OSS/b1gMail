@@ -565,7 +565,7 @@ class BMPlugin
      * @param string $options
      * @param string $default
      */
-    public function RegisterGroupOption($key, $type = FIELD_TEXT, $desc, $options = '', $default = '')
+    public function RegisterGroupOption($key, $type, $desc, $options = '', $default = '')
     {
         $this->_groupOptions[$key] = [
             'type' => $type,
