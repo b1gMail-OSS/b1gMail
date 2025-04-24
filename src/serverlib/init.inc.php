@@ -302,6 +302,9 @@ if (!defined('DEBUG')) {
 if (!defined('DB_CHARSET')) {
     define('DB_CHARSET', '');
 }
+if (!defined('DISABLE_WRITE_XMAILER')) {
+    define('DISABLE_WRITE_XMAILER', false);
+}
 
 if (DEBUG) {
     error_reporting(E_ALL & ~E_STRICT);
