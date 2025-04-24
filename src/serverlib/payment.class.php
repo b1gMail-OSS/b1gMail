@@ -166,7 +166,7 @@ class BMPayment
 	 * @param int $paidAmount Paid order amount (in cents)
 	 * @return bool Success
 	 */
-	function ActivateOrderWithVKCode($vkCode, $paidAmount)
+	public static function ActivateOrderWithVKCode($vkCode, $paidAmount)
 	{
 		global $db;
 
