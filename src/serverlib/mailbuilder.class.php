@@ -426,6 +426,8 @@ class BMMailBuilder
 		$this->AddHeaderField('Date',			date('r'));
 		$this->AddHeaderField('MIME-Version',	'1.0');
 		$this->AddHeaderField('Message-ID',		$this->_generateMessageID());
-		$this->AddHeaderField('X-Mailer',		'b1gMail/' . B1GMAIL_VERSION);
+		if(!DISABLE_WRITE_XMAILER) {
+			$this->AddHeaderField('X-Mailer',		'b1gMail/' . B1GMAIL_VERSION);
+		}
 	}
 }
