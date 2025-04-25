@@ -3477,7 +3477,7 @@ function PutLog($entry, $prio = PRIO_NOTE, $at_file = __FILE__, $at_line = __LIN
 	$at_file = $at_file[ count($at_file)-1 ];
 
 	$db->Query('INSERT INTO {pre}logs(eintrag, zeitstempel, prio) VALUES(?, UNIX_TIMESTAMP(), ?)',
-		"(${at_file}:${at_line}) $entry",
+		"({$at_file}:{$at_line}) $entry",
 		$prio);
 }
 
