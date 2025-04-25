@@ -54,6 +54,7 @@ class BMPlugin
     public $update_url = false;
     public $_groupOptions = [];
     public $order = 0;
+    public $mail, $web, $designedfor;
 
     //
     // setup routines
@@ -960,7 +961,7 @@ class BMPluginPackage
             }
             if (!include($pluginFile)) {
                 DisplayError(0x11, 'Plugin cannot be loaded', 'A plugin cannot be loaded.',
-                                sprintf("Module:\n%s", basename($pluginFile)), __FILE__, __LINE__,500);
+                                sprintf("Module:\n%s", basename($pluginFile)), __FILE__, __LINE__);
                 die();
             }
         }
@@ -1235,7 +1236,7 @@ class BMPluginInterface
 
         if (!is_object($dirHandle)) {
             DisplayError(0x10, 'Plugin directory unavailable', 'The plugin path cannot be opened.',
-                            sprintf("Path:\n%s", $dir), __FILE__, __LINE__,500);
+                            sprintf("Path:\n%s", $dir), __FILE__, __LINE__);
             die();
         }
 
@@ -1244,7 +1245,7 @@ class BMPluginInterface
                 && is_file($dir.$entry)) {
                 if (!include($dir.$entry)) {
                     DisplayError(0x11, 'Plugin cannot be loaded', 'A plugin cannot be loaded.',
-                                    sprintf("Module:\n%s", $dir), __FILE__, __LINE__,500);
+                                    sprintf("Module:\n%s", $dir), __FILE__, __LINE__);
                     die();
                 }
             }
