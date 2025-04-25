@@ -19,7 +19,7 @@
 			<td align="center"><img src="../plugins/templates/images/modfax_prefix.png" border="0" alt="" width="16" height="16" /></td>
 			<td align="center"><input type="checkbox" name="prefixes[]" value="{$prefix.prefixid}" /></td>
 			<td>{if $prefix.prefix!='*'}(0){/if}{$prefix.prefix}<br /><small>{lng p="modfax_country_prefix"}: {if $prefix.country_prefix!='*'}+{/if}{$prefix.country_prefix}</small></td>
-			<td>{if $prefix.faxgateid==-1}({lng p="modfax_forbidno"}){elseif $prefix.faxgateid==0}({lng p="defaultgateway}){else}{text value=$gateways[$prefix.faxgateid]}{/if}</td>
+			<td>{if $prefix.faxgateid==-1}({lng p="modfax_forbidno"}){elseif $prefix.faxgateid==0}({lng p="defaultgateway"}){else}{text value=$gateways[$prefix.faxgateid]}{/if}</td>
 			<td>{if $prefix.faxgateid==-1} - {else}{$prefix.price_firstpage} {lng p="credits"}{/if}</td>
 			<td>{if $prefix.faxgateid==-1} - {else}{$prefix.price_nextpages} {lng p="credits"}{/if}</td>
 			<td>
