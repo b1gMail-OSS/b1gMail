@@ -151,13 +151,13 @@ if($_REQUEST['action'] == 'common')
 	$countries = CountryList();
 	
 	// maintenance whitelist
-	$whitelist = NULL;
+	$whitelist = '';
 	if(!empty($bm_prefs['wartung_whitelist_ips'])) {
 		foreach (unserialize($bm_prefs['wartung_whitelist_ips']) as $whiteip) {
 			$whitelist .= $whiteip .', ';
 		}
 	}
-	$whitelist = rtrim($whitelist, ', ');
+	if(!empty($whitelist)) $whitelist = rtrim($whitelist, ', ');
 
 	// assign
 	$tpl->assign('wartungwhitelist', $whitelist);
