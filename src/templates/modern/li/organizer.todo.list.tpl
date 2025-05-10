@@ -70,12 +70,12 @@
 	{if isset($haveDoneTasks)}
 	<tr style="height:auto;">
 		<td colspan="6" class="folderGroup">
-			<a style="display:block;cursor:pointer;" onclick="toggleGroup(1,'todo1');">&nbsp;<img id="groupImage_1" src="{$tpldir}images/{if $smarty.cookies.toggleGroup.todo1=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
+			<a style="display:block;cursor:pointer;" onclick="toggleGroup(1,'todo1');">&nbsp;<img id="groupImage_1" src="{$tpldir}images/{if isset($smarty.cookies.toggleGroup.todo1) && $smarty.cookies.toggleGroup.todo1=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
 			&nbsp;{lng p="donetasks"}</a>
 		</td>
 	</tr>
 	
-	<tbody id="group_1" style="display:{if $smarty.cookies.toggleGroup.todo1=='closed'}none{/if};">
+	<tbody id="group_1" style="display:{if isset($smarty.cookies.toggleGroup.todo1) && $smarty.cookies.toggleGroup.todo1=='closed'}none{/if};">
 		
 	{foreach from=$todoList key=taskID item=task}
 	{if $task.akt_status==64}
