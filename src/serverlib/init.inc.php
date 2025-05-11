@@ -305,7 +305,9 @@ if (!defined('DB_CHARSET')) {
 if (!defined('DISABLE_WRITE_XMAILER')) {
     define('DISABLE_WRITE_XMAILER', false);
 }
-
+if (!defined('LEGACY_WEBDISCICONS')) {
+    define('LEGACY_WEBDISCICONS', false);
+}
 if (DEBUG) {
     error_reporting(E_ALL & ~E_STRICT);
 } elseif (defined('INTERFACE_MODE') && INTERFACE_MODE) {

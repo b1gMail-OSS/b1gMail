@@ -4,7 +4,7 @@
 <div id="webdiskDetailInfo" class="webdiskDetailInfo" style="display:none;">
 	<table style="border-collapse:collapse;">
 		<tr>
-			<td rowspan="2" valign="top" width="35"><img src="" border="0" alt="" id="wdExt" /></td>
+			<td rowspan="2" valign="top" width="35"><!--<img src="" border="0" alt="" id="wdExt" />--></td>
 			<td><b><span id="wdTitle">&nbsp;</span></b>
 				<br /><br />
 				<small>

@@ -393,7 +393,7 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 	// details
 	EBID('webdiskDetailInfoNote').style.display = 'none';
 	EBID('webdiskDetailInfo').style.display = '';
-	EBID('wdExt').src = 'webdisk.php?action=displayExtension&ext=' + ext + '&sid=' + currentSID;
+	//EBID('wdExt').src = 'webdisk.php?action=displayExtension&ext=' + ext + '&sid=' + currentSID;
 	EBID('wdTitle').innerHTML = title;
 	EBID('wdSize').innerHTML = type == 1 ? ' - ' : size;
 	EBID('wdDate').innerHTML = date;

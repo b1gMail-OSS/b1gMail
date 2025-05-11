@@ -19,34 +19,35 @@
  *
  */
 
-include('../serverlib/admin.inc.php');
+require '../serverlib/admin.inc.php';
 RequestPrivileges(PRIVILEGES_ADMIN);
 AdminRequirePrivilege('prefs.webdisk');
 
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'common';
 
-$tabs = array(
-	0 => array(
+$tabs = [
+	0 => [
 		'title'		=> $lang_admin['common'],
 		'relIcon'	=> 'ico_disk.png',
 		'link'		=> 'prefs.webdisk.php?',
 		'active'	=> $_REQUEST['action'] == 'common'
-	),
-	1 => array(
+	],
+	1 => [
 		'title'		=> $lang_admin['limits'],
 		'relIcon'	=> 'filetype.png',
 		'link'		=> 'prefs.webdisk.php?action=limits&',
 		'active'	=> $_REQUEST['action'] == 'limits'
-	),
-	2 => array(
-		'title'		=> $lang_admin['webdiskicons'],
-		'relIcon'	=> 'extension.png',
-		'link'		=> 'prefs.webdisk.php?action=extensions&',
-		'active'	=> $_REQUEST['action'] == 'extensions'
-	)
-);
-
+	],
+];
+if(LEGACY_WEBDISCICONS===true) {
+	$tabs[2] = [
+			'title'		=> $lang_admin['webdiskicons'],
+			'relIcon'	=> 'extension.png',
+			'link'		=> 'prefs.webdisk.php?action=extensions&',
+			'active'	=> $_REQUEST['action'] == 'extensions'
+	];
+}
 /**
  * common
  */
@@ -102,7 +103,7 @@ else if($_REQUEST['action'] == 'limits')
 /**
  * extensions
  */
-else if($_REQUEST['action'] == 'extensions')
+else if($_REQUEST['action'] == 'extensions' AND LEGACY_WEBDISCICONS===true)
 {
 	if(!isset($_REQUEST['do']))
 		$_REQUEST['do'] = 'list';

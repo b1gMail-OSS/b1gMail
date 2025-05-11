@@ -212,6 +212,12 @@ if($_REQUEST['action'] == 'folder')
 	$folderContent 	= $webdisk->GetFolderContent($folderID);
 	$tpl->assign('folderContent', $folderContent);
 	$tpl->assign('pageTitle', HTMLFormat($folderName));
+	if(LEGACY_WEBDISCICONS===true) {
+		$tpl->assign('use_fa_icons', 0);
+	}
+	else {
+		$tpl->assign('use_fa_icons', 1);
+	}
 	$tpl->assign('page', 'm/webdisk.folder.tpl');
 	$tpl->display('m/index.tpl');
 }
@@ -364,6 +370,12 @@ else if($_REQUEST['action'] == 'itemDetails'
 		$tpl->assign('folderID', $folderID);
 		$tpl->assign('itemType', (int)$_REQUEST['type']);
 		$tpl->assign('item', $item);
+		if(LEGACY_WEBDISCICONS===true) {
+		$tpl->assign('use_fa_icons', 0);
+		}
+		else {
+			$tpl->assign('use_fa_icons', 1);
+		}
 		$tpl->assign('page', 'm/webdisk.details.tpl');
 		$tpl->display('m/index.tpl');
 	}

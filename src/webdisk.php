@@ -236,6 +236,13 @@ if($_REQUEST['action'] == 'folder')
 	$tpl->assign('shareURL', $shareURL);
 	$tpl->assign('isShared', $folderInfo !== false && $folderInfo['share'] == 'yes');
 	$tpl->assign('folderContent', $folderContent);
+	$tpl->assign('webdiskicons', 'li/webdisk.icons.tpl');
+	if(LEGACY_WEBDISCICONS===true) {
+		$tpl->assign('use_fa_icons', 0);
+	}
+	else {
+		$tpl->assign('use_fa_icons', 1);
+	}
 
 	if(isset($_REQUEST['inline']))
 	{

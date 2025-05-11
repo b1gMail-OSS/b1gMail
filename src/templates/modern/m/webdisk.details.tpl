@@ -5,7 +5,10 @@
 
 <div data-role="content">
 	<div>
-		<img src="webdisk.php?action=displayExtension&ext={$item.ext}&sid={$sid}" style="vertical-align:middle;"/>
+		{assign var='fa_additionalparamclass' value='fa-4x' scope='global'}
+		{assign var='wdicons_additionalparam' value='style="vertical-align:middle;"' scope='global'}
+		{assign var='wdicons_imgattr' value='' scope='global'}
+		{include file="li/webdisk.icons.tpl"}
 		<strong>{$pageTitle}</strong>
 	</div>
 	<p><small>
