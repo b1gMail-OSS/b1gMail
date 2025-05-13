@@ -109,6 +109,9 @@ uksort($prefsItems, '_prefsItemsSort');
 $tpl->assign('prefsItems', $prefsItems);
 $tpl->assign('prefsImages', $prefsImages);
 $tpl->assign('prefsIcons', $prefsIcons);
+if(isset($prefsfaIcons)) {
+	$tpl->assign('prefsfaIcons', $prefsfaIcons);
+}
 
 /**
  * page sidebar
