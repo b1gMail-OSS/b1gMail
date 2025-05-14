@@ -1,6 +1,6 @@
 <div class="sidebarHeading">{lng p="prefs"}</div>
 <div class="contentMenuIcons">
-	<a href="prefs.php?sid={$sid}"><i class="fa fa-tachometer" aria-hidden="true"></i> {lng p="overview"}</a><br />
+	<a href="prefs.php?sid={$sid}"><i class="fa fa-tachometer" aria-hidden="true" style="width: 20px;"></i> {lng p="overview"}</a><br />
 	{foreach from=$prefsItems item=null key=item}
 	<a href="prefs.php?action={$item}&sid={$sid}">
 				{if isset($prefsfaIcons[$item])}
