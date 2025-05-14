@@ -1086,7 +1086,7 @@ class BMWebdisk
 		if(LEGACY_WEBDISCICONS===true) {
 			global $db;
 
-			$res = $db->Query("SELECT bild,ctype FROM {pre}extensions WHERE (ext='$ext') OR (ext LIKE '$ext,%') OR (ext LIKE '%,$ext,%') OR (ext LIKE '%,$ext') LIMIT 1");
+			$res = $db->Query("SELECT bild,ctype FROM {pre}extensions WHERE (ext='".$db->Escape($ext)."') OR (ext LIKE '".$db->Escape($ext).",%') OR (ext LIKE '%,".$db->Escape($ext).",%') OR (ext LIKE '%,$ext') LIMIT 1");
 			if($res->RowCount() == 0 && $ext != '.?')
 				return(BMWebdisk::DisplayExtension('.?'));
 			list($img, $ctype) = $res->FetchArray(MYSQLI_NUM);
