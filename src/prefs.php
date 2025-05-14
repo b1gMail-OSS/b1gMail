@@ -136,7 +136,8 @@ else if($_REQUEST['action'] == 'common')
 	$composeDefaults		= @unserialize($thisUser->GetPref('composeDefaults'));
 	if(!is_array($composeDefaults))
 		$composeDefaults	= array();
-
+	if(!array_key_exists('savecopy', $composeDefaults)) $composeDefaults['savecopy']	= '';
+	if(!array_key_exists('priority', $composeDefaults)) $composeDefaults['priority']	= '';
 	// save?
 	if(isset($_REQUEST['do']) && $_REQUEST['do']=='save'
 		&& IsPOSTRequest())
