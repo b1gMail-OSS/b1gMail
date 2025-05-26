@@ -1,63 +1,62 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-
+<!doctype html>
+<html lang="en">
 <head>
-    <title>b1gMail - {lng p="acp"}</title>
-    
-	<!-- meta -->
-	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
-	
-	<!-- links -->
-	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-	<link href="{$tpldir}style/common.css?{fileDateSig file="style/common.css"}" rel="stylesheet" type="text/css" />
-	
-	<!-- client scripts -->
-	<script src="../clientlang.php?sid={$sid}" type="text/javascript"></script>
-	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}" type="text/javascript"></script>
-</head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+	<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+	<title>b1gMail - {lng p="acp"}</title>
 
-<body onload="EBID('username').focus();" id="loginBody">
-	
-	<form action="index.php?action=login" method="post" autocomplete="off">
-		{if isset($jump)}<input type="hidden" id="jump" name="jump" value="{text value=$jump allowEmpty=true}" />{/if}
-		<input type="hidden" name="timezone" id="timezone" value="{$timezone}" />
-		
-		<div id="loginBox1">
-			<div id="loginBox2">
-				<div id="loginBox3">
-					{if isset($error)}<div class="loginError">{$error}</div>{/if}
-				
-					<div id="loginLogo">
-						<img src="templates/images/logo_letter.png" style="width:90px;height:53px;" border="0" alt="" />
+	<meta name="theme-color" content=""/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="mobile-web-app-capable" content="yes"/>
+	<meta name="HandheldFriendly" content="True"/>
+	<meta name="MobileOptimized" content="320"/>
+	<link rel="icon" type="image/png" href="{$tpldir}images/favicon-256x256.png" />
+
+	<meta name="description" content="{lng p="acp"}"/>
+
+	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
+	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}"></script>
+	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>
+
+	<!-- BEGIN CUSTOM FONT -->
+	<style>
+		@import url("https://rsms.me/inter/inter.css");
+	</style>
+	<!-- END CUSTOM FONT -->
+</head>
+<body onload="EBID('username').focus();" class="d-flex flex-column" id="loginBody" style="background-color: #333333;">
+<div class="page page-center">
+	<div class="container container-tight py-4">
+		<div class="text-center mb-4">
+			<img src="{$tpldir}images/logo_text.png" height="36" alt="{lng p="acp"}">
+		</div>
+		<div class="card card-md">
+			<div class="card-body">
+				<h2 class="h2 text-center mb-4">{lng p="acp"}</h2>
+				<form action="index.php?action=login" method="post" autocomplete="off">
+					<div class="mb-3">
+						<label class="form-label">{lng p="username"}</label>
+						<input type="text" id="username" name="username" class="form-control" placeholder="{lng p="username"}" autocomplete="off">
 					</div>
-					
-					<div id="loginForm">
-						{lng p="username"}:<br />
-						<input id="username" type="text" name="username" value="" style="width:200px;" />
-						<br /><br />
-						
-						{lng p="password"}:<br />
-						<input id="pw" type="password" name="password" value="" style="width:200px;" />
-						<br /><br />
-						
-						<div style="float:right;">
-						<input class="button" type="submit" value=" {lng p="login"} &raquo; " />
-						</div>
+					<div class="mb-2">
+						<label class="form-label">{lng p="password"}</label>
+						<input type="password" id="pw" name="password" class="form-control" placeholder="{lng p="password"}" autocomplete="off">
 					</div>
-					
-					<br class="clear" />
-				</div>
+					<div class="form-footer">
+						<button type="submit" class="btn btn-primary w-100">{lng p="login"}</button>
+					</div>
+				</form>
 			</div>
 		</div>
-	</form>
-	
-	<script>
+	</div>
+</div>
+
+<script>
 	<!--
-		EBID('timezone').value = (new Date()).getTimezoneOffset() * (-60);
+	EBID('timezone').value = (new Date()).getTimezoneOffset() * (-60);
 	//-->
-	</script>
-
+</script>
 </body>
-
 </html>

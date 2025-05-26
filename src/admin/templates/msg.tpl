@@ -2,24 +2,25 @@
 	<legend>{$msgTitle}</legend>
 	
 	{if !empty($msgIcon)}
-	<table>
-		<tr>
-			<td width="36" valign="top"><img src="{$tpldir}images/{$msgIcon}.png" border="0" alt="" width="32" height="32" /></td>
-			<td valign="top">{$msgText}</td>
-		</tr>
-	</table>
+		{if $msgIcon == 'add32'}
+			<div class="alert alert-success"><i class="fa-regular fa-circle-check"></i> {$msgText}</div>
+		{elseif $msgIcon == 'error32'}
+			<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation"></i> {$msgText}</div>
+		{else}
+			<div class="alert alert-info"><i class="fa-solid fa-circle-info"></i> {$msgText}</div>
+		{/if}
 	{else}
-	{$msgText}
+		<div class="alert">{$msgText}</div>
 	{/if}
 	
 	{if !empty($backLink)}
-	<p align="right">
-		<input class="button" type="button" onclick="document.location.href='{$backLink}sid={$sid}';" value=" {lng p="back"} " />
-	</p>
+	<div class="text-end">
+		<input class="btn btn-primary" type="button" onclick="document.location.href='{$backLink}sid={$sid}';" value="{lng p="back"}" />
+	</div>
 	{else}
-	<p align="right">
-		<input class="button" type="button" onclick="history.back(1);" value=" {lng p="back"} " />
-	</p>	
+		<div class="text-end">
+		<input class="btn btn-primary" type="button" onclick="history.back(1);" value="{lng p="back"}" />
+	</div>
 	{/if}
 </fieldset>
 

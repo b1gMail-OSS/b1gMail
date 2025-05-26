@@ -1,53 +1,27 @@
 <fieldset>
 	<legend>{lng p="mailorphans"}</legend>
-	
+
+	<div class="alert alert-warning">{lng p="undowarn"}</div>
+
 	<form action="maintenance.php?action=orphans&do=exec&sid={$sid}" method="post" onsubmit="spin(this)">
-		<table>
-			<tr>
-				<td width="40" valign="top"><img src="{$tpldir}images/orphans32.png" border="0" alt="" width="32" height="32" /></td>
-				<td valign="top">
-					<p>
-						{lng p="orphans_desc"}
-					</p>
-				</td>
-			</tr>
-		</table>
-		
-		<p>
-			<div style="float:left;">
-				<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-				{lng p="undowarn"}
-			</div>
-			<div style="float:right;">
-				<input class="button" type="submit" value=" {lng p="execute"} " />
-			</div>
-		</p>
+		<p>{lng p="orphans_desc"}</p>
+
+		<div class="text-end">
+			<input class="btn btn-sm btn-warning" type="submit" value="{lng p="execute"}" />
+		</div>
 	</form>
 </fieldset>
 
 <fieldset>
 	<legend>{lng p="diskorphans"}</legend>
+
+	<div class="alert alert-warning">{lng p="undowarn"}</div>
 	
 	<form action="maintenance.php?action=orphans&do=diskExec&sid={$sid}" method="post" onsubmit="spin(this)">
-		<table>
-			<tr>
-				<td width="40" valign="top"><img src="{$tpldir}images/ico_disk.png" border="0" alt="" width="32" height="32" /></td>
-				<td valign="top">
-					<p>
-						{lng p="diskorphans_desc"}
-					</p>
-				</td>
-			</tr>
-		</table>
-		
-		<p>
-			<div style="float:left;">
-				<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-				{lng p="undowarn"}
-			</div>
-			<div style="float:right;">
-				<input class="button" type="submit" value=" {lng p="execute"} " />
-			</div>
-		</p>
+		<p>{lng p="diskorphans_desc"}</p>
+
+		<div class="text-end">
+			<input class="btn btn-sm btn-warning" type="submit" value="{lng p="execute"}" />
+		</div>
 	</form>
 </fieldset>

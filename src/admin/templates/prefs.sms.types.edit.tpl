@@ -2,42 +2,56 @@
 	<legend>{lng p="edit"}</legend>
 	
 	<form action="prefs.sms.php?action=types&do=edit&save=true&id={$type.id}&sid={$sid}" method="post" onsubmit="spin(this)">
-		<table width="100%">
-			<tr>
-				<td width="40" valign="top" rowspan="6"><img src="{$tpldir}images/type32.png" border="0" alt="" width="32" height="32" /></td>
-				<td class="td1" width="150">{lng p="title"}:</td>
-				<td class="td2"><input type="text" style="width:85%;" name="titel" value="{if isset($type.titel)}{text value=$type.titel}{/if}" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="gateway"}:</td>
-				<td class="td2"><select name="gateway">
-					<option value="0"{if $gateway.id==0} selected="selected"{/if}>({lng p="defaultgateway"})</option>
-				{foreach from=$gateways item=gateway}
-					<option value="{$gateway.id}"{if $type.gateway==$gateway.id} selected="selected"{/if}>{text value=$gateway.titel}</option>
-				{/foreach}
-				</select></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="type"}:</td>
-				<td class="td2"><input type="text" size="6" name="typ" value="{if isset($type.typ)}{text value=$type.typ allowEmpty=true}{/if}" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="price"}:</td>
-				<td class="td2"><input type="text" size="6" name="price" value="{$type.price}" /> {lng p="credits"}</td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="maxlength"}:</td>
-				<td class="td2"><input type="text" size="6" name="maxlength" value="{$type.maxlength}" /></td>
-			</tr>
-			<tr>
-				<td class="td1">{lng p="prefs"}:</td>
-				<td class="td2"><input type="checkbox" name="flags[1]" value="true" id="flag_1"{if $type.flags&1} checked="checked"{/if} />
-								<label for="flag_1">{lng p="disablesender"}</label></td>
-			</tr>
-		</table>
-	
-		<p align="right">
-			<input class="button" type="submit" value=" {lng p="save"} " />
-		</p>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="titel" value="{if isset($type.titel)}{text value=$type.titel}{/if}" placeholder="{lng p="title"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="gateway"}</label>
+			<div class="col-sm-10">
+				<select name="gateway" class="form-select">
+					<option value="0">({lng p="defaultgateway"})</option>
+					{foreach from=$gateways item=gateway}
+						<option value="{$gateway.id}"{if $type.gateway==$gateway.id} selected="selected"{/if}>{text value=$gateway.titel}</option>
+					{/foreach}
+				</select>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="type"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="typ" value="{if isset($type.typ)}{text value=$type.typ allowEmpty=true}{/if}" placeholder="{lng p="type"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="price"}</label>
+			<div class="col-sm-10">
+				<div class="input-group mb-2">
+					<input type="text" class="form-control" name="price" value="{$type.price}" placeholder="{lng p="price"}">
+					<span class="input-group-text">{lng p="credits"}</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="maxlength"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="maxlength" value="{$type.maxlength}" placeholder="{lng p="maxlength"}">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="prefs"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="flags[1]" value="true"{if $type.flags&1} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="disablesender"}</span>
+				</label>
+			</div>
+		</div>
+
+		<div class="text-end">
+			<input class="btn btn-primary" type="submit" value=" {lng p="save"} " />
+		</div>
 	</form>
 </fieldset>

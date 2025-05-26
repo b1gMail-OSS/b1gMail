@@ -1,27 +1,19 @@
 <fieldset>
 	<legend>{lng p="installplugin"}</legend>
-	
+
 	<form action="plugins.php?action=install&do=uploadPlugin&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
-		<p>
-			{lng p="install_desc"}
-		</p>
-		
-		<table>
-			<tr>
-				<td width="40" valign="top"><img src="{$tpldir}images/plugin_add.png" border="0" alt="" width="32" height="32" /></td>
-				<td>{lng p="plugpackage"}:<br />
-					<input type="file" name="package" accept=".bmplugin" style="width:440px;" /></td>
-			</tr>
-		</table>
-		
-		<p>
-			<div style="float:left;">
-				<img src="{$tpldir}images/warning.png" border="0" alt="" align="absmiddle" width="16" height="16" />
-				{lng p="sourcewarning"}
+		<div class="alert alert-warning">{lng p="sourcewarning"}</div>
+		<p>{lng p="install_desc"}</p>
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="plugpackage"}</label>
+			<div class="col-sm-10">
+				<input type="file" class="form-control" name="package" accept=".bmplugin" placeholder="{lng p="plugpackage"}">
 			</div>
-			<div style="float:right;">
-				<input class="button" type="submit" value=" {lng p="install"} " />
-			</div>
-		</p>
+		</div>
+
+		<div class="text-end">
+			<input class="btn btn-primary" type="submit" value="{lng p="install"}" />
+		</div>
 	</form>
 </fieldset>
