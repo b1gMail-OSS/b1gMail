@@ -21,9 +21,7 @@
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>
 
 	<!-- BEGIN CUSTOM FONT -->
-	<style>
-		@import url("https://rsms.me/inter/inter.css");
-	</style>
+	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
 	<!-- END CUSTOM FONT -->
 </head>
 <body onload="EBID('username').focus();" class="d-flex flex-column" id="loginBody" style="background-color: #333333;">
