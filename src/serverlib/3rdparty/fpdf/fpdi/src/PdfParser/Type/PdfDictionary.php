@@ -4,7 +4,7 @@
  * This file is part of FPDI
  *
  * @package   setasign\Fpdi
- * @copyright Copyright (c) 2024 Setasign GmbH & Co. KG (https://www.setasign.com)
+ * @copyright Copyright (c) 2023 Setasign GmbH & Co. KG (https://www.setasign.com)
  * @license   http://opensource.org/licenses/mit-license The MIT License
  */
 
@@ -48,11 +48,12 @@ class PdfDictionary extends PdfType
             if (!($key instanceof PdfName)) {
                 $lastToken = null;
                 // ignore all other entries and search for the closing brackets
-                while (($token = $tokenizer->getNextToken()) !== '>' || $lastToken !== '>') {
-                    if ($token === false) {
-                        return false;
-                    }
+                while (($token = $tokenizer->getNextToken()) !== '>' && $token !== false && $lastToken !== '>') {
                     $lastToken = $token;
+                }
+
+                if ($token === false) {
+                    return false;
                 }
 
                 break;
@@ -106,11 +107,8 @@ class PdfDictionary extends PdfType
      * @return PdfNull|PdfType
      * @throws PdfTypeException
      */
-    public static function get($dictionary, $key, $default = null)
+    public static function get($dictionary, $key, PdfType $default = null)
     {
-        if ($default !== null && !($default instanceof PdfType)) {
-            throw new \InvalidArgumentException('Default value must be an instance of PdfType or null');
-        }
         $dictionary = self::ensure($dictionary);
 
         if (isset($dictionary->value[$key])) {

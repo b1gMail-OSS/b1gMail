@@ -833,7 +833,8 @@ class BMPayment
 
 		// set input resource
 		$bmPayment = _new('BMPayment');
-		$rgTpl->registerResource('prefsdb', array(&$bmPayment, '__tpl_getTemplate', '__tpl_getTimestamp', '__tpl_getSecure', '__tpl_getTrusted'));
+		//FIXME:
+		//$rgTpl->registerPlugin('resource','prefsdb', array(&$bmPayment, '__tpl_getTemplate', '__tpl_getTimestamp', '__tpl_getSecure', '__tpl_getTrusted'));
 
 		// generate invoice
 		$invoice = $rgTpl->fetch('prefsdb:rgtemplate');

@@ -280,8 +280,8 @@
 					<div class="col-lg-auto ms-lg-auto">
 						<ul class="list-inline list-inline-dots mb-0">
 							<li class="list-inline-item"><a href="https://www.b1gmail.eu/" target="_blank" class="link-secondary"><i class="ti ti-users-group"></i> Community</a></li>
-							<li class="list-inline-item"><a href="https://github.com/b1gMail-OSS/b1gMail" target="_blank" class="link-secondary" rel="noopener"><i class="ti ti-brand-github"></i> Source code</a></li>
-							<li class="list-inline-item"><a href="https://github.com/b1gMail-OSS/b1gMail/wiki" target="_blank" class="link-secondary" rel="noopener"><i class="ti ti-brand-github"></i> Wiki</a></li>
+							<li class="list-inline-item"><a href="https://github.com/b1gMail-OSS/b1gMail" target="_blank" class="link-secondary" rel="noopener noreferrer"><i class="ti ti-brand-github"></i> Source code</a></li>
+							<li class="list-inline-item"><a href="https://github.com/b1gMail-OSS/b1gMail/wiki" target="_blank" class="link-secondary" rel="noopene noreferrerr"><i class="ti ti-brand-github"></i> Wiki</a></li>
 						</ul>
 					</div>
 					<div class="col-12 col-lg-auto mt-3 mt-lg-0">

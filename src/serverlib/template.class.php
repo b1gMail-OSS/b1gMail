@@ -26,12 +26,12 @@ if (!defined('B1GMAIL_INIT')) {
 /**
  * smarty
  */
-include B1GMAIL_DIR . 'serverlib/3rdparty/smarty/Smarty.class.php';
+include B1GMAIL_DIR . 'serverlib/3rdparty/smarty/libs/Smarty.class.php';
 
 /**
  * template class (extends smarty)
  */
-class Template extends Smarty {
+class Template extends Smarty\Smarty {
     var $_cssFiles, $_jsFiles;
     var $tplDir;
     var $reassignFolderList = false;
@@ -57,15 +57,15 @@ class Template extends Smarty {
             $this->assign('tpldir', $this->tplDir = './templates/');
         } else {
             $this->setTemplateDir(
-                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/'
+                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/',
             );
             $this->setCompileDir(
-                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/'
+                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/',
             );
             $this->assign(
                 'tpldir',
                 $this->tplDir =
-                    B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/'
+                    B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/',
             );
         }
 
@@ -75,7 +75,7 @@ class Template extends Smarty {
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             $this->assign(
                 'selfurl',
-                str_replace('http://', 'https://', $bm_prefs['selfurl'])
+                str_replace('http://', 'https://', $bm_prefs['selfurl']),
             );
         } else {
             $this->assign('selfurl', $bm_prefs['selfurl']);
@@ -131,6 +131,8 @@ class Template extends Smarty {
         $this->registerPlugin('function', 'fileDateSig', 'TemplateFileDateSig');
         $this->registerPlugin('function', 'number', 'TemplateNumber');
         $this->registerPlugin('function', 'fieldDate', 'TemplateFieldDate');
+        $this->registerPlugin('modifier', 'array_key_exists', 'array_key_exists');
+        $this->registerPlugin('modifier', 'IsMobileUserAgent', 'IsMobileUserAgent');
 
         // module handler
         ModuleFunction('OnCreateTemplate', [&$this]);
@@ -188,12 +190,11 @@ class Template extends Smarty {
     }
 
     function createTemplate(
-        $template,
+        $template_name,
         $cache_id = null,
         $compile_id = null,
-        $parent = null,
-        $do_clone = true
-    ) {
+        $parent = null
+    ): Smarty\Template {
         global $thisUser,
             $userRow,
             $groupRow,
@@ -219,11 +220,11 @@ class Template extends Smarty {
                     $pluginMenuItems[$className] = [
                         'title' => $plugins->getParam(
                             'admin_page_title',
-                            $className
+                            $className,
                         ),
                         'icon' => $plugins->getParam(
                             'admin_page_icon',
-                            $className
+                            $className,
                         ),
                     ];
                 }
@@ -455,18 +456,18 @@ class Template extends Smarty {
             }
         }
 
-        ModuleFunction('BeforeDisplayTemplate', [$template, &$this]);
+        ModuleFunction('BeforeDisplayTemplate', [$template_name, &$this]);
 
         $this->assign('_cssFiles', $this->_cssFiles);
         $this->assign('_jsFiles', $this->_jsFiles);
+        $GLOBALS['getTemplateDir'] = parent::getTemplateDir();
 
         StartPageOutput();
         return parent::createTemplate(
-            $template,
+            $template_name,
             $cache_id,
             $compile_id,
-            $parent,
-            $do_clone
+            $parent
         );
     }
 }
@@ -491,7 +492,10 @@ function TemplateTabSort($a, $b) {
  * functions registered with smarty
  */
 function TemplateFileDateSig($params, $smarty) {
-    $fileName = $smarty->template_dir[0] . $params['file'];
+
+    $template_dir = $GLOBALS['getTemplateDir'];
+
+    $fileName = $template_dir[0] . $params['file'];
     if (!file_exists($fileName)) {
         return '';
     }
@@ -512,16 +516,16 @@ function TemplateBanner($params, $smarty) {
         $res = $db->Query(
             'SELECT id,code FROM {pre}ads WHERE paused=? AND category=? ORDER BY (views/weight) ASC LIMIT 1',
             'no',
-            $category
+            $category,
         );
     } else {
         $res = $db->Query(
             'SELECT id,code FROM {pre}ads WHERE paused=? ORDER BY (views/weight) ASC LIMIT 1',
-            'no'
+            'no',
         );
     }
     if ($res->RowCount() == 1) {
-        list($bannerID, $bannerCode) = $res->FetchArray(MYSQLI_NUM);
+        [$bannerID, $bannerCode] = $res->FetchArray(MYSQLI_NUM);
         $res->Free();
 
         $db->Query('UPDATE {pre}ads SET views=views+1 WHERE id=?', $bannerID);
@@ -559,7 +563,7 @@ function TemplateHalfHourToTime($params, $smarty) {
             0,
             date('m', $params['dateStart']),
             date('d', $parmas['dateStart']),
-            date('Y', $params['dateStart'])
+            date('Y', $params['dateStart']),
         );
     }
 
@@ -600,28 +604,28 @@ function TemplateDate($params, $smarty) {
                 $diff == 1
                     ? $lang_user['elapsed_second']
                     : $lang_user['elapsed_seconds'],
-                $diff
+                $diff,
             );
         } elseif ($diff >= TIME_ONE_MINUTE && $diff < TIME_ONE_HOUR) {
             $elapsed = sprintf(
                 round($diff / TIME_ONE_MINUTE, 0) == 1
                     ? $lang_user['elapsed_minute']
                     : $lang_user['elapsed_minutes'],
-                round($diff / TIME_ONE_MINUTE, 0)
+                round($diff / TIME_ONE_MINUTE, 0),
             );
         } elseif ($diff >= TIME_ONE_HOUR && $diff < TIME_ONE_DAY) {
             $elapsed = sprintf(
                 round($diff / TIME_ONE_HOUR, 0) == 1
                     ? $lang_user['elapsed_hour']
                     : $lang_user['elapsed_hours'],
-                round($diff / TIME_ONE_HOUR, 0)
+                round($diff / TIME_ONE_HOUR, 0),
             );
         } elseif ($diff >= TIME_ONE_DAY) {
             $elapsed = sprintf(
                 round($diff / TIME_ONE_DAY, 0) == 1
                     ? $lang_user['elapsed_day']
                     : $lang_user['elapsed_days'],
-                round($diff / TIME_ONE_DAY, 0)
+                round($diff / TIME_ONE_DAY, 0),
             );
         } else {
             $elapsed = '';
@@ -650,7 +654,7 @@ function TemplateDate($params, $smarty) {
             return sprintf(
                 '%s, %s',
                 $lang_user['yesterday'],
-                date('H:i:s', $ts)
+                date('H:i:s', $ts),
             ) . $elapsed;
         } else {
             return date($format, $ts) . $elapsed;
@@ -729,7 +733,7 @@ function TemplateFieldDate($params, $smarty) {
         return '-';
     }
 
-    list($y, $m, $d) = $parts;
+    [$y, $m, $d] = $parts;
     if ($y == 0 || $m == 0 || $d == 0) {
         return '-';
     }
@@ -788,7 +792,7 @@ function TemplateText($params, $smarty) {
     } else {
         $text = HTMLFormat(
             $text,
-            isset($params['allowDoubleEnc']) && $params['allowDoubleEnc']
+            isset($params['allowDoubleEnc']) && $params['allowDoubleEnc'],
         );
         return $text;
     }
@@ -805,7 +809,7 @@ function TemplateAddressList($params, $smarty) {
                     trim(
                         HTMLFormat($addressItem['name']) != ''
                             ? HTMLFormat($addressItem['name'])
-                            : HTMLFormat(DecodeEMail($addressItem['mail']))
+                            : HTMLFormat(DecodeEMail($addressItem['mail'])),
                     );
             } else {
                 $list .= sprintf(
@@ -814,8 +818,8 @@ function TemplateAddressList($params, $smarty) {
                     trim(
                         HTMLFormat($addressItem['name']) != ''
                             ? HTMLFormat($addressItem['name'])
-                            : HTMLFormat(DecodeEMail($addressItem['mail']))
-                    )
+                            : HTMLFormat(DecodeEMail($addressItem['mail'])),
+                    ),
                 );
             }
         } else {
@@ -828,12 +832,12 @@ function TemplateAddressList($params, $smarty) {
                             (trim($addressItem['name']) != ''
                                 ? '&lt;' .
                                     HTMLFormat(
-                                        DecodeEMail($addressItem['mail'])
+                                        DecodeEMail($addressItem['mail']),
                                     ) .
                                     '&gt;'
                                 : HTMLFormat(
-                                    DecodeEMail($addressItem['mail'])
-                                ))
+                                    DecodeEMail($addressItem['mail']),
+                                )),
                     );
             } else {
                 $list .= sprintf(
@@ -845,7 +849,7 @@ function TemplateAddressList($params, $smarty) {
                             (trim($addressItem['name']) != ''
                                 ? '&lt;' .
                                     HTMLFormat(
-                                        DecodeEMail($addressItem['mail'])
+                                        DecodeEMail($addressItem['mail']),
                                     ) .
                                     '&gt;'
                                 : HTMLFormat(
@@ -880,7 +884,7 @@ function TemplateProgressBar($params, $smarty) {
         $name,
         $width,
         $name,
-        min($width - 2, $valueWidth)
+        min($width - 2, $valueWidth),
     );
 }
 function TemplateMiniCalendar($params, $smarty) {
@@ -930,7 +934,7 @@ function TemplateFileSelector($params, $smarty) {
         $name,
         $size,
         session_id(),
-        $name
+        $name,
     );
 }
 function TemplatePageNav($params, $smarty) {
@@ -954,7 +958,7 @@ function TemplatePageNav($params, $smarty) {
         $ret .= str_replace(
             '.t',
             '&lt;&lt;',
-            str_replace('.s', $aktuelle_seite - 1, $tpl_off)
+            str_replace('.s', $aktuelle_seite - 1, $tpl_off),
         );
     }
 
@@ -972,7 +976,7 @@ function TemplatePageNav($params, $smarty) {
         $ret .= str_replace(
             '.t',
             '&gt;&gt;',
-            str_replace('.s', $aktuelle_seite + 1, $tpl_off)
+            str_replace('.s', $aktuelle_seite + 1, $tpl_off),
         );
     }
 
@@ -1048,7 +1052,7 @@ function TemplateMobileNr($params, $smarty) {
                     $preOptions .= sprintf(
                         '<option value="%s" selected="selected">%s</option>',
                         $entry,
-                        $entry
+                        $entry,
                     );
                     $value = substr($value, strlen($entry));
                     $haveValue = true;
@@ -1056,7 +1060,7 @@ function TemplateMobileNr($params, $smarty) {
                     $preOptions .= sprintf(
                         '<option value="%s">%s</option>',
                         $entry,
-                        $entry
+                        $entry,
                     );
                 }
             }
@@ -1075,7 +1079,7 @@ function TemplateMobileNr($params, $smarty) {
             $preOptions,
             $name,
             $name,
-            $value
+            $value,
         );
     } else {
         return sprintf(
@@ -1083,7 +1087,7 @@ function TemplateMobileNr($params, $smarty) {
             $name,
             $name,
             $size,
-            HTMLFormat($value)
+            HTMLFormat($value),
         );
     }
 }
