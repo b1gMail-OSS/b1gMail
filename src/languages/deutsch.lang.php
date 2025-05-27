@@ -2151,3 +2151,10 @@ $lang_admin['company']			= 'Firma';
 $lang_admin['taxid'] 			= 'USt-ID';
 $lang_admin['latinmodenote']    = 'Ihre Datenbank liegt noch im Latin1-Format vor. Um zukünftig Updates zu erhalten, müssen Sie mit der <a href="../setup/utf8convert.php">UTF-8-Konvertierung</a> fortfahren.';
 $lang_admin['bzip2']			= 'Die <code>bz2</code>-PHP-Erweiterung ist nicht installiert. Um Logdateien zu komprimieren, sollten Sie möglichst diese Erweiterung nachinstallieren.';
+$lang_admin['use_tls']			= 'TLS benutzen';
+$lang_admin['use_ssl']			= 'SSL benutzen';
+$lang_admin['no_encryption']	= 'Keine Verschlüsselung';
+$lang_admin['secure_connection'] 	= 'Verbindungssicherheit';
+// Avoid duplicates
+$lang_admin['zip']				= $lang_user['zip'];
+$lang_admin['city']				= $lang_user['city'];

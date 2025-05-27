@@ -2156,3 +2156,10 @@ $lang_admin['company']			= 'Company';
 $lang_admin['taxid'] 			= 'VAT';
 $lang_admin['latinmodenote']    = 'Your database is still in Latin1 format / ISO charset. To get updates in the future you have to convert the database in <a href="../setup/utf8convert.php">UTF-8</a>.';
 $lang_admin['bzip2']			= 'The <code>bz2</code> php extension is not available. If you want compress the logfiles you should install this extension soon.';
+$lang_admin['use_tls']			= 'Use TLS';
+$lang_admin['use_ssl']			= 'Use SSL';
+$lang_admin['no_encryption']	= 'No encryption';
+$lang_admin['secure_connection'] 	= 'Secure connection';
+// Avoid duplicates
+$lang_admin['zip']				= $lang_user['zip'];
+$lang_admin['city']				= $lang_user['city'];
