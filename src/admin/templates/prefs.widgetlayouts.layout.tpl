@@ -41,7 +41,7 @@
 			<div class="col-sm-12">
 				{foreach from=$groups item=group key=groupID}
 					<label class="form-check">
-						<input class="form-check-input" type="checkbox" name="groups[]" value="{$groupID}" id="group_{$groupID}"{if !$smarty.get.toGroup||$smarty.get.toGroup==$groupID} checked="checked"{/if}>
+						<input class="form-check-input" type="checkbox" name="groups[]" value="{$groupID}" id="group_{$groupID}"{if empty($smarty.get.toGroup)||$smarty.get.toGroup==$groupID} checked="checked"{/if}>
 						<span class="form-check-label">{text value=$group.title}</span>
 					</label>
 				{/foreach}

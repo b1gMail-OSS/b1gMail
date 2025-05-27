@@ -34,16 +34,16 @@
 			<tr>
 				<td class="td1" width="200">{lng p="folders"}:</td>
 				<td class="td2">
-					<input type="checkbox" name="pop3_folders[]" value="0" id="pop3_folders_0"{if $pop3Folders.0} checked="checked"{/if} />
+					<input type="checkbox" name="pop3_folders[]" value="0" id="pop3_folders_0"{if isset($pop3Folders.0) && $pop3Folders.0} checked="checked"{/if} />
 					<label for="pop3_folders_0">{lng p="bms_folder_inbox"}</label><br />
 
-					<input type="checkbox" name="pop3_folders[]" value="-4" id="pop3_folders_-4"{if $pop3Folders.m4} checked="checked"{/if} />
+					<input type="checkbox" name="pop3_folders[]" value="-4" id="pop3_folders_-4"{if isset($pop3Folders.m4) && $pop3Folders.m4} checked="checked"{/if} />
 					<label for="pop3_folders_-4">{lng p="bms_folder_spam"}</label><br />
 
-					<input type="checkbox" name="pop3_folders[]" value="-5" id="pop3_folders_-5"{if $pop3Folders.m5} checked="checked"{/if} />
+					<input type="checkbox" name="pop3_folders[]" value="-5" id="pop3_folders_-5"{if isset($pop3Folders.m5) && $pop3Folders.m5} checked="checked"{/if} />
 					<label for="pop3_folders_-5">{lng p="bms_folder_trash"}</label><br />
 
-					<input type="checkbox" name="pop3_folders[]" value="-128" id="pop3_folders_-128"{if $pop3Folders.m128} checked="checked"{/if} />
+					<input type="checkbox" name="pop3_folders[]" value="-128" id="pop3_folders_-128"{if isset($pop3Folders.m128) && $pop3Folders.m128} checked="checked"{/if} />
 					<label for="pop3_folders_-128">{lng p="bms_userfolders"}</label><br />
 				</td>
 			</tr>

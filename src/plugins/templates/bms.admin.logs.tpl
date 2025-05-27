@@ -56,41 +56,41 @@
 			<tr>
 				<td class="td1">{lng p="bms_component"}:</td>
 				<td class="td2">
-					<input type="checkbox"{if $component[1]} checked="checked"{/if} name="component[1]" id="component1" />
+					<input type="checkbox"{if isset($component[1]) && $component[1]} checked="checked"{/if} name="component[1]" id="component1" />
 					<label for="component1">Core</label> &nbsp;
 
-					<input type="checkbox"{if $component[2]} checked="checked"{/if} name="component[2]" id="component2" />
+					<input type="checkbox"{if isset($component[2]) && $component[2]} checked="checked"{/if} name="component[2]" id="component2" />
 					<label for="component2">POP3</label> &nbsp;
 
-					<input type="checkbox"{if $component[4]} checked="checked"{/if} name="component[4]" id="component4" />
+					<input type="checkbox"{if isset($component[4]) && $component[4]} checked="checked"{/if} name="component[4]" id="component4" />
 					<label for="component4">IMAP</label> &nbsp;
 
-					<input type="checkbox"{if $component[8]} checked="checked"{/if} name="component[8]" id="component8" />
+					<input type="checkbox"{if isset($component[8]) && $component[8]} checked="checked"{/if} name="component[8]" id="component8" />
 					<label for="component8">HTTP</label> &nbsp;
 
-					<input type="checkbox"{if $component[16]} checked="checked"{/if} name="component[16]" id="component16" />
+					<input type="checkbox"{if isset($component[16]) && $component[16]} checked="checked"{/if} name="component[16]" id="component16" />
 					<label for="component16">SMTP</label> &nbsp;
 
-					<input type="checkbox"{if $component[32]} checked="checked"{/if} name="component[32]" id="component32" />
+					<input type="checkbox"{if isset($component[32]) && $component[32]} checked="checked"{/if} name="component[32]" id="component32" />
 					<label for="component32">MSGQueue</label> &nbsp;
 
-					<input type="checkbox"{if $component[64]} checked="checked"{/if} name="component[64]" id="component64" />
+					<input type="checkbox"{if isset($component[64]) && $component[64]} checked="checked"{/if} name="component[64]" id="component64" />
 					<label for="component64">Plugin</label>
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="priority"}:</td>
 				<td class="td2">
-					<input type="checkbox"{if $prio[8]} checked="checked"{/if} name="prio[8]" id="prio8" />
+					<input type="checkbox"{if !empty($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8" />
 					<label for="prio8"><img src="{$tpldir}images/debug.png" border="0" alt="" width="16" height="16" /></label> &nbsp;
 
-					<input type="checkbox"{if $prio[1]} checked="checked"{/if} name="prio[1]" id="prio1" />
+					<input type="checkbox"{if !empty($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1" />
 					<label for="prio1"><img src="{$tpldir}images/info.png" border="0" alt="" width="16" height="16" /></label> &nbsp;
 
-					<input type="checkbox"{if $prio[2]} checked="checked"{/if} name="prio[2]" id="prio2" />
+					<input type="checkbox"{if !empty($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2" />
 					<label for="prio2"><img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" /></label> &nbsp;
 
-					<input type="checkbox"{if $prio[4]} checked="checked"{/if} name="prio[4]" id="prio4" />
+					<input type="checkbox"{if !empty($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4" />
 					<label for="prio4"><img src="{$tpldir}images/error.png" border="0" alt="" width="16" height="16" /></label>
 				</td>
 			</tr>

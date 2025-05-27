@@ -29,7 +29,7 @@
 			<div class="col-sm-12" style="padding-left: 30px;">
 				{foreach from=$groups item=group key=groupID}
 				<label class="form-check">
-					<input class="form-check-input" type="checkbox" name="contactform_name"{if $bm_prefs.contactform_name=='yes'} checked="checked"{/if}>
+					<input class="form-check-input" type="checkbox" name="contactform_name"{if isset($bm_prefs.contactform_name) && $bm_prefs.contactform_name=='yes'} checked="checked"{/if}>
 					<span class="form-check-label">{text value=$group.title}</span>
 				</label>
 				{/foreach}

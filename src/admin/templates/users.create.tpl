@@ -57,10 +57,10 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="zipcity"}</label>
 					<div class="col-sm-2">
-						<input type="text" class="form-control" name="plz" value="{if isset($user.plz)}{text value=$user.plz allowEmpty=true}{/if}" placeholder="{lng p="ssl_url"}">
+						<input type="text" class="form-control" name="plz" value="{if isset($user.plz)}{text value=$user.plz allowEmpty=true}{/if}" placeholder="{lng p="zip"}">
 					</div>
 					<div class="col-sm-6">
-						<input type="text" class="form-control" name="ort" value="{if isset($user.ort)}{text value=$user.ort allowEmpty=true}{/if}" placeholder="{lng p="ssl_url"}">
+						<input type="text" class="form-control" name="ort" value="{if isset($user.ort)}{text value=$user.ort allowEmpty=true}{/if}" placeholder="{lng p="city"}">
 					</div>
 				</div>
 				<div class="mb-3 row">
@@ -68,7 +68,7 @@
 					<div class="col-sm-8">
 						<select name="land" class="form-select">
 							{foreach from=$countries item=countryName key=countryID}
-								<option value="{$countryID}"{if $countryID==$user.land} selected="selected"{/if}>{text value=$countryName}</option>
+								<option value="{$countryID}"{if isset($user.land) && $countryID==$user.land} selected="selected"{/if}>{text value=$countryName}</option>
 							{/foreach}
 						</select>
 					</div>
@@ -94,7 +94,7 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="altmail"}</label>
 					<div class="col-sm-8">
-						<input type="text" class="form-control" name="altmail" value="{email value=$user.altmail}" placeholder="{lng p="altmail"}">
+						<input type="text" class="form-control" name="altmail" value="{if isset($user.altmail)}{email value=$user.altmail}{/if}" placeholder="{lng p="altmail"}">
 					</div>
 				</div>
 				<div class="mb-3 row">
@@ -154,7 +154,7 @@
 					<div class="col-sm-8">
 						<select name="gruppe" class="form-select">
 							{foreach from=$groups item=groupItem}
-								<option value="{$groupItem.id}"{if $groupItem.id==$group.id} selected="selected"{/if}>{text value=$groupItem.title}</option>
+								<option value="{$groupItem.id}"{if isset($group.id) && $groupItem.id==$group.id} selected="selected"{/if}>{text value=$groupItem.title}</option>
 							{/foreach}
 						</select>
 					</div>
@@ -163,10 +163,10 @@
 					<label class="col-sm-4 col-form-label">{lng p="status"}</label>
 					<div class="col-sm-8">
 						<select name="gesperrt" class="form-select">
-							<option value="no"{if $user.gesperrt=='no'} selected="selected"{/if}>{lng p="active"}</option>
-							<option value="yes"{if $user.gesperrt=='yes'} selected="selected"{/if}>{lng p="locked"}</option>
-							<option value="locked"{if $user.gesperrt=='locked'} selected="selected"{/if}>{lng p="notactivated"}</option>
-							<option value="delete"{if $user.gesperrt=='delete'} selected="selected"{/if}>{lng p="deleted"}</option>
+							<option value="no"{if isset($user.gesperrt) && $user.gesperrt=='no'} selected="selected"{/if}>{lng p="active"}</option>
+							<option value="yes"{if isset($user.gesperrt) && $user.gesperrt=='yes'} selected="selected"{/if}>{lng p="locked"}</option>
+							<option value="locked"{if isset($user.gesperrt) && $user.gesperrt=='locked'} selected="selected"{/if}>{lng p="notactivated"}</option>
+							<option value="delete"{if isset($user.gesperrt) && $user.gesperrt=='delete'} selected="selected"{/if}>{lng p="deleted"}</option>
 						</select>
 					</div>
 				</div>
@@ -181,7 +181,7 @@
 			<fieldset>
 				<legend>{lng p="notes"}</legend>
 
-				<textarea class="form-control" style="min-height: 150px;" name="notes">{text value=$user.notes allowEmpty=true}</textarea>
+				<textarea class="form-control" style="min-height: 150px;" name="notes">{if isset($user.notes)}{text value=$user.notes allowEmpty=true}{/if}</textarea>
 			</fieldset>
 		</div>
 	</div>

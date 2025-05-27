@@ -1,5 +1,5 @@
 <fieldset>
-	<legend>{lng p="license"}</legend>
+	<legend>b1gMailServer</legend>
 
 	<table width="100%">
 		<tr>
@@ -16,7 +16,6 @@
 	<legend>{lng p="overview"}</legend>
 
 	<table width="100%">
-		{if ($bms_prefs.licfeatures&4)!=0}
 		<tr>
 			<td rowspan="3" width="40" align="center" valign="top"><img src="../plugins/templates/images/bms_common.png" border="0" alt="" width="32" heigh="32" /></td>
 			<td class="td1" width="24%">{lng p="bms_pop3today"}:</td>
@@ -44,7 +43,6 @@
 		<tr>
 			<td colspan="6">&nbsp;</td>
 		</tr>
-		{/if}
 		<tr>
 			<td rowspan="3" width="40" align="center" valign="top"><img src="../plugins/templates/images/bms_queue.png" border="0" alt="" width="32" heigh="32" /></td>
 			<td class="td1">{lng p="bms_queueentries"}:</td>
