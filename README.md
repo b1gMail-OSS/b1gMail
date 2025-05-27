@@ -28,7 +28,7 @@ In order to install a development environment, proceed as follows:
 5. Follow the setup instructs
 
 ### System requirements
-PHP 5.4 is minimum requirement. MariaDB as Database is recommended.
+PHP 7.2 is minimum requirement. MariaDB as Database is recommended. MySQL 8 and higher is not supported yet.
 
 ## Staying up to date
 When pulling new changes from the server, you will need to update your database
