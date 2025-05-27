@@ -309,7 +309,7 @@ if (!defined('LEGACY_WEBDISCICONS')) {
     define('LEGACY_WEBDISCICONS', false);
 }
 if (DEBUG) {
-    error_reporting(E_ALL & ~E_STRICT);
+    error_reporting(E_ALL);
 } elseif (defined('INTERFACE_MODE') && INTERFACE_MODE) {
     error_reporting(0);
 } else {
