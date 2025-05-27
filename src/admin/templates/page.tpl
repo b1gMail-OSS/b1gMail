@@ -171,6 +171,19 @@
 												{assign var="count" value=0}
 												{assign var="perColumn" value=8}
 												<div class="dropdown-menu-column">
+													{* if pluginmenuitems is empty show the first entry *}
+													{if empty($pluginMenuItems)}
+														{if $adminRow.type == 0 || $adminRow.privileges.plugins.$plugin}
+														<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/plugins.php'} active{/if}" href="plugins.php?sid={$sid}">
+															<span class="nav-link-icon d-md-none d-lg-inline-block">
+																<img src="./templates/images/plugin.png" height="16" />
+															</span>
+																<span class="nav-link-title">{lng p="plugins"}</span>
+															</a>
+														{/if}
+
+													{/if}
+													
 													{foreach from=$pluginMenuItems key=plugin item=pluginInfo name=pluginLoop}
 
 														{* Nur wenn sichtbar für Admin oder nach Berechtigung *}
@@ -192,13 +205,9 @@
 														{/if}
 
 														{* Plugin-Link selbst *}
-														<a class="dropdown-item{if $smarty.get.plugin == $plugin} active{/if}" href="plugin.page.php?sid={$sid}&plugin={$plugin}">
+														<a class="dropdown-item{if isset($smarty.get.plugin) && $smarty.get.plugin == $plugin} active{/if}" href="plugin.page.php?sid={$sid}&{if isset($plugin)}plugin={$plugin}{/if}">
 															<span class="nav-link-icon d-md-none d-lg-inline-block">
-																{if $product.product|strstr:"<i class"}
-																	{$pluginInfo.icon}
-																{else}
-																	<img src="{if $pluginInfo.icon}../plugins/templates/images/{$pluginInfo.icon}{else}./templates/images/wlayout_add.png{/if}" height="16" />
-																{/if}
+																	<img src="{if isset($pluginInfo.icon) && $pluginInfo.icon}../plugins/templates/images/{$pluginInfo.icon}{else}./templates/images/wlayout_add.png{/if}" height="16" />
 															</span>
 															<span class="nav-link-title">{text value=$pluginInfo.title cut=20}</span>
 														</a>
@@ -213,7 +222,7 @@
 													{/foreach}
 												</div>
 											</div>
-										</div
+										</div>
 									</li>
 								{/if}
 							</ul>
@@ -249,7 +258,7 @@
 							<li class="nav-item">
 								<a class="nav-link{if $tab.active} active{/if}" href="{$tab.link}sid={$sid}">
 									<span class="nav-link-icon d-md-none d-lg-inline-block">
-											<img src="{if $tab.relIcon}./templates/images/{$tab.relIcon}{elseif $tab.icon}{$tab.icon}{else}./templates/images/ico_prefs_misc.png{/if}" height="16" alt="{$tab.title}" />
+											<img src="{if isset($tab.relIcon) && $tab.relIcon}./templates/images/{$tab.relIcon}{elseif $tab.icon}{$tab.icon}{else}./templates/images/ico_prefs_misc.png{/if}" height="16" alt="{$tab.title}" />
 										</span>
 									<span class="nav-link-title"> {$tab.title} </span>
 								</a>
