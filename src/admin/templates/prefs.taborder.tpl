@@ -18,7 +18,7 @@
 						<tr class="{$class}">
 							<td style="width: 20px; text-align: center;">
 								<i class="fa {$tab.faIcon}" aria-hidden="true"></i></td>
-							<td>{text value=$tab.text}</td>
+							<td>{if isset($tab.text)}{text value=$tab.text}{else}-{/if}</td>
 							<td><input type="text" name="order[{$tabKey}]" value="{$tab.order}" size="6" /></td>
 						</tr>
 					{/foreach}
