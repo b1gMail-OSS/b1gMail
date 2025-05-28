@@ -2,29 +2,19 @@
 <fieldset>
 	<legend>{lng p="pacc_deletepackage"}</legend>
 	
-	{lng p="pacc_deletepackagedesc"}
-		
-	<p>
-		<div>
-			<table>
-			<tr>
-				<td>{text value=$packageTitle}</td>
-				<td><b>&nbsp;&raquo;&nbsp;</b></td>
-				<td>
-					<select name="subscriptionAction">
-						<option value="continue">{lng p="pacc_delcontinue"}</option>
-						<option value="delete">{lng p="pacc_delfallback"}</option>
-					</select>
-				</td>
-			</tr>
-			</table>
-		</div>
-	</p>
-</fieldset>
+	<div class="alert alert-warning">{lng p="pacc_deletepackagedesc"}</div>
 
-<p>
-	<div style="float:right">
-		<input class="button" type="submit" value=" {lng p="delete"} " />
+	<div class="mb-3 row">
+		<label class="col-sm-2 col-form-label">{text value=$packageTitle}</label>
+		<div class="col-sm-10">
+			<select name="subscriptionAction" class="form-select">
+				<option value="continue">{lng p="pacc_delcontinue"}</option>
+				<option value="delete">{lng p="pacc_delfallback"}</option>
+			</select>
+		</div>
 	</div>
-</p>
+	<div class="text-end">
+		<input class="btn btn-primary" type="submit" value="{lng p="delete"}" />
+	</div>
+</fieldset>
 </form>
