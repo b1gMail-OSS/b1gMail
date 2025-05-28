@@ -35,7 +35,7 @@ $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0
                         '7.3.0-Beta1', '7.3.0-Beta2', '7.3.0-Beta3', '7.3.0-Beta4',
                         '7.3.0-Beta5', '7.3.0-Beta6', '7.3.0',
                         '7.4.0-Beta1', '7.4.0-Beta2', '7.4.0-Beta3', '7.4.0-Beta4', '7.4.0', 
-                        '7.4.1-Beta1', '7.4.1-Beta2', '7.4.1-Beta3', '7.4.1-Beta4', '7.4.1-RC1', '7.4.1-RC2'];
+                        '7.4.1-Beta1', '7.4.1-Beta2', '7.4.1-Beta3', '7.4.1-Beta4', '7.4.1-RC1', '7.4.1-RC2', '7.4.1'];
 
 // steps
 define('STEP_SELECT_LANGUAGE', 0);
@@ -133,9 +133,9 @@ elseif ($step == STEP_SYSTEMCHECK) {
 		</tr>
 		<tr>
 			<th><?php echo $lang_setup['phpversion']; ?></th>
-			<td>5.4.0</td>
+			<td>7.2.0</td>
 			<td><?php echo phpversion(); ?></td>
-			<td><img src="../admin/templates/images/<?php if ((int) str_replace('.', '', phpversion()) >= 540) {
+			<td><img src="../admin/templates/images/<?php if ((int) str_replace('.', '', phpversion()) >= 720) {
         echo 'ok';
     } else {
         echo 'error';

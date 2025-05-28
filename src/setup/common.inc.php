@@ -118,14 +118,14 @@ function pageHeader($update = false, $convert = false)
 {
 	global $lang_setup, $lang, $step;
 
-	header('Content-Type: text/html; charset=ISO-8859-1');
+	header('Content-Type: text/html; charset=UTF-8');
 	?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>b1gMail - <?php echo($lang_setup['setup']); ?></title>
 	<link type="text/css" href="res/style.css" rel="stylesheet" />
-	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
 <body>
 <center>
@@ -645,4 +645,4 @@ function GetLanguageInfo($fileName)
 }
 
 // target version
-$target_version = '7.4.1';
+$target_version = '7.4.2-RC1';

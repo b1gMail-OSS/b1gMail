@@ -182,9 +182,9 @@ elseif ($step == STEP_SYSTEMCHECK) {
 		</tr>
 		<tr>
 			<th><?php echo $lang_setup['phpversion']; ?></th>
-			<td>5.4.0</td>
+			<td>7.2.0</td>
 			<td><?php echo phpversion(); ?></td>
-			<td><img src="../admin/templates/images/<?php if ((int) str_replace('.', '', phpversion()) >= 540) {
+			<td><img src="../admin/templates/images/<?php if ((int) str_replace('.', '', phpversion()) >= 720) {
         echo 'ok';
     } else {
         echo 'error';
@@ -558,8 +558,8 @@ elseif ($step == STEP_INSTALL) {
                             $setupMode == 'public' ? 'yes' : 'no',
                             SQLEscape('postmaster@'.EncodeDomain($firstDomain), $connection),
                             SQLEscape('postmaster@'.EncodeDomain($firstDomain), $connection),
-                            $blobDBSupport ? 1 : 0,
-                            $blobDBSupport ? 1 : 0,
+                            0,
+                            0,
                             $gzSupport ? 'yes' : 'no',
                             $gzSupport ? 'yes' : 'no');
             if (mysqli_query($connection, $prefsQuery)) {

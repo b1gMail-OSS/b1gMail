@@ -117,9 +117,9 @@ else if($step == STEP_SYSTEMCHECK)
 		</tr>
 		<tr>
 			<th><?php echo($lang_setup['phpversion']); ?></th>
-			<td>5.4.0</td>
+			<td>7.2.0</td>
 			<td><?php echo(phpversion()); ?></td>
-			<td><img src="../admin/templates/images/<?php if((int)str_replace('.', '', phpversion()) >= 540) echo 'ok'; else { echo 'error'; $nextStep = STEP_SYSTEMCHECK; } ?>.png" border="0" alt="" width="16" height="16" /></td>
+			<td><img src="../admin/templates/images/<?php if((int)str_replace('.', '', phpversion()) >= 720) echo 'ok'; else { echo 'error'; $nextStep = STEP_SYSTEMCHECK; } ?>.png" border="0" alt="" width="16" height="16" /></td>
 		</tr>
 		<tr>
 			<th><?php echo($lang_setup['mbiconvext']); ?></th>
