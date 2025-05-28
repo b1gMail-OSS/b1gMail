@@ -38,7 +38,7 @@ class MyBBAuthPlugin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'MyBB Authentication PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.0';
+		$this->version				= '1.1';
 
 		// admin pages
 		$this->admin_pages			= true;
@@ -70,11 +70,24 @@ class MyBBAuthPlugin extends BMPlugin
 	{
 		global $db, $bm_prefs;
 
-		// create prefs table
-		$db->Query('CREATE TABLE {pre}mybb_plugin_prefs(enableAuth tinyint(4) NOT NULL DEFAULT 0, mysqlHost varchar(128) NOT NULL, mysqlUser varchar(128) NOT NULL, mysqlPass varchar(128) NOT NULL, mysqlDB varchar(128) NOT NULL, mysqlPrefix varchar(128) NOT NULL, userDomain varchar(128) NOT NULL)');
+		$DatabaseStructure = [
+            'bm60_mybb_plugin_prefs' => [
+                'fields' => [
+                    ['enableAuth', 'tinyint(4)', 'NO'],
+                    ['mysqlHost', 'varchar(128)', 'NO'],
+                    ['mysqlUser', 'varchar(128)', 'NO'],
+					['mysqlPass', 'varchar(128)', 'NO'],
+					['mysqlDB', 'varchar(128)', 'NO'],
+					['mysqlPrefix', 'varchar(128)', 'NO'],
+                    ['userDomain', 'varchar(128)', 'NO']
+                ],
+                'indexes' => [],
+            ],
+        ];
+        SyncDBStruct($DatabaseStructure);	
 
 		// insert initial row
-		list($domain) = explode(':', $bm_prefs['domains']);
+		list($domain) = $this->_getDomains();
 		$db->Query('REPLACE INTO {pre}mybb_plugin_prefs(enableAuth, mysqlHost, mysqlUser, mysqlPass, mysqlDB, mysqlPrefix, userDomain) VALUES'
 					. '(?,?,?,?,?,?,?)',
 			0,
@@ -248,7 +261,8 @@ class MyBBAuthPlugin extends BMPlugin
 			0 => array(
 				'title'		=> $lang_admin['prefs'],
 				'link'		=> $this->_adminLink() . '&',
-				'active'	=> $_REQUEST['action'] == 'prefs'
+				'active'	=> $_REQUEST['action'] == 'prefs',
+				'icon' => '../plugins/templates/images/mybb32.png',
 			)
 		);
 

@@ -1,5 +1,5 @@
 <fieldset>
-	<legend>{lng p="license"}</legend>
+	<legend>{lng p="modfax_fax"}</legend>
 
 	<table width="100%">
 		<tr>
