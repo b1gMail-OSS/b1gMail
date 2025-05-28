@@ -115,9 +115,9 @@ $phpBelow54 = false;
 						</tr>
 						<tr>
 							<th>PHP-Version</th>
-							<td>5.4,7.4 empfohlen</td>
+							<td>7.2, 7.4 empfohlen</td>
 							<td><?php echo(phpversion()); ?></td>
-							<td><img src="servertest.php?file=<?php if(PHPNumVersion() >= 540) { echo 'ok'; } else { echo 'error'; $testOK = false; } ?>.png" border="0" alt="" width="16" height="16" /></td>
+							<td><img src="servertest.php?file=<?php if(PHPNumVersion() >= 720) { echo 'ok'; } else { echo 'error'; $testOK = false; } ?>.png" border="0" alt="" width="16" height="16" /></td>
 						</tr>
 						<tr>
 							<th>MySQL-Unterst&uuml;tzung</th>
