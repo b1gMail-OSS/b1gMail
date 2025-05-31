@@ -66,9 +66,9 @@ if(class_exists('DOMDocument'))
 			$code = preg_replace('~<meta.*?([/]{0,1})>~i', '<meta$1>', $code);
 			$code = preg_replace('~<[/]{0,1}o:p>~i', '', $code);
 
-			if(function_exists('mb_convert_encoding'))
+			if(function_exists('mb_encode_numericentity'))
 			{
-				$code2 = mb_convert_encoding($code, 'HTML-ENTITIES', $encoding);
+				$code2 = mb_encode_numericentity($code, [0x80, 0x10FFFF, 0, ~0], $encoding);
 				if($code2 !== false)
 					$code = $code2;
 			}
@@ -297,9 +297,9 @@ else
 			$code = preg_replace('~<meta.*?([/]{0,1})>~i', '<meta$1>', $code);
 			$code = preg_replace('~<[/]{0,1}o:p>~i', '', $code);
 
-			if(function_exists('mb_convert_encoding'))
+			if(function_exists('mb_encode_numericentity'))
 			{
-				$code2 = mb_convert_encoding($code, 'HTML-ENTITIES', $encoding);
+				$code2 = mb_encode_numericentity($code, [0x80, 0x10FFFF, 0, ~0], $encoding);
 				if($code2 !== false)
 					$code = $code2;
 			}
