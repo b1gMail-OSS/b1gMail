@@ -4,9 +4,6 @@
 	text-align: center;
 }
 
-.metaList LI LABEL
-{
-}
 
 .metaList LI P
 {
@@ -35,51 +32,6 @@
 	-webkit-box-shadow: none !important;
 	-webkit-border-radius: 0 !important;
 	border-radius: 0 !important; 
-}
-
-.ui-icon-email
-{
-	background: url(../images/m/nav-mail.png) 50% 50% no-repeat;
-	background-size: 24px 24px;
-	border: 0 !important;
-	border-radius: 0 !important;
-	box-shadow: none !important;
-}
-
-.ui-icon-contacts
-{
-	background: url(../images/m/nav-contacts.png) 50% 50% no-repeat;
-	background-size: 24px 24px;
-	border: 0 !important;
-	border-radius: 0 !important;
-	box-shadow: none !important;
-}
-
-.ui-icon-calendar
-{
-	background: url(../images/m/nav-calendar.png) 50% 50% no-repeat;
-	background-size: 24px 24px;
-	border: 0 !important;
-	border-radius: 0 !important;
-	box-shadow: none !important;
-}
-
-.ui-icon-tasks
-{
-	background: url(../images/m/nav-tasks.png) 50% 50% no-repeat;
-	background-size: 24px 24px;
-	border: 0 !important;
-	border-radius: 0 !important;
-	box-shadow: none !important;
-}
-
-.ui-icon-webdisk
-{
-	background: url(../images/m/nav-webdisk.png) 50% 50% no-repeat;
-	background-size: 24px 24px;
-	border: 0 !important;
-	border-radius: 0 !important;
-	box-shadow: none !important;
 }
 
 .listCheckbox

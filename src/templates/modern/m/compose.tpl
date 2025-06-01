@@ -7,8 +7,8 @@
 <div data-role="content">
 	<form action="email.php?action=sendMail&sid={$sid}" method="post" id="composeForm">
 		<input type="hidden" name="actionToken" value="{$actionToken}" />
-		{if $smarty.get.reply}<input type="hidden" name="reference" value="reply:{text value=$smarty.get.reply}" />{/if}
-		{if $smarty.get.forward}<input type="hidden" name="reference" value="forward:{text value=$smarty.get.forward}" />{/if}
+		{if isset($smarty.get.reply)}<input type="hidden" name="reference" value="reply:{text value=$smarty.get.reply}" />{/if}
+		{if isset($smarty.get.forward)}<input type="hidden" name="reference" value="forward:{text value=$smarty.get.forward}" />{/if}
 
 		<div data-role="fieldcontain">
 			<label for="from">{lng p="from"}:</label>
@@ -34,6 +34,6 @@
 			<input type="text" name="subject" id="subject" value="{if isset($mail.subject)}{text value=$mail.subject allowEmpty=true}{/if}"  />
 		</div>
 		
-		<textarea name="text" style="min-height:200px;">{$mail.text}</textarea>
+		<textarea name="text" style="min-height:200px;">{if isset($mail.text)}{$mail.text}{/if}</textarea>
 	</form>
 </div>

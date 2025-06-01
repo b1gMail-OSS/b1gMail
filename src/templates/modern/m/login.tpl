@@ -32,4 +32,7 @@
 	<div class="bottomLink">
 		<a href="{$selfurl}?noMobileRedirect=true" rel="external">{lng p="desktopversion"}</a>
 	</div>
+	<div class="bottomLink">
+		powered by <a href="https://www.b1gmail.eu" rel="noreferrer external" target="_blank">b1gMail.eu</a>
+	</div>
 </div>

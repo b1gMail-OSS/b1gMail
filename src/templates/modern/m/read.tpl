@@ -26,7 +26,7 @@
 			<p>{text value=$subject}</p>
 			<p class="ui-li-aside">
 				{date timestamp=$date nice=true}<br />
-				<a href="email.php?action=read{if !$isUnread}&unread=true{/if}&id={$mailID}&sid={$sid}" class="unreadLink"><img src="{$selfurl}{$_tpldir}images/m/dot.png" />{if $isUnread}{lng p="unread"}{else}{lng p="read"}{/if}</a>
+				<a href="email.php?action=read{if !$isUnread}&unread=true{/if}&id={$mailID}&sid={$sid}" class="unreadLink"><i class="fa fa-circle"></i>{if $isUnread}{lng p="unread"}{else}{lng p="read"}{/if}</a>
 			</p>
 		</li>
 	</ul>
