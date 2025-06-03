@@ -26,8 +26,8 @@
 	</script>
 
 	<script src="clientlang.php" type="text/javascript"></script>
-	<script src="clientlib/jquery/jquery-1.8.2.min.js"></script>
-	<script src="{$tpldir}bootstrap/js/bootstrap.min.js"></script>
+	<script src="clientlib/jquery/jquery-3.7.1.min.js"></script>
+	<script src="{$tpldir}bootstrap/js/bootstrap.min.js?{fileDateSig file="bootstrap/js/bootstrap.min.js"}"></script>
 	<script src="{$tpldir}js/nli.main.js?{fileDateSig file="js/nli.main.js"}"></script>
 	{hook id="nli:index.tpl:head"}
 </head>

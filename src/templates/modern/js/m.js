@@ -48,7 +48,7 @@ function setTaskDone(id, done)
 
 function initTaskList()
 {
-	$('#page').live('pagebeforeshow', function(e, data)
+	$('#page').on('pagebeforeshow', function(e, data)
 	{
 		$('input[type="checkbox"]').each(function()
 		{

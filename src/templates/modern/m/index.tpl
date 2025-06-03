@@ -11,7 +11,8 @@
 	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome-animation.min.css" rel="stylesheet" type="text/css" />
 	<script src="{$selfurl}{$_tpldir}js/m.js?{fileDateSig file="js/m.js"}"></script>
-	<script src="{$selfurl}clientlib/jquery/jquery-1.8.2.min.js"></script>
+	<script src="{$selfurl}clientlib/jquery/jquery-3.7.1.min.js"></script>
+	<script src="{$selfurl}clientlib/jquery/jquery-migrate-3.5.2.min.js"></script>
 	<script src="{$selfurl}clientlib/jquery/jquery.mobile-1.4.5.min.js"></script>
 	
 	<script type="text/javascript">
