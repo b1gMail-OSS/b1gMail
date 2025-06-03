@@ -13,6 +13,10 @@ BODY
 	color: #CCC !important;
 }
 
+.navbar-brand img {
+    display: inline-block;
+}
+
 .login-li .popover
 {
 	max-width: 400px;
