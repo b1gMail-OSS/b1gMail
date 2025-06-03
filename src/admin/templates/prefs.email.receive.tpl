@@ -39,7 +39,7 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="pop3pass"}</label>
 					<div class="col-sm-8">
-						<input type="password" class="form-control" name="pop3_host" value="{text allowEmpty=true value=$bm_prefs.pop3_pass}" placeholder="{lng p="pop3pass"}">
+						<input type="password" class="form-control" name="pop3_pass" value="{text allowEmpty=true value=$bm_prefs.pop3_pass}" placeholder="{lng p="pop3pass"}">
 					</div>
 				</div>
 				<div class="mb-3 row">
