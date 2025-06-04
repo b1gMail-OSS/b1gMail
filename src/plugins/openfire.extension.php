@@ -26,8 +26,9 @@ class modopenfire extends BMPlugin
     public function __construct()
     {
         $this->name					= 'Jabber Openfire-Integration';
-		$this->version				= '1.1.3';
+		$this->version				= '1.1.4';
 		$this->type					= BMPLUGIN_DEFAULT;
+        $this->designedfor			= '7.4.2';
 
 		$this->author				= 'Home of the Sebijk.com';
 		$this->web					= 'http://www.sebijk.com';
@@ -131,7 +132,7 @@ class modopenfire extends BMPlugin
         if ($lang == 'deutsch') {
             $lang_admin['openfire_domain'] = 'Openfire-Domain';
             $lang_admin['openfire_port'] = 'Openfire Adminport';
-            $lang_admin['openfire_https'] = 'HTTPS f&uuml;r Adminbereich nutzen';
+            $lang_admin['openfire_https'] = 'HTTPS für Adminbereich nutzen';
             $lang_admin['openfire_secretkey'] = 'Secret Key vom User Service Plugin';
             $lang_admin['openfire_updated_data'] = 'Die Daten wurden erfolgreich aktualisiert!';
         }
@@ -238,12 +239,6 @@ class modopenfire extends BMPlugin
 
     private function _toRawUrl($text)
     {
-        global $bm_prefs;
-
-        if (!$bm_prefs['db_is_utf8']) {
-			$text = CharsetDecode($text, 'ISO-8859-1');
-        }
-
         return rawurlencode($text);
     }
 }

@@ -39,27 +39,13 @@ class MyBBAuthPlugin extends BMPlugin
 		$this->name					= 'MyBB Authentication PlugIn';
 		$this->author				= 'b1gMail Project';
 		$this->version				= '1.1';
+		$this->designedfor			= '7.4.2';
 
 		// admin pages
 		$this->admin_pages			= true;
 		$this->admin_page_title		= 'MyBB-Auth';
 		$this->admin_page_icon		= "mybb32.png";
 	}
-
-	/**
- 	 * get list of domains
- 	 *
- 	 * @return array
- 	 */
-	  private function _getDomains()
-	  {
-		  global $bm_prefs;
-  
-		  if(function_exists('GetDomainList'))
-			  return GetDomainList();
-		  else
-			  return explode(':', $bm_prefs['domains']);
-	  }
 
 	/**
 	 * installation routine
@@ -87,7 +73,7 @@ class MyBBAuthPlugin extends BMPlugin
         SyncDBStruct($DatabaseStructure);	
 
 		// insert initial row
-		list($domain) = $this->_getDomains();
+		list($domain) = GetDomainList();
 		$db->Query('REPLACE INTO {pre}mybb_plugin_prefs(enableAuth, mysqlHost, mysqlUser, mysqlPass, mysqlDB, mysqlPrefix, userDomain) VALUES'
 					. '(?,?,?,?,?,?,?)',
 			0,
@@ -299,7 +285,7 @@ class MyBBAuthPlugin extends BMPlugin
 		$res->Free();
 
 		// assign
-		$tpl->assign('domains', $this->_getDomains());
+		$tpl->assign('domains', GetDomainList());
 		$tpl->assign('mybb_prefs', $mybb_prefs);
 		$tpl->assign('pageURL', $this->_adminLink());
 		$tpl->assign('page', $this->_templatePath('mybbauth.plugin.prefs.tpl'));

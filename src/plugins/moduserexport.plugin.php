@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * NOTE:
- * starting with Version 1.0.2 the licensed is changed from LGPL to AGPL.
+ * starting with Version 1.0.2 the license is changed from LGPL to AGPL.
  */
 class moduserexport extends BMPlugin
 {
