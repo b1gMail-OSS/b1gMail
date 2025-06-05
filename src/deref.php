@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail
- * Copyright (c) 2021 Patrick Schlangen et al, 2022 b1gMail.eu
+ * Copyright (c) 2021 Patrick Schlangen et al, 2022-2025 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,44 @@ require './serverlib/init.inc.php';
  */
 ModuleFunction('FileHandler',
 	array(substr(__FILE__, strlen(__DIR__)+1),
-	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
+	$_REQUEST['action'] ?? ''));
+
+/**
+ * clean url with known tracking links
+ *
+ * @param string $string
+ * @return $string
+ */
+function cleanUrl($targetURL) {
+    // Parse the URL and extract the query parameters
+    $parsedUrl = parse_url($targetURL);
+    parse_str($parsedUrl['query'], $queryParams);
+
+    // Check if the URL contains 'safelinks.protection.outlook'
+    if (strpos($targetURL, 'safelinks.protection.outlook')) {
+        if (isset($queryParams['url'])) {
+            // Decode the URL and parse it
+            $decodedUrl = urldecode($queryParams['url']);
+            $parsedUrl = parse_url($decodedUrl);
+			if(!empty($parsedUrl['query'])) parse_str($parsedUrl['query'], $queryParams);
+			else $queryParams = [];
+        }
+    }
+
+    // Remove UTM parameters
+    foreach (['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'] as $utmParam) {
+        unset($queryParams[$utmParam]);
+    }
+
+    // Build the cleaned URL without UTM parameters
+    $cleanUrlParam = http_build_query($queryParams);
+    $finalCleanUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . ($parsedUrl['path'] ?? '') . 
+                     (!empty($cleanUrlParam) ? '?' . $cleanUrlParam : '');
+
+    return $finalCleanUrl;
+}
+
+
 
 /**
  * check referer
@@ -52,7 +89,7 @@ $url = $_SERVER['REQUEST_URI'];
 $sepPos = strpos($url, '?');
 if($sepPos !== false)
 {
-	$targetURL = substr($url, $sepPos+1);
+	$targetURL = cleanUrl(substr($url, $sepPos+1));
 	$targetURL = str_replace('%23','#',$targetURL);
 	$tpl->assign('pref_exturl_warning', $bm_prefs['exturl_warning']);
 	if($bm_prefs['exturl_warning']=='no') {
