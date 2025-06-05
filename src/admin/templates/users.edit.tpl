@@ -55,10 +55,10 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="zipcity"}</label>
 					<div class="col-sm-2">
-						<input type="text" class="form-control" name="plz" value="{if isset($user.plz)}{text value=$user.plz allowEmpty=true}{/if}" placeholder="{lng p="ssl_url"}">
+						<input type="text" class="form-control" name="plz" value="{if isset($user.plz)}{text value=$user.plz allowEmpty=true}{/if}" placeholder="{lng p="zip"}">
 					</div>
 					<div class="col-sm-6">
-						<input type="text" class="form-control" name="ort" value="{if isset($user.ort)}{text value=$user.ort allowEmpty=true}{/if}" placeholder="{lng p="ssl_url"}">
+						<input type="text" class="form-control" name="ort" value="{if isset($user.ort)}{text value=$user.ort allowEmpty=true}{/if}" placeholder="{lng p="city"}">
 					</div>
 				</div>
 				<div class="mb-3 row">
