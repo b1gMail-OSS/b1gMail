@@ -223,7 +223,7 @@ if($_REQUEST['action'] == 'groups')
 		$res->Free();
 
 		// assign
-		$group['saliase'] = implode("\n", array_map('DecodeDomain', explode(':', $group['saliase'])));
+		$group['saliase'] = implode("\n", array_map('DecodeDomain', array_filter(explode(':', $group['saliase']))));
 		$group['sms_pre'] = str_replace(':', "\n", $group['sms_pre']);
 		$tpl->assign('groupOptions',	$plugins->GetGroupOptions($group['id']));
 		$tpl->assign('group',			$group);
