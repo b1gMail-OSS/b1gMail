@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail
- * Copyright (c) 2021 Patrick Schlangen et al
+ * Copyright (c) 2021 Patrick Schlangen et al, 2022-2025 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -93,7 +93,7 @@ class BMSMS
      *
      * @return bool
      */
-    public function PreOK($no, $pre)
+    public static function PreOK($no, $pre)
     {
         if (trim($pre) != '') {
             $ok = false;
