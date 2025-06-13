@@ -2158,3 +2158,5 @@ $lang_admin['secure_connection'] 	= 'Verbindungssicherheit';
 // Avoid duplicates
 $lang_admin['zip']				= $lang_user['zip'];
 $lang_admin['city']				= $lang_user['city'];
+$lang_admin['street']			= $lang_user['street'];
+$lang_admin['no']				= $lang_user['nr'];

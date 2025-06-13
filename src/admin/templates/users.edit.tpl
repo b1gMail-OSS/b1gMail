@@ -46,10 +46,10 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="streetno"}</label>
 					<div class="col-sm-6">
-						<input type="text" class="form-control" name="strasse" value="{if isset($user.strasse)}{text value=$user.strasse allowEmpty=true}{/if}" placeholder="{lng p="streetno"}">
+						<input type="text" class="form-control" name="strasse" value="{if isset($user.strasse)}{text value=$user.strasse allowEmpty=true}{/if}" placeholder="{lng p="street"}">
 					</div>
 					<div class="col-sm-2">
-						<input type="text" class="form-control" name="hnr" value="{if isset($user.hnr)}{text value=$user.hnr allowEmpty=true}{/if}" placeholder="{lng p="streetno"}">
+						<input type="text" class="form-control" name="hnr" value="{if isset($user.hnr)}{text value=$user.hnr allowEmpty=true}{/if}" placeholder="{lng p="no"}">
 					</div>
 				</div>
 				<div class="mb-3 row">
