@@ -69,7 +69,7 @@
 				</div>
 				<div class="col-xs-4" style="text-align:center;">
 					<a href="{$mobileURL}">{lng p="mobilepda"}</a>
-				{foreach from=$pluginUserPages item=item}{if !$item.top}
+				{foreach from=$pluginUserPages item=item}{if empty($item.top)}
 				|	<a href="{$item.link}">{$item.text}</a>
 				{/if}{/foreach}
 				</div>

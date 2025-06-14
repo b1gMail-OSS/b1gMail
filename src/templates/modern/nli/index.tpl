@@ -71,7 +71,7 @@
 					<input type="hidden" name="timezone" value="{$timezone}" />
 
 					<ul class="nav navbar-nav navbar-right">
-						{if $smarty.request.action!='login'||$welcomeBack}<li class="login-li{if !$welcomeBack} hidden-xs{/if}">
+						{if (isset($smarty.request.action) && $smarty.request.action!='login')||$welcomeBack}<li class="login-li{if !$welcomeBack} hidden-xs{/if}">
 							{if $welcomeBack}
 							<input type="hidden" name="email_full" value="{$smarty.cookies.bm_savedUser}" />
 							<input type="hidden" name="password" value="" />

@@ -1774,7 +1774,7 @@ class BMUser
 			$senders[] = sprintf('<%s>',
 							$workgroup['email']);
 
-		if(trim($this->_row['absendername']) != '')
+		if(!empty($this->_row['absendername']) && trim($this->_row['absendername']) != '')
 			$senders[] = sprintf('"%s" <%s>',
 							$this->_row['absendername'],
 							$this->_row['email']);
@@ -1787,11 +1787,11 @@ class BMUser
 		foreach($aliases as $alias)
 			if(($alias['type']&ALIAS_SENDER) != 0
 				&& ($alias['type']&ALIAS_PENDING) == 0)
-					if(trim($alias['sendername']) != '')
+					if(!empty($alias['sendername']) && trim($alias['sendername']) != '')
 						$senders[] = sprintf('"%s" <%s>',
 										$alias['sendername'],
 										$alias['email']);
-					else if(trim($this->_row['absendername']) != '')
+					else if(!empty($this->_row['absendername']) && trim($this->_row['absendername']) != '')
 						$senders[] = sprintf('"%s" <%s>',
 										$this->_row['absendername'],
 										$alias['email']);
