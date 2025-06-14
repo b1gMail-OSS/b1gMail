@@ -4294,7 +4294,7 @@
                 "varchar(255)",
                 "NO",
                 "",
-                "http:\/\/www.google.de\/search?q=%s",
+                "https:\/\/leta.mullvad.net\/search?q=%s",
                 ""
             ],
             [

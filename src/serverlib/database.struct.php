@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail
- * Copyright (c) 2021 Patrick Schlangen et al, 2022 b1gMail.eu
+ * Copyright (c) 2021 Patrick Schlangen et al, 2022-2025 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,8 +20,8 @@
  */
 
 // extract version
-$databaseStructureVersion = '1.70';
-define('DATABASE_STRUCT_HASH', '75ea517ee222f527fefbfff660189edf03225e0f2bd25082bead50c7b43fd08d');
+$databaseStructureVersion = '1.71';
+define('DATABASE_STRUCT_HASH', '78bd476b5ba1ef3bbca0ad67150dc4c16c71cec55554d46d8265ce07eb9f7159');
 
 // structure
 $databaseStructure = file_get_contents(__DIR__.'/database.struct.json');

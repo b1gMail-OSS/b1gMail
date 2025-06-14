@@ -38,7 +38,7 @@ class B1GMailSearchProvider extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMail Search Provider';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.21';
+		$this->version				= '1.22';
 		$this->website				= 'https://www.b1gmail.org/';
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
 
@@ -190,7 +190,7 @@ class B1GMailSearchProvider extends BMPlugin
 				{
 					if(strpos($itemID, '_') === false)
 						continue;
-					list($itemType, $id) = explode('_', $itemID);
+					[$itemType, $id] = explode('_', $itemID);
 
 					if($itemType == 'file')
 						$webdisk->DeleteFile((int)$id);
@@ -292,7 +292,7 @@ class B1GMailSearchProvider extends BMPlugin
 					'date'		=> $row['fetched'],
 					'size'		=> $row['size'],
 					'id'		=> $row['id'],
-					'icon'		=> isset($folderIcons[$row['folder']]) ? $folderIcons[$row['folder']] : 'fa-folder-o',
+					'icon'		=> $folderIcons[$row['folder']] ?? 'fa-folder-o',
 					'bold'		=> ($row['flags'] & FLAG_UNREAD) != 0,
 					'strike'	=> ($row['flags'] & FLAG_DELETED) != 0 || ($row['folder'] == FOLDER_TRASH)
 				);
@@ -355,7 +355,7 @@ class B1GMailSearchProvider extends BMPlugin
 						'date'		=> $row['fetched'],
 						'size'		=> $row['size'],
 						'id'		=> $row['id'],
-						'icon'		=> isset($folderIcons[$row['folder']]) ? $folderIcons[$row['folder']] : 'fa-folder-o',
+						'icon'		=> $folderIcons[$row['folder']] ?? 'fa-folder-o',
 						'bold'		=> ($row['flags'] & FLAG_UNREAD) != 0,
 						'strike'	=> ($row['flags'] & FLAG_DELETED) != 0 || ($row['folder'] == FOLDER_TRASH),
 						'excerpt'	=> $excerpt,
@@ -403,7 +403,7 @@ class B1GMailSearchProvider extends BMPlugin
 					$thisUser->_id);
 				if($res2->RowCount() != 1)
 					continue;
-				list($fetched) = $res2->FetchArray(MYSQLI_NUM);
+				[$fetched] = $res2->FetchArray(MYSQLI_NUM);
 				$res2->Free();
 
 				if($fetched < $dateFrom || $fetched > $dateTo)
@@ -640,7 +640,7 @@ class B1GMailSearchProvider extends BMPlugin
 		//
 		// web
 		//
-		if($bm_prefs['search_engine'] != '')
+		if(!empty($bm_prefs['search_engine']))
 		{
 			$results[] = array(
 				'icon'		=> 'fa-globe',
@@ -649,7 +649,7 @@ class B1GMailSearchProvider extends BMPlugin
 				'results'	=>  array(
 					array(
 						'title'		=> $query,
-						'extLink'	=> sprintf($bm_prefs['search_engine'], urlencode($query))
+						'extLink'	=> sprintf('deref.php?'.$bm_prefs['search_engine'], urlencode($query))
 					)
 				)
 			);

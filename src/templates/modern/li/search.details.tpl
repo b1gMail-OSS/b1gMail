@@ -60,8 +60,8 @@
 				{if !empty($result.excerpt)}<div style="color:#777;text-overflow:ellipsis;overflow:hidden;">{$result.excerpt}</div>{/if}
 			</a>
 		</td>
-		<td width="130"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">{if $result.date}{date timestamp=$result.date nice=true}{/if}</span></td>
-		<td width="75"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">{if $result.size||$result.size===0}{size bytes=$result.size}{/if}</span></td>
+		<td width="130"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">{if isset($result.date)}{date timestamp=$result.date nice=true}{/if}</span></td>
+		<td width="75"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">{if isset($result.size) && ($result.size||$result.size===0)}{size bytes=$result.size}{/if}</span></td>
 		<td style="text-align:center;">{if !empty($result.score)}{$result.score} %{else}-{/if}</td>
 	</tr>
 	{/foreach}
