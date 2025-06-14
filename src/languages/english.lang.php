@@ -2160,6 +2160,7 @@ $lang_admin['use_tls']			= 'Use TLS';
 $lang_admin['use_ssl']			= 'Use SSL';
 $lang_admin['no_encryption']	= 'No encryption';
 $lang_admin['secure_connection'] 	= 'Secure connection';
+$lang_admin['follow_mastodon']	= 'Follow us on Mastodon';
 // Avoid duplicates
 $lang_admin['zip']				= $lang_user['zip'];
 $lang_admin['city']				= $lang_user['city'];

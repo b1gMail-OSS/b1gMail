@@ -2155,6 +2155,7 @@ $lang_admin['use_tls']			= 'TLS benutzen';
 $lang_admin['use_ssl']			= 'SSL benutzen';
 $lang_admin['no_encryption']	= 'Keine Verschlüsselung';
 $lang_admin['secure_connection'] 	= 'Verbindungssicherheit';
+$lang_admin['follow_mastodon']	= 'Folge uns auf Mastodon';
 // Avoid duplicates
 $lang_admin['zip']				= $lang_user['zip'];
 $lang_admin['city']				= $lang_user['city'];
