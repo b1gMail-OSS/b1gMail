@@ -69,6 +69,7 @@
 					</a>
 					<div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 						<a href="admins.php?sid={$sid}" class="dropdown-item">{lng p="profile"}</a>
+						<a href="../index.php" class="dropdown-item" target="_blank" rel="noreferrer">{lng p="to_startpage"}</a>
 						<!--<a href="javascript:showHelp();" class="dropdown-item">{lng p="help"}</a>-->
 						{if $adminRow.type==0}<a href="welcome.php?action=phpinfo&sid={$sid}" class="dropdown-item">{lng p="phpinfo"}</a>{/if}
 						<div class="dropdown-divider"></div>
