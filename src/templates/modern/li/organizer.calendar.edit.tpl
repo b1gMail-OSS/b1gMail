@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if $smarty.get.jumpbackDate}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}&sid={$sid}" onsubmit="return(checkCalendarDateForm(this));">
+<form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}&sid={$sid}" onsubmit="return(checkCalendarDateForm(this));">
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {if !empty($eDate)}{lng p="editdate"}{else}{lng p="adddate"}{/if}</th>
@@ -61,7 +61,7 @@
 						</td>
 					</tr>
 					<tr>
-						<td><input type="radio" id="wholeDay_1" name="wholeDay" value="1"{if ($eDate.flags&1)} checked="checked"{/if} /></td>
+						<td><input type="radio" id="wholeDay_1" name="wholeDay" value="1"{if (isset($eDate.flags) && $eDate.flags&1)} checked="checked"{/if} /></td>
 						<td><label for="wholeDay_1">{lng p="wholeday"}</label></td>
 					</tr>				
 				</table>
@@ -85,15 +85,15 @@
 			<td class="listTableRight">
 				<table>
 					<tr>
-						<td><input type="radio" name="repeat_until" id="repeat_until_endless" value="endless"{if !$eDate||$eDate.repeat_flags&1} checked="checked"{/if} /></td>
+						<td><input type="radio" name="repeat_until" id="repeat_until_endless" value="endless"{if empty($eDate)||(isset($eDate.repeat_flags) && $eDate.repeat_flags&1)} checked="checked"{/if} /></td>
 						<td><label for="repeat_until_endless">{lng p="endless"}</label></td>
 					</tr>
 					<tr>
-						<td><input type="radio" name="repeat_until" id="repeat_until_count" value="count"{if $eDate.repeat_flags&2} checked="checked"{/if} /></td>
+						<td><input type="radio" name="repeat_until" id="repeat_until_count" value="count"{if isset($eDate.repeat_flags) && $eDate.repeat_flags&2} checked="checked"{/if} /></td>
 						<td><input type="text" size="4" name="repeat_until_count" value="{if isset($eDate)&&$eDate.repeat_flags&2}{$eDate.repeat_times}{else}5{/if}" /> <label for="repeat_until_count">{lng p="times"}</label></td>
 					</tr>
 					<tr>
-						<td><input type="radio" name="repeat_until" id="repeat_until_date" value="date"{if $eDate.repeat_flags&4} checked="checked"{/if} /></td>
+						<td><input type="radio" name="repeat_until" id="repeat_until_date" value="date"{if isset($eDate.repeat_flags) && $eDate.repeat_flags&4} checked="checked"{/if} /></td>
 						<td><label for="repeat_until_date">{lng p="until"}</label>
 						{if isset($eDate)&&$eDate.repeat_flags&4}
 							{html_select_date prefix="repeat_until_date" time=$eDate.repeat_times field_order="DMY" start_year="-5" end_year="+5" field_separator="."},
@@ -111,7 +111,7 @@
 			<td class="listTableRight">
 				<table>
 					<tr>
-						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_daily" value="daily"{if !$eDate||$eDate.repeat_flags&8} checked="checked"{/if} /></td>
+						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_daily" value="daily"{if empty($eDate)||(isset($eDate.repeat_flags) && $eDate.repeat_flags&8)} checked="checked"{/if} /></td>
 						<td><label for="repeat_interval_daily">{lng p="every"}</label>
 							<input type="text" name="repeat_interval_daily" value="{if isset($eDate)&&$eDate.repeat_flags&8}{$eDate.repeat_value}{else}1{/if}" size="4" />
 							{lng p="days"}<br />
@@ -123,13 +123,13 @@
 						</td>
 					</tr>
 					<tr>
-						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_weekly" value="weekly"{if $eDate.repeat_flags&16} checked="checked"{/if} /></td>
+						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_weekly" value="weekly"{if isset($eDate.repeat_flags) && $eDate.repeat_flags&16} checked="checked"{/if} /></td>
 						<td><label for="repeat_interval_weekly">{lng p="every"}</label>
 							<input type="text" name="repeat_interval_weekly" value="{if isset($eDate)&&$eDate.repeat_flags&16}{$eDate.repeat_value}{else}1{/if}" size="4" />
 							{lng p="weeks"}</td>
 					</tr>
 					<tr>
-						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_monthly_mday" value="monthly_mday"{if $eDate.repeat_flags&32} checked="checked"{/if} /></td>
+						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_monthly_mday" value="monthly_mday"{if isset($eDate.repeat_flags) && $eDate.repeat_flags&32} checked="checked"{/if} /></td>
 						<td><label for="repeat_interval_monthly_mday">{lng p="every"}</label>
 							<input type="text" name="repeat_interval_monthly_mday" value="{if isset($eDate)&&$eDate.repeat_flags&32}{$eDate.repeat_value}{else}1{/if}" size="4" />
 							{lng p="months"} {lng p="at"}
@@ -137,7 +137,7 @@
 							{lng p="ofthemonth"}</td>
 					</tr>
 					<tr>
-						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_monthly_wday" value="monthly_wday"{if $eDate.repeat_flags&64} checked="checked"{/if} /></td>
+						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_monthly_wday" value="monthly_wday"{if isset($eDate.repeat_flags) && $eDate.repeat_flags&64} checked="checked"{/if} /></td>
 						<td><label for="repeat_interval_monthly_wday">{lng p="every"}</label>
 							<input type="text" name="repeat_interval_monthly_wday" value="{if isset($eDate)&&$eDate.repeat_flags&64}{$eDate.repeat_value}{else}1{/if}" size="4" />
 							{lng p="months"} {lng p="at"}
@@ -156,9 +156,9 @@
 							{lng p="ofthemonth"}</td>
 					</tr>
 					<tr>
-						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_yearly" value="yearly"{if $eDate.repeat_flags&128} checked="checked"{/if} /></td>
+						<td valign="top"><input type="radio" name="repeat_interval" id="repeat_interval_yearly" value="yearly"{if isset($eDate.repeat_flags) &&$eDate.repeat_flags&128} checked="checked"{/if} /></td>
 						<td><label for="repeat_interval_yearly">{lng p="every"}</label>
-							<input type="text" name="repeat_interval_yearly" value="{if isset($eDate)&&$eDate.repeat_flags&128}{$eDate.repeat_value}{else}1{/if}" size="4" />
+							<input type="text" name="repeat_interval_yearly" value="{if isset($eDate)&&(isset($eDate.repeat_flags) && $eDate.repeat_flags&128)}{$eDate.repeat_value}{else}1{/if}" size="4" />
 							{lng p="years"}</td>
 					</tr>
 				</table>

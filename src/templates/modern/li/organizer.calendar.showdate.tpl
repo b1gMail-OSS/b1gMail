@@ -36,12 +36,12 @@
 			<tr>
 				<td><b>{lng p="begin"}:</b></td>
 				<td>{if ($date.flags&1)}{date timestamp=$date.startdate dayonly=true} ({lng p="wholeday"}){else}{date timestamp=$date.startdate nice=true elapsed=true}{/if}
-				{if $date.orig_startdate}<small> ({lng p="thisevent"} {if ($date.flags&1)}{date timestamp=$date.orig_startdate dayonly=true}{else}{date timestamp=$date.orig_startdate nice=true}{/if})</small>{/if}</td>
+				{if !empty($date.orig_startdate)}<small> ({lng p="thisevent"} {if ($date.flags&1)}{date timestamp=$date.orig_startdate dayonly=true}{else}{date timestamp=$date.orig_startdate nice=true}{/if})</small>{/if}</td>
 			</tr>
 			<tr>
 				<td><b>{lng p="end"}:</b></td>
 				<td>{if ($date.flags&1)}{date timestamp=$date.enddate dayonly=true} ({lng p="wholeday"}){else}{date timestamp=$date.enddate nice=true elapsed=true}{/if}
-				{if $date.orig_enddate}<small> ({lng p="thisevent"} {if ($date.flags&1)}{date timestamp=$date.orig_enddate dayonly=true}{else}{date timestamp=$date.orig_enddate nice=true}{/if})</small>{/if}</td>
+				{if !empty($date.orig_enddate)}<small> ({lng p="thisevent"} {if ($date.flags&1)}{date timestamp=$date.orig_enddate dayonly=true}{else}{date timestamp=$date.orig_enddate nice=true}{/if})</small>{/if}</td>
 			</tr>
 			<tr>
 				<td><b>{lng p="location"}:</b> &nbsp;</td>

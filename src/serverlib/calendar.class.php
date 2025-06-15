@@ -937,8 +937,8 @@ class BMCalendar
             $row['repeat_value'],
             $row['repeat_extra1'],
             $row['repeat_extra2'],
-            $row['dav_uri'],
-            $row['dav_uid']);
+            (isset($row['dav_uri']) ? $row['dav_uri'] : ''),
+            (isset($row['dav_uid']) ? $row['dav_uid'] : ''));
 
         // attendees
         if ($dateID = $db->InsertId()) {
@@ -1006,8 +1006,8 @@ class BMCalendar
             $row['repeat_value'],
             $row['repeat_extra1'],
             $row['repeat_extra2'],
-            $row['dav_uri'],
-            $row['dav_uid'],
+            (isset($row['dav_uri']) ? $row['dav_uri'] : ''),
+            (isset($row['dav_uid']) ? $row['dav_uid'] : ''),
             (int) $id,
             $this->_userID);
 
@@ -1094,13 +1094,13 @@ class BMCalendar
             //
             // duration
             //
-            if ($_REQUEST['repeat_until'] == 'endless') {
+            if (isset($_REQUEST['repeat_until']) && $_REQUEST['repeat_until'] == 'endless') {
                 $row['repeat_times'] = 0;
                 $row['repeat_flags'] |= CLNDR_REPEATING_UNTIL_ENDLESS;
-            } elseif ($_REQUEST['repeat_until'] == 'count') {
+            } elseif (isset($_REQUEST['repeat_until']) && $_REQUEST['repeat_until'] == 'count') {
                 $row['repeat_times'] = max(1, $_REQUEST['repeat_until_count']);
                 $row['repeat_flags'] |= CLNDR_REPEATING_UNTIL_COUNT;
-            } elseif ($_REQUEST['repeat_until'] == 'date') {
+            } elseif (isset($_REQUEST['repeat_until']) && $_REQUEST['repeat_until'] == 'date') {
                 $row['repeat_times'] = max($row['startdate'] + TIME_ONE_MINUTE,
                                             SmartyDateTime('repeat_until_date'));
                 $row['repeat_flags'] |= CLNDR_REPEATING_UNTIL_DATE;
@@ -1109,27 +1109,29 @@ class BMCalendar
             //
             // interval
             //
-            if ($_REQUEST['repeat_interval'] == 'daily') {
-                $row['repeat_flags'] |= CLNDR_REPEATING_DAILY;
-                $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_daily']);
-                $row['repeat_extra1'] = isset($_REQUEST['repeat_daily_exceptions']) && is_array($_REQUEST['repeat_daily_exceptions']) && count($_REQUEST['repeat_daily_exceptions']) > 0
-                                            ? implode(',', $_REQUEST['repeat_daily_exceptions'])
-                                            : '';
-            } elseif ($_REQUEST['repeat_interval'] == 'weekly') {
-                $row['repeat_flags'] |= CLNDR_REPEATING_WEEKLY;
-                $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_weekly']);
-            } elseif ($_REQUEST['repeat_interval'] == 'monthly_mday') {
-                $row['repeat_flags'] |= CLNDR_REPEATING_MONTHLY_MDAY;
-                $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_monthly_mday']);
-                $row['repeat_extra1'] = max(1, min(31, $_REQUEST['repeat_interval_monthly_mday_extra1']));
-            } elseif ($_REQUEST['repeat_interval'] == 'monthly_wday') {
-                $row['repeat_flags'] |= CLNDR_REPEATING_MONTHLY_WDAY;
-                $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_monthly_wday']);
-                $row['repeat_extra1'] = max(0, min(4, $_REQUEST['repeat_interval_monthly_wday_extra1']));
-                $row['repeat_extra2'] = max(0, min(6, $_REQUEST['repeat_interval_monthly_wday_extra2']));
-            } elseif ($_REQUEST['repeat_interval'] == 'yearly') {
-                $row['repeat_flags'] |= CLNDR_REPEATING_YEARLY;
-                $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_yearly']);
+            if(isset($_REQUEST['repeat_interval'])) {
+                if ($_REQUEST['repeat_interval'] == 'daily') {
+                    $row['repeat_flags'] |= CLNDR_REPEATING_DAILY;
+                    $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_daily']);
+                    $row['repeat_extra1'] = isset($_REQUEST['repeat_daily_exceptions']) && is_array($_REQUEST['repeat_daily_exceptions']) && count($_REQUEST['repeat_daily_exceptions']) > 0
+                                                ? implode(',', $_REQUEST['repeat_daily_exceptions'])
+                                                : '';
+                } elseif ($_REQUEST['repeat_interval'] == 'weekly') {
+                    $row['repeat_flags'] |= CLNDR_REPEATING_WEEKLY;
+                    $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_weekly']);
+                } elseif ($_REQUEST['repeat_interval'] == 'monthly_mday') {
+                    $row['repeat_flags'] |= CLNDR_REPEATING_MONTHLY_MDAY;
+                    $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_monthly_mday']);
+                    $row['repeat_extra1'] = max(1, min(31, $_REQUEST['repeat_interval_monthly_mday_extra1']));
+                } elseif ($_REQUEST['repeat_interval'] == 'monthly_wday') {
+                    $row['repeat_flags'] |= CLNDR_REPEATING_MONTHLY_WDAY;
+                    $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_monthly_wday']);
+                    $row['repeat_extra1'] = max(0, min(4, $_REQUEST['repeat_interval_monthly_wday_extra1']));
+                    $row['repeat_extra2'] = max(0, min(6, $_REQUEST['repeat_interval_monthly_wday_extra2']));
+                } elseif ($_REQUEST['repeat_interval'] == 'yearly') {
+                    $row['repeat_flags'] |= CLNDR_REPEATING_YEARLY;
+                    $row['repeat_value'] = max(1, $_REQUEST['repeat_interval_yearly']);
+                }
             }
         }
 
