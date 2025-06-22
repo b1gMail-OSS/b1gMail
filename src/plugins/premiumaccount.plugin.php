@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail PremiumAccount plugin
- * (c) 2021 Patrick Schlangen et al
+ * (c) 2021 Patrick Schlangen et al, 2022-2025 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -50,7 +50,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMail PremiumAccount PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '2.52';
+		$this->version				= '2.53';
 		$this->website				= 'https://www.b1gmail.org/';
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
 
@@ -639,7 +639,7 @@ class PremiumAccountPlugin extends BMPlugin
 
 		// prefs row?
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_prefs');
-		list($rowCount) = $res->FetchArray(MYSQLI_NUM);
+		[$rowCount] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		if($rowCount < 1)
@@ -881,7 +881,7 @@ class PremiumAccountPlugin extends BMPlugin
 		{
 			$subRes = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_subscribers WHERE paket=?',
 				$row['id']);
-			list($subCount) = $subRes->FetchArray(MYSQLI_NUM);
+			[$subCount] = $subRes->FetchArray(MYSQLI_NUM);
 			$subRes->Free();
 
 			if($subCount == 0)
@@ -914,8 +914,8 @@ class PremiumAccountPlugin extends BMPlugin
 				$template = $activeSubscription['package']['template'];
 				if(file_exists(B1GMAIL_DIR . 'templates/' . $template . '/'))
 				{
-					$tpl->template_dir 	= B1GMAIL_DIR . 'templates/' . $template . '/';
-					$tpl->compile_dir 	= B1GMAIL_DIR . 'templates/' . $template . '/cache/';
+					$tpl->setTemplateDir(B1GMAIL_DIR . 'templates/' . $template . '/');
+            		$tpl->setCompileDir(B1GMAIL_DIR . 'templates/' . $template . '/cache/');
 					$tpl->assign('tpldir', 	B1GMAIL_REL . 'templates/' . $template . '/');
 					$tpl->assign('_tpldir',	'templates/' . $template . '/');
 				}
@@ -1939,7 +1939,7 @@ class PremiumAccountPlugin extends BMPlugin
 		global $db;
 
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_packages WHERE geloescht=0');
-		list($packageCount) = $res->FetchArray(MYSQLI_NUM);
+		[$packageCount] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		return($packageCount);
@@ -2001,7 +2001,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_userauth WHERE userid=? AND token=?',
 			$userID,
 			$userToken);
-		list($rowCount) = $res->FetchArray();
+		[$rowCount] = $res->FetchArray();
 		$res->Free();
 		if($rowCount != 1)
 			die('Invalid authentication token');
@@ -2230,7 +2230,7 @@ class PremiumAccountPlugin extends BMPlugin
 			if(isset($_REQUEST['executeMassAction']))
 			{
 				// get subscriber IDs
-				$subscriberIDs = isset($_POST['subscriber']) ? $_POST['subscriber'] : array();
+				$subscriberIDs = $_POST['subscriber'] ?? array();
 				if(!is_array($subscriberIDs))
 					$subscriberIDs = array();
 				else
@@ -2330,9 +2330,7 @@ class PremiumAccountPlugin extends BMPlugin
 			}
 
 			// sort options
-			$sortBy = isset($_REQUEST['sortBy'])
-						? $_REQUEST['sortBy']
-						: 'ablauf';
+			$sortBy = $_REQUEST['sortBy'] ?? 'ablauf';
 			$sortOrder = isset($_REQUEST['sortOrder'])
 							? strtolower($_REQUEST['sortOrder'])
 							: 'asc';
@@ -2351,7 +2349,7 @@ class PremiumAccountPlugin extends BMPlugin
 
 			// page calculation
 			$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_subscribers ' . $queryAdd);
-			list($subscriptionCount) = $res->FetchArray(MYSQLI_NUM);
+			[$subscriptionCount] = $res->FetchArray(MYSQLI_NUM);
 			$res->Free();
 			$pageCount = ceil($subscriptionCount / $perPage);
 			$pageNo = isset($_REQUEST['page'])
@@ -2472,7 +2470,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$res = $db->Query('SHOW FIELDS FROM {pre}gruppen');
 			while($row = $res->FetchArray(MYSQLI_NUM))
 			{
-				list($fieldName) = $row;
+				[$fieldName] = $row;
 				if($fieldName == 'id' || $fieldName == 'send_limit_time')
 					continue;
 				if($fieldName == 'send_limit_count')
@@ -2541,7 +2539,7 @@ class PremiumAccountPlugin extends BMPlugin
 				// fetch subscriber count
 				$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_subscribers WHERE paket=?',
 					$id);
-				list($subscriberCount) = $res->FetchArray(MYSQLI_NUM);
+				[$subscriberCount] = $res->FetchArray(MYSQLI_NUM);
 				$res->Free();
 
 				// subscribers?
@@ -2550,7 +2548,7 @@ class PremiumAccountPlugin extends BMPlugin
 					// fetch title
 					$res = $db->Query('SELECT titel FROM {pre}mod_premium_packages WHERE id=?',
 						$id);
-					list($packageTitle) = $res->FetchArray(MYSQLI_NUM);
+					[$packageTitle] = $res->FetchArray(MYSQLI_NUM);
 					$res->Free();
 
 					// assign
@@ -2579,7 +2577,7 @@ class PremiumAccountPlugin extends BMPlugin
 						// get fallback group
 						$res = $db->Query('SELECT fallback_grp FROM {pre}mod_premium_packages WHERE id=?',
 							$id);
-						list($fallbackGroup) = $res->FetchArray(MYSQLI_NUM);
+						[$fallbackGroup] = $res->FetchArray(MYSQLI_NUM);
 						$res->Free();
 
 						// process users
@@ -2698,7 +2696,7 @@ class PremiumAccountPlugin extends BMPlugin
 				// get subscriber count
 				$res2 = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_subscribers WHERE paket=?',
 					$row['id']);
-				list($subscribers) = $res2->FetchArray(MYSQLI_NUM);
+				[$subscribers] = $res2->FetchArray(MYSQLI_NUM);
 				$res2->Free();
 
 				// fallback group
@@ -2708,7 +2706,7 @@ class PremiumAccountPlugin extends BMPlugin
 				{
 					$groupRes = $db->Query('SELECT titel FROM {pre}gruppen WHERE id=?',
 						$row['fallback_grp']);
-					list($fallbackGroup) = $groupRes->FetchArray(MYSQLI_NUM);
+					[$fallbackGroup] = $groupRes->FetchArray(MYSQLI_NUM);
 					$groupRes->Free();
 				}
 
@@ -2840,46 +2838,46 @@ class PremiumAccountPlugin extends BMPlugin
 
 		// package count
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_packages WHERE geloescht=0');
-		list($packageCount) = $res->FetchArray(MYSQLI_NUM);
+		[$packageCount] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// subscriber count
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_subscribers');
-		list($subscriberCount) = $res->FetchArray(MYSQLI_NUM);
+		[$subscriberCount] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// overall revenue
 		$res = $db->Query('SELECT SUM(amount) FROM {pre}orders WHERE status=1 AND cart LIKE \'%PAcc.order.%\'');
-		list($overallRevenue) = $res->FetchArray(MYSQLI_NUM);
+		[$overallRevenue] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// month revenue
 		$res = $db->Query('SELECT SUM(amount) FROM {pre}orders WHERE status=1 AND cart LIKE \'%PAcc.order.%\' AND activated>?',
 			mktime(0, 0, 0, date('m'), 1, date('Y')));
-		list($monthRevenue) = $res->FetchArray(MYSQLI_NUM);
+		[$monthRevenue] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// outstanding payments (overall)
 		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\'');
-		list($outstandingPaymentsCount, $outstandingPaymentsSum) = $res->FetchArray(MYSQLI_NUM);
+		[$outstandingPaymentsCount, $outstandingPaymentsSum] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// outstanding payments (advance)
 		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\' AND paymethod=?',
 			PAYMENT_METHOD_BANKTRANSFER);
-		list($advancePaymentsCount, $advancePaymentsSum) = $res->FetchArray(MYSQLI_NUM);
+		[$advancePaymentsCount, $advancePaymentsSum] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// outstanding payments (paypal)
 		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\' AND paymethod=?',
 			PAYMENT_METHOD_PAYPAL);
-		list($paypalPaymentsCount, $paypalPaymentsSum) = $res->FetchArray(MYSQLI_NUM);
+		[$paypalPaymentsCount, $paypalPaymentsSum] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// outstanding payments (sofortueberweisung)
 		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\' AND paymethod=?',
 			PAYMENT_METHOD_SOFORTUEBERWEISUNG);
-		list($suPaymentsCount, $suPaymentsSum) = $res->FetchArray(MYSQLI_NUM);
+		[$suPaymentsCount, $suPaymentsSum] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// assign
