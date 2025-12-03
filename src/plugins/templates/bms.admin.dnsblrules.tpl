@@ -1,19 +1,21 @@
 <form action="{$pageURL}&sid={$sid}&action=smtp&do=dnsblRules&save=true" method="post" onsubmit="spin(this)">
 	<fieldset>
 		<legend>{lng p="bms_dnsbl_rules"}</legend>
-		
+
 		<table class="list">
 			<tr>
 				<th>{lng p="bms_dnsbl"}</th>
+				<th>{lng p="bms_matchips"}</th>
 				<th>{lng p="bms_classification"}</th>
 				<th>{lng p="type"}</th>
 				<th>{lng p="delete"}</th>
 			</tr>
-			
+
 			{foreach from=$dnsbls item=dnsbl}
 			{cycle name=class values="td1,td2" assign=class}
 			<tr class="{$class}">
-				<td><input type="text" name="dnsbls[{$dnsbl.id}][host]" value="{$dnsbl.host}" size="32" /></td>
+				<td><input type="text" name="dnsbls[{$dnsbl.id}][host]" value="{text value=$dnsbl.host allowEmpty=true}" size="32" /></td>
+				<td><input type="text" name="dnsbls[{$dnsbl.id}][match_ips]" value="{text value=$dnsbl.match_ips allowEmpty=true}" size="32" /></td>
 				<td><select name="dnsbls[{$dnsbl.id}][classification]">
 					<option value="1"{if $dnsbl.classification==1} selected="selected"{/if}>{lng p="bms_origin_default"}</option>
 					<option value="2"{if $dnsbl.classification==2} selected="selected"{/if}>{lng p="bms_origin_trusted"}</option>
@@ -30,10 +32,11 @@
 				<td><input type="checkbox" name="dnsbls[{$dnsbl.id}][delete]" /></td>
 			</tr>
 			{/foreach}
-			
+
 			{cycle name=class values="td1,td2" assign=class}
 			<tr class="{$class}">
 				<td><input type="text" name="dnsbls[0][host]" value="" size="32" /></td>
+				<td><input type="text" name="dnsbls[0][match_ips]" value="" size="32" /></td>
 				<td><select name="dnsbls[0][classification]">
 					<option value="1">{lng p="bms_origin_default"}</option>
 					<option value="2">{lng p="bms_origin_trusted"}</option>
@@ -51,7 +54,7 @@
 			</tr>
 		</table>
 	</fieldset>
-	
+
 	<p>
 		<div style="float:left" class="buttons">
 			<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='{$pageURL}&action=smtp&sid={$sid}';" />
