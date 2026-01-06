@@ -274,6 +274,7 @@ define('BM_LOCKED', 1024);
 define('BM_WRONGLOGIN', 2048);
 define('BM_IS_INFECTED', 4096);
 define('BM_IS_SPAM', 8192);
+define('BM_WRONGUSER', 16384);
 define('BM_UPDATE_UNKNOWN', 0);
 define('BM_UPDATE_NOT_AVAILABLE', 1);
 define('BM_UPDATE_AVAILABLE', 2);

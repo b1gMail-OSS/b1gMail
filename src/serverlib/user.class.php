@@ -1131,6 +1131,8 @@ class BMUser
 	{
 		global $db, $currentCharset, $currentLanguage, $bm_prefs;
 
+		ModuleFunction('OnLoginAttempt', array($email));
+
 		$passwordPlain = CharsetDecode($passwordPlain, false, 'ISO-8859-15');
 		$result = array(USER_DOES_NOT_EXIST, false);
 		$row = false;
@@ -1329,6 +1331,10 @@ class BMUser
 					}
 				}
 			}
+		}
+		else
+		{
+			ModuleFunction('OnLoginFailed', array($email, $password, BM_WRONGUSER));
 		}
 
 		// log

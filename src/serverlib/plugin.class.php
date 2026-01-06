@@ -368,6 +368,10 @@ class BMPlugin
     {
     }
 
+    public function OnLoginAttempt($email)
+    {
+    }
+
     public function OnLogout($userID)
     {
     }
