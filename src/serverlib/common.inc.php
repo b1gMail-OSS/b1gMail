@@ -1247,6 +1247,8 @@ function SyncDBStruct($databaseStructure)
 					if(defined('DB_CHARSET')) {
 						if(DB_CHARSET=='utf8mb4') $utf8_collate = ' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
 					}
+					$mysqlFunctions = ['CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME', 'NOW()', 'CURDATE()', 'CURTIME()'];
+					$isMySQLFunction = in_array(strtoupper($field[4]), $mysqlFunctions);
 					$syncQueries[] = sprintf('ALTER TABLE %s %s `%s` %s%s%s%s%s',
 						$tableName,
 						$op,
@@ -1257,9 +1259,11 @@ function SyncDBStruct($databaseStructure)
 														: '') : '',
 						$field[2] == 'NO' ? ' NOT NULL' : '',
 						$field[4] == 'NULL' ? ' DEFAULT NULL' : ($field[4] != ''
-							? (is_numeric($field[4])
+							? ($isMySQLFunction
 									? ' DEFAULT ' . $field[4]
-									: ' DEFAULT \'' . $db->Escape($field[4]) . '\'')
+									: (is_numeric($field[4])
+										? ' DEFAULT ' . $field[4]
+										: ' DEFAULT \'' . $db->Escape($field[4]) . '\''))
 							: ''),
 						$field[5] != '' ? ' ' . $field[5] : '');
 				}
@@ -1330,6 +1334,10 @@ function SyncDBStruct($databaseStructure)
 					if(defined('DB_CHARSET')) {
 						if(DB_CHARSET=='utf8mb4') $utf8_collate = ' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
 					}
+				// Check if default is a MySQL function (CURRENT_TIMESTAMP, NOW(), etc.)
+				$mysqlFunctions = ['CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME', 'NOW()', 'CURDATE()', 'CURTIME()'];
+				$isMySQLFunction = in_array(strtoupper($field[4]), $mysqlFunctions);
+
 				$stmt .= sprintf(' `%s` %s%s%s%s%s,' . "\n",
 					$field[0],
 					$field[1],
@@ -1338,9 +1346,11 @@ function SyncDBStruct($databaseStructure)
 													: '') : '',
 					$field[2] == 'NO' ? ' NOT NULL' : '',
 					$field[4] == 'NULL' ? ' DEFAULT NULL' : ($field[4] != ''
-						? (is_numeric($field[4])
+						? ($isMySQLFunction
 								? ' DEFAULT ' . $field[4]
-								: ' DEFAULT \'' . $db->Escape($field[4]) . '\'')
+								: (is_numeric($field[4])
+									? ' DEFAULT ' . $field[4]
+									: ' DEFAULT \'' . $db->Escape($field[4]) . '\''))
 						: ''),
 					$field[5] != '' ? ' ' . $field[5] : '');
 			}
