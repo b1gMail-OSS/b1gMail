@@ -319,7 +319,7 @@ if (DEBUG) {
 ini_set('zend.assertions', DEBUG ? 1 : 0);
 ini_set('assert.exception', DEBUG ? 1 : 0);
 
-assert_options(ASSERT_WARNING, DEBUG ? 1 : 0);
+
 
 /**
  * required files.
