@@ -282,7 +282,7 @@ define('BM_UPDATE_AVAILABLE', 2);
 /**
  * include config and set error reporting based on debug setting.
  */
-include B1GMAIL_DIR.'serverlib/config.inc.php';
+require B1GMAIL_DIR.'serverlib/config.inc.php';
 
 if (!defined('TOOLBOX_SERVER')) {
     define('TOOLBOX_SERVER', '');
@@ -316,6 +316,9 @@ if (DEBUG) {
 } else {
     error_reporting(E_ERROR | E_WARNING | E_PARSE);
     }
+ini_set('zend.assertions', DEBUG ? 1 : 0);
+ini_set('assert.exception', DEBUG ? 1 : 0);
+
 assert_options(ASSERT_WARNING, DEBUG ? 1 : 0);
 
 /**
