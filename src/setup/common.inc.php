@@ -379,7 +379,7 @@ function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode
 					if($myField[1] != $field[1]
 						|| $myField[2] != $field[2]
 						|| ($myField[4] != $field[4] && !(($myField[4]==0 && $field[4]=='') || ($myField[4]=='' && $field[4]==0)))
-						|| $myField[5] != $field[5])
+						|| (isset($field[5]) && $myField[5] != $field[5]))
 					{
 						$op = 'MODIFY';
 					}
@@ -387,6 +387,8 @@ function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode
 
 				if($op !== false)
 				{
+					$mysqlFunctions = ['CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME', 'NOW()', 'CURDATE()', 'CURTIME()'];
+					$isMySQLFunction = in_array(strtoupper($field[4]), $mysqlFunctions);
 					$syncQueries[] = sprintf('ALTER TABLE %s %s `%s` %s%s%s%s%s',
 						$tableName,
 						$op,
@@ -397,11 +399,13 @@ function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode
 										: '') : '',
 						$field[2] == 'NO' ? ' NOT NULL' : '',
 						$field[4] == 'NULL' ? ' DEFAULT NULL' : ($field[4] != ''
-							? (is_numeric($field[4])
+							? ($isMySQLFunction
 									? ' DEFAULT ' . $field[4]
-									: ' DEFAULT \'' . SQLEscape($field[4], $connection) . '\'')
+									: (is_numeric($field[4])
+										? ' DEFAULT ' . $field[4]
+										: ' DEFAULT \'' . SQLEscape($field[4], $connection) . '\''))
 							: ''),
-						$field[5] != '' ? ' ' . $field[5] : '');
+						isset($field[5]) && $field[5] != '' ? ' ' . $field[5] : '');
 				}
 			}
 
@@ -464,8 +468,11 @@ function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode
 				$tableName);
 
 			// fields
+			$mysqlFunctions = ['CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME', 'NOW()', 'CURDATE()', 'CURTIME()'];
 			foreach($tableFields as $field)
 			{
+				// Check if default is a MySQL function (CURRENT_TIMESTAMP, NOW(), etc.)
+				$isMySQLFunction = in_array(strtoupper($field[4]), $mysqlFunctions);
 				$stmt .= sprintf(' `%s` %s%s%s%s%s,' . "\n",
 					$field[0],
 					$field[1],
@@ -474,11 +481,13 @@ function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode
 									: '') : '',
 					$field[2] == 'NO' ? ' NOT NULL' : '',
 					$field[4] == 'NULL' ? ' DEFAULT NULL' : ($field[4] != ''
-						? (is_numeric($field[4])
+						? ($isMySQLFunction
 								? ' DEFAULT ' . $field[4]
-								: ' DEFAULT \'' . SQLEscape($field[4], $connection) . '\'')
+								: (is_numeric($field[4])
+									? ' DEFAULT ' . $field[4]
+									: ' DEFAULT \'' . SQLEscape($field[4], $connection) . '\''))
 						: ''),
-					$field[5] != '' ? ' ' . $field[5] : '');
+					isset($field[5]) && $field[5] != '' ? ' ' . $field[5] : '');
 			}
 
 			// indexes
