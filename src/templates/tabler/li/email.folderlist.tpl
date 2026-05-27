@@ -1,0 +1,4 @@
+var d = new dTree('d');
+{foreach from=$folderList item=folder}
+d.add({$folder.i}, {$folder.parent}, '<span class="bm-folder-label">{text value=$folder.text escape=true noentities=true}</span>{if $folder.unread>0}<span class="bm-folder-count">{$folder.unread}</span>{/if}', 'javascript:switchFolder({$folder.id});', '{text value=$folder.text escape=true noentities=true}', '', 'ti {if $folder.icon == 'inbox'}ti-inbox{elseif $folder.icon == 'outbox'}ti-send{elseif $folder.icon == 'drafts'}ti-file-pencil{elseif $folder.icon == 'spam'}ti-ban{elseif $folder.icon == 'trash'}ti-trash{elseif $folder.icon == 'intellifolder'}ti-folder{else}ti-folder{/if}', 'ti {if $folder.icon == 'inbox'}ti-inbox{elseif $folder.icon == 'outbox'}ti-send{elseif $folder.icon == 'drafts'}ti-file-pencil{elseif $folder.icon == 'spam'}ti-ban{elseif $folder.icon == 'trash'}ti-trash{elseif $folder.icon == 'intellifolder'}ti-folder{else}ti-folder{/if}');
+{/foreach}

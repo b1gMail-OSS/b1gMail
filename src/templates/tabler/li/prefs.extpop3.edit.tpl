@@ -1,0 +1,76 @@
+<div class="bm-prefs-page bm-prefs-page-extpop3">
+<div id="contentHeader" class="contentHeader bm-organizer-header bm-prefs-header">
+	<div class="left">
+		<i class="ti ti-mail-down icon icon-sm" aria-hidden="true"></i>
+		{if $account}{lng p="editpop3"}{else}{lng p="addpop3"}{/if}
+	</div>
+</div>
+
+<form name="f1" method="post" action="prefs.php?action=extpop3&do={if $account}saveAccount&id={$account.id}{else}createAccount{/if}&sid={$sid}" onsubmit="return checkPOP3AccountForm(this);">
+<div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
+	<table class="listTable">
+		<tr>
+			<th class="listTableHead" colspan="2"> {if $account}{lng p="editpop3"}{else}{lng p="addpop3"}{/if}</th>
+		</tr>
+		<tr>
+			<td class="listTableLeft"><label for="paused">{lng p="paused"}?</label></td>
+			<td class="listTableRight">
+				<label class="form-check mb-0"><input type="checkbox" class="form-check-input" name="paused" id="paused"{if $account && $account.paused} checked="checked"{/if} /></label>
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft">* <label for="p_host">{lng p="pop3server"}:</label></td>
+			<td class="listTableRight">
+				<input type="text" name="p_host" id="p_host" value="{if isset($account.p_host)}{text value=$account.p_host allowEmpty=true}{/if}" size="48" />
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft">* <label for="p_port">{lng p="port"}:</label></td>
+			<td class="listTableRight">
+				<input type="text" name="p_port" id="p_port" value="{if $account}{text value=$account.p_port allowEmpty=true}{else}110{/if}" size="6" />
+				<label class="form-check mb-0"><input type="checkbox" class="form-check-input" name="p_ssl" id="p_ssl"{if $account&&$account.p_ssl} checked="checked"{/if} onclick="if(this.checked&&EBID('p_port').value==110) EBID('p_port').value=995; else if(!this.checked&&EBID('p_port').value==995) EBID('p_port').value=110;" /><span class="form-check-label">SSL</span></label>
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft">* <label for="p_user">{lng p="username"}:</label></td>
+			<td class="listTableRight">
+				<input type="text" name="p_user" id="p_user" value="{if isset($account.p_user)}{text value=$account.p_user allowEmpty=true}{/if}" size="48" />
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft"><label for="p_pass">{lng p="password"}:</label></td>
+			<td class="listTableRight">
+				<input type="password" name="p_pass" id="p_pass" placeholder="****" size="24" />
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft"><label for="p_target">{lng p="pop3target"}:</label></td>
+			<td class="listTableRight">
+				<select name="p_target" id="p_target">
+					<option value="-1">({lng p="default"})</option>
+					
+					<optgroup label="{lng p="folders"}">
+					{foreach from=$dropdownFolderList key=dFolderID item=dFolderTitle}
+					{if $dFolderID>0}<option value="{$dFolderID}" style="font-family:courier;"{if $account && $account.p_target==$dFolderID} selected="selected"{/if}>{$dFolderTitle}</option>{/if}
+					{/foreach}
+					</optgroup>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft"><label for="p_keep">{lng p="keepmails"}?</label></td>
+			<td class="listTableRight">
+				<label class="form-check mb-0"><input type="checkbox" class="form-check-input" name="p_keep" id="p_keep"{if $account && $account.p_keep} checked="checked"{/if} /></label>
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft">&nbsp;</td>
+			<td class="listTableRight">
+				<input type="submit" class="btn btn-primary" value="{lng p="ok"}" />
+				<input type="reset" value="{lng p="reset"}" />
+			</td>
+		</tr>
+	</table>
+</div></div>
+</form>
+</div>

@@ -394,6 +394,32 @@ if($_REQUEST['action'] == 'folder')
 	if($groupMode != '-')
 		$mailList = $mailbox->GroupMailList($mailList, $groupMode);
 
+	$templatePrefs = GetTemplatePrefs($bm_prefs['template']);
+	$mailListPreviewLines = isset($templatePrefs['mailListPreviewLines'])
+		? (int)$templatePrefs['mailListPreviewLines']
+		: 2;
+	if($mailListPreviewLines < 0)
+		$mailListPreviewLines = 0;
+	else if($mailListPreviewLines > 2)
+		$mailListPreviewLines = 2;
+
+	if($mailListPreviewLines > 0 && method_exists($mailbox, 'EnrichMailListPreviews'))
+	{
+		try
+		{
+			$mailbox->EnrichMailListPreviews($mailList, $mailListPreviewLines == 1 ? 100 : 180);
+		}
+		catch(Throwable $e)
+		{
+			PutLog(
+				'EnrichMailListPreviews failed: ' . $e->getMessage(),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__
+			);
+		}
+	}
+
 	// update last notify date
 	if($folderID == FOLDER_INBOX)
 		$mailbox->UpdateLastNotifyDate();

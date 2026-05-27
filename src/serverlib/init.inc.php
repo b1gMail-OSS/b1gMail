@@ -456,6 +456,7 @@ if(MAINTENANCE_MODE && INTERFACE_MODE)
 }
 else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], unserialize($bm_prefs['wartung_whitelist_ips'])))
 {
+        $tpl->assign('year', date('Y'));
         $tpl->assign('text', $lang_custom['maintenance']);
         $tpl->display('nli/maintenance.tpl');
         exit();

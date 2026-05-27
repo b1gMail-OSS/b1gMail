@@ -27,6 +27,8 @@ include('./serverlib/zip.class.php');
 include('./serverlib/unzip.class.php');
 RequestPrivileges(PRIVILEGES_USER);
 
+define('BM_MAIL_IFRAME_STYLE', '<style id="bmMailIframeTheme">html,body{background:#fff!important;color:#333!important;color-scheme:light;margin:0;padding:0}#__bmMailText{background:#fff;color:#333;padding:1rem 1.25rem;box-sizing:border-box}a{color:#066fd1}</style>');
+
 /**
  * file handler for modules
  */
@@ -163,9 +165,9 @@ if($_REQUEST['action'] == 'read'
 		}
 
 		if($textMode == 'html')
-			$text = '<base target="_blank" /><div id="__bmMailText"><font face="arial" size="2">' . $text . '</font></div>';
+			$text = '<base target="_blank" />' . BM_MAIL_IFRAME_STYLE . '<div id="__bmMailText"><font face="arial" size="2">' . $text . '</font></div>';
 		else
-			$text = '<base target="_blank" /><div id="__bmMailText"><font face="' . ($userRow['plaintext_courier']=='yes' ? 'courier' : 'arial') . '" size="2">' . $text . '</font></div>';
+			$text = '<base target="_blank" />' . BM_MAIL_IFRAME_STYLE . '<div id="__bmMailText"><font face="' . ($userRow['plaintext_courier']=='yes' ? 'courier' : 'arial') . '" size="2">' . $text . '</font></div>';
 
 		// attachment action?
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'downloadAttachments'
@@ -505,9 +507,9 @@ else if($_REQUEST['action'] == 'inlineHTML'
 			$mailbox->FlagMail(FLAG_SHOWEXTERNAL, true, $mail->id);
 
 		if($_REQUEST['mode'] == 'html')
-			$text = '<base target="_blank" /><div id="__bmMailText"><font face="arial" size="2">' . formatEMailHTMLText(isset($textParts['html']) ? $textParts['html'] : '', $enableExternal || $mail->IsTrusted(), $attachments, (int)$_REQUEST['id']) . '</font></div>';
+			$text = '<base target="_blank" />' . BM_MAIL_IFRAME_STYLE . '<div id="__bmMailText"><font face="arial" size="2">' . formatEMailHTMLText(isset($textParts['html']) ? $textParts['html'] : '', $enableExternal || $mail->IsTrusted(), $attachments, (int)$_REQUEST['id']) . '</font></div>';
 		else
-			$text = '<base target="_blank" /><div id="__bmMailText"><font face="' . ($userRow['plaintext_courier']=='yes' ? 'courier' : 'arial') . '" size="2">' . formatEMailText(isset($textParts['text']) ? $textParts['text'] : (isset($textParts['html']) ? htmlToText($textParts['html']) : '')) . '</font></div>';
+			$text = '<base target="_blank" />' . BM_MAIL_IFRAME_STYLE . '<div id="__bmMailText"><font face="' . ($userRow['plaintext_courier']=='yes' ? 'courier' : 'arial') . '" size="2">' . formatEMailText(isset($textParts['text']) ? $textParts['text'] : (isset($textParts['html']) ? htmlToText($textParts['html']) : '')) . '</font></div>';
 
 		echo($text);
 	}

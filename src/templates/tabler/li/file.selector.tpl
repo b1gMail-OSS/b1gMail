@@ -1,0 +1,36 @@
+<div class="bm-file-selector" data-name="{$name}">
+	<div class="input-group bm-file-selector-source-group">
+		<span class="input-group-text text-secondary">
+			<i class="ti ti-source-code icon" aria-hidden="true"></i>
+		</span>
+		<select class="form-select bm-file-selector-source" onchange="changeFileSelectorSource(this, '{$name}')">
+			<option value="local">{lng p="localfile"}</option>
+			{if $hasWebdisk}
+			<option value="webdisk">{lng p="webdiskfile"}</option>
+			{/if}
+		</select>
+	</div>
+
+	<div id="fileSelector_local_{$name}" class="bm-file-selector-panel mt-2">
+		<div class="input-group">
+			<span class="input-group-text text-secondary">
+				<i class="ti ti-upload icon" aria-hidden="true"></i>
+			</span>
+			<input type="file" class="form-control" id="localFile_{$name}" name="localFile_{$name}{if isset($multiple) && $multiple}[]{/if}"{if isset($multiple) && $multiple} multiple="multiple"{/if} />
+		</div>
+	</div>
+
+	<div id="fileSelector_webdisk_{$name}" class="bm-file-selector-panel mt-2" style="display:none;">
+		<input type="hidden" name="webdiskFile_{$name}_id" id="webdiskFile_{$name}_id" value="" />
+		<div class="input-group">
+			<span class="input-group-text text-secondary">
+				<i class="ti ti-cloud icon" aria-hidden="true"></i>
+			</span>
+			<input type="text" class="form-control" id="webdiskFile_{$name}" name="webdiskFile_{$name}" readonly="readonly" placeholder="{lng p="webdiskfile"}" />
+			<button type="button" class="btn btn-outline-secondary" onclick="webdiskDialog('{$sid}', 'open', 'webdiskFile_{$name}')">
+				<i class="ti ti-folder icon" aria-hidden="true"></i>
+				{lng p="browse"}
+			</button>
+		</div>
+	</div>
+</div>

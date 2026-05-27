@@ -53,3 +53,4 @@ $null = null;
 list($folderList, $pageMenu) = $mailbox->GetPageFolderList();
 $tpl->assign('folderList', $pageMenu);
 $tpl->assign('pageMenuFile', 'li/email.sidebar.tpl');
+$tpl->assign('hasWebdisk', isset($groupRow['webdisk']) && (int)$groupRow['webdisk'] > 0);

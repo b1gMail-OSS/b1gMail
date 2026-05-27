@@ -47,6 +47,34 @@ if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'compose';
 
 /**
+ * emit JS to append attachment(s) to the compose form (overlay-aware)
+ *
+ * @param array $attachmentStrings
+ * @param bool $closeOverlay
+ */
+function _composeAttachmentUploadJs($attachmentStrings, $closeOverlay = true)
+{
+	if(empty($attachmentStrings))
+	{
+		if($closeOverlay)
+			echo 'try{if(typeof parent.hideOverlay==="function")parent.hideOverlay();}catch(e){}' . "\n";
+		return;
+	}
+
+	echo 'try{' . "\n";
+	echo 'var ow=(typeof parent.overlayDocument==="function")?parent.overlayDocument():null;' . "\n";
+	echo 'var doc=(ow&&ow.document)?ow.document:parent.document;' . "\n";
+	echo 'var f=doc.getElementById("attachments");' . "\n";
+	foreach($attachmentStrings as $attachmentString)
+		echo 'if(f)f.value+=\'' . addslashes($attachmentString) . '\';' . "\n";
+	echo 'if(ow&&typeof ow.generateAttachmentList==="function")ow.generateAttachmentList();' . "\n";
+	echo 'else if(typeof parent.generateAttachmentList==="function")parent.generateAttachmentList();' . "\n";
+	echo '}catch(e){}' . "\n";
+	if($closeOverlay)
+		echo 'try{if(typeof parent.hideOverlay==="function")parent.hideOverlay();}catch(e){}' . "\n";
+}
+
+/**
  * compose
  */
 if($_REQUEST['action'] == 'compose')
@@ -433,6 +461,9 @@ else if($_REQUEST['action'] == 'addAttachment')
 	$tpl->assign('multiple', true);
 	$tpl->assign('formAction', 'email.compose.php?action=uploadAttachment&spaceLeft=' . $attLeft . '&sid=' . session_id());
 	$tpl->assign('fieldName', 'attachFile');
+	$tpl->assign('hasWebdisk', isset($groupRow['webdisk']) && (int)$groupRow['webdisk'] > 0);
+	if(!empty($_REQUEST['fileSource']) && $_REQUEST['fileSource'] == 'webdisk')
+		$tpl->assign('fileSource', 'webdisk');
 	$tpl->display('li/dialog.openfile.tpl');
 }
 
@@ -510,17 +541,17 @@ else if($_REQUEST['action'] == 'uploadAttachment'
 
 	$spaceLeft = (int)$_REQUEST['spaceLeft'];
 	$files = getUploadedFiles('attachFile');
+	$addedAttachments = array();
 	foreach($files as $file)
 	{
 		if($file['size'] <= $spaceLeft)
 		{
 			$spaceLeft -= $file['size'];
 
-			$attachmentString = sprintf(';%d,%s,%s',
+			$addedAttachments[] = sprintf(';%d,%s,%s',
 				$file['dest_id'],
 				str_replace(array('/', ',', ';', '\\'), '', $file['name']),
 				str_replace(array(',', ';', '\\'), '', $file['type']));
-			echo 'parent.document.getElementById(\'attachments\').value += \'' . addslashes($attachmentString) . '\';' . "\n";
 		}
 		else
 		{
@@ -530,8 +561,7 @@ else if($_REQUEST['action'] == 'uploadAttachment'
 		}
 	}
 
-	echo 'parent.generateAttachmentList();' . "\n";
-	echo 'parent.hideOverlay();' . "\n";
+	_composeAttachmentUploadJs($addedAttachments);
 	echo '//-->' . "\n";
 	echo '</script>' . "\n";
 }
@@ -621,8 +651,7 @@ else if($_REQUEST['action'] == 'uploadDnDAttachment'
 			$tempFileID,
 			str_replace(array('/', ',', ';', '\\'), '', $fileName),
 			str_replace(array(',', ';', '\\'), '', $mimeType));
-		echo 'parent.document.getElementById(\'attachments\').value += \'' . addslashes($attachmentString) . '\';' . "\n";
-		echo 'parent.generateAttachmentList();' . "\n";
+		_composeAttachmentUploadJs(array($attachmentString), false);
 	}
 }
 

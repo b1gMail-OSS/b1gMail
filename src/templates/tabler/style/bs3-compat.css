@@ -1,0 +1,160 @@
+/* Minimal Bootstrap 3 markup compatibility for legacy b1gMail NLI templates */
+
+.panel {
+	background-color: var(--tblr-bg-surface, #fff);
+	border: 1px solid var(--tblr-border-color);
+	border-radius: var(--tblr-border-radius);
+	margin-bottom: 1rem;
+}
+
+.panel-primary {
+	border-color: var(--tblr-primary);
+}
+
+.panel-primary > .panel-heading {
+	color: #fff;
+	background-color: var(--tblr-primary);
+	border-color: var(--tblr-primary);
+	padding: 0.75rem 1rem;
+	border-radius: calc(var(--tblr-border-radius) - 1px) calc(var(--tblr-border-radius) - 1px) 0 0;
+}
+
+.panel-heading {
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--tblr-border-color);
+}
+
+.panel-heading a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.panel-body {
+	padding: 1rem;
+}
+
+.panel-footer {
+	padding: 0.75rem 1rem;
+	background-color: var(--tblr-gray-100);
+	border-top: 1px solid var(--tblr-border-color);
+	border-radius: 0 0 var(--tblr-border-radius) var(--tblr-border-radius);
+}
+
+.panel-group .panel {
+	margin-bottom: 0;
+}
+
+.panel-group .panel + .panel {
+	margin-top: 0.5rem;
+}
+
+.panel-collapse.collapse:not(.show) {
+	display: none;
+}
+
+.collapse.in,
+.panel-collapse.collapse.in {
+	display: block;
+}
+
+.has-error .form-control,
+.has-error .form-select {
+	border-color: var(--tblr-danger);
+}
+
+.has-error .form-group label {
+	color: var(--tblr-danger);
+}
+
+.input-group-addon {
+	display: flex;
+	align-items: center;
+	padding: 0.375rem 0.75rem;
+	font-size: 1rem;
+	background-color: var(--tblr-gray-100);
+	border: 1px solid var(--tblr-border-color);
+	border-radius: var(--tblr-border-radius) 0 0 var(--tblr-border-radius);
+}
+
+.input-group .form-control:not(:first-child) {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.input-group-btn {
+	display: flex;
+}
+
+.input-group-btn .btn {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.form-group {
+	margin-bottom: 1rem;
+}
+
+.control-label {
+	display: inline-block;
+	margin-bottom: 0.35rem;
+}
+
+.page-header {
+	padding-bottom: 0.5rem;
+	margin: 1.5rem 0 1rem;
+	border-bottom: 1px solid var(--tblr-border-color);
+}
+
+.page-header h1 {
+	margin: 0;
+	font-size: 1.75rem;
+}
+
+.jumbotron.splash {
+	margin-bottom: 0;
+	border-radius: 0;
+}
+
+.login .panel-heading {
+	position: relative;
+}
+
+.login .lost-pw {
+	position: absolute;
+	right: 1rem;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 0.875rem;
+}
+
+.login .lost-pw a {
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.login .bottom {
+	margin-top: 2rem;
+}
+
+.glyphicon {
+	display: inline-block;
+	font-family: "tabler-icons" !important;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+}
+
+.glyphicon-user:before { content: "\eb4d"; }
+.glyphicon-lock:before { content: "\eae2"; }
+.glyphicon-envelope:before { content: "\eac7"; }
+.glyphicon-chevron-right:before { content: "\ea60"; }
+.glyphicon-home:before { content: "\eac1"; }
+.glyphicon-earphone:before,
+.glyphicon-phone:before { content: "\eb09"; }
+.glyphicon-list-alt:before { content: "\eb6b"; }
+.glyphicon-barcode:before { content: "\ea77"; }
+.glyphicon-flag:before { content: "\eaa6"; }
+.glyphicon-info-sign:before { content: "\eac5"; }
+.glyphicon-ok:before { content: "\ea5e"; }
+.glyphicon-remove:before { content: "\eb55"; }
+.glyphicon-comment:before { content: "\ea0b"; }

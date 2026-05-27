@@ -1,0 +1,21 @@
+@media (min-width: 992px) {
+    .navbar-nav .dropdown:hover > .dropdown-menu,
+    .navbar-nav .dropdown-menu:hover {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .navbar-nav .dropdown-menu {
+        display: block; /* wichtig für Animation */
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+    }
+}
