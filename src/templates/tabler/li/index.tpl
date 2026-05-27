@@ -20,6 +20,13 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
 	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	{if $bmPushEnabled}
+	<link rel="manifest" href="manifest.php" />
+	<meta name="theme-color" content="#066fd1" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	{/if}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
@@ -49,6 +56,14 @@
 	<script src="{$tpldir}js/modal.js?{fileDateSig file="js/modal.js"}" type="text/javascript"></script>
 	<script src="clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
 	<script src="clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
+	{if $bmPushEnabled}
+	<script type="text/javascript">
+	<!--
+		var bmPushEnabled = true, bmPushAutoSubscribe = {if $bmPushSubscribed}true{else}false{/if}, bmPushPromptDismissed = {if $bmPushPromptDismissed|default:false}true{else}false{/if};
+	//-->
+	</script>
+	<script src="clientlib/push.js?{fileDateSig file="../../clientlib/push.js"}" type="text/javascript"></script>
+	{/if}
 	<script type="text/javascript">
 	{literal}
 	var favicon=new Favico({
@@ -62,8 +77,12 @@
 	{hook id="li:index.tpl:head"}
 </head>
 
-<body class="layout-fluid bm-loggedin bm-layout-combo{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" onload="documentLoader()">
+<body class="layout-fluid bm-loggedin bm-layout-combo{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
+
+	{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}
+	{include file="li/push-prompt.tpl" promptId="bmPushPrompt" promptVariant="mobile"}
+	{/if}
 
 	<div class="page" id="main">
 		<aside class="navbar navbar-vertical navbar-expand-lg bm-li-vertical-nav" data-bs-theme="dark" id="mainMenu">
@@ -164,6 +183,9 @@
 
 			<div class="page-body">
 				<div class="container-xl" id="mainContent">
+					{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}
+					{include file="li/push-prompt.tpl" promptId="bmPushPromptDesktop" promptVariant="desktop"}
+					{/if}
 					<div id="mainBanner" style="display:none;">{banner}</div>
 					<div id="mainContentArea">
 						{include file="$pageContent"}

@@ -237,6 +237,12 @@ class Template extends Smarty\Smarty {
                 'isGerman',
                 strpos(strtolower($currentLanguage), 'deutsch') !== false
             );
+
+            if (!class_exists('BMPush', false)) {
+                include B1GMAIL_DIR.'serverlib/push.class.php';
+            }
+            BMPush::ensureSchema();
+            $this->assign('bmPushEnabled', BMPush::isEnabled());
         }
 
         // tabs
@@ -445,6 +451,20 @@ class Template extends Smarty\Smarty {
                     'bmNotifySound',
                     $userRow['notify_sound'] == 'yes'
                 );
+            }
+
+            if (!class_exists('BMPush', false)) {
+                include B1GMAIL_DIR.'serverlib/push.class.php';
+            }
+            BMPush::ensureSchema();
+            $pushEnabled = BMPush::isEnabled();
+            $this->assign('bmPushEnabled', $pushEnabled);
+            if ($pushEnabled) {
+                $pushPrefs = BMPush::getUserPushPrefs($thisUser->_id);
+                $this->assign('bmPushSubscribed', !empty($pushPrefs['enabled']));
+                $this->assign('bmPushPromptDismissed', BMPush::isPushPromptDismissed($thisUser->_id));
+                $this->assign('bmPushTypes', BMPush::getPushTypes(BMPush::AREA_USER));
+                $this->assign('bmPushTypePrefs', BMPush::getPushTypePrefsForUi($thisUser->_id));
             }
         }
 

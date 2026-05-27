@@ -1065,6 +1065,17 @@ class BMMailbox
 		if($flagged)
 			$cond .= ' AND (flags&'.FLAG_FLAGGED.')!=0';
 
+		// all folders: always count by mailbox owner (folder=-1 is not a workgroup share)
+		if($folderID == -1)
+		{
+			$res = $db->Query('SELECT COUNT(*) FROM {pre}mails WHERE userid=? AND '.$cond,
+				$this->_userID);
+			$row = $res->FetchArray(MYSQLI_NUM);
+			$res->Free();
+
+			return($row[0]);
+		}
+
 		if(BMWorkgroup::AccessAllowed($this->_userID, WORKGROUP_TYPE_MAILFOLDER, $folderID, false))
 		{
 			$res = $db->Query('SELECT COUNT(*) FROM {pre}mails WHERE folder=? AND ' . $cond,
@@ -2946,9 +2957,23 @@ class BMMailbox
 				$sms->Send($bm_prefs['mail2sms_abs'], $toNo, $smsText, $bm_prefs['mail2sms_type'], true, true);
 			}
 
-			// notification
+			// notification (+ Web Push via PostNotification)
+			PutLog(sprintf(
+				'Notification: user %d mailid=%d check (notify_email=%s, spam=%d, filter_notify=%d, unread_flag=%d)',
+				$this->_userID,
+				$mail->id,
+				$this->_userObject->_row['notify_email'],
+				($mail->flags&FLAG_SPAM) != 0 ? 1 : 0,
+				($filterActionFlags & FILTER_ACTIONFLAG_NOTIFY) != 0 ? 1 : 0,
+				($mail->flags&FLAG_UNREAD) != 0 ? 1 : 0
+			), PRIO_NOTE, __FILE__, __LINE__);
 			if(($filterActionFlags & FILTER_ACTIONFLAG_NOTIFY) != 0)
 			{
+				PutLog(sprintf(
+					'Notification: user %d incoming mail (filter notify), mailid=%d',
+					$this->_userID,
+					$mail->id
+				), PRIO_NOTE, __FILE__, __LINE__);
 				$this->_userObject->PostNotification('notify_email',
 					array(HTMLFormat(DecodeSingleEMail(ExtractMailAddress($mail->GetHeaderValue('from')))), HTMLFormat($mail->GetHeaderValue('subject'))),
 					'email.read.php?id='.$mail->id.'&',
@@ -2960,21 +2985,50 @@ class BMMailbox
 			}
 			else if(($this->_userObject->_row['notify_email'] == 'yes' && ($mail->flags&FLAG_SPAM) == 0))
 			{
-				$unreadCount = $this->GetMailCount(-1, true);
+				$unreadCount = (int)$this->GetMailCount(-1, true);
+				if($unreadCount < 1)
+					$unreadCount = 1;
 
-				if($unreadCount)
-				{
-					$this->_userObject->PostNotification('notify_newemail',
-						array($unreadCount, HTMLFormat($mail->GetHeaderValue('subject')) . ($unreadCount > 1 ? ', ...' : '')),
-						'email.php?folder='.$folder.'&',
-						'%%tpldir%%images/li/notify_newemail.png',
-						0,
-						0,
-						NOTIFICATION_FLAG_USELANG,
-						'::newEMail',
-						true);
-				}
+				PutLog(sprintf(
+					'Notification: user %d incoming mail, unread=%d, mailid=%d',
+					$this->_userID,
+					$unreadCount,
+					$mail->id
+				), PRIO_NOTE, __FILE__, __LINE__);
+				$this->_userObject->PostNotification('notify_newemail',
+					array($unreadCount, HTMLFormat($mail->GetHeaderValue('subject')) . ($unreadCount > 1 ? ', ...' : '')),
+					'email.php?folder='.$folder.'&',
+					'%%tpldir%%images/li/notify_newemail.png',
+					0,
+					0,
+					NOTIFICATION_FLAG_USELANG,
+					'::newEMail',
+					true);
 			}
+			else
+			{
+				PutLog(sprintf(
+					'Notification: user %d mailid=%d skipped (notify_email=%s, spam=%d)',
+					$this->_userID,
+					$mail->id,
+					$this->_userObject->_row['notify_email'],
+					($mail->flags&FLAG_SPAM) != 0 ? 1 : 0
+				), PRIO_NOTE, __FILE__, __LINE__);
+			}
+
+			// Web Push on receive (independent of notify_email; logs always when this file is deployed)
+			if(!class_exists('BMPush', false))
+				include(B1GMAIL_DIR.'serverlib/push.class.php');
+			$unreadForPush = 1;
+			if(($filterActionFlags & FILTER_ACTIONFLAG_NOTIFY) == 0)
+				$unreadForPush = max(1, (int)$this->GetMailCount(-1, true));
+			BMPush::sendNewMailPush(
+				$this->_userObject,
+				$mail,
+				$folder,
+				($filterActionFlags & FILTER_ACTIONFLAG_NOTIFY) != 0,
+				$unreadForPush
+			);
 
 			// receive stats
 			$oldOffset = ftell($mail->_fp);

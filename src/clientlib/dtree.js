@@ -201,6 +201,8 @@ dTree.prototype.addNode = function(pNode) {
 
 			if (cn._hc && !cn._io && this.config.useCookies) cn._io = this.isOpen(cn.id);
 
+			if (cn._hc && cn.pid == this.root.id && !cn._io) cn._io = true;
+
 			if (!this.config.folderLinks && cn._hc) cn.url = null;
 
 			if (this.config.useSelection && cn.id == this.selectedNode && !this.selectedFound) {
@@ -281,7 +283,7 @@ dTree.prototype.node = function(node, nodeId) {
 
 	if (node._hc) {
 
-		str += '<div id="d' + this.obj + nodeId + '" class="clip" style="display:' + ((this.root.id == node.pid || node._io) ? 'block' : 'none') + ';">';
+		str += '<div id="d' + this.obj + nodeId + '" class="clip" style="display:' + (node._io ? 'block' : 'none') + ';">';
 
 		str += this.addNode(node);
 
@@ -303,7 +305,9 @@ dTree.prototype.indent = function(node, nodeId) {
 
 	var str = '';
 
-	if (this.root.id != node.pid) {
+	var isRootChild = (this.root.id == node.pid);
+
+	if (!isRootChild) {
 
 		for (var n=0; n<this.aIndent.length; n++)
 
@@ -311,17 +315,25 @@ dTree.prototype.indent = function(node, nodeId) {
 
 		(node._ls) ? this.aIndent.push(0) : this.aIndent.push(1);
 
-		if (node._hc) {
+	}
 
-			str += '<a href="javascript: ' + this.obj + '.o(' + nodeId + ');"><i id="j' + this.obj + nodeId + '" class="';
+	if (node._hc) {
 
-			if (!this.config.useLines) str += (node._io) ? this.icon.nlMinus : this.icon.nlPlus;
+		str += '<a href="javascript: ' + this.obj + '.o(' + nodeId + ');"><i id="j' + this.obj + nodeId + '" class="';
 
-			else str += ( (node._io) ? ((node._ls && this.config.useLines) ? this.icon.minusBottom : this.icon.minus) : ((node._ls && this.config.useLines) ? this.icon.plusBottom : this.icon.plus ) );
+		if (!this.config.useLines) str += (node._io) ? this.icon.nlMinus : this.icon.nlPlus;
 
-			str += '" /></i> &nbsp; </a>';
+		else str += ( (node._io) ? ((node._ls && this.config.useLines) ? this.icon.minusBottom : this.icon.minus) : ((node._ls && this.config.useLines) ? this.icon.plusBottom : this.icon.plus ) );
 
-		} else str += '<img src="' + ( (this.config.useLines) ? ((node._ls) ? this.icon.joinBottom : this.icon.join ) : this.icon.empty) + '" alt="" />';
+		str += '" /></i></a>';
+
+	} else if (!this.config.useLines) {
+
+		str += '<span class="dtree-indent-spacer" aria-hidden="true"></span>';
+
+	} else if (!isRootChild) {
+
+		str += '<img src="' + ( (this.config.useLines) ? ((node._ls) ? this.icon.joinBottom : this.icon.join ) : this.icon.empty) + '" alt="" />';
 
 	}
 
@@ -421,7 +433,7 @@ dTree.prototype.oAll = function(status) {
 
 	for (var n=0; n<this.aNodes.length; n++) {
 
-		if (this.aNodes[n]._hc && this.aNodes[n].pid != this.root.id) {
+		if (this.aNodes[n]._hc) {
 
 			this.nodeStatus(status, n, this.aNodes[n]._ls)
 
@@ -459,7 +471,7 @@ dTree.prototype.openTo = function(nId, bSelect, bFirst) {
 
 	var cn=this.aNodes[nId];
 
-	if (cn.pid==this.root.id || !cn._p) return;
+	if (!cn) return;
 
 	cn._io = true;
 
@@ -471,7 +483,7 @@ dTree.prototype.openTo = function(nId, bSelect, bFirst) {
 
 	else if (bSelect) this._sn=cn._ai;
 
-	this.openTo(cn._p._ai, false, true);
+	if (cn.pid != this.root.id && cn._p) this.openTo(cn._p._ai, false, true);
 
 };
 
@@ -621,7 +633,7 @@ dTree.prototype.updateCookie = function() {
 
 	for (var n=0; n<this.aNodes.length; n++) {
 
-		if (this.aNodes[n]._io && this.aNodes[n].pid != this.root.id) {
+		if (this.aNodes[n]._io) {
 
 			if (str) str += '.';
 

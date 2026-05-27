@@ -77,6 +77,24 @@
 				{include file="li/form-check.tpl" inline=true id="notify_birthday" name="notify_birthday" checked=$notifyBirthday labelKey="notify_birthday"}
 			</td>
 		</tr>
+		{if $bmPushEnabled}
+		<tr>
+			<td class="listTableLeft"><label>{lng p="push_browser"}:</label></td>
+			<td class="listTableRight">
+				<button type="button" class="btn btn-primary btn-sm" id="bmPushSubscribeBtn"{if $bmPushSubscribed|default:false} style="display:none;"{/if}>{lng p="push_enable"}</button>
+				<button type="button" class="btn btn-outline-secondary btn-sm" id="bmPushUnsubscribeBtn"{if !$bmPushSubscribed|default:false} style="display:none;"{/if}>{lng p="push_disable"}</button>
+				<button type="button" class="btn btn-outline-primary btn-sm" id="bmPushTestBtn"{if !$bmPushSubscribed|default:false} style="display:none;"{/if}>{lng p="push_test"}</button>
+				<span class="text-muted small" id="bmPushTestResult"></span>
+				<input type="hidden" name="push_prefs_save" value="1" />
+				{foreach from=$bmPushTypes key=pushType item=pushLabel}
+				<div class="mt-2 bm-push-type-row" data-push-type="{$pushType|escape}">
+					{assign var=pushTypeField value=$pushType|replace:'.':'_'}
+					{include file="li/form-check.tpl" inline=true name="push_type[$pushTypeField]" checked=$bmPushTypePrefs[$pushType] label=$pushLabel}
+				</div>
+				{/foreach}
+			</td>
+		</tr>
+		{/if}
 
 		<tr>
 			<td class="listTableLeftDesc"><i class="fa fa-inbox" aria-hidden="true"></i></td>

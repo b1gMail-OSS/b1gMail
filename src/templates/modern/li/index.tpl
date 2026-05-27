@@ -9,6 +9,12 @@
 
 	<!-- links -->
 	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	{if $bmPushEnabled}
+	<link rel="manifest" href="manifest.php" />
+	<meta name="theme-color" content="#066fd1" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	{/if}
 	    <link href="{$tpldir}style/loggedin.css?{fileDateSig file="style/loggedin.css"}" rel="stylesheet" type="text/css" />
     	<link href="{$tpldir}style/dtree.css?{fileDateSig file="style/dtree.css"}" rel="stylesheet" type="text/css" />
 	<link href="clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
@@ -30,6 +36,14 @@
 	<script src="clientlib/overlay.js?{fileDateSig file="../../clientlib/overlay.js"}" type="text/javascript"></script>
 	<script src="clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
 	<script src="clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
+	{if $bmPushEnabled}
+	<script type="text/javascript">
+	<!--
+		var bmPushEnabled = true, bmPushAutoSubscribe = {if $bmPushSubscribed}true{else}false{/if}, bmPushPromptDismissed = {if $bmPushPromptDismissed|default:false}true{else}false{/if};
+	//-->
+	</script>
+	<script src="clientlib/push.js?{fileDateSig file="../../clientlib/push.js"}" type="text/javascript"></script>
+	{/if}
 	<script type="text/javascript">
 	{literal}
 	var favicon=new Favico({
@@ -50,10 +64,13 @@
 	{hook id="li:index.tpl:head"}
 </head>
 
-<body onload="documentLoader()">
+<body onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
 
 	<div id="main">
+	{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}
+	{include file="li/push-prompt.tpl"}
+	{/if}
 		<div class="dropdownNavbar">
 			<a class="logo" href="#"{if $templatePrefs.navPos=='top'} onclick="toggleDropdownNavMenu()"{/if}>
 				{if $activeTab=='_search'}<i class="fa fa-search"></i>{else}{foreach from=$pageTabs key=tabID item=tab}{if $activeTab==$tabID}

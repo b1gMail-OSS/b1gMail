@@ -169,6 +169,40 @@ else if($_REQUEST['action'] == 'getNotificationCount')
 }
 
 /**
+ * test Web Push delivery (logged-in user)
+ */
+else if($_REQUEST['action'] == 'testPush')
+{
+	include B1GMAIL_DIR.'serverlib/push.class.php';
+	header('Content-Type: application/json; charset=utf-8');
+
+	if (!BMPush::isEnabled()) {
+		echo json_encode(['ok' => false, 'error' => 'disabled']);
+		exit();
+	}
+
+	$pushPrefs = BMPush::getUserPushPrefs($thisUser->_id);
+	$result = BMPush::sendTestPush($thisUser->_id);
+
+	$reason = isset($result['reason']) ? $result['reason'] : '';
+	if ($result['sent'] == 0 && $reason == '' && !empty($pushPrefs['enabled']) && empty($pushPrefs['types'][BMPush::TYPE_MAIL])) {
+		$reason = 'mail_type_disabled';
+	}
+
+	echo json_encode([
+		'ok' => $result['sent'] > 0,
+		'sent' => $result['sent'],
+		'failed' => isset($result['failed']) ? $result['failed'] : 0,
+		'removed' => isset($result['removed']) ? $result['removed'] : 0,
+		'subscriptions' => BMPush::countSubscriptions(BMPush::AREA_USER, $thisUser->_id),
+		'prefsEnabled' => !empty($pushPrefs['enabled']),
+		'reason' => $reason,
+		'lastError' => isset($result['lastError']) ? $result['lastError'] : '',
+	]);
+	exit();
+}
+
+/**
  * logout
  */
 else if($_REQUEST['action'] == 'logout')

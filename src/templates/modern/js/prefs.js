@@ -145,3 +145,175 @@ function exportPrivateCert(hash)
 		140,
 		true);
 }
+
+(function () {
+	function collectPushTypes() {
+		var types = {};
+		var rows = document.querySelectorAll('.bm-push-type-row[data-push-type]');
+		for (var i = 0; i < rows.length; i++) {
+			var typeKey = rows[i].getAttribute('data-push-type');
+			var input = rows[i].querySelector('input[type="checkbox"]');
+			if (typeKey && input) {
+				types[typeKey] = input.checked;
+			}
+		}
+		return types;
+	}
+
+	function updatePushButtons(subscribed) {
+		var subBtn = document.getElementById('bmPushSubscribeBtn');
+		var unsubBtn = document.getElementById('bmPushUnsubscribeBtn');
+		var testBtn = document.getElementById('bmPushTestBtn');
+		if (subBtn) {
+			subBtn.style.display = subscribed ? 'none' : '';
+		}
+		if (unsubBtn) {
+			unsubBtn.style.display = subscribed ? '' : 'none';
+		}
+		if (testBtn) {
+			testBtn.style.display = subscribed ? '' : 'none';
+		}
+	}
+
+	document.addEventListener('DOMContentLoaded', function () {
+		if (typeof bmPush === 'undefined' || !bmPush.isSupported()) {
+			return;
+		}
+		var subBtn = document.getElementById('bmPushSubscribeBtn');
+		var unsubBtn = document.getElementById('bmPushUnsubscribeBtn');
+		var testBtn = document.getElementById('bmPushTestBtn');
+		var testResult = document.getElementById('bmPushTestResult');
+		if (!subBtn && !unsubBtn) {
+			return;
+		}
+
+		function syncPushUi() {
+			var browserSub = false;
+			var serverSubs = 0;
+			var prefsEnabled = false;
+
+			var pBrowser = bmPush.hasSubscription().then(function (v) {
+				browserSub = !!v;
+			});
+			var pServer = fetch('push-api.php?action=status&sid=' + encodeURIComponent(currentSID), { credentials: 'same-origin' })
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					if (data && data.ok) {
+						serverSubs = data.subscriptions || 0;
+						prefsEnabled = !!data.prefsEnabled;
+					}
+				})
+				.catch(function () {});
+
+			return Promise.all([pBrowser, pServer]).then(function () {
+				updatePushButtons(browserSub && (serverSubs > 0 || prefsEnabled));
+				return { browserSub: browserSub, serverSubs: serverSubs, prefsEnabled: prefsEnabled };
+			});
+		}
+
+		syncPushUi();
+
+		if (subBtn) {
+			subBtn.addEventListener('click', function () {
+				subBtn.disabled = true;
+				bmPush.subscribe(collectPushTypes()).then(function (r) {
+					subBtn.disabled = false;
+					if (r && r.ok) {
+						syncPushUi();
+					} else if (testResult) {
+						testResult.textContent = lang['push_enable_fail'] || lang['push_enabled_fail'] || '';
+					}
+				}).catch(function () {
+					subBtn.disabled = false;
+				});
+			});
+		}
+		if (unsubBtn) {
+			unsubBtn.addEventListener('click', function () {
+				unsubBtn.disabled = true;
+				bmPush.unsubscribe().then(function () {
+					unsubBtn.disabled = false;
+					syncPushUi();
+				}).catch(function () {
+					unsubBtn.disabled = false;
+				});
+			});
+		}
+		function pushTestFailMessage(data) {
+			if (!data) {
+				return lang['push_test_fail'] || 'Failed';
+			}
+			if (data.reason === 'no_subscription' || (data.subscriptions !== undefined && data.subscriptions < 1)) {
+				return lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
+			}
+			if (data.reason === 'prefs_blocked' || data.prefsEnabled === false) {
+				return lang['push_test_fail_noprefs'] || lang['push_test_fail'] || 'Failed';
+			}
+			if (data.reason === 'mail_type_disabled') {
+				return lang['push_test_fail_mailtype'] || lang['push_test_fail'] || 'Failed';
+			}
+			if (data.reason === 'delivery_failed' || (data.failed && data.failed > 0)) {
+				var msg = lang['push_test_fail_delivery'] || lang['push_test_fail'] || 'Failed';
+				if (data.lastError) {
+					msg += ' (' + data.lastError + ')';
+				}
+				return msg;
+			}
+			return lang['push_test_fail'] || 'Failed';
+		}
+
+		if (testBtn) {
+			testBtn.addEventListener('click', function () {
+				testBtn.disabled = true;
+				if (testResult) {
+					testResult.textContent = '';
+				}
+				syncPushUi().then(function (state) {
+					if (!state.browserSub) {
+						testBtn.disabled = false;
+						if (testResult) {
+							testResult.textContent = lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
+						}
+						return;
+					}
+					if (state.serverSubs < 1) {
+						return bmPush.subscribe(collectPushTypes()).then(function (r) {
+							if (!r || !r.ok) {
+								testBtn.disabled = false;
+								if (testResult) {
+									testResult.textContent = lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
+								}
+								return;
+							}
+							return fetch('start.php?action=testPush&sid=' + encodeURIComponent(currentSID), { credentials: 'same-origin' });
+						});
+					}
+					return fetch('start.php?action=testPush&sid=' + encodeURIComponent(currentSID), { credentials: 'same-origin' });
+				}).then(function (r) {
+					if (!r || !r.json) {
+						return;
+					}
+					return r.json();
+				}).then(function (data) {
+					if (!data) {
+						return;
+					}
+					testBtn.disabled = false;
+					if (testResult) {
+						if (data.ok) {
+							var okMsg = lang['push_test_ok'] || 'OK';
+							testResult.textContent = okMsg.split('%%n%%').join(String(data.sent));
+						} else {
+							testResult.textContent = pushTestFailMessage(data);
+						}
+					}
+				}).catch(function () {
+					testBtn.disabled = false;
+					if (testResult) {
+						testResult.textContent = lang['push_test_fail'] || 'Failed';
+					}
+				});
+			});
+		}
+	});
+})();

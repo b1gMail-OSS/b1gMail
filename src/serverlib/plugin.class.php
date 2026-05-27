@@ -328,6 +328,44 @@ class BMPlugin
     {
     }
 
+    /**
+     * register push notification types for user/admin prefs (type => label).
+     *
+     * @param array  $types Push types (by reference)
+     * @param string $area  user|admin
+     */
+    public function GetPushTypes(&$types, $area)
+    {
+    }
+
+    /**
+     * adjust or cancel outgoing Web Push ($abort = true).
+     *
+     * @param array $payload  title, body, icon, tag, url, type
+     * @param array $message  original BMPush::send() message
+     * @param bool  $abort
+     */
+    public function OnBeforePushSend(&$payload, &$message, &$abort)
+    {
+    }
+
+    /**
+     * @param array $payload
+     * @param array $message
+     * @param array $results sent, failed, removed
+     */
+    public function OnAfterPushSend($payload, $message, $results)
+    {
+    }
+
+    public function OnPushSubscribe($area, $targetId, $subscription)
+    {
+    }
+
+    public function OnPushUnsubscribe($area, $targetId, $endpoint)
+    {
+    }
+
     // added in 7.0.0-PL1
     public function AfterStoreMail($mailID, &$mail, &$mailbox)
     {
