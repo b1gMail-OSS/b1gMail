@@ -57,7 +57,14 @@ $sms = _new('BMSMS', array($userRow['id'], &$thisUser));
  */
 $tpl->assign('pageMenuFile', 'li/sms.sidebar.tpl');
 $tpl->assign('pageToolbarFile', 'li/sms.toolbar.tpl');
-$tpl->assign('accBalance', $thisUser->GetBalance());
+$accBalance = $thisUser->GetBalance();
+$accBalanceMax = max(
+	$accBalance,
+	max(0, (int) $groupRow['sms_monat']) + $thisUser->GetStaticBalance(),
+	1
+);
+$tpl->assign('accBalance', $accBalance);
+$tpl->assign('accBalanceMax', $accBalanceMax);
 
 $validationRequired = $groupRow['smsvalidation'] == 'yes' && $userRow['sms_validation'] == 0;
 

@@ -1217,7 +1217,7 @@ class BMMailbox
 
 		if(BMWorkgroup::AccessAllowed($this->_userID, WORKGROUP_TYPE_MAILFOLDER, $folderID, false))
 		{
-			$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color FROM {pre}mails WHERE folder=? AND ' . $condition . ' '
+			$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color,blobstorage,virnam,trained FROM {pre}mails WHERE folder=? AND ' . $condition . ' '
 						. 'ORDER BY ' . ($groupMode != '-' ? $this->GetGroupOrderBy($groupMode) . ', ' : ''). $sortField . '  ' . $sortBy
 						. ($mailsPerPage != -1 ? ' LIMIT ' . (($page-1)*$mailsPerPage) . ','. (int)$mailsPerPage : ''),
 						$folderID);
@@ -1228,7 +1228,7 @@ class BMMailbox
 
 			if(count($sharedFolders) > 0)
 			{
-				$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color FROM {pre}mails WHERE (userid=? OR folder IN ?) AND ' . $condition . ' '
+				$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color,blobstorage,virnam,trained FROM {pre}mails WHERE (userid=? OR folder IN ?) AND ' . $condition . ' '
 							. 'ORDER BY ' . ($groupMode != '-' ? $this->GetGroupOrderBy($groupMode) . ', ' : ''). $sortField . '  ' . $sortBy
 							. ($mailsPerPage != -1 ? ' LIMIT ' . (($page-1)*$mailsPerPage) . ','. (int)$mailsPerPage : ''),
 							$this->_userID,
@@ -1236,7 +1236,7 @@ class BMMailbox
 			}
 			else
 			{
-				$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color FROM {pre}mails WHERE userid=? AND ' . $condition . ' '
+				$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color,blobstorage,virnam,trained FROM {pre}mails WHERE userid=? AND ' . $condition . ' '
 							. 'ORDER BY ' . ($groupMode != '-' ? $this->GetGroupOrderBy($groupMode) . ', ' : ''). $sortField . '  ' . $sortBy
 							. ($mailsPerPage != -1 ? ' LIMIT ' . (($page-1)*$mailsPerPage) . ','. (int)$mailsPerPage : ''),
 							$this->_userID);
@@ -1244,7 +1244,7 @@ class BMMailbox
 		}
 		else
 		{
-			$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color FROM {pre}mails WHERE userid=? AND ' . $condition . ' '
+			$res = $db->Query('SELECT id,von,an,betreff,datum,flags,priority,size,color,blobstorage,virnam,trained FROM {pre}mails WHERE userid=? AND ' . $condition . ' '
 						. 'ORDER BY ' . ($groupMode != '-' ? $this->GetGroupOrderBy($groupMode) . ', ' : ''). $sortField . '  ' . $sortBy
 						. ($mailsPerPage != -1 ? ' LIMIT ' . (($page-1)*$mailsPerPage) . ','. (int)$mailsPerPage : ''),
 						$this->_userID);
@@ -1286,6 +1286,69 @@ class BMMailbox
 		ModuleFunction('OnEndMailList', array($this->_userID, $folderID == FOLDER_DRAFTS));
 
 		return($result);
+	}
+
+	/**
+	 * add plain-text body preview snippets to mail list entries
+	 *
+	 * @param array $mailList
+	 * @param int $maxLen
+	 * @return void
+	 */
+	function EnrichMailListPreviews(&$mailList, $maxLen = 180)
+	{
+		foreach($mailList as $mailID => &$mail)
+		{
+			if($mailID < 0)
+				continue;
+
+			$mail['preview'] = '';
+
+			if(!isset($mail['row']) || !is_array($mail['row']))
+				continue;
+
+			try
+			{
+				// List row is already loaded – avoid GetMail() per message (DB + S/MIME), prevents timeouts
+				$bmMail = _new('BMMail', array($this->_userID, $mail['row'], false, true, false, &$this->_userObject));
+				if(!is_object($bmMail))
+					continue;
+
+				$preview = '';
+
+				$textParts = $bmMail->GetTextParts();
+
+				if(isset($textParts['text']))
+					$preview = trim($textParts['text']);
+
+				if($preview === '' && isset($textParts['html']))
+					$preview = trim(htmlToText($textParts['html']));
+
+				if($preview !== '')
+				{
+					$preview = @preg_replace('/\s+/u', ' ', $preview);
+					if($preview === null)
+						$preview = preg_replace('/\s+/', ' ', $preview);
+
+					if(function_exists('mb_strlen') && function_exists('mb_substr'))
+					{
+						if(mb_strlen($preview) > $maxLen)
+							$preview = rtrim(mb_substr($preview, 0, $maxLen - 1)) . '...';
+					}
+					else if(strlen($preview) > $maxLen)
+					{
+						$preview = rtrim(substr($preview, 0, $maxLen - 1)) . '...';
+					}
+				}
+
+				$mail['preview'] = $preview;
+			}
+			catch(Throwable $e)
+			{
+				continue;
+			}
+		}
+		unset($mail);
 	}
 
 	/**

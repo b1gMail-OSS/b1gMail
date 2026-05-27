@@ -123,6 +123,7 @@ $tpl->assign('prevMonth',		mktime(0, 0, 0, date('m', $date), 15, date('Y', $date
 $tpl->assign('nextMonth',		mktime(0, 0, 0, date('m', $date), 15, date('Y', $date)) + TIME_ONE_MONTH);
 $tpl->assign('prevWeek',		$date - TIME_ONE_WEEK);
 $tpl->assign('nextWeek',		$date + TIME_ONE_WEEK);
+$tpl->assign('calWeekNo',		(int)date('W', $date));
 $tpl->assign('weekYear',		date('o') == 'o' ? date('Y', $date) : date('o', $date));
 $tpl->assign('thisMonthText',	_strftime('%B %Y', mktime(0, 0, 0, date('m', $date), 15, date('Y', $date))));
 $tpl->assign('smsEnabled',		$thisUser->SMSEnabled());
@@ -348,6 +349,14 @@ else if($_REQUEST['action'] == 'addDate')
 		: time();
 
 	// assign
+	$tpl->assign('date', $startDate);
+	$tpl->assign('theDate', $startDate);
+	$tpl->assign('calWeekNo', (int)date('W', $startDate));
+	$tpl->assign('prevMonth', mktime(0, 0, 0, date('m', $startDate), 15, date('Y', $startDate)) - TIME_ONE_MONTH);
+	$tpl->assign('nextMonth', mktime(0, 0, 0, date('m', $startDate), 15, date('Y', $startDate)) + TIME_ONE_MONTH);
+	$tpl->assign('prevWeek', $startDate - TIME_ONE_WEEK);
+	$tpl->assign('nextWeek', $startDate + TIME_ONE_WEEK);
+	$tpl->assign('thisMonthText', _strftime('%B %Y', mktime(0, 0, 0, date('m', $startDate), 15, date('Y', $startDate))));
 	$tpl->assign('pageTitle', $lang_user['adddate']);
 	$tpl->assign('weekDays', $lang_user['full_weekdays']);
 	$tpl->assign('startDate', $startDate);
@@ -433,6 +442,15 @@ else if($_REQUEST['action'] == 'editDate'
 		}
 
 		// assign
+		$apptDate = $date['startdate'];
+		$tpl->assign('date', $apptDate);
+		$tpl->assign('theDate', $apptDate);
+		$tpl->assign('calWeekNo', (int)date('W', $apptDate));
+		$tpl->assign('prevMonth', mktime(0, 0, 0, date('m', $apptDate), 15, date('Y', $apptDate)) - TIME_ONE_MONTH);
+		$tpl->assign('nextMonth', mktime(0, 0, 0, date('m', $apptDate), 15, date('Y', $apptDate)) + TIME_ONE_MONTH);
+		$tpl->assign('prevWeek', $apptDate - TIME_ONE_WEEK);
+		$tpl->assign('nextWeek', $apptDate + TIME_ONE_WEEK);
+		$tpl->assign('thisMonthText', _strftime('%B %Y', mktime(0, 0, 0, date('m', $apptDate), 15, date('Y', $apptDate))));
 		$tpl->assign('pageTitle', $lang_user['editdate']);
 		$tpl->assign('attendees', implode(';', $attendeeStr));
 		$tpl->assign('startDate', $date['startdate']);

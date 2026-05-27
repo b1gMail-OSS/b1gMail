@@ -1,0 +1,29 @@
+/*
+ * CKEditor-Inhaltsbereich – Typografie an Tabler angeglichen
+ * Wird zusätzlich zu clientlib/ckeditor/contents.css geladen.
+ */
+
+body
+{
+	font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+	font-size: 0.8125rem;
+	color: #1d273b;
+	background-color: #fff;
+	margin: 0.75rem;
+}
+
+.cke_editable
+{
+	font-size: 0.8125rem;
+	line-height: 1.5;
+}
+
+a
+{
+	color: #206bc4;
+}
+
+a > img
+{
+	outline-color: #206bc4;
+}

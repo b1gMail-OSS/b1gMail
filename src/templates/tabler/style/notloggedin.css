@@ -1,0 +1,5 @@
+/* Legacy NLI helpers – login page uses tabler-custom.css */
+
+HTML, BODY {
+	height: 100%;
+}

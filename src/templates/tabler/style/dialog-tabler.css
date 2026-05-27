@@ -1,0 +1,675 @@
+/* Tabler-Stil für Overlay-Dialoge (Anlage, Webdisk, Adressbuch) */
+
+BODY.bm-dialog-body {
+	margin: 0;
+	padding: 0;
+	background: var(--tblr-bg-surface, #fff);
+	color: var(--tblr-body-color);
+	font-family: var(--tblr-font-sans-serif, inherit);
+	font-size: 0.875rem;
+}
+
+.bm-dialog-page {
+	padding: 1rem 1.125rem;
+	min-height: 100%;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+}
+
+.bm-dialog-body.bm-dialog-attendees .bm-dialog-page {
+	min-height: 100%;
+	height: 100%;
+	padding-top: 0.875rem;
+}
+
+.bm-dialog-page-fill {
+	height: 100vh;
+	max-height: 100%;
+}
+
+.bm-dialog-title {
+	margin: 0 0 0.5rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.bm-dialog-intro {
+	margin: 0 0 1rem;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+}
+
+.bm-dialog-form {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.bm-dialog-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-top: auto;
+	padding-top: 1rem;
+}
+
+.bm-dialog-actions-left {
+	margin-right: auto;
+}
+
+.bm-dialog-actions-right {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+/* Dateiauswahl (lokal / Webdisk) */
+.bm-file-selector {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Input-Groups: eine Zeile (Tabler setzt flex-wrap: wrap – sonst Icon/Button unter dem Feld) */
+.bm-dialog-body .input-group,
+.bm-file-selector .input-group {
+	display: flex;
+	width: 100%;
+	flex-wrap: nowrap;
+	align-items: stretch;
+}
+
+.bm-dialog-body .input-group > .form-control,
+.bm-dialog-body .input-group > .form-select,
+.bm-dialog-body .input-group > .addressDiv,
+.bm-file-selector .input-group > .form-control,
+.bm-file-selector .input-group > .form-select {
+	flex: 1 1 auto;
+	width: 1%;
+	min-width: 0;
+}
+
+.bm-dialog-body .input-group > .input-group-text,
+.bm-dialog-body .input-group > .btn,
+.bm-file-selector .input-group > .input-group-text,
+.bm-file-selector .input-group > .btn {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.bm-file-selector-source-group .input-group-text {
+	padding-left: 0.75rem;
+	padding-right: 0.75rem;
+}
+
+.bm-file-selector-panel .input-group-text {
+	padding-left: 0.75rem;
+	padding-right: 0.75rem;
+}
+
+.bm-file-selector-panel .form-control[type="file"] {
+	font-size: 0.8125rem;
+}
+
+.bm-file-selector-panel .form-control[type="file"]::file-selector-button {
+	margin-right: 0.625rem;
+	padding: 0.25rem 0.625rem;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius-sm, 4px);
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+	font-size: 0.8125rem;
+}
+
+/* Webdisk-Browser */
+.bm-webdisk-file-list.fileList {
+	flex: 1 1 auto;
+	min-height: 12rem;
+	height: auto !important;
+	width: 100% !important;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 6px);
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+	overflow: hidden;
+}
+
+.bm-webdisk-columns-table {
+	border-collapse: collapse;
+	height: 100% !important;
+}
+
+.bm-webdisk-column {
+	width: 11.5rem;
+	vertical-align: top;
+	border-right: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-webdisk-column-scroll {
+	width: 11.5rem !important;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.bm-webdisk-item,
+.bm-webdisk-item.contentItem {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	min-height: 2rem;
+	padding: 0.25rem 0.5rem;
+	text-decoration: none;
+	color: var(--tblr-body-color);
+	background: transparent;
+	border-bottom: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+}
+
+.bm-webdisk-item:hover {
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+}
+
+.bm-webdisk-item.contentItemActive,
+.bm-webdisk-item.bm-webdisk-item-active {
+	background: var(--tblr-primary, #206bc4) !important;
+	color: #fff !important;
+}
+
+.bm-webdisk-item-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.8125rem;
+}
+
+.bm-webdisk-item-chevron {
+	flex-shrink: 0;
+	opacity: 0.55;
+	font-size: 0.75rem;
+}
+
+.bm-webdisk-item.contentItemActive .bm-webdisk-item-chevron,
+.bm-webdisk-item.bm-webdisk-item-active .bm-webdisk-item-chevron {
+	opacity: 0.9;
+}
+
+.bm-webdisk-column-spacer {
+	width: 0.25rem;
+}
+
+/* Adressbuch-Dialog */
+.bm-dialog-body.bm-dialog-addressbook .addressDiv.bm-addressbook-list,
+.bm-addressbook-dialog .addressDiv.bm-addressbook-list {
+	width: 100% !important;
+	flex: none;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 6px);
+	background: var(--tblr-bg-surface, #fff);
+	overflow: auto;
+}
+
+.bm-addressbook-list {
+	height: 10rem;
+	padding: 0.125rem 0;
+}
+
+.bm-dialog-body.bm-dialog-addressbook .input-group,
+.bm-addressbook-dialog .input-group {
+	display: flex !important;
+	width: 100%;
+	flex-wrap: nowrap !important;
+	align-items: stretch;
+}
+
+/* dialog.css: .addressDiv { width: 100% } – nur in der Kontaktliste, nicht neben dem Pfeil-Button */
+.bm-dialog-body.bm-dialog-addressbook .input-group > .addressDiv.bm-addressbook-target,
+.bm-addressbook-dialog .input-group > .addressDiv.bm-addressbook-target {
+	flex: 1 1 auto !important;
+	width: 1% !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	min-height: 2.75rem;
+	max-height: 5.5rem;
+	height: auto;
+	padding: 0.25rem 0.375rem;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 6px);
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	background: var(--tblr-bg-surface, #fff);
+	box-shadow: none;
+	overflow: auto;
+	box-sizing: border-box;
+}
+
+.bm-addressbook-dialog .input-group > .addressDiv.bm-addressbook-target.form-control {
+	padding: 0.25rem 0.375rem;
+}
+
+.bm-dialog-body.bm-dialog-addressbook .input-group > .btn,
+.bm-addressbook-dialog .input-group > .btn {
+	flex: 0 0 auto !important;
+	flex-shrink: 0;
+	min-width: 2.75rem;
+	align-self: stretch;
+	white-space: nowrap;
+}
+
+.bm-addressbook-dialog .bm-addressbook-target.addressDiv {
+	min-height: 2.75rem;
+	max-height: 5.5rem;
+}
+
+.bm-dialog-body.bm-dialog-addressbook .addressItem,
+.bm-dialog-body.bm-dialog-addressbook .addressItemActive,
+.bm-addressbook-dialog .addressItem,
+.bm-addressbook-dialog .addressItemActive {
+	display: flex !important;
+	align-items: center;
+	width: auto !important;
+	min-height: 2rem;
+	height: auto;
+	padding: 0.35rem 0.625rem;
+	border-bottom: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+	cursor: pointer;
+	font-size: 0.8125rem;
+	line-height: 1.35;
+	overflow: visible;
+}
+
+.bm-addressbook-dialog .addressItem > div,
+.bm-addressbook-dialog .addressItemActive > div {
+	float: none !important;
+	display: flex;
+	align-items: center;
+	flex: 1 1 auto;
+	min-width: 0;
+	gap: 0.375rem;
+}
+
+.bm-addressbook-dialog .addressItem img,
+.bm-addressbook-dialog .addressItemActive img {
+	flex-shrink: 0;
+	width: 1rem !important;
+	height: 1rem !important;
+	margin: 0 !important;
+}
+
+.bm-addressbook-dialog .addressItem a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.bm-addressbook-dialog .addressItemActive {
+	background: var(--tblr-primary, #206bc4);
+	color: #fff;
+}
+
+.bm-addressbook-dialog .addressItemActive a {
+	color: #fff;
+}
+
+.bm-addressbook-dialog .bm-addressbook-target .addressItem,
+.bm-addressbook-dialog .bm-addressbook-target .addressItemActive {
+	border-bottom: none;
+}
+
+.bm-addressbook-dialog .bm-addressbook-target .addressItem + .addressItem,
+.bm-addressbook-dialog .bm-addressbook-target .addressItem + .addressItemActive,
+.bm-addressbook-dialog .bm-addressbook-target .addressItemActive + .addressItem,
+.bm-addressbook-dialog .bm-addressbook-target .addressItemActive + .addressItemActive {
+	margin-top: 0.25rem;
+	padding-top: 0.35rem;
+	border-top: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+}
+
+.bm-spin {
+	animation: bm-dialog-spin 0.8s linear infinite;
+}
+
+@keyframes bm-dialog-spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+/* Fortschrittsbalken in Dialogen */
+.bm-dialog-body .progressBar {
+	height: 0.5rem;
+	border-radius: var(--tblr-border-radius-pill, 999px);
+	background: var(--tblr-bg-surface-secondary, #e9ecef);
+	border: none;
+	overflow: hidden;
+}
+
+.bm-dialog-body .progressBarValue {
+	background: var(--tblr-primary, #206bc4);
+}
+
+/* Termin-Ansicht */
+BODY.bm-dialog-body.bm-dialog-calendar-date {
+	overflow-y: auto;
+}
+
+BODY.bm-dialog-body.bm-dialog-modal-sections {
+	padding: 0;
+	overflow-y: auto;
+}
+
+.bm-dialog-modal-sections .bm-calendar-showdate {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+}
+
+.bm-dialog-modal-sections .bm-calendar-showdate > .modal-body {
+	flex-shrink: 0;
+	padding: 1rem 1.25rem;
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-dialog-modal-sections .bm-calendar-showdate > .modal-body + .modal-body {
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+.bm-dialog-modal-sections .bm-calendar-showdate > .modal-body .modal-title {
+	margin-bottom: 0.75rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+.bm-dialog-modal-sections .bm-calendar-showdate > .modal-footer {
+	flex-shrink: 0;
+	margin-top: auto;
+	padding: 0.75rem 1.25rem;
+	background: var(--tblr-bg-surface, #fff);
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+.bm-calendar-showdate-footer {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.bm-calendar-showdate-footer-start {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.bm-calendar-showdate-footer-actions {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.bm-calendar-showdate dl dt {
+	font-weight: 600;
+	color: var(--tblr-secondary, #626976);
+}
+
+.bm-calendar-showdate dl dd {
+	margin-bottom: 0.5rem;
+}
+
+.bm-calendar-showdate dl dd:last-child {
+	margin-bottom: 0;
+}
+
+.bm-calendar-attendee-list {
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 6px);
+	overflow: auto;
+	max-height: 8rem;
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-calendar-showdate .addressItem {
+	display: block;
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+	cursor: pointer;
+	font-size: 0.8125rem;
+}
+
+.bm-calendar-showdate .addressItem:hover {
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+}
+
+.bm-calendar-showdate .addressItem:last-child {
+	border-bottom: none;
+}
+
+/* Teilnehmer hinzufügen */
+BODY.bm-dialog-body.bm-dialog-attendees {
+	overflow: hidden;
+	height: 100%;
+}
+
+.bm-attendees-dialog {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	padding-bottom: 0.75rem;
+}
+
+.bm-attendees-dialog .bm-dialog-intro {
+	flex-shrink: 0;
+	padding-bottom: 0.75rem;
+	border-bottom: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+}
+
+.bm-attendees-transfer {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	gap: 0.625rem;
+	margin-top: 0.75rem;
+}
+
+.bm-attendees-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 0;
+	min-height: 0;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	box-shadow: none;
+}
+
+.bm-attendees-panel .card-header {
+	flex-shrink: 0;
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+	border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+.bm-attendees-panel .card-title {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+}
+
+.bm-attendees-panel .card-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.bm-attendees-list {
+	flex: 1 1 auto;
+	min-height: 7rem;
+	height: auto;
+	max-height: none;
+	border: none;
+	border-radius: 0;
+	background: var(--tblr-bg-surface, #fff);
+	overflow-y: auto;
+}
+
+.bm-attendees-transfer-bar {
+	display: flex;
+	justify-content: center;
+	flex-shrink: 0;
+	padding: 0.125rem 0;
+}
+
+.bm-attendees-transfer-bar .btn {
+	min-width: 2.25rem;
+}
+
+.bm-attendees-dialog .addressItem,
+.bm-attendees-dialog .addressItemActive {
+	display: flex;
+	align-items: center;
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+	cursor: pointer;
+	font-size: 0.8125rem;
+	line-height: 1.35;
+}
+
+.bm-attendees-dialog .addressItem > div,
+.bm-attendees-dialog .addressItemActive > div {
+	float: none !important;
+	display: flex;
+	align-items: center;
+	flex: 1 1 auto;
+	min-width: 0;
+	gap: 0.5rem;
+}
+
+.bm-attendees-dialog .addressItem img,
+.bm-attendees-dialog .addressItemActive img {
+	flex-shrink: 0;
+	width: 1rem !important;
+	height: 1rem !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	opacity: 0.75;
+}
+
+.bm-attendees-dialog .addressItem:hover {
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+}
+
+.bm-attendees-dialog .addressItemActive {
+	background: var(--tblr-primary, #206bc4);
+	color: #fff;
+}
+
+.bm-attendees-dialog .addressItemActive img {
+	filter: brightness(0) invert(1);
+	opacity: 0.95;
+}
+
+.bm-attendees-dialog .addressItem:last-child,
+.bm-attendees-dialog .addressItemActive:last-child {
+	border-bottom: none;
+}
+
+.bm-attendees-selected:empty::before {
+	content: attr(data-empty);
+	display: block;
+	padding: 1.25rem 0.75rem;
+	text-align: center;
+	font-size: 0.8125rem;
+	color: var(--tblr-secondary, #626976);
+	font-style: italic;
+}
+
+.bm-attendees-dialog #attendees .addressItem img[id^="delAddress"],
+.bm-attendees-dialog #attendees .addressItemActive img[id^="delAddress"] {
+	margin-left: auto !important;
+	opacity: 0.55;
+	cursor: pointer;
+}
+
+.bm-attendees-dialog #attendees .addressItem:hover img[id^="delAddress"],
+.bm-attendees-dialog #attendees .addressItemActive img[id^="delAddress"] {
+	opacity: 0.85;
+}
+
+.bm-attendees-dialog .bm-dialog-actions {
+	flex-shrink: 0;
+	margin-top: 0.75rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+}
+
+/* Dark Mode – Dialog-Iframes übernehmen data-bs-theme vom Parent */
+[data-bs-theme="dark"] BODY.bm-dialog-body {
+	background: var(--tblr-bg-surface, #1f2937);
+	color: var(--tblr-body-color, #e5e7eb);
+}
+
+[data-bs-theme="dark"] .bm-addressbook-dialog .addressDiv.bm-addressbook-list,
+[data-bs-theme="dark"] .bm-addressbook-dialog .input-group > .addressDiv.bm-addressbook-target {
+	background: var(--tblr-bg-surface, #1f2937);
+	border-color: var(--tblr-border-color-translucent, rgba(255, 255, 255, 0.1));
+}
+
+[data-bs-theme="dark"] .bm-addressbook-dialog .addressItem {
+	border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="dark"] .bm-addressbook-dialog .addressItem img,
+[data-bs-theme="dark"] .bm-addressbook-dialog .addressItemActive img {
+	filter: brightness(0) invert(1);
+	opacity: 0.85;
+}
+
+[data-bs-theme="dark"] .bm-addressbook-dialog .bm-addressbook-target .addressItem + .addressItem,
+[data-bs-theme="dark"] .bm-addressbook-dialog .bm-addressbook-target .addressItem + .addressItemActive,
+[data-bs-theme="dark"] .bm-addressbook-dialog .bm-addressbook-target .addressItemActive + .addressItem,
+[data-bs-theme="dark"] .bm-addressbook-dialog .bm-addressbook-target .addressItemActive + .addressItemActive {
+	border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .bm-webdisk-file-list.fileList,
+[data-bs-theme="dark"] .bm-webdisk-column {
+	background: var(--tblr-bg-surface, #1f2937);
+	border-color: var(--tblr-border-color-translucent, rgba(255, 255, 255, 0.1));
+}
+
+[data-bs-theme="dark"] .bm-webdisk-item,
+[data-bs-theme="dark"] .bm-webdisk-item.contentItem {
+	border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-bs-theme="dark"] .bm-webdisk-item:hover {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+[data-bs-theme="dark"] .bm-file-selector-panel .form-control[type="file"]::file-selector-button {
+	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(255, 255, 255, 0.12);
+	color: var(--tblr-body-color, #e5e7eb);
+}
+
+[data-bs-theme="dark"] .bm-dialog-modal-sections .bm-calendar-showdate > .modal-body,
+[data-bs-theme="dark"] .bm-dialog-modal-sections .bm-calendar-showdate > .modal-footer,
+[data-bs-theme="dark"] .bm-calendar-attendee-list {
+	background: var(--tblr-bg-surface, #1f2937);
+	border-color: var(--tblr-border-color-translucent, rgba(255, 255, 255, 0.1));
+}
+
+[data-bs-theme="dark"] .bm-attendees-panel .card-header {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+[data-bs-theme="dark"] .bm-attendees-list {
+	background: var(--tblr-bg-surface, #1f2937);
+}
+
+[data-bs-theme="dark"] .bm-attendees-dialog .bm-dialog-intro,
+[data-bs-theme="dark"] .bm-attendees-dialog .bm-dialog-actions {
+	border-top-color: rgba(255, 255, 255, 0.1);
+}

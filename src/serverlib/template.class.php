@@ -407,6 +407,23 @@ class Template extends Smarty\Smarty {
             $this->assign('pageTabsCount', count($pageTabs));
             $this->assign('newMenu', $newMenu);
             $this->assign('_userEmail', $userRow['email']);
+            $this->assign('_userFirstName', $userRow['vorname']);
+            $this->assign('_userLastName', $userRow['nachname']);
+            $this->assign(
+                '_userDisplayName',
+                trim($userRow['vorname'] . ' ' . $userRow['nachname'])
+            );
+            $userInitials = '';
+            if (trim($userRow['vorname']) != '') {
+                $userInitials .= mb_strtoupper(mb_substr($userRow['vorname'], 0, 1));
+            }
+            if (trim($userRow['nachname']) != '') {
+                $userInitials .= mb_strtoupper(mb_substr($userRow['nachname'], 0, 1));
+            }
+            if ($userInitials == '') {
+                $userInitials = mb_strtoupper(mb_substr($userRow['email'], 0, 1));
+            }
+            $this->assign('_userInitials', $userInitials);
             $this->assign(
                 'searchDetailsDefault',
                 $userRow['search_details_default'] == 'yes'
