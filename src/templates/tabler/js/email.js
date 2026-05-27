@@ -1092,7 +1092,7 @@ function _folderColorMail(http)
 														: (color == 0 ? '' : 'mailColor_' + color);
 
 		if(EBID('mail_' + id + '_ncol1'))
-			EBID('mail_' + id + '_ncol1').className = 'narrowRow bm-mail-status-icon';
+			EBID('mail_' + id + '_ncol1').className = 'narrowRow bm-mail-status-icon bm-mail-list-leading';
 
 		var tr = EBID('mail_' + id + '_ntr');
 		if(tr)

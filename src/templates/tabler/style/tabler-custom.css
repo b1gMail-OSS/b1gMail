@@ -2153,6 +2153,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #fo
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea {
+	--bm-mail-leading-inset: 0.5rem;
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
@@ -2804,8 +2805,13 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea .cont
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea #contentHeader {
-	padding-left: 0.5rem;
+	padding-left: calc(var(--bm-mail-card-gap, 0.5rem) + var(--bm-mail-leading-inset, 0.5rem));
 	padding-right: 0.5rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea #contentHeader .left,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea .contentHeader .left {
+	gap: var(--bm-mail-leading-inset, 0.5rem);
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea #contentHeader .left,
@@ -3235,6 +3241,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody {
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable {
 	--bm-mail-card-gap: 0.5rem;
+	--bm-mail-leading-inset: 0.5rem;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] {
@@ -3246,7 +3253,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id
 	box-sizing: border-box;
 	height: auto !important;
 	min-height: 0;
-	padding: 0.625rem 0.75rem;
+	padding: 0.625rem 0.75rem 0.625rem var(--bm-mail-leading-inset, 0.5rem);
 	margin: 0 0 var(--bm-mail-card-gap, 0.5rem);
 	background: var(--tblr-bg-surface, #fff);
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
@@ -3486,6 +3493,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id
 	border-bottom-color: var(--tblr-border-color, #e6e7e9) !important;
 	border-left-width: 4px !important;
 	border-left-style: solid !important;
+	padding-left: var(--bm-mail-leading-inset, 0.5rem);
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"].mailColor_1:not(.selected) {
@@ -3523,19 +3531,57 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id
 	color: inherit !important;
 }
 
-/* Narrow-Liste (Split-Vorschau): Absender, Betreff, Body-Snippet */
+/* Narrow-Liste (Split-Vorschau): Checkbox + Status-Icon, Absender, Betreff, Body-Snippet */
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] td.bm-mail-status-icon,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] td[id$="_ncol1"] {
-	flex: 0 0 1.75rem;
+	flex: 0 0 auto;
 	display: flex;
-	align-items: flex-start;
-	justify-content: center;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	gap: var(--bm-mail-leading-inset, 0.5rem);
 	overflow: visible;
 	white-space: nowrap;
 	align-self: flex-start;
 	height: auto !important;
 	opacity: 1 !important;
-	padding-top: 0.125rem;
+}
+
+/* Tabler .form-check: padding-left 2rem – in der Card-Liste nur minimal */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea #mailTable label.form-check,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea #contentHeader .left label.form-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: flex-start;
+	min-height: 1.25rem;
+	padding-left: 0.2rem;
+	margin: 0;
+	overflow: visible;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] td.bm-mail-list-leading .bm-mail-row-check {
+	flex: 0 0 auto;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea #mailTable label.form-check .form-check-input,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea #contentHeader .left label.form-check .form-check-input {
+	float: none;
+	margin: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] td.bm-mail-list-leading .bm-mail-status-icon-wrap {
+	flex: 0 0 1.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: var(--tblr-border-radius, 0.375rem);
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"].selected td.bm-mail-list-leading .bm-mail-status-icon-wrap {
+	background: rgba(255, 255, 255, 0.18);
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] td[id$="_ncol1"] .ti-mail {
@@ -6729,7 +6775,8 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-addr
 	min-width: 2.75rem;
 	max-width: 2.75rem;
 	box-sizing: border-box;
-	padding: 0.5rem 0.625rem;
+	padding: 0.5rem 0.375rem;
+	padding-left: 0;
 	text-align: center;
 	vertical-align: middle;
 	border-right: 1px solid var(--tblr-border-color, #e6e7e9);
@@ -6744,6 +6791,16 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-addr
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-addressbook #addressTable tr {
 	border-bottom: 1px dotted var(--tblr-border-color-translucent, #d1d5db);
 	cursor: default;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-addressbook #addressTable .bm-organizer-task-gutter .form-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 0;
+	padding: 0;
+	margin: 0;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-addressbook #addressTable .form-check-input {
@@ -7145,9 +7202,13 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer #tasksTable tr.don
 	opacity: 0.55;
 }
 
-/* Aufgaben-Tabelle: Gutter zwischen Checkbox und Inhalt */
+/* Aufgaben-Tabelle: kompakter als Tabler-Standard (.75rem), Gutter für Checkboxen */
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo .taskContainer.taskList {
 	background-image: none !important;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable > :not(caption) > * > * {
+	padding: 0.375rem 0.5rem;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .taskCheckBox,
@@ -7156,7 +7217,8 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo
 	min-width: 2.75rem;
 	max-width: 2.75rem;
 	box-sizing: border-box;
-	padding: 0.5rem 0.625rem;
+	padding: 0.375rem 0.375rem;
+	padding-left: 0;
 	text-align: center;
 	vertical-align: middle;
 	border-right: 1px solid var(--tblr-border-color, #e6e7e9);
@@ -7168,7 +7230,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo
 	width: 1.5rem;
 	min-width: 1.5rem;
 	max-width: 1.5rem;
-	padding-left: 0.625rem;
+	padding-left: 0.375rem;
 	padding-right: 0;
 	text-align: center;
 	vertical-align: middle;
@@ -7183,7 +7245,51 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo
 	border-bottom: 1px dotted var(--tblr-border-color-translucent, #d1d5db);
 }
 
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-gutter .form-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 0;
+	padding: 0;
+	margin: 0;
+}
+
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .form-check-input {
+	float: none;
+	margin: 0;
+}
+
+/* Notizen-Tabelle: Checkboxen in der Gutter-Spalte (wie Aufgaben/Adressbuch) */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-gutter {
+	width: 2.75rem;
+	min-width: 2.75rem;
+	max-width: 2.75rem;
+	box-sizing: border-box;
+	padding: 0.5rem 0.375rem;
+	padding-left: 0;
+	text-align: center;
+	vertical-align: middle;
+	border-right: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+	background-image: none !important;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable thead .bm-organizer-task-gutter {
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-gutter .form-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 0;
+	padding: 0;
+	margin: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .form-check-input {
 	float: none;
 	margin: 0;
 }
@@ -7434,17 +7540,48 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-date
 	border-radius: var(--tblr-border-radius, 0.375rem);
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-sidebar-task {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-task {
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	gap: 0.375rem;
-	padding: 0.15rem 0.5rem;
+	padding: 0.35rem 0.5rem;
 	margin: 0 -0.5rem;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-sidebar-task a {
+/* Tabler .form-check hat padding-left: 2rem – in der Sidebar mit Menü-Icons bündig halten */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-task .form-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	min-height: 0;
+	padding-left: 0;
+	margin: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-task .form-check-input {
+	float: none;
+	width: 1.125rem;
+	height: 1.125rem;
+	min-height: 1.125rem;
+	margin: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-task a {
+	display: flex;
+	align-items: center;
 	flex: 1 1 auto;
 	min-width: 0;
+	padding: 0;
+	margin: 0;
+	font-size: 0.8125rem;
+	line-height: 1.35;
+	color: rgba(255, 255, 255, 0.75);
+	text-decoration: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-task a:hover {
+	color: #fff;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-minical {
@@ -9086,11 +9223,12 @@ BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-col-subscribed .form-
 	margin: 0;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable .bm-mail-col-check .form-check,
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #contentHeader .form-check {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable .bm-mail-col-check .form-check {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
+	min-height: 1.25rem;
+	padding-left: 0.2rem;
 	margin: 0;
 }
 
