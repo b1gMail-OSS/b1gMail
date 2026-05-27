@@ -14,7 +14,7 @@
 						<table class="table table-vcenter table-hover card-table bm-organizer-table" id="notesTable">
 							<thead>
 							<tr>
-								<th style="width:1.25rem;"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1);" aria-label="{lng p="selaction"}" /></label></th>
+								<th class="bm-organizer-task-gutter"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1);" aria-label="{lng p="selaction"}" /></label></th>
 								<th style="width:5rem;">
 									<a class="bm-organizer-sort-link" href="organizer.notes.php?sid={$sid}&sort=priority&order={$sortOrderInv}">{lng p="priority"}</a>
 									{if $sortColumn=='priority'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
@@ -36,7 +36,7 @@
 							{foreach from=$noteList key=noteID item=note}
 							{assign value=$note.priority var=prio}
 							<tr>
-								<td nowrap="nowrap"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="note_{$noteID}" /></label></td>
+								<td class="bm-organizer-task-gutter" nowrap="nowrap"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="note_{$noteID}" /></label></td>
 								<td nowrap="nowrap"{if $sortColumn=='priority'} class="text-primary fw-semibold"{/if}>
 									<img src="{$tpldir}images/li/prio_{if $note.priority==-1}low{elseif $note.priority==0}normal{else}high{/if}.gif" border="0" alt="" align="absmiddle" />
 									{lng p="prio_$prio"}

@@ -2,8 +2,8 @@
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
 <div id="contentHeader">
-	<div class="left"{if $templatePrefs.showCheckboxes} style="padding-left:2px;"{/if}>
-		{if $templatePrefs.showCheckboxes}<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="checkAllMails" onclick="if(this.checked) _mailSel.selectAll(); else _mailSel.unselectAll()||showMultiSelPreview(0);" /></label>{/if}
+	<div class="left">
+		{if $templatePrefs.showCheckboxes}<label class="form-check mb-0 bm-mail-row-check"><input type="checkbox" class="form-check-input" id="checkAllMails" onclick="if(this.checked) _mailSel.selectAll(); else _mailSel.unselectAll()||showMultiSelPreview(0);" /></label>{/if}
 		<i class="ti {if $folderInfo.type == 'inbox'}ti-inbox{elseif $folderInfo.type == 'outbox'}ti-send{elseif $folderInfo.type == 'drafts'}ti-file-pencil{elseif $folderInfo.type == 'spam'}ti-ban{elseif $folderInfo.type == 'trash'}ti-trash{elseif $folderInfo.type == 'intellifolder'}ti-folder{else}ti-folder{/if} icon" aria-hidden="true"></i> {$folderInfo.title}
 	</div>
 
@@ -29,10 +29,7 @@
 
 <table class="bigTable" id="mailTable">
 	<colgroup>
-		{if $templatePrefs.showCheckboxes}
-		<col style="width:24px;" />
-		{/if}
-		<col style="width:24px;" />
+		<col class="bm-mail-col-leading" />
 		<col />
 	</colgroup>
 
@@ -49,7 +46,7 @@
 	</tbody>
 	{/if}
 	<tr>
-		<td colspan="{if $templatePrefs.showCheckboxes}3{else}2{/if}" class="folderGroup">
+		<td colspan="2" class="folderGroup">
 			<a style="display:block;cursor:pointer;" onclick="toggleGroup({$mailID},'{if isset($mail.groupID)}{$mail.groupID}{/if}');">&nbsp;<img id="groupImage_{$mailID}" src="{$tpldir}images/{if !empty($smarty.cookies.toggleGroup.$mailGroupID) && $smarty.cookies.toggleGroup.$mailGroupID=='closed'}expand{else}contract{/if}.png" width="11" height="11" border="0" align="absmiddle" alt="" />
 			&nbsp;{$mail.text} {if isset($mail.date) && $mail.date!=-1}({date timestamp=$mail.date dayonly=true}){/if}</a>
 		</td>
@@ -58,13 +55,13 @@
 	{assign var=first value=false}
 	{else}
 	<tr id="mail_{$mailID}_ntr" class="{$class}{if $mail.color>0} mailColor_{$mail.color}{/if}">
-		{if $templatePrefs.showCheckboxes}
-		<td class="narrowRow" style="text-align:center;width:24px;">
-			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="selecTable_{$mailID}" /></label>
-		</td>
-		{/if}
-		<td id="mail_{$mailID}_ncol1" class="narrowRow bm-mail-status-icon">
-			<i id="mail_{$mailID}_nicon" class="ti {if $mail.flags&1}ti-mail{else}ti-mail-opened{/if}" aria-hidden="true"></i>
+		<td id="mail_{$mailID}_ncol1" class="narrowRow bm-mail-status-icon bm-mail-list-leading">
+			{if $templatePrefs.showCheckboxes}
+			<label class="form-check mb-0 bm-mail-row-check"><input type="checkbox" class="form-check-input" id="selecTable_{$mailID}" /></label>
+			{/if}
+			<span class="bm-mail-status-icon-wrap" aria-hidden="true">
+				<i id="mail_{$mailID}_nicon" class="ti {if $mail.flags&1}ti-mail{else}ti-mail-opened{/if}"></i>
+			</span>
 		</td>
 		<td draggable="false" id="mail_{$mailID}_ncol2" class="narrowRow bm-mail-card-cell">
 			<a draggable="false" class="bm-mail-card-link" href="email.read.php?id={$mailID}&sid={$sid}" onclick="return(false)"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>
