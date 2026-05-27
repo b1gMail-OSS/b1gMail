@@ -26,6 +26,10 @@ AdminRequirePrivilege('prefs.common');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'common';
 
+include('../serverlib/push.class.php');
+BMPush::ensureSchema();
+ReadConfig();
+
 $tabs = array(
 	array(
 		'title'		=> $lang_admin['common'],
@@ -72,6 +76,25 @@ $tabs = array(
 );
 
 /**
+ * generate VAPID keys
+ */
+if($_REQUEST['action'] == 'generateVapid')
+{
+	$subject = isset($_REQUEST['push_vapid_subject']) ? trim($_REQUEST['push_vapid_subject']) : '';
+	if($subject == '' && isset($bm_prefs['push_vapid_subject']))
+		$subject = trim($bm_prefs['push_vapid_subject']);
+
+	$pushResult = 'ok';
+	if(!BMPush::canGenerateKeys())
+		$pushResult = 'openssl';
+	else if(!BMPush::generateVapidKeys($subject))
+		$pushResult = 'fail';
+
+	header('Location: prefs.common.php?sid=' . session_id() . '&pushVapid=' . $pushResult);
+	exit();
+}
+
+/**
  * common
  */
 if($_REQUEST['action'] == 'common')
@@ -100,7 +123,7 @@ if($_REQUEST['action'] == 'common')
 		$dbwhitelist = explode(',', $_POST['wartung_whitelist']);
 
 		$db->Query('UPDATE {pre}prefs SET titel=?, b1gmta_host=?, selffolder=?, selfurl=?, mobile_url=?, search_engine=?, datafolder=?, language=?, std_land=?, datumsformat=?, ordner_proseite=?, gut_regged=?, autocancel=?, wartung=?, wartung_whitelist_ips=?, structstorage=?, cron_interval=?, logouturl=?, contact_history=?, ip_lock=?, cookie_lock=?, domain_combobox=?, ssl_url=?, ssl_login_option=?, ssl_login_enable=?, ssl_signup_enable=?, auto_tz=?, compress_pages=?, redirect_mobile=?, calendar_defaultviewmode=?, '
-			. 'logs_autodelete=?, logs_autodelete_days=?, logs_autodelete_archive=?, hotkeys_default=?, contactform=?, contactform_to=?, contactform_name=?, notify_interval=?, notify_lifetime=?, mail_groupmode=?',
+			. 'logs_autodelete=?, logs_autodelete_days=?, logs_autodelete_archive=?, hotkeys_default=?, contactform=?, contactform_to=?, contactform_name=?, notify_interval=?, notify_lifetime=?, mail_groupmode=?, push_enabled=?, push_vapid_subject=?',
 			$_POST['titel'],
 			$_POST['b1gmta_host'],
 			$_POST['selffolder'],
@@ -140,8 +163,14 @@ if($_REQUEST['action'] == 'common')
 			isset($_POST['contactform_name']) ? 'yes' : 'no',
 			max(1, $_REQUEST['notify_interval']),
 			max(1, $_REQUEST['notify_lifetime']),
-			$_POST['mail_groupmode']);
+			$_POST['mail_groupmode'],
+			isset($_POST['push_enabled']) ? 'yes' : 'no',
+			isset($_POST['push_vapid_subject']) ? $_POST['push_vapid_subject'] : '');
 		ReadConfig();
+		if ($bm_prefs['push_enabled'] == 'yes' && empty($bm_prefs['push_vapid_public'])) {
+			BMPush::generateVapidKeys(isset($_POST['push_vapid_subject']) ? $_POST['push_vapid_subject'] : '');
+			ReadConfig();
+		}
 
 		$_SESSION['bm_sessionToken'] 	= SessionToken();
 	}
@@ -158,6 +187,10 @@ if($_REQUEST['action'] == 'common')
 		}
 	}
 	if(!empty($whitelist)) $whitelist = rtrim($whitelist, ', ');
+
+	// push feedback
+	if(isset($_REQUEST['pushVapid']))
+		$tpl->assign('pushVapidResult', $_REQUEST['pushVapid']);
 
 	// assign
 	$tpl->assign('wartungwhitelist', $whitelist);

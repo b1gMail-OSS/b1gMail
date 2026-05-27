@@ -353,6 +353,43 @@
 			</fieldset>
 
 			<fieldset>
+				<legend>{lng p="push_settings"}</legend>
+
+				{if isset($pushVapidResult)}
+				<div class="alert alert-{if $pushVapidResult=='ok'}success{elseif $pushVapidResult=='openssl'}warning{else}danger{/if} mb-3" role="alert">
+					{if $pushVapidResult=='ok'}{lng p="push_vapid_generated_ok"}
+					{elseif $pushVapidResult=='openssl'}{lng p="push_vapid_openssl_missing"}
+					{else}{lng p="push_vapid_generated_fail"}{/if}
+				</div>
+				{/if}
+
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-check-label">{lng p="push_enable_global"}</label>
+					<div class="col-sm-8">
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="push_enabled"{if $bm_prefs.push_enabled|default:'no'=='yes'} checked="checked"{/if}>
+						</label>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="push_vapid_subject"}</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" name="push_vapid_subject" value="{text allowEmpty=true value=$bm_prefs.push_vapid_subject|default:''}" placeholder="mailto:admin@example.com">
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="push_vapid_keys"}</label>
+					<div class="col-sm-8">
+						{if $bm_prefs.push_vapid_public|default:''}
+						<p class="text-muted small mb-2">{lng p="push_vapid_configured"}</p>
+						{else}
+						<p class="text-muted small mb-2">{lng p="push_vapid_missing"}</p>
+						{/if}
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset>
 				<legend>{lng p="notifications"}</legend>
 
 				<div class="mb-3 row">
@@ -378,6 +415,7 @@
 	</div>
 
 	<div class="text-end">
+		<a class="btn btn-outline-secondary me-2" href="prefs.common.php?action=generateVapid&amp;sid={$sid}">{lng p="push_generate_vapid"}</a>
 		<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
 	</div>
 </form>

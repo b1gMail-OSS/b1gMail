@@ -81,6 +81,25 @@
 					<label for="notify_birthday">{lng p="notify_birthday"}</label>
 			</td>
 		</tr>
+		{if $bmPushEnabled}
+		<tr>
+			<td class="listTableLeft"><label>{lng p="push_browser"}:</label></td>
+			<td class="listTableRight">
+				<button type="button" class="primary" id="bmPushSubscribeBtn"{if $bmPushSubscribed|default:false} style="display:none;"{/if}>{lng p="push_enable"}</button>
+				<button type="button" id="bmPushUnsubscribeBtn"{if !$bmPushSubscribed|default:false} style="display:none;"{/if}>{lng p="push_disable"}</button>
+				<button type="button" id="bmPushTestBtn"{if !$bmPushSubscribed|default:false} style="display:none;"{/if}>{lng p="push_test"}</button>
+				<span class="bm-push-test-result" id="bmPushTestResult"></span>
+				<input type="hidden" name="push_prefs_save" value="1" />
+				{foreach from=$bmPushTypes key=pushType item=pushLabel}
+				<div class="bm-push-type-row" data-push-type="{$pushType|escape}">
+					{assign var=pushTypeField value=$pushType|replace:'.':'_'}
+					<input type="checkbox" name="push_type[{$pushTypeField}]" id="push_type_{$pushTypeField}" value="1"{if $bmPushTypePrefs[$pushType]} checked="checked"{/if} />
+					<label for="push_type_{$pushTypeField}">{$pushLabel}</label>
+				</div>
+				{/foreach}
+			</td>
+		</tr>
+		{/if}
 
 		<tr>
 			<td class="listTableLeftDesc"><i class="fa fa-inbox" aria-hidden="true"></i></td>

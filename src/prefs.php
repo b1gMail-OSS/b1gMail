@@ -187,6 +187,21 @@ else if($_REQUEST['action'] == 'common')
 			: array();
 		$thisUser->SetPref('composeDefaults', serialize($composeDefaults));
 
+		if (!class_exists('BMPush', false)) {
+			include B1GMAIL_DIR.'serverlib/push.class.php';
+		}
+		if (BMPush::isEnabled() && isset($_REQUEST['push_prefs_save'])) {
+			$existing = BMPush::getUserPushPrefs($thisUser->_id);
+			$subCount = BMPush::countSubscriptions(BMPush::AREA_USER, $thisUser->_id);
+			$postTypes = isset($_REQUEST['push_type']) && is_array($_REQUEST['push_type'])
+				? $_REQUEST['push_type']
+				: [];
+			BMPush::setUserPushPrefs($thisUser->_id, [
+				'enabled' => !empty($existing['enabled']) || $subCount > 0,
+				'types' => BMPush::pushTypesFromPost($postTypes),
+			]);
+		}
+
 		PrefsDone();
 	}
 
@@ -221,6 +236,17 @@ else if($_REQUEST['action'] == 'common')
 	$tpl->assign('notifySound', 		$userRow['notify_sound'] == 'yes');
 	$tpl->assign('notifyEMail', 		$userRow['notify_email'] == 'yes');
 	$tpl->assign('notifyBirthday', 		$userRow['notify_birthday'] == 'yes');
+	if (!class_exists('BMPush', false)) {
+		include B1GMAIL_DIR.'serverlib/push.class.php';
+	}
+	BMPush::ensureSchema();
+	$tpl->assign('bmPushEnabled', BMPush::isEnabled());
+	if (BMPush::isEnabled()) {
+		$pushPrefs = BMPush::getUserPushPrefs($thisUser->_id);
+		$tpl->assign('bmPushSubscribed', !empty($pushPrefs['enabled']));
+		$tpl->assign('bmPushTypes', BMPush::getPushTypes(BMPush::AREA_USER));
+		$tpl->assign('bmPushTypePrefs', BMPush::getPushTypePrefsForUi($thisUser->_id));
+	}
 	$tpl->assign('autoSaveDrafts',		$userRow['auto_save_drafts'] == 'yes');
 	$tpl->assign('autoSaveDraftsInterval', max($bm_prefs['min_draft_save_interval'], $userRow['auto_save_drafts_interval']));
 

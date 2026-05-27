@@ -3053,3 +3053,63 @@ INPUT.primary:disabled
 {
 	border: 0 none !important;
 }
+
+/* Web Push prompt & prefs (modern template) */
+.bm-push-prompt
+{
+	background: #e8f4fc;
+	border-bottom: 1px solid #c5d9eb;
+	padding: 0.5em 0.75em;
+}
+
+.bm-push-prompt-inner
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5em 0.75em;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.bm-push-prompt-inner .fa-bell
+{
+	color: #3071a9;
+	font-size: 1.1em;
+}
+
+.bm-push-prompt-text
+{
+	flex: 1 1 12rem;
+	font-size: 0.9em;
+	line-height: 1.35;
+}
+
+.bm-push-prompt-dismiss
+{
+	background: transparent;
+	border: none;
+	font-size: 1.25em;
+	line-height: 1;
+	cursor: pointer;
+	color: #666;
+	padding: 0 0.25em;
+}
+
+.bm-push-test-result
+{
+	display: block;
+	font-size: 0.85em;
+	color: #666;
+	margin: 0.35em 0;
+}
+
+.bm-push-type-row
+{
+	margin-top: 0.35em;
+}
+
+.bm-push-type-row label
+{
+	margin-left: 0.25em;
+}

@@ -277,7 +277,25 @@ class BMUser
 			$link,
 			$icon,
 			$class);
-		return($db->InsertId());
+		$notificationId = $db->InsertId();
+
+		if (!class_exists('BMPush', false)) {
+			include B1GMAIL_DIR.'serverlib/push.class.php';
+		}
+		// Mail push is sent from BMMailbox::ReceiveMail (sendNewMailPush) to avoid duplicate delivery
+		if (BMPush::isEnabled() && $class != '' && $class != '::newEMail' && $class != '::notifyEMail') {
+			$pushResult = BMPush::sendFromNotification($this, $notificationId, $textPhrase, $textParams, $link, $icon, $flags, $class);
+			if (is_array($pushResult) && empty($pushResult['sent']) && !empty($pushResult['reason'])) {
+				PutLog(sprintf(
+					'Web Push: user %d class=%s after PostNotification – not sent (%s)',
+					$this->_id,
+					$class,
+					$pushResult['reason']
+				), PRIO_NOTE, __FILE__, __LINE__);
+			}
+		}
+
+		return($notificationId);
 	}
 
 	/**

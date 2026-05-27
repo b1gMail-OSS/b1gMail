@@ -17,6 +17,10 @@
 	<meta name="MobileOptimized" content="320" />
 
 	<link rel="icon" type="image/png" href="{$tpldir}images/favicon-256x256.png" />
+	{if $bmPushEnabled}
+	<link rel="manifest" href="manifest.php" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	{/if}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-custom.css?{fileDateSig file="css/tabler-custom.css"}" />
@@ -37,6 +41,14 @@
 	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}"></script>
 	<script src="{$tpldir}js/tabler-custom.js?{fileDateSig file="js/tabler-custom.js"}"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>
+	{if $bmPushEnabled}
+	<script type="text/javascript">
+	<!--
+		var bmPushEnabled = true;
+	//-->
+	</script>
+	<script src="{$tpldir}js/push.js?{fileDateSig file="js/push.js"}" type="text/javascript"></script>
+	{/if}
 	{foreach from=$_jsFiles.admin item=_file}
 	<script type="text/javascript" src="{$_file}"></script>
 	{/foreach}
