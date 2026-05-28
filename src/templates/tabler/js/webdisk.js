@@ -119,7 +119,7 @@ function initWDSel()
 
 		if(itemID[0] == 1)
 			switchWebdiskFolder(itemID[1]);
-		else
+		else if(!webdiskTryOpenPreviewOnDblClick(parseInt(itemID[0], 10), parseInt(itemID[1], 10)))
 			document.location.href = 'webdisk.php?action=downloadFile&id='+itemID[1]+'&sid='+currentSID;
 	}
 	sel.cbStyleRow = function(element, selected)
@@ -218,11 +218,49 @@ function webdiskMouseDown(event, type, id)
 {
 	return(true);
 }
+function webdiskMassDownload()
+{
+	EBID('wdMassAction').value = 'download';
+	transferSelectedWebdiskItems();
+	document.forms.f1.submit();
+}
+
+function webdiskDownloadCurrent()
+{
+	if(_wdSel && _wdSel.sel.length > 1)
+	{
+		webdiskMassDownload();
+		return;
+	}
+
+	if(_wdSel && _wdSel.sel.length == 1)
+	{
+		var itemID = _wdSel.getIDList()[0].split('_');
+		if(itemID[0] == '1')
+		{
+			webdiskMassDownload();
+			return;
+		}
+		if(itemID[0] == '2')
+		{
+			document.location.href = 'webdisk.php?action=downloadFile&id=' + itemID[1] + '&sid=' + currentSID;
+			return;
+		}
+	}
+
+	if(currentType == 1 && currentID > 0)
+		webdiskMassDownload();
+	else if(currentType == 2 && currentID > 0)
+		document.location.href = 'webdisk.php?action=downloadFile&id=' + currentID + '&sid=' + currentSID;
+}
+
 function showWebdiskItemDetails(type, id)
 {
 	_lastSelectedWebdiskID = type;
 	_lastSelectedWebdiskType = id;
 	var _requestTimeWDFolder = currentWebdiskFolderID;
+	var _requestType = type;
+	var _requestID = id;
 
 	MakeXMLRequest('webdisk.php?action=itemInfo&type='+escape(type)+'&id='+escape(id)+'&sid='+currentSID, function(e)
 			{
@@ -230,6 +268,14 @@ function showWebdiskItemDetails(type, id)
 				{
 					if(_requestTimeWDFolder != currentWebdiskFolderID)
 						return;
+					if(_wdSel && _wdSel.sel.length > 1)
+						return;
+					if(_wdSel && _wdSel.sel.length == 1)
+					{
+						var singleID = _wdSel.getIDList()[0].split('_');
+						if(singleID[0] != String(_requestType) || singleID[1] != String(_requestID))
+							return;
+					}
 					if(e.responseXML)
 					{
 						var x = e.responseXML;
@@ -258,21 +304,29 @@ function showWebdiskItemDetails(type, id)
 function selectedWebdiskCountChanged(no)
 {
 	if(no <= 1)
+	{
+		if(EBID('webdiskMultiActions'))
+			EBID('webdiskMultiActions').style.display = 'none';
 		return;
+	}
 
 	_lastSelectedWebdiskID = 0;
 	_lastSelectedWebdiskType = 0;
 
 	// reset links
-	EBID('wdCutLink').className = '';
-	EBID('wdCopyLink').className = '';
+	if(EBID('wdCutLink')) EBID('wdCutLink').className = '';
+	if(EBID('wdCopyLink')) EBID('wdCopyLink').className = '';
+	if(EBID('wdCutLink2')) EBID('wdCutLink2').className = '';
+	if(EBID('wdCopyLink2')) EBID('wdCopyLink2').className = '';
 
 	// details
 	EBID('webdiskDetailInfoNote').style.display = 'none';
 	EBID('webdiskDetailInfo').style.display = '';
-	EBID('wdExt').src = tplDir + 'images/li/drag_wditems.png';
+	var wdExt = EBID('wdExt');
+	if(wdExt)
+		wdExt.src = tplDir + 'images/li/drag_wditems.png';
 	EBID('wdTitle').innerHTML = no + ' ' + lang['items'];
-	EBID('wdSize').innerHTML = '-';
+	EBID('wdSize').innerHTML = '…';
 	EBID('wdDate').innerHTML = '-';
 	EBID('wdShared').style.display = 'none';
 
@@ -282,6 +336,10 @@ function selectedWebdiskCountChanged(no)
 
 	// folder
 	EBID('webdiskDetailFolderActions').style.display = 'none';
+	if(EBID('wdStopShareLink'))
+		EBID('wdStopShareLink').style.display = 'none';
+	if(EBID('wdStopFileShareLink'))
+		EBID('wdStopFileShareLink').style.display = 'none';
 
 	// file
 	EBID('webdiskDetailFileActions').style.display = 'none';
@@ -292,6 +350,43 @@ function selectedWebdiskCountChanged(no)
 
 	// multiple
 	EBID('webdiskMultiActions').style.display = '';
+
+	transferSelectedWebdiskItems();
+	var items = EBID('selectedWebdiskItems') ? EBID('selectedWebdiskItems').value : '';
+	if(!items)
+		return;
+
+	var _requestFolder = currentWebdiskFolderID;
+	var _requestCount = no;
+
+	MakeXMLRequest('webdisk.php?action=selectionInfo&items=' + encodeURIComponent(items) + '&sid=' + currentSID, function(e)
+	{
+		if(e.readyState != 4)
+			return;
+		if(!_wdSel || _wdSel.sel.length != _requestCount || currentWebdiskFolderID != _requestFolder)
+			return;
+		if(!e.responseXML)
+			return;
+
+		var x = e.responseXML;
+		var totalSize = parseInt(x.getElementsByTagName('totalSize').item(0).childNodes.item(0).nodeValue, 10);
+		var fileCount = parseInt(x.getElementsByTagName('fileCount').item(0).childNodes.item(0).nodeValue, 10);
+		var folderCount = parseInt(x.getElementsByTagName('folderCount').item(0).childNodes.item(0).nodeValue, 10);
+
+		if(x.getElementsByTagName('sizeFormatted').length > 0)
+			EBID('wdSize').innerHTML = x.getElementsByTagName('sizeFormatted').item(0).childNodes.item(0).nodeValue;
+		else if(!isNaN(totalSize))
+			EBID('wdSize').innerHTML = webdiskFormatBytes(totalSize);
+
+		if(lang['wd_selection_detail'] && (fileCount > 0 || folderCount > 0))
+		{
+			var detail = lang['wd_selection_detail']
+				.replace('%d', _requestCount)
+				.replace('%f', fileCount)
+				.replace('%o', folderCount);
+			EBID('wdTitle').innerHTML = detail;
+		}
+	});
 }
 function transferSelectedWebdiskItems()
 {
@@ -312,20 +407,410 @@ function transferSelectedWebdiskItems()
 			f.value = f.value.substr(0, f.value.length-1);
 	}
 }
-function webdiskShowUploadForm()
+function webdiskFormatUploadAlertMessage(response, fileName)
 {
-	MakeXMLRequest('webdisk.php?inline=true&do=uploadFilesForm&fileCount='+escape(EBID('fileCount').value)+'&folder='+currentWebdiskFolderID+'&sid='+currentSID, function(e)
+	if(!response)
+		return('');
+
+	if(fileName && response.indexOf(fileName) < 0)
+		return('<div class="fw-semibold mb-1">' + bmEscapeHtml(fileName) + '</div><div>' + bmEscapeHtml(response) + '</div>');
+
+	return(bmEscapeHtml(response).replace(/\n/g, '<br>'));
+}
+
+function webdiskShowUploadAlert(messageOrHtml, type, isHtml)
+{
+	if(typeof bmShowPageAlert !== 'function')
+	{
+		alert(isHtml ? stripTags(messageOrHtml) : messageOrHtml);
+		return;
+	}
+
+	var container = EBID('webdiskPageAlert');
+	if(!container)
+	{
+		bmShowPageAlert(isHtml ? stripTags(messageOrHtml) : messageOrHtml, type, 'webdiskPageAlert');
+		return;
+	}
+
+	type = type || 'danger';
+	var iconClass = (type === 'success') ? 'ti-check' : 'ti-alert-circle';
+
+	container.className = 'alert alert-' + type + ' alert-dismissible bm-webdisk-alert';
+	container.innerHTML =
+		'<div class="d-flex">'
+		+ '<div><i class="ti ' + iconClass + ' alert-icon icon" aria-hidden="true"></i></div>'
+		+ '<div class="bm-webdisk-alert-body">' + (isHtml ? messageOrHtml : bmEscapeHtml(String(messageOrHtml)).replace(/\n/g, '<br>')) + '</div>'
+		+ '</div>'
+		+ '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+	container.classList.remove('d-none');
+	container.style.display = '';
+
+	var wrap = EBID('wdAlerts');
+	if(wrap && typeof wrap.scrollIntoView === 'function')
+		wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function webdiskDnDFileDone(response, fileName)
+{
+	if(response === '1')
+		return;
+
+	if(!response)
+		response = (typeof lang !== 'undefined' && lang['internalerror']) ? lang['internalerror'] : 'Error';
+
+	webdiskShowUploadAlert(webdiskFormatUploadAlertMessage(response, fileName), 'danger', true);
+}
+
+function webdiskFormatBytes(bytes)
+{
+	if(bytes < 1024)
+		return(bytes + ' B');
+	if(bytes < 1024 * 1024)
+		return(Math.round(bytes / 1024 * 100) / 100 + ' KB');
+	if(bytes < 1024 * 1024 * 1024)
+		return(Math.round(bytes / 1024 / 1024 * 100) / 100 + ' MB');
+
+	return(Math.round(bytes / 1024 / 1024 / 1024 * 100) / 100 + ' GB');
+}
+
+var _webdiskUploadModal = null;
+var _webdiskUploadModalDnDInited = false;
+
+function webdiskResetUploadModalState()
+{
+	if(_webdiskUploadModal)
+	{
+		try { _webdiskUploadModal.dispose(); } catch(exDispose) {}
+	}
+	_webdiskUploadModal = null;
+	_webdiskUploadModalDnDInited = false;
+}
+
+function webdiskIsFileForbidden(fileName, mimeType)
+{
+	var rules = window.webdiskUploadRules, i, val;
+
+	if(!rules)
+		return(false);
+
+	fileName = (fileName || '').toLowerCase();
+	mimeType = (mimeType || '').toLowerCase();
+
+	if(rules.extensions && rules.extensions.length)
+	{
+		for(i = 0; i < rules.extensions.length; i++)
+		{
+			val = String(rules.extensions[i]).toLowerCase();
+			if(!val)
+				continue;
+			if(val.charAt(val.length - 1) === '*')
 			{
-				if(e.readyState == 4)
-				{
-					EBID('mainContentArea').innerHTML = e.responseText;
-					initDnDUpload(EBID('wdDnDArea'), 'webdisk.php?sid='+currentSID+'&folder='+currentWebdiskFolderID+'&action=dndUpload', function()
-							{
-								switchWebdiskFolder(currentWebdiskFolderID);
-							});
-				}
-			});
+				if(fileName.indexOf(val.substring(0, val.length - 1)) !== -1)
+					return(true);
+			}
+			else if(val.length > 1 && fileName.length >= val.length && fileName.substr(fileName.length - val.length) === val)
+				return(true);
+		}
+	}
+
+	if(rules.mimetypes && rules.mimetypes.length)
+	{
+		for(i = 0; i < rules.mimetypes.length; i++)
+		{
+			val = String(rules.mimetypes[i]).toLowerCase();
+			if(!val)
+				continue;
+			if(val === mimeType)
+				return(true);
+			if(val.charAt(val.length - 1) === '*' && mimeType.indexOf(val.substring(0, val.length - 1)) === 0)
+				return(true);
+		}
+	}
+
 	return(false);
+}
+
+function webdiskValidateUploadFile(file)
+{
+	var maxBytes = (typeof window.webdiskMaxUploadBytes !== 'undefined') ? window.webdiskMaxUploadBytes : 0;
+	var errors = [];
+
+	if(!file || !file.name)
+		return(errors);
+
+	if(webdiskIsFileForbidden(file.name, file.type))
+		errors.push(((typeof lang !== 'undefined' && lang['wd_fileforbidden']) ? lang['wd_fileforbidden'] : 'File type not allowed') + ': ' + file.name);
+
+	if(maxBytes > 0 && file.size > maxBytes)
+	{
+		var limitText = (typeof lang !== 'undefined' && lang['wd_filetoolarge'])
+			? lang['wd_filetoolarge'].replace('%s', webdiskFormatBytes(maxBytes))
+			: ('Max. ' + webdiskFormatBytes(maxBytes));
+		errors.push(file.name + ': ' + limitText);
+	}
+
+	return(errors);
+}
+
+function webdiskEnsureUploadModalInBody()
+{
+	var modals = document.querySelectorAll('#webdiskUploadModal');
+	var modal, i;
+
+	if(modals.length > 1)
+	{
+		for(i = 0; i < modals.length; i++)
+		{
+			if(modals[i].parentNode !== document.body)
+				modals[i].parentNode.removeChild(modals[i]);
+		}
+	}
+
+	modal = EBID('webdiskUploadModal');
+	if(!modal)
+		return(null);
+
+	if(modal.parentNode !== document.body)
+		document.body.appendChild(modal);
+
+	return(modal);
+}
+
+function webdiskCollectUploadModalFiles()
+{
+	var input = EBID('webdiskUploadFiles');
+	var files = [], j;
+
+	if(!input || !input.files)
+		return(files);
+
+	for(j = 0; j < input.files.length; j++)
+		files.push(input.files[j]);
+
+	return(files);
+}
+
+function webdiskValidateUploadModalForm()
+{
+	var files = webdiskCollectUploadModalFiles(), allErrors = [], i, errs;
+
+	if(files.length <= 0)
+	{
+		webdiskShowUploadAlert((typeof lang !== 'undefined' && lang['wd_upload_nofiles']) ? lang['wd_upload_nofiles'] : 'Please select at least one file.', 'warning', false);
+		return(false);
+	}
+
+	for(i = 0; i < files.length; i++)
+	{
+		errs = webdiskValidateUploadFile(files[i]);
+		if(errs.length)
+			allErrors = allErrors.concat(errs);
+	}
+
+	if(allErrors.length)
+	{
+		webdiskShowUploadAlert(allErrors.join('\n'), 'danger', false);
+		return(false);
+	}
+
+	return(true);
+}
+
+function webdiskSyncUploadModalTargetFolder()
+{
+	var form = EBID('webdiskUploadForm');
+
+	if(!form)
+		return;
+
+	var folderId = (typeof currentWebdiskFolderID !== 'undefined' && currentWebdiskFolderID >= 0)
+		? currentWebdiskFolderID
+		: 0;
+
+	form.action = 'webdisk.php?folder=' + folderId + '&sid=' + currentSID;
+}
+
+function webdiskCloseUploadModal()
+{
+	if(_webdiskUploadModal)
+	{
+		try { _webdiskUploadModal.hide(); } catch(exHide) {}
+	}
+	else
+	{
+		var el = EBID('webdiskUploadModal');
+
+		if(el && typeof bootstrap !== 'undefined')
+		{
+			var inst = bootstrap.Modal.getInstance(el);
+
+			if(inst)
+			{
+				try { inst.hide(); } catch(exHide2) {}
+			}
+		}
+	}
+
+	window.setTimeout(webdiskCleanupModalBackdrops, 50);
+}
+
+function webdiskBindUploadModalClose(modalEl)
+{
+	var closeBtn = EBID('webdiskUploadClose') || (modalEl && modalEl.querySelector('.modal-header .btn-close'));
+	var cancelBtn = modalEl && modalEl.querySelector('.modal-footer [data-bs-dismiss="modal"]');
+
+	function onCloseClick(e)
+	{
+		if(e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+		}
+
+		webdiskCloseUploadModal();
+	}
+
+	if(closeBtn && !closeBtn.dataset.wdUploadCloseBound)
+	{
+		closeBtn.dataset.wdUploadCloseBound = '1';
+		closeBtn.addEventListener('click', onCloseClick);
+	}
+
+	if(cancelBtn && !cancelBtn.dataset.wdUploadCancelBound)
+	{
+		cancelBtn.dataset.wdUploadCancelBound = '1';
+		cancelBtn.addEventListener('click', onCloseClick);
+	}
+}
+
+function webdiskSubmitUploadModal()
+{
+	webdiskSyncUploadModalTargetFolder();
+	return(webdiskValidateUploadModalForm());
+}
+
+function webdiskUploadFilesSelected(input)
+{
+	var list = EBID('webdiskUploadFilesList');
+
+	if(!list || !input || !input.files)
+		return;
+
+	if(input.files.length === 0)
+	{
+		list.textContent = '';
+		return;
+	}
+
+	var names = [], i;
+	for(i = 0; i < input.files.length; i++)
+		names.push(input.files[i].name);
+
+	list.textContent = names.join(', ');
+}
+
+function webdiskResetUploadModalForm()
+{
+	var form = EBID('webdiskUploadForm');
+	if(form)
+		form.reset();
+
+	var fileList = EBID('webdiskUploadFilesList');
+	if(fileList)
+		fileList.textContent = '';
+
+	var zone = EBID('wdUploadModalDnD');
+	if(zone)
+	{
+		zone.className = zone.className.replace(/bm-dnd-upload-active/g, '').replace(/\s+/g, ' ').trim();
+		var prog = zone.querySelector('.bm-dnd-upload-progress');
+		if(prog && prog.parentNode)
+			prog.parentNode.removeChild(prog);
+	}
+}
+
+function webdiskCleanupModalBackdrops()
+{
+	if(typeof bmForceHideDnDOverlay === 'function')
+		bmForceHideDnDOverlay();
+
+	var modal = EBID('webdiskUploadModal');
+	if(modal && modal.classList.contains('show'))
+		return;
+
+	document.body.classList.remove('modal-open');
+	document.body.style.removeProperty('overflow');
+	document.body.style.removeProperty('padding-right');
+
+	var backdrops = document.querySelectorAll('.modal-backdrop');
+	for(var i = 0; i < backdrops.length; i++)
+	{
+		if(backdrops[i].parentNode)
+			backdrops[i].parentNode.removeChild(backdrops[i]);
+	}
+}
+
+function webdiskOpenUploadModal()
+{
+	var el = webdiskEnsureUploadModalInBody();
+
+	if(!el || typeof bootstrap === 'undefined')
+		return;
+
+	webdiskSyncUploadModalTargetFolder();
+
+	if(!_webdiskUploadModal)
+	{
+		_webdiskUploadModal = bootstrap.Modal.getOrCreateInstance(el);
+
+		if(!el.dataset.webdiskUploadModalBound)
+		{
+			el.dataset.webdiskUploadModalBound = '1';
+			el.addEventListener('hidden.bs.modal', function()
+			{
+				webdiskResetUploadModalForm();
+				webdiskCleanupModalBackdrops();
+			});
+			el.addEventListener('shown.bs.modal', function()
+			{
+				webdiskSyncUploadModalTargetFolder();
+				webdiskInitUploadModalDnD();
+			});
+			webdiskBindUploadModalClose(el);
+		}
+	}
+
+	webdiskResetUploadModalForm();
+	_webdiskUploadModal.show();
+}
+
+function webdiskInitUploadModalDnD()
+{
+	var zone = EBID('wdUploadModalDnD');
+
+	if(!zone || _webdiskUploadModalDnDInited)
+		return;
+
+	_webdiskUploadModalDnDInited = true;
+
+	initDnDUpload(zone,
+		'webdisk.php?sid=' + currentSID + '&action=dndUpload',
+		function()
+		{
+			webdiskCleanupModalBackdrops();
+			switchWebdiskFolder(currentWebdiskFolderID);
+		},
+		webdiskDnDFileDone,
+		function()
+		{
+			var folderId = (typeof currentWebdiskFolderID !== 'undefined' && currentWebdiskFolderID >= 0)
+				? currentWebdiskFolderID
+				: 0;
+
+			return('&folder=' + folderId);
+		},
+		{ useOverlay: false });
 }
 function webdiskGetTreeIDbyFolderID(folderID)
 {
@@ -360,11 +845,14 @@ function switchWebdiskFolder(folderID)
 					webdiskClearInfo();
 					currentWebdiskFolderID = folderID;
 					EBID('mainContentArea').innerHTML = e.responseText;
+					webdiskResetUploadModalState();
 					initWDSel();
+					if(typeof webdiskReloadPreviewFromDom === 'function')
+						webdiskReloadPreviewFromDom();
 					initDnDUpload(EBID('wdDnDArea'), 'webdisk.php?sid='+currentSID+'&folder='+folderID+'&action=dndUpload', function()
 							{
 								switchWebdiskFolder(currentWebdiskFolderID);
-							});
+							}, webdiskDnDFileDone);
 
 					var treeID = webdiskGetTreeIDbyFolderID(folderID);
 					if(treeID > 0)
@@ -417,7 +905,7 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 	EBID('webdiskDetailInfo').style.display = '';
 	//EBID('wdExt').src = 'webdisk.php?action=displayExtension&ext=' + ext + '&sid=' + currentSID;
 	EBID('wdTitle').innerHTML = title;
-	EBID('wdSize').innerHTML = type == 1 ? ' - ' : size;
+	EBID('wdSize').innerHTML = size;
 	EBID('wdDate').innerHTML = date;
 	EBID('wdShared').style.display = shared ? '' : 'none';
 
@@ -427,6 +915,10 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 
 	// folder
 	EBID('webdiskDetailFolderActions').style.display = type == 1 ? '' : 'none';
+	if(EBID('wdStopShareLink'))
+		EBID('wdStopShareLink').style.display = type == 1 && shared ? '' : 'none';
+	if(EBID('wdStopFileShareLink'))
+		EBID('wdStopFileShareLink').style.display = type == 2 && shared ? '' : 'none';
 
 	// file
 	EBID('webdiskDetailFileActions').style.display = type == 2 ? '' : 'none';
@@ -437,6 +929,36 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 
 	// multiple
 	EBID('webdiskMultiActions').style.display = 'none';
+}
+function webdiskStopShareFolder(folderID)
+{
+	currentType = 1;
+	currentID = folderID;
+	webdiskStopShare();
+}
+function webdiskStopShare()
+{
+	if(currentType != 1 || currentID <= 0)
+		return;
+
+	if(!confirm(lang['stopsharing_confirm']))
+		return;
+
+	document.location.href = 'webdisk.php?action=stopShare&id=' + currentID
+		+ '&folder=' + currentWebdiskFolderID
+		+ '&sid=' + currentSID;
+}
+function webdiskStopFileShare()
+{
+	if(currentType != 2 || currentID <= 0)
+		return;
+
+	if(!confirm(lang['stopsharing_confirm']))
+		return;
+
+	document.location.href = 'webdisk.php?action=stopFileShare&id=' + currentID
+		+ '&folder=' + currentWebdiskFolderID
+		+ '&sid=' + currentSID;
 }
 function webdiskClipboardAction(action)
 {

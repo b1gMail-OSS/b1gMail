@@ -60,7 +60,7 @@
 			<label class="form-check mb-0 bm-mail-row-check"><input type="checkbox" class="form-check-input" id="selecTable_{$mailID}" /></label>
 			{/if}
 			<span class="bm-mail-status-icon-wrap" aria-hidden="true">
-				<i id="mail_{$mailID}_nicon" class="ti {if $mail.flags&1}ti-mail{else}ti-mail-opened{/if}"></i>
+				<i id="mail_{$mailID}_nicon" class="ti {if !empty($mail.isCalendarInvite)}ti-calendar-event{if $mail.flags&1} bm-mail-invite-unread{/if}{elseif $mail.flags&1}ti-mail{else}ti-mail-opened{/if}"></i>
 			</span>
 		</td>
 		<td draggable="false" id="mail_{$mailID}_ncol2" class="narrowRow bm-mail-card-cell">

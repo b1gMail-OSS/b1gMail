@@ -1,200 +1,221 @@
-<!--
+/**
+ * Public Webdisk share page (Tabler)
+ */
 
-BODY
-{
-	text-align: center;
-	margin: 10px;
-	background-color: #EFEFEF;
+.bm-share-page {
+	background-color: var(--tblr-bg-surface-secondary, #f6f8fb);
+	font-size: 1rem;
 }
 
-FORM
-{
-	display: inline;
+.bm-share-page .page-center {
+	min-height: 100vh;
 }
 
-TD,DIV,P,BODY
-{
-	font-family: tahoma, helvetica, arial;
-	font-size: 12px;
-	color: #333333;
+.bm-share-page .bm-share-container {
+	max-width: min(72rem, 96vw);
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
 }
 
-a
-{
+.bm-share-brand .avatar {
+	margin-left: auto;
+	margin-right: auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.bm-share-brand .avatar .icon {
+	font-size: 2rem;
+	line-height: 1;
+}
+
+.bm-share-card {
+	overflow: hidden;
+}
+
+.bm-share-breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem 0.5rem;
+	font-size: 1.0625rem;
+	background: var(--tblr-bg-surface, #fff);
+	border-top-left-radius: var(--tblr-border-radius-lg, 0.5rem);
+	border-top-right-radius: var(--tblr-border-radius-lg, 0.5rem);
+}
+
+.bm-share-breadcrumb-icon {
+	font-size: 1.25rem;
+	line-height: 1;
+	color: var(--tblr-primary, #066fd1);
+	flex-shrink: 0;
+}
+
+.bm-share-breadcrumb-icon.ti-folder-share {
+	color: var(--tblr-azure, #4299e1);
+}
+
+.bm-share-breadcrumb-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	color: var(--tblr-primary, #066fd1);
 	text-decoration: none;
 }
 
-a:hover
-{
-	text-decoration: none;
-	color: #1C62F4;
+.bm-share-breadcrumb-item:hover {
+	text-decoration: underline;
 }
 
-INPUT
-{
-	border: 1px inset #666666;
-	font-family: tahoma, helvetica, arial;
-	font-size: 12px;
-	height: 18px;
+.bm-share-breadcrumb-item--current {
+	color: var(--tblr-body-color, #1f2937);
+	font-weight: 600;
+	cursor: default;
 }
 
-INPUT:focus
-{
-	background-color: #EFEFEF;
-	border: 1px inset #1C62F4;
+.bm-share-breadcrumb-sep {
+	color: var(--tblr-secondary, #6c757d);
+	font-size: 0.75rem;
+	opacity: 0.7;
+	flex-shrink: 0;
 }
 
-.errorMessage
-{
-	border: 1px solid #DDDDDD;
-    background-color: #F3B4B4;
-	padding: 5px;
-	text-align: center;
-	width: 400px;
+.bm-share-col-date {
+	width: 11rem;
+	white-space: nowrap;
 }
 
-#mainLayer
-{
-	width: 650px;
-	border: 1px solid #878787;
+.bm-share-col-size {
+	width: 7rem;
+	white-space: nowrap;
 }
 
-#toolBar
-{
-	height: 25px;
-	background-image: url(../images/share/toolbar.png);
+.bm-share-col-actions {
+	width: 4.5rem;
 }
 
-#contentLayer
-{
-	height: 500px;
-	overflow-x: auto;
-	overflow-y: scroll;
+.bm-share-page #contentTable th {
+	font-size: 0.8125rem;
+	letter-spacing: 0.04em;
+	padding: 0.875rem 1.25rem;
+}
+
+.bm-share-page #contentTable td {
+	padding: 0.875rem 1.25rem;
+	font-size: 1rem;
+}
+
+#contentLayer {
+	max-height: min(75vh, 42rem);
+	overflow: auto;
+}
+
+.bm-share-item-link {
+	display: inline-flex;
+	align-items: center;
+	max-width: 100%;
+}
+
+.bm-share-item-link {
+	font-size: 1.0625rem;
+	gap: 0.625rem;
+}
+
+.bm-share-item-link .bm-share-item-icon {
+	flex-shrink: 0;
+	font-size: 1.5rem;
+	line-height: 1;
+	color: var(--tblr-primary, #066fd1);
+}
+
+.bm-share-page #contentTable .btn {
+	padding: 0.375rem 0.625rem;
+}
+
+.bm-share-page #contentTable .btn .ti {
+	font-size: 1.25rem;
+}
+
+.bm-share-item-link .ti-folder-share {
+	color: var(--tblr-azure, #4299e1);
+}
+
+.bm-share-item-link .ti-file-type-pdf {
+	color: #d63939;
+}
+
+.bm-share-item-link .ti-file-type-doc,
+.bm-share-item-link .ti-file-type-docx {
+	color: #206bc4;
+}
+
+.bm-share-item-link .ti-file-type-xls,
+.bm-share-item-link .ti-file-type-csv {
+	color: #2fb344;
+}
+
+.bm-share-item-link .ti-file-type-zip {
+	color: #ae3ec9;
+}
+
+.bm-share-empty td {
+	border-bottom: none !important;
+}
+
+.bm-share-password-dialog {
+	background: var(--tblr-bg-surface, #fff);
+	font-family: var(--tblr-font-sans-serif, inherit);
+}
+
+.bm-share-password-dialog .form-label {
+	font-weight: 500;
+}
+
+.bm-share-password-dialog .avatar .icon {
+	font-size: 1.7rem;
+}
+
+/* Overlay (password dialog) */
+BODY.bm-share-page #__olBackground {
+	background: rgba(15, 23, 42, 0.45);
+	backdrop-filter: blur(2px);
+}
+
+BODY.bm-share-page .__olContainer {
+	background-color: var(--tblr-bg-surface, #fff);
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius-lg, 0.5rem);
+	box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.12);
+	overflow: hidden;
+}
+
+BODY.bm-share-page .__olCaption {
+	background: var(--tblr-bg-surface, #fff);
+	font-weight: 600;
+	font-size: 0.9375rem;
+	height: auto;
+	padding: 0.75rem 1rem;
 	text-align: left;
-	background-color: #FFFFFF;
+	border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
 }
 
-#locationBar
-{
-	padding: 4px;
-	border-top: 1px solid #878787;
-	background-color: #E8E8E8;
-	text-align: left;
+BODY.bm-share-page .__olContent {
+	padding: 0;
 }
 
-#headingTable
-{
-	width: 100%;
-	height: 17px;
-	background-image: url(../images/share/th_bg.png);
+BODY.bm-share-page .__olShadow {
+	display: none;
 }
 
-#headingTable TH
-{
-	font-size: 10px;
-	text-align: left;
-	padding-left: 10px;
-	vertical-align: middle;
-}
+@media (max-width: 575.98px) {
+	.bm-share-col-date {
+		display: none;
+	}
 
-#thTitle
-{
-	border-right: 1px solid #A0A0A0;
-	width: 345px;
+	.bm-share-page #contentTable thead th:nth-child(2),
+	.bm-share-page #contentTable tbody td:nth-child(2) {
+		display: none;
+	}
 }
-
-#thModified
-{
-	width: 110px;
-	border-right: 1px solid #A0A0A0;
-}
-
-#thSize
-{
-	width: 75px;
-	border-right: 1px solid #A0A0A0;
-}
-
-#contentTable
-{
-	width: 100%;
-}
-
-.trRow1
-{
-	background-color: #FFFFFF;
-}
-
-.trRow2
-{
-	background-color: #EEEEEE;
-}
-
-.tdTitle
-{
-	padding: 2px;
-	padding-left: 6px;
-	width: 347px;
-}
-
-.tdModified
-{
-	padding: 2px;
-	padding-left: 6px;
-	width: 112px;
-}
-
-.tdSize
-{
-	padding: 2px;
-	padding-left: 6px;
-	width: 77px;
-}
-
-.tdActions
-{
-	padding: 2px;
-	padding-left: 6px;
-}
-
-#titleBar
-{
-	font-size: 10px;
-	padding-top: 4px;
-}
-
-#__olBackground
-{
-	background-image: url(../images/overlay.png);
-}
-.__olContainer
-{
-	background-color: #FFFFFF;
-	border-left: 1px solid #DDDDDD;
-	border-right: 1px solid #DDDDDD;
-	border-bottom: 1px solid #DDDDDD;
-}
-.__olContent
-{
-}
-.__olCaption
-{
-	background-image: url(../images/li/list_bg.png);
-	font-weight: normal;
-	height: 20px;
-	padding-top: 5px;
-	text-align: center;
-	border-bottom: 1px solid #DDDDDD;
-}
-.__olShadow
-{
-	background-color: #555555;
-}
-
-#locationBar IMG, #contentTable IMG
-{
-	width: 16px;
-	height: 16px;
-}
-
--->

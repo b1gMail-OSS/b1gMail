@@ -261,7 +261,68 @@ define('BMSFLAG_IS_SPAM', 1);
 define('BMSFLAG_IS_INFECTED', 2);
 $VIEWABLE_TYPES = ['image/jpeg', 'image/gif',
                         'image/png', 'image/jpg', 'image/pjpeg',
-                        'application/pdf', 'text/plain', ];
+                        'image/webp',
+                        'application/pdf', 'text/plain', 'text/markdown', 'text/x-markdown',
+                        'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/wav', 'audio/webm', 'audio/ogg',
+                        'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', ];
+
+function WebdiskIsMediaPreviewFile($fileName, $contentType)
+{
+	$contentType = strtolower(trim((string)$contentType));
+	if($contentType !== '')
+	{
+		if(strpos($contentType, 'audio/') === 0 || strpos($contentType, 'video/') === 0)
+			return(true);
+	}
+
+	$dotPos = strrpos((string)$fileName, '.');
+	if($dotPos === false)
+		return(false);
+
+	$ext = strtolower(substr((string)$fileName, $dotPos + 1));
+	static $playableExtensions = array(
+		// Audio
+		'mp3', 'ogg', 'oga', 'opus', 'wav', 'aac', 'm4a', 'flac', 'webm',
+		// Video
+		'mp4', 'webm', 'ogv', 'mov', 'avi', 'wmv', 'mkv', 'm4v', '3gp', 'mpg', 'mpeg'
+	);
+
+	return(in_array($ext, $playableExtensions, true));
+}
+
+function WebdiskGetMediaMimeTypeByFileName($fileName)
+{
+	$dotPos = strrpos((string)$fileName, '.');
+	if($dotPos === false)
+		return('');
+
+	$ext = strtolower(substr((string)$fileName, $dotPos + 1));
+	static $map = array(
+		// Audio
+		'mp3'	=> 'audio/mpeg',
+		'ogg'	=> 'audio/ogg',
+		'oga'	=> 'audio/ogg',
+		'opus'	=> 'audio/ogg',
+		'wav'	=> 'audio/wav',
+		'aac'	=> 'audio/aac',
+		'm4a'	=> 'audio/mp4',
+		'flac'	=> 'audio/flac',
+		// Video
+		'mp4'	=> 'video/mp4',
+		'webm'	=> 'video/webm',
+		'ogv'	=> 'video/ogg',
+		'mov'	=> 'video/quicktime',
+		'avi'	=> 'video/x-msvideo',
+		'wmv'	=> 'video/x-ms-wmv',
+		'mkv'	=> 'video/x-matroska',
+		'm4v'	=> 'video/x-m4v',
+		'3gp'	=> 'video/3gpp',
+		'mpg'	=> 'video/mpeg',
+		'mpeg'	=> 'video/mpeg'
+	);
+
+	return(isset($map[$ext]) ? $map[$ext] : '');
+}
 
 /*
  * plugin return constants

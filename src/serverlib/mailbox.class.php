@@ -1300,6 +1300,192 @@ class BMMailbox
 	}
 
 	/**
+	 * remove CSS/JS artifacts from mail list preview text
+	 *
+	 * @param string $text
+	 * @return string
+	 */
+	function CleanMailListPreviewText($text)
+	{
+		$text = (string)$text;
+
+		if($text === '')
+			return('');
+
+		$text = str_replace(array("\r\n", "\r"), "\n", $text);
+
+		// Remove top-level RFC822 style headers if a raw source slipped through.
+		if(preg_match('/^\s*[A-Za-z0-9\-]{2,40}\s*:/', $text))
+		{
+			$text = preg_replace('/\A(?:[A-Za-z0-9\-]{2,40}\s*:.*(?:\n[ \t].*)?\n)+\n?/u', ' ', $text, 1);
+			if($text === null)
+				$text = preg_replace('/\A(?:[A-Za-z0-9\-]{2,40}\s*:.*(?:\n[ \t].*)?\n)+\n?/',' ', $text, 1);
+		}
+
+		// Decode quoted-printable artifacts often found in HTML-only newsletters.
+		if(strpos($text, '=') !== false)
+		{
+			$qpText = preg_replace("/=\n/u", '', $text);
+			if($qpText === null)
+				$qpText = preg_replace("/=\n/", '', $text);
+			if(is_string($qpText) && $qpText !== '')
+			{
+				$decoded = quoted_printable_decode($qpText);
+				if(is_string($decoded) && $decoded !== '')
+					$text = $decoded;
+				else
+					$text = $qpText;
+			}
+		}
+
+		// Remove embedded style/script/noscript blocks if raw HTML slipped through.
+		$text = @preg_replace('/<\s*(style|script|noscript)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/<\s*(style|script|noscript)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', ' ', $text);
+
+		// Remove other non-content HTML blocks.
+		$text = @preg_replace('/<\s*(head|title|meta|link|svg|xml)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/<\s*(head|title|meta|link|svg|xml)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', ' ', $text);
+
+		// Remove standalone tags before converting to text.
+		$text = @preg_replace('/<\s*\/?\s*(?:!doctype|html|body|table|tbody|thead|tfoot|tr|td|th|div|span|font|center|br|hr)\b[^>]*>/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/<\s*\/?\s*(?:!doctype|html|body|table|tbody|thead|tfoot|tr|td|th|div|span|font|center|br|hr)\b[^>]*>/i', ' ', $text);
+
+		// Remove CSS comment blocks and at-rules.
+		$text = @preg_replace('/\/\*[\s\S]*?\*\//u', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/\/\*[\s\S]*?\*\//', ' ', $text);
+
+		$text = @preg_replace('/@(?:media|supports|font-face|keyframes|import|page)\b[^;{]*(?:;|\{[\s\S]*?\})/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/@(?:media|supports|font-face|keyframes|import|page)\b[^;{]*(?:;|\{[\s\S]*?\})/i', ' ', $text);
+
+		// Remove common selector blocks like "th, td { font-family: ... }".
+		$text = @preg_replace('/\b[a-z][a-z0-9\-\_\.\#\s,\>\+\~\:\*\[\]\(\)"\'=]*\{[^{}]*:[^{}]*\}/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/\b[a-z][a-z0-9\-\_\.\#\s,\>\+\~\:\*\[\]\(\)"\'=]*\{[^{}]*:[^{}]*\}/i', ' ', $text);
+
+		// Remove leftover template/script markers often seen in newsletter HTML.
+		$text = @preg_replace('/\{\/?if\b[^}]*\}|\{\/?class\}|\{\$[^}]+\}/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/\{\/?if\b[^}]*\}|\{\/?class\}|\{\$[^}]+\}/i', ' ', $text);
+
+		// Strip all HTML tags and decode entities after other cleanup passes.
+		$text = strip_tags($text);
+		$text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		// Remove long URLs/tracking fragments and MIME leftovers.
+		$text = @preg_replace('/https?:\/\/\S{20,}/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/https?:\/\/\S{20,}/i', ' ', $text);
+		$text = @preg_replace('/\b(?:charset|boundary|content-type|content-transfer-encoding|mime-version)\b\s*[:=]\s*[^\s]{2,}/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/\b(?:charset|boundary|content-type|content-transfer-encoding|mime-version)\b\s*[:=]\s*[^\s]{2,}/i', ' ', $text);
+		$text = @preg_replace('/\b[a-z0-9][a-z0-9_\-]{20,}\.[a-z0-9][a-z0-9_\-]{8,}\b/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/\b[a-z0-9][a-z0-9_\-]{20,}\.[a-z0-9][a-z0-9_\-]{8,}\b/i', ' ', $text);
+
+		// Remove leaked HTML-attribute style fragments from broken HTML->text conversions.
+		$text = @preg_replace('/\b(?:class|style|href|src|width|height|align|valign|cellpadding|cellspacing|bgcolor|border|role|id|title|target|data-[a-z0-9\-_]+)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/iu', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/\b(?:class|style|href|src|width|height|align|valign|cellpadding|cellspacing|bgcolor|border|role|id|title|target|data-[a-z0-9\-_]+)\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s>]+)/i', ' ', $text);
+
+		// Remove noisy symbol sequences (e.g. "*|*|*|*|" or long punctuation runs).
+		$text = @preg_replace('/(?:\*\|){2,}\*?/u', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/(?:\*\|){2,}\*?/', ' ', $text);
+		$text = @preg_replace('/[^\p{L}\p{N}\s]{6,}/u', ' ', $text);
+		if($text === null)
+			$text = preg_replace('/[^a-zA-Z0-9\s]{6,}/', ' ', $text);
+
+		// Line-based cleanup: keep only meaningful text lines.
+		$lines = preg_split('/\n+/u', str_replace("\r", "\n", $text));
+		if(is_array($lines))
+		{
+			$cleanLines = array();
+			foreach($lines as $line)
+			{
+				$line = trim($line);
+				if($line === '')
+					continue;
+
+				// Drop mail header lines and similar technical metadata.
+				if(preg_match('/^[A-Za-z0-9\-]{2,40}\s*:\s*\S/u', $line))
+					continue;
+
+				// Drop CSS-like or markup-noise lines.
+				if(preg_match('/(?:\{|\}|<|>|;|@media|@supports|font-family|line-height|display\s*:|padding\s*:|margin\s*:)/iu', $line))
+					continue;
+
+				// Drop URL-dominant lines.
+				$lineWithoutUrls = preg_replace('/https?:\/\/\S+/iu', '', $line);
+				if($lineWithoutUrls === null)
+					$lineWithoutUrls = preg_replace('/https?:\/\/\S+/i', '', $line);
+				if(trim((string)$lineWithoutUrls) === '')
+					continue;
+
+				// Keep only lines with enough letters (avoid symbol soup).
+				if(!preg_match('/[\p{L}]{3,}/u', $line))
+					continue;
+
+				$cleanLines[] = $line;
+				if(count($cleanLines) >= 3)
+					break;
+			}
+
+			if(count($cleanLines) > 0)
+				$text = implode(' ', $cleanLines);
+		}
+
+		return trim($text);
+	}
+
+	/**
+	 * identify calendar invitations/replies for mail-list icon hint
+	 *
+	 * @param string $subject
+	 * @param string $preview
+	 * @return bool
+	 */
+	function IsCalendarInvitePreview($subject, $preview)
+	{
+		$haystack = strtolower(trim((string)$subject . ' ' . (string)$preview));
+		if($haystack === '')
+			return(false);
+
+		return (bool)preg_match('/\b(ical|calendar|termin|meeting|einladung|invite|invitation|zugestimmt|abgelehnt|accepted|declined|tentative|organizer)\b/u', $haystack);
+	}
+
+	/**
+	 * detect calendar invites by attachment MIME/filename
+	 *
+	 * @param BMMail $bmMail
+	 * @return bool
+	 */
+	function IsCalendarInviteAttachment($bmMail)
+	{
+		$attachments = $bmMail->GetAttachments();
+		foreach($attachments as $att)
+		{
+			$mimetype = strtolower(trim((string)($att['mimetype'] ?? '')));
+			$filename = strtolower(trim((string)($att['filename'] ?? '')));
+
+			if($mimetype !== '')
+			{
+				if(strpos($mimetype, 'text/calendar') === 0 || strpos($mimetype, 'application/ics') === 0)
+					return(true);
+			}
+
+			if($filename !== '' && preg_match('/\.ics$/', $filename))
+				return(true);
+		}
+
+		return(false);
+	}
+
+	/**
 	 * add plain-text body preview snippets to mail list entries
 	 *
 	 * @param array $mailList
@@ -1314,6 +1500,7 @@ class BMMailbox
 				continue;
 
 			$mail['preview'] = '';
+			$mail['isCalendarInvite'] = false;
 
 			if(!isset($mail['row']) || !is_array($mail['row']))
 				continue;
@@ -1337,6 +1524,8 @@ class BMMailbox
 
 				if($preview !== '')
 				{
+					$preview = $this->CleanMailListPreviewText($preview);
+
 					$preview = @preg_replace('/\s+/u', ' ', $preview);
 					if($preview === null)
 						$preview = preg_replace('/\s+/', ' ', $preview);
@@ -1353,6 +1542,10 @@ class BMMailbox
 				}
 
 				$mail['preview'] = $preview;
+				$mail['isCalendarInvite'] = $this->IsCalendarInviteAttachment($bmMail) || $this->IsCalendarInvitePreview(
+					isset($mail['subject']) ? $mail['subject'] : (isset($mail['row']['betreff']) ? $mail['row']['betreff'] : ''),
+					$preview
+				);
 			}
 			catch(Throwable $e)
 			{
@@ -3068,6 +3261,22 @@ class BMMailbox
 
 			// module functions
 			ModuleFunction('AfterReceiveMail', array(&$mail, &$this, &$this->_userObject));
+
+			if($groupRow['organizer'] == 'yes')
+			{
+				if(!function_exists('bmMailProcessCalendarReplyMail'))
+					include_once(B1GMAIL_DIR.'serverlib/email.attachment.inc.php');
+				try
+				{
+					bmMailProcessCalendarReplyMail($this->_userObject->Fetch(), $mail);
+				}
+				catch(Throwable $calendarEx)
+				{
+					PutLog('Calendar reply on receive failed: '.$calendarEx->getMessage(),
+						PRIO_WARNING, __FILE__, __LINE__);
+				}
+			}
+
 			if(!$isUserPOP3)
 			{
 				Add2Stat('receive');

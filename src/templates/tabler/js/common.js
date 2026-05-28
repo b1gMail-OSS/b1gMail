@@ -515,6 +515,90 @@ function EBID(k)
 	return(document.getElementById(k));
 }
 
+function bmEscapeHtml(text)
+{
+	if(text == null || text === '')
+		return('');
+
+	var div = document.createElement('div');
+	div.appendChild(document.createTextNode(String(text)));
+	return(div.innerHTML);
+}
+
+/**
+ * Tabler-style page alert (Bootstrap alert + Tabler icon).
+ *
+ * @param {string} message Plain text; newlines become line breaks
+ * @param {string} type success|danger|warning|info
+ * @param {string} containerId DOM id of the alert container
+ */
+function bmShowPageAlert(message, type, containerId)
+{
+	type = type || 'danger';
+	containerId = containerId || 'bmPageAlert';
+
+	var isWebdisk = (containerId === 'webdiskPageAlert');
+	var container = EBID(containerId);
+
+	if(!container)
+	{
+		var anchor = isWebdisk ? (EBID('wdAlerts') || document.querySelector('.bm-webdisk-alerts')) : null;
+		if(!anchor)
+			anchor = EBID('mainContentArea') || EBID('mainContent');
+		if(!anchor)
+		{
+			alert(message);
+			return;
+		}
+
+		container = document.createElement('div');
+		container.id = containerId;
+		container.setAttribute('role', 'alert');
+		container.setAttribute('aria-live', 'polite');
+
+		if(isWebdisk && (anchor.id === 'wdAlerts' || anchor.className.indexOf('bm-webdisk-alerts') >= 0))
+			anchor.appendChild(container);
+		else
+			anchor.insertBefore(container, anchor.firstChild);
+	}
+
+	var iconClass = 'ti-info-circle';
+	if(type === 'success')
+		iconClass = 'ti-check';
+	else if(type === 'danger')
+		iconClass = 'ti-alert-circle';
+	else if(type === 'warning')
+		iconClass = 'ti-alert-triangle';
+
+	var html = bmEscapeHtml(String(message)).replace(/\n/g, '<br>');
+
+	container.className = 'alert alert-' + type + ' alert-dismissible' + (isWebdisk ? ' bm-webdisk-alert' : ' bm-page-alert mb-3');
+
+	container.innerHTML =
+		'<div class="d-flex">'
+		+ '<div><i class="ti ' + iconClass + ' alert-icon icon" aria-hidden="true"></i></div>'
+		+ '<div class="' + (isWebdisk ? 'bm-webdisk-alert-body' : '') + '">' + html + '</div>'
+		+ '</div>'
+		+ '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+	container.classList.remove('d-none');
+	container.style.display = '';
+
+	if(typeof container.scrollIntoView === 'function')
+		container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function bmHidePageAlert(containerId)
+{
+	var container = EBID(containerId || 'bmPageAlert');
+	if(!container)
+		return;
+
+	container.classList.add('d-none');
+	container.style.display = 'none';
+	container.innerHTML = '';
+}
+
 function DateFormat(format, d)
 {
 	var d = new Date(d * 1000);

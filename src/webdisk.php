@@ -21,9 +21,59 @@
 
 require './serverlib/init.inc.php';
 include('./serverlib/webdisk.class.php');
+include('./serverlib/webdisk.thumbnail.inc.php');
+WebdiskThumbnailsEnsureSchema();
 include('./serverlib/zip.class.php');
 include('./serverlib/unzip.class.php');
 RequestPrivileges(PRIVILEGES_USER);
+
+function WebdiskGenerateSharePassword($minLength = 12)
+{
+	$alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*-_';
+	$alphaLen = strlen($alphabet);
+	$pw = '';
+
+	if(function_exists('random_int'))
+	{
+		for($i = 0; $i < $minLength; $i++)
+			$pw .= $alphabet[random_int(0, $alphaLen - 1)];
+	}
+	else
+	{
+		$seed = md5(uniqid((string)mt_rand(), true));
+		while(strlen($pw) < $minLength)
+		{
+			$idx = hexdec($seed[strlen($pw) % strlen($seed)]) % $alphaLen;
+			$pw .= $alphabet[$idx];
+		}
+	}
+
+	return($pw);
+}
+
+function WebdiskStoreShareFeedback($folderID, $fileName, $shareURL)
+{
+	$_SESSION['webdiskShareFeedback'] = array(
+		'folderID' => (int)$folderID,
+		'fileName' => (string)$fileName,
+		'shareURL' => (string)$shareURL
+	);
+}
+
+function WebdiskApplyShareFeedback($folderID, $tpl)
+{
+	if(empty($_SESSION['webdiskShareFeedback']))
+		return;
+
+	$fb = $_SESSION['webdiskShareFeedback'];
+	unset($_SESSION['webdiskShareFeedback']);
+
+	if((int)$fb['folderID'] !== (int)$folderID)
+		return;
+
+	$tpl->assign('fileShareNoticeName', isset($fb['fileName']) ? $fb['fileName'] : '');
+	$tpl->assign('fileShareNoticeURL', isset($fb['shareURL']) ? $fb['shareURL'] : '');
+}
 
 /**
  * file handler for modules
@@ -37,6 +87,8 @@ ModuleFunction('FileHandler',
  */
 $tpl->addJSFile('li', 'clientlib/selectable.js');
 $tpl->addJSFile('li', $tpl->tplDir . 'js/webdisk.js');
+$tpl->addJSFile('li', 'clientlib/pdfjs/pdf.min.js');
+$tpl->addJSFile('li', $tpl->tplDir . 'js/webdisk.preview.js');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'folder';
 $tpl->assign('activeTab', 'webdisk');
@@ -150,8 +202,11 @@ if($_REQUEST['action'] == 'folder')
 				if($folderInfo)
 					$zipName 	= $folderInfo['titel'];
 			}
-			$zipName = preg_replace('/[^a-zA-Z0-9\-\_]/', '_', $zipName);
-			if(empty($zipName)) $zipName = 'files.zip';
+			$zipName = preg_replace('/[^a-zA-Z0-9\-\_\.]/', '_', $zipName);
+			if(empty($zipName))
+				$zipName = 'files';
+			if(preg_match('/\.zip$/i', $zipName))
+				$zipName = substr($zipName, 0, -4);
 
 			// create ZIP file
 			$fp = fopen($tempFileName, 'wb+');
@@ -219,6 +274,9 @@ if($_REQUEST['action'] == 'folder')
 	foreach($folderPath as $folderBit)
 		$titlePath .= $folderBit['title'] . '/';
 
+	WebdiskApplyUploadFeedback($folderID, $tpl);
+	WebdiskApplyShareFeedback($folderID, $tpl);
+
 	$folderInfo 	= $webdisk->GetFolderInfo($folderID);
 	$folderContent 	= $webdisk->GetFolderContent($folderID);
 	$shareURL		= sprintf('%sshare/?user=%s', $bm_prefs['selfurl'], $userRow['email']);
@@ -235,7 +293,21 @@ if($_REQUEST['action'] == 'folder')
 
 	$tpl->assign('shareURL', $shareURL);
 	$tpl->assign('isShared', $folderInfo !== false && $folderInfo['share'] == 'yes');
+	$webdiskMaxUploadBytes = WebdiskGetMaxUploadFileSize($usedSpace, $spaceLimit, $groupRow, $userRow);
+	$tpl->assign('webdiskMaxUploadBytes', $webdiskMaxUploadBytes);
+	$tpl->assign('webdiskMaxUploadSize', WebdiskFormatBytes($webdiskMaxUploadBytes));
+	$webdiskUploadRules = WebdiskGetForbiddenUploadRules();
+	$tpl->assign('webdiskUploadRulesJSON', json_encode($webdiskUploadRules, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE));
+	$tpl->assign('webdiskForbiddenExtensions', $webdiskUploadRules['extensions']);
+	$tpl->assign('webdiskForbiddenMimetypes', $webdiskUploadRules['mimetypes']);
+	$tpl->assign('webdiskForbiddenExtensionsList', implode(', ', $webdiskUploadRules['extensions']));
+	$tpl->assign('webdiskForbiddenMimetypesList', implode(', ', $webdiskUploadRules['mimetypes']));
 	$tpl->assign('folderContent', $folderContent);
+	$tpl->assign('webdiskThumbnails', isset($groupRow['wd_thumbnails']) && $groupRow['wd_thumbnails'] == 'yes');
+	$webdiskPreviewData = WebdiskBuildPreviewData($folderContent);
+	$jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE;
+	$tpl->assign('webdiskPreviewFilesJSON', json_encode($webdiskPreviewData['gallery'], $jsonFlags));
+	$tpl->assign('webdiskPreviewItemsJSON', json_encode($webdiskPreviewData['items'], $jsonFlags));
 	$tpl->assign('webdiskicons', 'li/webdisk.icons.tpl');
 	if(LEGACY_WEBDISCICONS===true) {
 		$tpl->assign('use_fa_icons', 0);
@@ -290,15 +362,90 @@ else if($_REQUEST['action'] == 'itemInfo'
 		'type'			=> (int)$_REQUEST['type'],
 		'title'			=> $_info['titel'],
 		'shortTitle'	=> TemplateText(array('cut' => 20, 'value' => $_info['titel']), $tpl),
-		'size'			=> $type == 'folder' ? '-' : TemplateSize(array('bytes' => $_info['size']), $tpl),
+		'size'			=> $type == 'folder'
+							? TemplateSize(array('bytes' => $webdisk->GetFolderTreeSize((int)$_info['id'])), $tpl)
+							: TemplateSize(array('bytes' => $_info['size']), $tpl),
 		'ext'			=> $ext,
 		'created'		=> TemplateDate(array('timestamp' => $_info['created'], 'nice' => true), $tpl),
 		'id'			=> $_info['id'],
-		'share'			=> $type == 'folder' && $_info['share'] == 'yes',
-		'viewable'		=> $type == 'folder' || in_array(strtolower($_info['contenttype']), $VIEWABLE_TYPES)
+		'share'			=> $type == 'folder'
+							? ($_info['share'] == 'yes')
+							: $webdisk->IsFileShared((int)$_info['id']),
+		'viewable'		=> $type == 'folder'
+							|| in_array(strtolower($_info['contenttype']), $VIEWABLE_TYPES)
+							|| ($type == 'file' && WebdiskIsTextPreviewFile($_info['dateiname'], $_info['contenttype']))
+							|| ($type == 'file' && function_exists('WebdiskIsMediaPreviewFile') && WebdiskIsMediaPreviewFile($_info['dateiname'], $_info['contenttype']))
 	);
 
 	NormalArray2XML($info, $type);
+	exit();
+}
+
+/**
+ * get info for multiple selected items
+ */
+else if($_REQUEST['action'] == 'selectionInfo'
+		&& isset($_REQUEST['items']))
+{
+	$folderIDs = $fileIDs = array();
+
+	$_items = explode(';', $_REQUEST['items']);
+	foreach($_items as $_item)
+	{
+		if(trim($_item) == '')
+			continue;
+
+		list($_itemType, $_itemID) = explode(',', $_item);
+
+		if((int)$_itemType == WEBDISK_ITEM_FOLDER)
+			$folderIDs[] = (int)$_itemID;
+		else if((int)$_itemType == WEBDISK_ITEM_FILE)
+			$fileIDs[] = (int)$_itemID;
+	}
+
+	$stats = $webdisk->GetSelectionStats($folderIDs, $fileIDs);
+
+	$info = array(
+		'count'			=> $stats['count'],
+		'fileCount'		=> $stats['fileCount'],
+		'folderCount'	=> $stats['folderCount'],
+		'totalSize'		=> $stats['totalSize'],
+		'sizeFormatted'	=> TemplateSize(array('bytes' => $stats['totalSize']), $tpl)
+	);
+
+	NormalArray2XML($info, 'selection');
+	exit();
+}
+
+/**
+ * thumbnail image (group option wd_thumbnails)
+ */
+else if($_REQUEST['action'] == 'thumbnail'
+		&& isset($_REQUEST['id']))
+{
+	if(!isset($groupRow['wd_thumbnails']) || $groupRow['wd_thumbnails'] != 'yes' || !function_exists('imagecreatetruecolor'))
+	{
+		header('HTTP/1.1 404 Not Found');
+		exit();
+	}
+
+	$fileInfo = $webdisk->GetFileInfo((int)$_REQUEST['id']);
+	if($fileInfo === false || !WebdiskThumbnailIsSupportedType($fileInfo))
+	{
+		header('HTTP/1.1 404 Not Found');
+		exit();
+	}
+
+	$cachePath = WebdiskEnsureThumbnail($fileInfo, $userRow['id']);
+	if($cachePath === false)
+	{
+		header('HTTP/1.1 404 Not Found');
+		exit();
+	}
+
+	header('Content-Type: image/jpeg');
+	header('Cache-Control: private, max-age=86400');
+	readfile($cachePath);
 	exit();
 }
 
@@ -314,19 +461,54 @@ else if($_REQUEST['action'] == 'downloadFile'
 		if($groupRow['traffic'] <= 0 || ($userRow['traffic_down']+$userRow['traffic_up']+$fileInfo['size']) <= $groupRow['traffic']+$userRow['traffic_add'])
 		{
 			// ok
-			$speedLimit = $groupRow['wd_member_kbs'] <= 0 ? -1 : $groupRow['wd_member_kbs'];
-			$db->Query('UPDATE {pre}users SET traffic_down=traffic_down+? WHERE id=?',
-				$fileInfo['size'],
-				$userRow['id']);
+			$isInlineView = isset($_REQUEST['view']);
+			$contentType = strtolower($fileInfo['contenttype']);
+			$isMediaFile = function_exists('WebdiskIsMediaPreviewFile')
+				&& WebdiskIsMediaPreviewFile($fileInfo['dateiname'], $contentType);
+			$isPdfView = $isInlineView && $contentType === 'application/pdf';
+			$isMediaRangeView = $isInlineView && ($isMediaFile || strpos($contentType, 'video/') === 0 || strpos($contentType, 'audio/') === 0);
 
-			// send file
+			$effectiveContentType = $fileInfo['contenttype'];
+			if($isInlineView && $isMediaFile)
+			{
+				$guessedType = GuessMIMEType($fileInfo['dateiname']);
+				if(is_string($guessedType) && trim($guessedType) != '' && strtolower($guessedType) != 'application/octet-stream')
+					$effectiveContentType = $guessedType;
+				else if(function_exists('WebdiskGetMediaMimeTypeByFileName'))
+				{
+					$fallbackType = WebdiskGetMediaMimeTypeByFileName($fileInfo['dateiname']);
+					if($fallbackType !== '')
+						$effectiveContentType = $fallbackType;
+				}
+			}
+
+			// Vorschau: kein KB/s-Limit; PDF.js nutzt HTTP-Range (nur benötigte Bytes)
+			if($isPdfView || $isMediaRangeView)
+				$speedLimit = -1;
+			else
+				$speedLimit = $groupRow['wd_member_kbs'] <= 0 ? -1 : $groupRow['wd_member_kbs'];
+
 			header('Pragma: public');
-			header('Content-Type: ' . $fileInfo['contenttype']);
-			header('Content-Length: ' . $fileInfo['size']);
-			header('Content-Disposition: ' . (isset($_REQUEST['view']) ? 'inline' : 'attachment') . '; filename="' . addslashes($fileInfo['dateiname']) . '"');
-			Add2Stat('wd_down', ceil($fileInfo['size']/1024));
-			SendFileFP(BMBlobStorage::CreateProvider($fileInfo['blobstorage'], $userRow['id'])->loadBlob(BMBLOB_TYPE_WEBDISK, $fileInfo['id']),
-				$speedLimit);
+			header('Content-Type: ' . $effectiveContentType);
+			header('Content-Disposition: ' . ($isInlineView ? 'inline' : 'attachment') . '; filename="' . addslashes($fileInfo['dateiname']) . '"');
+
+			$fp = BMBlobStorage::CreateProvider($fileInfo['blobstorage'], $userRow['id'])->loadBlob(BMBLOB_TYPE_WEBDISK, $fileInfo['id']);
+			if($isPdfView || $isMediaRangeView)
+				$sentBytes = SendFileFPWithRange($fp, $fileInfo['size'], $speedLimit);
+			else
+			{
+				header('Content-Length: ' . $fileInfo['size']);
+				$sentBytes = SendFileFP($fp, $speedLimit);
+			}
+
+			if($sentBytes > 0)
+			{
+				$db->Query('UPDATE {pre}users SET traffic_down=traffic_down+? WHERE id=?',
+					$sentBytes,
+					$userRow['id']);
+				Add2Stat('wd_down', ceil($sentBytes / 1024));
+			}
+
 			exit();
 		}
 		else
@@ -338,6 +520,109 @@ else if($_REQUEST['action'] == 'downloadFile'
 
 	$tpl->assign('pageContent', 'li/error.tpl');
 	$tpl->display('li/index.tpl');
+}
+
+/**
+ * load text file for preview/editor
+ */
+else if($_REQUEST['action'] == 'getFileText'
+		&& isset($_REQUEST['id']))
+{
+	$fileInfo = $webdisk->GetFileInfo((int)$_REQUEST['id']);
+
+	header('Content-Type: application/json; charset=' . $currentCharset);
+
+	if($fileInfo === false
+		|| !WebdiskIsTextPreviewFile($fileInfo['dateiname'], $fileInfo['contenttype']))
+	{
+		echo json_encode(array('ok' => false, 'error' => 'forbidden'));
+		exit();
+	}
+
+	if($fileInfo['size'] > WebdiskGetTextEditMaxBytes())
+	{
+		echo json_encode(array(
+			'ok'		=> false,
+			'error'		=> 'toolarge',
+			'maxBytes'	=> WebdiskGetTextEditMaxBytes(),
+			'size'		=> (int)$fileInfo['size']
+		));
+		exit();
+	}
+
+	$fp = BMBlobStorage::createProvider($fileInfo['blobstorage'], $userRow['id'])->loadBlob(BMBLOB_TYPE_WEBDISK, $fileInfo['id']);
+	if(!$fp)
+	{
+		echo json_encode(array('ok' => false, 'error' => 'internal'));
+		exit();
+	}
+
+	$content = stream_get_contents($fp);
+	fclose($fp);
+
+	if($content === false || !WebdiskIsLikelyTextContent($content))
+	{
+		echo json_encode(array('ok' => false, 'error' => 'binary'));
+		exit();
+	}
+
+	if($groupRow['traffic'] > 0)
+	{
+		$db->Query('UPDATE {pre}users SET traffic_down=traffic_down+? WHERE id=?',
+			$fileInfo['size'],
+			$userRow['id']);
+		Add2Stat('wd_down', ceil($fileInfo['size'] / 1024));
+	}
+
+	echo json_encode(array(
+		'ok'		=> true,
+		'content'	=> $content,
+		'size'		=> (int)$fileInfo['size'],
+		'editable'	=> true
+	), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+	exit();
+}
+
+/**
+ * save text file from preview editor
+ */
+else if($_REQUEST['action'] == 'saveFileText'
+		&& IsPOSTRequest()
+		&& isset($_REQUEST['id']))
+{
+	$fileID = (int)$_REQUEST['id'];
+	$content = isset($_POST['content']) ? $_POST['content'] : '';
+
+	header('Content-Type: application/json; charset=' . $currentCharset);
+
+	$result = $webdisk->UpdateFileContent($fileID, $content);
+
+	if($result === true)
+	{
+		$fileInfo = $webdisk->GetFileInfo($fileID);
+		echo json_encode(array(
+			'ok'	=> true,
+			'size'	=> $fileInfo ? (int)$fileInfo['size'] : strlen($content)
+		));
+		exit();
+	}
+
+	$errorMessages = array(
+		'notfound'	=> $lang_user['wd_text_notfound'],
+		'forbidden'	=> $lang_user['wd_fileforbidden'],
+		'binary'	=> $lang_user['wd_text_binary'],
+		'toolarge'	=> sprintf($lang_user['wd_text_toolarge'], TemplateSize(array('bytes' => WebdiskGetTextEditMaxBytes()), $tpl)),
+		'nospace'	=> $lang_user['nospace'],
+		'notraffic'	=> $lang_user['notraffic'],
+		'internal'	=> $lang_user['internalerror']
+	);
+
+	echo json_encode(array(
+		'ok'		=> false,
+		'error'		=> $result,
+		'message'	=> isset($errorMessages[$result]) ? $errorMessages[$result] : $lang_user['internalerror']
+	));
+	exit();
 }
 
 /**
@@ -365,6 +650,144 @@ else if($_REQUEST['action'] == 'createFolder' && isset($_REQUEST['folderName']))
 }
 
 /**
+ * file share settings
+ */
+else if($_REQUEST['action'] == 'shareFile' && isset($_REQUEST['id']) && $groupRow['share'] == 'yes')
+{
+	$fileInfo = $webdisk->GetFileInfo((int)$_REQUEST['id']);
+	if($fileInfo !== false)
+	{
+		$existingShare = $webdisk->GetFileShareInfo((int)$fileInfo['id']);
+		$fileShared = $existingShare !== false && $webdisk->IsFileShared((int)$fileInfo['id']);
+		$sharePasswordRequired = isset($bm_prefs['wd_share_pw_required']) && $bm_prefs['wd_share_pw_required'] == 'yes';
+		$maxShareDays = isset($bm_prefs['wd_share_max_days']) ? max(0, (int)$bm_prefs['wd_share_max_days']) : 0;
+		$shareExpiryRequired = isset($bm_prefs['wd_share_expiry_required']) && $bm_prefs['wd_share_expiry_required'] == 'yes';
+		$shareExpiryMinDate = date('Y-m-d');
+		$shareExpiryMaxDate = $maxShareDays > 0 ? date('Y-m-d', strtotime('+' . $maxShareDays . ' day')) : '';
+		$shareUntilDate = '';
+		if($existingShare && (int)$existingShare['share_until'] > 0)
+			$shareUntilDate = date('Y-m-d', (int)$existingShare['share_until']);
+		$filePW = $existingShare ? $existingShare['share_pw'] : '';
+		if($sharePasswordRequired && trim($filePW) == '')
+			$filePW = WebdiskGenerateSharePassword(12);
+		$fileToken = $existingShare ? $existingShare['token'] : '';
+		$fileShareURL = $fileToken != ''
+			? sprintf('%sshare/?user=%s&file=%s', $bm_prefs['selfurl'], urlencode($userRow['email']), urlencode($fileToken))
+			: '';
+		$shareSingleUse = $existingShare ? ((int)$existingShare['single_use'] === 1 || $existingShare['single_use'] === true) : false;
+
+		$tpl->assign('pageTitle',		$lang_user['sharing']);
+		$tpl->assign('id', 				$fileInfo['id']);
+		$tpl->assign('folderID', 		(int)$fileInfo['ordner']);
+		$tpl->assign('fileName', 		$fileInfo['dateiname']);
+		$tpl->assign('fileShared', 		$fileShared);
+		$tpl->assign('filePW', 			$filePW);
+		$tpl->assign('shareSingleUse',	$shareSingleUse);
+		$tpl->assign('fileShareURL',	$fileShareURL);
+		$tpl->assign('sharePasswordRequired', $sharePasswordRequired);
+		$tpl->assign('shareUntilDate',	$shareUntilDate);
+		$tpl->assign('shareExpiryRequired', $shareExpiryRequired);
+		$tpl->assign('shareExpiryMaxDays', $maxShareDays);
+		$tpl->assign('shareExpiryMinDate', $shareExpiryMinDate);
+		$tpl->assign('shareExpiryMaxDate', $shareExpiryMaxDate);
+		$tpl->assign('pageContent', 	'li/webdisk.file.share.tpl');
+		$tpl->display('li/index.tpl');
+	}
+}
+
+/**
+ * save file share settings
+ */
+else if($_REQUEST['action'] == 'saveFileShareSettings' && isset($_REQUEST['id']) && $groupRow['share'] == 'yes'
+		&& IsPOSTRequest())
+{
+	$fileID = (int)$_REQUEST['id'];
+	$fileInfo = $webdisk->GetFileInfo($fileID);
+	if($fileInfo === false)
+		die('File not found');
+
+	$shareFile = isset($_REQUEST['shareFile']);
+	$sharePW = isset($_REQUEST['sharePW']) ? $_REQUEST['sharePW'] : '';
+	$shareSingleUse = isset($_REQUEST['shareSingleUse']);
+	$sharePasswordRequired = isset($bm_prefs['wd_share_pw_required']) && $bm_prefs['wd_share_pw_required'] == 'yes';
+	$shareUntil = 0;
+	$maxShareDays = isset($bm_prefs['wd_share_max_days']) ? max(0, (int)$bm_prefs['wd_share_max_days']) : 0;
+	$shareExpiryRequired = isset($bm_prefs['wd_share_expiry_required']) && $bm_prefs['wd_share_expiry_required'] == 'yes';
+	$shareExpiryMinDate = date('Y-m-d');
+	$shareExpiryMaxDate = $maxShareDays > 0 ? date('Y-m-d', strtotime('+' . $maxShareDays . ' day')) : '';
+	$shareUntilRaw = isset($_REQUEST['shareUntil']) ? trim($_REQUEST['shareUntil']) : '';
+	$shareError = '';
+
+	if($shareFile)
+	{
+		if($sharePasswordRequired && trim($sharePW) == '')
+			$shareError = $lang_user['wd_share_pw_required_err'];
+		else if($sharePasswordRequired && strlen($sharePW) < 12)
+			$shareError = $lang_user['wd_share_pw_minlength_err'];
+
+		if($shareUntilRaw == '' && $shareExpiryRequired && $shareError == '')
+			$shareError = $lang_user['wd_share_expiry_required'];
+		else if($shareUntilRaw != '' && $shareError == '')
+		{
+			$shareUntil = strtotime($shareUntilRaw . ' 23:59:59');
+			if($shareUntil === false)
+				$shareError = $lang_user['wd_share_expiry_invalid'];
+			else
+			{
+				$todayStart = strtotime(date('Y-m-d') . ' 00:00:00');
+				if($shareUntil < $todayStart)
+					$shareError = $lang_user['wd_share_expiry_invalid'];
+				else if($maxShareDays > 0)
+				{
+					$maxAllowed = strtotime('+' . $maxShareDays . ' day', $todayStart) + 86399;
+					if($shareUntil > $maxAllowed)
+						$shareError = sprintf($lang_user['wd_share_expiry_maxdays_err'], $maxShareDays);
+				}
+			}
+		}
+	}
+
+	if($shareError != '')
+	{
+		$existingShare = $webdisk->GetFileShareInfo($fileID);
+		$fileToken = $existingShare ? $existingShare['token'] : '';
+		$fileShareURL = $fileToken != ''
+			? sprintf('%sshare/?user=%s&file=%s', $bm_prefs['selfurl'], urlencode($userRow['email']), urlencode($fileToken))
+			: '';
+
+		$tpl->assign('pageTitle',		$lang_user['sharing']);
+		$tpl->assign('id', 				$fileInfo['id']);
+		$tpl->assign('folderID', 		(int)$fileInfo['ordner']);
+		$tpl->assign('fileName', 		$fileInfo['dateiname']);
+		$tpl->assign('fileShared', 		$shareFile);
+		$tpl->assign('filePW', 			(trim($sharePW) == '' && $sharePasswordRequired) ? WebdiskGenerateSharePassword(12) : $sharePW);
+		$tpl->assign('shareSingleUse',	$shareSingleUse);
+		$tpl->assign('fileShareURL',	$fileShareURL);
+		$tpl->assign('sharePasswordRequired', $sharePasswordRequired);
+		$tpl->assign('shareUntilDate',	$shareUntilRaw);
+		$tpl->assign('shareExpiryRequired', $shareExpiryRequired);
+		$tpl->assign('shareExpiryMaxDays', $maxShareDays);
+		$tpl->assign('shareExpiryMinDate', $shareExpiryMinDate);
+		$tpl->assign('shareExpiryMaxDate', $shareExpiryMaxDate);
+		$tpl->assign('shareError',		$shareError);
+		$tpl->assign('pageContent', 	'li/webdisk.file.share.tpl');
+		$tpl->display('li/index.tpl');
+		exit();
+	}
+
+	if($shareFile)
+	{
+		$fileToken = $webdisk->SetFileShareSettings($fileID, true, $sharePW, $shareUntil, $shareSingleUse);
+		$fileShareURL = sprintf('%sshare/?user=%s&file=%s', $bm_prefs['selfurl'], urlencode($userRow['email']), urlencode($fileToken));
+		WebdiskStoreShareFeedback((int)$fileInfo['ordner'], $fileInfo['dateiname'], $fileShareURL);
+	}
+	else
+		$webdisk->StopFileShare($fileID);
+
+	header('Location: webdisk.php?folder=' . (int)$fileInfo['ordner'] . '&sid=' . session_id());
+}
+
+/**
  * folder share settings
  */
 else if($_REQUEST['action'] == 'shareFolder' && isset($_REQUEST['id']) && $groupRow['share'] == 'yes')
@@ -372,11 +795,29 @@ else if($_REQUEST['action'] == 'shareFolder' && isset($_REQUEST['id']) && $group
 	$folderInfo = $webdisk->GetFolderInfo((int)$_REQUEST['id']);
 	if($folderInfo !== false)
 	{
+		$sharePasswordRequired = isset($bm_prefs['wd_share_pw_required']) && $bm_prefs['wd_share_pw_required'] == 'yes';
+		$maxShareDays = isset($bm_prefs['wd_share_max_days']) ? max(0, (int)$bm_prefs['wd_share_max_days']) : 0;
+		$shareExpiryRequired = isset($bm_prefs['wd_share_expiry_required']) && $bm_prefs['wd_share_expiry_required'] == 'yes';
+		$shareExpiryMinDate = date('Y-m-d');
+		$shareExpiryMaxDate = $maxShareDays > 0 ? date('Y-m-d', strtotime('+' . $maxShareDays . ' day')) : '';
+		$shareUntilDate = '';
+		if(isset($folderInfo['share_until']) && (int)$folderInfo['share_until'] > 0)
+			$shareUntilDate = date('Y-m-d', (int)$folderInfo['share_until']);
+		$folderPW = $folderInfo['share_pw'];
+		if($sharePasswordRequired && trim($folderPW) == '')
+			$folderPW = WebdiskGenerateSharePassword(12);
+
 		$tpl->assign('pageTitle',		$lang_user['sharing']);
 		$tpl->assign('id', 				$folderInfo['id']);
 		$tpl->assign('folderName', 		$folderInfo['titel']);
 		$tpl->assign('folderShared', 	$folderInfo['share'] == 'yes');
-		$tpl->assign('folderPW', 		$folderInfo['share_pw']);
+		$tpl->assign('folderPW', 		$folderPW);
+		$tpl->assign('sharePasswordRequired', $sharePasswordRequired);
+		$tpl->assign('shareUntilDate',	$shareUntilDate);
+		$tpl->assign('shareExpiryRequired', $shareExpiryRequired);
+		$tpl->assign('shareExpiryMaxDays', $maxShareDays);
+		$tpl->assign('shareExpiryMinDate', $shareExpiryMinDate);
+		$tpl->assign('shareExpiryMaxDate', $shareExpiryMaxDate);
 		$tpl->assign('pageContent', 	'li/webdisk.share.tpl');
 		$tpl->display('li/index.tpl');
 	}
@@ -388,8 +829,101 @@ else if($_REQUEST['action'] == 'shareFolder' && isset($_REQUEST['id']) && $group
 else if($_REQUEST['action'] == 'saveShareSettings' && isset($_REQUEST['id']) && $groupRow['share'] == 'yes'
 		&& IsPOSTRequest())
 {
-	$webdisk->SetShareSettings((int)$_REQUEST['id'], isset($_REQUEST['shareFolder']), $_REQUEST['sharePW']);
+	$folderID = (int)$_REQUEST['id'];
+	$shareFolder = isset($_REQUEST['shareFolder']);
+	$sharePW = isset($_REQUEST['sharePW']) ? $_REQUEST['sharePW'] : '';
+	$sharePasswordRequired = isset($bm_prefs['wd_share_pw_required']) && $bm_prefs['wd_share_pw_required'] == 'yes';
+	$shareUntil = 0;
+	$maxShareDays = isset($bm_prefs['wd_share_max_days']) ? max(0, (int)$bm_prefs['wd_share_max_days']) : 0;
+	$shareExpiryRequired = isset($bm_prefs['wd_share_expiry_required']) && $bm_prefs['wd_share_expiry_required'] == 'yes';
+	$shareExpiryMinDate = date('Y-m-d');
+	$shareExpiryMaxDate = $maxShareDays > 0 ? date('Y-m-d', strtotime('+' . $maxShareDays . ' day')) : '';
+	$shareUntilRaw = isset($_REQUEST['shareUntil']) ? trim($_REQUEST['shareUntil']) : '';
+	$shareError = '';
+
+	if($shareFolder)
+	{
+		if($sharePasswordRequired && trim($sharePW) == '')
+			$shareError = $lang_user['wd_share_pw_required_err'];
+		else if($sharePasswordRequired && strlen($sharePW) < 12)
+			$shareError = $lang_user['wd_share_pw_minlength_err'];
+
+		if($shareUntilRaw == '' && $shareExpiryRequired && $shareError == '')
+			$shareError = $lang_user['wd_share_expiry_required'];
+		else if($shareUntilRaw != '' && $shareError == '')
+		{
+			$shareUntil = strtotime($shareUntilRaw . ' 23:59:59');
+			if($shareUntil === false)
+				$shareError = $lang_user['wd_share_expiry_invalid'];
+			else
+			{
+				$todayStart = strtotime(date('Y-m-d') . ' 00:00:00');
+				if($shareUntil < $todayStart)
+					$shareError = $lang_user['wd_share_expiry_invalid'];
+				else if($maxShareDays > 0)
+				{
+					$maxAllowed = strtotime('+' . $maxShareDays . ' day', $todayStart) + 86399;
+					if($shareUntil > $maxAllowed)
+						$shareError = sprintf($lang_user['wd_share_expiry_maxdays_err'], $maxShareDays);
+				}
+			}
+		}
+	}
+
+	if($shareError != '')
+	{
+		$folderInfo = $webdisk->GetFolderInfo($folderID);
+		if($folderInfo !== false)
+		{
+			$tpl->assign('pageTitle',		$lang_user['sharing']);
+			$tpl->assign('id', 				$folderInfo['id']);
+			$tpl->assign('folderName', 		$folderInfo['titel']);
+			$tpl->assign('folderShared', 	$shareFolder);
+			$tpl->assign('folderPW', 		(trim($sharePW) == '' && $sharePasswordRequired) ? WebdiskGenerateSharePassword(12) : $sharePW);
+			$tpl->assign('sharePasswordRequired', $sharePasswordRequired);
+			$tpl->assign('shareUntilDate',	$shareUntilRaw);
+			$tpl->assign('shareExpiryRequired', $shareExpiryRequired);
+			$tpl->assign('shareExpiryMaxDays', $maxShareDays);
+			$tpl->assign('shareExpiryMinDate', $shareExpiryMinDate);
+			$tpl->assign('shareExpiryMaxDate', $shareExpiryMaxDate);
+			$tpl->assign('shareError',		$shareError);
+			$tpl->assign('pageContent', 	'li/webdisk.share.tpl');
+			$tpl->display('li/index.tpl');
+			exit();
+		}
+	}
+
+	$webdisk->SetShareSettings($folderID, $shareFolder, $sharePW, $shareUntil);
 	header('Location: webdisk.php?folder=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+}
+
+/**
+ * stop folder share (one click from sidebar)
+ */
+else if($_REQUEST['action'] == 'stopShare' && isset($_REQUEST['id']) && $groupRow['share'] == 'yes')
+{
+	$folderID = (int)$_REQUEST['id'];
+	$folderInfo = $webdisk->GetFolderInfo($folderID);
+
+	if($folderInfo !== false && $folderInfo['share'] == 'yes')
+		$webdisk->SetShareSettings($folderID, false, '');
+
+	$redirectFolder = isset($_REQUEST['folder']) ? (int)$_REQUEST['folder'] : $folderID;
+	header('Location: webdisk.php?folder=' . $redirectFolder . '&sid=' . session_id());
+}
+
+/**
+ * stop file share (one click from sidebar)
+ */
+else if($_REQUEST['action'] == 'stopFileShare' && isset($_REQUEST['id']) && $groupRow['share'] == 'yes')
+{
+	$fileID = (int)$_REQUEST['id'];
+	$fileInfo = $webdisk->GetFileInfo($fileID);
+	if($fileInfo !== false)
+		$webdisk->StopFileShare($fileID);
+
+	$redirectFolder = $fileInfo !== false ? (int)$fileInfo['ordner'] : (isset($_REQUEST['folder']) ? (int)$_REQUEST['folder'] : 0);
+	header('Location: webdisk.php?folder=' . $redirectFolder . '&sid=' . session_id());
 }
 
 /**
@@ -771,11 +1305,30 @@ else if($_REQUEST['action'] == 'dndUpload'
 	$fileName = $_REQUEST['filename'];
 	$fileSize = (int)$_REQUEST['size'];
 	$mimeType = $_REQUEST['type'];
+	$maxUpload = WebdiskGetMaxUploadFileSize($usedSpace, $spaceLimit, $groupRow, $userRow);
 
 	if($mimeType == '' || $mimeType == 'application/octet-stream')
 		$mimeType = GuessMIMEType($fileName);
 
-	if($groupRow['traffic'] <= 0 || ($userRow['traffic_down']+$userRow['traffic_up']+$fileSize) <= $groupRow['traffic']+$userRow['traffic_add'])
+	if($fileSize <= 0)
+	{
+		$msg = $lang_user['wd_upload_nofile'];
+	}
+	else if($maxUpload <= 0)
+	{
+		$msg = $lang_user['nospace'];
+	}
+	else if($fileSize > $maxUpload)
+	{
+		$msg = sprintf($lang_user['wd_filetoolarge'],
+			$fileName,
+			WebdiskFormatBytes($maxUpload));
+	}
+	else if($webdisk->Forbidden($fileName, $mimeType))
+	{
+		$msg = $lang_user['wd_fileforbidden'];
+	}
+	else if($groupRow['traffic'] <= 0 || ($userRow['traffic_down']+$userRow['traffic_up']+$fileSize) <= $groupRow['traffic']+$userRow['traffic_add'])
 	{
 		if($spaceLimit == -1 || $usedSpace+$fileSize <= $spaceLimit)
 		{
@@ -860,7 +1413,10 @@ else if($_REQUEST['action'] == 'dndUpload'
 		$msg = $lang_user['notraffic'];
 	}
 
-	http_response_code(400);
+	if($msg === '1')
+		http_response_code(200);
+	else
+		http_response_code(400);
 	echo $msg;
 }
 
@@ -871,92 +1427,32 @@ else if($_REQUEST['action'] == 'uploadFiles'
 		&& IsPOSTRequest())
 {
 	$error = $success = array();
+	$maxUpload = WebdiskGetMaxUploadFileSize($usedSpace, $spaceLimit, $groupRow, $userRow);
 
-	foreach($_FILES as $key=>$value)
+	if(WebdiskIsUploadPostTooLarge())
 	{
-		if(is_array($value) && substr($key, 0, 4) == 'file' && isset($value['name']) && trim($value['name']) != '')
+		$error[''] = sprintf($lang_user['wd_upload_posttoolarge'],
+			WebdiskFormatBytes(ParsePHPSize(ini_get('post_max_size'))));
+	}
+	else
+	{
+		foreach(WebdiskCollectUploadFiles() as $entry)
 		{
-			$fileName = isset($value['name']) ? $value['name'] : 'unknown';
-			$fileSize = (int)$value['size'];
-			$mimeType = $value['type'];
+			$fileName = $entry['name'];
+			$errMsg = WebdiskProcessUploadedFileEntry($webdisk, $folderID, $entry, $maxUpload, $usedSpace, $spaceLimit, $groupRow, $userRow);
 
-			if($mimeType == '' || $mimeType == 'application/octet-stream')
-				$mimeType = GuessMIMEType($fileName);
-
-			if($groupRow['traffic'] <= 0 || ($userRow['traffic_down']+$userRow['traffic_up']+$fileSize) <= $groupRow['traffic']+$userRow['traffic_add'])
-			{
-				if($spaceLimit == -1 || $usedSpace+$fileSize <= $spaceLimit)
-				{
-					if(($fileID = $webdisk->CreateFile($folderID, $fileName, $mimeType, $fileSize)) !== false)
-					{
-						$tempFileID = RequestTempFile($userRow['id'], time()+TIME_ONE_HOUR);
-						$tempFileName = TempFileName($tempFileID);
-
-						if(!@move_uploaded_file($value['tmp_name'], $tempFileName))
-						{
-							$webdisk->DeleteFile($fileID);
-							$error[$fileName] = $lang_user['internalerror'];
-
-							// log
-							PutLog(sprintf('Failed to move uploaded file <%s> to <%s>, deleting webdisk file',
-								$value['tmp_name'],
-								$tempFileName),
-								PRIO_ERROR,
-								__FILE__,
-								__LINE__);
-						}
-						else
-						{
-							$sourceFP = fopen($tempFileName, 'rb');
-							if($sourceFP
-								&& BMBlobStorage::createDefaultWebdiskProvider($userRow['id'])->storeBlob(BMBLOB_TYPE_WEBDISK, $fileID, $sourceFP))
-							{
-								fclose($sourceFP);
-
-								$usedSpace += $fileSize;
-								$db->Query('UPDATE {pre}users SET traffic_up=traffic_up+? WHERE id=?',
-									$fileSize,
-									$userRow['id']);
-								Add2Stat('wd_up', ceil($fileSize/1024));
-								$success[$fileName] = $lang_user['success'];
-							}
-							else
-							{
-								$webdisk->DeleteFile($fileID);
-								$error[$fileName] = $lang_user['internalerror'];
-							}
-						}
-
-						ReleaseTempFile($userRow['id'], $tempFileID);
-					}
-					else
-					{
-						$error[$fileName] = $lang_user['fileexists'];
-					}
-				}
-				else
-				{
-					$error[$fileName] = $lang_user['nospace'];
-				}
-			}
+			if($errMsg !== null)
+				$error[$fileName] = $errMsg;
 			else
-			{
-				$error[$fileName] = $lang_user['notraffic'];
-			}
+				$success[$fileName] = $lang_user['success'];
 		}
 	}
 
 	if(count($error) > 0 || count($success) > 0)
-	{
-		$tpl->assign('error', $error);
-		$tpl->assign('success', $success);
-		$tpl->assign('pageContent', 'li/webdisk.uploadresult.tpl');
-		$tpl->display('li/index.tpl');
-	}
-	else
-	{
-		header('Location: webdisk.php?folder=' . $folderID . '&sid=' . session_id());
-	}
+		WebdiskStoreUploadFeedback($folderID, $error, $success);
+
+	header('Location: webdisk.php?folder=' . $folderID . '&sid=' . session_id());
+	exit();
 }
 
 /**

@@ -208,6 +208,12 @@ class BMUser
 				case '%%tpldir%%images/li/notify_calendar.png':
 					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_calendar.png', 'fa-calendar', $row['icon']);
 					break;
+				case '%%tpldir%%images/li/notify_webdisk.png':
+					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_webdisk.png', 'fa-cloud', $row['icon']);
+					break;
+				case '%%tpldir%%images/li/notify_webdisk_download.png':
+					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_webdisk_download.png', 'fa-download', $row['icon']);
+					break;
 			}
 			$row['icon'] = str_replace('%%tpldir%%', $tpl->tplDir, $row['icon']);
 

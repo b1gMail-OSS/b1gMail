@@ -2278,6 +2278,80 @@ function SendFileFP($fp, $speed = -1)
 }
 
 /**
+ * send a file stream with optional HTTP Range support (for PDF.js etc.)
+ *
+ * @param resource $fp File stream
+ * @param int $fileSize Total file size in bytes
+ * @param int $speed Speed limit (kb/s), -1 = unlimited
+ * @return int Sent bytes
+ */
+function SendFileFPWithRange($fp, $fileSize, $speed = -1)
+{
+	$fileSize = (int)$fileSize;
+
+	if(!is_resource($fp) || $fileSize <= 0)
+		return(0);
+
+	header('Accept-Ranges: bytes');
+
+	$start = 0;
+	$end = $fileSize - 1;
+	$partial = false;
+
+	if(isset($_SERVER['HTTP_RANGE']) && preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $m))
+	{
+		if($m[1] !== '')
+			$start = (int)$m[1];
+		if($m[2] !== '')
+			$end = (int)$m[2];
+
+		if($start > $end || $start >= $fileSize)
+		{
+			header('HTTP/1.1 416 Range Not Satisfiable');
+			header('Content-Range: bytes */' . $fileSize);
+			return(0);
+		}
+
+		if($end >= $fileSize)
+			$end = $fileSize - 1;
+
+		$partial = true;
+	}
+
+	$length = $end - $start + 1;
+
+	if($partial)
+	{
+		header('HTTP/1.1 206 Partial Content');
+		header('Content-Range: bytes ' . $start . '-' . $end . '/' . $fileSize);
+	}
+	header('Content-Length: ' . $length);
+
+	if($start > 0 && @fseek($fp, $start) !== 0)
+		return(0);
+
+	if($speed == -1)
+		$bufferSize = 4096;
+	else
+		$bufferSize = max(1, (int)(($speed * 1024) / 100));
+
+	$sentBytes = 0;
+	while(is_resource($fp) && !feof($fp) && $sentBytes < $length)
+	{
+		$toRead = min($bufferSize, $length - $sentBytes);
+		$buffer = fread($fp, $toRead);
+		if($buffer === false || $buffer === '')
+			break;
+		echo($buffer);
+		$sentBytes += strlen($buffer);
+		if($speed != -1)
+			usleep(10000);
+	}
+
+	return($sentBytes);
+}
+
+/**
  * send a file with speed limit
  *
  * @param string $file Filename

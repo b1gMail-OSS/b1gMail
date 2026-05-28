@@ -27,3 +27,6 @@
 			{else}
 				<img src="webdisk.php?action=displayExtension&ext={$item.ext}&sid={$sid}" border="0" alt="" {$wdicons_imgattr} {$wdicons_additionalparam}>
 			{/if}
+			{if isset($item.share) && $item.share}
+				<i class="fa fa-share-square-o" aria-hidden="true" style="font-size:11px;vertical-align:top;margin-left:2px;color:#4a78c2;"></i>
+			{/if}

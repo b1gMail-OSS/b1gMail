@@ -326,6 +326,13 @@ SELECT
 	line-height: 16px;
 }
 
+#mailTable .narrowRow .bm-mail-invite-icon
+{
+	font-size: 1.15em;
+	line-height: 1;
+	color: inherit;
+}
+
 .selected TD, .selected SPAN
 {
 	background-color: #428bca;
@@ -2289,6 +2296,29 @@ A:hover
 	margin: 0.5em;
 }
 
+@media (prefers-color-scheme: dark)
+{
+	BODY.layout-fluid.bm-loggedin.bm-li-email .mailNote.preview,
+	BODY.layout-fluid.bm-loggedin.bm-li-email .mailWarning.preview
+	{
+		background-color: #f6f8fb;
+		border-color: #d7dce3;
+		color: #1f2937;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-li-email .mailNote.preview a,
+	BODY.layout-fluid.bm-loggedin.bm-li-email .mailWarning.preview a
+	{
+		color: #0b5ed7;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-li-email #mailTable .folderGroup img[id^="groupImage_"]
+	{
+		filter: invert(88%) sepia(9%) saturate(430%) hue-rotate(178deg) brightness(101%) contrast(96%);
+		opacity: 0.95;
+	}
+}
+
 /* ******************************************************************* */
 .dragTable
 {
@@ -3112,4 +3142,463 @@ INPUT.primary:disabled
 .bm-push-type-row label
 {
 	margin-left: 0.25em;
+}
+
+/* E-Mail: Anhänge (Chips) und Kalendereinladung */
+.bm-mail-attachments
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem;
+}
+
+.bm-mail-attachments-footer
+{
+	margin: 0.5em 0.75em 0;
+	padding: 0.5em 0;
+	border-top: 1px solid #ddd;
+}
+
+.bm-mail-attachments-label
+{
+	margin-bottom: 0.35em;
+}
+
+.bm-mail-attachment-chip
+{
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	max-width: 100%;
+	padding: 0.35rem 0.55rem;
+	font-size: 0.9em;
+	line-height: 1.25;
+	color: #333;
+	text-decoration: none;
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+}
+
+.bm-mail-attachment-chip:hover
+{
+	color: #066fd1;
+	border-color: #066fd1;
+	text-decoration: none;
+}
+
+.bm-mail-attachment-chip-selectable
+{
+	padding-left: 0.25rem;
+}
+
+.bm-mail-attachment-check-label
+{
+	margin: 0 0.25rem 0 0;
+}
+
+.bm-mail-attachment-icon
+{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	flex-shrink: 0;
+	color: #066fd1;
+	background: #eef4fc;
+	border-radius: 3px;
+}
+
+.bm-mail-attachment-meta
+{
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.bm-mail-attachment-name
+{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 600;
+}
+
+.bm-mail-attachment-size
+{
+	font-size: 0.85em;
+	color: #666;
+}
+
+.bm-mail-calendar-card
+{
+	margin: 0.75em 0.75em 0;
+	border: 1px solid #ccc;
+	border-left: 4px solid #066fd1;
+	background: #fafbfd;
+}
+
+.bm-mail-calendar-card fieldset
+{
+	margin: 0;
+	border: 0;
+	padding: 0.75em;
+}
+
+.bm-mail-calendar-card-header
+{
+	display: flex;
+	gap: 0.75em;
+	align-items: center;
+	margin-bottom: 0.5em;
+}
+
+.bm-mail-calendar-avatar
+{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 4rem;
+	height: 4rem;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background: #e8f2fc;
+	color: #066fd1;
+	font-size: 2rem;
+}
+
+.bm-mail-calendar-avatar--accepted
+{
+	background: #e6f7e6;
+	color: #2a8f2a;
+}
+
+.bm-mail-calendar-avatar--declined
+{
+	background: #fde8e8;
+	color: #c00;
+}
+
+.bm-mail-calendar-avatar--tentative
+{
+	background: #fff8e6;
+	color: #c90;
+}
+
+.bm-mail-calendar-title
+{
+	margin: 0 0 0.25em;
+	font-size: 1.15em;
+}
+
+.bm-mail-calendar-when,
+.bm-mail-calendar-organizer
+{
+	font-size: 0.9em;
+	color: #666;
+}
+
+.bm-mail-calendar-rsvp-actions
+{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35em;
+	margin-top: 0.5em;
+}
+
+.bm-mail-calendar-rsvp-actions .bm-mail-rsvp-btn
+{
+	margin-right: 0.25em;
+}
+
+#previewArea .bm-mail-calendar-card
+{
+	flex-shrink: 0;
+}
+
+/* Webdisk-Vorschau (ohne Bootstrap 5) */
+#wdPreviewModal.bm-wd-preview-modal
+{
+	display: none;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 10050;
+	overflow: hidden;
+	outline: 0;
+}
+
+#wdPreviewModal.bm-wd-preview-modal.show,
+#wdPreviewModal.bm-wd-preview-modal.in
+{
+	display: block;
+}
+
+#wdPreviewModal .modal-dialog
+{
+	position: relative;
+	width: auto;
+	max-width: 96%;
+	margin: 1.75rem auto;
+	pointer-events: none;
+}
+
+#wdPreviewModal.show .modal-dialog,
+#wdPreviewModal.in .modal-dialog
+{
+	pointer-events: auto;
+}
+
+#wdPreviewModal .modal-content
+{
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	max-height: 92vh;
+	background: #fff;
+	border: 1px solid #999;
+	border-radius: 6px;
+	box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.25);
+	pointer-events: auto;
+}
+
+#wdPreviewModal .modal-header
+{
+	display: flex;
+	align-items: center;
+	padding: 0.75rem 2.5rem 0.75rem 1rem;
+	border-bottom: 1px solid #e5e5e5;
+	flex-shrink: 0;
+}
+
+#wdPreviewModal .modal-header .close
+{
+	position: absolute;
+	right: 0.5rem;
+	top: 0.35rem;
+	font-size: 1.75rem;
+	line-height: 1;
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+}
+
+#wdPreviewModal .modal-title
+{
+	flex: 1 1 auto;
+	margin: 0;
+	font-size: 1.1em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#wdPreviewModal .modal-body.bm-wd-preview-body
+{
+	position: relative;
+	flex: 1 1 auto;
+	min-height: min(70vh, 720px);
+	background: #f4f6fa;
+	overflow: hidden;
+}
+
+#wdPreviewModal .modal-footer
+{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border-top: 1px solid #e5e5e5;
+	flex-shrink: 0;
+}
+
+.bm-wd-preview-backdrop,
+.modal-backdrop.bm-wd-preview-backdrop
+{
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 10040;
+	background: #000;
+	opacity: 0.5;
+}
+
+body.bm-wd-preview-body-lock
+{
+	overflow: hidden;
+}
+
+.bm-wd-preview-stage
+{
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	min-height: 0;
+	padding: 1rem 3.25rem;
+	overflow: auto;
+}
+
+.bm-wd-preview-image
+{
+	max-width: 100%;
+	max-height: min(68vh, 680px);
+	object-fit: contain;
+}
+
+.bm-wd-preview-pdf
+{
+	max-width: 100%;
+	height: auto;
+	box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.12);
+	background: #fff;
+}
+
+.bm-wd-preview-text
+{
+	width: 100%;
+	height: min(68vh, 680px);
+	border: 0;
+	background: #fff;
+}
+
+.bm-wd-preview-video
+{
+	width: 100%;
+	max-height: min(68vh, 680px);
+	background: #000;
+}
+
+.bm-wd-preview-audio
+{
+	width: min(48rem, calc(100% - 3rem));
+	max-width: 100%;
+}
+
+.bm-wd-preview-editor
+{
+	display: block;
+	width: 100%;
+	height: 100%;
+	min-height: 12rem;
+	box-sizing: border-box;
+	font-family: monospace;
+	font-size: 0.875rem;
+	border: 0;
+	resize: none;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-markdown .bm-wd-preview-editor-pane
+{
+	flex-direction: row;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-md-edit .bm-wd-preview-editor
+{
+	width: 100%;
+	border-right: 0;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-md-edit .bm-wd-preview-markdown-preview
+{
+	display: none !important;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-markdown .bm-wd-preview-editor
+{
+	width: 50%;
+	border-right: 1px solid #ddd;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-md-preview .bm-wd-preview-editor
+{
+	display: none !important;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-md-preview .bm-wd-preview-markdown-preview
+{
+	width: 100%;
+}
+
+.bm-wd-preview-markdown-preview
+{
+	display: block;
+	flex: 1 1 auto;
+	width: 50%;
+	min-width: 0;
+	min-height: 0;
+	overflow: auto;
+	padding: 1rem;
+	background: #f7f7f7;
+}
+
+.bm-wd-preview-nav
+{
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 10;
+	width: 2.25rem;
+	height: 2.25rem;
+	padding: 0;
+	border: 1px solid #ccc;
+	border-radius: 50%;
+	background: #fff;
+	cursor: pointer;
+}
+
+.bm-wd-preview-prev { left: 0.5rem; }
+.bm-wd-preview-next { right: 0.5rem; }
+
+.bm-wd-preview-loading,
+.bm-wd-preview-editor-loading
+{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 12rem;
+	color: #666;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-mode-text .bm-wd-preview-editor-pane
+{
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.bm-wd-preview-modal.bm-wd-preview-mode-text .bm-wd-preview-nav
+{
+	display: none !important;
+}
+
+.bm-wd-preview-text-actions
+{
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.bm-wd-preview-pdf-pages
+{
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+/* Webdisk Sidebar: keinen Leerabstand ohne "Freigabe beenden" */
+#webdiskDetailFolderActions #wdStopShareLink[style*="display:none"] + br,
+#webdiskDetailFolderActions #wdStopShareLink[style*="display: none"] + br
+{
+	display: none;
 }

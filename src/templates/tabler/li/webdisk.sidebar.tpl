@@ -22,13 +22,21 @@
 	<div class="contentMenuIcons bm-webdisk-sidebar-actions">
 		<div id="webdiskDetailFolderActions" style="display:none;">
 			<a href="javascript:void(0);" onclick="switchWebdiskFolder(currentID);"><i class="ti ti-eye icon icon-sm me-1" aria-hidden="true"></i>{lng p="view"}</a><br />
-			{if $allowShare}<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />{/if}
+			<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
+			{if $allowShare}
+			<a href="javascript:void(0);" id="wdShareLink" onclick="document.location.href='webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />
+			<a href="javascript:void(0);" id="wdStopShareLink" style="display:none;" onclick="webdiskStopShare();"><i class="ti ti-share-off icon icon-sm me-1" aria-hidden="true"></i>{lng p="stopsharing"}</a><br />
+			{/if}
 		</div>
 		<div id="webdiskDetailFileActionsView" style="display:none;">
-			<a href="javascript:void(0);" onclick="window.open('webdisk.php?action=downloadFile&id='+currentID+'&view=true&sid={$sid}');"><i class="ti ti-eye icon icon-sm me-1" aria-hidden="true"></i>{lng p="view"}</a><br />
+			<a href="javascript:void(0);" onclick="webdiskOpenPreview(currentID);"><i class="ti ti-eye icon icon-sm me-1" aria-hidden="true"></i>{lng p="view"}</a><br />
 		</div>
 		<div id="webdiskDetailFileActions" style="display:none;">
-			<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=downloadFile&id='+currentID+'&sid={$sid}';"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
+			<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
+			{if $allowShare}
+			<a href="javascript:void(0);" id="wdShareFileLink" onclick="document.location.href='webdisk.php?action=shareFile&id=' + currentID + '&sid={$sid}';"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />
+			<a href="javascript:void(0);" id="wdStopFileShareLink" style="display:none;" onclick="webdiskStopFileShare();"><i class="ti ti-share-off icon icon-sm me-1" aria-hidden="true"></i>{lng p="stopsharing"}</a><br />
+			{/if}
 		</div>
 		<div id="webdiskDetailZIPActions" style="display:none;">
 			<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=extractFile&id='+currentID+'&folder='+currentWebdiskFolderID+'&sid={$sid}';"><i class="ti ti-file-zip icon icon-sm me-1" aria-hidden="true"></i>{lng p="extract"}</a><br />
@@ -41,7 +49,7 @@
 			{hook id="webdisk.sidebar.tpl:actions.details"}
 		</div>
 		<div id="webdiskMultiActions" style="display:none;">
-			<a href="javascript:void(0);" onclick="EBID('wdMassAction').value='download';transferSelectedWebdiskItems();document.forms.f1.submit();"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
+			<a href="javascript:void(0);" onclick="webdiskMassDownload();"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
 			<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) {literal}{  EBID('wdMassAction').value='delete';transferSelectedWebdiskItems();document.forms.f1.submit(); }{/literal}"><i class="ti ti-trash icon icon-sm me-1" aria-hidden="true"></i>{lng p="delete"}</a><br />
 			<a href="javascript:webdiskClipboardAction('copy');" id="wdCopyLink2"><i class="ti ti-copy icon icon-sm me-1" aria-hidden="true"></i>{lng p="copy"}</a><br />
 			<a href="javascript:webdiskClipboardAction('cut');" id="wdCutLink2"><i class="ti ti-cut icon icon-sm me-1" aria-hidden="true"></i>{lng p="cut"}</a><br />
@@ -54,16 +62,5 @@
 	</div>
 </div>
 
-<div class="bm-webdisk-sidebar-section">
-	<div class="sidebarHeading">{lng p="uploadfiles"}</div>
-	<div class="contentMenuIcons bm-webdisk-sidebar-upload">
-		<form action="webdisk.php?do=uploadFilesForm&folder={$folderID}&sid={$sid}" method="post" id="fileCountForm" onsubmit="return webdiskShowUploadForm();" class="d-flex flex-wrap align-items-center gap-2">
-			<label class="small text-secondary mb-0" for="fileCount">{lng p="count"}:</label>
-			<input type="text" class="form-control form-control-sm" style="width:4rem;" value="5" name="fileCount" id="fileCount" />
-			<button type="submit" class="btn btn-sm btn-primary">{lng p="ok"}</button>
-		</form>
-		{hook id="webdisk.sidebar.tpl:upload"}
-	</div>
-</div>
-
+{hook id="webdisk.sidebar.tpl:upload"}
 {hook id="webdisk.sidebar.tpl:foot"}

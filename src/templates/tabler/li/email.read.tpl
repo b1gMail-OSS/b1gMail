@@ -154,6 +154,9 @@
 <div class="pad bm-mail-read-body">
 
 {hook id="email.read.tpl:beforeText"}
+{if isset($calendarInviteCard)}
+{include file="li/email.calendar.invite.tpl"}
+{/if}
 <div class="bm-mail-alerts">
 {include file="li/email.mailnotes.tpl"}
 		{hook id="email.read.tpl:mailNotes"}
@@ -165,6 +168,8 @@
 	<script>
 	<!--
 		initEMailTextArea(EBID('textArea_raw').value);
+		if(typeof bmMailCalendarInviteInit === 'function')
+			bmMailCalendarInviteInit();
 	//-->
 	</script>
 
@@ -392,3 +397,4 @@
 </div>
 
 {include file="li/email.addressmenu.tpl"}
+{include file="li/webdisk.preview.tpl"}

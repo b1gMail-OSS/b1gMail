@@ -121,6 +121,62 @@ function CleanupNotifications()
 }
 
 /**
+ * Expire webdisk shares and notify owners.
+ *
+ */
+function ProcessWebdiskShareExpirations()
+{
+	global $db, $mysql;
+
+	$db->Query('CREATE TABLE IF NOT EXISTS {pre}disksharemeta (
+		folder_id INT(11) NOT NULL,
+		`user` INT(11) NOT NULL,
+		share_until INT(11) NOT NULL DEFAULT 0,
+		PRIMARY KEY(folder_id),
+		KEY `user` (`user`)
+	)');
+
+	$now = time();
+	$expired = array();
+	$res = $db->Query('SELECT m.folder_id,m.user,m.share_until,f.titel FROM {pre}disksharemeta m
+		INNER JOIN {pre}diskfolders f ON f.id=m.folder_id AND f.user=m.user
+		WHERE m.share_until>0 AND m.share_until<? AND f.share=?',
+		$now,
+		'yes');
+	while($row = $res->FetchArray(MYSQLI_ASSOC))
+		$expired[] = $row;
+	$res->Free();
+
+	if(count($expired) == 0)
+		return;
+
+	foreach($expired as $item)
+	{
+		$db->Query('UPDATE {pre}diskfolders SET share=?,share_pw=?,modified=? WHERE id=? AND user=?',
+			'no',
+			'',
+			$now,
+			(int)$item['folder_id'],
+			(int)$item['user']);
+
+		$db->Query('DELETE FROM {pre}disksharemeta WHERE folder_id=? AND user=?',
+			(int)$item['folder_id'],
+			(int)$item['user']);
+
+		$user = _new('BMUser', array((int)$item['user']));
+		$user->PostNotification('notify_wd_share_expired',
+			array(HTMLFormat($item['titel'])),
+			'webdisk.php?folder=' . (int)$item['folder_id'] . '&',
+			'%%tpldir%%images/li/notify_webdisk.png',
+			0,
+			0,
+			NOTIFICATION_FLAG_USELANG,
+			'::webdiskShareExpired:' . (int)$item['folder_id'],
+			true);
+	}
+}
+
+/**
  * Birthday notification cron job
  *
  */

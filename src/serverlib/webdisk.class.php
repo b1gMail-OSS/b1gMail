@@ -34,6 +34,10 @@ define('WEBDISK_ITEM_FILE',			2);
 class BMWebdisk
 {
 	var $_userID;
+	var $_shareUntilByFolder = null;
+	var $_fileShareByFile = null;
+	static $_shareMetaTableReady = false;
+	static $_fileShareTableReady = false;
 
 	/**
 	 * constructor
@@ -56,6 +60,311 @@ class BMWebdisk
 				(int)date('m'),
 				$userID);
 		}
+
+		$this->EnsureShareMetaTable();
+		$this->CleanupExpiredShares();
+		$this->EnsureFileShareTable();
+		$this->CleanupExpiredFileShares();
+	}
+
+	function EnsureShareMetaTable()
+	{
+		global $db;
+
+		if(self::$_shareMetaTableReady)
+			return;
+
+		$db->Query('CREATE TABLE IF NOT EXISTS {pre}disksharemeta (
+			folder_id INT(11) NOT NULL,
+			`user` INT(11) NOT NULL,
+			share_until INT(11) NOT NULL DEFAULT 0,
+			PRIMARY KEY(folder_id),
+			KEY `user` (`user`)
+		)');
+
+		self::$_shareMetaTableReady = true;
+	}
+
+	function LoadShareMeta()
+	{
+		global $db;
+
+		if(is_array($this->_shareUntilByFolder))
+			return;
+
+		$this->_shareUntilByFolder = array();
+		$res = $db->Query('SELECT folder_id,share_until FROM {pre}disksharemeta WHERE user=?',
+			$this->_userID);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+			$this->_shareUntilByFolder[(int)$row['folder_id']] = max(0, (int)$row['share_until']);
+		$res->Free();
+	}
+
+	function GetShareUntil($folderID)
+	{
+		$this->LoadShareMeta();
+		return(isset($this->_shareUntilByFolder[(int)$folderID]) ? (int)$this->_shareUntilByFolder[(int)$folderID] : 0);
+	}
+
+	function SetShareUntil($folderID, $shareUntil)
+	{
+		global $db;
+
+		$folderID = (int)$folderID;
+		$shareUntil = max(0, (int)$shareUntil);
+		$this->LoadShareMeta();
+
+		if($shareUntil > 0)
+		{
+			$db->Query('REPLACE INTO {pre}disksharemeta(folder_id,user,share_until) VALUES(?,?,?)',
+				$folderID,
+				$this->_userID,
+				$shareUntil);
+			$this->_shareUntilByFolder[$folderID] = $shareUntil;
+		}
+		else
+		{
+			$db->Query('DELETE FROM {pre}disksharemeta WHERE folder_id=? AND user=?',
+				$folderID,
+				$this->_userID);
+			unset($this->_shareUntilByFolder[$folderID]);
+		}
+	}
+
+	function IsShareExpired($shareUntil)
+	{
+		return((int)$shareUntil > 0 && (int)$shareUntil < time());
+	}
+
+	function CleanupExpiredShares()
+	{
+		global $db;
+
+		$this->LoadShareMeta();
+
+		$expiredFolderIDs = array();
+		foreach($this->_shareUntilByFolder as $folderID => $shareUntil)
+			if($this->IsShareExpired($shareUntil))
+				$expiredFolderIDs[] = (int)$folderID;
+
+		if(count($expiredFolderIDs) == 0)
+			return;
+
+		$db->Query('UPDATE {pre}diskfolders SET share=?,share_pw=?,modified=? WHERE user=? AND id IN(' . implode(',', $expiredFolderIDs) . ')',
+			'no',
+			'',
+			time(),
+			$this->_userID);
+		$db->Query('DELETE FROM {pre}disksharemeta WHERE user=? AND folder_id IN(' . implode(',', $expiredFolderIDs) . ')',
+			$this->_userID);
+
+		foreach($expiredFolderIDs as $folderID)
+			unset($this->_shareUntilByFolder[(int)$folderID]);
+	}
+
+	function EnsureFileShareTable()
+	{
+		global $db;
+
+		if(self::$_fileShareTableReady)
+			return;
+
+		$db->Query('CREATE TABLE IF NOT EXISTS {pre}diskfileshares (
+			file_id INT(11) NOT NULL,
+			`user` INT(11) NOT NULL,
+			token VARCHAR(96) NOT NULL,
+			share_pw VARCHAR(255) NOT NULL DEFAULT \'\',
+			share_until INT(11) NOT NULL DEFAULT 0,
+			single_use TINYINT(1) NOT NULL DEFAULT 0,
+			used TINYINT(1) NOT NULL DEFAULT 0,
+			active TINYINT(1) NOT NULL DEFAULT 1,
+			created INT(11) NOT NULL DEFAULT 0,
+			last_used INT(11) NOT NULL DEFAULT 0,
+			PRIMARY KEY(file_id),
+			UNIQUE KEY token (token),
+			KEY `user` (`user`)
+		)');
+
+		self::$_fileShareTableReady = true;
+	}
+
+	function LoadFileShareMeta()
+	{
+		global $db;
+
+		if(is_array($this->_fileShareByFile))
+			return;
+
+		$this->_fileShareByFile = array();
+		$res = $db->Query('SELECT file_id,token,share_pw,share_until,single_use,used,active FROM {pre}diskfileshares WHERE user=?',
+			$this->_userID);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+			$this->_fileShareByFile[(int)$row['file_id']] = array(
+				'file_id' => (int)$row['file_id'],
+				'token' => $row['token'],
+				'share_pw' => $row['share_pw'],
+				'share_until' => (int)$row['share_until'],
+				'single_use' => (int)$row['single_use'] === 1,
+				'used' => (int)$row['used'] === 1,
+				'active' => (int)$row['active'] === 1
+			);
+		$res->Free();
+	}
+
+	function GetFileShareInfo($fileID)
+	{
+		$this->LoadFileShareMeta();
+		return(isset($this->_fileShareByFile[(int)$fileID]) ? $this->_fileShareByFile[(int)$fileID] : false);
+	}
+
+	function IsFileShared($fileID)
+	{
+		$info = $this->GetFileShareInfo((int)$fileID);
+		if(!$info || !$info['active'])
+			return(false);
+
+		return(!$this->IsShareExpired($info['share_until']));
+	}
+
+	function BuildFileShareToken($fileID)
+	{
+		return(md5(GenerateRandomKey('file-share:' . $this->_userID . ':' . (int)$fileID . ':' . microtime(true)))
+			. md5(GenerateRandomKey('file-share-alt:' . $this->_userID . ':' . (int)$fileID . ':' . mt_rand())));
+	}
+
+	function SetFileShareSettings($fileID, $enabled, $sharePW, $shareUntil = 0, $singleUse = false)
+	{
+		global $db;
+
+		$fileID = (int)$fileID;
+		$shareUntil = max(0, (int)$shareUntil);
+		$enabled = (bool)$enabled;
+		$singleUse = (bool)$singleUse;
+		$this->LoadFileShareMeta();
+
+		if(!$enabled)
+			return($this->StopFileShare($fileID));
+
+		$existing = $this->GetFileShareInfo($fileID);
+		$token = $existing && !empty($existing['token']) ? $existing['token'] : $this->BuildFileShareToken($fileID);
+		$created = $existing && isset($existing['created']) ? (int)$existing['created'] : time();
+
+		$db->Query('REPLACE INTO {pre}diskfileshares(file_id,user,token,share_pw,share_until,single_use,used,active,created,last_used) VALUES(?,?,?,?,?,?,?,?,?,?)',
+			$fileID,
+			$this->_userID,
+			$token,
+			$sharePW,
+			$shareUntil,
+			$singleUse ? 1 : 0,
+			0,
+			1,
+			$created,
+			0);
+
+		$this->_fileShareByFile[$fileID] = array(
+			'file_id' => $fileID,
+			'token' => $token,
+			'share_pw' => $sharePW,
+			'share_until' => $shareUntil,
+			'single_use' => $singleUse,
+			'used' => false,
+			'active' => true
+		);
+
+		return($token);
+	}
+
+	function StopFileShare($fileID)
+	{
+		global $db;
+
+		$fileID = (int)$fileID;
+		$this->LoadFileShareMeta();
+		$db->Query('DELETE FROM {pre}diskfileshares WHERE file_id=? AND user=?',
+			$fileID,
+			$this->_userID);
+		unset($this->_fileShareByFile[$fileID]);
+		return(true);
+	}
+
+	function GetFileShareByToken($token, $includeInactive = false)
+	{
+		global $db;
+
+		$this->EnsureFileShareTable();
+		$res = $db->Query('SELECT file_id,user,token,share_pw,share_until,single_use,used,active FROM {pre}diskfileshares WHERE token=? LIMIT 1',
+			$token);
+		if($res->RowCount() == 0)
+		{
+			$res->Free();
+			return(false);
+		}
+
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+		$row['file_id'] = (int)$row['file_id'];
+		$row['user'] = (int)$row['user'];
+		$row['share_until'] = (int)$row['share_until'];
+		$row['single_use'] = (int)$row['single_use'] === 1;
+		$row['used'] = (int)$row['used'] === 1;
+		$row['active'] = (int)$row['active'] === 1;
+
+		if(!$includeInactive)
+		{
+			if(!$row['active'])
+				return(false);
+			if($this->IsShareExpired($row['share_until']))
+				return(false);
+			if($row['single_use'] && $row['used'])
+				return(false);
+		}
+
+		return($row);
+	}
+
+	function MarkFileShareUsed($token)
+	{
+		global $db;
+
+		$now = time();
+		$db->Query('UPDATE {pre}diskfileshares SET used=1,active=CASE WHEN single_use=1 THEN 0 ELSE active END,last_used=? WHERE token=?',
+			$now,
+			$token);
+
+		$this->LoadFileShareMeta();
+		foreach($this->_fileShareByFile as $fileID => $shareInfo)
+		{
+			if($shareInfo['token'] == $token)
+			{
+				$this->_fileShareByFile[$fileID]['used'] = true;
+				if($this->_fileShareByFile[$fileID]['single_use'])
+					$this->_fileShareByFile[$fileID]['active'] = false;
+				break;
+			}
+		}
+	}
+
+	function CleanupExpiredFileShares()
+	{
+		global $db;
+
+		$this->LoadFileShareMeta();
+		$expired = array();
+		foreach($this->_fileShareByFile as $fileID => $shareInfo)
+		{
+			if(!$shareInfo['active'])
+				continue;
+			if($this->IsShareExpired($shareInfo['share_until']))
+				$expired[] = (int)$fileID;
+		}
+
+		if(count($expired) < 1)
+			return;
+
+		$db->Query('DELETE FROM {pre}diskfileshares WHERE user=? AND file_id IN(' . implode(',', $expired) . ')',
+			$this->_userID);
+		foreach($expired as $fileID)
+			unset($this->_fileShareByFile[(int)$fileID]);
 	}
 
 
@@ -246,9 +555,12 @@ class BMWebdisk
 	 * @param string $sharePW Password
 	 * @return bool
 	 */
-	function SetShareSettings($folderID, $shareFolder, $sharePW)
+	function SetShareSettings($folderID, $shareFolder, $sharePW, $shareUntil = 0)
 	{
 		global $db;
+
+		$folderID = (int)$folderID;
+		$shareUntil = $shareFolder ? max(0, (int)$shareUntil) : 0;
 
 		$db->Query('UPDATE {pre}diskfolders SET share=?, share_pw=?, modified=? WHERE id=? AND user=?',
 			$shareFolder ? 'yes' : 'no',
@@ -256,6 +568,7 @@ class BMWebdisk
 			time(),
 			$folderID,
 			$this->_userID);
+		$this->SetShareUntil($folderID, $shareUntil);
 		return($db->AffectedRows() == 1);
 	}
 
@@ -274,10 +587,15 @@ class BMWebdisk
 			$this->_userID);
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
-			$result[] = array(
+			$shareUntil = $this->GetShareUntil($row['id']);
+			if($this->IsShareExpired($shareUntil))
+				continue;
+
+			$shareFolderItem = array(
 				'id'		=> $row['id'],
 				'type'		=> WEBDISK_ITEM_FOLDER,
 				'pw'		=> trim($row['share_pw']) != '',
+				'share_until' => $shareUntil,
 				'title'		=> $row['titel'],
 				'size'		=> 0,
 				'created'	=> $row['created'],
@@ -285,6 +603,10 @@ class BMWebdisk
 				'modified'	=> $this->FolderDate($row['id'], 'modified', $row['modified']),
 				'ext'		=> '.SHAREDFOLDER'
 			);
+			$shareFolderItem['icon'] = function_exists('WebdiskGetItemIcon')
+				? WebdiskGetItemIcon($shareFolderItem)
+				: 'ti-folder-share';
+			$result[] = $shareFolderItem;
 		}
 		$res->Free();
 
@@ -350,7 +672,10 @@ class BMWebdisk
 		$info = $res->FetchArray(MYSQLI_ASSOC);
 		$res->Free();
 
-		$info['viewable'] = in_array(strtolower($info['contenttype']), $VIEWABLE_TYPES);
+		$ctypeLower = strtolower($info['contenttype']);
+		$info['viewable'] = in_array($ctypeLower, $VIEWABLE_TYPES)
+			|| (function_exists('WebdiskIsTextPreviewFile') && WebdiskIsTextPreviewFile($info['dateiname'], $ctypeLower))
+			|| (function_exists('WebdiskIsMediaPreviewFile') && WebdiskIsMediaPreviewFile($info['dateiname'], $ctypeLower));
 
 		$this->UpdateFileAccess($fileID);
 
@@ -374,6 +699,7 @@ class BMWebdisk
 			return(false);
 		$info = $res->FetchArray(MYSQLI_ASSOC);
 		$res->Free();
+		$info['share_until'] = $this->GetShareUntil($folderID);
 
 		$this->UpdateFolderAccess($folderID);
 
@@ -561,6 +887,10 @@ class BMWebdisk
 		{
 			if($pathItem['share'] == 'yes')
 			{
+				$shareUntil = $this->GetShareUntil($pathItem['id']);
+				if($this->IsShareExpired($shareUntil))
+					continue;
+
 				return(array(true, trim($pathItem['share_pw'])));
 			}
 		}
@@ -596,6 +926,7 @@ class BMWebdisk
 		$db->Query('DELETE FROM {pre}diskfolders WHERE id=? AND user=?',
 			$folderID,
 			$this->_userID);
+		$this->SetShareUntil($folderID, 0);
 		return(true);
 	}
 
@@ -759,7 +1090,10 @@ class BMWebdisk
 		$db->Query('COMMIT');
 
 		if($success)
+		{
+			$this->StopFileShare((int)$fileID);
 			BMBlobStorage::createProvider($info['blobstorage'], $this->_userID)->deleteBlob(BMBLOB_TYPE_WEBDISK, $fileID);
+		}
 
 		return($success);
 	}
@@ -810,6 +1144,144 @@ class BMWebdisk
 		$this->UpdateFileAccess($fileID);
 
 		return($size);
+	}
+
+	/**
+	 * replace file contents (text files)
+	 *
+	 * @param int $fileID File ID
+	 * @param string $content New file content
+	 * @return bool|string true on success, error code string on failure
+	 */
+	function UpdateFileContent($fileID, $content)
+	{
+		global $db, $groupRow, $userRow;
+
+		$fileInfo = $this->GetFileInfo((int)$fileID);
+		if($fileInfo === false)
+			return('notfound');
+
+		$ctypeLower = strtolower($fileInfo['contenttype']);
+		if(!function_exists('WebdiskIsTextPreviewFile')
+			|| !WebdiskIsTextPreviewFile($fileInfo['dateiname'], $ctypeLower))
+			return('forbidden');
+
+		if(!WebdiskIsLikelyTextContent($content))
+			return('binary');
+
+		$newSize = strlen($content);
+		if($newSize > WebdiskGetTextEditMaxBytes())
+			return('toolarge');
+
+		$oldSize = (int)$fileInfo['size'];
+		$sizeDiff = $newSize - $oldSize;
+
+		$spaceLimit = $this->GetSpaceLimit();
+		$usedSpace = $this->GetUsedSpace();
+
+		if($sizeDiff > 0 && $spaceLimit != -1 && ($usedSpace + $sizeDiff) > $spaceLimit)
+			return('nospace');
+
+		if($groupRow['traffic'] > 0
+			&& ($userRow['traffic_down'] + $userRow['traffic_up'] + $newSize) > ($groupRow['traffic'] + $userRow['traffic_add']))
+			return('notraffic');
+
+		$fp = fopen('php://temp', 'wb+');
+		if(!$fp)
+			return('internal');
+
+		fwrite($fp, $content);
+		fseek($fp, 0, SEEK_SET);
+
+		$provider = BMBlobStorage::createProvider($fileInfo['blobstorage'], $this->_userID);
+		if(!$provider->storeBlob(BMBLOB_TYPE_WEBDISK, (int)$fileID, $fp))
+		{
+			fclose($fp);
+			return('internal');
+		}
+		fclose($fp);
+
+		if($sizeDiff != 0)
+			$this->UpdateSpace($sizeDiff);
+
+		$db->Query('UPDATE {pre}diskfiles SET size=?, modified=? WHERE id=? AND user=?',
+			$newSize,
+			time(),
+			(int)$fileID,
+			$this->_userID);
+
+		if($newSize > 0)
+		{
+			$db->Query('UPDATE {pre}users SET traffic_up=traffic_up+? WHERE id=?',
+				$newSize,
+				$this->_userID);
+			Add2Stat('wd_up', ceil($newSize / 1024));
+		}
+
+		$this->UpdateFileAccess((int)$fileID);
+
+		return(true);
+	}
+
+	/**
+	 * get total size of all files in a folder tree
+	 *
+	 * @param int $folderID Folder ID
+	 * @return int
+	 */
+	function GetFolderTreeSize($folderID)
+	{
+		global $db;
+
+		if(!$this->GetFolderInfo($folderID))
+			return(0);
+
+		$total = 0;
+
+		$res = $db->Query('SELECT COALESCE(SUM(size), 0) AS total FROM {pre}diskfiles WHERE ordner=? AND user=?',
+			$folderID,
+			$this->_userID);
+		if($row = $res->FetchArray(MYSQLI_ASSOC))
+			$total += (int)$row['total'];
+		$res->Free();
+
+		$res = $db->Query('SELECT id FROM {pre}diskfolders WHERE parent=? AND user=?',
+			$folderID,
+			$this->_userID);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+			$total += $this->GetFolderTreeSize((int)$row['id']);
+		$res->Free();
+
+		return($total);
+	}
+
+	/**
+	 * get stats for a multi-item selection
+	 *
+	 * @param array $folderIDs Folder IDs
+	 * @param array $fileIDs File IDs
+	 * @return array
+	 */
+	function GetSelectionStats($folderIDs, $fileIDs)
+	{
+		$totalSize = 0;
+
+		foreach($fileIDs as $fileID)
+		{
+			$fileInfo = $this->GetFileInfo((int)$fileID);
+			if($fileInfo)
+				$totalSize += (int)$fileInfo['size'];
+		}
+
+		foreach($folderIDs as $folderID)
+			$totalSize += $this->GetFolderTreeSize((int)$folderID);
+
+		return(array(
+			'count'			=> count($fileIDs) + count($folderIDs),
+			'fileCount'		=> count($fileIDs),
+			'folderCount'	=> count($folderIDs),
+			'totalSize'		=> $totalSize
+		));
 	}
 
 	/**
@@ -970,7 +1442,13 @@ class BMWebdisk
 			list($thisID, $thisTitle, $parentID, $share, $share_pw) = $res->FetchArray(MYSQLI_NUM);
 			$res->Free();
 
-			$path[] = array('id' => $thisID, 'title' => $thisTitle, 'share' => $share, 'share_pw' => $share_pw);
+			$path[] = array(
+				'id' => $thisID,
+				'title' => $thisTitle,
+				'share' => $share,
+				'share_pw' => $share_pw,
+				'share_until' => $this->GetShareUntil($thisID)
+			);
 		}
 
 		$path = array_reverse($path);
@@ -1007,7 +1485,7 @@ class BMWebdisk
 	 */
 	function GetFolderContent($folderID, $sort = 'dateiname', $order = 'ASC')
 	{
-		global $db, $VIEWABLE_TYPES, $thisUser;
+		global $db, $VIEWABLE_TYPES, $thisUser, $groupRow;
 
 		if(isset($thisUser) && is_object($thisUser))
 			$hideHidden = $thisUser->GetPref('webdisk_hideHidden');
@@ -1027,7 +1505,7 @@ class BMWebdisk
 			if($row['titel'][0] == '.' && $hideHidden)
 				continue;
 
-			$result[] = array(
+			$folderItem = array(
 				'id'		=> $row['id'],
 				'type'		=> WEBDISK_ITEM_FOLDER,
 				'title'		=> $row['titel'],
@@ -1039,6 +1517,10 @@ class BMWebdisk
 				'ext'		=> $row['share']=='yes' ? '.SHAREDFOLDER' : '.FOLDER',
 				'viewable'	=> true
 			);
+			$folderItem['icon'] = function_exists('WebdiskGetItemIcon')
+				? WebdiskGetItemIcon($folderItem)
+				: 'ti-folder';
+			$result[] = $folderItem;
 		}
 		$res->Free();
 
@@ -1056,18 +1538,29 @@ class BMWebdisk
 				$ext = substr($dotPos, 1);
 			else
 				$ext = '?';
-			$result[] = array(
+			$ctypeLower = strtolower($row['contenttype']);
+			$thumbsEnabled = isset($groupRow['wd_thumbnails']) && $groupRow['wd_thumbnails'] == 'yes';
+
+			$fileItem = array(
 				'id'		=> $row['id'],
 				'type'		=> WEBDISK_ITEM_FILE,
 				'title'		=> $row['dateiname'],
+				'share'		=> $this->IsFileShared((int)$row['id']),
 				'size'		=> (int)$row['size'],
 				'created'	=> (int)$row['created'],
 				'accessed'	=> (int)$row['accessed'],
 				'modified'	=> (int)$row['modified'],
 				'ctype'		=> $row['contenttype'],
 				'ext'		=> $ext,
-				'viewable'	=> in_array(strtolower($row['contenttype']), $VIEWABLE_TYPES)
+				'viewable'	=> in_array($ctypeLower, $VIEWABLE_TYPES)
+								|| (function_exists('WebdiskIsTextPreviewFile') && WebdiskIsTextPreviewFile($row['dateiname'], $ctypeLower))
+								|| (function_exists('WebdiskIsMediaPreviewFile') && WebdiskIsMediaPreviewFile($row['dateiname'], $ctypeLower)),
+				'thumbnail'	=> $thumbsEnabled && strpos($ctypeLower, 'image/') === 0 && $ctypeLower !== 'image/svg+xml'
 			);
+			$fileItem['icon'] = function_exists('WebdiskGetItemIcon')
+				? WebdiskGetItemIcon($fileItem)
+				: 'ti-file';
+			$result[] = $fileItem;
 		}
 		$res->Free();
 

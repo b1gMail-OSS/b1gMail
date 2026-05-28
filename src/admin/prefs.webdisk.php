@@ -26,6 +26,34 @@ AdminRequirePrivilege('prefs.webdisk');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'common';
 
+function EnsureWebdiskSharePrefColumns()
+{
+	global $db;
+
+	$columnDefaults = array(
+		'wd_share_pw_required'		=> "'no'",
+		'wd_share_expiry_required'	=> "'no'",
+		'wd_share_max_days'			=> "0"
+	);
+
+	foreach($columnDefaults as $column => $defaultValue)
+	{
+		$res = $db->Query('SHOW COLUMNS FROM {pre}prefs LIKE ?',
+			$column);
+		$exists = $res->RowCount() > 0;
+		$res->Free();
+
+		if(!$exists)
+		{
+			$db->Query('ALTER TABLE {pre}prefs ADD COLUMN `' . $column . '` '
+				. ($column == 'wd_share_max_days' ? 'INT(11) NOT NULL DEFAULT ' : 'VARCHAR(10) NOT NULL DEFAULT ')
+				. $defaultValue);
+		}
+	}
+}
+
+EnsureWebdiskSharePrefColumns();
+
 $tabs = [
 	0 => [
 		'title'		=> $lang_admin['common'],
@@ -55,9 +83,12 @@ if($_REQUEST['action'] == 'common')
 {
 	if(isset($_REQUEST['save']))
 	{
-		$db->Query('UPDATE {pre}prefs SET blobstorage_provider_webdisk=?, blobstorage_webdisk_compress=?',
+		$db->Query('UPDATE {pre}prefs SET blobstorage_provider_webdisk=?, blobstorage_webdisk_compress=?, wd_share_pw_required=?, wd_share_expiry_required=?, wd_share_max_days=?',
 			$_REQUEST['blobstorage_provider_webdisk'],
-			isset($_REQUEST['blobstorage_webdisk_compress']) ? 'yes' : 'no');
+			isset($_REQUEST['blobstorage_webdisk_compress']) ? 'yes' : 'no',
+			isset($_REQUEST['wd_share_pw_required']) ? 'yes' : 'no',
+			isset($_REQUEST['wd_share_expiry_required']) ? 'yes' : 'no',
+			max(0, (int)$_REQUEST['wd_share_max_days']));
 		ReadConfig();
 	}
 
