@@ -103,7 +103,7 @@ if(extension_loaded('zip')) {
         public function AddFileByFP($fileFP, $fileName, $zipFileName = false)
         {
             if (!$zipFileName) {
-                $zipFileName = basename($fileName);
+                $zipFileName = str_replace('\\', '/', $fileName);
             }
 
             // Add file to the ZIP archive from file pointer

@@ -25,13 +25,16 @@
 <div class="contentMenuIcons">
 	<div id="webdiskDetailFolderActions" style="display:none;">
 		&nbsp;<a href="javascript:void(0);" onclick="switchWebdiskFolder(currentID);"><i class="fa fa-eye" aria-hidden="true"></i> {lng p="view"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
 		{if $allowShare}&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="sharing"}</a><br />{/if}
 	</div>
 	<div id="webdiskDetailFileActionsView" style="display:none;">
 		&nbsp;<a href="javascript:void(0);" onclick="window.open('webdisk.php?action=downloadFile&id='+currentID+'&view=true&sid={$sid}');"><i class="fa fa-eye" aria-hidden="true"></i> {lng p="view"}</a><br />
 	</div>
 	<div id="webdiskDetailFileActions" style="display:none;">
-		&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=downloadFile&id='+currentID+'&sid={$sid}';"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
+		{if $allowShare}&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=shareFile&id=' + currentID + '&sid={$sid}';"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="sharing"}</a><br />{/if}
+		{if $allowShare}&nbsp;<a href="javascript:void(0);" id="wdStopFileShareLink" style="display:none;" onclick="webdiskStopFileShare();"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="stopsharing"}</a><br />{/if}
 	</div>
 	<div id="webdiskDetailZIPActions" style="display:none;">
 		&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=extractFile&id='+currentID+'&folder='+currentWebdiskFolderID+'&sid={$sid}';"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {lng p="extract"}</a><br />
@@ -44,7 +47,7 @@
 		{hook id="webdisk.sidebar.tpl:actions.details"}
 	</div>
 	<div id="webdiskMultiActions" style="display:none;">
-		&nbsp;<a href="javascript:void(0);" onclick="EBID('wdMassAction').value='download';transferSelectedWebdiskItems();document.forms.f1.submit();"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="webdiskMassDownload();"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
 		&nbsp;<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) {literal}{  EBID('wdMassAction').value='delete';transferSelectedWebdiskItems();document.forms.f1.submit(); }{/literal}"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="delete"}</a><br />
 		&nbsp;<a href="javascript:webdiskClipboardAction('copy');" id="wdCopyLink2"><i class="fa fa-clipboard" aria-hidden="true"></i> {lng p="copy"}</a><br />
 		&nbsp;<a href="javascript:webdiskClipboardAction('cut');" id="wdCutLink2"><i class="fa fa-scissors" aria-hidden="true"></i> {lng p="cut"}</a><br />

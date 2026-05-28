@@ -101,6 +101,15 @@
 					</div>
 				</div>
 				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="wd_thumbnails"}</label>
+					<div class="col-sm-8 d-flex align-items-center">
+						<label class="form-check mb-0">
+							<input class="form-check-input" type="checkbox" name="wd_thumbnails"{if $group.wd_thumbnails|default:'no' == 'yes'} checked="checked"{/if}>
+							<span class="form-check-label">{lng p="wd_thumbnails_desc"}</span>
+						</label>
+					</div>
+				</div>
+				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="maxrecps"}</label>
 					<div class="col-sm-8">
 						<input type="text" class="form-control" name="max_recps" value="{$group.max_recps}" placeholder="{lng p="maxrecps"}">

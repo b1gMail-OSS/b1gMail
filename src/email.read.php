@@ -23,6 +23,7 @@ require './serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('./serverlib/mailbox.class.php');
 include('./serverlib/vcard.class.php');
+include('./serverlib/email.attachment.inc.php');
 include('./serverlib/zip.class.php');
 include('./serverlib/unzip.class.php');
 RequestPrivileges(PRIVILEGES_USER);
@@ -45,6 +46,9 @@ include('./serverlib/email.top.php');
  * default action = start
  */
 $tpl->addJSFile('li', $tpl->tplDir . 'js/email.js');
+$tpl->addJSFile('li', 'clientlib/pdfjs/pdf.min.js');
+$tpl->addJSFile('li', $tpl->tplDir . 'js/webdisk.preview.js');
+$tpl->addJSFile('li', $tpl->tplDir . 'js/email.attachment.js');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'read';
 
@@ -61,6 +65,19 @@ if($_REQUEST['action'] == 'read'
 
 	if($mail !== false)
 	{
+		if($groupRow['organizer'] == 'yes')
+		{
+			try
+			{
+				bmMailProcessCalendarReplyMail($userRow, $mail);
+			}
+			catch(Throwable $calendarEx)
+			{
+				PutLog('Calendar reply processing failed: '.$calendarEx->getMessage(),
+					PRIO_WARNING, __FILE__, __LINE__);
+			}
+		}
+
 		$enableExternal = isset($_REQUEST['enableExternal']) || ($mail->flags & FLAG_SHOWEXTERNAL) != 0;
 
 		// unread?
@@ -292,7 +309,23 @@ if($_REQUEST['action'] == 'read'
 		$tpl->assign('text', $text);
 		$tpl->assign('textMode', $textMode);
 		$tpl->assign('mailID', (int)$_REQUEST['id']);
+		bmMailEnrichAttachmentOpenKinds($attachments);
 		$tpl->assign('attachments', $attachments);
+
+		if($groupRow['organizer'] == 'yes')
+		{
+			try
+			{
+				$inviteCard = bmMailGetCalendarInviteCard($mail, $userRow);
+				if($inviteCard !== false)
+					$tpl->assign('calendarInviteCard', $inviteCard);
+			}
+			catch(Throwable $calendarEx)
+			{
+				PutLog('Calendar invite card failed: '.$calendarEx->getMessage(),
+					PRIO_WARNING, __FILE__, __LINE__);
+			}
+		}
 		$tpl->assign('noExternal', !$enableExternal && ($textMode == 'html') && !$mail->IsTrusted() && formatEMailHTMLText($textParts['html'], true) != formatEMailHTMLText($textParts['html'], false));
 		$tpl->assign('htmlAvailable', isset($textParts['html']) && $textMode != 'html');
 		$tpl->assign('confirmationTo', $confirmationTo);
@@ -639,6 +672,59 @@ else if($_REQUEST['action'] == 'downloadAttachment'
 }
 
 /**
+ * attachment dialog (VCF / ICS / generic)
+ */
+else if($_REQUEST['action'] == 'attachmentDialog'
+		&& isset($_REQUEST['attachment'])
+		&& isset($_REQUEST['id']))
+{
+	$mail = $mailbox->GetMail((int)$_REQUEST['id']);
+
+	if($mail !== false)
+	{
+		$parts = $mail->GetPartList();
+		if(isset($parts[$_REQUEST['attachment']]))
+		{
+			$part = $parts[$_REQUEST['attachment']];
+			$attachments = $mail->GetAttachments();
+			$attInfo = isset($attachments[$_REQUEST['attachment']])
+				? $attachments[$_REQUEST['attachment']]
+				: array(
+					'filename' => $part['filename'],
+					'mimetype' => $part['content-type'],
+					'filetype' => strtolower(substr($part['filename'], -4))
+				);
+			$openKind = bmMailAttachmentOpenKind($attInfo);
+
+			$tpl->assign('mailID', (int)$_REQUEST['id']);
+			$tpl->assign('attachment', $_REQUEST['attachment']);
+			$tpl->assign('filename', $attInfo['filename']);
+			$tpl->assign('openKind', $openKind);
+			$tpl->assign('organizerEnabled', $groupRow['organizer'] == 'yes');
+
+			if($openKind == 'vcf')
+			{
+				$card = bmMailParseVcfAttachment($mail, $_REQUEST['attachment']);
+				if($card !== false)
+					$tpl->assign('vcard', $card);
+			}
+			else if($openKind == 'ics' && $groupRow['organizer'] == 'yes')
+			{
+				$event = bmMailParseIcsAttachment($mail, $_REQUEST['attachment']);
+				if($event !== false)
+				{
+					$event = bmMailFillOrganizerFromMail($event, $mail);
+					$tpl->assign('calendarEvent', $event);
+					$tpl->assign('canCalendarReply', bmMailCanSendCalendarReply($event, $mail));
+				}
+			}
+
+			$tpl->display('li/email.attachment.dialog.tpl');
+		}
+	}
+}
+
+/**
  * import a VCF attachment
  */
 else if($_REQUEST['action'] == 'importVCF'
@@ -655,8 +741,9 @@ else if($_REQUEST['action'] == 'importVCF'
 
 		if($mail->AttachmentToFP($_REQUEST['attachment'], $cardFP))
 		{
-			header('Location: organizer.addressbook.php?sid=' . session_id() . '&action=addContact&importFile=' . $tempID);
 			fclose($cardFP);
+			bmMailOverlayParentRedirect('organizer.addressbook.php?sid=' . session_id()
+				. '&action=addContact&importFile=' . $tempID);
 		}
 		else
 		{
@@ -664,6 +751,179 @@ else if($_REQUEST['action'] == 'importVCF'
 			ReleaseTempFile($userRow['id'], $tempID);
 		}
 	}
+}
+
+/**
+ * RSVP to a calendar invitation (accept / decline / tentative)
+ */
+else if($_REQUEST['action'] == 'calendarRsvp'
+		&& isset($_REQUEST['attachment'])
+		&& isset($_REQUEST['id'])
+		&& isset($_REQUEST['partstat'])
+		&& $groupRow['organizer'] == 'yes')
+{
+	include('./serverlib/calendar.class.php');
+
+	header('Content-Type: application/json; charset=' . $currentCharset);
+
+	$result = array('ok' => false);
+	$mail = $mailbox->GetMail((int)$_REQUEST['id']);
+
+	if($mail !== false)
+	{
+		$event = bmMailParseIcsAttachment($mail, $_REQUEST['attachment']);
+
+		if($event === false)
+			$event = bmMailBuildCalendarEventFallback($mail);
+
+		if($event !== false)
+		{
+			if(empty($event['_attachmentKey']))
+				$event['_attachmentKey'] = $_REQUEST['attachment'];
+
+			$event = bmMailFillOrganizerFromMail($event, $mail);
+			$mapped = bmMailCalendarPartstatMap($_REQUEST['partstat']);
+			$comment = isset($_REQUEST['comment']) ? trim($_REQUEST['comment']) : '';
+			$calendar = _new('BMCalendar', array($userRow['id']));
+			$dateID = 0;
+
+			if(in_array($mapped['store'], array('accepted', 'tentative'), true))
+			{
+				$exists = false;
+				if(!empty($event['uid']))
+					$exists = ($calendar->FindDateByDavUid($event['uid']) !== false);
+
+				if(!$exists)
+				{
+					$groups = $calendar->GetGroups();
+					$group = (($group = $thisUser->GetPref('calendarGroup')) !== false && isset($groups[$group])
+						? $group
+						: -2);
+
+					$row = array(
+						'title' => $event['title'] != '' ? $event['title'] : $lang_user['calendar'],
+						'location' => $event['location'],
+						'text' => $event['text'],
+						'group' => $group,
+						'startdate' => $event['startdate'],
+						'enddate' => $event['enddate'],
+						'reminder' => 0,
+						'flags' => $event['wholeDay'] ? CLNDR_WHOLE_DAY : 0,
+						'repeat_flags' => 0,
+						'repeat_times' => 0,
+						'repeat_value' => 0,
+						'repeat_extra1' => '',
+						'repeat_extra2' => '',
+						'dav_uid' => !empty($event['uid']) ? $event['uid'] : ''
+					);
+					$dateID = (int)$calendar->AddDate($row, array());
+				}
+				else if(!empty($event['uid']))
+				{
+					$dateRow = $calendar->FindDateByDavUid($event['uid']);
+					if($dateRow !== false)
+						$dateID = (int)$dateRow['id'];
+				}
+			}
+
+			$replySent = false;
+			if(bmMailCanSendCalendarReply($event, $mail))
+				$replySent = bmMailSendCalendarReply($event, $userRow, $thisUser, $mapped['store'], $comment);
+
+			$result = array(
+				'ok' => true,
+				'partstat' => $mapped['store'],
+				'replySent' => $replySent,
+				'dateID' => $dateID
+			);
+		}
+	}
+
+	echo json_encode($result);
+	exit();
+}
+
+/**
+ * import an ICS attachment into the calendar
+ */
+else if($_REQUEST['action'] == 'importICS'
+		&& isset($_REQUEST['attachment'])
+		&& isset($_REQUEST['id'])
+		&& $groupRow['organizer'] == 'yes')
+{
+	include('./serverlib/calendar.class.php');
+
+	$ajax = isset($_REQUEST['ajax']);
+	$mail = $mailbox->GetMail((int)$_REQUEST['id']);
+	$result = array('ok' => false);
+
+	if($mail !== false)
+	{
+		$event = bmMailParseIcsAttachment($mail, $_REQUEST['attachment']);
+
+		if($event !== false)
+		{
+			$event = bmMailFillOrganizerFromMail($event, $mail);
+
+			$calendar = _new('BMCalendar', array($userRow['id']));
+			$groups = $calendar->GetGroups();
+			$group = (($group = $thisUser->GetPref('calendarGroup')) !== false && isset($groups[$group])
+				? $group
+				: -2);
+
+			$row = array(
+				'title' => $event['title'] != '' ? $event['title'] : $lang_user['calendar'],
+				'location' => $event['location'],
+				'text' => $event['text'],
+				'group' => $group,
+				'startdate' => $event['startdate'],
+				'enddate' => $event['enddate'],
+				'reminder' => 0,
+				'flags' => $event['wholeDay'] ? CLNDR_WHOLE_DAY : 0,
+				'repeat_flags' => 0,
+				'repeat_times' => 0,
+				'repeat_value' => 0,
+				'repeat_extra1' => '',
+				'repeat_extra2' => '',
+				'dav_uid' => !empty($event['uid']) ? $event['uid'] : ''
+			);
+
+			$dateID = $calendar->AddDate($row, array());
+
+			if($dateID)
+			{
+				$replySent = false;
+				if(!empty($_REQUEST['sendReply']) && bmMailCanSendCalendarReply($event, $mail))
+				{
+					$partstat = isset($_REQUEST['partstat']) ? $_REQUEST['partstat'] : 'accepted';
+					$comment = isset($_REQUEST['comment']) ? trim($_REQUEST['comment']) : '';
+					$replySent = bmMailSendCalendarReply($event, $userRow, $thisUser, $partstat, $comment);
+				}
+
+				$result = array(
+					'ok' => true,
+					'dateID' => (int)$dateID,
+					'title' => $row['title'],
+					'replySent' => $replySent
+				);
+			}
+		}
+	}
+
+	if($ajax)
+	{
+		header('Content-Type: application/json; charset=' . $currentCharset);
+		echo json_encode($result);
+		exit();
+	}
+
+	if($result['ok'])
+	{
+		bmMailOverlayParentRedirect('email.read.php?id=' . (int)$_REQUEST['id']
+			. '&sid=' . session_id() . '&calendarAdded=1');
+	}
+
+	bmMailOverlayParentRedirect('email.read.php?id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
 }
 
 /**

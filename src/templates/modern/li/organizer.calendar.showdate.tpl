@@ -69,7 +69,15 @@
 		{else}
 			{foreach from=$attendees item=person}
 			<div class="addressItem" onclick="parent.document.location.href='organizer.addressbook.php?sid={$sid}&action=editContact&id={$person.id}';">
-				<i class="fa fa-user-o" aria-hidden="true"></i>
+				{if $person.partstat == 'accepted'}
+					<i class="fa fa-check-circle" style="color:green;" title="{lng p="mail_att_partstat_accepted"}" aria-hidden="true"></i>
+				{elseif $person.partstat == 'declined'}
+					<i class="fa fa-times-circle" style="color:#c00;" title="{lng p="mail_att_partstat_declined"}" aria-hidden="true"></i>
+				{elseif $person.partstat == 'tentative'}
+					<i class="fa fa-question-circle" style="color:#c90;" title="{lng p="mail_att_partstat_tentative"}" aria-hidden="true"></i>
+				{else}
+					<i class="fa fa-user-o" title="{lng p="mail_att_partstat_needs"}" aria-hidden="true"></i>
+				{/if}
 				{text value=$person.nachname}, {text value=$person.vorname}
 			</div>
 			{/foreach}

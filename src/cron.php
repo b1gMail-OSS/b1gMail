@@ -111,6 +111,9 @@ if ($bm_prefs['last_cron'] < time() - $bm_prefs['cron_interval']) {
     // clean up notifications
     CleanupNotifications();
 
+    // expire webdisk shares and notify owners
+    ProcessWebdiskShareExpirations();
+
     // abuse protect cron
     AbuseCron();
 

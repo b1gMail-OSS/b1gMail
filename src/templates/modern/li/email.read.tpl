@@ -228,12 +228,18 @@
 		{hook id="email.read.tpl:mailNotes"}
 	</div>
 
+{if isset($calendarInviteCard)}
+{include file="li/email.calendar.invite.tpl"}
+{/if}
+
 	<iframe name="mailFrame" width="100%" style="height:200px;" id="textArea" src="about:blank" class="mailHTMLText" frameborder="no"></iframe>
 	<textarea id="textArea_raw" style="display:none;">{text allowEmpty=true value=$text allowDoubleEnc=true}</textarea>
 
 	<script>
 	<!--
 		initEMailTextArea(EBID('textArea_raw').value);
+		if(typeof bmMailCalendarInviteInit === 'function')
+			bmMailCalendarInviteInit();
 	//-->
 	</script>
 </p>
@@ -298,34 +304,8 @@
 	<input type="hidden" name="id" value="{$mailID}" />
 	<input type="hidden" name="sid" value="{$sid}" />
 
-	<div class="scrollContainer withBottomBar">
-		<table class="listTable" style="border:none;border-radius:0;">
-			{foreach from=$attachments item=attachment key=attID}
-			{cycle values="listTableTD,listTableTD2" assign="class"}
-			<tr>
-				<td class="{$class}" width="26"><input type="checkbox" name="att[]" id="att_{$attID}" value="{$attID}" /></td>
-				<td class="{$class}"><i class="fa fa-paperclip"></i>
-										<a href="javascript:advancedOptions('{$attID}', 'right', 'bottom', '{$tpldir}');"><img id="advanced_{$attID}_arrow" src="{$tpldir}images/li/mini_arrow_right.png" width="13" height="13" border="0" alt="" align="absmiddle" />
-										{text value=$attachment.filename cut=45}</a></td>
-				<td class="{$class}" width="20%">{text value=$attachment.mimetype cut=45}</td>
-				<td class="{$class}" width="20%" style="text-align:right;">{lng p="approx"} {size bytes=$attachment.size}&nbsp;&nbsp;
-											<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&sid={$sid}"><i class="fa fa-download"></i></a>
-											&nbsp;</td>
-			</tr>
-			<tbody id="advanced_{$attID}_body" style="display:none;">
-			<tr>
-				<td class="attDiv">&nbsp;</td>
-				<td colspan="3" class="attDiv">
-					<input type="button" value=" {lng p="download"} " onclick="document.location.href='email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&sid={$sid}';" />
-					<input type="button" value=" {lng p="savetowebdisk"} " onclick="saveAttachmentToWebdisk({$mailID}, '{$attID}', '{$attachment.filename}', '{$sid}')" />
-					{if $attachment.viewable}<input type="button" value=" {lng p="view"} " onclick="javascript:window.open('email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&view=true&sid={$sid}');" />{/if}
-					{if $attachment.mimetype=='message/rfc822'||$attachment.filetype=='.eml'}<input type="button" value=" {lng p="view"} " onclick="javascript:showAttachedMail({$mailID}, '{$attID}', '{text value=$attachment.filename cut=45 escape=true}');" />{/if}
-					{if $attachment.mimetype=='application/zip'||$attachment.filetype=='.zip'}<input type="button" value=" {lng p="view"} " onclick="javascript:showAttachedZIP({$mailID}, '{$attID}', '{text value=$attachment.filename cut=45 escape=true}');" />{/if}
-				</td>
-			</tr>
-			</tbody>
-			{/foreach}
-		</table>
+	<div class="scrollContainer withBottomBar" style="padding:0.5em 0.75em;">
+		{include file="li/email.attachments.chips.tpl" selectable=true}
 	</div>
 
 	<div class="contentFooter">
@@ -469,3 +449,4 @@
 </div>
 
 {include file="li/email.addressmenu.tpl"}
+{include file="li/webdisk.preview.tpl"}

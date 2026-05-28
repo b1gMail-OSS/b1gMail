@@ -244,6 +244,13 @@
 				<div>
 					<a href="javascript:addAttendee('{$sid}')"><i class="fa fa-calendar-plus-o" aria-hidden="true"></i> {lng p="add"}</a>
 				</div>
+				<p style="margin:0.75em 0 0;">
+					<label>
+						<input type="checkbox" name="sendInvites" id="sendInvites" value="1" checked="checked" />
+						{lng p="mail_att_send_invites"}
+					</label>
+					<br /><small>{lng p="mail_att_send_invites_d"}</small>
+				</p>
 				{if $attendees}
 				<script>
 				<!--

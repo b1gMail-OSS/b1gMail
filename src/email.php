@@ -42,6 +42,9 @@ include('./serverlib/email.top.php');
  */
 $tpl->addJSFile('li', 'clientlib/selectable.js');
 $tpl->addJSFile('li', $tpl->tplDir . 'js/email.js');
+$tpl->addJSFile('li', 'clientlib/pdfjs/pdf.min.js');
+$tpl->addJSFile('li', $tpl->tplDir . 'js/webdisk.preview.js');
+$tpl->addJSFile('li', $tpl->tplDir . 'js/email.attachment.js');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'folder';
 

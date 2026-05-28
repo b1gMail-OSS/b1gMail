@@ -1,48 +1,43 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="{lng p="langCode_editor"|default:'en'}">
 
 <head>
-    <title>Password</title>
-    
-	<!-- meta -->
-	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
-	
-	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}{$_tpldir}images/li/webdisk_folder.png" />
-	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
+	<meta charset="{$charset}" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>{lng p="protectedfolder"}</title>
 
-	<!-- font awesome -->
-	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome-animation.min.css" rel="stylesheet" type="text/css" />
-	
-	<!-- client scripts -->
-	<script src="../clientlang.php" type="text/javascript"></script>
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	<link rel="icon" href="{$selfurl}favicon.ico" type="image/x-icon" />
+	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
+	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
+	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
+	<link rel="stylesheet" href="{$tpldir}style/share.css?{fileDateSig file="style/share.css"}" />
+
+	<script src="{$selfurl}clientlang.php"></script>
 </head>
 
-<body onload="document.getElementById('pw').focus()">
+<body class="bm-share-password-dialog p-3" onload="document.getElementById('pw').focus()">
 
-		<table width="100%" cellspacing="0">
-			<tr>
-				<td width="42" valign="top"><i class="fa fa-cloud-download fa-3x" aria-hidden="true"></i></td>
-				<td>
-					{lng p="protected_desc"}
-					
-					<form action="index.php?action=passwordSubmit&user={$user}&folder={$folder}" method="post">
-						<p align="center">
-							{lng p="password"}:
-							<input type="password" name="pw" id="pw" size="26" />
-						</p>
-						
-						<p align="right">
-							<input type="button" onclick="parent.hideOverlay()" value="{lng p="cancel"}" />
-							<input type="submit" value="{lng p="ok"}" />
-						</p>
-					</form>
-				</td>
-			</tr>
-		</table>
-	
+	<div class="d-flex gap-3">
+		<span class="avatar avatar-lg bg-primary-lt text-primary flex-shrink-0">
+			<i class="ti ti-lock icon" aria-hidden="true"></i>
+		</span>
+		<div class="flex-fill">
+			<p class="mb-3 text-secondary">{lng p="protected_desc"}</p>
+
+			<form action="index.php?action=passwordSubmit&amp;user={$user|escape:'url'}&amp;folder={$folder}" method="post" class="bm-share-password-form">
+				<div class="mb-3">
+					<label class="form-label" for="pw">{lng p="password"}</label>
+					<input type="password" class="form-control" name="pw" id="pw" autocomplete="current-password" required="required" />
+				</div>
+
+				<div class="d-flex justify-content-end gap-2">
+					<button type="button" class="btn" onclick="parent.hideOverlay()">{lng p="cancel"}</button>
+					<button type="submit" class="btn btn-primary">{lng p="ok"}</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 </body>
-
 </html>

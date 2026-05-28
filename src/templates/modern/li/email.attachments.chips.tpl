@@ -1,0 +1,35 @@
+<div class="bm-mail-attachments">
+{foreach from=$attachments item=attachment key=attID}
+	{if $attachment.mimetype=='message/rfc822'||$attachment.filetype=='.eml'}
+		{assign var=attHref value="javascript:showAttachedMail({$mailID}, '{$attID}', '{text value=$attachment.filename cut=45 escape=true}');"}
+	{elseif $attachment.mimetype=='application/zip'||$attachment.filetype=='.zip'}
+		{assign var=attHref value="javascript:showAttachedZIP({$mailID}, '{$attID}', '{text value=$attachment.filename cut=45 escape=true}');"}
+	{elseif ($attachment.openKind|default:'')=='viewable'||($attachment.openKind|default:'')=='vcf'||($attachment.openKind|default:'')=='ics'}
+		{assign var=attHref value="javascript:mailOpenAttachment({$mailID}, '{$attID}', '{$attachment.openKind}', '{text value=$attachment.filename cut=45 escape=true}', '{text value=$attachment.filename escape=true}', '{text value=$attachment.mimetype escape=true}');"}
+	{else}
+		{assign var=attHref value="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&sid={$sid}"}
+	{/if}
+	{if isset($selectable) && $selectable}
+	<div class="bm-mail-attachment-chip bm-mail-attachment-chip-selectable">
+		<label class="bm-mail-attachment-check-label">
+			<input type="checkbox" class="bm-mail-attachment-check" name="att[]" id="att_{$attID}" value="{$attID}" />
+		</label>
+		<a class="bm-mail-attachment-chip-link" href="{$attHref}"{if $attachment.mimetype!='message/rfc822'&&$attachment.filetype!='.eml'&&$attachment.mimetype!='application/zip'&&$attachment.filetype!='.zip'&&($attachment.openKind|default:'')!='viewable'&&($attachment.openKind|default:'')!='vcf'&&($attachment.openKind|default:'')!='ics'} target="_blank"{/if} title="{text value=$attachment.filename escape=true}">
+			<span class="bm-mail-attachment-icon"><i class="fa fa-paperclip" aria-hidden="true"></i></span>
+			<span class="bm-mail-attachment-meta">
+				<span class="bm-mail-attachment-name">{text value=$attachment.filename cut=40}</span>
+				<span class="bm-mail-attachment-size">{size bytes=$attachment.size}</span>
+			</span>
+		</a>
+	</div>
+	{else}
+	<a class="bm-mail-attachment-chip" href="{$attHref}"{if $attachment.mimetype!='message/rfc822'&&$attachment.filetype!='.eml'&&$attachment.mimetype!='application/zip'&&$attachment.filetype!='.zip'&&($attachment.openKind|default:'')!='viewable'&&($attachment.openKind|default:'')!='vcf'&&($attachment.openKind|default:'')!='ics'} target="_blank"{/if} title="{text value=$attachment.filename escape=true}">
+		<span class="bm-mail-attachment-icon"><i class="fa fa-paperclip" aria-hidden="true"></i></span>
+		<span class="bm-mail-attachment-meta">
+			<span class="bm-mail-attachment-name">{text value=$attachment.filename cut=40}</span>
+			<span class="bm-mail-attachment-size">{size bytes=$attachment.size}</span>
+		</span>
+	</a>
+	{/if}
+{/foreach}
+</div>

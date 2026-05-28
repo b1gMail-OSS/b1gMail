@@ -20,6 +20,7 @@ class BMPush
     const TYPE_CALENDAR = 'core.calendar';
     const TYPE_BIRTHDAY = 'core.birthday';
     const TYPE_TASK = 'core.task';
+    const TYPE_WEBDISK = 'core.webdisk';
 
     private static $schemaChecked = false;
 
@@ -737,6 +738,7 @@ class BMPush
             self::TYPE_CALENDAR => $lang_user['push_type_calendar'],
             self::TYPE_BIRTHDAY => $lang_user['push_type_birthday'],
             self::TYPE_TASK => $lang_user['push_type_task'],
+            self::TYPE_WEBDISK => $lang_user['push_type_webdisk'],
         ];
     }
 
@@ -1011,6 +1013,9 @@ class BMPush
             case '::taskReminder':
                 return self::TYPE_TASK;
             default:
+                if (strpos($class, '::webdiskShareExpired') === 0 || strpos($class, '::webdiskShareDownload') === 0) {
+                    return self::TYPE_WEBDISK;
+                }
                 if (strpos($class, '::') === 0) {
                     return 'core.'.substr($class, 2);
                 }

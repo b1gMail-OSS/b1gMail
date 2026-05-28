@@ -24,6 +24,45 @@ if (!defined('B1GMAIL_INIT')) {
 }
 
 /**
+ * Ensure dates_attendees.partstat exists (RSVP status).
+ */
+function bmCalendarEnsureAttendeePartstat()
+{
+    global $db, $mysql;
+
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+
+    $table = $mysql['prefix'].'dates_attendees';
+    $res = $db->Query('SHOW COLUMNS FROM `'.$table.'` LIKE ?', 'partstat');
+    if ($res->RowCount() == 0) {
+        $db->Query('ALTER TABLE `'.$table.'` ADD `partstat` varchar(20) NOT NULL DEFAULT \'needs-action\'');
+    }
+    $res->Free();
+}
+
+/**
+ * Normalize iCalendar PARTSTAT to stored value.
+ *
+ * @param string $partstat
+ *
+ * @return string needs-action|accepted|declined|tentative
+ */
+function bmCalendarNormalizePartstat($partstat)
+{
+    $partstat = strtolower(str_replace('_', '-', trim($partstat)));
+
+    if (in_array($partstat, ['accepted', 'declined', 'tentative', 'needs-action'], true)) {
+        return $partstat;
+    }
+
+    return 'needs-action';
+}
+
+/**
  * calendar class.
  */
 class BMCalendar
@@ -719,16 +758,124 @@ class BMCalendar
     {
         global $db;
 
+        bmCalendarEnsureAttendeePartstat();
+
         $result = [];
-        $res = $db->Query('SELECT {pre}adressen.vorname AS vorname,{pre}adressen.nachname AS nachname,{pre}adressen.id AS id,{pre}adressen.email AS email,{pre}adressen.work_email AS work_email,{pre}adressen.default_address AS default_address FROM {pre}adressen,{pre}dates_attendees WHERE {pre}adressen.id={pre}dates_attendees.address AND {pre}dates_attendees.date=? AND {pre}adressen.user=?',
+        $res = $db->Query('SELECT {pre}adressen.vorname AS vorname,{pre}adressen.nachname AS nachname,{pre}adressen.id AS id,{pre}adressen.email AS email,{pre}adressen.work_email AS work_email,{pre}adressen.default_address AS default_address,{pre}dates_attendees.partstat AS partstat FROM {pre}adressen,{pre}dates_attendees WHERE {pre}adressen.id={pre}dates_attendees.address AND {pre}dates_attendees.date=? AND {pre}adressen.user=?',
             $id,
             $this->_userID);
         while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+            $row['partstat'] = bmCalendarNormalizePartstat($row['partstat'] ?? 'needs-action');
             $result[$row['id']] = $row;
         }
         $res->Free();
 
         return $result;
+    }
+
+    /**
+     * Find a calendar event by DAV/iCal UID.
+     *
+     * @param string $uid
+     *
+     * @return array|false
+     */
+    public function FindDateByDavUid($uid)
+    {
+        global $db;
+
+        $uid = trim($uid);
+        if ($uid === '') {
+            return false;
+        }
+
+        $res = $db->Query('SELECT * FROM {pre}dates WHERE user=? AND dav_uid=? LIMIT 1',
+            $this->_userID,
+            $uid);
+        if ($res->RowCount() === 1) {
+            $row = $res->FetchArray(MYSQLI_ASSOC);
+            $res->Free();
+
+            return $row;
+        }
+        $res->Free();
+
+        return false;
+    }
+
+    /**
+     * Find the most recent event with an exact title (fallback without UID).
+     *
+     * @param string $title
+     *
+     * @return array|false
+     */
+    public function FindDateByTitle($title)
+    {
+        global $db;
+
+        $title = trim($title);
+        if ($title === '') {
+            return false;
+        }
+
+        $res = $db->Query('SELECT * FROM {pre}dates WHERE user=? AND title=? ORDER BY startdate DESC LIMIT 1',
+            $this->_userID,
+            $title);
+        if ($res->RowCount() === 1) {
+            $row = $res->FetchArray(MYSQLI_ASSOC);
+            $res->Free();
+
+            return $row;
+        }
+        $res->Free();
+
+        return false;
+    }
+
+    /**
+     * Update RSVP status for an attendee matched by e-mail address.
+     *
+     * @param int    $dateID
+     * @param string $email
+     * @param string $partstat
+     *
+     * @return bool
+     */
+    public function SetAttendeePartstatByEmail($dateID, $email, $partstat)
+    {
+        global $db;
+
+        bmCalendarEnsureAttendeePartstat();
+
+        $email = strtolower(trim($email));
+        if ($email === '' || !preg_match('/^[^@\s]+@[^@\s]+\.[^@\s]+$/', $email)) {
+            return false;
+        }
+
+        $partstat = bmCalendarNormalizePartstat($partstat);
+        $dateID = (int) $dateID;
+
+        $res = $db->Query('SELECT {pre}dates_attendees.address AS address FROM {pre}dates_attendees,{pre}adressen WHERE {pre}dates_attendees.date=? AND {pre}dates_attendees.address={pre}adressen.id AND {pre}adressen.user=? AND (LOWER({pre}adressen.email)=? OR LOWER({pre}adressen.work_email)=?)',
+            $dateID,
+            $this->_userID,
+            $email,
+            $email);
+        if ($res->RowCount() !== 1) {
+            $res->Free();
+
+            return false;
+        }
+
+        $row = $res->FetchArray(MYSQLI_ASSOC);
+        $res->Free();
+
+        $db->Query('UPDATE {pre}dates_attendees SET partstat=? WHERE `date`=? AND address=?',
+            $partstat,
+            $dateID,
+            (int) $row['address']);
+
+        return $db->AffectedRows() > 0;
     }
 
     /**
@@ -944,10 +1091,12 @@ class BMCalendar
         if ($dateID = $db->InsertId()) {
             ChangelogAdded(BMCL_TYPE_CALENDAR, $dateID, time());
 
+            bmCalendarEnsureAttendeePartstat();
             foreach ($attendees as $contactID) {
-                $db->Query('INSERT INTO {pre}dates_attendees(date,address) VALUES(?,?)',
+                $db->Query('INSERT INTO {pre}dates_attendees(date,address,partstat) VALUES(?,?,?)',
                     $dateID,
-                    $contactID);
+                    $contactID,
+                    'needs-action');
             }
         }
 
@@ -1020,10 +1169,23 @@ class BMCalendar
         if (count($attendees) > 0) {
             $db->Query('DELETE FROM {pre}dates_attendees WHERE date=? AND address NOT IN('.implode(',', $attendees).')',
                 (int) $id);
+            bmCalendarEnsureAttendeePartstat();
             foreach ($attendees as $contactID) {
-                $db->Query('REPLACE INTO {pre}dates_attendees(date,address) VALUES(?,?)',
+                $contactID = (int) $contactID;
+                $res = $db->Query('SELECT partstat FROM {pre}dates_attendees WHERE `date`=? AND address=?',
                     (int) $id,
                     $contactID);
+                $existingPartstat = 'needs-action';
+                if ($res->RowCount() === 1) {
+                    $psRow = $res->FetchArray(MYSQLI_ASSOC);
+                    $existingPartstat = bmCalendarNormalizePartstat($psRow['partstat'] ?? 'needs-action');
+                }
+                $res->Free();
+
+                $db->Query('REPLACE INTO {pre}dates_attendees(date,address,partstat) VALUES(?,?,?)',
+                    (int) $id,
+                    $contactID,
+                    $existingPartstat);
             }
         } else {
             $db->Query('DELETE FROM {pre}dates_attendees WHERE date=?',

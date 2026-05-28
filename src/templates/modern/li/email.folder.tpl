@@ -140,3 +140,4 @@
 </script>
 
 {include file="li/email.addressmenu.tpl"}
+{include file="li/webdisk.preview.tpl"}

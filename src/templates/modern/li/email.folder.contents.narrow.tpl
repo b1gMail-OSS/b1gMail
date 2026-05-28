@@ -64,7 +64,7 @@
 		</td>
 		{/if}
 		<td id="mail_{$mailID}_ncol1" style="width:24px;" align="center" class="narrowRow{if $mail.color>0} mailColor_{$mail.color}{/if}">
-			<i id="mail_{$mailID}_nicon" class="fa fa-envelope{if !($mail.flags&1)}-o{/if}"></i>
+			<i id="mail_{$mailID}_nicon" class="{if !empty($mail.isCalendarInvite)}fa fa-calendar bm-mail-invite-icon{else}fa fa-envelope{if !($mail.flags&1)}-o{/if}{/if}"></i>
 		</td>
 		<td draggable="false" id="mail_{$mailID}_ncol2" class="narrowRow" nowrap="nowrap">
 			<a draggable="false" href="email.read.php?id={$mailID}&sid={$sid}" onclick="return(false)"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>

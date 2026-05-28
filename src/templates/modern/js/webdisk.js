@@ -196,11 +196,49 @@ function webdiskMouseDown(event, type, id)
 {
 	return(true);
 }
+function webdiskMassDownload()
+{
+	EBID('wdMassAction').value = 'download';
+	transferSelectedWebdiskItems();
+	document.forms.f1.submit();
+}
+
+function webdiskDownloadCurrent()
+{
+	if(_wdSel && _wdSel.sel.length > 1)
+	{
+		webdiskMassDownload();
+		return;
+	}
+
+	if(_wdSel && _wdSel.sel.length == 1)
+	{
+		var itemID = _wdSel.getIDList()[0].split('_');
+		if(itemID[0] == '1')
+		{
+			webdiskMassDownload();
+			return;
+		}
+		if(itemID[0] == '2')
+		{
+			document.location.href = 'webdisk.php?action=downloadFile&id=' + itemID[1] + '&sid=' + currentSID;
+			return;
+		}
+	}
+
+	if(currentType == 1 && currentID > 0)
+		webdiskMassDownload();
+	else if(currentType == 2 && currentID > 0)
+		document.location.href = 'webdisk.php?action=downloadFile&id=' + currentID + '&sid=' + currentSID;
+}
+
 function showWebdiskItemDetails(type, id)
 {
 	_lastSelectedWebdiskID = type;
 	_lastSelectedWebdiskType = id;
 	var _requestTimeWDFolder = currentWebdiskFolderID;
+	var _requestType = type;
+	var _requestID = id;
 
 	MakeXMLRequest('webdisk.php?action=itemInfo&type='+escape(type)+'&id='+escape(id)+'&sid='+currentSID, function(e)
 			{
@@ -208,6 +246,14 @@ function showWebdiskItemDetails(type, id)
 				{
 					if(_requestTimeWDFolder != currentWebdiskFolderID)
 						return;
+					if(_wdSel && _wdSel.sel.length > 1)
+						return;
+					if(_wdSel && _wdSel.sel.length == 1)
+					{
+						var singleID = _wdSel.getIDList()[0].split('_');
+						if(singleID[0] != String(_requestType) || singleID[1] != String(_requestID))
+							return;
+					}
 					if(e.responseXML)
 					{
 						var x = e.responseXML;
@@ -236,21 +282,29 @@ function showWebdiskItemDetails(type, id)
 function selectedWebdiskCountChanged(no)
 {
 	if(no <= 1)
+	{
+		if(EBID('webdiskMultiActions'))
+			EBID('webdiskMultiActions').style.display = 'none';
 		return;
+	}
 
 	_lastSelectedWebdiskID = 0;
 	_lastSelectedWebdiskType = 0;
 
 	// reset links
-	EBID('wdCutLink').className = '';
-	EBID('wdCopyLink').className = '';
+	if(EBID('wdCutLink')) EBID('wdCutLink').className = '';
+	if(EBID('wdCopyLink')) EBID('wdCopyLink').className = '';
+	if(EBID('wdCutLink2')) EBID('wdCutLink2').className = '';
+	if(EBID('wdCopyLink2')) EBID('wdCopyLink2').className = '';
 
 	// details
 	EBID('webdiskDetailInfoNote').style.display = 'none';
 	EBID('webdiskDetailInfo').style.display = '';
-	EBID('wdExt').src = tplDir + 'images/li/drag_wditems.png';
+	var wdExt = EBID('wdExt');
+	if(wdExt)
+		wdExt.src = tplDir + 'images/li/drag_wditems.png';
 	EBID('wdTitle').innerHTML = no + ' ' + lang['items'];
-	EBID('wdSize').innerHTML = '-';
+	EBID('wdSize').innerHTML = '…';
 	EBID('wdDate').innerHTML = '-';
 	EBID('wdShared').style.display = 'none';
 
@@ -260,6 +314,8 @@ function selectedWebdiskCountChanged(no)
 
 	// folder
 	EBID('webdiskDetailFolderActions').style.display = 'none';
+	if(EBID('wdStopFileShareLink'))
+		EBID('wdStopFileShareLink').style.display = 'none';
 
 	// file
 	EBID('webdiskDetailFileActions').style.display = 'none';
@@ -270,6 +326,43 @@ function selectedWebdiskCountChanged(no)
 
 	// multiple
 	EBID('webdiskMultiActions').style.display = '';
+
+	transferSelectedWebdiskItems();
+	var items = EBID('selectedWebdiskItems') ? EBID('selectedWebdiskItems').value : '';
+	if(!items)
+		return;
+
+	var _requestFolder = currentWebdiskFolderID;
+	var _requestCount = no;
+
+	MakeXMLRequest('webdisk.php?action=selectionInfo&items=' + encodeURIComponent(items) + '&sid=' + currentSID, function(e)
+	{
+		if(e.readyState != 4)
+			return;
+		if(!_wdSel || _wdSel.sel.length != _requestCount || currentWebdiskFolderID != _requestFolder)
+			return;
+		if(!e.responseXML)
+			return;
+
+		var x = e.responseXML;
+		var totalSize = parseInt(x.getElementsByTagName('totalSize').item(0).childNodes.item(0).nodeValue, 10);
+		var fileCount = parseInt(x.getElementsByTagName('fileCount').item(0).childNodes.item(0).nodeValue, 10);
+		var folderCount = parseInt(x.getElementsByTagName('folderCount').item(0).childNodes.item(0).nodeValue, 10);
+
+		if(x.getElementsByTagName('sizeFormatted').length > 0)
+			EBID('wdSize').innerHTML = x.getElementsByTagName('sizeFormatted').item(0).childNodes.item(0).nodeValue;
+		else if(!isNaN(totalSize))
+			EBID('wdSize').innerHTML = webdiskFormatBytes(totalSize);
+
+		if(lang['wd_selection_detail'] && (fileCount > 0 || folderCount > 0))
+		{
+			var detail = lang['wd_selection_detail']
+				.replace('%d', _requestCount)
+				.replace('%f', fileCount)
+				.replace('%o', folderCount);
+			EBID('wdTitle').innerHTML = detail;
+		}
+	});
 }
 function transferSelectedWebdiskItems()
 {
@@ -395,7 +488,7 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 	EBID('webdiskDetailInfo').style.display = '';
 	//EBID('wdExt').src = 'webdisk.php?action=displayExtension&ext=' + ext + '&sid=' + currentSID;
 	EBID('wdTitle').innerHTML = title;
-	EBID('wdSize').innerHTML = type == 1 ? ' - ' : size;
+	EBID('wdSize').innerHTML = size;
 	EBID('wdDate').innerHTML = date;
 	EBID('wdShared').style.display = shared ? '' : 'none';
 
@@ -405,6 +498,8 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 
 	// folder
 	EBID('webdiskDetailFolderActions').style.display = type == 1 ? '' : 'none';
+	if(EBID('wdStopFileShareLink'))
+		EBID('wdStopFileShareLink').style.display = type == 2 && shared ? '' : 'none';
 
 	// file
 	EBID('webdiskDetailFileActions').style.display = type == 2 ? '' : 'none';
@@ -415,6 +510,18 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 
 	// multiple
 	EBID('webdiskMultiActions').style.display = 'none';
+}
+function webdiskStopFileShare()
+{
+	if(currentType != 2 || currentID <= 0)
+		return;
+
+	if(!confirm(lang['stopsharing_confirm']))
+		return;
+
+	document.location.href = 'webdisk.php?action=stopFileShare&id=' + currentID
+		+ '&folder=' + currentWebdiskFolderID
+		+ '&sid=' + currentSID;
 }
 function webdiskClipboardAction(action)
 {

@@ -97,6 +97,7 @@
 		{/if}
 		<td nowrap="nowrap">
 			<i id="mail_{$mailID}_flagimg" class="{if $mail.flags&16}ti ti-flag-filled bm-mail-flag-icon{elseif $mail.priority==1}ti ti-alert-triangle bm-mail-flag-icon{elseif $mail.priority==-1}ti ti-arrow-down bm-mail-flag-icon{else}{/if}"></i>
+			{if !empty($mail.isCalendarInvite)}<i class="fa fa-calendar" title="{lng p="date"}"></i>{/if}
 			{if $mail.flags&64}<i class="fa fa-paperclip"></i>{/if}
 			{if $mail.flags&4||$mail.flags&2}<i class="fa fa-mail-{if $mail.flags&4}forward{else}reply{/if}"></i>{/if}
 		</td>
@@ -112,7 +113,7 @@
 		<td id="mail_{$mailID}_col3"{if $sortColumn=='betreff'&&$mail.color==0} class="listTableTDActive"{elseif $mail.color>0} class="mailColor_{$mail.color}"{/if} nowrap="nowrap">
 			<a draggable="false" href="email.read.php?id={$mailID}&sid={$sid}" onclick="return(false)">
 				&nbsp;
-				{if $mail.flags&8}<s>{/if}<i id="maildone_{$mailID}" class="{if $mail.flags&4096}fa fa-check{/if}"></i> {if $mail.flags&128}<i class="fa fa-bug" aria-hidden="true"></i> {/if}{if $mail.flags&256}<i class="fa fa-ban" aria-hidden="true"></i> {/if}<span style="background:transparent;" id="mail_{$mailID}_span2" class="{if $mail.flags&1}un{/if}readMail">{text value=$mail.subject}</span>
+				{if $mail.flags&8}<s>{/if}<i id="maildone_{$mailID}" class="{if $mail.flags&4096}fa fa-check{/if}"></i> {if !empty($mail.isCalendarInvite)}<i class="fa fa-calendar" aria-hidden="true"></i> {/if}{if $mail.flags&128}<i class="fa fa-bug" aria-hidden="true"></i> {/if}{if $mail.flags&256}<i class="fa fa-ban" aria-hidden="true"></i> {/if}<span style="background:transparent;" id="mail_{$mailID}_span2" class="{if $mail.flags&1}un{/if}readMail">{text value=$mail.subject}</span>
 				{if $mail.flags&8}</s>{/if}
 				{if ($templatePrefs.mailListPreviewLines|default:2) > 0 && $mail.preview}<div class="bm-mail-preview">{text value=$mail.preview}</div>{/if}
 			</a>

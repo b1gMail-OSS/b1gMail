@@ -38,8 +38,16 @@
 				<p class="text-secondary mb-0"><i>({lng p="none"})</i></p>
 			{else}
 				{foreach from=$attendees item=person}
-				<div class="addressItem" onclick="parent.document.location.href='organizer.addressbook.php?sid={$sid}&action=editContact&id={$person.id}';">
-					<i class="ti ti-user icon icon-sm me-1" aria-hidden="true"></i>
+				<div class="addressItem bm-calendar-attendee-item" onclick="parent.document.location.href='organizer.addressbook.php?sid={$sid}&action=editContact&id={$person.id}';">
+					{if $person.partstat == 'accepted'}
+						<i class="ti ti-circle-check-filled icon icon-sm text-success me-1" title="{lng p="mail_att_partstat_accepted"}" aria-hidden="true"></i>
+					{elseif $person.partstat == 'declined'}
+						<i class="ti ti-circle-x-filled icon icon-sm text-danger me-1" title="{lng p="mail_att_partstat_declined"}" aria-hidden="true"></i>
+					{elseif $person.partstat == 'tentative'}
+						<i class="ti ti-help-circle-filled icon icon-sm text-warning me-1" title="{lng p="mail_att_partstat_tentative"}" aria-hidden="true"></i>
+					{else}
+						<i class="ti ti-user icon icon-sm text-secondary me-1" title="{lng p="mail_att_partstat_needs"}" aria-hidden="true"></i>
+					{/if}
 					{text value=$person.nachname}, {text value=$person.vorname}
 				</div>
 				{/foreach}

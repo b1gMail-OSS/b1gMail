@@ -105,8 +105,10 @@
 						<a href="javascript:showAttachedMail({$mailID}, '{$attID}', '{text value=$attachment.filename cut=45 escape=true}');">
 						{elseif $attachment.mimetype=='application/zip'||$attachment.filetype=='.zip'}
 						<a href="javascript:showAttachedZIP({$mailID}, '{$attID}', '{text value=$attachment.filename cut=45 escape=true}');">
+						{elseif ($attachment.openKind|default:'')=='viewable'||($attachment.openKind|default:'')=='vcf'||($attachment.openKind|default:'')=='ics'}
+						<a href="javascript:mailOpenAttachment({$mailID}, '{$attID}', '{$attachment.openKind}', '{text value=$attachment.filename cut=45 escape=true}', '{text value=$attachment.filename escape=true}', '{text value=$attachment.mimetype escape=true}');">
 						{else}
-						<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}{if $attachment.viewable}&view=true{/if}&sid={$sid}" target="_blank">
+						<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&sid={$sid}" target="_blank">
 						{/if}
 							{text value=$attachment.filename cut=45}
 							({size bytes=$attachment.size})</a>
@@ -255,8 +257,19 @@
 </div>
 {/if}
 
+{if isset($calendarInviteCard)}
+{include file="li/email.calendar.invite.tpl"}
+{/if}
+
 <iframe width="100%" style="height:200px;" id="textArea" name="textArea" src="about:blank" frameborder="no"></iframe>
 <textarea id="textArea_raw" style="display:none;">{text allowEmpty=true value=$text allowDoubleEnc=true}</textarea>
+
+{if $attachments}
+<div class="bm-mail-attachments-footer">
+	<div class="bm-mail-attachments-label"><b>{lng p="attachments"}</b></div>
+	{include file="li/email.attachments.chips.tpl"}
+</div>
+{/if}
 
 <form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
 	<input type="hidden" name="text" id="quoteText" value="" />

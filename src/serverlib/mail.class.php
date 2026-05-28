@@ -328,12 +328,16 @@ class BMMail
 
 		foreach($parts as $id=>$info)
 		{
-			$contentType = strtolower($info['content-type']);
+			$contentTypeFull = strtolower($info['content-type'] ?? '');
+			$contentType = $contentTypeFull;
+			if(($semi = strpos($contentType, ';')) !== false)
+				$contentType = trim(substr($contentType, 0, $semi));
 			list($primType) = explode('/', $contentType);
 
 			if(strtolower($info['content-disposition']) == 'attachment'
 				|| in_array($primType, $attachmentTypes)
 				|| isset($attachmentTypes2[$contentType])
+				|| isset($attachmentTypes2[$contentTypeFull])
 				|| (isset($info['filename']) && trim($info['filename']) != 'unnamed'))
 			{
 				$fileName = $info['filename'];

@@ -709,6 +709,9 @@ function _togglePreviewPane(e)
 			initEMailTextArea(EBID('textArea_raw').value);
 		}
 
+		if(typeof bmMailCalendarInviteInit === 'function')
+			bmMailCalendarInviteInit(EBID('previewArea'));
+
 		if(EBID('previewLoading')) EBID('previewLoading').style.display = 'none';
 	}
 }
@@ -990,7 +993,10 @@ function folderFlagMail(id, flag, value)
 							}
 							else
 							{
-								icon.className = unread ? 'ti ti-mail' : 'ti ti-mail-opened';
+								if(icon.className.indexOf('ti-calendar-event') !== -1)
+									icon.className = unread ? 'ti ti-calendar-event bm-mail-invite-unread' : 'ti ti-calendar-event';
+								else
+									icon.className = unread ? 'ti ti-mail' : 'ti ti-mail-opened';
 							}
 						}
 					}

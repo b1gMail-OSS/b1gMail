@@ -396,6 +396,104 @@ BODY.bm-dialog-body.bm-dialog-modal-sections {
 	gap: 0.75rem;
 }
 
+/* E-Mail-Anhang (VCF / ICS) im Overlay */
+.bm-dialog-modal-sections .bm-mail-attachment-dialog {
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
+}
+
+.bm-dialog-modal-sections .bm-mail-attachment-dialog > .modal-body {
+	flex: 1 1 auto;
+	padding: 1rem 1.25rem;
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-dialog-modal-sections .bm-mail-attachment-dialog > .modal-footer {
+	flex-shrink: 0;
+	margin-top: auto;
+	padding: 0.75rem 1.25rem;
+	background: var(--tblr-bg-surface, #fff);
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+.bm-mail-attachment-dialog-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.bm-mail-attachment-dialog-footer-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-left: auto;
+}
+
+.bm-mail-attachment-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.bm-mail-attachment-preview-hero {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.bm-mail-attachment-preview-heading {
+	min-width: 0;
+	flex: 1;
+}
+
+.bm-mail-attachment-preview-name {
+	font-size: 1.0625rem;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+.bm-mail-attachment-initials {
+	font-size: 1.125rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+}
+
+.bm-dialog-mail-attachment .bm-mail-vcard-dl dt {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--tblr-secondary, #626976);
+}
+
+.bm-dialog-mail-attachment .bm-mail-vcard-dl dd {
+	font-size: 0.875rem;
+	margin-bottom: 0.35rem;
+}
+
+.bm-mail-attachment-ics-summary {
+	line-height: 1.45;
+}
+
+.bm-mail-attachment-ics-loc {
+	word-break: break-word;
+}
+
+.bm-mail-attachment-ics-options {
+	padding: 0.75rem 1rem;
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 0.375rem);
+}
+
+[data-bs-theme="dark"] .bm-dialog-modal-sections .bm-mail-attachment-dialog > .modal-body,
+[data-bs-theme="dark"] .bm-dialog-modal-sections .bm-mail-attachment-dialog > .modal-footer {
+	background: var(--tblr-bg-surface, #1f2937);
+}
+
 .bm-calendar-showdate-footer-start {
 	flex: 1 1 auto;
 	min-width: 0;
@@ -672,4 +770,67 @@ BODY.bm-dialog-body.bm-dialog-attendees {
 [data-bs-theme="dark"] .bm-attendees-dialog .bm-dialog-intro,
 [data-bs-theme="dark"] .bm-attendees-dialog .bm-dialog-actions {
 	border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.bm-mail-calendar-card {
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-left: 4px solid var(--tblr-azure, #4299e1);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.bm-mail-calendar-card .h4 {
+	font-weight: 600;
+}
+
+.bm-mail-calendar-rsvp-actions .btn-success {
+	min-width: 7rem;
+}
+
+.bm-mail-calendar-card .bm-mail-calendar-avatar {
+	--tblr-avatar-size: 4rem;
+	--tblr-avatar-icon-size: 2.5rem;
+	width: var(--tblr-avatar-size);
+	height: var(--tblr-avatar-size);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.bm-mail-calendar-card .bm-mail-calendar-avatar .icon {
+	width: var(--tblr-avatar-icon-size);
+	height: var(--tblr-avatar-icon-size);
+	font-size: var(--tblr-avatar-icon-size);
+	line-height: 1;
+	margin: 0;
+	display: block;
+	vertical-align: middle;
+	stroke-width: 1.75;
+}
+
+.bm-mail-calendar-card .bm-mail-calendar-avatar--accepted {
+	background: var(--tblr-green-lt, #d3f9d8);
+	color: var(--tblr-green, #2fb344);
+}
+
+.bm-mail-calendar-card .bm-mail-calendar-avatar--declined {
+	background: var(--tblr-red-lt, #ffe3e3);
+	color: var(--tblr-red, #d63939);
+}
+
+.bm-mail-calendar-card .bm-mail-calendar-avatar--tentative {
+	background: var(--tblr-yellow-lt, #fff3bf);
+	color: var(--tblr-yellow, #f59f00);
+}
+
+.bm-mail-calendar-card .bm-mail-calendar-rsvp-actions .icon {
+	--tblr-icon-size: 1.125rem;
+	width: var(--tblr-icon-size);
+	height: var(--tblr-icon-size);
+	font-size: var(--tblr-icon-size);
+	vertical-align: -0.2em;
+}
+
+.bm-calendar-attendee-item .icon {
+	vertical-align: -0.15em;
 }

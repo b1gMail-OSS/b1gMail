@@ -23,6 +23,7 @@ require './serverlib/init.inc.php';
 include('./serverlib/todo.class.php');
 include('./serverlib/calendar.class.php');
 include('./serverlib/addressbook.class.php');
+include('./serverlib/email.attachment.inc.php');
 RequestPrivileges(PRIVILEGES_USER);
 
 /**
@@ -383,7 +384,16 @@ else if($_REQUEST['action'] == 'createDate'
 	}
 
 	$row = $calendar->Form2Row();
+	if(empty($row['dav_uid']))
+		$row['dav_uid'] = 'b1gmail-'.uniqid('', true).'@'.preg_replace('/[^a-zA-Z0-9.\-]/', '', $_SERVER['HTTP_HOST'] ?? 'local');
 	$dateID = $calendar->AddDate($row, $attendees);
+
+	if($dateID && isset($_REQUEST['sendInvites']) && count($attendees) > 0)
+	{
+		$row['id'] = $dateID;
+		bmCalendarSendInvites($userRow, $thisUser, $row, $attendees);
+	}
+
 	header('Location: organizer.calendar.php?sid=' . session_id() . '&date=' . $row['startdate']);
 	exit();
 }
@@ -481,7 +491,20 @@ else if($_REQUEST['action'] == 'saveDate'
 	}
 
 	$row = $calendar->Form2Row();
-	$calendar->ChangeDate((int)$_REQUEST['id'], $row, $attendees);
+	$dateID = (int)$_REQUEST['id'];
+	$calendar->ChangeDate($dateID, $row, $attendees);
+
+	if(isset($_REQUEST['sendInvites']) && count($attendees) > 0)
+	{
+		$row['id'] = $dateID;
+		if(empty($row['dav_uid']))
+		{
+			$existing = $calendar->GetDate($dateID);
+			if($existing !== false && !empty($existing['dav_uid']))
+				$row['dav_uid'] = $existing['dav_uid'];
+		}
+		bmCalendarSendInvites($userRow, $thisUser, $row, $attendees);
+	}
 
 	$jumpbackDate = isset($_REQUEST['jumpbackDate']) ? (int)$_REQUEST['jumpbackDate'] : $row['startdate'];
 

@@ -247,6 +247,11 @@
 						<button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="openAttendeePopup('{$sid}');">
 							<i class="ti ti-user-plus icon icon-sm me-1" aria-hidden="true"></i>{lng p="add"}
 						</button>
+						<label class="form-check mt-3 mb-0">
+							<input class="form-check-input" type="checkbox" name="sendInvites" id="sendInvites" value="1" checked="checked" />
+							<span class="form-check-label">{lng p="mail_att_send_invites"}</span>
+						</label>
+						<div class="form-text">{lng p="mail_att_send_invites_d"}</div>
 						{if $attendees}
 						<script>
 						<!--

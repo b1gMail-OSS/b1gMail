@@ -595,6 +595,9 @@ function _togglePreviewPane(e)
 			initEMailTextArea(EBID('textArea_raw').value);
 		}
 
+		if(typeof bmMailCalendarInviteInit === 'function')
+			bmMailCalendarInviteInit(EBID('previewArea'));
+
 		if(EBID('previewLoading')) EBID('previewLoading').style.display = 'none';
 	}
 }
@@ -870,7 +873,10 @@ function folderFlagMail(id, flag, value)
 							}
 							else
 							{
-								icon.className = unread ? 'fa fa-envelope' : 'fa fa-envelope-o';
+								if(icon.className.indexOf('fa-calendar') !== -1)
+									icon.className = 'fa fa-calendar bm-mail-invite-icon';
+								else
+									icon.className = unread ? 'fa fa-envelope' : 'fa fa-envelope-o';
 							}
 						}
 					}

@@ -105,7 +105,7 @@ class BMZIP
     public function AddFileByFP($fileFP, $fileName, $zipFileName = false)
     {
         if (!$zipFileName) {
-            $zipFileName = basename($fileName);
+            $zipFileName = str_replace('\\', '/', $fileName);
         }
 
         // read file

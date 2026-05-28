@@ -1402,6 +1402,14 @@
                 "PRI",
                 null,
                 ""
+            ],
+            [
+                "partstat",
+                "varchar(20)",
+                "NO",
+                "",
+                "needs-action",
+                ""
             ]
         ],
         "indexes": {
@@ -2553,6 +2561,14 @@
                 "NO",
                 "",
                 "100",
+                ""
+            ],
+            [
+                "wd_thumbnails",
+                "enum('yes','no')",
+                "NO",
+                "",
+                "no",
                 ""
             ],
             [

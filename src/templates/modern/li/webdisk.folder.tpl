@@ -25,6 +25,12 @@
 	<input type="hidden" name="selectedWebdiskItems" id="selectedWebdiskItems" value="" />
 	
 	<div class="scrollContainer withBottomBar noSelect" id="wdDnDArea">
+	{if isset($fileShareNoticeURL) && $fileShareNoticeURL != ''}
+		<div class="note" style="margin-bottom:1em;margin-top:1em;">
+			<small>{lng p="sharing"}{if $fileShareNoticeName|default:'' != ''}: {text value=$fileShareNoticeName}{/if}</small><br />
+			<i class="fa fa-link" aria-hidden="true"></i> <a target="_blank" href="{$fileShareNoticeURL|escape}" style="color:blue;">{$fileShareNoticeURL|escape}</a>
+		</div>
+	{/if}
 	{if isset($upload)}
 		<fieldset style="margin-top:1em;">
 			<legend>{lng p="uploadfiles"}</legend>
@@ -62,7 +68,7 @@
 	<div style="padding:0.5em;width:120px;height:80px;float:left;text-align:center;" draggable="false">
 		<a id="wli_{$item.type}_{$item.id}"
 			class="webdiskItem"
-			title="{text value=$item.title}">
+			title="{text value=$item.title}"{if $item.type==2 && $item.viewable} data-viewable="1"{/if}>
 			{assign var='fa_additionalparamclass' value='fa-4x' scope='global'}
 			{assign var='wdicons_additionalparam' value='draggable="true"' scope='global'}
 			{assign var='wdicons_imgattr' value='' scope='global'}
@@ -87,7 +93,7 @@
 		</tr>
 		{foreach from=$folderContent item=item}	
 		{cycle values="listTableTR,listTableTR2" assign="class"}
-		<tr class="{$class}" id="wli_{$item.type}_{$item.id}">
+		<tr class="{$class}" id="wli_{$item.type}_{$item.id}"{if $item.type==2 && $item.viewable} data-viewable="1"{/if}>
 			<td style="text-align:center;">
 				{assign var='fa_additionalparamclass' value='' scope='global'}
 				{assign var='wdicons_additionalparam' value='draggable="true"' scope='global'}
@@ -125,9 +131,13 @@
 	</div>
 	
 	{hook id="webdisk.folder.tpl:foot"}
+
+	{include file="li/webdisk.preview.tpl"}
 	
 	{if !isset($smarty.post.inline)}
 	<script src="./clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
+	<script type="application/json" id="webdiskPreviewManifest">{$webdiskPreviewFilesJSON}</script>
+	<script type="application/json" id="webdiskPreviewItems">{$webdiskPreviewItemsJSON}</script>
 	
 	<script>
 	{if $hotkeys}

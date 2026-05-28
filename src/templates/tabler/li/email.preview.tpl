@@ -150,6 +150,10 @@
 {include file="li/email.mailnotes.tpl" preview=true}
 </div>
 
+{if isset($calendarInviteCard)}
+{include file="li/email.calendar.invite.tpl"}
+{/if}
+
 <iframe width="100%" style="height:200px;" id="textArea" name="textArea" src="about:blank" class="mailHTMLText" frameborder="no"></iframe>
 <textarea id="textArea_raw" style="display:none;">{text allowEmpty=true value=$text allowDoubleEnc=true}</textarea>
 
