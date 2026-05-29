@@ -201,8 +201,8 @@
 					<span class="input-group-text">
 						<i id="searchSpinner" class="fa fa-spinner fa-pulse fa-fw" style="display:none;"></i>
 						<i class="icon ti ti-search icon-1 search-icon-default"></i>
+						<input type="search" class="form-control" id="searchField" name="searchField" placeholder="{lng p="search"}" onkeypress="searchFieldKeyPress(event,{if $searchDetailsDefault}true{else}false{/if})" />
 					</span>
-					<input type="search" class="form-control" id="searchField" name="searchField" placeholder="{lng p="search"}" onkeypress="searchFieldKeyPress(event,{if $searchDetailsDefault}true{else}false{/if})" />
 				</div>
 				<div id="searchResultBody" class="mt-2" style="display:none">
 					<div id="searchResults" class="list-group list-group-flush"></div>
