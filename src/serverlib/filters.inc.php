@@ -316,8 +316,8 @@ class BMMailFilter_Bayes_Word
 		$allSpam 		= max($bayesSpam, 1);
 		$good 			= $this->inNonSpam * 2;
 		$bad 			= $this->inSpam;
-		$pGood 			= (double)min((double)$good / (double)$allNonSpam, (double)1);
-		$pBad 			= (double)min((double)$bad / (double)$allSpam, (double)1);
+		$pGood 			= (float) min((float) $good / (float) $allNonSpam, 1.0);
+		$pBad 			= (float) min((float) $bad / (float) $allSpam, 1.0);
 		$this->prob 	= max(min($pBad / ($pGood + $pBad), 0.9999), 0.0001);
 
 		// calculate interest

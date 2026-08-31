@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 
 /**
  * file handler for modules
@@ -27,43 +28,6 @@ require './serverlib/init.inc.php';
 ModuleFunction('FileHandler',
 	array(substr(__FILE__, strlen(__DIR__)+1),
 	$_REQUEST['action'] ?? ''));
-
-/**
- * clean url with known tracking links
- *
- * @param string $string
- * @return $string
- */
-function cleanUrl($targetURL) {
-    // Parse the URL and extract the query parameters
-    $parsedUrl = parse_url($targetURL);
-    parse_str($parsedUrl['query'], $queryParams);
-
-    // Check if the URL contains 'safelinks.protection.outlook'
-    if (strpos($targetURL, 'safelinks.protection.outlook')) {
-        if (isset($queryParams['url'])) {
-            // Decode the URL and parse it
-            $decodedUrl = urldecode($queryParams['url']);
-            $parsedUrl = parse_url($decodedUrl);
-			if(!empty($parsedUrl['query'])) parse_str($parsedUrl['query'], $queryParams);
-			else $queryParams = [];
-        }
-    }
-
-    // Remove UTM parameters
-    foreach (['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'] as $utmParam) {
-        unset($queryParams[$utmParam]);
-    }
-
-    // Build the cleaned URL without UTM parameters
-    $cleanUrlParam = http_build_query($queryParams);
-    $finalCleanUrl = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . ($parsedUrl['path'] ?? '') . 
-                     (!empty($cleanUrlParam) ? '?' . $cleanUrlParam : '');
-
-    return $finalCleanUrl;
-}
-
-
 
 /**
  * check referer
@@ -85,18 +49,12 @@ if(!isset($_SERVER['HTTP_REFERER'])
 /**
  * deref code
  */
-$url = $_SERVER['REQUEST_URI'];
-$sepPos = strpos($url, '?');
-if($sepPos !== false)
+$targetURL = DerefExtractTargetUrl();
+if($targetURL !== '')
 {
-	$targetURL = cleanUrl(substr($url, $sepPos+1));
-	$targetURL = str_replace('%23','#',$targetURL);
+	$targetURL = str_replace('%23', '#', DerefCleanTargetUrl($targetURL));
+	DerefAssignTplVars($targetURL);
 	$tpl->assign('pref_exturl_warning', $bm_prefs['exturl_warning']);
-	if($bm_prefs['exturl_warning']=='no') {
-		$tpl->assign('url', HTMLFormat($targetURL));
-	}
-	else {
-		$tpl->assign('exturlwarningurl', sprintf($lang_custom['deref'], '<a href="'.HTMLFormat($targetURL).'" rel="noreferrer nofollow noopener">'.HTMLFormat($targetURL).'</a>'));
-	}
+	ModuleFunction('OnDerefPage', array($targetURL));
 	$tpl->display('nli/deref.tpl');
 }

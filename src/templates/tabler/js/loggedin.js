@@ -74,7 +74,19 @@ function hideNotifications(really)
 }
 function showNotifications(elem)
 {
-	document.onmousedown = hideNotifications;
+	var box = EBID('notifyBox');
+	var hideFunc = function(event)
+	{
+		if(typeof(event.target) != 'undefined' && box && isChildOf(event.target, box))
+			return true;
+
+		if(typeof(event.button) != 'undefined' && event.button == 2)
+			return true;
+
+		hideNotifications(true);
+	};
+
+	document.onmousedown = hideFunc;
 	showHeaderPopup('notifyBox', elem);
 	refreshNotifications();
 }
@@ -113,18 +125,25 @@ function setNotificationCount(count)
 function refreshNotifications()
 {
 	var container = EBID('notifyInner');
-	if(container.innerHTML == '')
-	{
-		container.innerHTML = '<center><br /><i class="fa fa-spinner fa-pulse fa-fw fa-3x"></i></center>';
-	}
+	if(!container)
+		return;
 
-	MakeXMLRequest('start.php?action=getNotifications&sid=' + currentSID, function(e)
+	container.innerHTML = '<div class="bm-notify-loading text-center text-secondary py-4"><i class="icon ti ti-loader-2 icon-lg bm-notify-spinner" aria-hidden="true"></i></div>';
+
+	MakeXMLRequest(bmAppendSession('start.php?action=getNotifications'), function(e)
 		{
-			if(e.readyState == 4)
+			if(e.readyState != 4)
+				return;
+
+			if(e.status && e.status >= 400)
 			{
-				container.innerHTML = e.responseText;
-				setNotificationCount(0);
+				var emptyMsg = (typeof lang != 'undefined' && lang['nonotifications']) ? lang['nonotifications'] : '';
+				container.innerHTML = '<div class="bm-notify-empty text-center text-secondary py-3"><em>(' + emptyMsg + ')</em></div>';
+				return;
 			}
+
+			container.innerHTML = e.responseText;
+			setNotificationCount(0);
 		});
 }
 
@@ -170,12 +189,12 @@ function _previewNote(request)
 }
 function previewNote(sid, id)
 {
-	MakeXMLRequest('organizer.notes.php?action=getNoteText&sid=' + sid + '&id=' + id, _previewNote);
+	MakeXMLRequest(bmAppendSession('organizer.notes.php?action=getNoteText&id=' + id), _previewNote);
 }
 
 function autoSetPreviewPos()
 {
-	MakeXMLRequest('email.php?action=setPreviewPosition&pos='+(window.innerWidth>=1150?'right':'bottom')+'&sid='+currentSID, false);
+	MakeXMLRequest('email.php?action=setPreviewPosition&pos='+(window.innerWidth>=1150?'right':'bottom'), false);
 }
 
 function setTaskDone(sid, id, done)
@@ -185,7 +204,7 @@ function setTaskDone(sid, id, done)
 	if(EBID('sbTask_'+id))
 		EBID('sbTask_'+id).checked = done;
 
-	MakeXMLRequest('organizer.todo.php?do=setTaskDone&id=' + id + (reload?'&listOnly=true&taskListID='+currentTaskListID:'') + '&done=' + (done ? 'true' : 'false') + '&sid=' + currentSID, function(e)
+	MakeXMLRequest('organizer.todo.php?do=setTaskDone&id=' + id + (reload?'&listOnly=true&taskListID='+currentTaskListID:'') + '&done=' + (done ? 'true' : 'false') , function(e)
 	{
 		if(e.readyState == 4)
 		{
@@ -443,30 +462,85 @@ function _performSearch(e)
 	if(e.readyState == 4)
 	{
 		EBID('searchResults').innerHTML = e.responseText;
+		EBID('searchResultBody').hidden = false;
 		EBID('searchResultBody').style.display = '';
 		EBID('searchSpinner').style.display = 'none';
+		var searchIcon = document.querySelector('#searchPopup .search-icon-default');
+		if(searchIcon)
+			searchIcon.classList.remove('is-hidden');
 	}
+}
+var _searchFieldTimer = null;
+var _searchFieldReq = 0;
+function _runQuickSearch(q)
+{
+	EBID('searchResultBody').hidden = true;
+	EBID('searchSpinner').style.display = '';
+	var searchIcon = document.querySelector('#searchPopup .search-icon-default');
+	if(searchIcon)
+		searchIcon.classList.add('is-hidden');
+
+	var req = ++_searchFieldReq;
+	MakeXMLRequest('search.php?action=quickSearch&q=' + encodeURIComponent(q), function(e)
+	{
+		if(req !== _searchFieldReq)
+			return;
+		_performSearch(e);
+	});
+}
+function searchFieldInput(details)
+{
+	if(_searchFieldTimer)
+		clearTimeout(_searchFieldTimer);
+
+	var q = trim(EBID('searchField').value || '');
+	if(q.length < 3)
+	{
+		EBID('searchResultBody').hidden = true;
+		EBID('searchResults').innerHTML = '';
+		EBID('searchSpinner').style.display = 'none';
+		var searchIcon = document.querySelector('#searchPopup .search-icon-default');
+		if(searchIcon)
+			searchIcon.classList.remove('is-hidden');
+		return;
+	}
+
+	_searchFieldTimer = setTimeout(function()
+	{
+		_searchFieldTimer = null;
+		_runQuickSearch(q);
+	}, 280);
 }
 function searchFieldKeyPress(event, details)
 {
-	if(event.keyCode == 13)
-	{
-		var q = EBID('searchField').value;
-		if(trim(q).length > 2)
-		{
-			EBID('searchResultBody').style.display = 'none';
-			EBID('searchSpinner').style.display = '';
+	var key = event.key || event.keyCode;
+	if(key !== 'Enter' && key !== 13)
+		return;
 
-			if(details)
-				document.location.href = 'search.php?q=' + escape(q) + '&sid=' + currentSID;
-			else
-				MakeXMLRequest('search.php?action=quickSearch&q=' + escape(q) + '&sid=' + currentSID, _performSearch);
-		}
+	if(event.preventDefault)
+		event.preventDefault();
+
+	if(_searchFieldTimer)
+	{
+		clearTimeout(_searchFieldTimer);
+		_searchFieldTimer = null;
+	}
+
+	var q = trim(EBID('searchField').value || '');
+	if(q.length > 2)
+	{
+		if(details)
+			document.location.href = bmAppendSession('search.php?q=' + encodeURIComponent(q));
 		else
-		{
-			EBID('searchResultBody').style.display = 'none';
-			EBID('searchSpinner').style.display = 'none';
-		}
+			_runQuickSearch(q);
+	}
+	else
+	{
+		EBID('searchResultBody').hidden = true;
+		EBID('searchSpinner').style.display = 'none';
+		var searchIcon = document.querySelector('#searchPopup .search-icon-default');
+		if(searchIcon)
+			searchIcon.classList.remove('is-hidden');
 	}
 }
 function hideSearchPopup(really)
@@ -494,8 +568,25 @@ function showHeaderPopup(name, elem)
 }
 function showSearchPopup(elem)
 {
-	document.onmousedown = hideSearchPopup;
+	var box = EBID('searchPopup');
+	var hideFunc = function(event)
+	{
+		if(typeof(event.target) != 'undefined' && box && isChildOf(event.target, box))
+			return true;
+
+		if(typeof(event.button) != 'undefined' && event.button == 2)
+			return true;
+
+		hideSearchPopup(true);
+	};
+
+	document.onmousedown = hideFunc;
 	EBID('searchSpinner').style.display = 'none';
+	var searchIcon = document.querySelector('#searchPopup .search-icon-default');
+	if(searchIcon)
+		searchIcon.classList.remove('is-hidden');
+	EBID('searchResultBody').hidden = true;
+	EBID('searchResults').innerHTML = '';
 	showHeaderPopup('searchPopup', elem);
 	EBID('searchField').focus();
 }
@@ -525,10 +616,11 @@ function toggleResultMassActions(form, id)
  *************************************************************************/
 function webdiskDialog(sid, type, field)
 {
-	openOverlay('webdisk.php?sid=' + sid + '&action=webdiskDialog&type=' + type + '&field=' + field,
+	var url = 'webdisk.php?action=webdiskDialog&type=' + encodeURIComponent(type) + '&field=' + encodeURIComponent(field);
+	openOverlay(bmAppendSession(url),
 		lang['browse'],
-		760,
-		type == 'save' ? 420 : 400,
+		820,
+		type == 'save' ? 560 : 540,
 		true);
 }
 function changeFileSelectorSource(c, name)
@@ -552,7 +644,7 @@ function composeMail(args)
 	if(typeof(args) == 'undefined' || !args)
 		args = '';
 
-	openOverlay('email.compose.php?inline=true&sid='+currentSID+args,
+	openOverlay(bmAppendSession('email.compose.php?inline=true'+args),
 			lang['compose'],
 			getDocumentMetrics('windowW')*0.8,
 			getDocumentMetrics('windowH')*0.8,
@@ -567,7 +659,7 @@ function accelKeyPressed(e)
 }
 function showCertificate(hash)
 {
-	openOverlay('prefs.php?action=keyring&do=showCertificate&hash='+hash+'&sid='+currentSID,
+	openOverlay(bmAppendSession('prefs.php?action=keyring&do=showCertificate&hash='+hash),
 		lang['certificate'],
 		450,
 		380,
@@ -655,7 +747,7 @@ function searchSelectedText(sid)
 		sText = parent.frames.textArea.document.selection.createRange().text
 
 	if(sText.replace(/\s/g, "").length > 0)
-		window.open('start.php?sid='+sid+'&action=search&q=' + escape(sText));
+		window.open(bmAppendSession('start.php?action=search&q=' + escape(sText)));
 	else
 		alert(lang['selecttext']);
 }
@@ -682,11 +774,11 @@ function showAddressMenu(e, readItem)
  *************************************************************************/
 function startBoardOrderChanged()
 {
-	MakeXMLRequest('start.php?action=saveWidgetOrder&order=' + escape(this.order) + '&sid=' + currentSID, false);
+	MakeXMLRequest('start.php?action=saveWidgetOrder&order=' + escape(this.order) , false);
 }
 function organizerBoardOrderChanged()
 {
-	MakeXMLRequest('organizer.php?action=saveWidgetOrder&order=' + escape(this.order) + '&sid=' + currentSID, false);
+	MakeXMLRequest('organizer.php?action=saveWidgetOrder&order=' + escape(this.order) , false);
 }
 
 function checkSafeCode(failAction, successAction)
@@ -728,7 +820,7 @@ function checkSafeCode(failAction, successAction)
 	if(!haveSafecode && EBID('safecode'))
 		data += '&safecode=' + encodeURIComponent(EBID('safecode').value);
 
-	MakeXMLRequest('start.php?action=checkSafeCode&sid='+currentSID+data,
+	MakeXMLRequest(bmAppendSession('start.php?action=checkSafeCode'+data),
 		function(obj)
 		{
 			if(obj.readyState == 4)
@@ -786,7 +878,7 @@ function openAddressbook(sid, mode)
 			+	'&bcc=' + escape(EBID('bcc').value);
 	}
 
-	openOverlay('organizer.addressbook.php?sid=' + sid + '&action=addressPopup&mode=' + mode,
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=addressPopup&mode=' + mode),
 		lang['addressbook'],
 		720,
 		520,
@@ -802,7 +894,7 @@ function __addressbookLookup(e, obj)
 }
 function _addressbookLookup(obj, text)
 {
-	MakeXMLRequest('organizer.addressbook.php?action=lookupAddresses&sid=' + currentSID + '&text=' + escape(text), __addressbookLookup, obj);
+	MakeXMLRequest('organizer.addressbook.php?action=lookupAddresses' + '&text=' + escape(text), __addressbookLookup, obj);
 }
 function _loadMainContent(obj)
 {
@@ -882,13 +974,13 @@ function showCalendarDate(id, start, end, inFrame)
 	//end += getTZOffset();
 
 	if(inFrame)
-		parent.openOverlay('organizer.calendar.php?sid=' + currentSID + '&action=showDate&start=' + start + '&end=' + end + '&id=' + id,
+		parent.openOverlay(bmAppendSession('organizer.calendar.php?action=showDate&start=' + start + '&end=' + end + '&id=' + id),
 			lang['date'],
 			580,
 			520,
 			true);
 	else
-		openOverlay('organizer.calendar.php?sid=' + currentSID + '&action=showDate&start=' + start + '&end=' + end + '&id=' + id,
+		openOverlay(bmAppendSession('organizer.calendar.php?action=showDate&start=' + start + '&end=' + end + '&id=' + id),
 			lang['date'],
 			580,
 			520,

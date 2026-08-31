@@ -237,8 +237,7 @@ else if($_REQUEST['action'] == 'extensions' AND LEGACY_WEBDISCICONS===true)
 				ReleaseTempFile(0, $tempFileID);
 			}
 
-			header('Location: prefs.webdisk.php?action=extensions&sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.webdisk.php?action=extensions');
 		}
 
 		// fetch

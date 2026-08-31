@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAV\Xml\Request;
 
 use Sabre\DAV\Locks\LockInfo;
@@ -18,10 +20,10 @@ use Sabre\Xml\XmlDeserializable;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Lock implements XmlDeserializable {
-
+class Lock implements XmlDeserializable
+{
     /**
-     * Owner of the lock
+     * Owner of the lock.
      *
      * @var string
      */
@@ -31,6 +33,7 @@ class Lock implements XmlDeserializable {
      * Scope of the lock.
      *
      * Either LockInfo::SHARED or LockInfo::EXCLUSIVE
+     *
      * @var int
      */
     public $scope;
@@ -38,7 +41,7 @@ class Lock implements XmlDeserializable {
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -53,13 +56,12 @@ class Lock implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $reader->pushContext();
-        $reader->elementMap['{DAV:}owner'] = 'Sabre\\Xml\\Element\\XmlFragment';
+        $reader->elementMap['{DAV:}owner'] = \Sabre\Xml\Element\XmlFragment::class;
 
         $values = KeyValue::xmlDeserialize($reader);
 
@@ -71,11 +73,12 @@ class Lock implements XmlDeserializable {
 
         if (isset($values['{DAV:}lockscope'])) {
             foreach ($values['{DAV:}lockscope'] as $elem) {
-                if ($elem['name'] === '{DAV:}exclusive') $new->scope = LockInfo::EXCLUSIVE;
+                if ('{DAV:}exclusive' === $elem['name']) {
+                    $new->scope = LockInfo::EXCLUSIVE;
+                }
             }
         }
+
         return $new;
-
     }
-
 }

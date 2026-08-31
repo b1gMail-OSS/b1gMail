@@ -1,4 +1,5 @@
-<form action="prefs.webdisk.php?action=limits&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.webdisk.php' params="action=limits&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="limits"}</legend>
 

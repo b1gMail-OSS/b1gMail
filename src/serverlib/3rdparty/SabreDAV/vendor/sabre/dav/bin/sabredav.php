@@ -2,37 +2,35 @@
 
 // SabreDAV test server.
 
-class CliLog {
-
+class CliLog
+{
     protected $stream;
 
-    function __construct() {
-
-        $this->stream = fopen('php://stdout','w');
-
+    public function __construct()
+    {
+        $this->stream = fopen('php://stdout', 'w');
     }
 
-    function log($msg) {
-        fwrite($this->stream, $msg . "\n");
+    public function log($msg)
+    {
+        fwrite($this->stream, $msg."\n");
     }
-
 }
 
 $log = new CliLog();
 
-if (php_sapi_name()!=='cli-server') {
-    die("This script is intended to run on the built-in php webserver");
+if ('cli-server' !== php_sapi_name()) {
+    exit('This script is intended to run on the built-in php webserver');
 }
 
 // Finding composer
 
+$paths = [
+    __DIR__.'/../vendor/autoload.php',
+    __DIR__.'/../../../autoload.php',
+];
 
-$paths = array(
-    __DIR__ . '/../vendor/autoload.php',
-    __DIR__ . '/../../../autoload.php',
-);
-
-foreach($paths as $path) {
+foreach ($paths as $path) {
     if (file_exists($path)) {
         include $path;
         break;
@@ -41,7 +39,7 @@ foreach($paths as $path) {
 
 use Sabre\DAV;
 
-// Root 
+// Root
 $root = new DAV\FS\Directory(getcwd());
 
 // Setting up server.

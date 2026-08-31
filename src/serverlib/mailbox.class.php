@@ -3550,7 +3550,7 @@ class BMMailbox
 		{
 			$idTable[$folderID] = $i;
 			$pageMenu[] = array(
-					'link'			=> 'email.php?folder=' . $folderID . '&sid=' . session_id(),
+					'link'			=> SessionUrl('email.php?folder=' . $folderID),
 					'link_noSID'	=> 'email.php?folder=' . $folderID . '&sid=',
 					'text'			=> $folder['title'],
 					'icon'			=> $folder['type'],
@@ -3572,6 +3572,134 @@ class BMMailbox
 				$pageMenu[$key]['parent'] = -1;
 		}
 		return(array($folderList, $pageMenu));
+	}
+
+	/**
+	 * flat folder list for move-mail dialog (tree order, with depth)
+	 *
+	 * @return array
+	 */
+	function GetMoveFolderList()
+	{
+		$folderList = $this->GetFolderList(false);
+		$moveFolderList = array();
+		$systemFolderOrder = array(FOLDER_INBOX, FOLDER_OUTBOX, FOLDER_DRAFTS, FOLDER_SPAM, FOLDER_TRASH);
+
+		foreach($systemFolderOrder as $folderID)
+		{
+			if(!isset($folderList[$folderID]))
+				continue;
+
+			$this->_appendMoveFolderListEntry($moveFolderList, $folderID, $folderList[$folderID], 0);
+		}
+
+		$userRoots = array();
+		foreach($folderList as $folderID=>$folder)
+		{
+			if($folderID <= 0 || !$this->_isMoveFolderListRootParent($folder['parent']))
+				continue;
+
+			if($folder['intelligent'] || !empty($folder['readonly']))
+				continue;
+
+			$userRoots[$folderID] = $folder;
+		}
+		uasort($userRoots, array($this, '_compareMoveFolderTitles'));
+
+		foreach($userRoots as $folderID=>$folder)
+		{
+			$this->_appendMoveFolderListEntry($moveFolderList, $folderID, $folder, 0);
+			$this->_appendMoveFolderListChildren($moveFolderList, $folderList, $folderID, 1);
+		}
+
+		if(EXTENDED_WORKGROUPS)
+		{
+			$sharedRoots = array();
+			foreach($folderList as $folderID=>$folder)
+			{
+				if($folderID <= 0 || $folder['parent'] != FOLDER_ROOT)
+					continue;
+
+				if($folder['intelligent'] || !empty($folder['readonly']))
+					continue;
+
+				$sharedRoots[$folderID] = $folder;
+			}
+			uasort($sharedRoots, array($this, '_compareMoveFolderTitles'));
+
+			foreach($sharedRoots as $folderID=>$folder)
+				$this->_appendMoveFolderListEntry($moveFolderList, $folderID, $folder, 0);
+		}
+
+		return($moveFolderList);
+	}
+
+	/**
+	 * @param array $moveFolderList
+	 * @param array $folderList
+	 * @param int $parentID
+	 * @param int $depth
+	 */
+	function _appendMoveFolderListChildren(&$moveFolderList, $folderList, $parentID, $depth)
+	{
+		$children = array();
+		foreach($folderList as $folderID=>$folder)
+		{
+			if($folderID <= 0 || $folder['parent'] != $parentID)
+				continue;
+
+			if($folder['intelligent'] || !empty($folder['readonly']))
+				continue;
+
+			$children[$folderID] = $folder;
+		}
+		uasort($children, array($this, '_compareMoveFolderTitles'));
+
+		foreach($children as $folderID=>$folder)
+		{
+			$this->_appendMoveFolderListEntry($moveFolderList, $folderID, $folder, $depth);
+			$this->_appendMoveFolderListChildren($moveFolderList, $folderList, $folderID, $depth + 1);
+		}
+	}
+
+	/**
+	 * @param array $moveFolderList
+	 * @param int $folderID
+	 * @param array $folder
+	 * @param int $depth
+	 */
+	function _appendMoveFolderListEntry(&$moveFolderList, $folderID, $folder, $depth)
+	{
+		$moveFolderList[] = array(
+			'id'	=> $folderID,
+			'text'	=> $folder['title'],
+			'icon'	=> $folder['type'],
+			'depth'	=> $depth
+		);
+	}
+
+	/**
+	 * top-level mail folder (no parent folder id)
+	 *
+	 * @param int $parent
+	 * @return bool
+	 */
+	function _isMoveFolderListRootParent($parent)
+	{
+		return in_array((int)$parent, array(-1, 0), true);
+	}
+
+	/**
+	 * @param array $a
+	 * @param array $b
+	 * @return int
+	 */
+	function _compareMoveFolderTitles($a, $b)
+	{
+		return strcasecmp(
+			html_entity_decode(strip_tags($a['title']), ENT_QUOTES, 'UTF-8'),
+			html_entity_decode(strip_tags($b['title']), ENT_QUOTES, 'UTF-8')
+		);
 	}
 
 	/**

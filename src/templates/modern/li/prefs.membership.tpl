@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form action="prefs.php?action=membership&do=changePW&sid={$sid}" method="post">
+	{csrffield}
 <h2>{lng p="changepw"}</h2>
 {if isset($errorStep)}
 <div class="note">

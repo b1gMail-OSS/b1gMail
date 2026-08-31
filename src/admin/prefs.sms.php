@@ -135,11 +135,11 @@ else if($_REQUEST['action'] == 'gateways')
 		if(isset($_REQUEST['add']))
 		{
 			$db->Query('INSERT INTO {pre}smsgateways(titel,getstring,success,`user`,`pass`) VALUES(?,?,?,?,?)',
-				$_REQUEST['titel'],
-				$_REQUEST['getstring'],
-				$_REQUEST['success'],
-				$_REQUEST['user'],
-				$_REQUEST['pass']);
+				$_REQUEST['titel'] ?? '',
+				$_REQUEST['getstring'] ?? '',
+				$_REQUEST['success'] ?? '',
+				$_REQUEST['user'] ?? '',
+				$_REQUEST['pass'] ?? '');
 		}
 
 		// fetch
@@ -168,14 +168,13 @@ else if($_REQUEST['action'] == 'gateways')
 		if(isset($_REQUEST['save']))
 		{
 			$db->Query('UPDATE {pre}smsgateways SET titel=?, getstring=?, success=?, `user`=?, `pass`=? WHERE id=?',
-				$_REQUEST['titel'],
-				$_REQUEST['getstring'],
-				$_REQUEST['success'],
-				$_REQUEST['user'],
-				$_REQUEST['pass'],
+				$_REQUEST['titel'] ?? '',
+				$_REQUEST['getstring'] ?? '',
+				$_REQUEST['success'] ?? '',
+				$_REQUEST['user'] ?? '',
+				$_REQUEST['pass'] ?? '',
 				$_REQUEST['id']);
-			header('Location: prefs.sms.php?action=gateways&sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.sms.php?action=gateways');
 		}
 
 		// fetch
@@ -292,8 +291,7 @@ else if($_REQUEST['action'] == 'types')
 				isset($_REQUEST['flags']) ? array_sum(array_keys($_REQUEST['flags'])) : 0,
 				(int)$_REQUEST['maxlength'],
 				$_REQUEST['id']);
-			header('Location: prefs.sms.php?action=types&sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.sms.php?action=types');
 		}
 
 		// fetch

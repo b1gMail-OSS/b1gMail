@@ -10,6 +10,7 @@
 		</div>
 		<div class="col-md-6">
 			<form action="index.php?action=imprint" method="post">
+				{csrffield}
 				<input type="hidden" name="do" value="submitContactForm" />
 
 				<div class="panel panel-default">

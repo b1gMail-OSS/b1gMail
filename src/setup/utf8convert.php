@@ -29,8 +29,7 @@ define('STEP_WELCOME',				1);
 define('STEP_SYSTEMCHECK',			2);
 define('STEP_CONVERT',				3);
 define('STEP_CONVERT_STEP',			4);
-// other
-define('DB_INSTALL_PREFIX', 'bm60_');
+define('DB_INSTALL_PREFIX', isset($mysql['prefix']) ? $mysql['prefix'] : SETUP_DEFAULT_PREFIX);
 
 // connect to mysql db
 if(!($connection = CheckMySQLLogin($mysql['host'], $mysql['user'], $mysql['pass'],
@@ -51,13 +50,33 @@ else
 	$step = (int)$_REQUEST['step'];
 
 // read language file
-if(!isset($_GET['lng']))
+if(!isset($_GET['lng']) && !isset($_POST['lng']))
 	$_GET['lng'] = strpos($bm_prefs['language'], 'deutsch') !== false ? 'deutsch' : 'english';
 ReadLanguage();
 
-// header
+if($step == STEP_CONVERT_STEP)
+{
+	if(!SetupCsrfOk(true))
+	{
+		header('Content-Type: text/plain; charset=UTF-8');
+		echo 'ERROR:CSRF';
+		exit;
+	}
+}
+elseif(!SetupCsrfOk())
+{
+	$step = STEP_WELCOME;
+	$setupError = $lang_setup['csrf_fail'];
+}
+
+SetupAbortIfLocked('lock_utf8', false, true);
+
 if($step != STEP_CONVERT_STEP)
+{
 	pageHeader(false, true);
+	if(!empty($setupError))
+		echo SetupAlert('danger', $setupError);
+}
 
 /**
  * already utf-8?
@@ -65,9 +84,8 @@ if($step != STEP_CONVERT_STEP)
 if(isset($bm_prefs['db_is_utf8']) && $bm_prefs['db_is_utf8']==1)
 {
 	?>
-	<h1><?php echo($lang_setup['error']); ?></h1>
-
-	<?php echo($lang_setup['convert_alreadyutf8']); ?>
+	<h1><?php echo SetupH($lang_setup['error']); ?></h1>
+	<?php echo SetupAlert('info', $lang_setup['convert_alreadyutf8']); ?>
 	<?php
 }
 
@@ -78,15 +96,9 @@ else if($step == STEP_WELCOME)
 {
 	$nextStep = STEP_SYSTEMCHECK;
 	?>
-	<h1><?php echo($lang_setup['welcome']); ?></h1>
-
-	<p>
-		<?php echo($lang_setup['convert_welcome_text']); ?>
-	</p>
-
-	<div style="border:1px solid red;background-color:#efefef;padding:1em;">
-		<?php echo($lang_setup['update_note3']); ?>
-	</div>
+	<h1><?php echo SetupH($lang_setup['welcome']); ?></h1>
+	<p><?php echo $lang_setup['convert_welcome_text']; ?></p>
+	<?php echo SetupAlert('warning', $lang_setup['update_note3']); ?>
 	<?php
 }
 
@@ -102,65 +114,48 @@ else if($step == STEP_SYSTEMCHECK)
 	mysqli_free_result($result);
 
 	$mysqlVersionOK = in_array(CompareVersions($mysqlVersion, '4.1.1'), array(VERSION_IS_NEWER, VERSION_IS_EQUAL));
+	$phpOk = version_compare(PHP_VERSION, SETUP_PHP_MIN, '>=');
+	$encOk = function_exists('mb_convert_encoding') || function_exists('iconv');
+	$backStep = STEP_WELCOME;
+	$rows = array(
+		array(
+			'label' => $lang_setup['phpversion'],
+			'required' => SETUP_PHP_MIN,
+			'available' => PHP_VERSION,
+			'ok' => $phpOk,
+		),
+		array(
+			'label' => $lang_setup['mbiconvext'],
+			'required' => 'mbstring / iconv',
+			'available' => function_exists('mb_convert_encoding') ? 'mbstring' : (function_exists('iconv') ? 'iconv' : $lang_setup['no']),
+			'ok' => $encOk,
+		),
+		array(
+			'label' => $lang_setup['mysqlversion'],
+			'required' => '4.1.1',
+			'available' => $mysqlVersion,
+			'ok' => $mysqlVersionOK,
+		),
+	);
+	$langFiles = array('data/');
+	$d = dir('../languages/');
+	while($entry = $d->read())
+	{
+		if($entry == '.' || $entry == '..')
+			continue;
+		if(substr($entry, -9) == '.lang.php')
+			$langFiles[] = 'languages/' . $entry;
+	}
+	list($fileRows, $chmodCommands, $filesOk) = SetupCollectWritableRows($langFiles);
+	$rows = array_merge($rows, $fileRows);
+	if(!$phpOk || !$encOk || !$mysqlVersionOK || !$filesOk)
+		$nextStep = STEP_SYSTEMCHECK;
 	?>
-	<h1><?php echo($lang_setup['syscheck']); ?></h1>
-
-	<?php echo($lang_setup['convert_syscheck_text']); ?>
-
-	<br /><br />
-	<table class="list">
-		<tr>
-			<th width="180">&nbsp;</th>
-			<th><?php echo($lang_setup['required']); ?></th>
-			<th><?php echo($lang_setup['available']); ?></th>
-			<th width="60">&nbsp;</th>
-		</tr>
-		<tr>
-			<th><?php echo($lang_setup['phpversion']); ?></th>
-			<td>7.2.0</td>
-			<td><?php echo(phpversion()); ?></td>
-			<td><img src="../admin/templates/images/<?php if((int)str_replace('.', '', phpversion()) >= 720) echo 'ok'; else { echo 'error'; $nextStep = STEP_SYSTEMCHECK; } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-		<tr>
-			<th><?php echo($lang_setup['mbiconvext']); ?></th>
-			<td>mb_string / iconv</td>
-			<td><?php echo(function_exists('mb_convert_encoding') ? 'mb_string' : (function_exists('iconv') ? 'iconv' : $lang_setup['no'])); ?></td>
-			<td><img src="../admin/templates/images/<?php if(function_exists('mb_convert_encoding') || function_exists('iconv')) echo 'ok'; else { echo 'error'; $nextStep = STEP_SYSTEMCHECK; } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-		<tr>
-			<th><?php echo($lang_setup['mysqlversion']); ?></th>
-			<td>4.1.1</td>
-			<td><?php echo($mysqlVersion); ?></td>
-			<td><img src="../admin/templates/images/<?php if($mysqlVersionOK) echo 'ok'; else { echo 'error'; $nextStep = STEP_SYSTEMCHECK; } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-		<?php
-		$langFiles = array('data/');
-		$d = dir('../languages/');
-		while($entry = $d->read())
-		{
-			if($entry == '.' || $entry == '..')
-				continue;
-
-			if(substr($entry, -9) == '.lang.php')
-				$langFiles[] = 'languages/' . $entry;
-		}
-
-		foreach($langFiles as $file)
-		{
-			?>
-		<tr>
-			<th><?php echo($file); ?></th>
-			<td><?php echo($lang_setup['writeable']); ?></td>
-			<td><?php echo(is_writeable('../' . $file) ? $lang_setup['writeable'] : $lang_setup['notwriteable']); ?></td>
-			<td><img src="../admin/templates/images/<?php if(is_writeable('../' . $file)) echo 'ok'; else { echo 'error'; $nextStep = STEP_SYSTEMCHECK; } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-			<?php
-		}
-		?>
-	</table>
-
-	<br />
-	<?php echo($nextStep == STEP_CONVERT ? $lang_setup['checkok_text'] : $lang_setup['checkfail_text']);?>
+	<h1><?php echo SetupH($lang_setup['syscheck']); ?></h1>
+	<p><?php echo $lang_setup['convert_syscheck_text']; ?></p>
+	<?php SetupRenderCheckTable($rows); ?>
+	<?php echo SetupRenderChmod($chmodCommands); ?>
+	<?php echo SetupAlert($nextStep == STEP_CONVERT ? 'success' : 'danger', $nextStep == STEP_CONVERT ? $lang_setup['checkok_text'] : $lang_setup['checkfail_text'], '', array('class' => 'mt-3')); ?>
 	<?php
 }
 
@@ -169,77 +164,47 @@ else if($step == STEP_SYSTEMCHECK)
  */
 else if($step == STEP_CONVERT)
 {
+	$convertSteps = array('prepare', 'analyzedb', 'preptables', 'convert', 'collations', 'langfiles', 'resetcache', 'complete');
+	$convertLabels = array(
+		'prepare' => $lang_setup['convert_prepare'],
+		'analyzedb' => $lang_setup['convert_analyzedb'],
+		'preptables' => $lang_setup['convert_prepare_tables'],
+		'convert' => $lang_setup['convert_convertdata'],
+		'collations' => $lang_setup['convert_collations'],
+		'langfiles' => $lang_setup['convert_langfiles'],
+		'resetcache' => $lang_setup['convert_resetcache'],
+		'complete' => $lang_setup['convert_complete'],
+	);
 	?>
-	<h1><?php echo($lang_setup['converting']); ?></h1>
-
-	<?php echo($lang_setup['converting_text']); ?>
-
-	<br /><br />
-	<table class="list">
-		<tr>
-			<th width="40"></th>
-			<th><?php echo($lang_setup['step']); ?></th>
-			<th width="180"><?php echo($lang_setup['progress']); ?></th>
+	<h1><?php echo SetupH($lang_setup['converting']); ?></h1>
+	<p><?php echo $lang_setup['converting_text']; ?></p>
+	<?php SetupCloseCardBody(); ?>
+	<div id="setup-progress" data-script="utf8convert.php" data-ajax-step="4" data-csrf="<?php echo SetupH(SetupCsrfToken()); ?>" data-lng="<?php echo SetupH($lang); ?>" data-steps="<?php echo SetupH(json_encode($convertSteps)); ?>">
+	<div class="table-responsive">
+	<table class="table table-vcenter card-table">
+		<thead>
+			<tr>
+				<th class="w-1"></th>
+				<th><?php echo SetupH($lang_setup['step']); ?></th>
+				<th class="setup-progress-col"><?php echo SetupH($lang_setup['progress']); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach($convertSteps as $i => $key) { ?>
+		<tr class="setup-progress-row">
+			<td id="step_<?php echo SetupH($key); ?>_status"></td>
+			<th id="step_<?php echo SetupH($key); ?>_text"><?php echo ($i + 1).'. '.$convertLabels[$key]; ?></th>
+			<td class="setup-progress-col" id="step_<?php echo SetupH($key); ?>_progress"></td>
 		</tr>
-		<tr>
-			<td id="step_prepare_status">&nbsp;</td>
-			<th id="step_prepare_text" style="font-weight:normal;">1. <?php echo($lang_setup['convert_prepare']); ?></th>
-			<td id="step_prepare_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_analyzedb_status">&nbsp;</td>
-			<th id="step_analyzedb_text" style="font-weight:normal;">2. <?php echo($lang_setup['convert_analyzedb']); ?></th>
-			<td id="step_analyzedb_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_preptables_status">&nbsp;</td>
-			<th id="step_preptables_text" style="font-weight:normal;">3. <?php echo($lang_setup['convert_prepare_tables']); ?></th>
-			<td id="step_preptables_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_convert_status">&nbsp;</td>
-			<th id="step_convert_text" style="font-weight:normal;">4. <?php echo($lang_setup['convert_convertdata']); ?></th>
-			<td id="step_convert_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_collations_status">&nbsp;</td>
-			<th id="step_collations_text" style="font-weight:normal;">5. <?php echo($lang_setup['convert_collations']); ?></th>
-			<td id="step_collations_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_langfiles_status">&nbsp;</td>
-			<th id="step_langfiles_text" style="font-weight:normal;">6. <?php echo($lang_setup['convert_langfiles']); ?></th>
-			<td id="step_langfiles_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_resetcache_status">&nbsp;</td>
-			<th id="step_resetcache_text" style="font-weight:normal;">7. <?php echo($lang_setup['convert_resetcache']); ?></th>
-			<td id="step_resetcache_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_complete_status">&nbsp;</td>
-			<th id="step_complete_text" style="font-weight:normal;">8. <?php echo($lang_setup['convert_complete']); ?></th>
-			<td id="step_complete_progress">&nbsp;</td>
-		</tr>
+		<?php } ?>
+		</tbody>
 	</table>
-
-	<br />
-	<?php echo($lang_setup['converting_text2']); ?>
-
-	<textarea readonly="readonly" class="installLog" id="log" style="display:none;height:150px;"></textarea>
-	<br /><br />
-
-	<div align="center" id="done" style="display:none;">
-		<b><?php echo($lang_setup['convertdonefinal']); ?></b>
 	</div>
-
-	<script src="./res/convert.js"></script>
-	<script>
-	<!--
-		window.onload = beginConversion;
-	//-->
-	</script>
-
+	</div>
+	<?php SetupOpenCardBody(); ?>
+	<?php echo SetupAlert('warning', $lang_setup['converting_text2'], '', array('dismissible' => false)); ?>
+	<textarea readonly="readonly" class="form-control setup-log d-none" id="log" rows="6"></textarea>
+	<?php echo SetupAlert('success', $lang_setup['convertdonefinal'], '', array('id' => 'done', 'class' => 'd-none mt-3', 'dismissible' => false)); ?>
 	<?php
 }
 
@@ -652,7 +617,7 @@ else if($step == STEP_CONVERT_STEP)
 	{
 		$deleteIDs = array();
 
-		$res = mysqli_query($connection, 'SELECT size,`key` FROM '.DB_INSTALL_PREFIX.'file_cache', $connection);
+		$res = mysqli_query($connection, 'SELECT size,`key` FROM '.DB_INSTALL_PREFIX.'file_cache');
 		while($row = mysqli_fetch_array($res, MYSQLI_ASSOC))
 		{
 			$fileName = '../temp/cache/' . $row['key'] . '.cache';
@@ -706,6 +671,7 @@ else if($step == STEP_CONVERT_STEP)
 			mysqli_query($connection, 'UPDATE '.DB_INSTALL_PREFIX.'prefs SET `wartung`=\'no\',`db_is_utf8`=1');
 			mysqli_query($connection, 'DROP TABLE IF EXISTS '.DB_INSTALL_PREFIX.'utf8convert');
 
+			SetupWriteLock('lock_utf8');
 			echo 'OK:DONE';
 		}
 		else

@@ -7,11 +7,14 @@
 	</div>
 </div>
 
-<script src="./clientlib/dragcontainer.js?{fileDateSig file="../../clientlib/dragcontainer.js"}" type="text/javascript"></script>
+<script src="{$selfurl}clientlib/dragcontainer.js?{fileDateSig file="../../clientlib/dragcontainer.js"}" type="text/javascript"></script>
 <script src="{$tpldir}js/dashboard.js?{fileDateSig file="js/dashboard.js"}" type="text/javascript"></script>
 <script>
 <!--
-	currentSID = '{$sid}';
+	if(typeof currentSID === 'undefined')
+		currentSID = (typeof bmSessionConfig !== 'undefined' ? bmSessionConfig.sid : '{$sid|escape:'javascript'}');
+	if(typeof tplDir === 'undefined')
+		tplDir = '{$tpldir|escape:'javascript'}';
 	var dc = bmInitWidgetBoard('startBoxes', {$boardCols|default:3}, 'dc', '{$widgetOrder|escape:'javascript'}', {$boardSaveCallback});
 	{if isset($autoSetPreviewPos)}autoSetPreviewPos();{/if}
 //-->

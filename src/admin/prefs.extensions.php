@@ -141,8 +141,7 @@ if($_REQUEST['action'] == 'extensions')
 				ReleaseTempFile(0, $tempFileID);
 			}
 
-			header('Location: prefs.extensions.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.extensions.php');
 		}
 
 		// fetch

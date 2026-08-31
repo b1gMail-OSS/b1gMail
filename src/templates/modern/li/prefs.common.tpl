@@ -7,6 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 <form name="f1" method="post" action="prefs.php?action=common&do=save&sid={$sid}">
+	{csrffield}
 {if $allownewsoptout!='yes'&&$newsletter_optin=='yes'}
 <input type="hidden" name="newsletter_optin" value="true" />
 {/if}
@@ -111,6 +112,15 @@
 			<td class="listTableRight">
 				<input type="checkbox" name="newsletter_optin" id="newsletter_optin"{if $newsletter_optin=='yes'} checked="checked"{/if} />
 					<label for="newsletter_optin">{lng p="subscribe"}</label>
+			</td>
+		</tr>
+		{/if}
+		{if $loginNotifyAllowed}
+		<tr>
+			<td class="listTableLeft"><label for="notify_login_new_ip">{lng p="notify_login_new_ip"}:</label></td>
+			<td class="listTableRight">
+				<input type="checkbox" name="notify_login_new_ip" id="notify_login_new_ip"{if $notifyLoginNewIp} checked="checked"{/if} />
+					<label for="notify_login_new_ip">{lng p="notify_login_new_ip_desc"}</label>
 			</td>
 		</tr>
 		{/if}

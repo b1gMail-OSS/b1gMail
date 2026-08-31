@@ -19,7 +19,9 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
+CronRequireAllowed(true);
 require './serverlib/pop3gateway.class.php';
 include './serverlib/userpop3gateway.class.php';
 include './serverlib/calendar.class.php';
@@ -51,6 +53,10 @@ if (isset($_REQUEST['sid']) && RequestPrivileges(PRIVILEGES_USER, true)) {
     @session_write_close();
     $userPOP3Gateway = _new('BMUserPOP3Gateway', [$userRow['id'], &$thisUser]);
     $userPOP3Gateway->Run();
+}
+
+if (!CronInvokeAllowed()) {
+    exit();
 }
 
 // check if interval time passed
@@ -138,8 +144,22 @@ if ($bm_prefs['last_cron'] < time() - $bm_prefs['cron_interval']) {
         $pop3Gateway->Run();
     }
 
+    // scheduled maintenance tasks (core)
+    include B1GMAIL_DIR . 'serverlib/scheduledtasks.class.php';
+    BMScheduledTasks::onCron();
+
     // plugin cron
-    ModuleFunction('OnCron');
+    try
+    {
+        ModuleFunction('OnCron');
+    }
+    catch(Throwable $e)
+    {
+        PutLog(sprintf('OnCron plugin failed: %s', $e->getMessage()),
+            PRIO_WARNING,
+            $e->getFile(),
+            $e->getLine());
+    }
 
     // store time
     if ($bm_prefs['last_storetime_cron'] < time() - STORETIME_CRON_INTERVAL) {

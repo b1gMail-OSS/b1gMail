@@ -37,6 +37,15 @@ class PremiumAccountPlugin extends BMPlugin
 	 */
 	var $prefs;
 
+	/** @var int Order ID for post-placement payment page (placeOrder) */
+	var $_paccPaymentOrderID = 0;
+
+	/** @var bool Free package was activated in placeOrder flow */
+	var $_paccJustActivated = false;
+
+	/** @var bool Admin page already rendered (e.g. subscription extend form) */
+	var $_paccAdminHandled = false;
+
 	/**
 	 * constructor
 	 *
@@ -50,7 +59,8 @@ class PremiumAccountPlugin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMail PremiumAccount PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '2.53';
+		$this->version				= '2.55';
+		$this->designedfor			= '7.5.0';
 		$this->website				= 'https://www.b1gmail.org/';
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
 
@@ -58,6 +68,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$this->admin_pages			= true;
 		$this->admin_page_title		= 'PremiumAccount';
 		$this->admin_page_icon		= 'pacc_logo16.png';
+		$this->admin_route_slug		= 'premiumaccount';
 	}
 
 	/**
@@ -66,7 +77,121 @@ class PremiumAccountPlugin extends BMPlugin
 	 */
 	function OnLoad()
 	{
+		$this->_ensurePrefsSchema();
 		$this->prefs = $this->_getPrefs();
+	}
+
+	/**
+	 * DB column for optional NLI order buttons (added in 2.55).
+	 */
+	protected function _ensurePrefsSchema()
+	{
+		global $db;
+
+		static $done = false;
+		if($done)
+			return;
+		$done = true;
+
+		$res = $db->Query('SHOW COLUMNS FROM {pre}mod_premium_prefs LIKE ?', 'nli_packages_order_buttons');
+		if($res->RowCount() < 1)
+			$db->Query('ALTER TABLE {pre}mod_premium_prefs ADD `nli_packages_order_buttons` enum(\'yes\',\'no\') NOT NULL DEFAULT \'yes\' AFTER `nli_packages_page`');
+		$res->Free();
+	}
+
+	/**
+	 * @param string $template
+	 * @return string
+	 */
+	public function _templatePath($template)
+	{
+		global $bm_prefs;
+
+		$theme = $this->_activeThemeName();
+		if($theme !== '')
+		{
+			$dir  = '';
+			$file = $template;
+			if(strpos($template, '/') !== false)
+			{
+				$dir  = dirname($template) . '/';
+				$file = basename($template);
+			}
+			$dot  = strrpos($file, '.');
+			$base = $dot !== false ? substr($file, 0, $dot) : $file;
+			$ext  = $dot !== false ? substr($file, $dot + 1) : 'tpl';
+			$variantPath = $bm_prefs['selffolder'] . 'plugins/templates/' . $dir . $base . '.' . $theme . '.' . $ext;
+			if(file_exists($variantPath))
+				return $variantPath;
+		}
+
+		return parent::_templatePath($template);
+	}
+
+	protected function _registerNliPackagesCss()
+	{
+		global $tpl, $bm_prefs;
+
+		$tpl->addCSSFile('nli', $bm_prefs['selfurl'] . 'plugins/css/pacc-nli.css?ver=' . $this->version);
+	}
+
+	/**
+	 * @param array $matrix
+	 * @return int
+	 */
+	protected function _defaultPackageId(array $matrix)
+	{
+		if(!isset($matrix['packages']) || !is_array($matrix['packages']) || count($matrix['packages']) < 1)
+			return 0;
+
+		$preferredAccent = array(3, 2, 1, 0);
+		foreach($preferredAccent as $accent)
+		{
+			foreach($matrix['packages'] as $package)
+			{
+				if((int)$package['accentuation'] === $accent)
+					return (int)$package['id'];
+			}
+		}
+
+		$first = reset($matrix['packages']);
+
+		return is_array($first) ? (int)$first['id'] : 0;
+	}
+
+	/**
+	 * @param bool $signupMode
+	 * @param array $matrix
+	 * @param string|null $orderText
+	 */
+	protected function _assignNliPackagesViewVars($signupMode, array $matrix, $orderText = null)
+	{
+		global $tpl, $bm_prefs, $lang_user;
+
+		$versionComponents = explode('.', B1GMAIL_VERSION);
+		$b1gMail74orLater = ($versionComponents[0] > 7 || ($versionComponents[0] == 7 && $versionComponents[1] >= 4));
+
+		if($orderText === null)
+			$orderText = $lang_user['pacc_ordertext'];
+
+		$this->_registerNliPackagesCss();
+		$tpl->registerPlugin('function', 'paccFormatField', array(&$this, '_smartyPaccFormatField'));
+		$tpl->assign('signUp',				$signupMode);
+		$tpl->assign('nliPackages',			true);
+		$tpl->assign('regEnabled',			$bm_prefs['regenabled'] == 'yes' && $b1gMail74orLater);
+		$tpl->assign('paccOrderButtons',	!isset($this->prefs['nli_packages_order_buttons']) || $this->prefs['nli_packages_order_buttons'] !== 'no');
+		$tpl->assign('paccDefaultPackageId',	$this->_defaultPackageId($matrix));
+		$tpl->assign('paccOrderAction',		PublicNavUrl('index.php?action=paccOrder'));
+		$tpl->assign('paccSignupBase',		PublicNavUrl('index.php?action=signup'));
+		$tpl->assign('orderText',			$orderText);
+		$tpl->assign('matrix',				$matrix);
+		$tpl->assign('page',				$this->_templatePath('pacc.nli.packages.tpl'));
+		$tpl->assign('pageTitle',			$signupMode ? $lang_user['signup'] : $lang_user['pacc_packages']);
+	}
+
+	public function RegisterRoutes()
+	{
+		BMRoute()->nliAction('paccPackages');
 	}
 
 	/**
@@ -213,6 +338,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_accent_3']			= 'Unsere Empfehlung';
 			$lang_admin['pacc_packages']			= 'Pakete';
 			$lang_admin['pacc_subscriptions']		= 'Abonnements';
+			$lang_admin['pacc_saved']				= 'Die Einstellungen wurden gespeichert.';
 			$lang_admin['pacc_payments']			= 'Zahlungen';
 			$lang_admin['pacc_activatepayment']	= 'Zahlung freischalten';
 			$lang_admin['pacc_paymentid']			= 'Zahlungs-ID';
@@ -309,6 +435,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_nlipack_no']			= 'Deaktivieren';
 			$lang_admin['pacc_nlipack_yes']		= 'Zusätzlich anzeigen';
 			$lang_admin['pacc_nlipack_replace']	= 'Vor Registrierung anzeigen';
+			$lang_admin['pacc_nli_order_buttons']	= 'Bestell-Buttons auf Paketseite';
 			$lang_admin['pacc_alllanguages']		= 'alle Sprachen';
 		}
 		else
@@ -449,6 +576,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_accent_3']			= 'Our Recommendation';
 			$lang_admin['pacc_packages']			= 'Packages';
 			$lang_admin['pacc_subscriptions']		= 'Subscriptions';
+			$lang_admin['pacc_saved']				= 'Settings have been saved.';
 			$lang_admin['pacc_payments']			= 'Payments';
 			$lang_admin['pacc_activatepayment']	= 'Activate payments';
 			$lang_admin['pacc_paymentid']			= 'Payment ID';
@@ -545,6 +673,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_nlipack_no']			= 'Disable';
 			$lang_admin['pacc_nlipack_yes']		= 'Show additionally';
 			$lang_admin['pacc_nlipack_replace']	= 'Show before signup';
+			$lang_admin['pacc_nli_order_buttons']	= 'Order buttons on packages page';
 			$lang_admin['pacc_alllanguages']		= 'all languages';
 		}
 	}
@@ -676,56 +805,533 @@ class PremiumAccountPlugin extends BMPlugin
 	}
 
 	/**
-	 * admin handler
+	 * @return list<string>
+	 */
+	protected function _paccMainActions()
+	{
+		return array('overview', 'packages', 'subscriptions', 'prefs');
+	}
+
+	/**
+	 * Pretty-URL path segment (do) → internal main tab (action).
+	 */
+	protected function _paccNormalizeRequest()
+	{
+		$mainActions = $this->_paccMainActions();
+
+		if(!isset($_REQUEST['action']) || $_REQUEST['action'] === '')
+			$_REQUEST['action'] = 'overview';
+
+		$pathDo = isset($_REQUEST['do']) ? strtolower((string)$_REQUEST['do']) : '';
+		$pathAction = isset($_REQUEST['action']) ? strtolower((string)$_REQUEST['action']) : '';
+
+		if($pathDo !== '' && in_array($pathDo, $mainActions, true))
+		{
+			if($pathAction !== '' && !in_array($pathAction, $mainActions, true))
+			{
+				$sub = $_REQUEST['action'];
+				$_REQUEST['action'] = $_REQUEST['do'];
+				$_REQUEST['do'] = $sub;
+			}
+			else
+			{
+				$_REQUEST['action'] = $_REQUEST['do'];
+				unset($_REQUEST['do']);
+			}
+		}
+
+		if(isset($_REQUEST['action']) && $_REQUEST['action'] !== '')
+			$_REQUEST['action'] = strtolower((string)$_REQUEST['action']);
+
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] !== '')
+			$_REQUEST['do'] = strtolower((string)$_REQUEST['do']);
+	}
+
+	/**
+	 * Sub-page key for pageURL (list, edit, common, featurefields, …).
 	 *
+	 * @return string|null
+	 */
+	protected function _paccSubDoForUrl()
+	{
+		if(!isset($_REQUEST['do']) || $_REQUEST['do'] === '')
+			return null;
+
+		$do = (string)$_REQUEST['do'];
+		if(in_array(strtolower($do), $this->_paccMainActions(), true))
+			return null;
+
+		return $do;
+	}
+
+	/**
+	 * Tab link for page.tpl ({sessionurl file=$tab.link}).
+	 *
+	 * @param string      $action
+	 * @param string|null $subDo
+	 * @return string
+	 */
+	protected function _paccTabLink($action, $subDo = null)
+	{
+		$url = 'plugin.page.php?plugin=' . rawurlencode($this->internal_name);
+		if($action !== '' && $action !== 'overview')
+			$url .= '&do=' . rawurlencode($action);
+		if($subDo !== null && $subDo !== '')
+			$url .= '&action=' . rawurlencode($subDo);
+		$url .= '&';
+
+		return $url;
+	}
+
+	/**
+	 * Pretty admin URL for this plugin.
+	 *
+	 * @param string               $action
+	 * @param string|null          $subDo
+	 * @param array<string, mixed> $query
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _paccAdminUrl($action = 'overview', $subDo = null, array $query = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name), $query);
+
+		if($action !== '' && $action !== 'overview')
+			$params['do'] = $action;
+
+		if($subDo !== null && $subDo !== '')
+			$params['action'] = $subDo;
+
+		if(function_exists('AdminSessionUrl'))
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach($params as $key => $val)
+		{
+			if((string)$val === '')
+				continue;
+			$url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+		}
+		if($trailingAmp)
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
+
+		return $url;
+	}
+
+	/**
+	 * @param array{type: string, text: string}|null $msg
+	 */
+	protected function _paccTakeFlashMsg()
+	{
+		if(!isset($_SESSION['pacc_admin_msg']))
+			return null;
+
+		$msg = $_SESSION['pacc_admin_msg'];
+		unset($_SESSION['pacc_admin_msg']);
+
+		if(!is_array($msg) || !isset($msg['type'], $msg['text']))
+			return null;
+
+		return array(
+			'type' => (string)$msg['type'],
+			'text' => (string)$msg['text'],
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $request
+	 * @return array{0: array<string, string>, 1: array<string, string>}
+	 */
+	protected function _paccPackageAltTexts(array $request)
+	{
+		$altTitles = array();
+		foreach($request['titles'] ?? array() as $titleEntryKey => $titleEntry)
+		{
+			if($titleEntryKey == 0 || empty($titleEntry['title']))
+				continue;
+			$altTitles[$titleEntry['lang']] = $titleEntry['title'];
+		}
+
+		$altDescriptions = array();
+		foreach($request['descriptions'] ?? array() as $descriptionEntryKey => $descriptionEntry)
+		{
+			if($descriptionEntryKey == 0 || empty($descriptionEntry['description']))
+				continue;
+			$altDescriptions[$descriptionEntry['lang']] = $descriptionEntry['description'];
+		}
+
+		return array($altTitles, $altDescriptions);
+	}
+
+	protected function _paccSaveNewPackage()
+	{
+		global $db;
+
+		if(($_REQUEST['laufzeiten_all'] ?? '') == 'true')
+			$laufzeiten = '*';
+		else
+			$laufzeiten = implode(',', array_map('trim', explode(',', (string)($_REQUEST['laufzeiten'] ?? ''))));
+
+		if(isset($_REQUEST['max_laufzeit_enable']))
+			$max_laufzeit = max(1, (int)$_REQUEST['max_laufzeit']);
+		else
+			$max_laufzeit = 0;
+
+		$price = $this->_formCentPrice($_REQUEST['preis'] ?? '0');
+		list($altTitles, $altDescriptions) = $this->_paccPackageAltTexts($_REQUEST);
+
+		$db->Query('INSERT INTO {pre}mod_premium_packages(titel,gruppe,fallback_grp,abrechnung_t,abrechnung,laufzeiten,max_laufzeit,preis_cent,beschreibung,template,accentuation,`order`,`alt_titles`,`alt_descriptions`) '
+					. 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+			$_REQUEST['titles'][0]['title'],
+			$_REQUEST['gruppe'],
+			$_REQUEST['fallback_grp'],
+			$_REQUEST['abrechnung_t'],
+			$price == 0 ? 'einmalig' : $_REQUEST['abrechnung'],
+			$laufzeiten,
+			$max_laufzeit,
+			$price,
+			$_REQUEST['descriptions'][0]['description'],
+			$_REQUEST['template'],
+			$_REQUEST['accentuation'],
+			$_REQUEST['order'],
+			serialize($altTitles),
+			serialize($altDescriptions));
+	}
+
+	protected function _paccSavePackageEdit($id)
+	{
+		global $db;
+
+		if(($_REQUEST['laufzeiten_all'] ?? '') == 'true')
+			$laufzeiten = '*';
+		else
+			$laufzeiten = implode(',', array_map('trim', explode(',', (string)($_REQUEST['laufzeiten'] ?? ''))));
+
+		if(isset($_REQUEST['max_laufzeit_enable']))
+			$max_laufzeit = max(1, (int)$_REQUEST['max_laufzeit']);
+		else
+			$max_laufzeit = 0;
+
+		$price = $this->_formCentPrice($_REQUEST['preis'] ?? '0');
+		list($altTitles, $altDescriptions) = $this->_paccPackageAltTexts($_REQUEST);
+
+		$db->Query('UPDATE {pre}mod_premium_packages SET titel=?,gruppe=?,fallback_grp=?,abrechnung_t=?,abrechnung=?,laufzeiten=?,max_laufzeit=?,preis_cent=?,beschreibung=?,template=?,accentuation=?,`order`=?,`alt_titles`=?,`alt_descriptions`=? WHERE id=?',
+			$_REQUEST['titles'][0]['title'],
+			$_REQUEST['gruppe'],
+			$_REQUEST['fallback_grp'],
+			$_REQUEST['abrechnung_t'],
+			$price == 0 ? 'einmalig' : $_REQUEST['abrechnung'],
+			$laufzeiten,
+			$max_laufzeit,
+			$price,
+			$_REQUEST['descriptions'][0]['description'],
+			$_REQUEST['template'],
+			$_REQUEST['accentuation'],
+			$_REQUEST['order'],
+			serialize($altTitles),
+			serialize($altDescriptions),
+			$id);
+	}
+
+	protected function _paccDeletePackage($id, $subscriptionAction)
+	{
+		global $db, $lang_admin;
+
+		$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_premium_subscribers WHERE paket=?', $id);
+		[$subscriberCount] = $res->FetchArray(MYSQLI_NUM);
+		$res->Free();
+
+		if($subscriberCount <= 0)
+		{
+			$db->Query('DELETE FROM {pre}mod_premium_packages WHERE id=?', $id);
+			PutLog(sprintf('Premium package <%d> deleted (no subscriptions)', $id), PRIO_NOTE, __FILE__, __LINE__);
+			return;
+		}
+
+		if($subscriptionAction === 'continue')
+		{
+			$db->Query('UPDATE {pre}mod_premium_packages SET geloescht=1 WHERE id=?', $id);
+			PutLog(sprintf('Premium package <%d> marked for deletion', $id), PRIO_NOTE, __FILE__, __LINE__);
+			return;
+		}
+
+		if($subscriptionAction === 'delete')
+		{
+			$res = $db->Query('SELECT fallback_grp FROM {pre}mod_premium_packages WHERE id=?', $id);
+			[$fallbackGroup] = $res->FetchArray(MYSQLI_NUM);
+			$res->Free();
+
+			$res = $db->Query('SELECT id,benutzer FROM {pre}mod_premium_subscribers WHERE paket=?', $id);
+			while($row = $res->FetchArray(MYSQLI_ASSOC))
+			{
+				if($fallbackGroup == -1)
+					$db->Query('UPDATE {pre}users SET gesperrt=?,notes=CONCAT(notes,?) WHERE id=?',
+						'locked',
+						sprintf($lang_admin['pacc_expire_locked_note'], date('r'), $row['id']),
+						$row['benutzer']);
+				else
+					$db->Query('UPDATE {pre}users SET gruppe=? WHERE id=?',
+						$fallbackGroup,
+						$row['benutzer']);
+			}
+			$res->Free();
+
+			$db->Query('DELETE FROM {pre}mod_premium_subscribers WHERE paket=?', $id);
+			$db->Query('DELETE FROM {pre}mod_premium_packages WHERE id=?', $id);
+			PutLog(sprintf('Premium package <%d> deleted (subscriptions deleted; fallback group: %d)', $id, $fallbackGroup), PRIO_NOTE, __FILE__, __LINE__);
+		}
+	}
+
+	protected function _paccExtendSubscriptions()
+	{
+		global $db;
+
+		$subscriberIDs = explode(',', (string)$_REQUEST['extend']);
+
+		if(($_REQUEST['mode'] ?? '') === 'dynamic')
+		{
+			$time = (int)$_REQUEST['dynamicValue']
+				* min(365, max(1, (int)$_REQUEST['dynamicFactor']))
+				* TIME_ONE_DAY;
+			$db->Query('UPDATE {pre}mod_premium_subscribers SET ablauf=ablauf+? WHERE id IN ? AND ablauf>1',
+				$time,
+				$subscriberIDs);
+		}
+		else if(($_REQUEST['mode'] ?? '') === 'static')
+		{
+			$_REQUEST['staticValueHour'] = 23;
+			$_REQUEST['staticValueMinute'] = $_REQUEST['staticValueSecond'] = 59;
+			$time = SmartyDateTime('staticValue');
+			$db->Query('UPDATE {pre}mod_premium_subscribers SET ablauf=? WHERE id IN ?',
+				$time,
+				$subscriberIDs);
+		}
+	}
+
+	protected function _paccSubscriptionsMassAction()
+	{
+		global $db, $tpl, $lang_admin;
+
+		$subscriberIDs = $_POST['subscriber'] ?? array();
+		if(!is_array($subscriberIDs))
+			$subscriberIDs = array();
+		else
+			$subscriberIDs = array_keys($subscriberIDs);
+
+		if(count($subscriberIDs) === 0)
+			return;
+
+		if(($_REQUEST['massAction'] ?? '') === 'cancel')
+		{
+			$res = $db->Query('SELECT id,benutzer,paket FROM {pre}mod_premium_subscribers WHERE id IN ?', $subscriberIDs);
+			while($row = $res->FetchArray(MYSQLI_ASSOC))
+			{
+				$packageRes = $db->Query('SELECT fallback_grp,gruppe FROM {pre}mod_premium_packages WHERE id=?', $row['paket']);
+				$package = $packageRes->FetchArray(MYSQLI_ASSOC);
+				$packageRes->Free();
+
+				$userGroup = -1;
+				$userRes = $db->Query('SELECT `gruppe` FROM {pre}users WHERE `id`=?', $row['benutzer']);
+				if($userRes->RowCount() == 1)
+				{
+					$userRow = $userRes->FetchArray(MYSQLI_ASSOC);
+					$userGroup = $userRow['gruppe'];
+				}
+				$userRes->Free();
+
+				if($package['fallback_grp'] == -1)
+					$db->Query('UPDATE {pre}users SET gesperrt=?,notes=CONCAT(notes,?) WHERE id=?',
+						'locked',
+						sprintf($lang_admin['pacc_expire_locked_note'], date('r'), $row['id']),
+						$row['benutzer']);
+				else if($userGroup == -1 || $userGroup == $package['gruppe'])
+					$db->Query('UPDATE {pre}users SET gruppe=?,notes=CONCAT(notes,?) WHERE id=?',
+						$package['fallback_grp'],
+						sprintf($lang_admin['pacc_expire_moved_note'], date('r'), $package['fallback_grp'], $row['id']),
+						$row['benutzer']);
+				else
+					$db->Query('UPDATE {pre}users SET notes=CONCAT(notes,?) WHERE id=?',
+						sprintf($lang_admin['pacc_expire_notmoved_note'], date('r'), $package['fallback_grp'], $row['id']),
+						$row['benutzer']);
+
+				PutLog(sprintf('PremiumAccount: Subscription #%d of user #%d cancelled by admin', $row['id'], $row['benutzer']), PRIO_NOTE, __FILE__, __LINE__);
+			}
+			$res->Free();
+
+			$db->Query('DELETE FROM {pre}mod_premium_subscribers WHERE id IN ?', $subscriberIDs);
+			return;
+		}
+
+		if(($_REQUEST['massAction'] ?? '') === 'extend')
+		{
+			$tpl->assign('ids', implode(',', $subscriberIDs));
+			$tpl->assign('page', $this->_templatePath('pacc.admin.subscriptions.extend.tpl'));
+			$this->_paccAdminHandled = true;
+		}
+	}
+
+	/**
+	 * POST mutations (CSRF via {csrffield} in templates).
+	 */
+	protected function _paccHandlePost()
+	{
+		global $db, $lang_admin;
+
+		$action = $_REQUEST['action'] ?? 'overview';
+
+		if($action === 'prefs' && isset($_REQUEST['save']))
+		{
+			$do = $_REQUEST['do'] ?? 'common';
+
+			if($do === 'featurefields' && is_array($_POST['fields'] ?? null))
+			{
+				$db->Query('UPDATE {pre}mod_premium_prefs SET `fields`=?,`fields_order`=?',
+					serialize($_POST['fields']),
+					serialize($_POST['positions']));
+				$this->prefs = $this->_getPrefs();
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('prefs', 'featurefields', array(), false));
+				exit();
+			}
+
+			if($do === 'common')
+			{
+				$db->Query('UPDATE {pre}mod_premium_prefs SET delete_order=?, delete_order_after=?, send_update_notification=?, update_notification_days=?, update_notification_altmail=?, signup_order_page=?, signup_order_force=?, nli_packages_page=?, nli_packages_order_buttons=?',
+					isset($_REQUEST['delete_order']) ? 'yes' : 'no',
+					(int)$_REQUEST['delete_order_after'] * 86400,
+					isset($_REQUEST['send_update_notification']) ? 'yes' : 'no',
+					$_REQUEST['update_notification_days'],
+					isset($_REQUEST['update_notification_altmail']) ? 'yes' : 'no',
+					isset($_REQUEST['signup_order_page']) ? 'yes' : 'no',
+					isset($_REQUEST['signup_order_force']) ? 'yes' : 'no',
+					$_REQUEST['nli_packages_page'],
+					isset($_REQUEST['nli_packages_order_buttons']) ? 'yes' : 'no');
+				$this->prefs = $this->_getPrefs();
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('prefs', null, array(), false));
+				exit();
+			}
+		}
+
+		if($action === 'packages')
+		{
+			if(isset($_REQUEST['add']))
+			{
+				$this->_paccSaveNewPackage();
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('packages', null, array(), false));
+				exit();
+			}
+
+			if(($_REQUEST['do'] ?? '') === 'edit' && isset($_REQUEST['save'], $_REQUEST['id']))
+			{
+				$this->_paccSavePackageEdit((int)$_REQUEST['id']);
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('packages', null, array(), false));
+				exit();
+			}
+
+			if(isset($_REQUEST['delete'], $_REQUEST['subscriptionAction']))
+			{
+				$this->_paccDeletePackage((int)$_REQUEST['delete'], (string)$_REQUEST['subscriptionAction']);
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('packages', null, array(), false));
+				exit();
+			}
+		}
+
+		if($action === 'subscriptions')
+		{
+			if(isset($_REQUEST['extend']) && trim((string)$_REQUEST['extend']) !== '' && isset($_REQUEST['mode']))
+			{
+				$this->_paccExtendSubscriptions();
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('subscriptions', null, array(), false));
+				exit();
+			}
+
+			// Trash icon: singleAction() submits without executeMassAction button
+			if(isset($_REQUEST['singleAction'])
+				&& in_array($_REQUEST['singleAction'], array('extend', 'cancel'), true))
+			{
+				$_REQUEST['executeMassAction'] = true;
+				$_REQUEST['massAction'] = $_REQUEST['singleAction'];
+				$_POST['subscriber'] = array((int)$_REQUEST['singleID'] => true);
+			}
+
+			if(isset($_REQUEST['executeMassAction']))
+			{
+				$this->_paccSubscriptionsMassAction();
+				if($this->_paccAdminHandled)
+					return;
+
+				$_SESSION['pacc_admin_msg'] = array('type' => 'success', 'text' => $lang_admin['pacc_saved']);
+				SessionRedirect($this->_paccAdminUrl('subscriptions', null, array(), false));
+				exit();
+			}
+		}
+	}
+
+	/**
+	 * admin handler
 	 */
 	function AdminHandler()
 	{
-		global $tpl, $plugins, $lang_admin, $bm_prefs;
+		global $tpl, $lang_admin, $bm_prefs;
 
-		if(!isset($_REQUEST['action']))
-			$_REQUEST['action'] = 'overview';
+		$this->prefs = $this->_getPrefs();
+		$this->_paccNormalizeRequest();
+
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+			$this->_paccHandlePost();
+
+		if($this->_paccAdminHandled)
+			return;
+
+		$action = $_REQUEST['action'] ?? 'overview';
 
 		$tabs = array(
 			0 => array(
 				'title'		=> $lang_admin['overview'],
 				'icon'		=> '../plugins/templates/images/pacc_logo.png',
-				'link'		=> $this->_adminLink() . '&',
-				'active'	=> $_REQUEST['action'] == 'overview'
+				'link'		=> $this->_paccTabLink('overview'),
+				'active'	=> $action === 'overview',
 			),
 			1 => array(
 				'title'		=> $lang_admin['pacc_packages'],
 				'icon'		=> '../plugins/templates/images/pacc_packages32.png',
-				'link'		=> $this->_adminLink() . '&action=packages&',
-				'active'	=> $_REQUEST['action'] == 'packages'
+				'link'		=> $this->_paccTabLink('packages'),
+				'active'	=> $action === 'packages',
 			),
 			2 => array(
 				'title'		=> $lang_admin['pacc_subscriptions'],
 				'icon'		=> '../plugins/templates/images/pacc_subscriptions.png',
-				'link'		=> $this->_adminLink() . '&action=subscriptions&',
-				'active'	=> $_REQUEST['action'] == 'subscriptions'
+				'link'		=> $this->_paccTabLink('subscriptions'),
+				'active'	=> $action === 'subscriptions',
 			),
 			3 => array(
 				'title'		=> $lang_admin['prefs'],
 				'icon'		=> '../plugins/templates/images/pacc_prefs32.png',
-				'link'		=> $this->_adminLink() . '&action=prefs&',
-				'active'	=> $_REQUEST['action'] == 'prefs'
-			)
+				'link'		=> $this->_paccTabLink('prefs'),
+				'active'	=> $action === 'prefs',
+			),
 		);
 
-		$tpl->assign('tabHeaderText',	'PremiumAccount');
-		$tpl->assign('tabs', 			$tabs);
-		$tpl->assign('pageURL', 		$this->_adminLink());
-		$tpl->assign('pacc_prefs', 		$this->prefs);
-		$tpl->assign('usertpldir', 		B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/');
+		$tpl->assign('tabs', $tabs);
+		$tpl->assign('paccPlugin', $this->internal_name);
+		$tpl->assign('pageURL', $this->_paccAdminUrl($action, $this->_paccSubDoForUrl(), array(), true));
+		$tpl->assign('pacc_prefs', $this->prefs);
+		$tpl->assign('paccMsg', $this->_paccTakeFlashMsg());
+		$tpl->assign('usertpldir', B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/');
 
-		if($_REQUEST['action'] == 'overview')
+		if($action === 'overview')
 			$this->_overviewPage();
-		else if($_REQUEST['action'] == 'packages')
+		else if($action === 'packages')
 			$this->_packagesPage();
-		else if($_REQUEST['action'] == 'subscriptions')
+		else if($action === 'subscriptions')
 			$this->_subscriptionsPage();
-		else if($_REQUEST['action'] == 'prefs')
+		else if($action === 'prefs')
 			$this->_prefsPage();
 	}
 
@@ -900,7 +1506,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 */
 	function BeforePageTabsAssign(&$tabs)
 	{
-		global $userRow, $tpl;
+		global $userRow, $tpl, $bm_prefs;
 
 		if(ADMIN_MODE || !isset($tpl) || !isset($userRow) || !is_array($userRow))
 			return;
@@ -916,7 +1522,8 @@ class PremiumAccountPlugin extends BMPlugin
 				{
 					$tpl->setTemplateDir(B1GMAIL_DIR . 'templates/' . $template . '/');
             		$tpl->setCompileDir(B1GMAIL_DIR . 'templates/' . $template . '/cache/');
-					$tpl->assign('tpldir', 	B1GMAIL_REL . 'templates/' . $template . '/');
+					$tpl->tplDir = B1GMAIL_REL . 'templates/' . $template . '/';
+					$tpl->assign('tpldir', 	$bm_prefs['selfurl'] . 'templates/' . $template . '/');
 					$tpl->assign('_tpldir',	'templates/' . $template . '/');
 				}
 			}
@@ -939,7 +1546,7 @@ class PremiumAccountPlugin extends BMPlugin
 		return(array(
 			'paccPackages' => array(
 				'text'	=> $lang_user['pacc_packages'],
-				'link'	=> 'index.php?action=paccPackages',
+				'link'	=> '/paccpackages',
 				'top'	=> true,
 				'active'=> isset($_REQUEST['action']) && $_REQUEST['action'] == 'paccPackages',
 				'after'	=> 'login'
@@ -960,17 +1567,9 @@ class PremiumAccountPlugin extends BMPlugin
 
 		$countries = CountryList(true);
 		$vatRate = $countries[$bm_prefs['std_land']]['vat'];
+		$matrix = $this->_packageMatrix($vatRate);
 
-		$versionComponents = explode('.', B1GMAIL_VERSION);
-		$b1gMail74orLater = ($versionComponents[0] > 7 || ($versionComponents[0] == 7 && $versionComponents[1] >= 4));
-
-		$tpl->registerPlugin('function','paccFormatField', array(&$this, '_smartyPaccFormatField'));
-		$tpl->assign('signUp',		$signupMode);
-		$tpl->assign('nliPackages',	true);
-		$tpl->assign('regEnabled', 	$bm_prefs['regenabled'] == 'yes' && $b1gMail74orLater);
-		$tpl->assign('page', 		$this->_templatePath('pacc.nli.packages.tpl'));
-		$tpl->assign('matrix', 		$this->_packageMatrix($vatRate));
-		$tpl->assign('pageTitle', 	$signupMode ? $lang_user['signup'] : $lang_user['pacc_packages']);
+		$this->_assignNliPackagesViewVars($signupMode, $matrix, $lang_user['pacc_ordertext']);
 		$tpl->display('nli/index.tpl');
 	}
 
@@ -1052,7 +1651,7 @@ class PremiumAccountPlugin extends BMPlugin
 				&& ($package = $this->_getPackage($_REQUEST['paccPackage'])) !== false)
 			{
 				$tpl->registerHook('nli:signup.tpl:panelGroupStart',
-					B1GMAIL_DIR . 'plugins/templates/pacc.nli.hook.signup.tpl');
+					$this->_templatePath('pacc.nli.hook.signup.tpl'));
 				$tpl->assign('paccPackage',	$package);
 				$tpl->assign('signupText', 	$lang_user['pacc_signuptext']);
 			}
@@ -1106,7 +1705,7 @@ class PremiumAccountPlugin extends BMPlugin
 			{
 				$GLOBALS['prefsItems']['pacc_mod'] = true;
 				$GLOBALS['prefsImages']['pacc_mod'] = 'plugins/templates/images/pacc_subscriptions_user.png';
-				$GLOBALS['prefsIcons']['pacc_mod'] = 'plugins/templates/images/pacc_subscriptions_user.png';
+				$GLOBALS['prefsfaIcons']['pacc_mod'] = 'fa-cube';
 			}
 
 			if($action == 'membership'
@@ -1174,10 +1773,42 @@ class PremiumAccountPlugin extends BMPlugin
 		else if($_REQUEST['do'] == 'placeOrder'
 			&& isset($_REQUEST['id']))
 		{
-			$packageID = (int)$_REQUEST['id'];
+			global $lang_user;
 
-			if(!$this->_initiateOrderPlacement($userRow['id'], $packageID, $userRow))
+			$packageID = (int)$_REQUEST['id'];
+			$this->_paccPaymentOrderID = 0;
+			$this->_paccJustActivated = false;
+
+			if($this->_initiateOrderPlacement($userRow['id'], $packageID, $userRow))
+			{
+				if($this->_paccPaymentOrderID > 0)
+				{
+					if(!class_exists('BMPayment'))
+						include(B1GMAIL_DIR . 'serverlib/payment.class.php');
+					BMPayment::InitiatePayment($tpl, $this->_paccPaymentOrderID);
+					$tpl->display('li/index.tpl');
+					exit();
+				}
+				if($this->_paccJustActivated)
+				{
+					SessionRedirect(SessionUrl('prefs.php?action=pacc_mod'));
+					if(!headers_sent())
+						exit();
+					$tpl->assign('title', $lang_user['order']);
+					$tpl->assign('msg', $lang_user['pacc_activated']);
+					$tpl->assign('pageContent', 'li/prefs.message.tpl');
+					$tpl->display('li/index.tpl');
+					exit();
+				}
+				if(!$tpl->getTemplateVars('pageContent'))
+				{
+					$this->_prepareOrderPage($userRow['id'], $packageID, $userRow);
+					$tpl->assign('pageContent', 	$this->_templatePath('pacc.user.order.tpl'));
+				}
+			}
+			else
 				$tpl->assign('pageContent', 	$this->_templatePath('pacc.user.order.tpl'));
+
 			$tpl->display('li/index.tpl');
 		}
 
@@ -1315,6 +1946,9 @@ class PremiumAccountPlugin extends BMPlugin
 		$res = $db->Query('SELECT * FROM {pre}mod_premium_prefs LIMIT 1');
 		$prefs = $res->FetchArray(MYSQLI_ASSOC);
 		$res->Free();
+
+		if(!isset($prefs['nli_packages_order_buttons']) || $prefs['nli_packages_order_buttons'] === '')
+			$prefs['nli_packages_order_buttons'] = 'yes';
 
 		return($prefs);
 	}
@@ -1872,17 +2506,24 @@ class PremiumAccountPlugin extends BMPlugin
 			{
 				if($this->_activateOrder($package['id'], 1, -1, $userID))
 				{
-					$tpl->assign('title', $lang_user['order']);
-					$tpl->assign('msg', $lang_user['pacc_activated']);
-					$tpl->assign('pageContent', 'li/msg.tpl');
-					$tpl->assign('backLink', 'prefs.php?action=pacc_mod&sid='.session_id());
+					if($nli)
+					{
+						$tpl->assign('title', $lang_user['order']);
+						$tpl->assign('msg', $lang_user['pacc_activated']);
+						$tpl->assign('pageContent', 'li/msg.tpl');
+					}
+					else
+						$this->_paccJustActivated = true;
 				}
 				else
 					die('Failed to activate order');
 			}
 			else
 			{
-				BMPayment::InitiatePayment($tpl, $orderID, $nli ? $bm_prefs['selfurl'] . 'index.php?action=paccPaymentReturn' : '', 'pageContent', $userID);
+				if($nli)
+					BMPayment::InitiatePayment($tpl, $orderID, $bm_prefs['selfurl'] . 'index.php?action=paccPaymentReturn', 'pageContent', $userID);
+				else
+					$this->_paccPaymentOrderID = (int)$orderID;
 			}
 
 			return(true);
@@ -2187,16 +2828,16 @@ class PremiumAccountPlugin extends BMPlugin
 
 		// find VAT rate for user
 		$vatRate = $this->_vatRateForUser($userID);
+		$matrix = $this->_packageMatrix($vatRate);
+		$orderText = $this->prefs['signup_order_force'] == 'yes'
+			? ($signUp ? $lang_user['pacc_forcetext'] : $lang_user['pacc_locktext'])
+			: $lang_user['pacc_ordertext'];
 
-		// show order page
-		$tpl->registerPlugin('function','paccFormatField', array(&$this, '_smartyPaccFormatField'));
+		$this->_assignNliPackagesViewVars($signUp, $matrix, $orderText);
+		$tpl->assign('nliPackages',	false);
 		$tpl->assign('userID',		$userID);
 		$tpl->assign('userToken',	$userToken);
-		$tpl->assign('signUp',		$signUp);
 		$tpl->assign('force',		$this->prefs['signup_order_force'] == 'yes');
-		$tpl->assign('orderText',	$this->prefs['signup_order_force'] == 'yes' ?  ($signUp ? $lang_user['pacc_forcetext'] : $lang_user['pacc_locktext']) : $lang_user['pacc_ordertext']);
-		$tpl->assign('page', 		$this->_templatePath('pacc.nli.packages.tpl'));
-		$tpl->assign('matrix', 		$this->_packageMatrix($vatRate));
 		$tpl->display('nli/index.tpl');
 		exit();
 	}
@@ -2224,109 +2865,6 @@ class PremiumAccountPlugin extends BMPlugin
 				$_REQUEST['executeMassAction'] = true;
 				$_REQUEST['massAction'] = $_REQUEST['singleAction'];
 				$_POST['subscriber'] = array((int)$_REQUEST['singleID'] => true);
-			}
-
-			// mass action
-			if(isset($_REQUEST['executeMassAction']))
-			{
-				// get subscriber IDs
-				$subscriberIDs = $_POST['subscriber'] ?? array();
-				if(!is_array($subscriberIDs))
-					$subscriberIDs = array();
-				else
-					$subscriberIDs = array_keys($subscriberIDs);
-
-				if(count($subscriberIDs) > 0)
-				{
-					// cancel subscriptions
-					if($_REQUEST['massAction'] == 'cancel')
-					{
-						$res = $db->Query('SELECT id,benutzer,paket FROM {pre}mod_premium_subscribers WHERE id IN ?',
-							$subscriberIDs);
-						while($row = $res->FetchArray(MYSQLI_ASSOC))
-						{
-							// get package details
-							$packageRes = $db->Query('SELECT fallback_grp,gruppe FROM {pre}mod_premium_packages WHERE id=?',
-								$row['paket']);
-							$package = $packageRes->FetchArray(MYSQLI_ASSOC);
-							$packageRes->Free();
-
-							// get current user group
-							$userGroup = -1;
-							$userRes = $db->Query('SELECT `gruppe` FROM {pre}users WHERE `id`=?',
-								$row['benutzer']);
-							if($userRes->RowCount() == 1)
-							{
-								$userRow = $userRes->FetchArray(MYSQLI_ASSOC);
-								$userGroup = $userRow['gruppe'];
-							}
-							$userRes->Free();
-
-							if($package['fallback_grp'] == -1)
-								$db->Query('UPDATE {pre}users SET gesperrt=?,notes=CONCAT(notes,?) WHERE id=?',
-									'locked',
-									sprintf($lang_admin['pacc_expire_locked_note'], date('r'), $row['id']),
-									$row['benutzer']);
-							else if($userGroup == -1 || $userGroup == $package['gruppe'])
-								$db->Query('UPDATE {pre}users SET gruppe=?,notes=CONCAT(notes,?) WHERE id=?',
-									$package['fallback_grp'],
-									sprintf($lang_admin['pacc_expire_moved_note'], date('r'), $package['fallback_grp'], $row['id']),
-									$row['benutzer']);
-							else
-								$db->Query('UPDATE {pre}users SET notes=CONCAT(notes,?) WHERE id=?',
-									sprintf($lang_admin['pacc_expire_notmoved_note'], date('r'), $package['fallback_grp'], $row['id']),
-									$row['benutzer']);
-
-							PutLog(sprintf('PremiumAccount: Subscription #%d of user #%d cancelled by admin',
-								$row['id'],
-								$row['benutzer']),
-								PRIO_NOTE,
-								__FILE__,
-								__LINE__);
-						}
-						$res->Free();
-
-						$db->Query('DELETE FROM {pre}mod_premium_subscribers WHERE id IN ?',
-							$subscriberIDs);
-					}
-
-					// extend subscriptions
-					else if($_REQUEST['massAction'] == 'extend')
-					{
-						// assign
-						$tpl->assign('ids',		implode(',', $subscriberIDs));
-						$tpl->assign('page', 	$this->_templatePath('pacc.admin.subscriptions.extend.tpl'));
-						return;
-					}
-				}
-			}
-
-			// extend subscriptions
-			if(isset($_REQUEST['extend'])
-				&& trim($_REQUEST['extend']) != ''
-				&& isset($_REQUEST['mode']))
-			{
-				$subscriberIDs = explode(',', $_REQUEST['extend']);
-
-				if($_REQUEST['mode'] == 'dynamic')
-				{
-					$time = (int)$_REQUEST['dynamicValue']
-								* min(365, max(1, (int)$_REQUEST['dynamicFactor']))
-								* TIME_ONE_DAY;
-					$db->Query('UPDATE {pre}mod_premium_subscribers SET ablauf=ablauf+? WHERE id IN ? AND ablauf>1',
-						$time,
-						$subscriberIDs);
-				}
-
-				else if($_REQUEST['mode'] == 'static')
-				{
-					$_REQUEST['staticValueHour'] = 23;
-					$_REQUEST['staticValueMinute'] = $_REQUEST['staticValueSecond'] = 59;
-					$time = SmartyDateTime('staticValue');
-					$db->Query('UPDATE {pre}mod_premium_subscribers SET ablauf=? WHERE id IN ?',
-						$time,
-						$subscriberIDs);
-				}
 			}
 
 			// sort options
@@ -2421,21 +2959,6 @@ class PremiumAccountPlugin extends BMPlugin
 		//
 		if($_REQUEST['do'] == 'common')
 		{
-			// save?
-			if(isset($_REQUEST['save']))
-			{
-				$db->Query('UPDATE {pre}mod_premium_prefs SET delete_order=?, delete_order_after=?, send_update_notification=?, update_notification_days=?, update_notification_altmail=?, signup_order_page=?, signup_order_force=?, nli_packages_page=?',
-					isset($_REQUEST['delete_order']) ? 'yes' : 'no',
-					(int)$_REQUEST['delete_order_after']*86400,
-					isset($_REQUEST['send_update_notification']) ? 'yes' : 'no',
-					$_REQUEST['update_notification_days'],
-					isset($_REQUEST['update_notification_altmail']) ? 'yes' : 'no',
-					isset($_REQUEST['signup_order_page']) ? 'yes' : 'no',
-					isset($_REQUEST['signup_order_force']) ? 'yes' : 'no',
-					$_REQUEST['nli_packages_page']);
-				$this->prefs = $this->_getPrefs();
-			}
-
 			// assign
 			$tpl->assign('bmURL',			$bm_prefs['selfurl']);
 			$tpl->assign('pacc_prefs',		$this->prefs);
@@ -2445,25 +2968,12 @@ class PremiumAccountPlugin extends BMPlugin
 		//
 		// feature fields
 		//
-		else if($_REQUEST['do'] == 'featureFields')
+		else if($_REQUEST['do'] == 'featurefields')
 		{
-			// save?
-			if(isset($_REQUEST['save'])
-				&& is_array($_POST['fields']))
-			{
-				$db->Query('UPDATE {pre}mod_premium_prefs SET `fields`=?,`fields_order`=?',
-					serialize($_POST['fields']),
-					serialize($_POST['positions']));
-				$fieldValues = $_POST['fields'];
-				$fieldPositions = $_POST['positions'];
-			}
-			else
-			{
-				if(!is_array($fieldValues = @unserialize($this->prefs['fields'])))
-					$fieldValues = array();
-				if(!is_array($fieldPositions = @unserialize($this->prefs['fields_order'])))
-					$fieldPositions = array();
-			}
+			if(!is_array($fieldValues = @unserialize($this->prefs['fields'])))
+				$fieldValues = array();
+			if(!is_array($fieldPositions = @unserialize($this->prefs['fields_order'])))
+				$fieldPositions = array();
 
 			// fields
 			$fields = $fieldTitles = array();
@@ -2557,123 +3067,13 @@ class PremiumAccountPlugin extends BMPlugin
 					$tpl->assign('page',			$this->_templatePath('pacc.admin.packages.delete.tpl'));
 					return;
 				}
-				else if($subscriberCount > 0 && isset($_REQUEST['subscriptionAction']))
+				else if($subscriberCount <= 0)
 				{
-					if($_REQUEST['subscriptionAction'] == 'continue')
-					{
-						// mark for deletion
-						$db->Query('UPDATE {pre}mod_premium_packages SET geloescht=1 WHERE id=?',
-							$id);
-
-						// log
-						PutLog(sprintf('Premium package <%d> marked for deletion',
-							$id),
-							PRIO_NOTE,
-							__FILE__,
-							__LINE__);
-					}
-					else if($_REQUEST['subscriptionAction'] == 'delete')
-					{
-						// get fallback group
-						$res = $db->Query('SELECT fallback_grp FROM {pre}mod_premium_packages WHERE id=?',
-							$id);
-						[$fallbackGroup] = $res->FetchArray(MYSQLI_NUM);
-						$res->Free();
-
-						// process users
-						$res = $db->Query('SELECT id,benutzer FROM {pre}mod_premium_subscribers WHERE paket=?',
-							$id);
-						while($row = $res->FetchArray(MYSQLI_ASSOC))
-						{
-							if($fallbackGroup == -1)
-								$db->Query('UPDATE {pre}users SET gesperrt=?,notes=CONCAT(notes,?) WHERE id=?',
-									'locked',
-									sprintf($lang_admin['pacc_expire_locked_note'], date('r'), $row['id']),
-									$row['benutzer']);
-							else
-								$db->Query('UPDATE {pre}users SET gruppe=? WHERE id=?',
-									$fallbackGroup,
-									sprintf($lang_admin['pacc_expire_moved_note'], date('r'), $fallbackGroup, $row['id']),
-									$row['benutzer']);
-						}
-						$res->Free();
-
-						// delete subscriptions
-						$db->Query('DELETE FROM {pre}mod_premium_subscribers WHERE paket=?',
-							$id);
-
-						// delete package
-						$db->Query('DELETE FROM {pre}mod_premium_packages WHERE id=?',
-							$id);
-
-						// log
-						PutLog(sprintf('Premium package <%d> deleted (subscriptions deleted; fallback group: %d)',
-							$id,
-							$fallbackGroup),
-							PRIO_NOTE,
-							__FILE__,
-							__LINE__);
-					}
+					$db->Query('DELETE FROM {pre}mod_premium_packages WHERE id=?', $id);
+					PutLog(sprintf('Premium package <%d> deleted (no subscriptions)', $id), PRIO_NOTE, __FILE__, __LINE__);
+					SessionRedirect($this->_paccAdminUrl('packages', null, array(), false));
+					exit();
 				}
-				else
-				{
-					$db->Query('DELETE FROM {pre}mod_premium_packages WHERE id=?',
-						$id);
-					PutLog(sprintf('Premium package <%d> deleted (no subscriptions)',
-						$id),
-						PRIO_NOTE,
-						__FILE__,
-						__LINE__);
-				}
-			}
-
-			// add
-			if(isset($_REQUEST['add']))
-			{
-				if($_REQUEST['laufzeiten_all'] == 'true')
-					$laufzeiten = '*';
-				else
-					$laufzeiten = implode(',', array_map('trim', explode(',', $_REQUEST['laufzeiten'])));
-
-				if(isset($_REQUEST['max_laufzeit_enable']))
-					$max_laufzeit = max(1, $_REQUEST['max_laufzeit']);
-				else
-					$max_laufzeit = 0;
-
-				$price = $this->_formCentPrice($_REQUEST['preis']);
-
-				$altTitles = array();
-				foreach($_REQUEST['titles'] as $titleEntryKey=>$titleEntry)
-				{
-					if($titleEntryKey == 0 || empty($titleEntry['title']))
-						continue;
-					$altTitles[$titleEntry['lang']] = $titleEntry['title'];
-				}
-
-				$altDescriptions = array();
-				foreach($_REQUEST['descriptions'] as $descriptionEntryKey=>$descriptionEntry)
-				{
-					if($descriptionEntryKey == 0 || empty($descriptionEntry['description']))
-						continue;
-					$altDescriptions[$descriptionEntry['lang']] = $descriptionEntry['description'];
-				}
-
-				$db->Query('INSERT INTO {pre}mod_premium_packages(titel,gruppe,fallback_grp,abrechnung_t,abrechnung,laufzeiten,max_laufzeit,preis_cent,beschreibung,template,accentuation,`order`,`alt_titles`,`alt_descriptions`) '
-							. 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-							$_REQUEST['titles'][0]['title'],
-							$_REQUEST['gruppe'],
-							$_REQUEST['fallback_grp'],
-							$_REQUEST['abrechnung_t'],
-							$price==0 ? 'einmalig' : $_REQUEST['abrechnung'],
-							$laufzeiten,
-							$max_laufzeit,
-							$price,
-							$_REQUEST['descriptions'][0]['description'],
-							$_REQUEST['template'],
-							$_REQUEST['accentuation'],
-							$_REQUEST['order'],
-							serialize($altTitles),
-							serialize($altDescriptions));
 			}
 
 			// fetch
@@ -2726,7 +3126,7 @@ class PremiumAccountPlugin extends BMPlugin
 					'order'				=> $row['order']
 				);
 
-				$maxOrder = max($maxORder, $row['order']);
+				$maxOrder = max($maxOrder, $row['order']);
 			}
 			$res->Free();
 
@@ -2746,60 +3146,6 @@ class PremiumAccountPlugin extends BMPlugin
 		else if($_REQUEST['do'] == 'edit'
 				&& isset($_REQUEST['id']))
 		{
-			// save
-			if(isset($_REQUEST['save']))
-			{
-				if($_REQUEST['laufzeiten_all'] == 'true')
-					$laufzeiten = '*';
-				else
-					$laufzeiten = implode(',', array_map('trim', explode(',', $_REQUEST['laufzeiten'])));
-
-				if(isset($_REQUEST['max_laufzeit_enable']))
-					$max_laufzeit = max(1, $_REQUEST['max_laufzeit']);
-				else
-					$max_laufzeit = 0;
-
-				$price = $this->_formCentPrice($_REQUEST['preis']);
-
-				$altTitles = array();
-				foreach($_REQUEST['titles'] as $titleEntryKey=>$titleEntry)
-				{
-					if($titleEntryKey == 0 || empty($titleEntry['title']))
-						continue;
-					$altTitles[$titleEntry['lang']] = $titleEntry['title'];
-				}
-
-				$altDescriptions = array();
-				foreach($_REQUEST['descriptions'] as $descriptionEntryKey=>$descriptionEntry)
-				{
-					if($descriptionEntryKey == 0 || empty($descriptionEntry['description']))
-						continue;
-					$altDescriptions[$descriptionEntry['lang']] = $descriptionEntry['description'];
-				}
-
-				// update db
-				$db->Query('UPDATE {pre}mod_premium_packages SET titel=?,gruppe=?,fallback_grp=?,abrechnung_t=?,abrechnung=?,laufzeiten=?,max_laufzeit=?,preis_cent=?,beschreibung=?,template=?,accentuation=?,`order`=?,`alt_titles`=?,`alt_descriptions`=? WHERE id=?',
-					$_REQUEST['titles'][0]['title'],
-					$_REQUEST['gruppe'],
-					$_REQUEST['fallback_grp'],
-					$_REQUEST['abrechnung_t'],
-					$price == 0 ? 'einmalig' : $_REQUEST['abrechnung'],
-					$laufzeiten,
-					$max_laufzeit,
-					$price,
-					$_REQUEST['descriptions'][0]['description'],
-					$_REQUEST['template'],
-					$_REQUEST['accentuation'],
-					$_REQUEST['order'],
-					serialize($altTitles),
-					serialize($altDescriptions),
-					$_REQUEST['id']);
-
-				// redirect
-				header('Location: ' . $this->_adminLink(true) . '&action=packages');
-				exit();
-			}
-
 			// fetch
 			$res = $db->Query('SELECT id,titel,gruppe,fallback_grp,abrechnung_t,abrechnung,laufzeiten,max_laufzeit,preis_cent,beschreibung,template,accentuation,`order`,`alt_titles`,`alt_descriptions` FROM {pre}mod_premium_packages WHERE id=?',
 				(int)$_REQUEST['id']);
@@ -2899,9 +3245,27 @@ class PremiumAccountPlugin extends BMPlugin
 	// smarty callbacks
 	//
 	//
+	function _activeThemeName()
+	{
+		global $tpl;
+
+		if(!isset($tpl))
+			return('');
+
+		$tplName = $tpl->getTemplateVars('_tplname');
+
+		return(is_string($tplName) && $tplName !== '' ? $tplName : '');
+	}
+
+	function _usesTablerUi()
+	{
+		return(in_array($this->_activeThemeName(), array('tabler', 'km_v6', 'mt_v2'), true));
+	}
+
 	function _smartyPaccFormatField($params, &$smarty)
 	{
-		global $lang_user, $bm_prefs, $plugins, $userRow;
+		global $lang_user, $bm_prefs, $plugins, $userRow, $tpl;
+		$isTabler = $this->_usesTablerUi();
 
 		// params
 		$value = $params['value'];
@@ -2955,6 +3319,10 @@ class PremiumAccountPlugin extends BMPlugin
 
 		if($value == 'yes' || $value == 'no')
 		{
+			if($isTabler)
+				return sprintf('<i class="ti ti-%s icon icon-sm text-%s" aria-hidden="true"></i>',
+					$value == 'yes' ? 'check' : 'x',
+					$value == 'yes' ? 'success' : 'danger');
 			if(!isset($userRow))
 				return sprintf('<span class="glyphicon glyphicon-%s" style="color:%s;"></span>',
 					$value == 'yes' ? 'ok' : 'remove',
@@ -2968,6 +3336,7 @@ class PremiumAccountPlugin extends BMPlugin
 		// default
 		return($params['value']);
 	}
+
 }
 
 /**

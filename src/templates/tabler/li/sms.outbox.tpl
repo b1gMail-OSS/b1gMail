@@ -7,7 +7,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="sms.php?action=outbox&do=action&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='sms.php' params='action=outbox&do=action'}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar bm-prefs-body bm-prefs-list-body">
 <div class="card bm-prefs-table-card">
@@ -16,15 +17,15 @@
 	<tr>
 		<th width="20"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'sms');" /></label></th>
 		<th>
-			<a href="sms.php?action=outbox&sid={$sid}&sort=from&order={$sortOrderInv}">{lng p="from"}</a>
+			<a href="sms.php?action=outbox&sort=from&order={$sortOrderInv}{$sessionUrlSuffix}">{lng p="from"}</a>
 			{if $sortColumn=='from'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th>
-			<a href="sms.php?action=outbox&sid={$sid}&sort=to&order={$sortOrderInv}">{lng p="to"}</a>
+			<a href="sms.php?action=outbox&sort=to&order={$sortOrderInv}{$sessionUrlSuffix}">{lng p="to"}</a>
 			{if $sortColumn=='to'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="160">
-			<a href="sms.php?action=outbox&sid={$sid}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
+			<a href="sms.php?action=outbox&sort=date&order={$sortOrderInv}{$sessionUrlSuffix}">{lng p="date"}</a>
 			{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="5.5rem">&nbsp;</th>
@@ -42,10 +43,10 @@
 			</button>
 			{text value=$sms.from}
 		</td>
-		<td class="{if $sortColumn=='to'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="sms.php?to={text value=$sms.to}&sid={$sid}">{text value=$sms.to}</a></td>
+		<td class="{if $sortColumn=='to'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="sms.php?to={text value=$sms.to}{$sessionUrlSuffix}">{text value=$sms.to}</a></td>
 		<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{date timestamp=$sms.date nice=true}</td>
 		<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
-			<a onclick="return confirm('{lng p="realdel"}');" href="sms.php?action=outbox&do=delete&id={$sms.id}&sid={$sid}" class="btn btn-outline-secondary btn-icon btn-sm text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="sms.php?action=outbox&do=delete&id={$sms.id}{$sessionUrlSuffix}" class="btn btn-outline-secondary btn-icon btn-sm text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	<tbody id="group_{$sms.id}" style="display:{if $smarty.request.show!=$sms.id}none{/if}">

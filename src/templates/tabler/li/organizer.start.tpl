@@ -5,7 +5,7 @@
 			{lng p="overview"}
 		</div>
 		<div class="right bm-dashboard-header-actions">
-			<a href="organizer.php?action=customize&amp;sid={$sid}" class="btn btn-sm btn-outline-primary">
+			<a href="{sessionurl file='organizer.php' params='action=customize'}" class="btn btn-sm btn-outline-primary">
 				<i class="ti ti-layout-grid-add icon"></i>
 				{lng p="customize"}
 			</a>

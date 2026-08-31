@@ -21,6 +21,164 @@
 var loadActions = [];
 var clientTZ = (new Date()).getTimezoneOffset() * (-60);
 
+function bmPublicFilterParams(params, exclude)
+{
+	var extra = {}, k;
+	for(k in params)
+	{
+		if(!params.hasOwnProperty(k))
+			continue;
+		if(exclude.indexOf(k) >= 0)
+			continue;
+		extra[k] = params[k];
+	}
+	return extra;
+}
+
+function bmPublicNormalizeSegment(value)
+{
+	return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function bmPublicPathFromLegacy(script, params)
+{
+	script = String(script).replace(/^\.\//, '').split('/').pop();
+
+	if(script === 'email.read.php')
+	{
+		if(params.id !== undefined && params.id !== '')
+			return { path: 'email/read/' + encodeURIComponent(params.id), extra: bmPublicFilterParams(params, ['id']) };
+	}
+
+	if(script === 'email.php')
+	{
+		var folder = params.folder !== undefined ? String(params.folder) : '';
+		if(folder === '0' || folder === '')
+			return { path: 'mail/inbox', extra: bmPublicFilterParams(params, ['folder']) };
+		if(folder !== '')
+			return { path: 'mail/folder/' + encodeURIComponent(folder), extra: bmPublicFilterParams(params, ['folder']) };
+	}
+
+	if(script === 'email.compose.php')
+		return { path: 'email/compose', extra: params };
+
+	if(script === 'start.php')
+	{
+		if(params.action)
+			return { path: 'start/' + bmPublicNormalizeSegment(params.action), extra: bmPublicFilterParams(params, ['action']) };
+		return { path: 'start', extra: {} };
+	}
+
+	if(script === 'prefs.php')
+	{
+		var action = params.action || '';
+		if(action === '')
+			return { path: 'settings', extra: bmPublicFilterParams(params, ['action']) };
+		var path = 'settings/' + bmPublicNormalizeSegment(action);
+		var exclude = ['action'];
+		if(params.do)
+		{
+			path += '/' + bmPublicNormalizeSegment(params.do);
+			exclude.push('do');
+			if(params.id !== undefined && params.id !== '')
+			{
+				path += '/' + encodeURIComponent(params.id);
+				exclude.push('id');
+			}
+		}
+		return { path: path, extra: bmPublicFilterParams(params, exclude) };
+	}
+
+	return null;
+}
+
+function bmPublicUrl(url)
+{
+	if(!url || /^(https?:)?\/\//i.test(url))
+		return url;
+
+	var cfg = (typeof parent !== 'undefined' && parent !== window && parent.bmSessionConfig)
+		? parent.bmSessionConfig
+		: ((typeof bmSessionConfig !== 'undefined') ? bmSessionConfig : null);
+
+	if(!cfg || !cfg.publicRouting)
+		return url;
+
+	var script = url, query = '';
+	var qPos = url.indexOf('?');
+	if(qPos !== -1)
+	{
+		script = url.substring(0, qPos);
+		query = url.substring(qPos + 1);
+	}
+
+	var params = {};
+	if(query !== '')
+	{
+		query.split('&').forEach(function(part) {
+			if(part === '')
+				return;
+			var eq = part.indexOf('=');
+			var key = eq >= 0 ? decodeURIComponent(part.substring(0, eq).replace(/\+/g, ' ')) : part;
+			var val = eq >= 0 ? decodeURIComponent(part.substring(eq + 1).replace(/\+/g, ' ')) : '';
+			params[key] = val;
+		});
+	}
+
+	var built = bmPublicPathFromLegacy(script, params);
+	if(built === null)
+		return url;
+
+	var out = built.path;
+	var extraKeys = Object.keys(built.extra || {});
+	if(extraKeys.length > 0)
+	{
+		out += '?' + extraKeys.map(function(k) {
+			return encodeURIComponent(k) + '=' + encodeURIComponent(built.extra[k]);
+		}).join('&');
+	}
+
+	var base = cfg.apiBase || '';
+	if(base !== '' && out.indexOf('/') !== 0)
+		out = base.replace(/\/?$/, '/') + out.replace(/^\.\//, '');
+
+	return out;
+}
+window.bmPublicUrl = bmPublicUrl;
+
+function bmAppendSession(url)
+{
+	if(!url)
+		return url;
+
+	url = bmPublicUrl(url);
+
+	if(typeof parent !== 'undefined' && parent !== window && typeof parent.bmSessionAppendUrl === 'function')
+		return parent.bmSessionAppendUrl(url);
+
+	if(typeof bmSessionAppendUrl === 'function')
+		return bmSessionAppendUrl(url);
+
+	var cfg = (typeof parent !== 'undefined' && parent !== window && parent.bmSessionConfig)
+		? parent.bmSessionConfig
+		: ((typeof bmSessionConfig !== 'undefined') ? bmSessionConfig : null);
+
+	/* Match PHP SessionUrlSidEnabled(): only with urlCompat and without cookie mode */
+	if(!cfg || !cfg.urlCompat || cfg.cookieMode)
+		return url;
+
+	if(typeof currentSID !== 'undefined' && currentSID && url.indexOf('sid=') === -1)
+	{
+		var base = cfg ? (cfg.apiBase || '') : '';
+		if(base !== '' && !/^(https?:)?\/\//i.test(url) && url.indexOf('/') !== 0)
+			url = base.replace(/\/?$/, '/') + url.replace(/^\.\//, '');
+		return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'sid=' + encodeURIComponent(currentSID);
+	}
+
+	return url;
+}
+window.bmAppendSession = bmAppendSession;
+
 function isChildOf(child, parent)
 {
 	var node = child;
@@ -177,12 +335,7 @@ function documentLoader()
 	addEvent(window, 'drop', function(event) { event.preventDefault(); });
 
 	if(Math.random() > 0.5)
-	{
-		if(typeof(currentSID) != 'undefined')
-			MakeXMLRequest('cron.php?sid='+currentSID, null);
-		else
-			MakeXMLRequest('cron.php');
-	}
+		MakeXMLRequest(bmAppendSession('cron.php'), null);
 
 	ftsBGIndex();
 	notifyPollInstall();
@@ -192,7 +345,7 @@ function ftsBGIndex()
 {
 	if(typeof(ftsBGIndexing) != 'undefined' && typeof(currentSID) != 'undefined' && ftsBGIndexing)
 	{
-		MakeXMLRequest('search.php?action=ftsBGIndexing&sid='+currentSID, function(e)
+		MakeXMLRequest(bmAppendSession('search.php?action=ftsBGIndexing'), function(e)
 			{
 				if(e.readyState == 4)
 				{
@@ -294,6 +447,13 @@ function bmIsLegacyAddonPage()
 	if(area.querySelector(':scope > .bm-prefs-page'))
 		return false;
 
+	/* Prefs: Zahlungs-/Infoseiten ohne bm-prefs-page (payment.pay.tpl, msg.tpl) */
+	if(document.body.classList.contains('bm-li-prefs'))
+	{
+		if(area.querySelector(':scope > #contentHeader, :scope > .contentHeader, :scope > .scrollContainer, :scope > table'))
+			return true;
+	}
+
 	var contentArea = area.querySelector('.scrollContainer, .bigForm');
 	if(!contentArea)
 		return false;
@@ -368,7 +528,11 @@ function bmSyncTablerLayout()
 
 function notifyPoll()
 {
-	MakeXMLRequest('start.php?action=getNotificationCount&sid='+currentSID, function(e)
+	var url = 'start.php?action=getNotificationCount';
+	if(typeof bmSessionAppendUrl === 'function')
+		url = bmSessionAppendUrl(url);
+
+	MakeXMLRequest(url, function(e)
 		{
 			if(e.readyState == 4)
 			{
@@ -528,11 +692,12 @@ function bmEscapeHtml(text)
 /**
  * Tabler-style page alert (Bootstrap alert + Tabler icon).
  *
- * @param {string} message Plain text; newlines become line breaks
+ * @param {string} message Plain text (or HTML if isHtml is true); newlines become line breaks
  * @param {string} type success|danger|warning|info
  * @param {string} containerId DOM id of the alert container
+ * @param {boolean} isHtml When true, message is inserted as HTML (already escaped by caller)
  */
-function bmShowPageAlert(message, type, containerId)
+function bmShowPageAlert(message, type, containerId, isHtml)
 {
 	type = type || 'danger';
 	containerId = containerId || 'bmPageAlert';
@@ -544,10 +709,11 @@ function bmShowPageAlert(message, type, containerId)
 	{
 		var anchor = isWebdisk ? (EBID('wdAlerts') || document.querySelector('.bm-webdisk-alerts')) : null;
 		if(!anchor)
-			anchor = EBID('mainContentArea') || EBID('mainContent');
+			anchor = EBID('mainContentArea') || EBID('mainContent')
+				|| document.querySelector('.page-body .card-body');
 		if(!anchor)
 		{
-			alert(message);
+			alert(isHtml ? message.replace(/<[^>]+>/g, '') : message);
 			return;
 		}
 
@@ -570,7 +736,9 @@ function bmShowPageAlert(message, type, containerId)
 	else if(type === 'warning')
 		iconClass = 'ti-alert-triangle';
 
-	var html = bmEscapeHtml(String(message)).replace(/\n/g, '<br>');
+	var html = isHtml
+		? String(message)
+		: bmEscapeHtml(String(message)).replace(/\n/g, '<br>');
 
 	container.className = 'alert alert-' + type + ' alert-dismissible' + (isWebdisk ? ' bm-webdisk-alert' : ' bm-page-alert mb-3');
 
@@ -745,6 +913,8 @@ function GetXMLHTTP()
 
 function MakeXMLRequest(url, callback, param, cClose)
 {
+	url = bmAppendSession(url);
+
 	var xmlHTTP = GetXMLHTTP();
 
 	if(!xmlHTTP)
@@ -943,7 +1113,7 @@ function checkAddressAvailability()
 
 	var address = EBID('email_local').value + '@' + EBID('email_domain').value;
 	EBID('addressAvailabilityIndicator').innerHTML = '<i class="fa fa-spinner fa-pulse fa-fw"></i>';
-	MakeXMLRequest('index.php?action=checkAddressAvailability&address=' + encodeURI(address) + '&sid=' + currentSID, _checkAddressAvailability);
+	MakeXMLRequest(bmAppendSession('index.php?action=checkAddressAvailability&address=' + encodeURI(address)), _checkAddressAvailability);
 }
 
 function getTZOffset()

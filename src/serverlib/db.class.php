@@ -75,6 +75,12 @@ class DB
      */
     public function Escape($str)
     {
+        if ($str === null) {
+            $str = '';
+        } elseif (!is_string($str)) {
+            $str = (string) $str;
+        }
+
         return mysqli_real_escape_string($this->_handle, $str);
     }
 
@@ -102,7 +108,7 @@ class DB
                     $szUsername = $args[$i];
                     break;
                 } else {
-                    if (is_string($args[$i]) && (strcmp($args[$i], '#NULL#') == 0)) {
+                    if (is_string($args[$i]) && strcmp($args[$i], '#NULL#') == 0) {
                         $intxt = 'NULL';
                     } elseif (is_array($args[$i])) {
                         $intxt = '';

@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="prefs.php?action=aliases&do=create&sid={$sid}" onsubmit="return(checkAliasForm(this));">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="addalias"}</th>

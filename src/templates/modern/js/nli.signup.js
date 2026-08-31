@@ -38,9 +38,12 @@ function showAddressSugestions()
 	$('#suggestionsBody').html('<center>' + lang['pleasewait'] + '</center>');
 	$('#suggestionsModal').modal('show');
 
+	var postData = { 'action': 'showAddressSugestions', 'firstName': firstName, 'lastName': lastName,
+			'choice' : choice, 'domain' : domain };
+	if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+		postData.csrf_token = bmCsrfToken;
 	$.post('index.php',
-		{ 'action': 'showAddressSugestions', 'firstName': firstName, 'lastName': lastName,
-			'choice' : choice, 'domain' : domain },
+		postData,
 		function(data)
 		{
 			$('#suggestionsBody').html(data);

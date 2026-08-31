@@ -1,4 +1,4 @@
-{if $_tplname=='modern'}
+{if $_tplname=='modern' || $_tplname=='tabler'}
 <div id="contentHeader">
 	<div class="left">
 		<i class="fa fa-archive" aria-hidden="true"></i>
@@ -8,24 +8,25 @@
 
 <div class="scrollContainer withBottomBar">
 
-<form name="f1" method="post" action="start.php?action=faxPlugin&do=outbox&sid={$sid}">
+<form name="f1" method="post" action="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}">
+	{csrffield}
 <table class="bigTable">
 	<tr>
 		<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'fax');" /></th>
 		<th>
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=tono&order={$sortOrderInv}">{lng p="to"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=tono&order={$sortOrderInv}">{lng p="to"}</a>
 			{if $sortColumn=='tono'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="60">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=pages&order={$sortOrderInv}">{lng p="modfax_pages"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=pages&order={$sortOrderInv}">{lng p="modfax_pages"}</a>
 			{if $sortColumn=='pages'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="130">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
 			{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="120">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=status&order={$sortOrderInv}">{lng p="status"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=status&order={$sortOrderInv}">{lng p="status"}</a>
 			{if $sortColumn=='status'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="55">&nbsp;</th>
@@ -33,24 +34,25 @@
 {else}
 <h1><i class="fa fa-archive" aria-hidden="true"></i> {lng p="modfax_outbox"}</h1>
 
-<form name="f1" method="post" action="start.php?action=faxPlugin&do=outbox&sid={$sid}">
+<form name="f1" method="post" action="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}">
+	{csrffield}
 <table class="listTable">
 	<tr>
 		<th class="listTableHead" width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'fax');" /></th>
 		<th class="listTableHead">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=tono&order={$sortOrderInv}">{lng p="to"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=tono&order={$sortOrderInv}">{lng p="to"}</a>
 			{if $sortColumn=='tono'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="listTableHead" width="60">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=pages&order={$sortOrderInv}">{lng p="modfax_pages"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=pages&order={$sortOrderInv}">{lng p="modfax_pages"}</a>
 			{if $sortColumn=='pages'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="listTableHead" width="130">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
 			{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="listTableHead" width="120">
-			<a href="start.php?action=faxPlugin&do=outbox&sid={$sid}&sort=status&order={$sortOrderInv}">{lng p="status"}</a>
+			<a href="start.php?action=faxPlugin&do=outbox{$sessionUrlSuffixHtml}&sort=status&order={$sortOrderInv}">{lng p="status"}</a>
 			{if $sortColumn=='status'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="listTableHead" width="55">&nbsp;</th>
@@ -68,8 +70,8 @@
 		<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}">&nbsp;{date timestamp=$fax.date nice=true}</td>
 		<td class="{if $sortColumn=='status'}listTableTDActive{else}{$class}{/if}">&nbsp;{$fax.statusText}</td>
 		<td class="{$class}">
-			{if $fax.fileAvailable}<a href="webdisk.php?action=downloadFile&id={$fax.diskfileid}&sid={$sid}" title="{lng p="download"}"><i class="fa fa-file-pdf-o" aria-hidden="true" /></i></a>{/if}
-			<a onclick="return confirm('{lng p="realdel"}');" href="start.php?action=faxPlugin&do=outbox&delete={$faxID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			{if $fax.fileAvailable}<a href="webdisk.php?action=downloadFile&id={$fax.diskfileid}{$sessionUrlSuffixHtml}" title="{lng p="download"}"><i class="fa fa-file-pdf-o" aria-hidden="true" /></i></a>{/if}
+			<a onclick="return confirm('{lng p="realdel"}');" href="start.php?action=faxPlugin&do=outbox&delete={$faxID}{$sessionUrlSuffixHtml}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	<tbody id="group_{$faxID}" style="display:{if $smarty.request.show!=$faxID}none{/if}">
@@ -94,7 +96,7 @@
 				</tr>
 				<tr>
 					<td><b>{lng p="preview"}:</b> &nbsp;</td>
-					<td>{if !$fax.fileAvailable}({lng p="modfax_filena"}){else}<i class="fa fa-file-pdf-o" aria-hidden="true" /></i> <a href="webdisk.php?action=downloadFile&id={$fax.diskfileid}&sid={$sid}">{lng p="download"}</a>{/if}</td>
+					<td>{if !$fax.fileAvailable}({lng p="modfax_filena"}){else}<i class="fa fa-file-pdf-o" aria-hidden="true" /></i> <a href="webdisk.php?action=downloadFile&id={$fax.diskfileid}{$sessionUrlSuffixHtml}">{lng p="download"}</a>{/if}</td>
 				</tr>
 			</table>
 		</td>
@@ -106,7 +108,7 @@
 	
 
 
-{if $_tplname=='modern'}
+{if $_tplname=='modern' || $_tplname=='tabler'}
 </table>
 
 </div>
@@ -120,7 +122,7 @@
 		<input class="smallInput" type="submit" value="{lng p="ok"}" />
 	</div>
 	<div class="right">
-		{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <b>[.t]</b> " off=" <a class=\"pageNav\" href=\"start.php?action=faxPlugin&do=outbox&sort=$sortColumn&order=$sortOrder&page=.s&sid=$sid\">.t</a> "}
+		{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <b>[.t]</b> " off=" <a class=\"pageNav\" href=\"start.php?action=faxPlugin&do=outbox&sort=$sortColumn&order=$sortOrder&page=.s\">.t</a> "}
 	</div>
 </div>
 
@@ -138,7 +140,7 @@
 						<input class="smallInput" type="submit" value="{lng p="ok"}" />
 					</td>
 					<td align="right">
-						{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <b>[.t]</b> " off=" <a class=\"pageNav\" href=\"start.php?action=faxPlugin&do=outbox&sort=$sortColumn&order=$sortOrder&page=.s&sid=$sid\">.t</a> "}
+						{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <b>[.t]</b> " off=" <a class=\"pageNav\" href=\"start.php?action=faxPlugin&do=outbox&sort=$sortColumn&order=$sortOrder&page=.s\">.t</a> "}
 					</td>
 				</tr>
 			</table>

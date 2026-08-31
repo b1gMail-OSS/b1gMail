@@ -13,6 +13,7 @@
 {/if}
 
 <form name="f1" method="post" action="sms.php?do=validate&sid={$sid}">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="smsvalidation2"}</th>

@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form action="prefs.php?sid={$sid}" method="post">
+	{csrffield}
 <input type="hidden" name="action" value="membership" />
 <input type="hidden" name="do" value="reallyCancelAccount" />
 <input type="hidden" name="really" id="really" value="false" />

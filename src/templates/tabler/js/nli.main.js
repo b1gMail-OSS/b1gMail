@@ -22,6 +22,22 @@ var clientTZ = (new Date()).getTimezoneOffset() * (-60);
 
 $(document).ready(function()
 {
+	if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+	{
+		document.querySelectorAll('form').forEach(function(form)
+		{
+			if((form.getAttribute('method') || '').toLowerCase() !== 'post')
+				return;
+			if(form.querySelector('input[name="csrf_token"]'))
+				return;
+			var inp = document.createElement('input');
+			inp.type = 'hidden';
+			inp.name = 'csrf_token';
+			inp.value = bmCsrfToken;
+			form.appendChild(inp);
+		});
+	}
+
 	$(document.body).on('click', '.domainMenu li a, .domainMenu li', function(e)
 	{
 		var $item = $(e.currentTarget).is('a') ? $(e.currentTarget).parent() : $(e.currentTarget);
@@ -41,6 +57,23 @@ $(document).ready(function()
 		new bootstrap.Tooltip(el);
 	});
 
+	function loginShowError($form, msg, csrfData)
+	{
+		var $alert = $form.find('.alert');
+		if($alert.length == 0)
+		{
+			alert(msg);
+			return;
+		}
+
+		if(csrfData && typeof bmCsrfErrorAlertHtml === 'function')
+			$alert.html(bmCsrfErrorAlertHtml(csrfData));
+		else
+			$alert.html(msg);
+
+		$alert.addClass('alert-danger').css('display', '');
+	}
+
 	function loginFunc(event)
 	{
 		var $form = $(event.currentTarget).closest('form'), formData = $form.serialize() + '&ajax=true',
@@ -51,28 +84,70 @@ $(document).ready(function()
 		if($form.data('realSubmit') || $alert.length == 0)
 			return(true);
 
-		$.post($form.attr('action'), formData, function(data)
-		{
-			if(data.action == 'msg')
+		$.ajax({
+			url: $form.attr('action'),
+			type: 'POST',
+			data: formData,
+			dataType: 'json',
+			success: function(data)
 			{
-				$alert.html(data.msg);
-				$alert.css('display', '');
-
-				var $pwField = $form.find('input[type=password]');
-				if($pwField.length > 0)
+				if(!data || typeof data.action === 'undefined')
 				{
-					$pwField.val('');
-					$pwField.focus();
+					loginShowError($form, typeof lang_user !== 'undefined' && lang_user.badlogin
+						? lang_user.badlogin
+						: 'Login failed. Please reload the page and try again.');
+					return;
 				}
-			}
-			else if(data.action == 'redirect')
+				if(data.action == 'msg')
+				{
+					$alert.html(data.msg);
+					$alert.css('display', '');
+
+					var $pwField = $form.find('input[type=password]');
+					if($pwField.length > 0)
+					{
+						$pwField.val('');
+						$pwField.focus();
+					}
+				}
+				else if(data.action == 'redirect')
+				{
+					document.location.href = data.url;
+				}
+				else if(data.action == 'resubmit')
+				{
+					$form.data('realSubmit', true);
+					$form.submit();
+				}
+			},
+			error: function(xhr)
 			{
-				document.location.href = data.url;
-			}
-			else if(data.action == 'resubmit')
-			{
-				$form.data('realSubmit', true);
-				$form.submit();
+				var text = xhr.responseText || '', data = null, msg;
+
+				if(text.indexOf('"action"') !== -1 && text.indexOf('"redirect"') !== -1)
+				{
+					try {
+						data = JSON.parse(text.replace(/^[\s\S]*?(\{[\s\S]*\})[\s\S]*$/m, '$1'));
+					} catch(e) { data = null; }
+				}
+
+				if(data && data.action === 'redirect' && data.url)
+				{
+					document.location.href = data.url;
+					return;
+				}
+
+				msg = (typeof lang_user !== 'undefined' && lang_user.badlogin)
+					? lang_user.badlogin
+					: 'Login failed. Please reload the page and try again.';
+				if(xhr.status === 403 && xhr.responseJSON && xhr.responseJSON.csrfError)
+				{
+					loginShowError($form, '', xhr.responseJSON);
+					return;
+				}
+				if(xhr.responseJSON && xhr.responseJSON.error)
+					msg = xhr.responseJSON.error;
+				loginShowError($form, msg);
 			}
 		});
 

@@ -50,8 +50,11 @@ class BMPlugin
     public $admin_pages = false;
     public $admin_page_title = 'Plugin base';
     public $admin_page_icon = '';
+    /** @var string Pretty-URL segment under /admin/plugin/{slug}/ (empty = lowercase internal_name) */
+    public $admin_route_slug = '';
     public $internal_name = 'BMPlugin';
     public $update_url = false;
+    public $update_name = false;
     public $_groupOptions = [];
     public $order = 0;
     public $mail, $web, $designedfor;
@@ -619,6 +622,35 @@ class BMPlugin
     }
 
     /**
+     * Register a public pretty-URL matcher (see serverlib/route.registry.inc.php).
+     *
+     * @param string      $matchMethod  Method on this plugin: (array $segments) → route array|null
+     * @param string|null $legacyMethod Method for legacy link building, or null
+     * @param int         $priority     Higher priority runs first
+     */
+    protected function registerRouteMatcher($matchMethod, $legacyMethod = null, $priority = 10)
+    {
+        $self = $this;
+        $matchFn = function (array $segments) use ($self, $matchMethod) {
+            return $self->$matchMethod($segments);
+        };
+        $legacyFn = null;
+        if ($legacyMethod !== null && $legacyMethod !== '') {
+            $legacyFn = function ($script, array $params) use ($self, $legacyMethod) {
+                return $self->$legacyMethod($script, $params);
+            };
+        }
+
+        if (function_exists('RouteRegisterMatcher')) {
+            RouteRegisterMatcher($matchFn, $legacyFn, (int) $priority);
+
+            return;
+        }
+
+        BMRoute()->matcher($matchFn, $legacyFn, (int) $priority);
+    }
+
+    /**
      * get group option value.
      *
      * @param string $key
@@ -887,6 +919,10 @@ class BMPluginPackage
         global $db, $cacheManager, $plugins;
 
         // already installed?
+        // Drop stale rows from a previous failed install (step 2 aborted after REPLACE).
+        $db->Query('DELETE FROM {pre}mods WHERE signature=? AND installed=0',
+            $this->signature);
+
         if ($this->AlreadyInstalled()) {
             return false;
         }
@@ -924,6 +960,9 @@ class BMPluginPackage
         foreach ($this->metaInfo['classes'] as $className) {
             $db->Query('DELETE FROM {pre}mods WHERE modname=?',
                 $className);
+            unset($plugins->_plugins[$className]);
+            unset($plugins->_inactivePlugins[$className]);
+            unset($plugins->_dbPlugins[$className]);
         }
 
         // empty cache
@@ -1001,16 +1040,29 @@ class BMPluginPackage
             if (function_exists('opcache_invalidate')) {
                 @opcache_invalidate($pluginFile, true);
             }
-            if (!include($pluginFile)) {
-                DisplayError(0x11, 'Plugin cannot be loaded', 'A plugin cannot be loaded.',
-                                sprintf("Module:\n%s", basename($pluginFile)), __FILE__, __LINE__);
-                die();
+            include_once($pluginFile);
+        }
+
+        // Plugin may already be loaded in this request (e.g. dev copy in plugins/).
+        foreach ($this->metaInfo['classes'] as $className) {
+            if (isset($plugins->_plugins[$className]) && !isset($plugins->_inactivePlugins[$className])) {
+                $plugins->_inactivePlugins[$className] = $plugins->_plugins[$className];
+                unset($plugins->_plugins[$className]);
+                $plugins->_inactivePlugins[$className]['installed'] = false;
+                $plugins->_inactivePlugins[$className]['instance']->installed = false;
             }
         }
 
         // install
+        $activated = true;
         foreach ($this->metaInfo['classes'] as $className) {
-            $plugins->activatePlugin($className);
+            if (!$plugins->activatePlugin($className)) {
+                $activated = false;
+            }
+        }
+
+        if (!$activated) {
+            return false;
         }
 
         // empty cache
@@ -1130,9 +1182,14 @@ class BMPluginInterface
         // arrays
         $this->_plugins = [];
         $this->_inactivePlugins = [];
+        $this->_groupOptions = [];
 
         // get db data
-        if (!($this->_dbPlugins = $cacheManager->Get('dbPlugins_v2'))) {
+        $cachedDbPlugins = $cacheManager->Get('dbPlugins_v2');
+        if (is_array($cachedDbPlugins)) {
+            $this->_dbPlugins = $cachedDbPlugins;
+        } else {
+            $this->_dbPlugins = [];
             $res = $db->Query('SELECT installed,paused,pos,modname,packageName,signature FROM {pre}mods ORDER BY modname ASC');
             while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
                 $this->_dbPlugins[$row['modname']] = $row;
@@ -1443,6 +1500,61 @@ class BMPluginInterface
     }
 
     /**
+     * Merge language strings from all active plugins (OnReadLang hook).
+     *
+     * @param array  $lang_user
+     * @param array  $lang_client
+     * @param array  $lang_custom
+     * @param array  $lang_admin
+     * @param string $language
+     */
+    public function readPluginLanguages(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $language)
+    {
+        $this->callFunction('OnReadLang', false, false, [
+            &$lang_user,
+            &$lang_client,
+            &$lang_custom,
+            &$lang_admin,
+            $language,
+        ]);
+    }
+
+    /**
+     * Resolve URL/menu slug to an active (installed, not paused) plugin module name.
+     *
+     * @param string $slug Plugin class name or lowercase pretty-URL segment
+     *
+     * @return string Canonical module name, or empty string if not active
+     */
+    public function resolveActivePluginModule($slug)
+    {
+        if (!is_string($slug) || $slug === '') {
+            return '';
+        }
+
+        if (isset($this->_plugins[$slug])) {
+            return $slug;
+        }
+
+        $resolved = function_exists('RouteResolvePluginInternalName')
+            ? RouteResolvePluginInternalName($slug)
+            : $slug;
+
+        if ($resolved !== '' && isset($this->_plugins[$resolved])) {
+            return $resolved;
+        }
+
+        foreach ($this->_plugins as $name => $info) {
+            if (strcasecmp((string) $name, $slug) === 0
+                || ($resolved !== '' && strcasecmp((string) $name, $resolved) === 0)) {
+                return (string) $name;
+            }
+        }
+
+        return '';
+    }
+
+    /**
      * get param of plugin.
      *
      * @param string $param  Param name
@@ -1452,11 +1564,12 @@ class BMPluginInterface
      */
     public function getParam($param, $module)
     {
-        if (isset($this->_plugins[$module])) {
-            return $this->_plugins[$module]['instance']->$param;
+        $module = $this->resolveActivePluginModule($module);
+        if ($module === '' || !isset($this->_plugins[$module])) {
+            return false;
         }
 
-        return false;
+        return $this->_plugins[$module]['instance']->$param;
     }
 
     /**
@@ -1514,6 +1627,29 @@ class BMPluginInterface
     }
 
     /**
+     * register a core (non-plugin) group option (module "core").
+     *
+     * @param string       $key
+     * @param int          $type
+     * @param string       $desc
+     * @param string|array $options
+     * @param string       $default
+     */
+    public function RegisterCoreGroupOption($key, $type, $desc, $options = '', $default = '')
+    {
+        if (!isset($this->_groupOptions['core']) || !is_array($this->_groupOptions['core'])) {
+            $this->_groupOptions['core'] = [];
+        }
+
+        $this->_groupOptions['core'][$key] = [
+            'type' => $type,
+            'options' => $options,
+            'desc' => $desc,
+            'default' => $default,
+        ];
+    }
+
+    /**
      * get group option value.
      *
      * @param string $group
@@ -1551,9 +1687,34 @@ class BMPluginInterface
     {
         $result = [];
 
+        if (is_array($this->_groupOptions)) {
+            foreach ($this->_groupOptions as $module => $value) {
+                if (!is_array($value)) {
+                    continue;
+                }
+                foreach ($value as $key => $info) {
+                    if (!is_array($info)) {
+                        continue;
+                    }
+                    if ($forGroup != 0) {
+                        $info['value'] = $this->GetGroupOptionValue($forGroup, $module, $key, $info['default']);
+                    }
+                    $info['module'] = $module;
+                    $info['key'] = $key;
+                    $result[$module.'_'.$key] = $info;
+                }
+            }
+        }
+
         $values = $this->getParams('_groupOptions');
         foreach ($values as $module => $value) {
+            if (!is_array($value)) {
+                continue;
+            }
             foreach ($value as $key => $info) {
+                if (!is_array($info)) {
+                    continue;
+                }
                 if ($forGroup != 0) {
                     $info['value'] = $this->GetGroupOptionValue($forGroup, $module, $key, $info['default']);
                 }

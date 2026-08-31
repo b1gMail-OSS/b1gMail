@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAVACL\FS;
 
-use Sabre\DAV\Exception\Forbidden;
 use Sabre\DAVACL\AbstractPrincipalCollection;
+use Sabre\DAVACL\ACLTrait;
 use Sabre\DAVACL\IACL;
 use Sabre\DAVACL\PrincipalBackend\BackendInterface;
 use Sabre\Uri;
@@ -19,7 +21,9 @@ use Sabre\Uri;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class HomeCollection extends AbstractPrincipalCollection implements IACL {
+class HomeCollection extends AbstractPrincipalCollection implements IACL
+{
+    use ACLTrait;
 
     /**
      * Name of this collection.
@@ -38,15 +42,13 @@ class HomeCollection extends AbstractPrincipalCollection implements IACL {
     /**
      * Creates the home collection.
      *
-     * @param BackendInterface $principalBackend
-     * @param string $storagePath Where the actual files are stored.
-     * @param string $principalPrefix list of principals to iterate.
+     * @param string $storagePath     where the actual files are stored
+     * @param string $principalPrefix list of principals to iterate
      */
-    function __construct(BackendInterface $principalBackend, $storagePath, $principalPrefix = 'principals') {
-
+    public function __construct(BackendInterface $principalBackend, $storagePath, $principalPrefix = 'principals')
+    {
         parent::__construct($principalBackend, $principalPrefix);
         $this->storagePath = $storagePath;
-
     }
 
     /**
@@ -56,10 +58,9 @@ class HomeCollection extends AbstractPrincipalCollection implements IACL {
      *
      * @return string
      */
-    function getName() {
-
+    public function getName()
+    {
         return $this->collectionName;
-
     }
 
     /**
@@ -69,64 +70,32 @@ class HomeCollection extends AbstractPrincipalCollection implements IACL {
      * at least contain a uri item. Other properties may or may not be
      * supplied by the authentication backend.
      *
-     * @param array $principalInfo
-     * @return void
+     * @return \Sabre\DAV\INode
      */
-    function getChildForPrincipal(array $principalInfo) {
-
+    public function getChildForPrincipal(array $principalInfo)
+    {
         $owner = $principalInfo['uri'];
         $acl = [
             [
-                'privilege' => '{DAV:}read',
-                'principal' => $owner,
-                'protected' => true,
-            ],
-            [
-                'privilege' => '{DAV:}write',
-                'principal' => $owner,
+                'privilege' => '{DAV:}all',
+                'principal' => '{DAV:}owner',
                 'protected' => true,
             ],
         ];
 
         list(, $principalBaseName) = Uri\split($owner);
 
-        $path = $this->storagePath . '/' . $principalBaseName;
+        $path = $this->storagePath.'/'.$principalBaseName;
 
         if (!is_dir($path)) {
             mkdir($path, 0777, true);
         }
+
         return new Collection(
             $path,
             $acl,
             $owner
         );
-
-    }
-
-    /**
-     * Returns the owner principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getOwner() {
-
-        return null;
-
-    }
-
-    /**
-     * Returns a group principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getGroup() {
-
-        return null;
-
     }
 
     /**
@@ -141,48 +110,14 @@ class HomeCollection extends AbstractPrincipalCollection implements IACL {
      *
      * @return array
      */
-    function getACL() {
-
+    public function getACL()
+    {
         return [
             [
                 'principal' => '{DAV:}authenticated',
                 'privilege' => '{DAV:}read',
                 'protected' => true,
-            ]
+            ],
         ];
-
     }
-
-    /**
-     * Updates the ACL
-     *
-     * This method will receive a list of new ACE's as an array argument.
-     *
-     * @param array $acl
-     * @return void
-     */
-    function setACL(array $acl) {
-
-        throw new Forbidden('Setting ACL is not allowed here');
-
-    }
-
-    /**
-     * Returns the list of supported privileges for this node.
-     *
-     * The returned data structure is a list of nested privileges.
-     * See Sabre\DAVACL\Plugin::getDefaultSupportedPrivilegeSet for a simple
-     * standard structure.
-     *
-     * If null is returned from this method, the default privilege set is used,
-     * which is fine for most common usecases.
-     *
-     * @return array|null
-     */
-    function getSupportedPrivilegeSet() {
-
-        return null;
-
-    }
-
 }

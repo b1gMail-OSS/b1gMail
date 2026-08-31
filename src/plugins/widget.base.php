@@ -440,7 +440,7 @@ class BMPlugin_Widget_EMail extends BMPlugin
 				continue;
 
 			$emailItems[$folderID] = array(
-					'link'			=> 'email.php?folder=' . $folderID . '&sid=' . session_id(),
+					'link'			=> 'email.php?folder=' . $folderID . '',
 					'text'			=> $folder['title'],
 					'icon'			=> $folder['type'],
 					'unreadMails'	=> $folder['unread'],

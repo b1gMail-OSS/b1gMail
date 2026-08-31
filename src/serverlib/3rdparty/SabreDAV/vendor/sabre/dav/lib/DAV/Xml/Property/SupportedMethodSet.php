@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAV\Xml\Property;
 
 use Sabre\DAV\Browser\HtmlOutput;
@@ -20,29 +22,23 @@ use Sabre\Xml\XmlSerializable;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class SupportedMethodSet implements XmlSerializable, HtmlOutput {
-
+class SupportedMethodSet implements XmlSerializable, HtmlOutput
+{
     /**
-     * List of methods
+     * List of methods.
      *
      * @var string[]
      */
     protected $methods = [];
 
     /**
-     * Creates the property
+     * Creates the property.
      *
-     * Any reports passed in the constructor
-     * should be valid report-types in clark-notation.
-     *
-     * Either a string or an array of strings must be passed.
-     *
-     * @param string|string[] $methods
+     * @param string[] $methods
      */
-    function __construct($methods = null) {
-
-        $this->methods = (array)$methods;
-
+    public function __construct(array $methods)
+    {
+        $this->methods = $methods;
     }
 
     /**
@@ -50,34 +46,33 @@ class SupportedMethodSet implements XmlSerializable, HtmlOutput {
      *
      * @return string[]
      */
-    function getValue() {
-
+    public function getValue()
+    {
         return $this->methods;
-
     }
 
     /**
      * Returns true or false if the property contains a specific method.
      *
      * @param string $methodName
+     *
      * @return bool
      */
-    function has($methodName) {
-
+    public function has($methodName)
+    {
         return in_array(
             $methodName,
             $this->methods
         );
-
     }
 
     /**
-     * The xmlSerialize metod is called during xml writing.
+     * The xmlSerialize method is called during xml writing.
      *
      * Use the $writer argument to write its own xml serialization.
      *
      * An important note: do _not_ create a parent element. Any element
-     * implementing XmlSerializble should only ever write what's considered
+     * implementing XmlSerializable should only ever write what's considered
      * its 'inner xml'.
      *
      * The parent of the current element is responsible for writing a
@@ -86,18 +81,14 @@ class SupportedMethodSet implements XmlSerializable, HtmlOutput {
      * This allows serializers to be re-used for different element names.
      *
      * If you are opening new elements, you must also close them again.
-     *
-     * @param Writer $writer
-     * @return void
      */
-    function xmlSerialize(Writer $writer) {
-
+    public function xmlSerialize(Writer $writer)
+    {
         foreach ($this->getValue() as $val) {
             $writer->startElement('{DAV:}supported-method');
             $writer->writeAttribute('name', $val);
             $writer->endElement();
         }
-
     }
 
     /**
@@ -111,16 +102,13 @@ class SupportedMethodSet implements XmlSerializable, HtmlOutput {
      * The baseUri parameter is a url to the root of the application, and can
      * be used to construct local links.
      *
-     * @param HtmlOutputHelper $html
      * @return string
      */
-    function toHtml(HtmlOutputHelper $html) {
-
+    public function toHtml(HtmlOutputHelper $html)
+    {
         return implode(
             ', ',
             array_map([$html, 'h'], $this->getValue())
         );
-
     }
-
 }

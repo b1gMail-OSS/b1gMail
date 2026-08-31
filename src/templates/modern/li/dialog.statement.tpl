@@ -28,6 +28,7 @@
 <body onload="documentLoader()">
 
 	<form action="{$selfurl}prefs.php?action=membership&do=statement&sid={$sid}" method="post">
+		{csrffield}
 	<table width="100%">
 		<tr>
 			<td align="center" colspan="2">

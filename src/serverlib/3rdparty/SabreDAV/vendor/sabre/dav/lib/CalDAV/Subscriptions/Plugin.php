@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Subscriptions;
 
 use Sabre\DAV\INode;
 use Sabre\DAV\PropFind;
-use Sabre\DAV\ServerPlugin;
 use Sabre\DAV\Server;
+use Sabre\DAV\ServerPlugin;
 
 /**
  * This plugin adds calendar-subscription support to your CalDAV server.
@@ -17,8 +19,8 @@ use Sabre\DAV\Server;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Plugin extends ServerPlugin {
-
+class Plugin extends ServerPlugin
+{
     /**
      * This initializes the plugin.
      *
@@ -26,20 +28,16 @@ class Plugin extends ServerPlugin {
      * addPlugin is called.
      *
      * This method should set up the required event subscriptions.
-     *
-     * @param Server $server
-     * @return void
      */
-    function initialize(Server $server) {
-
-        $server->resourceTypeMapping['Sabre\\CalDAV\\Subscriptions\\ISubscription'] =
+    public function initialize(Server $server)
+    {
+        $server->resourceTypeMapping[\Sabre\CalDAV\Subscriptions\ISubscription::class] =
             '{http://calendarserver.org/ns/}subscribed';
 
         $server->xml->elementMap['{http://calendarserver.org/ns/}source'] =
-            'Sabre\\DAV\\Xml\\Property\\Href';
+            \Sabre\DAV\Xml\Property\Href::class;
 
         $server->on('propFind', [$this, 'propFind'], 150);
-
     }
 
     /**
@@ -50,21 +48,16 @@ class Plugin extends ServerPlugin {
      *
      * @return array
      */
-    function getFeatures() {
-
+    public function getFeatures()
+    {
         return ['calendarserver-subscribed'];
-
     }
 
     /**
      * Triggered after properties have been fetched.
-     *
-     * @param PropFind $propFind
-     * @param INode $node
-     * @return void
      */
-    function propFind(PropFind $propFind, INode $node) {
-
+    public function propFind(PropFind $propFind, INode $node)
+    {
         // There's a bunch of properties that must appear as a self-closing
         // xml-element. This event handler ensures that this will be the case.
         $props = [
@@ -74,13 +67,10 @@ class Plugin extends ServerPlugin {
         ];
 
         foreach ($props as $prop) {
-
-            if ($propFind->getStatus($prop) === 200) {
+            if (200 === $propFind->getStatus($prop)) {
                 $propFind->set($prop, '', 200);
             }
-
         }
-
     }
 
     /**
@@ -91,10 +81,9 @@ class Plugin extends ServerPlugin {
      *
      * @return string
      */
-    function getPluginName() {
-
+    public function getPluginName()
+    {
         return 'subscriptions';
-
     }
 
     /**
@@ -108,13 +97,12 @@ class Plugin extends ServerPlugin {
      *
      * @return array
      */
-    function getPluginInfo() {
-
+    public function getPluginInfo()
+    {
         return [
-            'name'        => $this->getPluginName(),
+            'name' => $this->getPluginName(),
             'description' => 'This plugin allows users to store iCalendar subscriptions in their calendar-home.',
-            'link'        => null,
+            'link' => null,
         ];
-
     }
 }

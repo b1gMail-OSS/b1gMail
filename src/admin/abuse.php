@@ -49,7 +49,7 @@ if($_REQUEST['action'] == 'overview')
 	if($_REQUEST['do'] == 'list')
 	{
 		// single action?
-		if(isset($_REQUEST['singleAction']))
+		if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
 		{
 			if($_REQUEST['singleAction'] == 'lock')
 			{
@@ -148,12 +148,13 @@ if($_REQUEST['action'] == 'overview')
 		}
 
 		// sort options
-		$sortBy = isset($_REQUEST['sortBy'])
-					? $_REQUEST['sortBy']
-					: 'pointsum';
-		$sortOrder = isset($_REQUEST['sortOrder'])
-						? strtolower($_REQUEST['sortOrder'])
-						: 'desc';
+		$sortBy = AdminSanitizeSortColumn(
+			isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'pointsum',
+			array('id', 'email', 'pointsum'),
+			'pointsum');
+		$sortOrder = AdminSanitizeSortOrder(
+			isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'desc',
+			'desc');
 		$perPage = 50;
 
 		// page calculation
@@ -247,7 +248,7 @@ if($_REQUEST['action'] == 'overview')
 		$types = GetAbuseTypes();
 
 		// single action?
-		if(isset($_REQUEST['singleAction']))
+		if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
 		{
 			if($_REQUEST['singleAction'] == 'delete')
 			{

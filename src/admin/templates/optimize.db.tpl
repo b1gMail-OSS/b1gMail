@@ -35,13 +35,12 @@
 				</table>
 			</div>
 			<div class="card-footer text-end">
-				<input class="btn btn-sm btn-primary" type="button" value="{lng p="back"}" onclick="document.location.href='optimize.php?sid={$sid}';" />
+				<input class="btn btn-sm btn-primary" type="button" value="{lng p="back"}" onclick="document.location.href='{sessionurl file='optimize.php'}';" />
 			</div>
 		</div>
 	{elseif $executeStruct}
-		<form action="optimize.php?do=repairStruct&sid={$sid}" method="post" onsubmit="spin(this)">
-
-			{if $repair}<div class="alert alert-warning">{lng p="dbwarn"}</div>{/if}
+		<form action="{sessionurl file='optimize.php' params="do=repairStruct"}" method="post" onsubmit="spin(this)">
+			{csrffield}
 
 			<div class="card">
 				<div class="table-responsive">
@@ -78,13 +77,14 @@
 				<div class="card-footer">
 					<div class="row">
 						<div class="col-md-6">{if $repair}<input class="btn btn-sm btn-warning" type="submit" value="{lng p="repairstruct"}" />{/if}</div>
-						<div class="col-md-6 text-end"><input class="btn btn-sm btn-primary" type="button" value=" {lng p="back"} " onclick="document.location.href='optimize.php?sid={$sid}';" /></div>
+						<div class="col-md-6 text-end"><input class="btn btn-sm btn-primary" type="button" value=" {lng p="back"} " onclick="document.location.href='{sessionurl file='optimize.php'}';" /></div>
 					</div>
 				</div>
 			</div>
 		</form>
 	{else}
-		<form action="optimize.php?sid={$sid}&do=execute" method="post" onsubmit="spin(this)">
+		<form action="{sessionurl file='optimize.php' params='do=execute'}" method="post" onsubmit="spin(this)">
+			{csrffield}
 			<div class="row">
 				<div class="col-md-4">
 					<div class="mb-3">

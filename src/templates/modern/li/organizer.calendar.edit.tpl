@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}&sid={$sid}" onsubmit="return(checkCalendarDateForm(this));">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {if !empty($eDate)}{lng p="editdate"}{else}{lng p="adddate"}{/if}</th>

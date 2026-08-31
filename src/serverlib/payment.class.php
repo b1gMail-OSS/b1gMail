@@ -132,6 +132,8 @@ class BMPayment
 		$pf['land']				= $userRow['land'];
 		$pf['company']			= $userRow['company'];
 		$pf['taxid']			= $userRow['taxid'];
+		$pf['f_company']		= $bm_prefs['f_company'];
+		$pf['f_taxid']			= $bm_prefs['f_taxid'];
 
 		$tpl->assign('_pf', $pf);
 	}
@@ -233,6 +235,14 @@ class BMPayment
 
 		// get user object
 		$user = _new('BMUser', array($row['userid']));
+		if(!is_array($user->_row))
+		{
+			PutLog(sprintf('Failed to activate order %d (user %d not found)', $orderID, $row['userid']),
+				   PRIO_WARNING,
+				   __FILE__,
+				   __LINE__);
+			return(false);
+		}
 
 		// process cart
 		$cart = @unserialize($row['cart']);
@@ -294,7 +304,21 @@ class BMPayment
 			}
 		}
 		if($generateInvoice)
-			BMPayment::GenerateInvoice($orderID);
+		{
+			try
+			{
+				BMPayment::GenerateInvoice($orderID);
+			}
+			catch(Throwable $e)
+			{
+				PutLog(sprintf('Failed to generate invoice for order %d: %s',
+							   $orderID,
+							   $e->getMessage()),
+					   PRIO_WARNING,
+					   __FILE__,
+					   __LINE__);
+			}
+		}
 
 		// payment notification?
 		if($bm_prefs['send_pay_notification'] == 'yes' && $row['amount'] > 0)
@@ -374,6 +398,8 @@ class BMPayment
 			$tpl->assign($pageVarName, 'li/msg.tpl');
 			$tpl->assign('title', $lang_user['error']);
 			$tpl->assign('msg', $lang_user['orderalreadypaid']);
+			if($pageVarName == 'pageContent')
+				BMPayment::UsePrefsPageLayout($tpl);
 			return(false);
 		}
 
@@ -460,6 +486,34 @@ class BMPayment
 
 		$tpl->assign($pageVarName, 'li/payment.pay.tpl');
 		$tpl->assign('_pf', $pf);
+
+		if($pageVarName == 'pageContent')
+			BMPayment::UsePrefsPageLayout($tpl);
+	}
+
+	/**
+	 * Wrap payment/message page for prefs layout (Tabler bm-prefs-page)
+	 *
+	 * @param &$tpl Template object
+	 */
+	static function UsePrefsPageLayout(&$tpl)
+	{
+		global $bm_prefs;
+
+		$pageContent = $tpl->getTemplateVars('pageContent');
+		$tplName = $tpl->getTemplateVars('_tplname');
+		$themeDir = (is_string($tplName) && $tplName != '')
+			? B1GMAIL_DIR . 'templates/' . $tplName . '/'
+			: (isset($bm_prefs['template'])
+				? B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/'
+				: $tpl->tplDir);
+
+		if($pageContent == 'li/payment.pay.tpl'
+			&& file_exists($themeDir . 'li/prefs.payment.tpl'))
+			$tpl->assign('pageContent', 'li/prefs.payment.tpl');
+		else if($pageContent == 'li/msg.tpl'
+			&& file_exists($themeDir . 'li/prefs.message.tpl'))
+			$tpl->assign('pageContent', 'li/prefs.message.tpl');
 	}
 
 	/**
@@ -531,6 +585,26 @@ class BMPayment
 				$invalidFields[] = 'plz';
 				$invalidFields[] = 'ort';
 			}
+
+			// company
+			if($bm_prefs['f_company'] != 'n')
+			{
+				$company = trim($_POST['company']);
+				if((strlen($company) < 2) && (strlen($company) > 0 || $bm_prefs['f_company'] == 'p'))
+					$invalidFields[] = 'company';
+			}
+			else
+				$_POST['company'] = '';
+
+			// taxid
+			if($bm_prefs['f_taxid'] != 'n')
+			{
+				$taxid = trim($_POST['taxid']);
+				if((strlen($taxid) < 2) && (strlen($taxid) > 0 || $bm_prefs['f_taxid'] == 'p'))
+					$invalidFields[] = 'taxid';
+			}
+			else
+				$_POST['taxid'] = '';
 		}
 
 		// check payment method
@@ -753,7 +827,9 @@ class BMPayment
 		$taxRate		= $orderRow['tax'];
 		$netAmount		= round($amount / (1+$taxRate/100), 2);
 		$taxAmount		= $amount - $netAmount;
-		$rawCart		= unserialize($orderRow['cart']);
+		$rawCart		= @unserialize($orderRow['cart']);
+		if(!is_array($rawCart))
+			$rawCart = array();
 		$cart 			= array();
 
 		// prepare cart
@@ -831,10 +907,23 @@ class BMPayment
 		$rgTpl->assign('ktoiban', 		$bm_prefs['vk_kto_iban']);
 		$rgTpl->assign('ktobic', 		$bm_prefs['vk_kto_bic']);
 
-		// set input resource
-		$bmPayment = _new('BMPayment');
-		//FIXME:
-		//$rgTpl->registerPlugin('resource','prefsdb', array(&$bmPayment, '__tpl_getTemplate', '__tpl_getTimestamp', '__tpl_getSecure', '__tpl_getTrusted'));
+		// load invoice template from prefs (Smarty 5 resource plugin)
+		$rgTpl->registerResource('prefsdb', new class extends \Smarty\Resource\CustomPlugin {
+			protected function fetch($name, &$source, &$mtime)
+			{
+				global $bm_prefs;
+
+				if(!isset($bm_prefs[$name]))
+				{
+					$source = null;
+					$mtime = null;
+					return;
+				}
+
+				$source = $bm_prefs[$name];
+				$mtime = time();
+			}
+		});
 
 		// generate invoice
 		$invoice = $rgTpl->fetch('prefsdb:rgtemplate');
@@ -888,37 +977,4 @@ class BMPayment
 		return($result);
 	}
 
-	//
-	// smarty callbacks
-	//
-	function __tpl_getTemplate($tpl_name, &$tpl_source, &$smarty_obj)
-	{
-		global $bm_prefs;
-		if(!isset($bm_prefs[$tpl_name]))
-			return(false);
-		$tpl_source = $bm_prefs[$tpl_name];
-		return(true);
-	}
-	function __tpl_getTimestamp($tpl_name, &$tpl_timestamp, &$smarty_obj)
-	{
-		global $bm_prefs;
-		if(!isset($bm_prefs[$tpl_name]))
-			return(false);
-		$tpl_timestamp = time();
-		return(true);
-	}
-	function __tpl_getSecure($tpl_name, &$smarty_obj)
-	{
-		global $bm_prefs;
-		if(!isset($bm_prefs[$tpl_name]))
-			return(false);
-		return(true);
-	}
-	function __tpl_getTrusted($tpl_name, &$smarty_obj)
-	{
-		global $bm_prefs;
-		if(!isset($bm_prefs[$tpl_name]))
-			return(false);
-		return(true);
-	}
 }

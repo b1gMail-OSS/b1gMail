@@ -46,6 +46,7 @@
 </div>
 
 <form name="f1" method="post" action="organizer.addressbook.php?action=action&sid={$sid}" onsubmit="transferSelectedAddresses();">
+	{csrffield}
 <input name="addrIDs" id="addrIDs" value="" />
 
 <div class="scrollContainer" style="overflow:hidden;">

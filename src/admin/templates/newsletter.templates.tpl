@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="templates"}</legend>
 
-	<form name="f1" action="newsletter.php?action=templates&sid={$sid}" method="post">
+	<form name="f1" action="{sessionurl file='newsletter.php' params="action=templates"}" method="post">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -22,8 +23,8 @@
 							<td>{text value=$tpl.subject cut=35}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="newsletter.php?action=templates&do=edit&templateID={$tpl.templateid}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="newsletter.php?action=templates&delete={$tpl.templateid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='newsletter.php' params="action=templates&do=edit&templateID={$tpl.templateid}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='newsletter.php' params="action=templates&delete={$tpl.templateid}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -52,7 +53,8 @@
 <fieldset>
 	<legend>{lng p="addtemplate"}</legend>
 
-	<form name="f1" action="newsletter.php?action=templates&add=true&sid={$sid}" method="post" onsubmit="editor.submit();spin(this);">
+	<form name="f1" action="{sessionurl file='newsletter.php' params="action=templates&add=true"}" method="post" onsubmit="editor.submit();spin(this);">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
 			<div class="col-sm-10">

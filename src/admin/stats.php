@@ -38,13 +38,13 @@ $tabs = array(
 	1 => array(
 		'title'		=> $lang_admin['emailstats'],
 		'relIcon'	=> 'ico_email.png',
-		'link'		=> 'stats.php?action=email&',
+		'link'		=> 'stats.php?action=email',
 		'active'	=> $_REQUEST['action'] == 'email'
 	),
 	2 => array(
 		'title'		=> $lang_admin['spaceusage'],
 		'relIcon'	=> 'ico_data.png',
-		'link'		=> 'stats.php?action=usage&',
+		'link'		=> 'stats.php?action=usage',
 		'active'	=> $_REQUEST['action'] == 'usage'
 	)
 );

@@ -1,48 +1,54 @@
-<fieldset>
-	<legend>{lng p="prefs"}</legend>
+{if $ofMsg}
+<div class="alert alert-{$ofMsg.type} mb-3" role="alert">{$ofMsg.text}</div>
+{/if}
 
-	<form action="{$pageURL}&sid={$sid}" name="save" id="save" method="post" onsubmit="spin(this)">
-	{if $erfolg}<div class="alert alert-success">{$erfolg}</div>{/if}
+<form action="{sessionurl file='plugin.page.php' params="plugin={$ofPlugin}"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-check-label">{lng p="enable"}</label>
-			<div class="col-sm-10">
+	<div class="card">
+		<div class="card-header">
+			<h3 class="card-title">
+				<img src="../plugins/templates/images/openfire_logo.png" alt="" width="24" height="24" class="me-2 align-text-bottom" />
+				{lng p="prefs"}
+			</h3>
+		</div>
+		<div class="card-body">
+			<div class="mb-3">
 				<label class="form-check">
-					<input class="form-check-input" type="checkbox" name="openfire_enableAuth"{if $openfire_prefs.enableAuth} checked="checked"{/if}>
+					<input class="form-check-input" type="checkbox" name="openfire_enableAuth" id="openfire_enableAuth"{if $openfire_prefs.enableAuth} checked="checked"{/if} />
+					<span class="form-check-label">{lng p="enable"}</span>
 				</label>
 			</div>
-		</div>
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-label">{lng p="openfire_domain"}</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" name="openfire_domain" value="{if isset($openfire_prefs.domain)}{text value=$openfire_prefs.domain}{/if}" placeholder="{lng p="openfire_domain"}">
+
+			<div class="mb-3">
+				<label class="form-label" for="openfire_domain">{lng p="openfire_domain"}</label>
+				<input type="text" class="form-control" name="openfire_domain" id="openfire_domain" value="{if isset($openfire_prefs.domain)}{text value=$openfire_prefs.domain}{/if}" placeholder="{lng p="openfire_domain"}" required="required" />
 			</div>
-		</div>
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-label">{lng p="openfire_port"}</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" name="openfire_domain" value="{if isset($openfire_prefs.domain)}{text value=$openfire_prefs.domain}{/if}" placeholder="{lng p="openfire_port"}">
+
+			<div class="mb-3">
+				<label class="form-label" for="openfire_port">{lng p="openfire_port"}</label>
+				<input type="number" class="form-control" name="openfire_port" id="openfire_port" value="{if isset($openfire_prefs.port)}{$openfire_prefs.port}{/if}" placeholder="{lng p="openfire_port"}" min="1" max="65535" step="1" required="required" />
 			</div>
-		</div>
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-check-label">{lng p="openfire_https"}</label>
-			<div class="col-sm-10">
+
+			<div class="mb-3">
 				<label class="form-check">
-					<input class="form-check-input" type="checkbox" name="openfire_https"{if !empty($openfire_prefs.https)} checked="checked"{/if}>
+					<input class="form-check-input" type="checkbox" name="openfire_https" id="openfire_https"{if !empty($openfire_prefs.https)} checked="checked"{/if} />
+					<span class="form-check-label">{lng p="openfire_https"}</span>
 				</label>
 			</div>
-		</div>
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-label">{lng p="openfire_secretkey"}</label>
-			<div class="col-sm-10">
-				<input type="password" class="form-control" name="openfire_userservice_secretkey" value="{if isset($openfire_prefs.secretkey)}{text value=$openfire_prefs.secretkey}{/if}" placeholder="{lng p="openfire_secretkey"}">
+
+			<div class="mb-3">
+				<label class="form-label" for="openfire_userservice_secretkey">{lng p="openfire_secretkey"}</label>
+				<input type="password" class="form-control" name="openfire_userservice_secretkey" id="openfire_userservice_secretkey" value="{if isset($openfire_prefs.secretkey)}{text value=$openfire_prefs.secretkey}{/if}" placeholder="{lng p="openfire_secretkey"}" autocomplete="off" />
 			</div>
 		</div>
-
-		<div class="text-end">
-			<input type="submit" name="save" value="{lng p="save"}" class="btn btn-primary" />
+		<div class="card-footer text-end">
+			<button type="submit" name="save" value="1" class="btn btn-primary">
+				<i class="ti ti-device-floppy me-1"></i>
+				{lng p="save"}
+			</button>
 		</div>
-	</form>
-</fieldset>
+	</div>
+</form>
 
-<div class="text-center"><small>b1gMail Openfire-Integration &copy; <a href="http://www.sebijk.com" target="_blank" rel="noreferrer">Home of the Sebijk.com</a></small></div>
+<div class="text-center text-secondary mt-3"><small>b1gMail Openfire-Integration &copy; <a href="http://www.sebijk.com" target="_blank" rel="noreferrer">Home of the Sebijk.com</a></small></div>

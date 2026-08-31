@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/loggedin.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/dtree.css" rel="stylesheet" type="text/css" />
 
@@ -19,12 +19,12 @@
 		var currentSID = '{$sid}', tplDir = '{$tpldir}', serverTZ = {$serverTZ};
 	//-->
 	</script>
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/dtree.js" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/overlay.js" type="text/javascript"></script>
-	<script src="clientlib/autocomplete.js" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/autocomplete.js" type="text/javascript"></script>
 
 	<base target="_top" />
 </head>
@@ -50,13 +50,13 @@
 			{else}
 			<td class="{if $mailID==$mail.id}listTableTDActiveH{else}{$class}{/if}" nowrap="nowrap" style="text-overflow:ellipsis;overflow:hidden;">
 				<img src="res/dummy.gif" border="0" width="{$mail.level*16}" height="1" alt="" />
-				{if $mail.id!=$mailID}<a href="email.read.php?id={$mail.id}&sid={$sid}&openConversationView=true">{/if}
+				{if $mail.id!=$mailID}<a href="email.read.php?id={$mail.id}&openConversationView=true{$sessionUrlSuffix}">{/if}
 					<img src="{$tpldir}images/li/mail_mark{if $mail.id!=$mailID}un{/if}read.png" width="16" height="16" border="0" alt="" align="absmiddle" />
 					{text value=$mail.subject}
 				{if $mail.id!=$mailID}</a>{/if}
 			</td>
 			<td class="{if $mailID==$mail.id}listTableTDActiveH{else}{$class}{/if}" width="25%"{if $mail.id==$mailID} id="activeMail"{/if} nowrap="nowrap" style="text-overflow:ellipsis;overflow:hidden;">
-				<a href="email.compose.php?to={email value=$mail.from_mail}&sid={$sid}">
+				<a href="{sessionurl file='email.compose.php' params='to={email value=$mail.from_mail}'}">
 					&nbsp;{if $mail.from_name}{text value=$mail.from_name}{else}{email value=$mail.from_mail}{/if}
 				</a>
 			</td>

@@ -1,36 +1,44 @@
-<form action="{$pageURL}&action=gateways&simple=true&save=true&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+<form action="{$pageURL}{$sessionUrlSuffixHtml}" name="f1" method="post" onsubmit="spin(this)">
+	{csrffield}
+	<input type="hidden" name="save" value="1" />
+
 <fieldset>
 	<legend>{lng p="modfax_gateways_simple"}</legend>
-	
-	<table class="list">
-		<tr>
-			<th width="20">&nbsp;</th>
-			<th>{lng p="title"}</th>
-			<th width="120">{lng p="modfax_protocol"}</th>
-			<th width="200">{lng p="user"}</th>
-			<th width="200">{lng p="password"}</th>
-		</tr>
-		
-		{foreach from=$gateways item=gateway}
-		{cycle name=class values="td1,td2" assign=class}
-		<tr class="{$class}">
-			<td align="center"><img src="../plugins/templates/images/modfax_gateway.png" border="0" alt="" width="16" height="16" /></td>
-			<td>{text value=$gateway.title}</td>
-			<td>{if $gateway.protocol==1}{lng p="modfax_email"}{else}{lng p="modfax_http"}{/if}</td>
-			<td><input type="text" name="gateways[{$gateway.faxgateid}][user]" value="{if isset($gateway.user)}{text value=$gateway.user allowEmpty=true}{/if}" style="width:90%;" /></td>
-			<td><input type="password" name="gateways[{$gateway.faxgateid}][pass]" value="{if isset($gateway.pass)}{text value=$gateway.pass allowEmpty=true}{/if}" style="width:90%;" /></td>
-		</tr>
-		{/foreach}
-	</table>
+
+	<div class="card">
+		<div class="table-responsive">
+			<table class="table table-vcenter table-striped card-table">
+				<thead>
+				<tr>
+					<th>{lng p="title"}</th>
+					<th style="width: 120px;">{lng p="modfax_protocol"}</th>
+					<th style="width: 200px;">{lng p="user"}</th>
+					<th style="width: 200px;">{lng p="password"}</th>
+				</tr>
+				</thead>
+				<tbody>
+				{foreach from=$gateways item=gateway}
+				<tr>
+					<td>{text value=$gateway.title}</td>
+					<td>{if $gateway.protocol==1}{lng p="modfax_email"}{else}{lng p="modfax_http"}{/if}</td>
+					<td><input type="text" class="form-control form-control-sm" name="gateways[{$gateway.faxgateid}][user]" value="{if isset($gateway.user)}{text value=$gateway.user allowEmpty=true}{/if}" /></td>
+					<td><input type="password" class="form-control form-control-sm" name="gateways[{$gateway.faxgateid}][pass]" value="{if isset($gateway.pass)}{text value=$gateway.pass allowEmpty=true}{/if}" autocomplete="off" /></td>
+				</tr>
+				{/foreach}
+				</tbody>
+			</table>
+		</div>
+	</div>
 </fieldset>
-		
-<p>
-	<div style="float:left;" class="buttons">
-		<img src="../plugins/templates/images/modfax_advanced.png" width="16" height="16" border="0" alt="" align="absmiddle" />
-		<a href="{$pageURL}&action=gateways&sid={$sid}">{lng p="modfax_advancedmode"}</a>
-	</div>
-	<div style="float:right;" class="buttons">
-		<input class="button" type="submit" value=" {lng p="save"} " />
-	</div>
-</p>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+	<a href="{$advancedUrl}{$sessionUrlSuffixHtml}" class="btn btn-outline-secondary">
+		<i class="ti ti-settings me-1"></i>
+		{lng p="modfax_advancedmode"}
+	</a>
+	<button type="submit" class="btn btn-primary">
+		<i class="ti ti-device-floppy me-1"></i>
+		{lng p="save"}
+	</button>
+</div>
 </form>

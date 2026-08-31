@@ -1,6 +1,10 @@
-<form action="{$pageURL}&action=imap&do=apns&import=true&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
-<fieldset>
-	<legend>{lng p="bms_pushcertificate"}</legend>
+<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=imap&action=apns&import=true"}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+	{csrffield}
+	<div class="alert alert-warning" role="alert">
+		<i class="ti ti-alert-triangle me-1"></i> {lng p="bms_apnslegacy"}
+	</div>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="bms_pushcertificate"} <span class="badge bg-secondary-lt align-middle">{lng p="bms_legacy"}</span></legend>
 	
 	{if $certInfo}
 	<table width="90%">
@@ -23,8 +27,8 @@
 	{/if}
 </fieldset>
 
-<fieldset>
-	<legend>{lng p="bms_certimport"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="bms_certimport"}</legend>
 		
 	<table width="90%">
 		<tr>
@@ -41,12 +45,9 @@
 </fieldset>
 
 <p>
-	<div style="float:left;" class="buttons">
-		<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='{$pageURL}&action=imap&sid={$sid}';" />
-	</div>
-	
-	<div style="float:right;" class="buttons">
-		<input class="button" type="submit" value=" {lng p="import"} " />
+	<div class="d-flex justify-content-between mt-3 mb-2">
+		<button type="button" class="btn btn-outline-secondary" onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=imap"}';"><i class="ti ti-chevron-left me-1"></i> {lng p="back"}</button>
+		<button type="submit" class="btn btn-primary"><i class="ti ti-upload me-1"></i> {lng p="import"}</button>
 	</div>
 </p>
 

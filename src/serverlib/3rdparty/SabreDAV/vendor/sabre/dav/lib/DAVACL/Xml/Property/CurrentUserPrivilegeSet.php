@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAVACL\Xml\Property;
 
 use Sabre\DAV\Browser\HtmlOutput;
@@ -9,7 +11,7 @@ use Sabre\Xml\Reader;
 use Sabre\Xml\Writer;
 
 /**
- * CurrentUserPrivilegeSet
+ * CurrentUserPrivilegeSet.
  *
  * This class represents the current-user-privilege-set property. When
  * requested, it contain all the privileges a user has on a specific node.
@@ -18,35 +20,32 @@ use Sabre\Xml\Writer;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class CurrentUserPrivilegeSet implements Element, HtmlOutput {
-
+class CurrentUserPrivilegeSet implements Element, HtmlOutput
+{
     /**
-     * List of privileges
+     * List of privileges.
      *
      * @var array
      */
     private $privileges;
 
     /**
-     * Creates the object
+     * Creates the object.
      *
      * Pass the privileges in clark-notation
-     *
-     * @param array $privileges
      */
-    function __construct(array $privileges) {
-
+    public function __construct(array $privileges)
+    {
         $this->privileges = $privileges;
-
     }
 
     /**
-     * The xmlSerialize metod is called during xml writing.
+     * The xmlSerialize method is called during xml writing.
      *
      * Use the $writer argument to write its own xml serialization.
      *
      * An important note: do _not_ create a parent element. Any element
-     * implementing XmlSerializble should only ever write what's considered
+     * implementing XmlSerializable should only ever write what's considered
      * its 'inner xml'.
      *
      * The parent of the current element is responsible for writing a
@@ -55,21 +54,14 @@ class CurrentUserPrivilegeSet implements Element, HtmlOutput {
      * This allows serializers to be re-used for different element names.
      *
      * If you are opening new elements, you must also close them again.
-     *
-     * @param Writer $writer
-     * @return void
      */
-    function xmlSerialize(Writer $writer) {
-
+    public function xmlSerialize(Writer $writer)
+    {
         foreach ($this->privileges as $privName) {
-
             $writer->startElement('{DAV:}privilege');
             $writer->writeElement($privName);
             $writer->endElement();
-
         }
-
-
     }
 
     /**
@@ -77,12 +69,12 @@ class CurrentUserPrivilegeSet implements Element, HtmlOutput {
      * list.
      *
      * @param string $privilegeName
+     *
      * @return bool
      */
-    function has($privilegeName) {
-
+    public function has($privilegeName)
+    {
         return in_array($privilegeName, $this->privileges);
-
     }
 
     /**
@@ -90,16 +82,15 @@ class CurrentUserPrivilegeSet implements Element, HtmlOutput {
      *
      * @return array
      */
-    function getValue() {
-
+    public function getValue()
+    {
         return $this->privileges;
-
     }
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -114,22 +105,21 @@ class CurrentUserPrivilegeSet implements Element, HtmlOutput {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $result = [];
 
-        $tree = $reader->parseInnerTree(['{DAV:}privilege' => 'Sabre\\Xml\\Element\\Elements']);
+        $tree = $reader->parseInnerTree(['{DAV:}privilege' => \Sabre\Xml\Element\Elements::class]);
         foreach ($tree as $element) {
-            if ($element['name'] !== '{DAV:}privilege') {
+            if ('{DAV:}privilege' !== $element['name']) {
                 continue;
             }
             $result[] = $element['value'][0];
         }
-        return new self($result);
 
+        return new self($result);
     }
 
     /**
@@ -143,17 +133,13 @@ class CurrentUserPrivilegeSet implements Element, HtmlOutput {
      * The baseUri parameter is a url to the root of the application, and can
      * be used to construct local links.
      *
-     * @param HtmlOutputHelper $html
      * @return string
      */
-    function toHtml(HtmlOutputHelper $html) {
-
+    public function toHtml(HtmlOutputHelper $html)
+    {
         return implode(
             ', ',
             array_map([$html, 'xmlName'], $this->getValue())
         );
-
     }
-
-
 }

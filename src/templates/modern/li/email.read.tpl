@@ -279,6 +279,7 @@
 {hook id="email.read.tpl:foot"}
 
 <form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
+	{csrffield}
 	<input type="hidden" name="text" id="quoteText" value="" />
 </form>
 
@@ -355,6 +356,7 @@
 	</div>
 
 	<form method="post" action="email.read.php?id={$mailID}&sid={$sid}">
+		{csrffield}
 	<input type="hidden" name="do" value="saveMeta" />
 
 	<div class="bigForm">

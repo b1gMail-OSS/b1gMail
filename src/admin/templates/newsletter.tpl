@@ -1,4 +1,5 @@
-<form action="newsletter.php?do=send&sid={$sid}" method="post" id="newsletterForm" onsubmit="{literal}if(newsletterMode=='export') { this.target='_blank'; } else { if(EBID('subject').value.length<3 && !confirm(window.lang['sendwosubject'])) return(false); this.target='';editor.submit();spin(this); }{/literal}">
+<form action="{sessionurl file='newsletter.php' params="do=send"}" method="post" id="newsletterForm" onsubmit="{literal}if(newsletterMode=='export') { this.target='_blank'; } else { if(EBID('subject').value.length<3 && !confirm(window.lang['sendwosubject'])) return(false); this.target='';editor.submit();spin(this); }{/literal}">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="recipients"}</legend>
 

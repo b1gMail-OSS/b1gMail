@@ -6,6 +6,7 @@
 
 <div class="scrollContainer"><div class="pad">
 <form name="f1" method="post" action="email.folders.php?action=saveFolder&id={$folderID}&sid={$sid}">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="editfolder"}</th>

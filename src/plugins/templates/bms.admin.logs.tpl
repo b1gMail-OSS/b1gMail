@@ -1,7 +1,7 @@
-<fieldset>
-	<legend>{lng p="logs"} ({date nice=true timestamp=$start} - {date nice=true timestamp=$end})</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="logs"} ({date nice=true timestamp=$start} - {date nice=true timestamp=$end})</legend>
 	
-	<table class="list">
+	<div class="card mb-3"><div class="table-responsive"><table class="table table-vcenter table-striped card-table">
 		<tr>
 			<th width="20">&nbsp;</th>
 			<th width="90">{lng p="bms_component"}</th>
@@ -11,8 +11,7 @@
 		</tr>
 		
 		{foreach from=$entries item=entry}
-		{cycle name=class values="td1,td2" assign=class}
-		<tr class="{$class}">
+		<tr>
 			<td><img src="{$tpldir}images/{$entry.prioImg}.png" border="0" alt="" width="16" height="16" /></td>
 			<td>{text value=$entry.componentName}</td>
 			<td><code>{$entry.szEntry}</code></td>
@@ -23,20 +22,21 @@
 		<tr>
 			<td class="footer" colspan="4">
 				<div style="float:left;">
-					<input class="button" type="button" value=" {lng p="export"} " onclick="parent.frames['top'].location.href='{$pageURL}&action=logs&sid={$sid}&do=export&start={$start}&end={$end}&page={$pageNo}&q={$ueQ}{$prioQ}';" />
+					<button type="button" class="btn btn-outline-secondary btn-sm"  onclick="parent.frames['top'].location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=logs&action=export&start={$start}&end={$end}&page={$pageNo}&q={$ueQ}{$prioQ}"}';" >{lng p="export"}</button>
 				</div>
 				<div style="float:right;padding-top:3px;">
-					{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"$pageURL&action=logs&start=$start&end=$end&q=$ueQ$prioQ&page=.s&sid=$sid\">.t</a></span> "}&nbsp;
+					{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"{$pageURL}start={$start}&end={$end}&q={$ueQ}{$prioQ}&page=.s\">.t</a></span> "}&nbsp;
 				</div>
 			</td>
 		</tr>
-	</table>
+	</table></div></div>
 </fieldset>
 
-<fieldset>
-	<legend>{lng p="filter"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="filter"}</legend>
 	
-	<form action="{$pageURL}&action=logs&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=logs"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 		<table>
 			<tr>
 				<td width="40" valign="top" rowspan="5"><img src="{$tpldir}images/filter.png" border="0" alt="" width="32" height="32" /></td>
@@ -56,62 +56,52 @@
 			<tr>
 				<td class="td1">{lng p="bms_component"}:</td>
 				<td class="td2">
-					<input type="checkbox"{if isset($component[1]) && $component[1]} checked="checked"{/if} name="component[1]" id="component1" />
-					<label for="component1">Core</label> &nbsp;
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[1]) && $component[1]} checked="checked"{/if} name="component[1]" id="component1" /><span class="form-check-label" for="component1">Core</span></label> &nbsp;
 
-					<input type="checkbox"{if isset($component[2]) && $component[2]} checked="checked"{/if} name="component[2]" id="component2" />
-					<label for="component2">POP3</label> &nbsp;
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[2]) && $component[2]} checked="checked"{/if} name="component[2]" id="component2" /><span class="form-check-label" for="component2">POP3</span></label> &nbsp;
 
-					<input type="checkbox"{if isset($component[4]) && $component[4]} checked="checked"{/if} name="component[4]" id="component4" />
-					<label for="component4">IMAP</label> &nbsp;
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[4]) && $component[4]} checked="checked"{/if} name="component[4]" id="component4" /><span class="form-check-label" for="component4">IMAP</span></label> &nbsp;
 
-					<input type="checkbox"{if isset($component[8]) && $component[8]} checked="checked"{/if} name="component[8]" id="component8" />
-					<label for="component8">HTTP</label> &nbsp;
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[8]) && $component[8]} checked="checked"{/if} name="component[8]" id="component8" /><span class="form-check-label" for="component8">HTTP</span></label> &nbsp;
 
-					<input type="checkbox"{if isset($component[16]) && $component[16]} checked="checked"{/if} name="component[16]" id="component16" />
-					<label for="component16">SMTP</label> &nbsp;
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[16]) && $component[16]} checked="checked"{/if} name="component[16]" id="component16" /><span class="form-check-label" for="component16">SMTP</span></label> &nbsp;
 
-					<input type="checkbox"{if isset($component[32]) && $component[32]} checked="checked"{/if} name="component[32]" id="component32" />
-					<label for="component32">MSGQueue</label> &nbsp;
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[32]) && $component[32]} checked="checked"{/if} name="component[32]" id="component32" /><span class="form-check-label" for="component32">MSGQueue</span></label> &nbsp;
 
-					<input type="checkbox"{if isset($component[64]) && $component[64]} checked="checked"{/if} name="component[64]" id="component64" />
-					<label for="component64">Plugin</label>
+					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox"{if isset($component[64]) && $component[64]} checked="checked"{/if} name="component[64]" id="component64" /><span class="form-check-label" for="component64">Plugin</span></label>
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="priority"}:</td>
 				<td class="td2">
-					<input type="checkbox"{if !empty($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8" />
-					<label for="prio8"><img src="{$tpldir}images/debug.png" border="0" alt="" width="16" height="16" /></label> &nbsp;
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8" /><span class="form-check-label" for="prio8"><img src="{$tpldir}images/debug.png" border="0" alt="" width="16" height="16" /></span></label> &nbsp;
 
-					<input type="checkbox"{if !empty($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1" />
-					<label for="prio1"><img src="{$tpldir}images/info.png" border="0" alt="" width="16" height="16" /></label> &nbsp;
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1" /><span class="form-check-label" for="prio1"><img src="{$tpldir}images/info.png" border="0" alt="" width="16" height="16" /></span></label> &nbsp;
 
-					<input type="checkbox"{if !empty($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2" />
-					<label for="prio2"><img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" /></label> &nbsp;
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2" /><span class="form-check-label" for="prio2"><img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" /></span></label> &nbsp;
 
-					<input type="checkbox"{if !empty($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4" />
-					<label for="prio4"><img src="{$tpldir}images/error.png" border="0" alt="" width="16" height="16" /></label>
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4" /><span class="form-check-label" for="prio4"><img src="{$tpldir}images/error.png" border="0" alt="" width="16" height="16" /></span></label>
 				</td>
 			</tr>
 			<tr>
 				<td class="td1">{lng p="search"}:</td>
 				<td class="td2">
-						<input type="text" name="q" value="{if isset($q)}{text value=$q allowEmpty=true}{/if}" size="36" style="width:85%;" />
+						<input class="form-control" type="text" name="q" value="{if isset($q)}{text value=$q allowEmpty=true}{/if}" size="36" style="width:85%;" />
 				</td>
 			</tr>
 		</table>
 		
 		<p align="right">
-			<input class="button" type="submit" value=" {lng p="apply"} " />
+			<button type="submit" class="btn btn-primary"  >{lng p="apply"}</button>
 		</p>
 	</form>
 </fieldset>
 
-<fieldset>
-	<legend>{lng p="archiving"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="archiving"}</legend>
 		
-	<form action="{$pageURL}&action=logs&do=archive&sid={$sid}" method="post" onsubmit="if(EBID('saveCopy').checked || confirm('{lng p="reallynotarc"}')) spin(this); else return(false);">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=logs&action=archive"}" method="post" onsubmit="if(EBID('saveCopy').checked || confirm('{lng p="reallynotarc"}')) spin(this); else return(false);">
+	{csrffield}
 		<p>
 			{lng p="logarc_desc"}
 		</p>
@@ -128,9 +118,8 @@
 		</table>
 		
 		<p align="right">
-			<input type="checkbox" name="saveCopy" id="saveCopy" checked="checked" />
-			<label for="saveCopy"><b>{lng p="savearc"}</label>
-			<input class="button" type="submit" value=" {lng p="execute"} " />
+			<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox" name="saveCopy" id="saveCopy" checked="checked" /><span class="form-check-label" for="saveCopy"><b>{lng p="savearc"}</b></span></label>
+			<button type="submit" class="btn btn-primary"  >{lng p="execute"}</button>
 		</p>
 	</form>
 </fieldset>

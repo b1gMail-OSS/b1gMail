@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Request;
 
-use Sabre\Xml\XmlDeserializable;
-use Sabre\Xml\Reader;
-use Sabre\DAV\Exception\BadRequest;
 use Sabre\CalDAV\Plugin;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\Xml\Reader;
+use Sabre\Xml\XmlDeserializable;
 
 /**
  * CalendarQueryReport request parser.
@@ -13,14 +15,14 @@ use Sabre\CalDAV\Plugin;
  * This class parses the {urn:ietf:params:xml:ns:caldav}calendar-query
  * REPORT, as defined in:
  *
- * https://tools.ietf.org/html/rfc4791#section-7.9
+ * https://tools.ietf.org/html/rfc4791#section-7.8
  *
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class CalendarQueryReport implements XmlDeserializable {
-
+class CalendarQueryReport implements XmlDeserializable
+{
     /**
      * An array with requested properties.
      *
@@ -46,7 +48,7 @@ class CalendarQueryReport implements XmlDeserializable {
     public $expand = null;
 
     /**
-     * The mimetype of the content that should be returend. Usually
+     * The mimetype of the content that should be returned. Usually
      * text/calendar.
      *
      * @var string
@@ -64,7 +66,7 @@ class CalendarQueryReport implements XmlDeserializable {
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -79,39 +81,38 @@ class CalendarQueryReport implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $elems = $reader->parseInnerTree([
-            '{urn:ietf:params:xml:ns:caldav}comp-filter'   => 'Sabre\\CalDAV\\Xml\\Filter\\CompFilter',
-            '{urn:ietf:params:xml:ns:caldav}prop-filter'   => 'Sabre\\CalDAV\\Xml\\Filter\\PropFilter',
-            '{urn:ietf:params:xml:ns:caldav}param-filter'  => 'Sabre\\CalDAV\\Xml\\Filter\\ParamFilter',
-            '{urn:ietf:params:xml:ns:caldav}calendar-data' => 'Sabre\\CalDAV\\Xml\\Filter\\CalendarData',
-            '{DAV:}prop'                                   => 'Sabre\\Xml\\Element\\KeyValue',
+            '{urn:ietf:params:xml:ns:caldav}comp-filter' => \Sabre\CalDAV\Xml\Filter\CompFilter::class,
+            '{urn:ietf:params:xml:ns:caldav}prop-filter' => \Sabre\CalDAV\Xml\Filter\PropFilter::class,
+            '{urn:ietf:params:xml:ns:caldav}param-filter' => \Sabre\CalDAV\Xml\Filter\ParamFilter::class,
+            '{urn:ietf:params:xml:ns:caldav}calendar-data' => \Sabre\CalDAV\Xml\Filter\CalendarData::class,
+            '{DAV:}prop' => \Sabre\Xml\Element\KeyValue::class,
         ]);
 
         $newProps = [
-            'filters'    => null,
+            'filters' => null,
             'properties' => [],
         ];
 
-        if (!is_array($elems)) $elems = [];
+        if (!is_array($elems)) {
+            $elems = [];
+        }
 
         foreach ($elems as $elem) {
-
             switch ($elem['name']) {
-
-                case '{DAV:}prop' :
+                case '{DAV:}prop':
                     $newProps['properties'] = array_keys($elem['value']);
-                    if (isset($elem['value']['{' . Plugin::NS_CALDAV . '}calendar-data'])) {
-                        $newProps += $elem['value']['{' . Plugin::NS_CALDAV . '}calendar-data'];
+                    if (isset($elem['value']['{'.Plugin::NS_CALDAV.'}calendar-data'])) {
+                        $newProps += $elem['value']['{'.Plugin::NS_CALDAV.'}calendar-data'];
                     }
                     break;
-                case '{' . Plugin::NS_CALDAV . '}filter' :
+                case '{'.Plugin::NS_CALDAV.'}filter':
                     foreach ($elem['value'] as $subElem) {
-                        if ($subElem['name'] === '{' . Plugin::NS_CALDAV . '}comp-filter') {
+                        if ($subElem['name'] === '{'.Plugin::NS_CALDAV.'}comp-filter') {
                             if (!is_null($newProps['filters'])) {
                                 throw new BadRequest('Only one top-level comp-filter may be defined');
                             }
@@ -119,21 +120,18 @@ class CalendarQueryReport implements XmlDeserializable {
                         }
                     }
                     break;
-
             }
-
         }
 
         if (is_null($newProps['filters'])) {
-            throw new BadRequest('The {' . Plugin::NS_CALDAV . '}filter element is required for this request');
+            throw new BadRequest('The {'.Plugin::NS_CALDAV.'}filter element is required for this request');
         }
 
         $obj = new self();
         foreach ($newProps as $key => $value) {
             $obj->$key = $value;
         }
+
         return $obj;
-
     }
-
 }

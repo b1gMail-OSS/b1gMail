@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="types"}</legend>
 
-	<form action="prefs.sms.php?action=types&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.sms.php' params="action=types"}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -33,9 +34,9 @@
 							<td width="100">{$type.price}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.sms.php?action=types&do=edit&id={$type.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									{if !$type.std}<a href="prefs.sms.php?action=types&setDefault={$type.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-square-check"></i></a>
-									<a href="prefs.sms.php?action=types&delete={$type.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
+									<a href="{sessionurl file='prefs.sms.php' params="action=types&do=edit&id={$type.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									{if !$type.std}<a href="{sessionurl file='prefs.sms.php' params="action=types&setDefault={$type.id}"}" class="btn btn-sm"><i class="fa-regular fa-square-check"></i></a>
+									<a href="{sessionurl file='prefs.sms.php' params="action=types&delete={$type.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
 								</div>
 							</td>
 						</tr>
@@ -64,7 +65,8 @@
 <fieldset>
 	<legend>{lng p="addtype"}</legend>
 
-	<form action="prefs.sms.php?action=types&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.sms.php' params="action=types&add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
 			<div class="col-sm-10">

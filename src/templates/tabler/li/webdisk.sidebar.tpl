@@ -24,7 +24,7 @@
 			<a href="javascript:void(0);" onclick="switchWebdiskFolder(currentID);"><i class="ti ti-eye icon icon-sm me-1" aria-hidden="true"></i>{lng p="view"}</a><br />
 			<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
 			{if $allowShare}
-			<a href="javascript:void(0);" id="wdShareLink" onclick="document.location.href='webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />
+			<a href="javascript:void(0);" id="wdShareLink" onclick="document.location.href=bmAppendSession('webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID);"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />
 			<a href="javascript:void(0);" id="wdStopShareLink" style="display:none;" onclick="webdiskStopShare();"><i class="ti ti-share-off icon icon-sm me-1" aria-hidden="true"></i>{lng p="stopsharing"}</a><br />
 			{/if}
 		</div>
@@ -34,16 +34,16 @@
 		<div id="webdiskDetailFileActions" style="display:none;">
 			<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>{lng p="download"}</a><br />
 			{if $allowShare}
-			<a href="javascript:void(0);" id="wdShareFileLink" onclick="document.location.href='webdisk.php?action=shareFile&id=' + currentID + '&sid={$sid}';"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />
+			<a href="javascript:void(0);" id="wdShareFileLink" onclick="document.location.href=bmAppendSession('webdisk.php?action=shareFile&id=' + currentID);"><i class="ti ti-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharing"}</a><br />
 			<a href="javascript:void(0);" id="wdStopFileShareLink" style="display:none;" onclick="webdiskStopFileShare();"><i class="ti ti-share-off icon icon-sm me-1" aria-hidden="true"></i>{lng p="stopsharing"}</a><br />
 			{/if}
 		</div>
 		<div id="webdiskDetailZIPActions" style="display:none;">
-			<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=extractFile&id='+currentID+'&folder='+currentWebdiskFolderID+'&sid={$sid}';"><i class="ti ti-file-zip icon icon-sm me-1" aria-hidden="true"></i>{lng p="extract"}</a><br />
+			<a href="javascript:void(0);" onclick="document.location.href=bmAppendSession('webdisk.php?action=extractFile&id='+currentID+'&folder='+currentWebdiskFolderID);"><i class="ti ti-file-zip icon icon-sm me-1" aria-hidden="true"></i>{lng p="extract"}</a><br />
 		</div>
 		<div id="webdiskDetailActions" style="display:none;">
 			<a href="javascript:webdiskRename(currentWebdiskFolderID, currentID, currentType, currentTitle);"><i class="ti ti-pencil icon icon-sm me-1" aria-hidden="true"></i>{lng p="rename"}</a><br />
-			<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) document.location.href='webdisk.php?action=deleteItem&type=' + currentType + '&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="ti ti-trash icon icon-sm me-1" aria-hidden="true"></i>{lng p="delete"}</a><br />
+			<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) document.location.href=bmAppendSession('webdisk.php?action=deleteItem&type=' + currentType + '&folder='+currentWebdiskFolderID+'&id=' + currentID);"><i class="ti ti-trash icon icon-sm me-1" aria-hidden="true"></i>{lng p="delete"}</a><br />
 			<a href="javascript:webdiskClipboardAction('copy');" id="wdCopyLink"><i class="ti ti-copy icon icon-sm me-1" aria-hidden="true"></i>{lng p="copy"}</a><br />
 			<a href="javascript:webdiskClipboardAction('cut');" id="wdCutLink"><i class="ti ti-cut icon icon-sm me-1" aria-hidden="true"></i>{lng p="cut"}</a><br />
 			{hook id="webdisk.sidebar.tpl:actions.details"}
@@ -56,7 +56,7 @@
 			{hook id="webdisk.sidebar.tpl:actions.details"}
 		</div>
 		{if $clipboard}
-			<a id="pasteLink" href="webdisk.php?action=pasteHere&folder={$folderID}&sid={$sid}"><i class="ti ti-clipboard icon icon-sm me-1" aria-hidden="true"></i>{lng p="paste"}</a><br />
+			<a id="pasteLink" href="webdisk.php?action=pasteHere&folder={$folderID}{$sessionUrlSuffix}"><i class="ti ti-clipboard icon icon-sm me-1" aria-hidden="true"></i>{lng p="paste"}</a><br />
 		{/if}
 		{hook id="webdisk.sidebar.tpl:actions"}
 	</div>

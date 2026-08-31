@@ -124,8 +124,7 @@ if($_REQUEST['action'] == 'fields')
 				isset($_REQUEST['show_signup']) ? 'yes' : 'no',
 				isset($_REQUEST['show_li']) ? 'yes' : 'no',
 				(int)$_REQUEST['id']);
-			header('Location: prefs.profilefields.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.profilefields.php');
 		}
 
 		// fetch

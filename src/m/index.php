@@ -19,7 +19,8 @@
  *
  */
 
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 
 /**
  * file handler for modules
@@ -53,6 +54,9 @@ if(!isset($_REQUEST['action']))
  */
 if($_REQUEST['action'] == 'login')
 {
+	setcookie('bm_msavedUser', 		'', time() - TIME_ONE_HOUR);
+	setcookie('bm_msavedPassword', 	'', time() - TIME_ONE_HOUR);
+
 	if(isset($_REQUEST['do']) && $_REQUEST['do']=='login')
 	{
 		// get login
@@ -80,20 +84,6 @@ if($_REQUEST['action'] == 'login')
 
 			// stats
 			Add2Stat('mobile_login');
-
-			// save login?
-			if(isset($_POST['savelogin']))
-			{
-				// set cookies
-				setcookie('bm_msavedUser', 		$email, 		time() + TIME_ONE_YEAR);
-				setcookie('bm_msavedPassword', 	$password, 		time() + TIME_ONE_YEAR);
-			}
-			else
-			{
-				// delete cookies
-				setcookie('bm_msavedUser', 		'', 			time() - TIME_ONE_HOUR);
-				setcookie('bm_msavedPassword', 	'', 			time() - TIME_ONE_HOUR);
-			}
 
 			// redirect to target page
 			header('Location: email.php?sid=' . $param);

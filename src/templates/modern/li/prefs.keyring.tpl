@@ -7,6 +7,7 @@
 	</div>
 	
 	<form name="f1" method="post" action="prefs.php?action=keyring&do=action&sid={$sid}">
+		{csrffield}
 	<div class="scrollContainer withBottomBar">
 		<table class="bigTable">
 			<tr>
@@ -96,6 +97,7 @@
 	</div>
 	
 	<form name="f2" method="post" action="prefs.php?action=keyring&do=action&sid={$sid}">
+		{csrffield}
 	<div class="scrollContainer withBottomBar">
 		<table class="bigTable">
 			<tr>

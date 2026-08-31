@@ -63,7 +63,7 @@ if($_REQUEST['action'] == 'users')
 	if($_REQUEST['do'] == 'list')
 	{
 		// single action?
-		if(isset($_REQUEST['singleAction']))
+		if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
 		{
 			if($_REQUEST['singleAction'] == 'lock')
 			{
@@ -164,12 +164,13 @@ if($_REQUEST['action'] == 'users')
 		}
 
 		// sort options
-		$sortBy = isset($_REQUEST['sortBy'])
-					? $_REQUEST['sortBy']
-					: 'email';
-		$sortOrder = isset($_REQUEST['sortOrder'])
-						? strtolower($_REQUEST['sortOrder'])
-						: 'asc';
+		$sortBy = AdminSanitizeSortColumn(
+			isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'email',
+			array('id', 'email', 'nachname', 'gesperrt'),
+			'email');
+		$sortOrder = AdminSanitizeSortOrder(
+			isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'asc',
+			'asc');
 		$perPage = max(1, isset($_REQUEST['perPage'])
 						? (int)$_REQUEST['perPage']
 						: 50);
@@ -233,6 +234,25 @@ if($_REQUEST['action'] == 'users')
 				&& count($query[1]) > 0)
 			{
 				list($queryString, $queryFields) = $query;
+
+				$allowedQueryFields = array(
+					'id', 'email', 'altmail', 'vorname', 'nachname',
+					'strasse', 'hnr', 'plz', 'ort', 'land',
+					'tel', 'fax', 'mail2sms_nummer', 'absendername'
+				);
+				$safeFields = array();
+				if(is_array($queryFields))
+				{
+					foreach($queryFields as $field)
+					{
+						if(is_string($field) && in_array($field, $allowedQueryFields, true))
+							$safeFields[] = $field;
+					}
+				}
+				$queryFields = $safeFields;
+
+				if(count($queryFields) === 0)
+					$queryFields = array('email');
 
 				// query suffix
 				$theQuery .= sprintf(' AND (CAST(CONCAT(`%s`) AS CHAR) LIKE \'%%%s%%\'',
@@ -318,8 +338,23 @@ if($_REQUEST['action'] == 'users')
 		}
 		$res->Free();
 
+		if($bm_prefs['mfa_li_enable'] == 'yes' && count($users) > 0)
+		{
+			$mfaMap = BMMfa::GetAccountsForUsers(array_keys($users));
+			foreach($users as $uid => &$userRow)
+			{
+				$mfaRow = isset($mfaMap[$uid]) ? $mfaMap[$uid] : false;
+				$st = BMMfa::ListStatusForUser($uid, (int)$userRow['gruppe'], $mfaRow, true);
+				$userRow['mfaStatus'] = $st['status'];
+				$userRow['mfaMethod'] = $st['method'];
+				$userRow['mfaStatusTitle'] = $st['title'];
+			}
+			unset($userRow);
+		}
+
 		// assign
 		$tpl->assign('users', $users);
+		$tpl->assign('mfaLiEnabled', $bm_prefs['mfa_li_enable'] == 'yes');
 		$tpl->assign('fields', $fields);
 		$tpl->assign('pageNo', $pageNo);
 		$tpl->assign('pageCount', $pageCount);
@@ -342,11 +377,32 @@ if($_REQUEST['action'] == 'users')
 	//
 	else if($_REQUEST['do'] == 'edit')
 	{
+		if(isset($_REQUEST['resetMfa']) && isset($_REQUEST['id']))
+		{
+			CsrfEnforceOnPost();
+			$userObject = _new('BMUser', array((int)$_REQUEST['id']));
+			$userRow = $userObject->Fetch();
+			if($userRow)
+			{
+				BMMfa::ResetAccount('user', (int)$userRow['id'], 'full', array('setup_required' => true));
+				PutLog(sprintf('Admin <%s> reset MFA for user <%s> (%d) from <%s>',
+					$adminRow['username'],
+					DecodeEMail($userRow['email']),
+					(int)$userRow['id'],
+					$_SERVER['REMOTE_ADDR']),
+					PRIO_NOTE,
+					__FILE__,
+					__LINE__);
+				$tpl->assign('msg', isset($lang_admin['mfa_reset_ok']) ? $lang_admin['mfa_reset_ok'] : 'MFA has been reset. The user must set up MFA again at next login.');
+			}
+		}
+
 		// save?
-		if(isset($_REQUEST['save']) && isset($_POST['email']))
+		else if(isset($_REQUEST['save']) && isset($_POST['email']))
 		{
 			// prepare aliases
-			$saliaseArray = explode("\n", $_REQUEST['saliase']);
+			$saliaseRaw = isset($_REQUEST['saliase']) ? (string)$_REQUEST['saliase'] : '';
+			$saliaseArray = explode("\n", $saliaseRaw);
 			foreach($saliaseArray as $key=>$val)
 				if(($val = trim($val)) != '')
 					$saliaseArray[$key] = EncodeDomain($val);
@@ -397,29 +453,25 @@ if($_REQUEST['action'] == 'users')
 				$_REQUEST['gruppe'],
 				$_REQUEST['gesperrt'],
 				$_REQUEST['notes'],
-				$_REQUEST['re'],
-				$_REQUEST['fwd'],
-				$_REQUEST['mail2sms'],
-				$_REQUEST['forward'],
-				EncodeEMail($_REQUEST['forward_to']),
-				$_REQUEST['newsletter_optin'],
-				$_REQUEST['datumsformat'],
-				$_REQUEST['absendername'],
+				isset($_REQUEST['re']) ? $_REQUEST['re'] : 'no',
+				isset($_REQUEST['fwd']) ? $_REQUEST['fwd'] : 'no',
+				isset($_REQUEST['mail2sms']) ? $_REQUEST['mail2sms'] : 'no',
+				isset($_REQUEST['forward']) ? $_REQUEST['forward'] : 'no',
+				EncodeEMail(isset($_REQUEST['forward_to']) ? $_REQUEST['forward_to'] : ''),
+				isset($_REQUEST['newsletter_optin']) ? $_REQUEST['newsletter_optin'] : 'no',
+				isset($_REQUEST['datumsformat']) ? $_REQUEST['datumsformat'] : '',
+				isset($_REQUEST['absendername']) ? $_REQUEST['absendername'] : '',
 				$_REQUEST['anrede'],
 				$saliase,
-				$_REQUEST['mailspace_add']*1024*1024,
-				$_REQUEST['diskspace_add']*1024*1024,
-				$_REQUEST['traffic_add']*1024*1024,
+				(isset($_REQUEST['mailspace_add']) ? (float)$_REQUEST['mailspace_add'] : 0) * 1024 * 1024,
+				(isset($_REQUEST['diskspace_add']) ? (float)$_REQUEST['diskspace_add'] : 0) * 1024 * 1024,
+				(isset($_REQUEST['traffic_add']) ? (float)$_REQUEST['traffic_add'] : 0) * 1024 * 1024,
 				$_REQUEST['id']);
 
 			// update password?
 			if(isset($_REQUEST['passwort']) && strlen(trim($_REQUEST['passwort'])) > 0)
 			{
-				$salt = GenerateRandomSalt(8);
-				$db->Query('UPDATE {pre}users SET passwort=?,passwort_salt=? WHERE id=?',
-					md5(md5(CharsetDecode($_REQUEST['passwort'], false, 'ISO-8859-15')) . $salt),
-					$salt,
-					$_REQUEST['id']);
+				PasswordHashSetUserPassword((int)$_REQUEST['id'], $_REQUEST['passwort']);
 			}
 		}
 
@@ -590,7 +642,7 @@ if($_REQUEST['action'] == 'users')
 				$historyCount = count($contactHistory);
 		}
 
-		$user['saliase'] = implode("\n", array_map('DecodeDomain', explode(':', $user['saliase'])));
+		$user['saliase'] = implode("\n", array_map('DecodeDomain', array_filter(explode(':', $user['saliase']), 'strlen')));
 
 		// payments
 		$payMethods = BMPayment::GetCustomPaymentMethods();
@@ -645,6 +697,13 @@ if($_REQUEST['action'] == 'users')
 		$tpl->assign('profileFields', 	$profileFields);
 		$tpl->assign('diskFiles',		$diskFiles);
 		$tpl->assign('diskFolders', 	$diskFolders);
+		$mfaAccount = BMMfa::GetAccount('user', (int)$user['id']);
+		$mfaEnabledAt = is_array($mfaAccount) ? BMMfa::GetEnabledAtTimestamp($mfaAccount) : 0;
+		$tpl->assign('mfaEnabled', is_array($mfaAccount) && $mfaAccount['enabled'] == 'yes');
+		$tpl->assign('mfaSetupRequired', is_array($mfaAccount) && $mfaAccount['setup_required'] == 'yes');
+		$tpl->assign('mfaEnabledAtFormatted', $mfaEnabledAt > 0 ? FormatDate($mfaEnabledAt) : '');
+		$tpl->assign('mfaActiveMethod', is_array($mfaAccount) ? BMMfa::ActiveMethod($mfaAccount) : '');
+		$tpl->assign('mfaLiEnabled', $bm_prefs['mfa_li_enable'] == 'yes');
 		$tpl->assign('page', 			'users.edit.tpl');
 	}
 
@@ -661,7 +720,7 @@ if($_REQUEST['action'] == 'users')
 			die('User not found');
 
 		// single action?
-		if(isset($_REQUEST['singleAction']))
+		if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
 		{
 			if($_REQUEST['singleAction'] == 'delete')
 			{
@@ -713,12 +772,13 @@ if($_REQUEST['action'] == 'users')
 		}
 
 		// sort options
-		$sortBy = isset($_REQUEST['sortBy'])
-					? $_REQUEST['sortBy']
-					: 'date';
-		$sortOrder = isset($_REQUEST['sortOrder'])
-						? strtolower($_REQUEST['sortOrder'])
-						: 'desc';
+		$sortBy = AdminSanitizeSortColumn(
+			isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'date',
+			array('transactionid', 'description', 'amount', 'date'),
+			'date');
+		$sortOrder = AdminSanitizeSortOrder(
+			isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'desc',
+			'desc');
 		$perPage = max(1, isset($_REQUEST['perPage'])
 						? (int)$_REQUEST['perPage']
 						: 50);
@@ -785,7 +845,7 @@ if($_REQUEST['action'] == 'users')
 				(int)$_POST['amount'],
 				(int)$_POST['status'],
 				(int)$_REQUEST['transactionid']);
-			header('Location: users.php?do=transactions&id='.$tx['userid'].'&sid='.session_id());
+			SessionRedirect('users.php?do=transactions&id='.$tx['userid']);
 			exit();
 		}
 
@@ -832,7 +892,7 @@ if($_REQUEST['action'] == 'users')
 		$db->Query('UPDATE {pre}users SET contactHistory=? WHERE id=?',
 			'',
 			(int)$_REQUEST['id']);
-		header('Location: users.php?do=edit&id=' . $_REQUEST['id'] . '&sid=' . session_id());
+		SessionRedirect('users.php?do=edit&id=' . (int)$_REQUEST['id']);
 		exit();
 	}
 
@@ -841,8 +901,19 @@ if($_REQUEST['action'] == 'users')
 	//
 	else if($_REQUEST['do'] == 'login')
 	{
+		if(!AdminRequestIsPost())
+		{
+			header('Location: users.php?');
+			exit();
+		}
+
 		$userObject = _new('BMUser', array((int)$_REQUEST['id']));
 		$userRow = $userObject->Fetch();
+		if(!is_array($userRow) || empty($userRow['id']))
+		{
+			header('Location: users.php?');
+			exit();
+		}
 
 		// log this
 		PutLog(sprintf('Admin logs in as user <%s> (%d) from <%s>',
@@ -852,14 +923,11 @@ if($_REQUEST['action'] == 'users')
 			PRIO_NOTE,
 			__FILE__,
 			__LINE__);
-		$adminAuth = sprintf('%d,%d', $userRow['id'], $adminRow['adminid']);
-		$adminAuth .= ',' . md5($adminAuth.$_SESSION['bm_adminAuth']);
 
-		// create new session
-		header(sprintf('Location: ../index.php?do=login&email_full=%s&adminAuth=%s',
-			urlencode($userRow['email']),
-			urlencode(base64_encode($adminAuth))));
-		exit();
+		BMUser::CreateAdminImpersonationGrant((int)$userRow['id'], (int)$adminRow['adminid']);
+
+		SessionRedirect(sprintf('../index.php?do=login&email_full=%s&impersonate=1',
+			urlencode($userRow['email'])));
 	}
 }
 
@@ -883,8 +951,7 @@ else if($_REQUEST['action'] == 'search')
 			|| !is_array($_REQUEST['searchIn'])
 			|| strlen(trim($_REQUEST['q'])) < 1)
 		{
-			header('Location: users.php?action=search&sid=' . session_id());
-			exit();
+			SessionRedirect('users.php?action=search');
 		}
 
 		// collect fields
@@ -909,8 +976,7 @@ else if($_REQUEST['action'] == 'search')
 
 		// build query string
 		$queryString = json_encode(array(trim($_REQUEST['q']), $fields));
-		header('Location: users.php?query=' . urlencode($queryString) . '&sid='  . session_id());
-		exit();
+		SessionRedirect('users.php?query=' . urlencode($queryString));
 	}
 }
 
@@ -983,7 +1049,7 @@ else if($_REQUEST['action'] == 'create')
 					$userID);
 
 				$msgIcon = 'info32';
-				$msgText = sprintf($lang_admin['accountcreated'], $userID, session_id());
+				$msgText = sprintf($lang_admin['accountcreated'], $userID);
 				$tpl->assign('backLink',		'users.php?action=create&');
 			}
 			else

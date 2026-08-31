@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/mailbox.class.php');
 include('./serverlib/payment.class.php');
 RequestPrivileges(PRIVILEGES_USER);
@@ -92,11 +93,16 @@ $prefsItems['faq'] = true;
 if(BMPayment::Available())
 	$prefsItems['orders'] = true;
 $prefsItems['membership'] = true;
+if(BMMfa::LiUserMayManageMfa((int)$groupRow['id']) && empty($_SESSION['bm_mfaSetupRequired']))
+	$prefsItems['mfa'] = true;
 
 function PrefsDone()
 {
-	header('Location: prefs.php?sid='.session_id());
-	exit();
+	$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : 'start';
+	if($action === '' || $action === 'start')
+		SessionRedirect('prefs.php');
+	else
+		SessionRedirect('prefs.php?action=' . rawurlencode($action));
 }
 
 function _prefsItemsSort($a, $b)
@@ -128,6 +134,34 @@ if($_REQUEST['action'] == 'start')
 }
 
 /**
+ * avatar upload / delete
+ */
+else if($_REQUEST['action'] == 'avatar' && isset($_REQUEST['do']) && IsPOSTRequest())
+{
+	CsrfEnforceOnPost();
+
+	if($_REQUEST['do'] == 'upload')
+	{
+		$errKey = AvatarHandleUpload('user', (int)$thisUser->_id, $_FILES['avatar_file'] ?? null);
+		if($errKey === '')
+		{
+			$thisUser->SetPref('avatar_source', 'upload');
+			$_SESSION['bm_avatarFlash'] = 'ok';
+		}
+		else
+			$_SESSION['bm_avatarFlash'] = $errKey;
+	}
+	else if($_REQUEST['do'] == 'delete')
+	{
+		AvatarDeleteCustom('user', (int)$thisUser->_id);
+		$thisUser->SetPref('avatar_source', 'initials');
+		$_SESSION['bm_avatarFlash'] = 'deleted';
+	}
+
+	SessionRedirect('prefs.php?action=common');
+}
+
+/**
  * common
  */
 else if($_REQUEST['action'] == 'common')
@@ -138,12 +172,18 @@ else if($_REQUEST['action'] == 'common')
 		$composeDefaults	= array();
 	if(!array_key_exists('savecopy', $composeDefaults)) $composeDefaults['savecopy']	= '';
 	if(!array_key_exists('priority', $composeDefaults)) $composeDefaults['priority']	= '';
+	EnsureLoginNotifySchema();
+	$loginNotifyAllowed = isset($bm_prefs['login_notify_li']) && $bm_prefs['login_notify_li'] == 'yes'
+		&& MfaGroupOption((int)$groupRow['id'], 'login_notify', 'no') == 'yes';
 	// save?
 	if(isset($_REQUEST['do']) && $_REQUEST['do']=='save'
 		&& IsPOSTRequest())
 	{
 		if($_REQUEST['absendername'] == $defaultName)
 			$_REQUEST['absendername'] = '';
+		$notifyLoginNewIp = (!isset($userRow['notify_login_new_ip']) || $userRow['notify_login_new_ip'] == 'yes');
+		if($loginNotifyAllowed)
+			$notifyLoginNewIp = isset($_REQUEST['notify_login_new_ip']);
 		$thisUser->UpdateCommonSettings(isset($_REQUEST['in_refresh_active']) ? max(15, (int)$_REQUEST['in_refresh']) : 0,
 			isset($_REQUEST['soforthtml']),
 			(int)$_REQUEST['c_firstday'],
@@ -168,6 +208,7 @@ else if($_REQUEST['action'] == 'common')
 			isset($_REQUEST['notify_sound']),
 			isset($_REQUEST['notify_email']),
 			isset($_REQUEST['notify_birthday']),
+			$notifyLoginNewIp,
 			isset($_REQUEST['auto_save_drafts']),
 			$_REQUEST['auto_save_drafts_interval']);
 		if(!empty($_REQUEST['preferred_language']))
@@ -182,6 +223,7 @@ else if($_REQUEST['action'] == 'common')
 		$thisUser->SetPref('webdisk_hideHidden', isset($_REQUEST['webdisk_hidehidden']));
 		$thisUser->SetPref('autosend_dn', isset($_REQUEST['autosend_dn']));
 		$thisUser->SetPref('linesep', isset($_REQUEST['linesep']));
+		$thisUser->SetPref('avatar_source', AvatarNormalizeSource(isset($_REQUEST['avatar_source']) ? $_REQUEST['avatar_source'] : 'initials'));
 		$composeDefaults = isset($_REQUEST['composeDefaults']) && is_array($_REQUEST['composeDefaults'])
 			? $_REQUEST['composeDefaults']
 			: array();
@@ -233,9 +275,28 @@ else if($_REQUEST['action'] == 'common')
 	$tpl->assign('attcheck',			$userRow['attcheck']);
 	$tpl->assign('autosend_dn',			$thisUser->GetPref('autosend_dn'));
 	$tpl->assign('linesep',				$thisUser->GetPref('linesep'));
+	$avatarSource = AvatarGetUserSource($thisUser);
+	$tpl->assign('avatar_source',		$avatarSource);
+	$tpl->assign('avatarDisplayMode',	AvatarResolveDisplayMode($avatarSource, 'user', (int)$thisUser->_id));
+	$tpl->assign('avatarHasCustom',		AvatarHasCustomImage('user', (int)$thisUser->_id));
+	$tpl->assign('avatarError',			'');
+	$tpl->assign('avatarMessage',		'');
+	if(isset($_SESSION['bm_avatarFlash']))
+	{
+		$flash = $_SESSION['bm_avatarFlash'];
+		unset($_SESSION['bm_avatarFlash']);
+		if($flash === 'ok')
+			$tpl->assign('avatarMessage', $lang_user['avatar_upload_ok']);
+		else if($flash === 'deleted')
+			$tpl->assign('avatarMessage', $lang_user['avatar_delete_ok']);
+		else if(isset($lang_user[$flash]))
+			$tpl->assign('avatarError', $lang_user[$flash]);
+	}
 	$tpl->assign('notifySound', 		$userRow['notify_sound'] == 'yes');
 	$tpl->assign('notifyEMail', 		$userRow['notify_email'] == 'yes');
 	$tpl->assign('notifyBirthday', 		$userRow['notify_birthday'] == 'yes');
+	$tpl->assign('loginNotifyAllowed',	$loginNotifyAllowed);
+	$tpl->assign('notifyLoginNewIp',	!isset($userRow['notify_login_new_ip']) || $userRow['notify_login_new_ip'] == 'yes');
 	if (!class_exists('BMPush', false)) {
 		include B1GMAIL_DIR.'serverlib/push.class.php';
 	}
@@ -629,7 +690,7 @@ else if($_REQUEST['action'] == 'coupons'
 			// success
 			$tpl->assign('title', $lang_user['redeemcoupon']);
 			$tpl->assign('msg', $lang_user['couponok']);
-			$tpl->assign('backLink', 'prefs.php?sid=' . session_id());
+			$tpl->assign('backLink', 'prefs.php');
 			$tpl->assign('pageContent', 'li/msg.tpl');
 		}
 		else
@@ -692,8 +753,7 @@ else if($_REQUEST['action'] == 'filters'
 			isset($_REQUEST['flags']) && is_array($_REQUEST['flags'])
 				? (int)array_sum($_REQUEST['flags'])
 				: 0);
-		header('Location: prefs.php?action=filters&sid=' . session_id());
-		exit();
+		SessionRedirect('prefs.php?action=filters');
 	}
 
 	//
@@ -849,8 +909,7 @@ else if($_REQUEST['action'] == 'filters'
 		$id = $thisUser->AddFilter($_REQUEST['title'], isset($_REQUEST['active']));
 
 		// redirect to edit form
-		header('Location: prefs.php?action=filters&do=edit&id=' . $id . '&sid=' . session_id());
-		exit();
+		SessionRedirect('prefs.php?action=filters&do=edit&id=' . $id);
 	}
 
 	//
@@ -1023,8 +1082,7 @@ else if($_REQUEST['action'] == 'signatures')
 		$id = $thisUser->AddSignature($_REQUEST['titel'],
 			$_REQUEST['text'],
 			$_REQUEST['html']);
-		header('Location: prefs.php?action=signatures&sid=' . session_id());
-		exit();
+		SessionRedirect('prefs.php?action=signatures');
 	}
 
 	//
@@ -1056,8 +1114,7 @@ else if($_REQUEST['action'] == 'signatures')
 			$_REQUEST['titel'],
 			$_REQUEST['text'],
 			$_REQUEST['html']);
-		header('Location: prefs.php?action=signatures&sid=' . session_id());
-		exit();
+		SessionRedirect('prefs.php?action=signatures');
 	}
 
 	//
@@ -1149,8 +1206,7 @@ else if($_REQUEST['action'] == 'aliases'
 				{
 					$thisUser->AddAlias($emailAddress, ALIAS_SENDER|ALIAS_RECIPIENT,
 					strip_tags($_REQUEST['email_name']),isset($_REQUEST['email_login']) ? 'yes' : 'no');
-					header('Location: prefs.php?action=aliases&sid=' . session_id());
-					exit();
+					SessionRedirect('prefs.php?action=aliases');
 				}
 				else
 				{
@@ -1182,7 +1238,7 @@ else if($_REQUEST['action'] == 'aliases'
 						$thisUser->AddAlias($emailAddress, ALIAS_SENDER,strip_tags($_REQUEST['typ_1_email_name']));
 						$tpl->assign('title', $lang_user['addalias']);
 						$tpl->assign('msg', sprintf($lang_user['confirmalias'], DecodeEMail($emailAddress)));
-						$tpl->assign('backLink', 'prefs.php?action=aliases&sid=' . session_id());
+						$tpl->assign('backLink', 'prefs.php?action=aliases');
 						$tpl->assign('pageContent', 'li/msg.tpl');
 					}
 				}
@@ -1331,8 +1387,7 @@ else if($_REQUEST['action'] == 'extpop3')
 						(int)$_REQUEST['p_port'],
 						isset($_REQUEST['p_keep']),
 						isset($_REQUEST['p_ssl']));
-					header('Location: prefs.php?action=extpop3&sid=' . session_id());
-					exit();
+					SessionRedirect('prefs.php?action=extpop3');
 				}
 				else
 				{
@@ -1404,8 +1459,7 @@ else if($_REQUEST['action'] == 'extpop3')
 				isset($_REQUEST['p_keep']),
 				isset($_REQUEST['p_ssl']),
 				isset($_REQUEST['paused']));
-			header('Location: prefs.php?action=extpop3&sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.php?action=extpop3');
 		}
 		else
 		{
@@ -1569,15 +1623,18 @@ else if($_REQUEST['action'] == 'membership')
 			}
 			else
 			{
-				$userRow['passwort'] = md5(md5($suPass1).$userRow['passwort_salt']);
+				$userRow['passwort'] = PasswordHashCreate($suPass1, 'li');
+				$userRow['passwort_salt'] = '';
 				$thisUser->UpdateContactData($userRow, false, true, 0, $suPass1);
+				$db->Query('UPDATE {pre}users SET passwort_salt=? WHERE id=?', '', (int)$userRow['id']);
+				BMUser::InvalidateOtherSessionsForUser((int)$userRow['id']);
 
 				// delete cookies
 				if(isset($_COOKIE['bm_savedToken']))
 					BMUser::DeleteSavedLogin($_COOKIE['bm_savedToken']);
-				setcookie('bm_savedUser', 		'',		 		time() - TIME_ONE_HOUR);
-				setcookie('bm_savedToken', 		'',		 		time() - TIME_ONE_HOUR);
-				setcookie('bm_savedPassword', 	'',		 		time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedUser', '', time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
 
 				PrefsDone();
 			}
@@ -1738,9 +1795,9 @@ else if($_REQUEST['action'] == 'membership')
 		// delete cookies
 		if(isset($_COOKIE['bm_savedToken']))
 			BMUser::DeleteSavedLogin($_COOKIE['bm_savedToken']);
-		setcookie('bm_savedUser', 		'', 			time() - TIME_ONE_HOUR);
-		setcookie('bm_savedToken', 		'', 			time() - TIME_ONE_HOUR);
-		setcookie('bm_savedPassword', 	'', 			time() - TIME_ONE_HOUR);
+		BMSecureSetCookie('bm_savedUser', '', time() - TIME_ONE_HOUR);
+		BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
+		BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
 
 		// page output
 		$tpl->assign('ssl_url',				$bm_prefs['ssl_url']);
@@ -1810,8 +1867,7 @@ else if($_REQUEST['action'] == 'orders'
 			$db->Query('DELETE FROM {pre}invoices WHERE `orderid`=?',
 					   $_REQUEST['id']);
 		}
-		header('Location: prefs.php?action=orders&sid=' . session_id());
-		exit();
+		SessionRedirect('prefs.php?action=orders');
 	}
 }
 
@@ -1821,8 +1877,8 @@ else if($_REQUEST['action'] == 'orders'
 else if($_REQUEST['action'] == 'paymentReturn')
 {
 	$tpl->assign('title', $lang_user['thankyou']);
-	$tpl->assign('msg', sprintf($lang_user['paymentreturn_txt'], session_id()));
-	$tpl->assign('backLink', 'prefs.php?action=orders&sid=' . session_id());
+	$tpl->assign('msg', $lang_user['paymentreturn_txt']);
+	$tpl->assign('backLink', SessionUrl('prefs.php?action=orders'));
 	$tpl->assign('pageContent', 'li/msg.tpl');
 	$tpl->display('li/index.tpl');
 }
@@ -2009,7 +2065,7 @@ else if($_REQUEST['action'] == 'keyring'
 				}
 				else
 				{
-					echo 'parent.document.location.href=\'prefs.php?action=keyring&sid=' . session_id() . '\';' . "\n";
+					echo 'parent.document.location.href=\'prefs.php?action=keyring' . '\';' . "\n";
 				}
 			}
 			else
@@ -2035,7 +2091,7 @@ else if($_REQUEST['action'] == 'keyring'
 		// page output
 		$tpl->assign('title', $lang_user['addcert']);
 		$tpl->assign('text', $lang_user['addcerttext']);
-		$tpl->assign('formAction', 'prefs.php?action=keyring&do=uploadPublicCertificate&sid=' . session_id());
+		$tpl->assign('formAction', 'prefs.php?action=keyring&do=uploadPublicCertificate');
 		$tpl->assign('fieldName', 'certFile');
 		$tpl->display('li/dialog.openfile.tpl');
 	}
@@ -2064,7 +2120,7 @@ else if($_REQUEST['action'] == 'keyring'
 			}
 			else
 			{
-				echo 'parent.document.location.href=\'prefs.php?action=keyring&sid=' . session_id() . '\';' . "\n";
+				echo 'parent.document.location.href=\'prefs.php?action=keyring' . '\';' . "\n";
 			}
 		}
 		else
@@ -2136,7 +2192,7 @@ else if($_REQUEST['action'] == 'keyring'
 				$password = CharsetDecode($_REQUEST['password'], false, 'ISO-8859-15');
 
 				// password wrong
-				if(md5(md5($password).$userRow['passwort_salt']) !== $userRow['passwort'])
+				if(!BMUser::VerifyPassword($password, $userRow))
 				{
 					$tpl->assign('title', $lang_user['error']);
 					$tpl->assign('msg', $lang_user['issuecert_wrongpw']);
@@ -2171,7 +2227,7 @@ else if($_REQUEST['action'] == 'keyring'
 					$caPKKey = $bm_prefs['ca_cert_pk'];
 					$caPKPass = $bm_prefs['ca_cert_pk_pass'];
 					if($caPKPass != '')
-						$caPKPass = CryptPKPassPhrase(base64_decode($caPKPass));
+						$caPKPass = CryptPKPassPhrase(base64_decode($caPKPass), true);
 					$caPK = $caPKPass != '' ? array($caPKKey, $caPKPass) : $caPKKey;
 
 					// sign
@@ -2189,8 +2245,7 @@ else if($_REQUEST['action'] == 'keyring'
 							PRIO_NOTE,
 							__FILE__,
 							__LINE__);
-						header('Location: prefs.php?action=keyring&sid=' . session_id());
-						exit();
+						SessionRedirect('prefs.php?action=keyring');
 					}
 
 					// error
@@ -2327,7 +2382,7 @@ else if($_REQUEST['action'] == 'keyring'
 				fwrite($fp, $pkcs12Data);
 				fclose($fp);
 
-				echo 'parent.document.location.href=\'prefs.php?action=keyring&do=getPrivateCertificate&id=' . $tempFileID . '&name=' . urlencode($hash) . '&sid=' . session_id() . '\';' . "\n";
+				echo 'parent.document.location.href=\'prefs.php?action=keyring&do=getPrivateCertificate&id=' . $tempFileID . '&name=' . urlencode($hash) . '\';' . "\n";
 				echo 'parent.hideOverlay();' . "\n";
 			}
 		}
@@ -2366,6 +2421,215 @@ else if($_REQUEST['action'] == 'keyring'
 			exit();
 		}
 	}
+}
+
+/**
+ * two-factor authentication (MFA)
+ */
+else if($_REQUEST['action'] == 'mfa')
+{
+	$userID = (int)$userRow['id'];
+	$groupID = (int)$groupRow['id'];
+
+	if(!BMMfa::LiUserMayManageMfa($groupID))
+	{
+		$tpl->assign('title', $lang_user['error']);
+		$tpl->assign('msg', $lang_user['errorsaving']);
+		$tpl->assign('pageContent', 'li/msg.tpl');
+		$tpl->display('li/index.tpl');
+		exit();
+	}
+
+	$mfaAccount = BMMfa::GetAccount('user', $userID);
+	$mfaMandatory = BMMfa::IsMandatoryForAccount('user', $userID, $groupID);
+	$mfaCanUseEmail = BMMfa::UserCanUseEmailMfa($userID);
+	$mfaAltMail = $mfaCanUseEmail ? BMMfa::EmailAddressForUserMfa($userID) : false;
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'mfaSave' && isset($_POST['switch_method']))
+	{
+		BMMfa::SetSetupMethod($_POST['switch_method'], $userID, $groupID, 'bm_mfaPrefsMethod');
+		unset($_SESSION['bm_mfaPrefsSwitch']);
+		SessionRedirect('prefs.php?action=mfa');
+	}
+
+	$mfaSetupMethod = BMMfa::ResolveSetupMethod($userID, $groupID, 'bm_mfaPrefsMethod');
+	$mfaPrefsSwitch = isset($_SESSION['bm_mfaPrefsSwitch']) ? $_SESSION['bm_mfaPrefsSwitch'] : '';
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'mfaSave')
+	{
+		$needsPassword = isset($_POST['mfa_action'])
+			&& !in_array($_POST['mfa_action'], array('resend_enable_email', 'resend_switch_email'), true);
+		$password = isset($_POST['password']) ? CharsetDecode($_POST['password'], false, 'ISO-8859-15') : '';
+
+		if($needsPassword && ($password === '' || !BMMfa::VerifyUserPassword($userID, $password)))
+			$tpl->assign('mfaError', isset($lang_user['mfa_wrong_password']) ? $lang_user['mfa_wrong_password'] : 'Wrong password.');
+		else if(isset($_POST['mfa_action']))
+		{
+			$action = $_POST['mfa_action'];
+
+			if($action === 'resend_enable_email' || $action === 'resend_switch_email')
+			{
+				if(BMMfa::SendSetupEmailCode($userID, $groupID, 'prefs_resend'))
+					$tpl->assign('mfaInfo', isset($lang_user['mfa_code_sent']) ? $lang_user['mfa_code_sent'] : '');
+				else
+					$tpl->assign('mfaError', isset($lang_user['mfa_email_send_failed']) ? $lang_user['mfa_email_send_failed'] : '');
+			}
+			else if($action === 'enable_totp')
+			{
+				$secret = isset($_SESSION['bm_mfaPrefsSecret']) ? $_SESSION['bm_mfaPrefsSecret'] : BMMfa::GenerateTotpSecret();
+				if(isset($_POST['totp_code']) && BMMfa::VerifyTotp($secret, $_POST['totp_code']))
+				{
+					$mfaID = is_array($mfaAccount) ? (int)$mfaAccount['id'] : BMMfa::EnsureUserAccount($userID, $groupID, 'totp', $secret);
+					$db->Query('UPDATE {pre}mfa_accounts SET totp_secret=?,totp_enabled=?,email_enabled=?,method=? WHERE id=?',
+						$secret, 'yes', 'no', 'totp', $mfaID);
+					BMMfa::ActivateMethod($mfaID, 'totp');
+					$tpl->assign('backupCodes', BMMfa::GenerateBackupCodes($mfaID));
+					BMMfa::CompleteSetup($mfaID);
+					unset($_SESSION['bm_mfaPrefsSecret'], $_SESSION['bm_mfaPrefsMethod']);
+					PutLog(sprintf('User <%d> enabled MFA (TOTP) from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+					$tpl->assign('mfaInfo', isset($lang_user['mfa_enabled']) ? $lang_user['mfa_enabled'] : 'MFA enabled.');
+				}
+				else
+					$tpl->assign('mfaError', isset($lang_user['mfa_verify_failed']) ? $lang_user['mfa_verify_failed'] : 'Invalid code.');
+			}
+			else if($action === 'enable_email' && $mfaCanUseEmail)
+			{
+				$acc = BMMfa::GetAccount('user', $userID);
+				$mfaID = is_array($acc) ? (int)$acc['id'] : 0;
+				if($mfaID <= 0)
+				{
+					BMMfa::SendSetupEmailCode($userID, $groupID, 'prefs_enable');
+					$acc = BMMfa::GetAccount('user', $userID);
+					$mfaID = is_array($acc) ? (int)$acc['id'] : 0;
+				}
+				if($mfaID > 0 && isset($_POST['email_code']) && BMMfa::VerifyEmailCode($mfaID, $_POST['email_code']))
+				{
+					BMMfa::ActivateMethod($mfaID, 'email');
+					$tpl->assign('backupCodes', BMMfa::GenerateBackupCodes($mfaID));
+					BMMfa::CompleteSetup($mfaID);
+					unset($_SESSION['bm_mfaPrefsMethod']);
+					PutLog(sprintf('User <%d> enabled MFA (e-mail) from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+					$tpl->assign('mfaInfo', isset($lang_user['mfa_enabled']) ? $lang_user['mfa_enabled'] : 'MFA enabled.');
+				}
+				else
+					$tpl->assign('mfaError', isset($lang_user['mfa_verify_failed']) ? $lang_user['mfa_verify_failed'] : 'Invalid code.');
+			}
+			else if($action === 'switch_to_email' && $mfaCanUseEmail && is_array($mfaAccount) && $mfaAccount['enabled'] == 'yes')
+			{
+				if(BMMfa::SendSetupEmailCode($userID, $groupID, 'prefs_switch'))
+				{
+					$_SESSION['bm_mfaPrefsSwitch'] = 'email';
+					BMMfa::ResolveSetupMethod($userID, $groupID, 'bm_mfaPrefsMethod');
+					$_SESSION['bm_mfaPrefsMethod'] = 'email';
+					$tpl->assign('mfaInfo', sprintf(
+						isset($lang_user['mfa_email_sent_to']) ? $lang_user['mfa_email_sent_to'] : 'Code sent to %s.',
+						BMMfa::MaskEmail($mfaAltMail)
+					));
+				}
+				else
+					$tpl->assign('mfaError', isset($lang_user['mfa_email_send_failed']) ? $lang_user['mfa_email_send_failed'] : '');
+			}
+			else if($action === 'switch_to_totp' && is_array($mfaAccount) && $mfaAccount['enabled'] == 'yes')
+			{
+				$_SESSION['bm_mfaPrefsSwitch'] = 'totp';
+				$_SESSION['bm_mfaPrefsMethod'] = 'totp';
+				if(!isset($_SESSION['bm_mfaPrefsSecret']))
+					$_SESSION['bm_mfaPrefsSecret'] = BMMfa::GenerateTotpSecret();
+			}
+			else if($action === 'confirm_switch_email' && $mfaCanUseEmail && is_array($mfaAccount))
+			{
+				$mfaID = (int)$mfaAccount['id'];
+				if(isset($_POST['email_code']) && BMMfa::VerifyEmailCode($mfaID, $_POST['email_code']))
+				{
+					BMMfa::ActivateMethod($mfaID, 'email');
+					BMMfa::CompleteSetup($mfaID);
+					unset($_SESSION['bm_mfaPrefsSwitch'], $_SESSION['bm_mfaPrefsMethod']);
+					PutLog(sprintf('User <%d> switched MFA to e-mail from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+					$tpl->assign('mfaInfo', isset($lang_user['mfa_method_switched']) ? $lang_user['mfa_method_switched'] : 'Method updated.');
+				}
+				else
+					$tpl->assign('mfaError', isset($lang_user['mfa_verify_failed']) ? $lang_user['mfa_verify_failed'] : 'Invalid code.');
+			}
+			else if($action === 'confirm_switch_totp' && is_array($mfaAccount))
+			{
+				$secret = isset($_SESSION['bm_mfaPrefsSecret']) ? $_SESSION['bm_mfaPrefsSecret'] : BMMfa::GenerateTotpSecret();
+				if(isset($_POST['totp_code']) && BMMfa::VerifyTotp($secret, $_POST['totp_code']))
+				{
+					$mfaID = (int)$mfaAccount['id'];
+					$db->Query('UPDATE {pre}mfa_accounts SET totp_secret=?,totp_enabled=?,email_enabled=?,method=? WHERE id=?',
+						$secret, 'yes', 'no', 'totp', $mfaID);
+					BMMfa::ActivateMethod($mfaID, 'totp');
+					BMMfa::CompleteSetup($mfaID);
+					unset($_SESSION['bm_mfaPrefsSecret'], $_SESSION['bm_mfaPrefsSwitch'], $_SESSION['bm_mfaPrefsMethod']);
+					PutLog(sprintf('User <%d> switched MFA to TOTP from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+					$tpl->assign('mfaInfo', isset($lang_user['mfa_method_switched']) ? $lang_user['mfa_method_switched'] : 'Method updated.');
+				}
+				else
+					$tpl->assign('mfaError', isset($lang_user['mfa_verify_failed']) ? $lang_user['mfa_verify_failed'] : 'Invalid code.');
+			}
+			else if($action === 'disable' && !$mfaMandatory)
+			{
+				BMMfa::ResetAccount('user', $userID, 'full');
+				unset($_SESSION['bm_mfaPrefsSecret'], $_SESSION['bm_mfaPrefsMethod'], $_SESSION['bm_mfaPrefsSwitch']);
+				PutLog(sprintf('User <%d> disabled MFA from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+				$mfaAccount = false;
+				$tpl->assign('mfaInfo', isset($lang_user['mfa_disabled']) ? $lang_user['mfa_disabled'] : 'MFA disabled.');
+			}
+			else if($action === 'regen_backup' && is_array($mfaAccount) && $mfaAccount['enabled'] == 'yes')
+			{
+				$tpl->assign('backupCodes', BMMfa::GenerateBackupCodes((int)$mfaAccount['id']));
+				PutLog(sprintf('User <%d> regenerated MFA backup codes from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+			}
+			else if($action === 'reset_setup' && is_array($mfaAccount) && $mfaAccount['enabled'] == 'yes')
+			{
+				BMMfa::PrepareUserSelfServiceReset($userID, $groupID);
+				PutLog(sprintf('User <%d> reset MFA for self-service re-setup from <%s>', $userID, $_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+				SessionRedirect('start.php?action=mfaSetup');
+				exit();
+			}
+		}
+		$mfaAccount = BMMfa::GetAccount('user', $userID);
+		$mfaPrefsSwitch = isset($_SESSION['bm_mfaPrefsSwitch']) ? $_SESSION['bm_mfaPrefsSwitch'] : '';
+	}
+
+	if($mfaSetupMethod === 'email' && $mfaCanUseEmail
+		&& (!is_array($mfaAccount) || $mfaAccount['enabled'] != 'yes')
+		&& empty($mfaPrefsSwitch)
+		&& empty($_SESSION['bm_mfaPrefsEmailSent']))
+	{
+		if(BMMfa::SendSetupEmailCode($userID, $groupID, 'prefs_auto'))
+		{
+			$_SESSION['bm_mfaPrefsEmailSent'] = true;
+			$tpl->assign('mfaInfo', sprintf(
+				isset($lang_user['mfa_email_sent_to']) ? $lang_user['mfa_email_sent_to'] : 'Code sent to %s.',
+				BMMfa::MaskEmail($mfaAltMail)
+			));
+		}
+	}
+
+	if($mfaSetupMethod !== 'email')
+		unset($_SESSION['bm_mfaPrefsEmailSent']);
+
+	if(!isset($_SESSION['bm_mfaPrefsSecret']))
+		$_SESSION['bm_mfaPrefsSecret'] = BMMfa::GenerateTotpSecret();
+	$setupSecret = $_SESSION['bm_mfaPrefsSecret'];
+	$issuer = isset($bm_prefs['titel']) ? $bm_prefs['titel'] : 'b1gMail';
+	$uri = BMMfa::ProvisioningUri(DecodeEMail($userRow['email']), $setupSecret, $issuer);
+
+	$tpl->assign('mfaAccount', $mfaAccount);
+	$tpl->assign('mfaMandatory', $mfaMandatory);
+	$tpl->assign('mfaCanUseEmail', $mfaCanUseEmail);
+	$tpl->assign('mfaSetupMethod', $mfaSetupMethod);
+	$tpl->assign('mfaAltMailMasked', $mfaAltMail !== false ? BMMfa::MaskEmail($mfaAltMail) : '');
+	$tpl->assign('mfaPrefsSwitch', $mfaPrefsSwitch);
+	$tpl->assign('mfaActiveMethod', is_array($mfaAccount) ? BMMfa::ActiveMethod($mfaAccount) : '');
+	$mfaEnabledAt = is_array($mfaAccount) ? BMMfa::GetEnabledAtTimestamp($mfaAccount) : 0;
+	$tpl->assign('mfaEnabledAtFormatted', $mfaEnabledAt > 0 ? FormatDate($mfaEnabledAt) : '');
+	$tpl->assign('mfaQrSvg', $mfaSetupMethod === 'totp' ? BMMfa::QrSvg($uri) : '');
+	$tpl->assign('mfaSecret', $setupSecret);
+	$tpl->assign('pageTitle', isset($lang_user['mfa']) ? $lang_user['mfa'] : 'Two-factor authentication');
+	$tpl->assign('pageContent', 'li/prefs.mfa.tpl');
+	$tpl->display('li/index.tpl');
 }
 
 /**

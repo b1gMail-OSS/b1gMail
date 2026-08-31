@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="domains"}</legend>
 
-	<form action="prefs.common.php?action=domains&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.common.php' params="action=domains"}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -27,7 +28,7 @@
 							<td style="text-align:center;"><input type="checkbox" name="domains[{$domain.domain}][in_aliases]"{if $domain.in_aliases} checked="checked"{/if} /></td>
 							<td><input type="text" name="domains[{$domain.domain}][pos]" value="{if isset($domain.pos)}{text value=$domain.pos allowEmpty=true}{/if}" size="6" /></td>
 							<td>
-								<a href="prefs.common.php?action=domains&delete={$domain.urlDomain}&sid={$sid}" class="btn btn-sm" onclick="return confirm('{lng p="realdel"}');"><i class="fa-regular fa-trash-can"></i></a>
+								<a href="{sessionurl file='prefs.common.php' params="action=domains&delete={$domain.urlDomain}"}" class="btn btn-sm" onclick="return confirm('{lng p="realdel"}');"><i class="fa-regular fa-trash-can"></i></a>
 							</td>
 						</tr>
 					{/foreach}
@@ -62,7 +63,8 @@
 <fieldset>
 	<legend>{lng p="adddomain"}</legend>
 
-	<form action="prefs.common.php?action=domains&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.common.php' params="action=domains&add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="row">
 			<div class="col-md-4">
 				<div class="mb-3">

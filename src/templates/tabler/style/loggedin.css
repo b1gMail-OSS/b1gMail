@@ -3114,3 +3114,26 @@ INPUT.primary:disabled
 	gap: 0.5rem;
 	margin-left: auto;
 }
+
+/* Mandatory MFA setup: block UI behind modal */
+body.bm-mfa-setup-active #main
+{
+	pointer-events: none;
+	user-select: none;
+}
+
+#bmMfaSetupModal
+{
+	z-index: 12050;
+}
+
+#bmMfaSetupBackdrop
+{
+	z-index: 12040;
+}
+
+/* Session lock must stay above MFA setup modal */
+body.bm-mfa-setup-active .bm-session-lock-overlay
+{
+	z-index: 12100;
+}

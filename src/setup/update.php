@@ -24,9 +24,7 @@ require './common.inc.php';
 require '../serverlib/config.inc.php';
 require '../serverlib/version.inc.php';
 
-if(file_exists(__DIR__."/lock_update")) {
-    die("Lockfile detected. Please remove the file lock_update if you want rerun.");
-}
+// lock is checked after language load
 
 // known versions
 $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0.0',
@@ -35,8 +33,8 @@ $knownVersions = ['7.0.0-Beta1', '7.0.0-Beta2', '7.0.0-Beta3', '7.0.0-RC1', '7.0
                         '7.3.0-Beta1', '7.3.0-Beta2', '7.3.0-Beta3', '7.3.0-Beta4',
                         '7.3.0-Beta5', '7.3.0-Beta6', '7.3.0',
                         '7.4.0-Beta1', '7.4.0-Beta2', '7.4.0-Beta3', '7.4.0-Beta4', '7.4.0', 
-                        '7.4.1-Beta1', '7.4.1-Beta2', '7.4.1-Beta3', '7.4.1-Beta4', '7.4.1-RC1', 
-                        '7.4.1-RC2', '7.4.1', '7.4.2-RC1'];
+                        '7.4.1-Beta1', '7.4.1-Beta2', '7.4.1-Beta3', '7.4.1-Beta4', '7.4.1-RC1', '7.4.1-RC2',
+                        '7.5.0-RC1', '7.5.0-RC2'];
 
 // steps
 define('STEP_SELECT_LANGUAGE', 0);
@@ -78,14 +76,29 @@ if (!isset($_REQUEST['step'])) {
 }
 
 // read language file
-if (!isset($_GET['lng'])) {
+if (!isset($_GET['lng']) && !isset($_POST['lng'])) {
     $_GET['lng'] = strpos($bm_prefs['language'], 'deutsch') !== false ? 'deutsch' : 'english';
 }
 ReadLanguage();
 
-// header
+if ($step == STEP_UPDATE_STEP) {
+    if (!SetupCsrfOk(true)) {
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo 'ERROR:CSRF';
+        exit;
+    }
+} elseif (!SetupCsrfOk()) {
+    $step = STEP_WELCOME;
+    $setupError = $lang_setup['csrf_fail'];
+}
+
+SetupAbortIfLocked('lock_update', true);
+
 if ($step != STEP_UPDATE_STEP) {
     pageHeader(true);
+    if (!empty($setupError)) {
+        echo SetupAlert('danger', $setupError);
+    }
 }
 
 /*
@@ -96,21 +109,19 @@ if ($step == STEP_WELCOME
     || !in_array($b1gmail_version, $knownVersions)) {
     if ($b1gmail_version == $target_version) {
         ?>
-		<h1><?php echo $lang_setup['error']; ?></h1>
-
-		<?php echo sprintf($lang_setup['uptodate'], $target_version); ?>
+		<h1><?php echo SetupH($lang_setup['error']); ?></h1>
+		<?php echo SetupAlert('info', sprintf($lang_setup['uptodate'], SetupH($target_version))); ?>
 		<?php
     } elseif (!in_array($b1gmail_version, $knownVersions)) {
         ?>
-		<h1><?php echo $lang_setup['error']; ?></h1>
-
-		<?php echo sprintf($lang_setup['unknownversion'], $b1gmail_version, $target_version); ?>
+		<h1><?php echo SetupH($lang_setup['error']); ?></h1>
+		<?php echo SetupAlert('danger', sprintf($lang_setup['unknownversion'], SetupH($b1gmail_version), SetupH($target_version))); ?>
 		<?php
     } else {
         $nextStep = STEP_SYSTEMCHECK; ?>
-		<h1><?php echo $lang_setup['welcome']; ?></h1>
-
-		<?php echo sprintf($lang_setup['update_welcome_text'], $b1gmail_version, $target_version); ?>
+		<h1><?php echo SetupH($lang_setup['welcome']); ?></h1>
+		<p><?php echo sprintf($lang_setup['update_welcome_text'], SetupH($b1gmail_version), SetupH($target_version)); ?></p>
+		<?php echo SetupAlert('warning', $lang_setup['update_note3']); ?>
 		<?php
     }
 }
@@ -119,91 +130,58 @@ if ($step == STEP_WELCOME
  * system check
  */
 elseif ($step == STEP_SYSTEMCHECK) {
-    $nextStep = STEP_UPDATE; ?>
-	<h1><?php echo $lang_setup['syscheck']; ?></h1>
+    $nextStep = STEP_UPDATE;
+    $backStep = STEP_WELCOME;
 
-	<?php echo $lang_setup['syscheck_text']; ?>
-
-	<br /><br />
-	<table class="list">
-		<tr>
-			<th width="180">&nbsp;</th>
-			<th><?php echo $lang_setup['required']; ?></th>
-			<th><?php echo $lang_setup['available']; ?></th>
-			<th width="60">&nbsp;</th>
-		</tr>
-		<tr>
-			<th><?php echo $lang_setup['phpversion']; ?></th>
-			<td>7.2.0</td>
-			<td><?php echo phpversion(); ?></td>
-			<td><img src="../admin/templates/images/<?php if ((int) str_replace('.', '', phpversion()) >= 720) {
-        echo 'ok';
-    } else {
-        echo 'error';
-        $nextStep = STEP_SYSTEMCHECK;
-    } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-		<tr>
-			<th><?php echo $lang_setup['mysqlext']; ?></th>
-			<td><?php echo $lang_setup['yes']; ?></td>
-			<td><?php echo function_exists('mysqli_connect') ? $lang_setup['yes'] : $lang_setup['no']; ?></td>
-			<td><img src="../admin/templates/images/<?php if (function_exists('mysqli_connect')) {
-        echo 'ok';
-    } else {
-        echo 'error';
-        $nextStep = STEP_SYSTEMCHECK;
-    } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-		<?php
-        if ($numVersion <= 7309) {
-            $res = mysqli_query($connection, 'SELECT COUNT(*) FROM '.$mysql['prefix'].'mails WHERE LENGTH(`body`)!=4');
-            list($dbMails) = mysqli_fetch_array($res, MYSQLI_NUM);
-            mysqli_free_result($res); ?>
-		<tr>
-			<th><?php echo $lang_setup['dbmails']; ?></th>
-			<td>0</td>
-			<td><?php echo $dbMails; ?></td>
-			<td><img src="../admin/templates/images/<?php if ($dbMails == 0) {
-                echo 'ok';
-            } else {
-                echo 'error';
-                $nextStep = STEP_SYSTEMCHECK;
-            } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-			<?php
-
-            $showDbMailsNote = ($dbMails != 0);
+    $phpOk = version_compare(PHP_VERSION, SETUP_PHP_MIN, '>=');
+    $rows = [
+        [
+            'label' => $lang_setup['phpversion'],
+            'required' => SETUP_PHP_MIN,
+            'available' => PHP_VERSION,
+            'ok' => $phpOk,
+        ],
+    ];
+    foreach (SetupRequiredExtensions() as $ext => $ok) {
+        $labelKey = 'ext_'.$ext;
+        $rows[] = [
+            'label' => $lang_setup[$labelKey] ?? $ext,
+            'required' => $lang_setup['yes'],
+            'available' => $ok ? $lang_setup['yes'] : $lang_setup['no'],
+            'ok' => $ok,
+        ];
+        if (!$ok) {
+            $phpOk = false;
         }
+    }
 
-    foreach ($writeableFiles as $file) {
-        ?>
-		<tr>
-			<th><?php echo $file; ?></th>
-			<td><?php echo $lang_setup['writeable']; ?></td>
-			<td><?php echo is_writeable('../'.$file) ? $lang_setup['writeable'] : $lang_setup['notwriteable']; ?></td>
-			<td><img src="../admin/templates/images/<?php if (is_writeable('../'.$file)) {
-            echo 'ok';
-        } else {
-            echo 'error';
-            $nextStep = STEP_SYSTEMCHECK;
-        } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-			<?php
+    $showDbMailsNote = false;
+    if ($numVersion <= 7309) {
+        $res = mysqli_query($connection, 'SELECT COUNT(*) FROM '.$mysql['prefix'].'mails WHERE LENGTH(`body`)!=4');
+        list($dbMails) = mysqli_fetch_array($res, MYSQLI_NUM);
+        mysqli_free_result($res);
+        $showDbMailsNote = ($dbMails != 0);
+        $rows[] = [
+            'label' => $lang_setup['dbmails'],
+            'required' => '0',
+            'available' => (string) $dbMails,
+            'ok' => !$showDbMailsNote,
+        ];
+    }
+
+    list($fileRows, $chmodCommands, $filesOk) = SetupCollectWritableRows($writeableFiles);
+    $rows = array_merge($rows, $fileRows);
+    if (!$phpOk || !$filesOk || $showDbMailsNote) {
+        $nextStep = STEP_SYSTEMCHECK;
     } ?>
-	</table>
-
-	<?php
-    if (!empty($showDbMailsNote)) {
-        ?>
-		<br />
-		<p>
-			<font color="red"><?php echo $lang_setup['dbmails_note']; ?></font>
-		</p>
-		<?php
-    } ?>
-
-	<br />
-	<?php echo $nextStep == STEP_UPDATE ? $lang_setup['checkok_text'] : $lang_setup['checkfail_text']; ?>
+	<h1><?php echo SetupH($lang_setup['syscheck']); ?></h1>
+	<p><?php echo $lang_setup['syscheck_text']; ?></p>
+	<?php SetupRenderCheckTable($rows); ?>
+	<?php echo SetupRenderChmod($chmodCommands); ?>
+	<?php if ($showDbMailsNote) { ?>
+	<?php echo SetupAlert('danger', $lang_setup['dbmails_note'], '', array('class' => 'mt-3')); ?>
+	<?php } ?>
+	<?php echo SetupAlert($nextStep == STEP_UPDATE ? 'success' : 'danger', $nextStep == STEP_UPDATE ? $lang_setup['checkok_text'] : $lang_setup['checkfail_text'], '', array('class' => 'mt-3')); ?>
 	<?php
 }
 
@@ -211,75 +189,51 @@ elseif ($step == STEP_SYSTEMCHECK) {
  * update
  */
 elseif ($step == STEP_UPDATE) {
-    ?>
-	<h1><?php echo $lang_setup['updating']; ?></h1>
-
-	<?php echo $lang_setup['updating_text']; ?>
-
-	<br /><br />
-	<table class="list">
-		<tr>
-			<th width="40"></th>
-			<th><?php echo $lang_setup['step']; ?></th>
-			<th width="180"><?php echo $lang_setup['progress']; ?></th>
+    $updateSteps = ['prepare', 'struct2', 'config', 'struct3', 'resetcache', 'optimize', 'complete'];
+    $updateLabels = [
+        'prepare' => $lang_setup['update_prepare'],
+        'struct2' => $lang_setup['update_struct2'],
+        'config' => $lang_setup['update_config'],
+        'struct3' => $lang_setup['update_struct3'],
+        'resetcache' => $lang_setup['update_resetcache'],
+        'optimize' => $lang_setup['update_optimize'],
+        'complete' => $lang_setup['update_complete'],
+    ]; ?>
+	<h1><?php echo SetupH($lang_setup['updating']); ?></h1>
+	<p><?php echo $lang_setup['updating_text']; ?></p>
+	<?php SetupCloseCardBody(); ?>
+	<div id="setup-progress" data-script="update.php" data-ajax-step="4" data-csrf="<?php echo SetupH(SetupCsrfToken()); ?>" data-lng="<?php echo SetupH($lang); ?>" data-steps="<?php echo SetupH(json_encode($updateSteps)); ?>">
+	<div class="table-responsive">
+	<table class="table table-vcenter card-table">
+		<thead>
+			<tr>
+				<th class="w-1"></th>
+				<th><?php echo SetupH($lang_setup['step']); ?></th>
+				<th class="setup-progress-col"><?php echo SetupH($lang_setup['progress']); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ($updateSteps as $i => $key) { ?>
+		<tr class="setup-progress-row">
+			<td id="step_<?php echo SetupH($key); ?>_status"></td>
+			<th id="step_<?php echo SetupH($key); ?>_text"><?php echo ($i + 1).'. '.$updateLabels[$key]; ?></th>
+			<td class="setup-progress-col" id="step_<?php echo SetupH($key); ?>_progress"></td>
 		</tr>
-		<tr>
-			<td id="step_prepare_status">&nbsp;</td>
-			<th id="step_prepare_text" style="font-weight:normal;">1. <?php echo $lang_setup['update_prepare']; ?></th>
-			<td id="step_prepare_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_struct2_status">&nbsp;</td>
-			<th id="step_struct2_text" style="font-weight:normal;">1. <?php echo $lang_setup['update_struct2']; ?></th>
-			<td id="step_struct2_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_config_status">&nbsp;</td>
-			<th id="step_config_text" style="font-weight:normal;">2. <?php echo $lang_setup['update_config']; ?></th>
-			<td id="step_config_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_struct3_status">&nbsp;</td>
-			<th id="step_struct3_text" style="font-weight:normal;">3. <?php echo $lang_setup['update_struct3']; ?></th>
-			<td id="step_struct3_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_resetcache_status">&nbsp;</td>
-			<th id="step_resetcache_text" style="font-weight:normal;">4. <?php echo $lang_setup['update_resetcache']; ?></th>
-			<td id="step_resetcache_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_optimize_status">&nbsp;</td>
-			<th id="step_optimize_text" style="font-weight:normal;">5. <?php echo $lang_setup['update_optimize']; ?></th>
-			<td id="step_optimize_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_complete_status">&nbsp;</td>
-			<th id="step_complete_text" style="font-weight:normal;">6. <?php echo $lang_setup['update_complete']; ?></th>
-			<td id="step_complete_progress">&nbsp;</td>
-		</tr>
+		<?php } ?>
+		</tbody>
 	</table>
-
-	<br />
-	<?php echo $lang_setup['updating_text2']; ?>
-
-	<textarea readonly="readonly" class="installLog" id="log" style="display:none;height:150px;"></textarea>
-	<br /><br />
-
-	<div align="center" id="done" style="display:none;">
-		<b><?php echo $lang_setup['updatedonefinal']; ?></b>
-        <?php if (empty($bm_prefs['db_is_utf8'])) { 
-            echo '<br /><br />'.$lang_setup['dbnotconverted'];
-        }?>
 	</div>
-
-	<script src="./res/update2.js"></script>
-	<script>
-	<!--
-		window.onload = beginUpdate;
-	//-->
-	</script>
-
+	</div>
+	<?php SetupOpenCardBody(); ?>
+	<?php echo SetupAlert('warning', $lang_setup['updating_text2'], '', array('dismissible' => false)); ?>
+	<textarea readonly="readonly" class="form-control setup-log d-none" id="log" rows="6"></textarea>
+	<?php
+    $doneText = $lang_setup['updatedonefinal'];
+    if (empty($bm_prefs['db_is_utf8'])) {
+        $doneText .= '<br /><br />'.$lang_setup['dbnotconverted'];
+    }
+    echo SetupAlert('success', $doneText, '', array('id' => 'done', 'class' => 'd-none mt-3', 'dismissible' => false));
+	?>
 	<?php
 }
 
@@ -364,7 +318,7 @@ elseif ($step == STEP_UPDATE_STEP) {
                                 $bm_prefs['sms_enable_paypal'],
                                 SQLEscape($bm_prefs['sms_paypal_mail'], $connection),
                                 $bm_prefs['sms_enable_paypal'] == 'yes' || $bm_prefs['sms_enable_su'] == 'yes' ? 'yes' : 'no',
-                                $defaultInvoice));
+                                SQLEscape($defaultInvoice, $connection)));
             mysqli_query($connection, sprintf('UPDATE '.$mysql['prefix'].'gruppen SET `max_recps`=%d',
                                 $bm_prefs['max_bcc']));
 
@@ -673,7 +627,7 @@ elseif ($step == STEP_UPDATE_STEP) {
             $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
             if($row['rgtemplate']==$old_defaultInvoice) {
                 mysqli_query($connection, sprintf('UPDATE '.$mysql['prefix'].'prefs SET rgtemplate=\'%s\'',
-                                $defaultInvoice));
+                                SQLEscape($defaultInvoice, $connection)));
             }
             mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'staaten SET is_eu = \'no\' WHERE id = 37'); // GB is not in EU anymore
             mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'staaten SET land = \'Eswatini\' WHERE id = 117'); // Rename Swasiland to Eswatini
@@ -824,16 +778,13 @@ elseif ($step == STEP_UPDATE_STEP) {
     elseif ($do == 'complete') {
         mysqli_query($connection, 'UPDATE '.$mysql['prefix'].'prefs SET wartung=\'no\',patchlevel=0');
 
+        ConfigEnsureSignKeyInFile('../serverlib/config.inc.php');
+
         $fp = fopen('../serverlib/version.inc.php', 'w');
         fwrite($fp, sprintf('<?php define(\'B1GMAIL_VERSION\', $b1gmail_version = \'%s\'); ?>', $target_version));
         fclose($fp);
 
-        if(is_writable('./'))
-        {
-            $lock = @fopen('./lock_update', 'w');
-            $written = @fwrite($lock, '1');
-            @fclose($lock);
-        }
+        SetupWriteLock('lock_update');
 
         echo 'OK:DONE';
     }

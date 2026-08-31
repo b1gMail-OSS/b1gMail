@@ -8,7 +8,8 @@
 				</h5>
 				<button type="button" class="btn-close" id="webdiskUploadClose" data-bs-dismiss="modal" aria-label="{lng p="close"}"></button>
 			</div>
-			<form class="modal-body" id="webdiskUploadForm" method="post" enctype="multipart/form-data" action="webdisk.php?folder={$folderID}&amp;sid={$sid}" onsubmit="return webdiskSubmitUploadModal();">
+			<form class="modal-body" id="webdiskUploadForm" method="post" enctype="multipart/form-data" action="webdisk.php?folder={$folderID}{$sessionUrlSuffix}" onsubmit="return webdiskSubmitUploadModal();">
+				{csrffield}
 				<input type="hidden" name="action" value="uploadFiles" />
 
 				<p class="text-secondary small mb-3" id="webdiskUploadLimitsNote">

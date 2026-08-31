@@ -9,6 +9,7 @@
 		</div>
 	
 		<form name="f1" method="post" action="organizer.notes.php?action=action&sid={$sid}">
+			{csrffield}
 		<div class="scrollContainer withBottomBar">
 			<table class="bigTable">
 				<tr>
@@ -39,7 +40,7 @@
 					<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{date timestamp=$note.date nice=true}&nbsp;</td>
 					<td class="{if $sortColumn=='text'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="javascript:previewNote('{$sid}', '{$noteID}');">{text value=$note.text}</a>&nbsp;</td>
 					<td class="{$class}" nowrap="nowrap">
-						<a href="organizer.notes.php?action=editNote&id={$noteID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+						<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
 						<a onclick="return confirm('{lng p="realdel"}');" href="organizer.notes.php?action=deleteNote&id={$noteID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 					</td>
 				</tr>
@@ -58,7 +59,7 @@
 				<input class="smallInput" type="submit" value="{lng p="ok"}" />
 			</div>
 			<div class="right">
-				<button type="button" class="primary" onclick="document.location.href='organizer.notes.php?action=addNote&sid={$sid}';">
+				<button type="button" class="primary" onclick="document.location.href='{sessionurl file='organizer.notes.php' params='action=addNote'|escape:'javascript'}';">
 					<i class="fa fa-plus-circle"></i>
 					{lng p="addnote"}
 				</button>

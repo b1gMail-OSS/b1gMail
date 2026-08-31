@@ -38,14 +38,16 @@ class B1GMailSearchProvider extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMail Search Provider';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.22';
+		$this->version				= '1.23';
+		$this->designedfor			= '7.5.0';
 		$this->website				= 'https://www.b1gmail.org/';
-		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
+		$this->update_url			= '';
 
 		// admin pages
 		$this->admin_pages			= true;
 		$this->admin_page_title		= $lang_admin['searchprovider'];
 		$this->admin_page_icon		= 'search32.png';
+		$this->admin_route_slug		= 'searchprovider';
 	}
 
 	/**
@@ -160,7 +162,7 @@ class B1GMailSearchProvider extends BMPlugin
 				}
 
 				$toList = urlencode(implode(', ', $to));
-				header('Location: email.compose.php?sid=' . session_id() . '&to=' . $toList);
+				SessionRedirect('email.compose.php?to=' . $toList);
 				exit();
 			}
 		}
@@ -288,7 +290,7 @@ class B1GMailSearchProvider extends BMPlugin
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 				$thisResults[] = array(
 					'title'		=> $row['betreff'],
-					'link'		=> sprintf('email.read.php?id=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('email.read.php?id=%d', $row['id'])),
 					'date'		=> $row['fetched'],
 					'size'		=> $row['size'],
 					'id'		=> $row['id'],
@@ -351,7 +353,7 @@ class B1GMailSearchProvider extends BMPlugin
 
 					$thisResults[] = array(
 						'title'		=> $row['betreff'],
-						'link'		=> sprintf('email.read.php?id=%d&', $row['id']),
+						'link'		=> SessionUrl(sprintf('email.read.php?id=%d', $row['id'])),
 						'date'		=> $row['fetched'],
 						'size'		=> $row['size'],
 						'id'		=> $row['id'],
@@ -411,7 +413,7 @@ class B1GMailSearchProvider extends BMPlugin
 
 				$thisResults[] = array(
 					'title'		=> $row['filename'],
-					'link'		=> sprintf('email.read.php?id=%d&', $row['mailid']),
+					'link'		=> SessionUrl(sprintf('email.read.php?id=%d', $row['mailid'])),
 					'date'		=> $fetched,
 					'size'		=> $row['size']
 				);
@@ -439,7 +441,7 @@ class B1GMailSearchProvider extends BMPlugin
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 				$thisResults[] = array(
 					'title'		=> $row['text'],
-					'link'		=> sprintf('sms.php?action=outbox&show=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('sms.php?action=outbox&show=%d', $row['id'])),
 					'date'		=> $row['date'],
 					'id'		=> $row['id']
 				);
@@ -470,7 +472,7 @@ class B1GMailSearchProvider extends BMPlugin
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 				$thisResults[] = array(
 					'title'		=> $row['title'],
-					'link'		=> sprintf('organizer.calendar.php?action=editDate&id=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('organizer.calendar.php?action=editDate&id=%d', $row['id'])),
 					'date'		=> $row['startdate'],
 					'id'		=> $row['id']
 				);
@@ -501,7 +503,7 @@ class B1GMailSearchProvider extends BMPlugin
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 				$thisResults[] = array(
 					'title'		=> $row['titel'],
-					'link'		=> sprintf('organizer.todo.php?action=editTask&id=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('organizer.todo.php?action=editTask&id=%d', $row['id'])),
 					'date'		=> $row['faellig'],
 					'id'		=> $row['id']
 				);
@@ -538,7 +540,7 @@ class B1GMailSearchProvider extends BMPlugin
 
 				$thisResults[] = array(
 					'title'		=> $addrTitle,
-					'link'		=> sprintf('organizer.addressbook.php?action=editContact&id=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('organizer.addressbook.php?action=editContact&id=%d', $row['id'])),
 					'id'		=> $row['id']
 				);
 			}
@@ -570,7 +572,7 @@ class B1GMailSearchProvider extends BMPlugin
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 				$thisResults[] = array(
 					'title'		=> $row['text'],
-					'link'		=> sprintf('organizer.notes.php?show=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('organizer.notes.php?show=%d', $row['id'])),
 					'date'		=> $row['date'],
 					'id'		=> $row['id']
 				);
@@ -603,7 +605,7 @@ class B1GMailSearchProvider extends BMPlugin
 				$thisResults[] = array(
 					'icon'		=> 'fa-file-o',
 					'title'		=> $row['dateiname'],
-					'link'		=> sprintf('webdisk.php?folder=%d&', $row['ordner']),
+					'link'		=> SessionUrl(sprintf('webdisk.php?folder=%d', $row['ordner'])),
 					'date'		=> $row['modified'],
 					'size'		=> $row['size'],
 					'id'		=> 'file_' . $row['id']
@@ -619,7 +621,7 @@ class B1GMailSearchProvider extends BMPlugin
 				$thisResults[] = array(
 					'icon'		=> 'fa-folder-open-o',
 					'title'		=> $row['titel'],
-					'link'		=> sprintf('webdisk.php?folder=%d&', $row['id']),
+					'link'		=> SessionUrl(sprintf('webdisk.php?folder=%d', $row['id'])),
 					'date'		=> $row['modified'],
 					'id'		=> 'folder_' . $row['id']
 				);
@@ -649,7 +651,7 @@ class B1GMailSearchProvider extends BMPlugin
 				'results'	=>  array(
 					array(
 						'title'		=> $query,
-						'extLink'	=> sprintf('deref.php?'.$bm_prefs['search_engine'], urlencode($query))
+						'extLink'	=> DerefUrl(sprintf($bm_prefs['search_engine'], urlencode($query)))
 					)
 				)
 			);
@@ -660,59 +662,117 @@ class B1GMailSearchProvider extends BMPlugin
 	}
 
 	/**
-	 * admin handler
+	 * Map pretty URLs and legacy query params to do=prefs.
+	 */
+	protected function _searchNormalizeRequest()
+	{
+		$do = $_REQUEST['do'] ?? $_REQUEST['action'] ?? '';
+
+		if($do === '' || $do === 'prefs')
+			$do = 'prefs';
+		else if($do === 'save')
+		{
+			$_REQUEST['save'] = true;
+			$do = 'prefs';
+		}
+
+		$_REQUEST['do'] = $do;
+	}
+
+	/**
+	 * Pretty admin URL for this plugin.
 	 *
+	 * @param array<string, mixed> $params
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _searchAdminUrl(array $params = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name, 'do' => 'prefs'), $params);
+
+		if(function_exists('AdminSessionUrl'))
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach($params as $key => $val)
+		{
+			if((string)$val === '')
+				continue;
+			$url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+		}
+		if($trailingAmp)
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
+
+		return $url;
+	}
+
+	/**
+	 * admin handler
 	 */
 	function AdminHandler()
 	{
-		global $tpl, $plugins, $lang_admin;
+		global $tpl, $lang_admin;
 
-		if(!isset($_REQUEST['action']))
-			$_REQUEST['action'] = 'prefs';
+		$this->_searchNormalizeRequest();
+
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+			$this->_searchHandlePost();
+
+		$do = $_REQUEST['do'] ?? 'prefs';
 
 		$tabs = array(
 			0 => array(
 				'title'		=> $lang_admin['prefs'],
 				'icon'		=> '../plugins/templates/images/search32.png',
-				'link'		=> $this->_adminLink() . '&',
-				'active'	=> $_REQUEST['action'] == 'prefs'
-			)
+				'link'		=> $this->_searchAdminUrl(array(), true),
+				'active'	=> $do === 'prefs',
+			),
 		);
 
 		$tpl->assign('tabs', $tabs);
+		$tpl->assign('searchPlugin', $this->internal_name);
+		$tpl->assign('pageURL', $this->_searchAdminUrl(array(), true));
 
-		if($_REQUEST['action'] == 'prefs')
+		if($do === 'prefs')
 			$this->_prefsPage();
 	}
 
 	/**
+	 * Save prefs (POST + CSRF only).
+	 */
+	protected function _searchHandlePost()
+	{
+		global $db;
+
+		if(!isset($_REQUEST['save']))
+			return;
+
+		if(isset($_REQUEST['searchIn']) && is_array($_REQUEST['searchIn']))
+			$searchIn = $_REQUEST['searchIn'];
+		else
+			$searchIn = array();
+
+		$db->Query('UPDATE {pre}prefs SET search_in=?',
+			serialize($searchIn));
+		ReadConfig();
+
+		SessionRedirect($this->_searchAdminUrl(array(), false));
+		exit();
+	}
+
+	/**
 	 * admin prefs page
-	 *
 	 */
 	function _prefsPage()
 	{
-		global $tpl, $db, $bm_prefs;
+		global $tpl, $bm_prefs;
 
-		// save?
-		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'save')
-		{
-			if(isset($_REQUEST['searchIn']) && is_array($_REQUEST['searchIn']))
-				$searchIn = $_REQUEST['searchIn'];
-			else
-				$searchIn = array();
-			$db->Query('UPDATE {pre}prefs SET search_in=?',
-				serialize($searchIn));
-			ReadConfig();
-		}
-
-		// unserialize
 		$searchIn = @unserialize($bm_prefs['search_in']);
 		if(!is_array($searchIn))
 			$searchIn = array();
 
-		// assign
 		$tpl->assign('searchIn', $searchIn);
-		$tpl->assign('pageURL', $this->_adminLink());
 		$tpl->assign('page', $this->_templatePath('search.plugin.prefs.tpl'));
 	}
 }
@@ -721,4 +781,3 @@ class B1GMailSearchProvider extends BMPlugin
  * register plugin
  */
 $plugins->registerPlugin('B1GMailSearchProvider');
-?>

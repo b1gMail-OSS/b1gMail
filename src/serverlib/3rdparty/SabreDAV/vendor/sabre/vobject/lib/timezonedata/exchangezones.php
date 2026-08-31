@@ -3,7 +3,7 @@
 /**
  * Microsoft exchange timezones
  * Source:
- * http://msdn.microsoft.com/en-us/library/ms988620%28v=exchg.65%29.aspx
+ * http://msdn.microsoft.com/en-us/library/ms988620%28v=exchg.65%29.aspx.
  *
  * Correct timezones deduced with help from:
  * http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
@@ -11,12 +11,13 @@
  * @copyright Copyright (C) fruux GmbH (https://fruux.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-return array(
+return [
     'Universal Coordinated Time' => 'UTC',
     'Casablanca, Monrovia' => 'Africa/Casablanca',
     'Greenwich Mean Time: Dublin, Edinburgh, Lisbon, London' => 'Europe/Lisbon',
-    'Greenwich Mean Time; Dublin, Edinburgh, London' =>  'Europe/London',
+    'Greenwich Mean Time; Dublin, Edinburgh, London' => 'Europe/London',
     'Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna' => 'Europe/Berlin',
+    'Amsterdam, Berlin, Bern, Rom, Stockholm, Wien' => 'Europe/Berlin',
     'Belgrade, Pozsony, Budapest, Ljubljana, Prague' => 'Europe/Prague',
     'Brussels, Copenhagen, Madrid, Paris' => 'Europe/Paris',
     'Paris, Madrid, Brussels, Copenhagen' => 'Europe/Paris',
@@ -39,12 +40,12 @@ return array(
     'Kabul' => 'Asia/Kabul',
     'Ekaterinburg' => 'Asia/Yekaterinburg',
     'Islamabad, Karachi, Tashkent' => 'Asia/Karachi',
-    'Kolkata, Chennai, Mumbai, New Delhi, India Standard Time' => 'Asia/Calcutta',
+    'Kolkata, Chennai, Mumbai, New Delhi, India Standard Time' => 'Asia/Kolkata',
     'Kathmandu, Nepal' => 'Asia/Kathmandu',
     'Almaty, Novosibirsk, North Central Asia' => 'Asia/Almaty',
     'Astana, Dhaka' => 'Asia/Dhaka',
     'Sri Jayawardenepura, Sri Lanka' => 'Asia/Colombo',
-    'Rangoon' => 'Asia/Rangoon',
+    'Rangoon' => 'Asia/Yangon',
     'Bangkok, Hanoi, Jakarta' => 'Asia/Bangkok',
     'Krasnoyarsk' => 'Asia/Krasnoyarsk',
     'Beijing, Chongqing, Hong Kong SAR, Urumqi' => 'Asia/Shanghai',
@@ -71,7 +72,7 @@ return array(
     'Mid-Atlantic' => 'America/Noronha',
     'Brasilia' => 'America/Sao_Paulo', // Best guess
     'Buenos Aires' => 'America/Argentina/Buenos_Aires',
-    'Greenland' => 'America/Godthab',
+    'Greenland' => 'America/Nuuk',
     'Newfoundland' => 'America/St_Johns',
     'Atlantic Time (Canada)' => 'America/Halifax',
     'Caracas, La Paz' => 'America/Caracas',
@@ -85,9 +86,10 @@ return array(
     'Saskatchewan' => 'America/Edmonton',
     'Arizona' => 'America/Phoenix',
     'Mountain Time (US & Canada)' => 'America/Denver', // Best guess
+    'Pacific Time (US & Canada)' => 'America/Los_Angeles', // Best guess
     'Pacific Time (US & Canada); Tijuana' => 'America/Los_Angeles', // Best guess
     'Alaska' => 'America/Anchorage',
     'Hawaii' => 'Pacific/Honolulu',
     'Midway Island, Samoa' => 'Pacific/Midway',
     'Eniwetok, Kwajalein, Dateline Time' => 'Pacific/Kwajalein',
-);
+];

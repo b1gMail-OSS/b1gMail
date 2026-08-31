@@ -1,4 +1,5 @@
-<form action="payments.php?filter=true&sid={$sid}" method="post" onsubmit="if(EBID('massAction').value!='download') spin(this)" name="f1">
+<form action="{sessionurl file='payments.php' params="filter=true"}" method="post" onsubmit="if(EBID('massAction').value!='download') spin(this)" name="f1">
+	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
 	<input type="hidden" name="sortBy" id="sortBy" value="{$sortBy}" />
 	<input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
@@ -32,7 +33,7 @@
 						<tr class="{$class}">
 							<td class="text-center">{if $payment.status==1}<i class="fa-regular fa-circle-check text-green"></i>{else}<i class="fa-regular fa-circle-xmark text-red"></i>{/if}</td>
 							<td align="center"><input type="checkbox" name="payment[{$payment.orderid}]" /></td>
-							<td><a href="users.php?do=edit&id={$payment.user.id}&sid={$sid}">{email value=$payment.user.email cut=25}</a><br />
+							<td><a href="{sessionurl file='users.php' params="do=edit&id={$payment.user.id}"}">{email value=$payment.user.email cut=25}</a><br />
 								<small>{text value=$payment.user.nachname cut=20}, {text value=$payment.user.vorname cut=20}</small></td>
 							<td>{text value=$payment.invoiceNo}<br /><small>{text value=$payment.customerNo}</small></td>
 							<td>
@@ -41,15 +42,15 @@
 								</div>
 								{if $payment.paymethod<0}
 									<div style="float:right;">
-										<a href="payments.php?do=details&orderid={$payment.orderid}&sid={$sid}" title="{lng p="details"}"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="{lng p="details"}" width="16" height="16" /></a>
+										<a href="{sessionurl file='payments.php' params="do=details&orderid={$payment.orderid}"}" title="{lng p="details"}"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="{lng p="details"}" width="16" height="16" /></a>
 									</div>
 								{/if}
 							</td>
 							<td>{date timestamp=$payment.created nice=true}</td>
 							<td class="text-nowrap text-end">
 								<div class="btn-group btn-group-sm">
-									{if $payment.hasInvoice}<a href="javascript:void(0);" onclick="openWindow('payments.php?action=showInvoice&orderID={$payment.orderid}&sid={$sid}','invoice_{$payment.orderid}',640,480);" title="{lng p="showinvoice"}" class="btn btn-sm"><i class="fa-solid fa-file-invoice-dollar"></i></a>{/if}
-									{if $payment.status==0}<a href="{if $payment.paymethod<0}payments.php?do=details&orderid={$payment.orderid}&sid={$sid}{else}javascript:singleAction('activate', '{$payment.orderid}');{/if}" title="{lng p="activatepayment"}" class="btn btn-sm"><i class="fa-solid fa-lock-open"></i></a>{/if}
+									{if $payment.hasInvoice}<a href="javascript:void(0);" onclick="openWindow('payments.php?action=showInvoice&orderID={$payment.orderid}{$sessionUrlSuffix}','invoice_{$payment.orderid}',640,480);" title="{lng p="showinvoice"}" class="btn btn-sm"><i class="fa-solid fa-file-invoice-dollar"></i></a>{/if}
+									{if $payment.status==0}<a href="{if $payment.paymethod<0}payments.php?do=details&orderid={$payment.orderid}{$sessionUrlSuffix}{else}javascript:singleAction('activate', '{$payment.orderid}');{/if}" title="{lng p="activatepayment"}" class="btn btn-sm"><i class="fa-solid fa-lock-open"></i></a>{/if}
 									<a href="javascript:singleAction('delete', '{$payment.orderid}');" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
@@ -87,11 +88,11 @@
 					<label class="col-sm-4 col-form-check-label">{lng p="status"}</label>
 					<div class="col-sm-8">
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="status[0]" id="status_0" {if $status[0]} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="status[0]" id="status_0" {if !empty($status[0])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="orderstatus_0"}</span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="status[1]" id="status_1" {if $status[1]} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="status[1]" id="status_1" {if !empty($status[1])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="orderstatus_1"}</span>
 						</label>
 					</div>
@@ -102,24 +103,24 @@
 					<label class="col-sm-4 col-form-check-label">{lng p="paymentmethods"}</label>
 					<div class="col-sm-8">
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="paymentMethod[0]" id="paymentMethod_0" {if $paymentMethod[0]} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="paymentMethod[0]" id="paymentMethod_0" {if !empty($paymentMethod[0])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="banktransfer"}</span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="paymentMethod[1]" id="paymentMethod_1" {if $paymentMethod[1]} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="paymentMethod[1]" id="paymentMethod_1" {if !empty($paymentMethod[1])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="paypal"}</span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="paymentMethod[2]" id="paymentMethod_2" {if $paymentMethod[2]} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="paymentMethod[2]" id="paymentMethod_2" {if !empty($paymentMethod[2])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="su"}</span>
 						</label>
 						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="paymentMethod[3]" id="paymentMethod_3" {if $paymentMethod[3]} checked="checked"{/if}>
+							<input class="form-check-input" type="checkbox" name="paymentMethod[3]" id="paymentMethod_3" {if !empty($paymentMethod[3])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="skrill"}</span>
 						</label>
 						{foreach from=$payMethods key=methodID item=method}
 							<label class="form-check">
-								<input class="form-check-input" type="checkbox" name="paymentMethod[-{$methodID}]" id="paymentMethod_-{$methodID}" {if $paymentMethod[$method.negID]} checked="checked"{/if}>
+								<input class="form-check-input" type="checkbox" name="paymentMethod[-{$methodID}]" id="paymentMethod_-{$methodID}" {if !empty($paymentMethod[$method.negID])} checked="checked"{/if}>
 								<span class="form-check-label">{text value=$method.title}</span>
 							</label>
 						{/foreach}

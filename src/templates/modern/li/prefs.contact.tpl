@@ -14,7 +14,8 @@
 <br />
 {/if}
 
-<form name="f1" method="post" action="prefs.php?action=contact&do=save&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=contact&do=save'}">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="contact"}</th>
@@ -46,12 +47,12 @@
 				<input type="text" name="nachname" id="nachname" value="{if isset($nachname)}{text value=$nachname allowEmpty=true}{/if}" size="35" required />
 			</td>
 		</tr>
-		<tr>
-			<td class="listTableLeft"><label for="company">{lng p="company"}</label>:</td>
+		{if $f_company!="n"}<tr>
+			<td class="listTableLeft">{if $f_company=="p"}*{/if} <label for="company">{lng p="company"}</label>:</td>
 			<td class="listTableRight">
-				<input type="text" name="company" id="company" value="{if isset($company)}{text value=$company allowEmpty=true}{/if}" size="35" />
+				<input type="text" name="company" id="company" value="{if isset($company)}{text value=$company allowEmpty=true}{/if}" size="35" {if $f_company=="p"}required{/if} />
 			</td>
-		</tr>
+		</tr>{/if}
 		
 		<tr>
 			<td class="listTableLeftDesc"><i class="fa fa-user-o" aria-hidden="true"></i></td>
@@ -110,12 +111,12 @@
 				<input type="email" name="altmail" id="altmail" value="{if isset($altmail)}{text value=$altmail allowEmpty=true}{/if}" size="35" {if $f_alternativ=="p"}required{/if} />
 			</td>
 		</tr>{/if}
-		<tr>
-			<td class="listTableLeft"><label for="taxid">{lng p="taxid"}</label>:</td>
+		{if $f_taxid!="n"}<tr>
+			<td class="listTableLeft">{if $f_taxid=="p"}*{/if} <label for="taxid">{lng p="taxid"}</label>:</td>
 			<td class="listTableRight">
-				<input type="text" name="taxid" id="taxid" value="{if isset($taxid)}{text value=$taxid allowEmpty=true}{/if}" size="35" />
+				<input type="text" name="taxid" id="taxid" value="{if isset($taxid)}{text value=$taxid allowEmpty=true}{/if}" size="35" {if $f_taxid=="p"}required{/if} />
 			</td>
-		</tr>
+		</tr>{/if}
 		{foreach from=$profileFields item=profileField}
 		{assign var=fieldID value=$profileField.id}
 		<tr>

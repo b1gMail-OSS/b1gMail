@@ -1,8 +1,10 @@
-<form action="{$pageURL}&action=subscriptions&extend={$ids}&sid={$sid}" method="post">
+<form action="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=subscriptions"}" method="post">
+	{csrffield}
+	<input type="hidden" name="extend" value="{$ids}" />
 	<fieldset>
 		<legend>{lng p="pacc_extendsubscr"}</legend>
 
-		{lng p="pacc_extendsubscrdesc"}
+		<p class="text-secondary mb-3">{lng p="pacc_extendsubscrdesc"}</p>
 
 		<div class="input-group mb-2">
 		<span class="input-group-text">
@@ -23,12 +25,18 @@
         	<input class="form-check-input m-0" type="radio" id="modeStatic" name="mode" value="static">
 		</span>
 			<span class="input-group-text">{lng p="pacc_extendstatic"}</span>
-			<input type="text" class="form-control" name="dynamicValue" value="30">
 			{html_select_date prefix="staticValue" end_year="+5" field_order="DMY" field_separator="."}
 		</div>
 
-		<div class="text-end">
-			<input class="btn btn-primary" type="submit" value="{lng p="pacc_extendsubscr"}" />
+		<div class="d-flex justify-content-between mt-3">
+			<a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=subscriptions"}" class="btn btn-outline-secondary">
+				<i class="ti ti-arrow-left me-1"></i>
+				{lng p="back"}
+			</a>
+			<button type="submit" class="btn btn-primary">
+				<i class="ti ti-calendar-plus me-1"></i>
+				{lng p="pacc_extendsubscr"}
+			</button>
 		</div>
 	</fieldset>
 </form>

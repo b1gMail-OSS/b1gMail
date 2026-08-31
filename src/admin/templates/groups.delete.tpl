@@ -1,4 +1,5 @@
-<form action="groups.php?do=realDelete&sid={$sid}" method="post">
+<form action="{sessionurl file='groups.php' params="do=realDelete"}" method="post">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="deletegroup"}</legend>
 

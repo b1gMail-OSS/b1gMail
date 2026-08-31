@@ -48,7 +48,7 @@ function initAddrSel()
 	}
 	sel.cbSelectSingleItem = function(element)
 	{
-		MakeXMLRequest('organizer.addressbook.php?action=showContact&id='+this.getItemID(element)+'&sid=' + currentSID, function(http)
+		MakeXMLRequest('organizer.addressbook.php?action=showContact&id='+this.getItemID(element)+'', function(http)
 			{
 				if(http.readyState == 4)
 				{
@@ -70,7 +70,7 @@ function initAddrSel()
 	}
 	sel.cbItemDoubleClick = function(element)
 	{
-		document.location.href = 'organizer.addressbook.php?action=editContact&id='+this.getItemID(element)+'&sid='+currentSID;
+		document.location.href = bmAppendSession('organizer.addressbook.php?action=editContact&id='+this.getItemID(element));
 	}
 	sel.init();
 	_addrSel = sel;
@@ -109,7 +109,7 @@ function transferSelectedAddresses()
 }
 function abExport()
 {
-	openOverlay('organizer.addressbook.php?sid=' + currentSID + '&action=exportDialog',
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=exportDialog'),
 		lang['export'],
 		440,
 		160,
@@ -117,7 +117,7 @@ function abExport()
 }
 function abImport()
 {
-	openOverlay('organizer.addressbook.php?sid=' + currentSID + '&action=importDialogStart',
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=importDialogStart'),
 		lang['import'],
 		440,
 		140,
@@ -125,7 +125,7 @@ function abImport()
 }
 function abGroups()
 {
-	openOverlay('organizer.addressbook.php?sid=' + currentSID + '&action=groups',
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=groups'),
 		lang['groups'],
 		550,
 		400,
@@ -133,7 +133,7 @@ function abGroups()
 }
 function updateCurrentGroup(id, sid)
 {
-	document.location.href = 'organizer.addressbook.php?sid=' + sid + '&group=' + id;
+	document.location.href = bmAppendSession('organizer.addressbook.php?group=' + id);
 }
 function checkContactForm(form)
 {
@@ -162,7 +162,7 @@ function addrFunction(what)
 }
 function addrImportVCF()
 {
-	openOverlay('organizer.addressbook.php?action=vcfImportDialog&sid=' + currentSID,
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=vcfImportDialog'),
 			lang['importvcf'],
 			520,
 			150);
@@ -178,14 +178,14 @@ function checkGroupForm(form)
 }
 function addrUserPicture(id)
 {
-	openOverlay('organizer.addressbook.php?action=userPictureDialog&id=' + id + '&sid=' + currentSID,
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=userPictureDialog&id=' + id ),
 		lang['userpicture'],
 		520,
 		150);
 }
 function addrImportDialog(sid)
 {
-	openOverlay('organizer.addressbook.php?action=importDialog&type=' + EBID('importType').value + '&encoding=' + EBID('importEncoding').value + '&sid=' + sid,
+	openOverlay('organizer.addressbook.php?action=importDialog&type=' + EBID('importType').value + '&encoding=' + EBID('importEncoding').value ,
 		lang['import'],
 		520,
 		130);
@@ -229,7 +229,7 @@ function initTasksSel()
 	}
 	sel.cbItemDoubleClick = function(element)
 	{
-		document.location.href = 'organizer.todo.php?action=editTask&id='+this.getItemID(element)+'&sid='+currentSID;
+		document.location.href = bmAppendSession('organizer.todo.php?action=editTask&id='+this.getItemID(element));
 	}
 	sel.init();
 	_tasksSel = sel;
@@ -301,7 +301,7 @@ function moveTasks(tasks, destID)
 	if(!tasks) return;
 	if(destID == currentTaskListID) return;
 
-	MakeXMLRequest('organizer.todo.php?do=moveTasks&listOnly=true&taskListID='+currentTaskListID+'&tasks=' + escape(tasks) + '&destID=' + destID + '&sid=' + currentSID, function(http)
+	MakeXMLRequest('organizer.todo.php?do=moveTasks&listOnly=true&taskListID='+currentTaskListID+'&tasks=' + escape(tasks) + '&destID=' + destID , function(http)
 		{
 			if(http.readyState == 4)
 			{
@@ -341,7 +341,7 @@ function reloadTodoLists(xml, scrollDown)
 {
 	if(typeof(xml) == 'undefined')
 	{
-		MakeXMLRequest('organizer.todo.php?action=getLists&sid='+currentSID, function(r)
+		MakeXMLRequest(bmAppendSession('organizer.todo.php?action=getLists'), function(r)
 		{
 			if(r.readyState == 4)
 				reloadTodoLists(r.responseXML, scrollDown);
@@ -395,7 +395,7 @@ function deleteTaskList(id)
 {
 	if(confirm(lang['realdel']))
 	{
-		MakeXMLRequest('organizer.todo.php?action=deleteList&tasklistid='+encodeURIComponent(id)+'&sid='+currentSID, function(r)
+		MakeXMLRequest('organizer.todo.php?action=deleteList&tasklistid='+encodeURIComponent(id), function(r)
 		{
 			if(r.readyState == 4)
 			{
@@ -426,7 +426,7 @@ function selectTaskList(id, nocheck)
 		if(currentTaskListID == id) return;
 	}
 
-	MakeXMLRequest('organizer.todo.php?taskListID='+encodeURIComponent(id)+'&listOnly=true&sid='+currentSID, function(r)
+	MakeXMLRequest('organizer.todo.php?taskListID='+encodeURIComponent(id)+'&listOnly=true', function(r)
 	{
 		if(r.readyState == 4)
 		{
@@ -453,7 +453,7 @@ function addTodoList()
 
 	EBID('addListTitle').value = '';
 
-	MakeXMLRequest('organizer.todo.php?action=addList&title='+encodeURIComponent(title)+'&sid='+currentSID, function(r)
+	MakeXMLRequest('organizer.todo.php?action=addList&title='+encodeURIComponent(title), function(r)
 	{
 		if(r.readyState == 4)
 		{
@@ -469,7 +469,7 @@ function addTask()
 		return(false);
 	}
 
-	MakeXMLRequest('organizer.todo.php?do=addTask&title='+encodeURIComponent(EBID('newTaskText').value)+'&listOnly=true&taskListID='+currentTaskListID+'&sid='+currentSID, function(r)
+	MakeXMLRequest('organizer.todo.php?do=addTask&title='+encodeURIComponent(EBID('newTaskText').value)+'&listOnly=true&taskListID='+currentTaskListID, function(r)
 	{
 		if(r.readyState == 4)
 		{
@@ -713,7 +713,15 @@ function deleteAttendee(id)
 }
 function openAttendeePopup(sid)
 {
-	openOverlay('organizer.addressbook.php?sid=' + sid + '&action=attendeePopup&attendeeList=' + escape(EBID('attendees').value),
+	var baseUrl = null;
+	if(typeof bmOrganizerActionUrls !== 'undefined' && bmOrganizerActionUrls.attendeePopup)
+		baseUrl = bmOrganizerActionUrls.attendeePopup;
+	else if(sid)
+		baseUrl = 'organizer.addressbook.php?sid=' + sid + '&action=attendeePopup';
+	else
+		baseUrl = bmAppendSession('organizer.addressbook.php?action=attendeePopup');
+	var sep = (baseUrl.indexOf('?') >= 0) ? '&' : '?';
+	openOverlay(baseUrl + sep + 'attendeeList=' + escape(EBID('attendees').value),
 		lang['addattendee'],
 		540,
 		520,
@@ -750,11 +758,11 @@ function checkCalendarGroupForm(form)
 }
 function updateCalendarViewMode(c, date, sid)
 {
-	document.location.href = 'organizer.calendar.php?sid=' + sid + '&view=' + c.value + '&date=' + date;
+	document.location.href = bmAppendSession('organizer.calendar.php?view=' + c.value + '&date=' + date);
 }
 function updateCalendarGroup(c, date, sid)
 {
-	document.location.href = 'organizer.calendar.php?sid=' + sid + '&switchGroup=' + c.value + '&date=' + date;
+	document.location.href = bmAppendSession('organizer.calendar.php?switchGroup=' + c.value + '&date=' + date);
 }
 function calendarDateClick(id)
 {

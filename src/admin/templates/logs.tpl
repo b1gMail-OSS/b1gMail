@@ -35,14 +35,15 @@
 				</tbody>
 			</table>
 		</div>
-		<div class="card-footer text-end"><input class="btn btn-sm" type="button" value="{lng p="export"}" onclick="parent.frames['top'].location.href='logs.php?sid={$sid}&do=export&start={$start}&end={$end}&q={$ueQ}{$prioQ}';" /></div>
+		<div class="card-footer text-end"><input class="btn btn-sm" type="button" value="{lng p="export"}" onclick="parent.frames['top'].location.href='logs.php?do=export&start={$start}&end={$end}&q={$ueQ}{$prioQ}';" /></div>
 	</div>
 </fieldset>
 
 <fieldset>
 	<legend>{lng p="filter"}</legend>
 
-	<form action="logs.php?sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='logs.php'}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="row">
 			<div class="col-md-6">
 				<div class="mb-3 row">

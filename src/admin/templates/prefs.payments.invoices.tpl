@@ -1,4 +1,5 @@
-<form action="prefs.payments.php?action=invoices&save=true&sid={$sid}" method="post" onsubmit="editor.submit();spin(this);" id="prefsForm">
+<form action="{sessionurl file='prefs.payments.php' params="action=invoices&save=true"}" method="post" onsubmit="editor.submit();spin(this);" id="prefsForm">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="invoices"}</legend>
 

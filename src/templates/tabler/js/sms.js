@@ -40,7 +40,8 @@ function updateMaxChars(field)
 }
 function smsTypeChanged()
 {
-	var type = parseInt(EBID('type').value),
+	var typeEl = EBID('smsType') || EBID('type'),
+		type = typeEl ? parseInt(typeEl.value, 10) : 0,
 		typePrice = smsTypePrices[type],
 		typeFlags = smsTypeFlags[type],
 		typeLength = smsTypeLengths[type],
@@ -67,7 +68,8 @@ function smsTypeChanged()
 }
 function checkSMSComposeForm()
 {
-	var type = parseInt(EBID('type').value),
+	var typeEl = EBID('smsType') || EBID('type'),
+		type = typeEl ? parseInt(typeEl.value, 10) : 0,
 		typeFlags = smsTypeFlags[type];
 
 	if((((EBID('from') && EBID('from').value.length < 3)
@@ -84,7 +86,7 @@ function checkSMSComposeForm()
 }
 function openCellphoneAddressbook(sid)
 {
-	openOverlay('organizer.addressbook.php?sid=' + sid + '&action=numberPopup',
+	openOverlay(bmAppendSession('organizer.addressbook.php?action=numberPopup'),
 		lang['addressbook'],
 		450,
 		380,

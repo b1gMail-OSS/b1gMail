@@ -1,4 +1,5 @@
-<form action="abuse.php?sid={$sid}" method="post" onsubmit="spin(this)" name="f1">
+<form action="{sessionurl file='abuse.php'}" method="post" onsubmit="spin(this)" name="f1">
+	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
 	<input type="hidden" name="sortBy" id="sortBy" value="{$sortBy}" />
 	<input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
@@ -41,15 +42,15 @@
 							</td>
 							<td class="text-center"><input type="checkbox" name="users[]" value="{$user.id}" /></td>
 							<td>{$user.id}</td>
-							<td><a href="abuse.php?do=show&userid={$user.id}&sid={$sid}">{email value=$user.email cut=30}</a></td>
-							<td><i class="fa-regular fa-circle text-{$user.indicator}"></i>&nbsp; <a href="abuse.php?do=show&userid={$user.id}&sid={$sid}">{$user.pointsum}</a></td>
+							<td><a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}">{email value=$user.email cut=30}</a></td>
+							<td><i class="fa-regular fa-circle text-{$user.indicator}"></i>&nbsp; <a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}">{$user.pointsum}</a></td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="abuse.php?do=show&userid={$user.id}&sid={$sid}" title="{lng p="show"}" class="btn btn-sm"><i class="fa-solid fa-magnifying-glass"></i></a>
-									<a href="users.php?do=edit&id={$user.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}" title="{lng p="show"}" class="btn btn-sm"><i class="fa-solid fa-magnifying-glass"></i></a>
+									<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
 									<a href="javascript:singleAction('{if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='no'}<i class="fa-solid fa-lock"></i>{elseif $user.gesperrt=='yes'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='locked'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='unlock'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='delete'}<i class="fa-solid fa-hammer"></i>{/if}</a>
 									<a href="javascript:singleAction('delete', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='delete'}<i class="fa-regular fa-trash-can text-danger"></i>{else}<i class="fa-regular fa-trash-can"></i>{/if}</a>
-									<a href="users.php?do=login&id={$user.id}&sid={$sid}" target="_blank" onclick="return confirm('{lng p="loginwarning"}');" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
+									<a href="#" target="_blank" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('{sessionurl file='users.php' params="do=login&id={$user.id}"}', true); return false;" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
 								</div>
 							</td>
 						</tr>

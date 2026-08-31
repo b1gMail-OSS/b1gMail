@@ -6,6 +6,7 @@
 
 <div data-role="content">
 	<form id="taskForm" action="tasks.php?do=save&id={$task.id}&list={$task.tasklistid}&sid={$sid}" method="post">
+		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="title">{lng p="title"}:</label>
 			<input type="text" name="titel" id="title" value="{if isset($task.titel)}{text value=$task.titel allowEmpty=true}{/if}"  />

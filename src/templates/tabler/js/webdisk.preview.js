@@ -111,7 +111,7 @@ function webdiskPreviewFileUrl(fileOrId, inline)
 	if(file && file.isMail && typeof mailAttachmentDownloadUrl === 'function')
 		return(mailAttachmentDownloadUrl(file.mailId, file.attachment, inline));
 
-	return 'webdisk.php?action=downloadFile&id=' + id + (inline ? '&view=true' : '') + '&sid=' + currentSID;
+	return 'webdisk.php?action=downloadFile&id=' + id + (inline ? '&view=true' : '') ;
 }
 
 function webdiskPreviewEscapeHtml(str)
@@ -310,7 +310,7 @@ function webdiskPreviewDownloadUrl(fileOrId)
 	if(file && file.isMail && typeof mailAttachmentDownloadUrl === 'function')
 		return(mailAttachmentDownloadUrl(file.mailId, file.attachment, false));
 
-	return 'webdisk.php?action=downloadFile&id=' + id + '&sid=' + currentSID;
+	return 'webdisk.php?action=downloadFile&id=' + id ;
 }
 
 function webdiskPreviewConfirmClose()
@@ -907,7 +907,7 @@ function webdiskPreviewRenderEditableText(file)
 	if(status)
 		status.textContent = '';
 
-	MakeXMLRequest('webdisk.php?action=getFileText&id=' + encodeURIComponent(file.id) + '&sid=' + currentSID, function(e)
+	MakeXMLRequest(bmAppendSession('webdisk.php?action=getFileText&id=' + encodeURIComponent(file.id) ), function(e)
 	{
 		if(e.readyState != 4 || loadToken !== _wdPreview.textLoadToken)
 			return;
@@ -982,7 +982,7 @@ function webdiskPreviewSaveText()
 		return;
 	}
 
-	xhr.open('POST', 'webdisk.php?action=saveFileText&id=' + encodeURIComponent(file.id) + '&sid=' + currentSID, true);
+	xhr.open('POST', 'webdisk.php?action=saveFileText&id=' + encodeURIComponent(file.id) , true);
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 	xhr.onreadystatechange = function()
 	{

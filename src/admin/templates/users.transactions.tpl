@@ -1,4 +1,5 @@
-<form action="users.php?do=transactions&id={$user.id}&filter=true&sid={$sid}" method="post" name="f1">
+<form action="{sessionurl file='users.php' params="do=transactions&id={$user.id}&filter=true"}" method="post" name="f1">
+	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
 	<input type="hidden" name="sortBy" id="sortBy" value="{$sortBy}" />
 	<input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
@@ -37,7 +38,7 @@
 							<td>{date nice=true timestamp=$tx.date}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-								<a href="users.php?do=editTransaction&transactionid={$tx.transactionid}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+								<a href="{sessionurl file='users.php' params="do=editTransaction&transactionid={$tx.transactionid}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
 								<a href="javascript:if(confirm('{lng p="realdel"}')) singleAction('delete', '{$tx.transactionid}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
@@ -82,7 +83,8 @@
 	</fieldset>
 </form>
 
-<form action="users.php?do=transactions&add=true&id={$user.id}&sid={$sid}" method="post" onsubmit="spin(this);">
+<form action="{sessionurl file='users.php' params="do=transactions&add=true&id={$user.id}"}" method="post" onsubmit="spin(this);">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="addtransaction"}</legend>
 
@@ -110,7 +112,7 @@
 	</fieldset>
 
 	<div class="row">
-		<div class="col-md-6"><input class="btn btn-primary" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='users.php?do=edit&id={$user.id}&sid={$sid}';" /></div>
+		<div class="col-md-6"><input class="btn btn-primary" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='users.php?do=edit&id={$user.id}{$sessionUrlSuffix}';" /></div>
 		<div class="col-md-6 text-end"><input class="btn btn-primary" type="submit" value="{lng p="add"}" /></div>
 	</div>
 </form>

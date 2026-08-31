@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV;
 
 use Sabre\DAV;
 use Sabre\DAV\Exception\NotFound;
 use Sabre\DAV\MkCol;
 use Sabre\DAVACL;
-use Sabre\HTTP\URLUtil;
+use Sabre\Uri;
 
 /**
  * The CalendarHome represents a node that is usually in a users'
@@ -20,79 +22,73 @@ use Sabre\HTTP\URLUtil;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
+class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL
+{
+    use DAVACL\ACLTrait;
 
     /**
-     * CalDAV backend
+     * CalDAV backend.
      *
-     * @var Sabre\CalDAV\Backend\BackendInterface
+     * @var Backend\BackendInterface
      */
     protected $caldavBackend;
 
     /**
-     * Principal information
+     * Principal information.
      *
      * @var array
      */
     protected $principalInfo;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param Backend\BackendInterface $caldavBackend
-     * @param mixed $userUri
+     * @param array $principalInfo
      */
-    function __construct(Backend\BackendInterface $caldavBackend, $principalInfo) {
-
+    public function __construct(Backend\BackendInterface $caldavBackend, $principalInfo)
+    {
         $this->caldavBackend = $caldavBackend;
         $this->principalInfo = $principalInfo;
-
     }
 
     /**
-     * Returns the name of this object
+     * Returns the name of this object.
      *
      * @return string
      */
-    function getName() {
+    public function getName()
+    {
+        list(, $name) = Uri\split($this->principalInfo['uri']);
 
-        list(, $name) = URLUtil::splitPath($this->principalInfo['uri']);
         return $name;
-
     }
 
     /**
-     * Updates the name of this object
+     * Updates the name of this object.
      *
      * @param string $name
-     * @return void
      */
-    function setName($name) {
-
+    public function setName($name)
+    {
         throw new DAV\Exception\Forbidden();
-
     }
 
     /**
-     * Deletes this object
-     *
-     * @return void
+     * Deletes this object.
      */
-    function delete() {
-
+    public function delete()
+    {
         throw new DAV\Exception\Forbidden();
-
     }
 
     /**
-     * Returns the last modification date
+     * Returns the last modification date.
      *
      * @return int
      */
-    function getLastModified() {
-
+    public function getLastModified()
+    {
         return null;
-
     }
 
     /**
@@ -100,14 +96,12 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
      *
      * This is currently not allowed
      *
-     * @param string $filename
+     * @param string   $name
      * @param resource $data
-     * @return void
      */
-    function createFile($filename, $data = null) {
-
+    public function createFile($name, $data = null)
+    {
         throw new DAV\Exception\MethodNotAllowed('Creating new files in this collection is not supported');
-
     }
 
     /**
@@ -116,30 +110,29 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
      * This is currently not allowed.
      *
      * @param string $filename
-     * @return void
      */
-    function createDirectory($filename) {
-
+    public function createDirectory($filename)
+    {
         throw new DAV\Exception\MethodNotAllowed('Creating new collections in this collection is not supported');
-
     }
 
     /**
-     * Returns a single calendar, by name
+     * Returns a single calendar, by name.
      *
      * @param string $name
+     *
      * @return Calendar
      */
-    function getChild($name) {
-
+    public function getChild($name)
+    {
         // Special nodes
-        if ($name === 'inbox' && $this->caldavBackend instanceof Backend\SchedulingSupport) {
+        if ('inbox' === $name && $this->caldavBackend instanceof Backend\SchedulingSupport) {
             return new Schedule\Inbox($this->caldavBackend, $this->principalInfo['uri']);
         }
-        if ($name === 'outbox' && $this->caldavBackend instanceof Backend\SchedulingSupport) {
+        if ('outbox' === $name && $this->caldavBackend instanceof Backend\SchedulingSupport) {
             return new Schedule\Outbox($this->principalInfo['uri']);
         }
-        if ($name === 'notifications' && $this->caldavBackend instanceof Backend\NotificationSupport) {
+        if ('notifications' === $name && $this->caldavBackend instanceof Backend\NotificationSupport) {
             return new Notifications\Collection($this->caldavBackend, $this->principalInfo['uri']);
         }
 
@@ -147,11 +140,7 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
         foreach ($this->caldavBackend->getCalendarsForUser($this->principalInfo['uri']) as $calendar) {
             if ($calendar['uri'] === $name) {
                 if ($this->caldavBackend instanceof Backend\SharingSupport) {
-                    if (isset($calendar['{http://calendarserver.org/ns/}shared-url'])) {
-                        return new SharedCalendar($this->caldavBackend, $calendar);
-                    } else {
-                        return new ShareableCalendar($this->caldavBackend, $calendar);
-                    }
+                    return new SharedCalendar($this->caldavBackend, $calendar);
                 } else {
                     return new Calendar($this->caldavBackend, $calendar);
                 }
@@ -164,45 +153,39 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
                     return new Subscriptions\Subscription($this->caldavBackend, $subscription);
                 }
             }
-
         }
 
-        throw new NotFound('Node with name \'' . $name . '\' could not be found');
-
+        throw new NotFound('Node with name \''.$name.'\' could not be found');
     }
 
     /**
      * Checks if a calendar exists.
      *
      * @param string $name
+     *
      * @return bool
      */
-    function childExists($name) {
-
+    public function childExists($name)
+    {
         try {
-            return !!$this->getChild($name);
+            return (bool) $this->getChild($name);
         } catch (NotFound $e) {
             return false;
         }
-
     }
 
     /**
-     * Returns a list of calendars
+     * Returns a list of calendars.
      *
      * @return array
      */
-    function getChildren() {
-
+    public function getChildren()
+    {
         $calendars = $this->caldavBackend->getCalendarsForUser($this->principalInfo['uri']);
         $objs = [];
         foreach ($calendars as $calendar) {
             if ($this->caldavBackend instanceof Backend\SharingSupport) {
-                if (isset($calendar['{http://calendarserver.org/ns/}shared-url'])) {
-                    $objs[] = new SharedCalendar($this->caldavBackend, $calendar);
-                } else {
-                    $objs[] = new ShareableCalendar($this->caldavBackend, $calendar);
-                }
+                $objs[] = new SharedCalendar($this->caldavBackend, $calendar);
             } else {
                 $objs[] = new Calendar($this->caldavBackend, $calendar);
             }
@@ -226,35 +209,33 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
         }
 
         return $objs;
-
     }
 
     /**
      * Creates a new calendar or subscription.
      *
      * @param string $name
-     * @param MkCol $mkCol
+     *
      * @throws DAV\Exception\InvalidResourceType
-     * @return void
      */
-    function createExtendedCollection($name, MkCol $mkCol) {
-
+    public function createExtendedCollection($name, MkCol $mkCol)
+    {
         $isCalendar = false;
         $isSubscription = false;
         foreach ($mkCol->getResourceType() as $rt) {
             switch ($rt) {
-                case '{DAV:}collection' :
-                case '{http://calendarserver.org/ns/}shared-owner' :
+                case '{DAV:}collection':
+                case '{http://calendarserver.org/ns/}shared-owner':
                     // ignore
                     break;
-                case '{urn:ietf:params:xml:ns:caldav}calendar' :
+                case '{urn:ietf:params:xml:ns:caldav}calendar':
                     $isCalendar = true;
                     break;
-                case '{http://calendarserver.org/ns/}subscribed' :
+                case '{http://calendarserver.org/ns/}subscribed':
                     $isSubscription = true;
                     break;
-                default :
-                    throw new DAV\Exception\InvalidResourceType('Unknown resourceType: ' . $rt);
+                default:
+                    throw new DAV\Exception\InvalidResourceType('Unknown resourceType: '.$rt);
             }
         }
 
@@ -266,41 +247,21 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
                 throw new DAV\Exception\InvalidResourceType('This backend does not support subscriptions');
             }
             $this->caldavBackend->createSubscription($this->principalInfo['uri'], $name, $properties);
-
         } elseif ($isCalendar) {
             $this->caldavBackend->createCalendar($this->principalInfo['uri'], $name, $properties);
-
         } else {
             throw new DAV\Exception\InvalidResourceType('You can only create calendars and subscriptions in this collection');
-
         }
-
     }
 
     /**
-     * Returns the owner principal
+     * Returns the owner of the calendar home.
      *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
+     * @return string
      */
-    function getOwner() {
-
+    public function getOwner()
+    {
         return $this->principalInfo['uri'];
-
-    }
-
-    /**
-     * Returns a group principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getGroup() {
-
-        return null;
-
     }
 
     /**
@@ -315,8 +276,8 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
      *
      * @return array
      */
-    function getACL() {
-
+    public function getACL()
+    {
         return [
             [
                 'privilege' => '{DAV:}read',
@@ -330,54 +291,20 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
             ],
             [
                 'privilege' => '{DAV:}read',
-                'principal' => $this->principalInfo['uri'] . '/calendar-proxy-write',
+                'principal' => $this->principalInfo['uri'].'/calendar-proxy-write',
                 'protected' => true,
             ],
             [
                 'privilege' => '{DAV:}write',
-                'principal' => $this->principalInfo['uri'] . '/calendar-proxy-write',
+                'principal' => $this->principalInfo['uri'].'/calendar-proxy-write',
                 'protected' => true,
             ],
             [
                 'privilege' => '{DAV:}read',
-                'principal' => $this->principalInfo['uri'] . '/calendar-proxy-read',
+                'principal' => $this->principalInfo['uri'].'/calendar-proxy-read',
                 'protected' => true,
             ],
-
         ];
-
-    }
-
-    /**
-     * Updates the ACL
-     *
-     * This method will receive a list of new ACE's.
-     *
-     * @param array $acl
-     * @return void
-     */
-    function setACL(array $acl) {
-
-        throw new DAV\Exception\MethodNotAllowed('Changing ACL is not yet supported');
-
-    }
-
-    /**
-     * Returns the list of supported privileges for this node.
-     *
-     * The returned data structure is a list of nested privileges.
-     * See Sabre\DAVACL\Plugin::getDefaultSupportedPrivilegeSet for a simple
-     * standard structure.
-     *
-     * If null is returned from this method, the default privilege set is used,
-     * which is fine for most common usecases.
-     *
-     * @return array|null
-     */
-    function getSupportedPrivilegeSet() {
-
-        return null;
-
     }
 
     /**
@@ -386,21 +313,21 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
      * This method should return the url of the newly created calendar if the
      * share was accepted.
      *
-     * @param string href The sharee who is replying (often a mailto: address)
-     * @param int status One of the SharingPlugin::STATUS_* constants
+     * @param string $href        The sharee who is replying (often a mailto: address)
+     * @param int    $status      One of the SharingPlugin::STATUS_* constants
      * @param string $calendarUri The url to the calendar thats being shared
-     * @param string $inReplyTo The unique id this message is a response to
-     * @param string $summary A description of the reply
-     * @return null|string
+     * @param string $inReplyTo   The unique id this message is a response to
+     * @param string $summary     A description of the reply
+     *
+     * @return string|null
      */
-    function shareReply($href, $status, $calendarUri, $inReplyTo, $summary = null) {
-
+    public function shareReply($href, $status, $calendarUri, $inReplyTo, $summary = null)
+    {
         if (!$this->caldavBackend instanceof Backend\SharingSupport) {
             throw new DAV\Exception\NotImplemented('Sharing support is not implemented by this backend.');
         }
 
         return $this->caldavBackend->shareReply($href, $status, $calendarUri, $inReplyTo, $summary);
-
     }
 
     /**
@@ -419,12 +346,11 @@ class CalendarHome implements DAV\IExtendedCollection, DAVACL\IACL {
      * collection should be ignored.
      *
      * @param string $uid
+     *
      * @return string|null
      */
-    function getCalendarObjectByUID($uid) {
-
+    public function getCalendarObjectByUID($uid)
+    {
         return $this->caldavBackend->getCalendarObjectByUID($this->principalInfo['uri'], $uid);
-
     }
-
 }

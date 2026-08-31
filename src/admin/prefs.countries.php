@@ -121,8 +121,7 @@ if($_REQUEST['action'] == 'countries')
 				(int)$_REQUEST['id']);
 			$cacheManager->Delete('countryList');
 			$cacheManager->Delete('countryListWithDetails');
-			header('Location: prefs.countries.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.countries.php');
 		}
 
 		// fetch

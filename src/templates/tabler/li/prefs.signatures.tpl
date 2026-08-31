@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=signatures&do=action&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=signatures&do=action'}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar bm-prefs-body bm-prefs-list-body">
 <div class="card bm-prefs-table-card">
@@ -27,11 +28,11 @@
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
 		<td class="{$class} bm-prefs-col-check" nowrap="nowrap"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="signature_{$signatureID}" name="signature_{$signatureID}" aria-label="{text value=$signature.titel}" /></label></td>
-		<td class="{$class}" nowrap="nowrap"><a href="prefs.php?action=signatures&do=edit&id={$signatureID}&sid={$sid}"><i class="ti ti-quote icon icon-sm text-secondary me-1" aria-hidden="true"></i>{text value=$signature.titel}</a></td>
+		<td class="{$class}" nowrap="nowrap"><a href="{sessionurl file='prefs.php' params="action=signatures&do=edit&id={$signatureID}"}"><i class="ti ti-quote icon icon-sm text-secondary me-1" aria-hidden="true"></i>{text value=$signature.titel}</a></td>
 		<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
 			<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="prefs.php?action=signatures&do=edit&id={$signatureID}&sid={$sid}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=signatures&do=delete&id={$signatureID}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='prefs.php' params="action=signatures&do=edit&id={$signatureID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=signatures&do=delete&id={$signatureID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 		</td>
 	</tr>
@@ -54,7 +55,7 @@
 		</div>
 	</div>
 	<div class="right">
-		<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='prefs.php?action=signatures&do=add&sid={$sid}';">
+		<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='prefs.php' params='action=signatures&do=add'}';">
 			<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 			{lng p="addsignature"}
 		</button>

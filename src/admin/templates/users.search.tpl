@@ -1,4 +1,5 @@
-<form action="users.php?action=search&do=search&sid={$sid}" method="post" onsubmit="spin(this)" name="f1">
+<form action="{sessionurl file='users.php' params="action=search&do=search"}" method="post" onsubmit="spin(this)" name="f1">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="search"}</legend>
 		<div class="mb-3 row">

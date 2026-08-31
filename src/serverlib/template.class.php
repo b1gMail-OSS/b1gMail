@@ -53,8 +53,11 @@ class Template extends Smarty\Smarty {
         // template & cache directories
         if (ADMIN_MODE) {
             $this->setTemplateDir(B1GMAIL_DIR . 'admin/templates/');
+            $this->addTemplateDir(B1GMAIL_DIR . 'plugins/templates/');
             $this->setCompileDir(B1GMAIL_DIR . 'admin/templates/cache/');
             $this->assign('tpldir', $this->tplDir = './templates/');
+            if(function_exists('AssignTemplateAdminRouteVars'))
+                AssignTemplateAdminRouteVars($this);
         } else {
             $this->setTemplateDir(
                 B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/',
@@ -62,11 +65,8 @@ class Template extends Smarty\Smarty {
             $this->setCompileDir(
                 B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/',
             );
-            $this->assign(
-                'tpldir',
-                $this->tplDir =
-                    B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/',
-            );
+            $this->tplDir =
+                B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/';
         }
 
         // variables
@@ -79,6 +79,15 @@ class Template extends Smarty\Smarty {
             );
         } else {
             $this->assign('selfurl', $bm_prefs['selfurl']);
+        }
+        if (!ADMIN_MODE) {
+            $this->assign(
+                'tpldir',
+                $this->getTemplateVars('selfurl') .
+                    'templates/' .
+                    $bm_prefs['template'] .
+                    '/',
+            );
         }
         $this->assign('_tpldir', 'templates/' . $bm_prefs['template'] . '/');
         $this->assign('_tplname', $bm_prefs['template']);
@@ -130,6 +139,10 @@ class Template extends Smarty\Smarty {
         $this->registerPlugin('function', 'hook', 'TemplateHook');
         $this->registerPlugin('function', 'fileDateSig', 'TemplateFileDateSig');
         $this->registerPlugin('function', 'number', 'TemplateNumber');
+        $this->registerPlugin('function', 'sessionurl', 'TemplateSessionUrl', false);
+        $this->registerPlugin('function', 'adminurl', 'TemplateAdminUrl', false);
+        $this->registerPlugin('function', 'csrffield', 'TemplateCsrfField');
+        $this->registerPlugin('function', 'derefurl', 'TemplateDerefUrl', false);
         $this->registerPlugin('function', 'fieldDate', 'TemplateFieldDate');
         $this->registerPlugin('modifier', 'array_key_exists', 'array_key_exists');
         $this->registerPlugin('modifier', 'IsMobileUserAgent', 'IsMobileUserAgent');
@@ -158,13 +171,99 @@ class Template extends Smarty\Smarty {
      * @param string $area Area (nli/li/admin)
      * @param string $file Filename
      */
+    function pathToURL($file) {
+        global $bm_prefs;
+
+        $path = $file;
+        $query = '';
+        if (($pos = strpos($file, '?')) !== false) {
+            $path = substr($file, 0, $pos);
+            $query = substr($file, $pos);
+        }
+
+        $selfUrl = $this->getTemplateVars('selfurl');
+        if (!$selfUrl) {
+            return $file;
+        }
+
+        if (strpos($path, B1GMAIL_DIR) === 0) {
+            return $selfUrl . substr($path, strlen(B1GMAIL_DIR)) . $query;
+        }
+        if (strpos($path, $this->tplDir) === 0) {
+            return $selfUrl .
+                'templates/' .
+                $bm_prefs['template'] .
+                '/' .
+                substr($path, strlen($this->tplDir)) .
+                $query;
+        }
+        if (strpos($path, B1GMAIL_REL) === 0) {
+            return $selfUrl . substr($path, strlen(B1GMAIL_REL)) . $query;
+        }
+        if (strpos($path, './') === 0) {
+            return $selfUrl . substr($path, 2) . $query;
+        }
+        if(preg_match('#^(\.\./)+#', $path))
+        {
+            $rel = preg_replace('#^(\.\./)+#', '', $path);
+
+            return $selfUrl . $rel . $query;
+        }
+
+        if(!preg_match('#^(https?:)?//#i', $path) && strpos($path, '/') !== 0)
+            return rtrim($selfUrl, '/') . '/' . ltrim($path, '/') . $query;
+
+        return $file;
+    }
+
+    function absoluteURL($url) {
+        if ($url === '' || $url === '#' || strpos($url, '#') === 0) {
+            return $url;
+        }
+        if (
+            preg_match('#^(https?:)?//#i', $url) ||
+            strpos($url, 'mailto:') === 0 ||
+            strpos($url, 'javascript:') === 0
+        ) {
+            return $url;
+        }
+
+        $selfUrl = $this->getTemplateVars('selfurl');
+        if (!$selfUrl) {
+            return $url;
+        }
+
+        if (strpos($url, './') === 0) {
+            $url = substr($url, 2);
+        }
+
+        if (strpos($url, '/') === 0) {
+            return rtrim($selfUrl, '/') . $url;
+        }
+
+        return $selfUrl . $url;
+    }
+
+    function absoluteNavLinks(&$items) {
+        foreach ($items as &$item) {
+            if (isset($item['link'])) {
+                $link = (string)$item['link'];
+                $link = preg_replace('/([?&])sid=$/', '', $link);
+                $link = rtrim($link, '?&');
+                $item['link'] = SessionUrl($this->absoluteURL($link));
+            }
+        }
+        unset($item);
+    }
+
     function addJSFile($area, $file) {
         if (isset($this->_jsFiles[$area])) {
-            if (!in_array($file, $this->_jsFiles[$area])) {
+            $url = $this->pathToURL($file);
+            if (!in_array($url, $this->_jsFiles[$area])) {
                 if (file_Exists($file)) {
-                    $file .= '?' . substr(md5(filemtime($file)), 0, 6);
+                    $url .= '?' . substr(md5(filemtime($file)), 0, 6);
                 }
-                $this->_jsFiles[$area][] = $file;
+                $this->_jsFiles[$area][] = $url;
                 return true;
             }
         }
@@ -180,8 +279,9 @@ class Template extends Smarty\Smarty {
      */
     function addCSSFile($area, $file) {
         if (isset($this->_cssFiles[$area])) {
-            if (!in_array($file, $this->_cssFiles[$area])) {
-                $this->_cssFiles[$area][] = $file;
+            $url = $this->pathToURL($file);
+            if (!in_array($url, $this->_cssFiles[$area])) {
+                $this->_cssFiles[$area][] = $url;
                 return true;
             }
         }
@@ -209,6 +309,14 @@ class Template extends Smarty\Smarty {
         // admin mode?
         if (ADMIN_MODE && isset($adminRow)) {
             $this->assign('adminRow', $adminRow);
+            $this->assign(
+                '_adminDisplayName',
+                function_exists('SessionAdminLockDisplayName')
+                    ? SessionAdminLockDisplayName($adminRow)
+                    : trim((isset($adminRow['firstname']) ? $adminRow['firstname'] : '')
+                        . ' ' . (isset($adminRow['lastname']) ? $adminRow['lastname'] : ''))
+            );
+            AvatarAssignAdminTemplateVars($this, $adminRow);
 
             $bmVer = B1GMAIL_VERSION;
 
@@ -251,7 +359,7 @@ class Template extends Smarty\Smarty {
                 [
                     'icon' => 'send_mail',
                     'faIcon' => 'fa-envelope-o',
-                    'link' => 'email.compose.php?sid=',
+                    'link' => 'email.compose.php',
                     'text' => $lang_user['email'],
                     'order' => 100,
                 ],
@@ -262,14 +370,14 @@ class Template extends Smarty\Smarty {
                 [
                     'icon' => 'ico_calendar',
                     'faIcon' => 'fa-calendar',
-                    'link' => 'organizer.calendar.php?action=addDate&sid=',
+                    'link' => 'organizer.calendar.php?action=addDate',
                     'text' => $lang_user['date2'],
                     'order' => 300,
                 ],
                 [
                     'icon' => 'ico_todo',
                     'faIcon' => 'fa-tasks',
-                    'link' => 'organizer.todo.php?action=addTask&sid=',
+                    'link' => 'organizer.todo.php?action=addTask',
                     'text' => $lang_user['task'],
                     'order' => 400,
                 ],
@@ -277,14 +385,14 @@ class Template extends Smarty\Smarty {
                     'icon' => 'ico_addressbook',
                     'faIcon' => 'fa-address-book-o',
                     'link' =>
-                        'organizer.addressbook.php?action=addContact&sid=',
+                        'organizer.addressbook.php?action=addContact',
                     'text' => $lang_user['contact'],
                     'order' => 500,
                 ],
                 [
                     'icon' => 'ico_notes',
                     'faIcon' => 'fa-sticky-note-o',
-                    'link' => 'organizer.notes.php?action=addNote&sid=',
+                    'link' => 'organizer.notes.php?action=addNote',
                     'text' => $lang_user['note'],
                     'order' => 600,
                 ],
@@ -294,14 +402,14 @@ class Template extends Smarty\Smarty {
                 'start' => [
                     'icon' => 'start',
                     'faIcon' => 'fa-home',
-                    'link' => 'start.php?sid=',
+                    'link' => 'start.php',
                     'text' => $lang_user['start'],
                     'order' => 100,
                 ],
                 'email' => [
                     'icon' => 'email',
                     'faIcon' => 'fa-envelope-o',
-                    'link' => 'email.php?sid=',
+                    'link' => 'email.php',
                     'text' => $lang_user['email'],
                     'order' => 200,
                 ],
@@ -311,7 +419,7 @@ class Template extends Smarty\Smarty {
                 $pageTabs['sms'] = [
                     'icon' => 'sms',
                     'faIcon' => 'fa-comments',
-                    'link' => 'sms.php?sid=',
+                    'link' => 'sms.php',
                     'text' => $lang_user['sms'],
                     'order' => 300,
                 ];
@@ -323,7 +431,7 @@ class Template extends Smarty\Smarty {
                 $newMenu[] = [
                     'icon' => 'ico_composesms',
                     'faIcon' => 'fa-comments',
-                    'link' => 'sms.php?sid=',
+                    'link' => 'sms.php',
                     'text' => $lang_user['sms'],
                     'order' => 801,
                 ];
@@ -334,7 +442,7 @@ class Template extends Smarty\Smarty {
                 'organizer' => [
                     'icon' => 'organizer',
                     'faIcon' => 'fa-calendar',
-                    'link' => 'organizer.php?sid=',
+                    'link' => 'organizer.php',
                     'text' => $lang_user['organizer'],
                     'order' => 400,
                 ],
@@ -346,7 +454,7 @@ class Template extends Smarty\Smarty {
                     'webdisk' => [
                         'icon' => 'webdisk',
                         'faIcon' => 'fa-cloud',
-                        'link' => 'webdisk.php?sid=',
+                        'link' => 'webdisk.php',
                         'text' => $lang_user['webdisk'],
                         'order' => 500,
                     ],
@@ -359,7 +467,7 @@ class Template extends Smarty\Smarty {
                 $newMenu[] = [
                     'icon' => 'webdisk_file',
                     'faIcon' => 'fa-file-o',
-                    'link' => 'webdisk.php?do=uploadFilesForm&sid=',
+                    'link' => 'webdisk.php?do=uploadFilesForm',
                     'text' => $lang_user['file'],
                     'order' => 701,
                 ];
@@ -386,7 +494,7 @@ class Template extends Smarty\Smarty {
                 'prefs' => [
                     'icon' => 'prefs',
                     'faIcon' => 'fa-cog',
-                    'link' => 'prefs.php?sid=',
+                    'link' => 'prefs.php',
                     'text' => $lang_user['prefs'],
                     'order' => 600,
                 ],
@@ -409,6 +517,9 @@ class Template extends Smarty\Smarty {
             uasort($pageTabs, 'TemplateTabSort');
             uasort($newMenu, 'TemplateTabSort');
 
+            $this->absoluteNavLinks($pageTabs);
+            $this->absoluteNavLinks($newMenu);
+
             $this->assign('pageTabs', $pageTabs);
             $this->assign('pageTabsCount', count($pageTabs));
             $this->assign('newMenu', $newMenu);
@@ -419,17 +530,16 @@ class Template extends Smarty\Smarty {
                 '_userDisplayName',
                 trim($userRow['vorname'] . ' ' . $userRow['nachname'])
             );
-            $userInitials = '';
-            if (trim($userRow['vorname']) != '') {
-                $userInitials .= mb_strtoupper(mb_substr($userRow['vorname'], 0, 1));
-            }
-            if (trim($userRow['nachname']) != '') {
-                $userInitials .= mb_strtoupper(mb_substr($userRow['nachname'], 0, 1));
-            }
-            if ($userInitials == '') {
-                $userInitials = mb_strtoupper(mb_substr($userRow['email'], 0, 1));
-            }
-            $this->assign('_userInitials', $userInitials);
+            AvatarAssignTemplateVars(
+                $this,
+                $userRow['email'],
+                $userRow['vorname'],
+                $userRow['nachname'],
+                AvatarGetUserSource($thisUser),
+                'user',
+                (int)$userRow['id'],
+                AvatarUsernameFallbackForUser($userRow['email'])
+            );
             $this->assign(
                 'searchDetailsDefault',
                 $userRow['search_details_default'] == 'yes'
@@ -469,7 +579,7 @@ class Template extends Smarty\Smarty {
         }
 
         // pugin pages (not logged in)
-        else {
+        elseif (!ADMIN_MODE) {
             $menu = [];
             $moduleResult = $plugins->callFunction(
                 'getUserPages',
@@ -480,6 +590,7 @@ class Template extends Smarty\Smarty {
             foreach ($moduleResult as $userPages) {
                 $menu = array_merge($menu, $userPages);
             }
+            $this->absoluteNavLinks($menu);
             $this->assign('pluginUserPages', $menu);
         }
 
@@ -586,6 +697,10 @@ function TemplateLang($params, $smarty) {
 
     if (!ADMIN_MODE && isset($lang_user[$phrase])) {
         return $lang_user[$phrase];
+    }
+
+    if (!ADMIN_MODE && isset($lang_client[$phrase])) {
+        return $lang_client[$phrase];
     }
 
     return '#UNKNOWN_PHRASE(' . $phrase . ')#';
@@ -977,29 +1092,35 @@ function TemplateFileSelector($params, $smarty) {
 function TemplatePageNav($params, $smarty) {
     $tpl_on = $params['on'];
     $tpl_off = $params['off'];
-    $aktuelle_seite = $params['page'];
-    $anzahl_seiten = $params['pages'];
+    $aktuelle_seite = (int)$params['page'];
+    $anzahl_seiten = (int)$params['pages'];
+    $radius = isset($params['radius']) ? max(0, (int)$params['radius']) : 3;
+    $prevLabel = isset($params['prev']) ? $params['prev'] : '&lt;&lt;';
+    $nextLabel = isset($params['next']) ? $params['next'] : '&gt;&gt;';
     $ret = '';
 
-    $seiten = [
-        $aktuelle_seite - 3,
-        $aktuelle_seite - 2,
-        $aktuelle_seite - 1,
-        $aktuelle_seite,
-        $aktuelle_seite + 1,
-        $aktuelle_seite + 2,
-        $aktuelle_seite + 3,
-    ];
+    if ($anzahl_seiten < 1) {
+        return '';
+    }
+
+    if ($anzahl_seiten == 1) {
+        return str_replace(['.s', '.t'], 1, $tpl_on);
+    }
+
+    $seiten = [];
+    for ($i = $aktuelle_seite - $radius; $i <= $aktuelle_seite + $radius; $i++) {
+        $seiten[] = $i;
+    }
 
     if ($aktuelle_seite > 1) {
         $ret .= str_replace(
             '.t',
-            '&lt;&lt;',
+            $prevLabel,
             str_replace('.s', $aktuelle_seite - 1, $tpl_off),
         );
     }
 
-    foreach ($seiten as $key => $val) {
+    foreach ($seiten as $val) {
         if ($val >= 1 && $val <= $anzahl_seiten) {
             if ($aktuelle_seite == $val) {
                 $ret .= str_replace(['.s', '.t'], $val, $tpl_on);
@@ -1012,7 +1133,7 @@ function TemplatePageNav($params, $smarty) {
     if ($aktuelle_seite < $anzahl_seiten) {
         $ret .= str_replace(
             '.t',
-            '&gt;&gt;',
+            $nextLabel,
             str_replace('.s', $aktuelle_seite + 1, $tpl_off),
         );
     }
@@ -1042,8 +1163,12 @@ function TemplateStoreTime($params, $smarty) {
         return '-';
     }
 }
-function TemplateHook($params, $smarty) {
+function TemplateHook($params, $template) {
     $result = '';
+    $smarty = $template;
+    if (method_exists($template, 'getSmarty')) {
+        $smarty = $template->getSmarty();
+    }
 
     if (DEBUG && isset($_REQUEST['_showHooks'])) {
         $result .= '<div>#' . $params['id'] . '</div>';
@@ -1127,4 +1252,21 @@ function TemplateMobileNr($params, $smarty) {
             HTMLFormat($value),
         );
     }
+}
+
+/**
+ * Smarty helper: {derefurl url="https://example.com/"}
+ *
+ * @param array $params
+ * @return string
+ */
+function TemplateDerefUrl($params = array())
+{
+	$url = '';
+	if(isset($params['url']))
+		$url = $params['url'];
+	else if(isset($params['value']))
+		$url = $params['value'];
+
+	return htmlspecialchars(DerefUrl($url), ENT_QUOTES, 'UTF-8');
 }

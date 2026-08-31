@@ -3,7 +3,8 @@
  * b1gMail – PWA / Push icon in correct dimensions (192, 512).
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 
 $size = isset($_REQUEST['size']) ? (int) $_REQUEST['size'] : 192;
 if (!in_array($size, [192, 512], true)) {

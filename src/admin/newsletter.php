@@ -444,8 +444,7 @@ else if($_REQUEST['action'] == 'templates')
 				$_REQUEST['emailText'],
 				(int)$_REQUEST['templateID']
 			);
-			header('Location: newsletter.php?action=templates&sid=' . session_id());
-			exit;
+			SessionRedirect('newsletter.php?action=templates');
 		}
 
 		$res = $db->Query('SELECT * FROM {pre}newsletter_templates WHERE `templateid`=?',

@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="banners"}</legend>
 
-	<form action="prefs.ads.php?sid={$sid}" method="post" name="f1" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.ads.php'}" method="post" name="f1" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -26,10 +27,10 @@
 							<td>{$ad.views}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.ads.php?{if !$ad.paused}de{/if}activate={$ad.id}&sid={$sid}" class="btn btn-sm">{if !$ad.paused}<i class="fa-regular fa-square-check" title="{if $ad.paused}{lng p="continue"}{else}{lng p="pause"}{/if}"></i>{else}<i class="fa-regular fa-square" title="{if $ad.paused}{lng p="continue"}{else}{lng p="pause"}{/if}"></i>{/if}</a>
-									<a href="prefs.ads.php?reset={$ad.id}&sid={$sid}" onclick="return confirm('{lng p="reallyresetstats"}');" title="{lng p="resetstats"}" class="btn btn-sm"><i class="fa-solid fa-arrow-trend-down"></i></a>
-									<a href="prefs.ads.php?do=edit&id={$ad.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="prefs.ads.php?delete={$ad.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.ads.php' params="{if !$ad.paused}de{/if}activate={$ad.id}"}" class="btn btn-sm">{if !$ad.paused}<i class="fa-regular fa-square-check" title="{if $ad.paused}{lng p="continue"}{else}{lng p="pause"}{/if}"></i>{else}<i class="fa-regular fa-square" title="{if $ad.paused}{lng p="continue"}{else}{lng p="pause"}{/if}"></i>{/if}</a>
+									<a href="{sessionurl file='prefs.ads.php' params="reset={$ad.id}"}" onclick="return confirm('{lng p="reallyresetstats"}');" title="{lng p="resetstats"}" class="btn btn-sm"><i class="fa-solid fa-arrow-trend-down"></i></a>
+									<a href="{sessionurl file='prefs.ads.php' params="do=edit&id={$ad.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='prefs.ads.php' params="delete={$ad.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -60,7 +61,8 @@
 <fieldset>
 	<legend>{lng p="addbanner"}</legend>
 
-	<form action="prefs.ads.php?add=true&sid={$sid}" method="post" onsubmit="spin(this);">
+	<form action="{sessionurl file='prefs.ads.php' params="add=true"}" method="post" onsubmit="spin(this);">
+		{csrffield}
 		<div class="mb-3 row">
 			<div class="col-sm-12">
 				<textarea name="code" id="code" class="form-control" style="font-family:courier;"></textarea>

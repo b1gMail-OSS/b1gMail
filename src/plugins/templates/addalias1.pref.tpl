@@ -1,15 +1,9 @@
-<form action="plugin.page.php?plugin=addalias&action=page1&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page1'}" method="post" onsubmit="spin(this)">
+	{csrffield}
 
 <fieldset>
 	<legend>{lng p="addalias_name"}</legend>
-	
-	<table>
-		<tr>
-			<td width="48"><i class="fa-solid fa-plus fa-2xl"></i></td>
-			<td width="10">&nbsp;</td>
-			<td><b>{lng p="addalias_name"}</b><br />{lng p="addalias_text"}</td>
-		</tr>
-	</table>
+	<b>{lng p="addalias_name"}</b><br />{lng p="addalias_text"}
 </fieldset>
 
 {if $tpl_use==3}
@@ -34,7 +28,7 @@
 					<option value="{$gruppe.id}"{if $selected_gruppe==$gruppe.id} selected="selected"{/if}>{text value=$gruppe.titel}</option>
 				{/foreach}
 				</select>
-				<input type="hidden" value="{$selected_gruppe}" name="gruppe_hidden"> <a href="plugin.page.php?plugin=addalias&action=page2&sid={$sid}"><img src="./templates/images/help.png" border="0" alt="Bearbeiten" width="16" height="16" /></a></td>
+				<input type="hidden" value="{$selected_gruppe}" name="gruppe_hidden"> <a href="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page2'}"><img src="./templates/images/help.png" border="0" alt="Bearbeiten" width="16" height="16" /></a></td>
 			</tr>
 		</table>
 
@@ -57,7 +51,7 @@
 					<option value="{$user.id}"{if $selected_user==$user.id} selected="selected"{/if}>{text value=$user.email}</option>
 				{/foreach}
 				</select>
-				<input type="hidden" value="{$selected_user}" name="user_hidden"> <a href="plugin.page.php?plugin=addalias&action=page2&sid={$sid}"><img src="./templates/images/help.png" border="0" alt="Bearbeiten" width="16" height="16" /></a></td>
+				<input type="hidden" value="{$selected_user}" name="user_hidden"> <a href="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page2'}"><img src="./templates/images/help.png" border="0" alt="Bearbeiten" width="16" height="16" /></a></td>
 			</tr>
 		</table>
 
@@ -117,3 +111,4 @@
 		</p>
 </fieldset>
 {/if}
+</form>

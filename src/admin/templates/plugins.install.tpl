@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="installplugin"}</legend>
 
-	<form action="plugins.php?action=install&do=uploadPlugin&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+	<form action="{sessionurl file='plugins.php' params="action=install&do=uploadPlugin"}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+		{csrffield}
 		<div class="alert alert-warning">{lng p="sourcewarning"}</div>
 		<p>{lng p="install_desc"}</p>
 

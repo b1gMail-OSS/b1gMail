@@ -1,26 +1,29 @@
 <fieldset>
 	<legend>{lng p="stats"}</legend>
 	
-	<form action="{$pageURL}&action=stats&sid={$sid}" method="post">
-		<table width="100%">
-			<tr>
-				<td align="left">
-					<img src="{$tpldir}images/stats.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-					<select name="statType">
-					{foreach from=$statTypes item=type}
-						<option value="{$type}"{if $statType==$type} selected="selected"{/if}>{lng p="modfax_$type"}</option>
-					{/foreach}
-					</select>
-					&nbsp;&nbsp;
-					<img src="{$tpldir}images/calendar.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-					{html_select_date prefix="time" start_year="-5" time=$time display_days=false}
-					<input class="button" type="submit" value=" {lng p="show"} &raquo; " />
-				</td>
-				<td align="right">
-					&nbsp;
-				</td>
-			</tr>
-		</table>
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="get">
+		<div class="row g-2 align-items-end">
+			<div class="col-md-4">
+				<label class="form-label" for="statType">{lng p="stats"}</label>
+				<select class="form-select" name="statType" id="statType">
+				{foreach from=$statTypes item=type}
+					<option value="{$type}"{if $statType==$type} selected="selected"{/if}>{lng p="modfax_$type"}</option>
+				{/foreach}
+				</select>
+			</div>
+			<div class="col-md-4">
+				<label class="form-label">{lng p="time"}</label>
+				<div>{html_select_date prefix="time" start_year="-5" time=$time display_days=false}</div>
+			</div>
+			<div class="col-md-4">
+				<button class="btn btn-primary" type="submit">{lng p="show"}</button>
+			</div>
+		</div>
+	</form>
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" class="mt-2">
+		{csrffield}
+		<input type="hidden" name="fax_stats_reset" value="1" />
+		<button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('{lng p="realdel"}');">{lng p="reset"}</button>
 	</form>
 </fieldset>
 

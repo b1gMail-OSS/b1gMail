@@ -9,7 +9,7 @@
 			{foreach from=$bmwidget_calendar_nextDates item=_date}
 			<li>
 				<span class="date">{date timestamp=$_date.startdate format="%a., %d.%m."}</span>
-				<a href="organizer.calendar.php?date={$_date.startdate}&sid={$sid}">{text value=$_date.title cut=35}</a>
+				<a href="{sessionurl file='organizer.calendar.php' params="date={$_date.startdate}"}">{text value=$_date.title cut=35}</a>
 			</li>
 			{/foreach}
 		</ul>

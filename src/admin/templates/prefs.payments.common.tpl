@@ -1,4 +1,5 @@
-<form action="prefs.payments.php?save=true&sid={$sid}" method="post" onsubmit="spin(this)" id="prefsForm">
+<form action="{sessionurl file='prefs.payments.php' params="save=true"}" method="post" onsubmit="spin(this)" id="prefsForm">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="payments"}</legend>
 
@@ -40,7 +41,7 @@
 					<option value="enthalten"{if $bm_prefs.mwst=='enthalten'} selected="selected"{/if}>{lng p="vat_enthalten"}</option>
 					<option value="nomwst"{if $bm_prefs.mwst=='nomwst'} selected="selected"{/if}>{lng p="vat_nomwst"}</option>
 				</select>
-				<small>{lng p="vatratenotice"} <a href="prefs.countries.php?sid={$sid}">{lng p="countries"}</a>.</small>
+				<small>{lng p="vatratenotice"} <a href="{sessionurl file='prefs.countries.php'}">{lng p="countries"}</a>.</small>
 			</div>
 		</div>
 	</fieldset>
@@ -241,5 +242,5 @@
 	<input type="hidden" name="projectsnotification_http_activated" value="1" />
 	<input type="hidden" name="projectsnotification_http_url" value="{$bm_prefs.selfurl}interface/su_callback.php" />
 	<input type="hidden" name="projectsnotification_http_method" value="1" />
-	<input type="hidden" name="backlink" value="{$bm_prefs.selfurl}admin/prefs.payments.php?do=suBack&sid={$sid}&prjPass={$prjPass}&notifyPass={$notifyPass}" />
+	<input type="hidden" name="backlink" value="{$bm_prefs.selfurl}admin/prefs.payments.php?do=suBack{$sessionUrlSuffix}&prjPass={$prjPass}&notifyPass={$notifyPass}" />
 </form>

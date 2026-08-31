@@ -29,13 +29,13 @@
 	<div id="menu" data-role="panel" data-position="left" data-display="reveal" data-dismissible="true" data-theme="a">
 		<ul data-role="listview" data-theme="a">
 			<li data-icon="delete"><a href="#" data-rel="close">{lng p="close"}</a></li>
-			<li data-icon="mail"{if $activeTab=='email'} data-theme="b"{/if}><a href="email.php?sid={$sid}" data-transition="none">{lng p="email"}</a></li>
-			<li data-icon="user"{if $activeTab=='contacts'} data-theme="b"{/if}><a href="contacts.php?sid={$sid}" data-transition="none">{lng p="contacts"}</a></li>
-			<li data-icon="calendar"{if $activeTab=='calendar'} data-theme="b"{/if}><a href="calendar.php?sid={$sid}" data-transition="none">{lng p="calendar"}</a></li>
-			<li data-icon="bullets"{if $activeTab=='tasks'} data-theme="b"{/if}><a href="tasks.php?sid={$sid}" data-transition="none">{lng p="tasks"}</a></li>
-			{if $pageTabs.webdisk}<li data-icon="cloud"{if $activeTab=='webdisk'} data-theme="b"{/if}><a href="webdisk.php?sid={$sid}" data-transition="none">{lng p="webdisk"}</a></li>{/if}
-			<li data-icon="home"><a href="../start.php?sid={$sid}" rel="external" data-transition="none">{lng p="desktopversion"}</a></li>
-			<li data-icon="delete"><a href="email.php?action=logout&sid={$sid}" data-transition="none">{lng p="logout"}</a></li>
+			<li data-icon="mail"{if $activeTab=='email'} data-theme="b"{/if}><a href="{$selfurl}email.php" data-transition="none">{lng p="email"}</a></li>
+			<li data-icon="user"{if $activeTab=='contacts'} data-theme="b"{/if}><a href="{$selfurl}contacts.php" data-transition="none">{lng p="contacts"}</a></li>
+			<li data-icon="calendar"{if $activeTab=='calendar'} data-theme="b"{/if}><a href="{$selfurl}calendar.php" data-transition="none">{lng p="calendar"}</a></li>
+			<li data-icon="bullets"{if $activeTab=='tasks'} data-theme="b"{/if}><a href="{$selfurl}tasks.php" data-transition="none">{lng p="tasks"}</a></li>
+			{if $pageTabs.webdisk}<li data-icon="cloud"{if $activeTab=='webdisk'} data-theme="b"{/if}><a href="{$selfurl}webdisk.php" data-transition="none">{lng p="webdisk"}</a></li>{/if}
+			<li data-icon="home"><a href="../start.php" rel="external" data-transition="none">{lng p="desktopversion"}</a></li>
+			<li data-icon="delete"><a href="{$selfurl}email.php?action=logout" data-transition="none">{lng p="logout"}</a></li>
 		</ul>
 	</div>
 	{/if}
@@ -46,7 +46,7 @@
 	<div data-role="footer" data-position="fixed">
 		<a href="#menu" data-icon="bars" class="ui-btn-left">{lng p="menu"}</a>
 		<span class="ui-title"></span>
-		<a href="email.php?action=logout&sid={$sid}" data-icon="delete" class="ui-btn-right" data-transition="none">{lng p="logout"}</a>
+		<a href="{$selfurl}email.php?action=logout" data-icon="delete" class="ui-btn-right" data-transition="none">{lng p="logout"}</a>
 	</div>
 	{/if}
 	

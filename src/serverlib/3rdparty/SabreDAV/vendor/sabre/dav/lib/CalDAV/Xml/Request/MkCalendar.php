@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Request;
 
 use Sabre\Xml\Reader;
@@ -16,8 +18,8 @@ use Sabre\Xml\XmlDeserializable;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class MkCalendar implements XmlDeserializable {
-
+class MkCalendar implements XmlDeserializable
+{
     /**
      * The list of properties that will be set.
      *
@@ -30,16 +32,15 @@ class MkCalendar implements XmlDeserializable {
      *
      * @return array
      */
-    function getProperties() {
-
+    public function getProperties()
+    {
         return $this->properties;
-
     }
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -54,26 +55,23 @@ class MkCalendar implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $self = new self();
 
         $elementMap = $reader->elementMap;
-        $elementMap['{DAV:}prop']   = 'Sabre\DAV\Xml\Element\Prop';
-        $elementMap['{DAV:}set']    = 'Sabre\Xml\Element\KeyValue';
+        $elementMap['{DAV:}prop'] = \Sabre\DAV\Xml\Element\Prop::class;
+        $elementMap['{DAV:}set'] = \Sabre\Xml\Element\KeyValue::class;
         $elems = $reader->parseInnerTree($elementMap);
 
         foreach ($elems as $elem) {
-            if ($elem['name'] === '{DAV:}set') {
+            if ('{DAV:}set' === $elem['name']) {
                 $self->properties = array_merge($self->properties, $elem['value']['{DAV:}prop']);
             }
         }
 
         return $self;
-
     }
-
 }

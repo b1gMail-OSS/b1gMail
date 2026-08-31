@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/print.css" rel="stylesheet" type="text/css" />
 </head>
 

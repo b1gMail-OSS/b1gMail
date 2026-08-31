@@ -1,4 +1,5 @@
-<form method="post" action="users.php?action=create&create=true&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="{sessionurl file='users.php' params="action=create&create=true"}" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
@@ -140,7 +141,7 @@
 				{if $historyCount}
 					<div class="alert alert-warning">
 						{$historyCount} {lng p="oldcontacts"}
-						<a href="users.php?do=contactHistory&id={$user.id}&sid={$sid}">{lng p="show"} &raquo;</a>
+						<a href="{sessionurl file='users.php' params="do=contactHistory&id={$user.id}"}">{lng p="show"} &raquo;</a>
 					</div>
 				{/if}
 			</fieldset>

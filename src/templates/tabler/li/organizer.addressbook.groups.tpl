@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
@@ -18,7 +18,7 @@
 		var tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="clientlang.php" type="text/javascript"></script>
+	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
@@ -46,9 +46,9 @@
 							&nbsp;
 							&nbsp;
 							
-							<a title="{lng p="sendmail"}" target="_top" href="email.compose.php?sid={$sid}&toGroup={$groupID}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
-							<a title="{lng p="export"}" target="_top" href="organizer.addressbook.php?sid={$sid}&action=groups&do=export&id={$groupID}"><i class="fa fa-address-card-o" aria-hidden="true"></i></a>
-							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="organizer.addressbook.php?sid={$sid}&action=groups&do=delete&id={$groupID}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+							<a title="{lng p="sendmail"}" target="_top" href="email.compose.php?toGroup={$groupID}{$sessionUrlSuffix}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
+							<a title="{lng p="export"}" target="_top" href="organizer.addressbook.php?action=groups&do=export&id={$groupID}{$sessionUrlSuffix}"><i class="fa fa-address-card-o" aria-hidden="true"></i></a>
+							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="organizer.addressbook.php?action=groups&do=delete&id={$groupID}{$sessionUrlSuffix}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 						</div>
 					</div>
 				{/foreach}
@@ -59,7 +59,8 @@
 	<table width="100%">
 		<tr>
 			<td align="left">
-				<form action="organizer.addressbook.php?action=groups&do=add&sid={$sid}" method="post">
+				<form action="{sessionurl file='organizer.addressbook.php' params='action=groups&do=add'}" method="post">
+					{csrffield}
 					<input type="text" name="title" value="" style="width:180px;" />
 					<input type="submit" value=" {lng p="add"} " />
 				</form>

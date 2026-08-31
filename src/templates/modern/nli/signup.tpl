@@ -62,6 +62,33 @@
 						</div>
 					</div>
 
+					{if $f_company!="n"||$f_taxid!="n"}
+					<div class="row">
+						{if $f_company!="n"}
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="control-label" for="company">
+									{lng p="company"}
+									{if $f_company=="p"}<span class="required">{lng p="required"}</span>{/if}
+								</label>
+								<input type="text" class="form-control"{if $f_company=="p"} required="true"{/if} name="company" id="company" value="{if isset($_safePost.company)}{$_safePost.company}{/if}" />
+							</div>
+						</div>
+						{/if}
+						{if $f_taxid!="n"}
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="control-label" for="taxid">
+									{lng p="taxid"}
+									{if $f_taxid=="p"}<span class="required">{lng p="required"}</span>{/if}
+								</label>
+								<input type="text" class="form-control"{if $f_taxid=="p"} required="true"{/if} name="taxid" id="taxid" value="{if isset($_safePost.taxid)}{$_safePost.taxid}{/if}" />
+							</div>
+						</div>
+						{/if}
+					</div>
+					{/if}
+
 					<hr />
 
 					<div class="row">

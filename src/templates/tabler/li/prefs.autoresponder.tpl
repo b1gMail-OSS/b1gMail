@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=autoresponder&do=save&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=autoresponder&do=save'}">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<table class="listTable">
 		<tr>

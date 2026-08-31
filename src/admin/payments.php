@@ -24,6 +24,44 @@ include('../serverlib/payment.class.php');
 RequestPrivileges(PRIVILEGES_ADMIN);
 AdminRequirePrivilege('payments');
 
+/**
+ * redirect back to payments list (preserve filter state)
+ */
+function PaymentsListRedirect($extraParams = array())
+{
+	$params = array();
+
+	if(isset($_REQUEST['filter']))
+	{
+		$params['filter'] = 'true';
+
+		if(isset($_POST['status']) && is_array($_POST['status']))
+		{
+			foreach(array_keys($_POST['status']) as $statusKey)
+				$params['status['.$statusKey.']'] = 'on';
+		}
+
+		if(isset($_POST['paymentMethod']) && is_array($_POST['paymentMethod']))
+		{
+			foreach(array_keys($_POST['paymentMethod']) as $methodKey)
+				$params['paymentMethod['.$methodKey.']'] = 'on';
+		}
+
+		if(isset($_POST['perPage']))
+			$params['perPage'] = max(1, (int)$_POST['perPage']);
+		if(isset($_POST['sortBy']))
+			$params['sortBy'] = $_POST['sortBy'];
+		if(isset($_POST['sortOrder']))
+			$params['sortOrder'] = $_POST['sortOrder'];
+		if(isset($_POST['page']))
+			$params['page'] = max(1, (int)$_POST['page']);
+	}
+
+	$params = array_merge($params, $extraParams);
+	header('Location: ' . SessionUrl('payments.php?' . http_build_query($params)));
+	exit();
+}
+
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'payments';
 
@@ -37,7 +75,7 @@ $tabs = array(
 	1 => array(
 		'title'		=> $lang_admin['export2'],
 		'relIcon'	=> 'ico_accentries.png',
-		'link'		=> 'payments.php?action=export&',
+		'link'		=> 'payments.php?action=export',
 		'active'	=> $_REQUEST['action'] == 'export'
 	)
 );
@@ -83,6 +121,7 @@ if($_REQUEST['action'] == 'payments')
 						$paymentIDs);
 					$db->Query('DELETE FROM {pre}invoices WHERE `orderid` IN ?',
 						$paymentIDs);
+					PaymentsListRedirect();
 				}
 
 				// activate payments
@@ -91,9 +130,13 @@ if($_REQUEST['action'] == 'payments')
 					$res = $db->Query('SELECT `orderid`,`amount` FROM {pre}orders WHERE `orderid` IN ? AND `status`=?',
 									  $paymentIDs,
 									  ORDER_STATUS_CREATED);
-					while($row = $res->FetchArray(MYSQLI_ASSOC))
-						BMPayment::ActivateOrder($row['orderid'], $row['amount']);
-					$res->Free();
+					if($res)
+					{
+						while($row = $res->FetchArray(MYSQLI_ASSOC))
+							BMPayment::ActivateOrder($row['orderid'], $row['amount']);
+						$res->Free();
+					}
+					PaymentsListRedirect();
 				}
 
 				// download invoices
@@ -154,11 +197,12 @@ if($_REQUEST['action'] == 'payments')
 
 
 		// sort options
-		$sortBy = isset($_REQUEST['sortBy'])
+		$allowedSortColumns = array('created', 'userid', 'orderid', 'amount');
+		$sortBy = isset($_REQUEST['sortBy']) && in_array($_REQUEST['sortBy'], $allowedSortColumns, true)
 					? $_REQUEST['sortBy']
 					: 'created';
-		$sortOrder = isset($_REQUEST['sortOrder'])
-						? strtolower($_REQUEST['sortOrder'])
+		$sortOrder = isset($_REQUEST['sortOrder']) && strtolower($_REQUEST['sortOrder']) == 'asc'
+						? 'asc'
 						: 'desc';
 		$perPage = max(1, isset($_REQUEST['perPage'])
 						? (int)$_REQUEST['perPage']
@@ -173,23 +217,38 @@ if($_REQUEST['action'] == 'payments')
 		$queryAdd = '';
 		if(isset($_REQUEST['filter']))
 		{
-			if(!isset($_REQUEST['status']))
-				$_REQUEST['status'] = array();
-			$statusIDs = $_REQUEST['status'];
-			$queryStatus = count(array_keys($statusIDs)) > 0 ? implode(',', array_keys($statusIDs)) : '-1';
+			$statusIDs = array(0 => false, 1 => false);
+			if(isset($_REQUEST['status']) && is_array($_REQUEST['status']))
+			{
+				foreach(array_keys($_REQUEST['status']) as $statusKey)
+					$statusIDs[(int)$statusKey] = true;
+			}
+			$queryStatus = count(array_keys(array_filter($statusIDs))) > 0 ? implode(',', array_keys(array_filter($statusIDs))) : '-1';
 			$queryAdd = 'WHERE `status` IN(' . $queryStatus . ') ';
 
-			if(!isset($_REQUEST['paymentMethod']))
-				$_REQUEST['paymentMethod'] = array();
-			$paymentMethods = $_REQUEST['paymentMethod'];
-			$queryPaymentMethods = count(array_keys($paymentMethods)) > 0 ? implode(',', array_keys($paymentMethods)) : '-1';
+			$paymentMethods = array(0 => false, 1 => false, 2 => false, 3 => false);
+			foreach($payMethods as $methodID=>$method)
+				$paymentMethods[-$methodID] = false;
+			if(isset($_REQUEST['paymentMethod']) && is_array($_REQUEST['paymentMethod']))
+			{
+				foreach(array_keys($_REQUEST['paymentMethod']) as $methodKey)
+					$paymentMethods[(int)$methodKey] = true;
+			}
+			$queryPaymentMethods = count(array_keys(array_filter($paymentMethods))) > 0 ? implode(',', array_keys(array_filter($paymentMethods))) : '-1';
 			$queryAdd .= 'AND `paymethod` IN(' . $queryPaymentMethods . ') ';
 		}
 
 		// page calculation
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}orders ' . $queryAdd);
-		list($paymentCount) = $res->FetchArray(MYSQLI_NUM);
-		$res->Free();
+		if(!$res)
+		{
+			$paymentCount = 0;
+		}
+		else
+		{
+			list($paymentCount) = $res->FetchArray(MYSQLI_NUM);
+			$res->Free();
+		}
 		$pageCount = ceil($paymentCount / $perPage);
 		$pageNo = isset($_REQUEST['page'])
 					? max(1, min($pageCount, (int)$_REQUEST['page']))
@@ -200,20 +259,33 @@ if($_REQUEST['action'] == 'payments')
 		$users = array();
 		$payments = array();
 		$res = $db->Query('SELECT * FROM {pre}orders ' . $queryAdd . ' ORDER BY ' . $sortBy . ' ' . $sortOrder . ' LIMIT ' . $startPos . ',' . $perPage);
+		if($res)
+		{
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
 			if(!isset($users[$row['userid']]))
 			{
 				$res2 = $db->Query('SELECT `id`,`email`,`vorname`,`nachname` FROM {pre}users WHERE `id`=?',
 								   $row['userid']);
-				$users[$row['userid']] = $res2->FetchArray(MYSQLI_ASSOC);
-				$res2->Free();
+				if($res2 && $res2->RowCount() == 1)
+					$users[$row['userid']] = $res2->FetchArray(MYSQLI_ASSOC);
+				else
+					$users[$row['userid']] = array('id' => $row['userid'], 'email' => '?', 'vorname' => '-', 'nachname' => '-');
+				if($res2)
+					$res2->Free();
 			}
 
 			$res2 = $db->Query('SELECT COUNT(*) FROM {pre}invoices WHERE `orderid`=?',
 							   $row['orderid']);
-			list($row['hasInvoice']) = $res2->FetchArray(MYSQLI_NUM);
-			$res2->Free();
+			if($res2)
+			{
+				list($row['hasInvoice']) = $res2->FetchArray(MYSQLI_NUM);
+				$res2->Free();
+			}
+			else
+			{
+				$row['hasInvoice'] = 0;
+			}
 
 			if($row['paymethod'] == PAYMENT_METHOD_BANKTRANSFER)
 				$row['method'] = $lang_admin['banktransfer'];
@@ -239,6 +311,7 @@ if($_REQUEST['action'] == 'payments')
 			$payments[] = $row;
 		}
 		$res->Free();
+		}
 
 		// assign
 		$tpl->assign('payMethods',		$payMethods);

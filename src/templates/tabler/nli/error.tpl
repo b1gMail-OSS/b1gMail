@@ -12,7 +12,7 @@
 			<p class="empty-title">{$title}</p>
 			<p class="empty-subtitle text-secondary">{$description}</p>
 			<div class="empty-action">
-				<a href="./" class="btn btn-primary">
+				<a href="{$nliUrlHome|default:$selfurl|escape:'html'}" class="btn btn-primary">
 					<i class="ti ti-arrow-left icon icon-2" aria-hidden="true"></i>
 					{lng p="start"}
 				</a>

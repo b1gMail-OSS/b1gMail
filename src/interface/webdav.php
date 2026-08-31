@@ -22,11 +22,13 @@
 define('INTERFACE_MODE', 		true);
 define('WEBDAV_ALT_TIMESTAMP', 	1411119133);
 
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 include('../serverlib/dav.inc.php');
 include('../serverlib/webdisk.class.php');
 
-use Sabre\DAV, Sabre\HTTP\URLUtil;
+use Sabre\DAV;
+use function Sabre\Uri\split;
 
 class BMWebdiskState extends BMSessionState
 {
@@ -106,8 +108,8 @@ class BMWebdiskFile extends BMWebdiskNode implements Sabre\DAV\IFile
 	{
 		global $wds;
 
-		list($parentPath, ) = URLUtil::splitPath($this->path);
-		list(, $newName) = URLUtil::splitPath($name);
+		list($parentPath, ) = split($this->path);
+		list(, $newName) = split($name);
 
 		$wds->webdisk->RenameFile($this->getFileID(), $newName);
 
@@ -262,8 +264,8 @@ class BMWebdiskDirectory extends BMWebdiskNode implements Sabre\DAV\ICollection,
 	{
 		global $wds;
 
-		list($parentPath, ) = URLUtil::splitPath($this->path);
-		list(, $newName) = URLUtil::splitPath($name);
+		list($parentPath, ) = split($this->path);
+		list(, $newName) = split($name);
 
 		$wds->webdisk->RenameFolder($this->getFolderID(), $newName);
 
@@ -513,7 +515,8 @@ $server = new DAV\Server($rootDirectory);
 $server->setBaseUri($_SERVER['SCRIPT_NAME']);
 
 $authBackend = new BMWebdiskAuthBackend;
-$authPlugin = new DAV\Auth\Plugin($authBackend, $bm_prefs['titel'] . ' ' . $lang_user['webdisk']);
+$authBackend->setRealm($bm_prefs['titel'] . ' ' . $lang_user['webdisk']);
+$authPlugin = new DAV\Auth\Plugin($authBackend);
 $server->addPlugin($authPlugin);
 
 $lockBackend = new BMWebdiskLockBackend;

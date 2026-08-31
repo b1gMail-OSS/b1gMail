@@ -6,7 +6,7 @@ function mailAttachmentDownloadUrl(mailId, attachment, inline)
 {
 	var url = 'email.read.php?id=' + encodeURIComponent(mailId)
 		+ '&action=downloadAttachment&attachment=' + encodeURIComponent(attachment)
-		+ '&sid=' + currentSID;
+		;
 
 	if(inline)
 		url += '&view=true';
@@ -84,9 +84,9 @@ function mailOpenAttachment(mailId, attachment, openKind, title, filename, mimet
 
 	if(openKind === 'vcf' || openKind === 'ics')
 	{
-		openOverlay(
+		openOverlay(bmAppendSession(
 			'email.read.php?action=attachmentDialog&id=' + encodeURIComponent(mailId)
-				+ '&attachment=' + encodeURIComponent(attachment) + '&sid=' + currentSID,
+				+ '&attachment=' + encodeURIComponent(attachment) ),
 			title || filename || '',
 			520,
 			openKind === 'ics' ? 480 : 460,
@@ -138,12 +138,12 @@ function mailCalendarRsvp(partstat, card)
 	url = 'email.read.php?id=' + encodeURIComponent(mailId)
 		+ '&action=calendarRsvp&attachment=' + encodeURIComponent(attKey)
 		+ '&partstat=' + encodeURIComponent(partstat)
-		+ '&ajax=1&sid=' + encodeURIComponent(sid);
+		+ '&ajax=1';
 
 	if(comment)
 		url += '&comment=' + encodeURIComponent(comment);
 
-	xhr.open('GET', url, true);
+	xhr.open('GET', bmAppendSession(url), true);
 	xhr.onreadystatechange = function()
 	{
 		var data;

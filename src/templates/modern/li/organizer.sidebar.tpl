@@ -11,7 +11,7 @@
 <div class="contentMenuIcons">
 {foreach from=$tasks key=taskID item=task}
 	<input type="checkbox" id="sbTask_{$taskID}" onclick="setTaskDone('{$sid}', {$taskID}, this.checked);"{if $task.akt_status==64} checked="checked"{/if} />
-	<a href="organizer.todo.php?action=editTask&id={$taskID}&sid={$sid}">{text value=$task.titel cut=20}</a><br />
+	<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}">{text value=$task.titel cut=20}</a><br />
 {/foreach}
 {if $tasks_haveMore}
 	<small><a href="organizer.todo.php?sid={$sid}">{lng p="more"}...</a></small><br />

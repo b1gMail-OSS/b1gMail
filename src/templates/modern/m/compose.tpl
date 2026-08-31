@@ -6,6 +6,7 @@
 
 <div data-role="content">
 	<form action="email.php?action=sendMail&sid={$sid}" method="post" id="composeForm">
+		{csrffield}
 		<input type="hidden" name="actionToken" value="{$actionToken}" />
 		{if isset($smarty.get.reply)}<input type="hidden" name="reference" value="reply:{text value=$smarty.get.reply}" />{/if}
 		{if isset($smarty.get.forward)}<input type="hidden" name="reference" value="forward:{text value=$smarty.get.forward}" />{/if}

@@ -9,6 +9,7 @@
 </div>
 
 <form name="f1" method="post" action="prefs.php?action=aliases&do=action&sid={$sid}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar">
 <table class="bigTable">

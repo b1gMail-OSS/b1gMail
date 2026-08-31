@@ -272,6 +272,7 @@
 {/if}
 
 <form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
+	{csrffield}
 	<input type="hidden" name="text" id="quoteText" value="" />
 </form>
 

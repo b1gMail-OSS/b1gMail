@@ -1,4 +1,5 @@
-<form action="abuse.php?action=prefs&do=save&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='abuse.php' params="action=prefs&do=save"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 <input type="hidden" name="save" value="true" />
 
 	<fieldset>
@@ -21,7 +22,7 @@
 								<tr>
 									<td><input type="radio" name="prefs[{$groupName}][{$fieldKey}][mode]" value="keep" checked="checked" id="keepRadio_{$groupName}_{$fieldKey}" /></td>
 									<td><label for="keepRadio_{$groupName}_{$fieldKey}">{lng p="keepcurrentimg"}</label> &nbsp; 
-										<small>[ <a href="toolbox.php?do=editVersionConfig&versionid={$versionID}&showImage=true&group={$groupName}&key={$fieldKey}&sid={$sid}" target="_blank">{lng p="show"}</a> ]</small></td>
+										<small>[ <a href="{sessionurl file='toolbox.php' params="do=editVersionConfig&versionid={$versionID}&showImage=true&group={$groupName}&key={$fieldKey}"}" target="_blank">{lng p="show"}</a> ]</small></td>
 								</tr>
 								<tr>
 									<td><input type="radio" name="prefs[{$groupName}][{$fieldKey}][mode]" value="upload" id="uploadRadio_{$groupName}_{$fieldKey}" /></td>

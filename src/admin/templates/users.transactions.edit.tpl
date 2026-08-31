@@ -1,4 +1,5 @@
-<form action="users.php?do=editTransaction&transactionid={$tx.transactionid}&save=true&sid={$sid}" method="post" onsubmit="spin(this);">
+<form action="{sessionurl file='users.php' params="do=editTransaction&transactionid={$tx.transactionid}&save=true"}" method="post" onsubmit="spin(this);">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="edittransaction"} ({email value=$user.email}, #{$user.id})</legend>
 
@@ -29,7 +30,7 @@
 		</fieldset>
 
 		<div class="row">
-			<div class="col-md-6"><input class="btn btn-primary" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='users.php?do=transactions&id={$user.id}&sid={$sid}';" /></div>
+			<div class="col-md-6"><input class="btn btn-primary" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='users.php?do=transactions&id={$user.id}{$sessionUrlSuffix}';" /></div>
 			<div class="col-md-6 text-end"><input class="btn btn-primary" type="submit" value="{lng p="save"}" /></div>
 		</div>
 	</fieldset>

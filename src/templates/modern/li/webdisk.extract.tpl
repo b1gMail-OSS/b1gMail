@@ -7,6 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 <form action="webdisk.php?action=doExtractFile&folder={$folder}&id={$id}&sid={$sid}" method="post">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="extract"}</th>

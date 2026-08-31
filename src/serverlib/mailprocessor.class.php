@@ -202,6 +202,17 @@ class BMMailProcessor
 					// create user object
 					$userObject = _new('BMUser', array($userID));
 					$userRow = $userObject->Fetch();
+					if(!is_array($userRow))
+					{
+						PutLog(sprintf('Mail to <%s> skipped: user #%d not found',
+							$recpMail,
+							$userID),
+							PRIO_WARNING,
+							__FILE__,
+							__LINE__);
+						$recipientErrors[$recpMail] = RECEIVE_RESULT_NO_RECIPIENTS;
+						continue;
+					}
 					$userMail = $userRow['email'];
 
 					// open user's mailbox

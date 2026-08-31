@@ -1,4 +1,5 @@
-<form action="prefs.common.php?save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.common.php' params="save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
@@ -50,26 +51,30 @@
 					</div>
 				</div>
 				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="cronauth"}</label>
+					<div class="col-sm-8">
+						<p class="form-text text-secondary mb-2">{lng p="cronauthdesc"}</p>
+						<label class="form-label">{lng p="croncli"}</label>
+						<input type="text" class="form-control form-control-sm mb-2" readonly="readonly" value="{text allowEmpty=true value=$cronCliCmd}">
+						<label class="form-label">{lng p="cronhttp"}</label>
+						<input type="text" class="form-control form-control-sm mb-2" readonly="readonly" value="{text allowEmpty=true value=$cronHttpUrl}">
+						<button type="submit" class="btn btn-outline-secondary btn-sm" name="regen_cron_secret" value="1">{lng p="cronregen"}</button>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-check-label">{lng p="clientapi"}</label>
+					<div class="col-sm-8">
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="clientapi_enable"{if $bm_prefs.clientapi_enable=='yes'} checked="checked"{/if}>
+							<span class="form-check-label">{lng p="clientapidesc"}</span>
+						</label>
+					</div>
+				</div>
+				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-check-label">{lng p="auto_tz"}</label>
 					<div class="col-sm-8">
 						<label class="form-check">
 							<input class="form-check-input" type="checkbox" name="auto_tz"{if $bm_prefs.auto_tz=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="sessioniplock"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="ip_lock"{if $bm_prefs.ip_lock=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="sessioncookielock"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="cookie_lock"{if $bm_prefs.cookie_lock=='yes'} checked="checked"{/if}>
 						</label>
 					</div>
 				</div>
@@ -87,22 +92,6 @@
 			<fieldset>
 				<legend>{lng p="nliarea"}</legend>
 
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="domain_combobox"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="domain_combobox"{if $bm_prefs.domain_combobox=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="redirectmobile"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="redirect_mobile"{if $bm_prefs.redirect_mobile=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="contactform"}</label>
 					<div class="col-sm-8">
@@ -128,7 +117,7 @@
 					<div class="col-sm-8">
 						<label class="form-check">
 							<input class="form-check-input" type="checkbox" name="contactform_subject"{if $bm_prefs.contactform_subject=='yes'} checked="checked"{/if}>
-							<span class="form-check-label">{lng p="cfs_note"}<a href="prefs.languages.php?action=texts&sid={$sid}#contact_subjects">&raquo; {lng p="customtexts"}</a></span>
+							<span class="form-check-label">{lng p="cfs_note"}<a href="{sessionurl file='prefs.languages.php' params='action=texts'}#contact_subjects">&raquo; {lng p="customtexts"}</a></span>
 						</label>
 					</div>
 				</div>
@@ -137,28 +126,6 @@
 			<fieldset>
 				<legend>{lng p="ssl"}</legend>
 
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-label">{lng p="ssl_url"}</label>
-					<div class="col-sm-8">
-						<input type="text" class="form-control" name="ssl_url" value="{text allowEmpty=true value=$bm_prefs.ssl_url}" placeholder="{lng p="ssl_url"}">
-					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="ssl_login_option"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="ssl_login_option"{if $bm_prefs.ssl_login_option=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="ssl_login_enable"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="ssl_login_enable"{if $bm_prefs.ssl_login_enable=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-check-label">{lng p="ssl_signup_enable"}</label>
 					<div class="col-sm-8">
@@ -219,20 +186,6 @@
 			<fieldset>
 				<legend>{lng p="users"}</legend>
 
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-label">{lng p="logouturl"}</label>
-					<div class="col-sm-8">
-						<input type="text" class="form-control" name="logouturl" value="{text allowEmpty=true value=$bm_prefs.logouturl}" placeholder="{lng p="logouturl"}">
-					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="savehistory"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="contact_history"{if $bm_prefs.contact_history=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-check-label">{lng p="gutregged"}</label>
 					<div class="col-sm-8">
@@ -415,7 +368,7 @@
 	</div>
 
 	<div class="text-end">
-		<a class="btn btn-outline-secondary me-2" href="prefs.common.php?action=generateVapid&amp;sid={$sid}">{lng p="push_generate_vapid"}</a>
+		<a class="btn btn-outline-secondary me-2" href="{sessionurl file='prefs.common.php' params='action=generateVapid'}">{lng p="push_generate_vapid"}</a>
 		<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
 	</div>
 </form>

@@ -5,7 +5,7 @@
 			{lng p="calendar"}: {$weekDay}, {date timestamp=$date dayonly=true} ({lng p="cw"} {$calWeek})
 		</div>
 		<div class="right">
-			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='organizer.calendar.php?action=groups&sid={$sid}';">
+			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 				<i class="ti ti-users-group icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="editgroups"}
 			</button>
@@ -31,7 +31,7 @@
 			</tr>
 			</table>
 		</div>
-		<iframe class="calendarDayBody bm-organizer-calendar-frame" id="calendarDayBody" src="organizer.calendar.php?action=dayView&date={$theDate}&sid={$sid}" frameborder="0" border="0"></iframe>
+		<iframe class="calendarDayBody bm-organizer-calendar-frame" id="calendarDayBody" src="organizer.calendar.php?action=dayView&date={$theDate}{$sessionUrlSuffix}" frameborder="0" border="0"></iframe>
 	</div>
 
 	<script>
@@ -42,7 +42,7 @@
 
 	<div id="contentFooter" class="contentFooter bm-organizer-footer">
 		<div class="right">
-			<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='organizer.calendar.php?action=addDate&date={$theDate}&sid={$sid}';">
+			<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params="action=addDate&date={$theDate}"|escape:'javascript'}';">
 				<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="adddate"}
 			</button>

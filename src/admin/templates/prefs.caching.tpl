@@ -1,4 +1,5 @@
-<form action="prefs.common.php?action=caching&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.common.php' params="action=caching&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>

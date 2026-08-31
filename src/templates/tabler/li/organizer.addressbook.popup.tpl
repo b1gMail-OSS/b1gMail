@@ -2,6 +2,7 @@
 {include file="li/dialog.head.tpl" dialogTitle=$dialogTitleText dialogBodyClass="bm-dialog-addressbook" dialogOnLoad="documentLoader()"}
 
 <div class="bm-dialog-page bm-dialog-page-fill bm-addressbook-dialog">
+	<div class="bm-addressbook-scroll">
 	<div class="bm-addressbook-picker mb-3">
 		<label class="form-label">{lng p="addressbook"}</label>
 		<div class="addressDiv bm-addressbook-list" id="addresses"></div>
@@ -11,30 +12,31 @@
 		<div class="mb-2">
 			<label class="form-label" for="addrTarget_to">{lng p="to"}</label>
 			<div class="input-group">
-				<div class="addressDiv bm-addressbook-target" id="to" role="textbox" aria-labelledby="addrTarget_to"></div>
-				<button type="button" class="btn btn-primary" onclick="addAddr('to');" title="{lng p="to"}">
+				<button type="button" class="btn btn-primary bm-addressbook-add-btn" onclick="addAddr('to');" title="{lng p="to"}">
 					<i class="ti ti-arrow-right icon" aria-hidden="true"></i>
 				</button>
+				<div class="addressDiv bm-addressbook-target" id="to" role="textbox" aria-labelledby="addrTarget_to"></div>
 			</div>
 		</div>
 		<div class="mb-2">
 			<label class="form-label" for="addrTarget_cc">CC</label>
 			<div class="input-group">
-				<div class="addressDiv bm-addressbook-target" id="cc" role="textbox" aria-labelledby="addrTarget_cc"></div>
-				<button type="button" class="btn btn-primary" onclick="addAddr('cc');" title="CC">
+				<button type="button" class="btn btn-primary bm-addressbook-add-btn" onclick="addAddr('cc');" title="CC">
 					<i class="ti ti-arrow-right icon" aria-hidden="true"></i>
 				</button>
+				<div class="addressDiv bm-addressbook-target" id="cc" role="textbox" aria-labelledby="addrTarget_cc"></div>
 			</div>
 		</div>
 		<div class="mb-2">
 			<label class="form-label" for="addrTarget_bcc">BCC</label>
 			<div class="input-group">
-				<div class="addressDiv bm-addressbook-target" id="bcc" role="textbox" aria-labelledby="addrTarget_bcc"></div>
-				<button type="button" class="btn btn-primary" onclick="addAddr('bcc');" title="BCC">
+				<button type="button" class="btn btn-primary bm-addressbook-add-btn" onclick="addAddr('bcc');" title="BCC">
 					<i class="ti ti-arrow-right icon" aria-hidden="true"></i>
 				</button>
+				<div class="addressDiv bm-addressbook-target" id="bcc" role="textbox" aria-labelledby="addrTarget_bcc"></div>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	<div class="bm-dialog-actions">

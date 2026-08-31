@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="prefs.countries.php?do=edit&id={$country.id}&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.countries.php' params="do=edit&id={$country.id}&save=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="country"}</label>
 			<div class="col-sm-10">

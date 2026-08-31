@@ -20,7 +20,8 @@
  */
 
 define('INTERFACE_MODE', true);
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 
 $exportedClasses = array(
 	'BMToolInterface'	=> array(
@@ -45,34 +46,38 @@ else
 	if(!class_exists($_REQUEST['class']))
 		include($classInfo['fileName']);
 
-	// check privileges
-	if(!RequestPrivileges($classInfo['requiredPrivileges'] | PRIVILEGES_CLIENTAPI, true))
+	$method = isset($_REQUEST['method']) ? (string)$_REQUEST['method'] : '';
+
+	if(!ClientApiEnabled())
 	{
-		// return access error
 		$response['status'] = 'ACCESS_DENIED';
+	}
+	else if(!RequestPrivileges($classInfo['requiredPrivileges'] | PRIVILEGES_CLIENTAPI, true))
+	{
+		$response['status'] = 'ACCESS_DENIED';
+	}
+	else if($method === '' || !ClientApiMethodAllowed($method))
+	{
+		$response['status'] = 'INVALID_METHOD';
+		if($method !== '')
+			$response['method'] = $method;
 	}
 	else
 	{
-		// instantiate
 		$response['class'] = $_REQUEST['class'];
-		if(isset($_REQUEST['method']))
-			$response['method'] = $_REQUEST['method'];
+		$response['method'] = $method;
 		$instance = _new($_REQUEST['class'], $classInfo['constructorParams']);
-
 		$params = isset($_REQUEST['params']) && is_array($_REQUEST['params']) ? $_REQUEST['params'] : array();
 
-		// function
-		if(!isset($_REQUEST['method']) || !method_exists($instance, $_REQUEST['method']))
-		{
-			$response['status'] = 'INVALID_METHOD';
-			if(method_exists($instance, 'HandleNonexistentMethod'))
-				call_user_func_array(array(&$instance, 'HandleNonexistentMethod'), array($_REQUEST['method'], $params, &$response));
-		}
-		else if(isset($_REQUEST['method']) && method_exists($instance, $_REQUEST['method']))
+		if(method_exists($instance, $method))
 		{
 			$response['status'] = 'OK';
-			$response['result'] = call_user_func_array(array(&$instance, $_REQUEST['method']), $params);
+			$response['result'] = call_user_func_array(array(&$instance, $method), $params);
 		}
+		else if(method_exists($instance, 'HandleNonexistentMethod'))
+			call_user_func_array(array(&$instance, 'HandleNonexistentMethod'), array($method, $params, &$response));
+		else
+			$response['status'] = 'INVALID_METHOD';
 	}
 }
 

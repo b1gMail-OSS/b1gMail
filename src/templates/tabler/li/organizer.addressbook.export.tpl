@@ -9,11 +9,11 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
@@ -60,7 +60,7 @@
 
 	<p align="right">
 		<input type="button" onclick="parent.hideOverlay()" value="{lng p="cancel"}" />
-		<input type="button" onclick="parent.document.location.href='organizer.addressbook.php?action=exportAddressbook&sid={$sid}&lineBreakChar='+escape(EBID('lineBreakChar').value)+'&sepChar='+escape(EBID('sepChar').value)+'&quoteChar='+escape(EBID('quoteChar').value);parent.hideOverlay();" value="{lng p="ok"}" />
+		<input type="button" onclick="parent.document.location.href=bmAppendSession('organizer.addressbook.php?action=exportAddressbook&lineBreakChar='+escape(EBID('lineBreakChar').value)+'&sepChar='+escape(EBID('sepChar').value)+'&quoteChar='+escape(EBID('quoteChar').value));parent.hideOverlay();" value="{lng p="ok"}" />
 	</p>
 	
 </body>

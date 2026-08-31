@@ -62,6 +62,7 @@
 <div class="sidebarHeading">{lng p="uploadfiles"}</div>
 <div class="contentMenuIcons">
 	<form action="webdisk.php?do=uploadFilesForm&folder={$folderID}&sid={$sid}" method="post" id="fileCountForm" onsubmit="return webdiskShowUploadForm();">
+		{csrffield}
 	{lng p="count"}: <input type="text" size="4" value="5" name="fileCount" id="fileCount" />
 	<input type="submit" value="{lng p="ok"}" />
 	</form>

@@ -29,8 +29,7 @@ define('STEP_WELCOME', 1);
 define('STEP_SYSTEMCHECK', 2);
 define('STEP_CONVERT', 3);
 define('STEP_CONVERT_STEP', 4);
-// other
-define('DB_INSTALL_PREFIX', 'bm60_');
+define('DB_INSTALL_PREFIX', isset($mysql['prefix']) ? $mysql['prefix'] : SETUP_DEFAULT_PREFIX);
 
 // connect to mysql db
 if (!($connection = CheckMySQLLogin($mysql['host'], $mysql['user'], $mysql['pass'],
@@ -51,51 +50,36 @@ if (!isset($_REQUEST['step'])) {
 }
 
 // read language file
-if (!isset($_GET['lng'])) {
+if (!isset($_GET['lng']) && !isset($_POST['lng'])) {
     $_GET['lng'] = strpos($bm_prefs['language'], 'deutsch') !== false ? 'deutsch' : 'english';
 }
 ReadLanguage();
-if ($_GET['lng'] == 'deutsch') {
-    $lang_setup['convert_welcome_text'] = 'Herzlich Willkommen! Dieser Assistent konvertiert Ihre b1gMail-Datenbank von den MySQL-Zeichensatz <b>UTF-8(mb3)</b>-Zeichensatz nach <b>UTF8MB4</b>. <font color="red">Nutzen Sie diesen Konverter nur, wenn Ihre Datenbank in der MySQL UTF8(mb3)-Kodierung vorliegt!</font> Klicken Sie auf &quot;Weiter &raquo;&quot;, um fortzufahren.';
-    $lang_setup['convert_alreadyutf8'] = 'Ihre Datenbank ist noch in latin1. Sie müssen zuerst utf8convert.php aufrufen, bevor Sie die Konvertierung nach UTF8MB4 abschließen können.';
+if ($lang == 'deutsch') {
+    $lang_setup['convert_welcome_text'] = 'Herzlich Willkommen! Dieser Assistent konvertiert Ihre b1gMail-Datenbank vom MySQL-Zeichensatz <b>UTF-8 (mb3)</b> nach <b>UTF8MB4</b>. Nutzen Sie diesen Konverter nur, wenn Ihre Datenbank in der MySQL-UTF8(mb3)-Kodierung vorliegt.';
+    $lang_setup['convert_alreadyutf8'] = 'Ihre Datenbank ist noch in latin1. Sie m&uuml;ssen zuerst utf8convert.php aufrufen, bevor Sie die Konvertierung nach UTF8MB4 abschlie&szlig;en k&ouml;nnen.';
 } else {
-    $lang_setup['convert_welcome_text'] = 'Welcome! This wizard will convert your b1gMail installation from the MySQL <b>UTF8(mb3)</b> encoding to <b>UTF8MB4</b>. <font color="red">Use this converter only if your database is in MySQL UTF8(mb3) encoding!</font> Click at &quot;Next &raquo;&quot; to continue.';
-    $lang_setup['convert_alreadyutf8'] = 'You have to first to execute the script utf8convert.php, before execute this script.';
+    $lang_setup['convert_welcome_text'] = 'Welcome! This wizard will convert your b1gMail installation from the MySQL <b>UTF8 (mb3)</b> encoding to <b>UTF8MB4</b>. Use this converter only if your database is in MySQL UTF8(mb3) encoding.';
+    $lang_setup['convert_alreadyutf8'] = 'You have to execute utf8convert.php first, before running this script.';
 }
 
-function pageHeader2($update = false, $convert = false)
-{
-    global $lang_setup, $lang, $step;
-
-    header('Content-Type: text/html; charset=UTF-8'); ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-	<title>b1gMail - <?php echo $lang_setup['setup']; ?></title>
-	<link type="text/css" href="res/style.css" rel="stylesheet" />
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href="../clientlib/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-	<link href="../clientlib/fontawesome/css/font-awesome-animation.min.css" rel="stylesheet" type="text/css" />
-</head>
-<body>
-<center>
-
-	<br />
-	<img src="res/shade_top.png" border="0" alt="" />
-	<table cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
-		<tr>
-			<td id="leftshade"></td>
-			<td id="main">
-				<div id="header">&nbsp;</div>
-				<div id="gradient"><i>MySQL UTF8MB4</i>&nbsp;&nbsp;</div>
-
-				<form action="utf8mb4convert.php" method="get"><?php if ($step != STEP_SELECT_LANGUAGE) { ?><input type="hidden" name="lng" value="<?php echo $lang; ?>" /><?php } ?><div id="content">
-	<?php
+if ($step == STEP_CONVERT_STEP) {
+    if (!SetupCsrfOk(true)) {
+        header('Content-Type: text/plain; charset=UTF-8');
+        echo 'ERROR:CSRF';
+        exit;
+    }
+} elseif (!SetupCsrfOk()) {
+    $step = STEP_WELCOME;
+    $setupError = $lang_setup['csrf_fail'];
 }
 
-// header
+SetupAbortIfLocked('lock_utf8mb4', false, 'mb4');
+
 if ($step != STEP_CONVERT_STEP) {
-    pageHeader2(false, true);
+    pageHeader(false, 'mb4');
+    if (!empty($setupError)) {
+        echo SetupAlert('danger', $setupError);
+    }
 }
 
 /*
@@ -103,9 +87,8 @@ if ($step != STEP_CONVERT_STEP) {
  */
 if (isset($bm_prefs['db_is_utf8']) && $bm_prefs['db_is_utf8'] == 0) {
     ?>
-	<h1><?php echo $lang_setup['error']; ?></h1>
-
-	<?php echo $lang_setup['convert_alreadyutf8']; ?>
+	<h1><?php echo SetupH($lang_setup['error']); ?></h1>
+	<?php echo SetupAlert('info', $lang_setup['convert_alreadyutf8']); ?>
 	<?php
 }
 
@@ -114,15 +97,9 @@ if (isset($bm_prefs['db_is_utf8']) && $bm_prefs['db_is_utf8'] == 0) {
  */
 elseif ($step == STEP_WELCOME) {
     $nextStep = STEP_SYSTEMCHECK; ?>
-	<h1><?php echo $lang_setup['welcome']; ?></h1>
-
-	<p>
-		<?php echo $lang_setup['convert_welcome_text']; ?>
-	</p>
-
-	<div style="border:1px solid red;background-color:#efefef;padding:1em;">
-		<?php echo $lang_setup['update_note3']; ?>
-	</div>
+	<h1><?php echo SetupH($lang_setup['welcome']); ?></h1>
+	<p><?php echo $lang_setup['convert_welcome_text']; ?></p>
+	<?php echo SetupAlert('warning', $lang_setup['update_note3']); ?>
 	<?php
 }
 
@@ -136,45 +113,30 @@ elseif ($step == STEP_SYSTEMCHECK) {
     list($mysqlVersion) = mysqli_fetch_array($result, MYSQLI_NUM);
     mysqli_free_result($result);
 
-    $mysqlVersionOK = in_array(CompareVersions($mysqlVersion, '5.5.3'), [VERSION_IS_NEWER, VERSION_IS_EQUAL]); ?>
-	<h1><?php echo $lang_setup['syscheck']; ?></h1>
-
-	<?php echo $lang_setup['convert_syscheck_text']; ?>
-
-	<br /><br />
-	<table class="list">
-		<tr>
-			<th width="180">&nbsp;</th>
-			<th><?php echo $lang_setup['required']; ?></th>
-			<th><?php echo $lang_setup['available']; ?></th>
-			<th width="60">&nbsp;</th>
-		</tr>
-		<tr>
-			<th><?php echo $lang_setup['phpversion']; ?></th>
-			<td>7.2.0</td>
-			<td><?php echo phpversion(); ?></td>
-			<td><img src="../admin/templates/images/<?php if ((int) str_replace('.', '', phpversion()) >= 720) {
-        echo 'ok';
-    } else {
-        echo 'error';
+    $mysqlVersionOK = in_array(CompareVersions($mysqlVersion, '5.5.3'), [VERSION_IS_NEWER, VERSION_IS_EQUAL]);
+    $phpOk = version_compare(PHP_VERSION, SETUP_PHP_MIN, '>=');
+    $backStep = STEP_WELCOME;
+    $rows = [
+        [
+            'label' => $lang_setup['phpversion'],
+            'required' => SETUP_PHP_MIN,
+            'available' => PHP_VERSION,
+            'ok' => $phpOk,
+        ],
+        [
+            'label' => $lang_setup['mysqlversion'],
+            'required' => '5.5.3',
+            'available' => $mysqlVersion,
+            'ok' => $mysqlVersionOK,
+        ],
+    ];
+    if (!$phpOk || !$mysqlVersionOK) {
         $nextStep = STEP_SYSTEMCHECK;
-    } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-		<tr>
-			<th><?php echo $lang_setup['mysqlversion']; ?></th>
-			<td>5.5.3</td>
-			<td><?php echo $mysqlVersion; ?></td>
-			<td><img src="../admin/templates/images/<?php if ($mysqlVersionOK) {
-        echo 'ok';
-    } else {
-        echo 'error';
-        $nextStep = STEP_SYSTEMCHECK;
-    } ?>.png" border="0" alt="" width="16" height="16" /></td>
-		</tr>
-	</table>
-
-	<br />
-	<?php echo $nextStep == STEP_CONVERT ? $lang_setup['checkok_text'] : $lang_setup['checkfail_text']; ?>
+    } ?>
+	<h1><?php echo SetupH($lang_setup['syscheck']); ?></h1>
+	<p><?php echo $lang_setup['convert_syscheck_text']; ?></p>
+	<?php SetupRenderCheckTable($rows); ?>
+	<?php echo SetupAlert($nextStep == STEP_CONVERT ? 'success' : 'danger', $nextStep == STEP_CONVERT ? $lang_setup['checkok_text'] : $lang_setup['checkfail_text'], '', array('class' => 'mt-3')); ?>
 	<?php
 }
 
@@ -182,212 +144,44 @@ elseif ($step == STEP_SYSTEMCHECK) {
  * convert
  */
 elseif ($step == STEP_CONVERT) {
-    ?>
-	<h1><?php echo $lang_setup['converting']; ?></h1>
-
-	<?php echo $lang_setup['converting_text']; ?>
-
-	<br /><br />
-	<table class="list">
-		<tr>
-			<th width="40"></th>
-			<th><?php echo $lang_setup['step']; ?></th>
-			<th width="180"><?php echo $lang_setup['progress']; ?></th>
+    $convertSteps = ['prepare', 'analyzedb', 'preptables', 'collations', 'resetcache', 'complete'];
+    $convertLabels = [
+        'prepare' => $lang_setup['convert_prepare'],
+        'analyzedb' => $lang_setup['convert_analyzedb'],
+        'preptables' => $lang_setup['convert_prepare_tables'],
+        'collations' => $lang_setup['convert_collations'],
+        'resetcache' => $lang_setup['convert_resetcache'],
+        'complete' => $lang_setup['convert_complete'],
+    ]; ?>
+	<h1><?php echo SetupH($lang_setup['converting']); ?></h1>
+	<p><?php echo $lang_setup['converting_text']; ?></p>
+	<?php SetupCloseCardBody(); ?>
+	<div id="setup-progress" data-script="utf8mb4convert.php" data-ajax-step="4" data-csrf="<?php echo SetupH(SetupCsrfToken()); ?>" data-lng="<?php echo SetupH($lang); ?>" data-steps="<?php echo SetupH(json_encode($convertSteps)); ?>">
+	<div class="table-responsive">
+	<table class="table table-vcenter card-table">
+		<thead>
+			<tr>
+				<th class="w-1"></th>
+				<th><?php echo SetupH($lang_setup['step']); ?></th>
+				<th class="setup-progress-col"><?php echo SetupH($lang_setup['progress']); ?></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ($convertSteps as $i => $key) { ?>
+		<tr class="setup-progress-row">
+			<td id="step_<?php echo SetupH($key); ?>_status"></td>
+			<th id="step_<?php echo SetupH($key); ?>_text"><?php echo ($i + 1).'. '.$convertLabels[$key]; ?></th>
+			<td class="setup-progress-col" id="step_<?php echo SetupH($key); ?>_progress"></td>
 		</tr>
-		<tr>
-			<td id="step_prepare_status">&nbsp;</td>
-			<th id="step_prepare_text" style="font-weight:normal;">1. <?php echo $lang_setup['convert_prepare']; ?></th>
-			<td id="step_prepare_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_analyzedb_status">&nbsp;</td>
-			<th id="step_analyzedb_text" style="font-weight:normal;">2. <?php echo $lang_setup['convert_analyzedb']; ?></th>
-			<td id="step_analyzedb_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_preptables_status">&nbsp;</td>
-			<th id="step_preptables_text" style="font-weight:normal;">3. <?php echo $lang_setup['convert_prepare_tables']; ?></th>
-			<td id="step_preptables_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_collations_status">&nbsp;</td>
-			<th id="step_collations_text" style="font-weight:normal;">4. <?php echo $lang_setup['convert_collations']; ?></th>
-			<td id="step_collations_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_resetcache_status">&nbsp;</td>
-			<th id="step_resetcache_text" style="font-weight:normal;">5. <?php echo $lang_setup['convert_resetcache']; ?></th>
-			<td id="step_resetcache_progress">&nbsp;</td>
-		</tr>
-		<tr>
-			<td id="step_complete_status">&nbsp;</td>
-			<th id="step_complete_text" style="font-weight:normal;">6. <?php echo $lang_setup['convert_complete']; ?></th>
-			<td id="step_complete_progress">&nbsp;</td>
-		</tr>
+		<?php } ?>
+		</tbody>
 	</table>
-
-	<br />
-	<?php echo $lang_setup['converting_text2']; ?>
-
-	<textarea readonly="readonly" class="installLog" id="log" style="display:none;height:150px;"></textarea>
-	<br /><br />
-
-	<div align="center" id="done" style="display:none;">
-		<b><?php echo $lang_setup['convertdonefinal']; ?></b>
 	</div>
-
-	<script>
-    var steps = [
-        'prepare',
-        'analyzedb',
-        'preptables',
-        'collations',
-        'resetcache',
-        'complete'
-    ];
-    var step = -1,
-        args = '',
-        pos = 0,
-        allQ = -1;
-
-    function EBID(f)
-    {
-        return(document.getElementById(f));
-    }
-
-    function Log(txt)
-    {
-        var log = EBID('log');
-
-        if(log.style.display == 'none')
-            log.style.display = '';
-
-        log.value = txt + "\n" + log.value;
-    }
-
-    function MakeXMLRequest(url, callback, param)
-    {
-        var xmlHTTP = false;
-
-        if(typeof(XMLHttpRequest) != "undefined")
-        {
-            xmlHTTP = new XMLHttpRequest();
-        }
-        if(!xmlHTTP)
-        {
-            return(false);
-        }
-        else
-        {
-            xmlHTTP.open("GET", url, true);
-            if(typeof(callback) == "string")
-            {
-                xmlHTTP.onreadystatechange = function xh_readyChange()
-                    {
-                        eval(callback + "(xmlHTTP)");
-                    }
-            }
-            else if(callback != null)
-            {
-                xmlHTTP.onreadystatechange = function xh_readyChangeCallback()
-                    {
-                        callback(xmlHTTP, param);
-                    }
-            }
-            xmlHTTP.send(null);
-            return(true);
-        }
-    }
-
-    function _stepStep(e)
-    {
-        if(e.readyState == 4)
-        {
-            var response = e.responseText;
-
-            if(response.substr(0, 3) == 'OK:')
-            {
-                response = response.substr(3);
-
-                if(response == 'DONE')
-                {
-                    stepInit(step+1);
-                }
-                else
-                {
-                    var numbers = response.split('/');
-                    if(numbers.length == 2)
-                    {
-                        if(steps[step] == 'struct2' && allQ == -1)
-                            allQ = parseInt(numbers[1]);
-
-                        if(steps[step] == 'struct2')
-                            numbers[1] = '' + allQ;
-
-                        pos = parseInt(numbers[0]);
-                        EBID('step_' + steps[step] + '_progress').innerHTML = '<b>' + Math.round(pos / parseInt(numbers[1]) * 100) + '%</b> <small>('
-                            + pos + ' / ' + parseInt(numbers[1]) + ')</small>';
-                        stepStep();
-                    }
-                    else
-                    {
-                        Log('Unexpected response - skipping position ' + pos);
-                        pos++;
-                        stepStep();
-                    }
-                }
-            }
-            else
-            {
-                Log('Unexpected response - skipping position ' + pos);
-                pos++;
-                stepStep();
-            }
-        }
-        else if(e.readyState < 0 || e.readyState > 4)
-        {
-            Log('Error in HTTP-Request: ' + e.readyState + ' - Trying again in 10s');
-            window.setTimeout('stepStep()', 10000);
-        }
-    }
-
-    function stepStep()
-    {
-        MakeXMLRequest('utf8mb4convert.php?' + args + '&step=4&do=' + steps[step] + '&pos=' + pos,
-                        _stepStep);
-    }
-
-    function stepInit(theStep)
-    {
-        if(step != -1)
-        {
-            EBID('step_' + steps[step] + '_status').innerHTML = '<i class="fa fa-check-circle" aria-hidden="true"></i>';
-            EBID('step_' + steps[step] + '_progress').innerHTML = '<b>100%</b>';
-        }
-
-        if(theStep < steps.length)
-        {
-            step = theStep;
-            EBID('step_' + steps[step] + '_text').innerHTML = '<b>' + EBID('step_' + steps[step] + '_text').innerHTML + '</b>';
-            EBID('step_' + steps[step] + '_status').innerHTML = '<i class="fa fa-spinner fa-spin fa-fw"></i>';
-
-            pos = 0;
-            stepStep();
-        }
-        else
-        {
-            EBID('done').style.display = '';
-        }
-    }
-
-    function beginConversion()
-    {
-        stepInit(0);
-    }
-
-		window.onload = beginConversion;
-	</script>
-
+	</div>
+	<?php SetupOpenCardBody(); ?>
+	<?php echo SetupAlert('warning', $lang_setup['converting_text2'], '', array('dismissible' => false)); ?>
+	<textarea readonly="readonly" class="form-control setup-log d-none" id="log" rows="6"></textarea>
+	<?php echo SetupAlert('success', $lang_setup['convertdonefinal'], '', array('id' => 'done', 'class' => 'd-none mt-3', 'dismissible' => false)); ?>
 	<?php
 }
 
@@ -640,7 +434,7 @@ elseif ($step == STEP_CONVERT_STEP) {
     elseif ($do == 'resetcache') {
         $deleteIDs = [];
 
-        $res = mysqli_query($connection, 'SELECT size,`key` FROM '.DB_INSTALL_PREFIX.'file_cache', $connection);
+        $res = mysqli_query($connection, 'SELECT size,`key` FROM '.DB_INSTALL_PREFIX.'file_cache');
         while ($row = mysqli_fetch_array($res, MYSQLI_ASSOC)) {
             $fileName = '../temp/cache/'.$row['key'].'.cache';
             if (file_exists($fileName)) {
@@ -692,6 +486,7 @@ elseif ($step == STEP_CONVERT_STEP) {
             mysqli_query($connection, 'UPDATE '.DB_INSTALL_PREFIX.'prefs SET `wartung`=\'no\'');
             mysqli_query($connection, 'DROP TABLE IF EXISTS '.DB_INSTALL_PREFIX.'utf8convert');
 
+            SetupWriteLock('lock_utf8mb4');
             echo 'OK:DONE';
         } else {
             echo 'OK:'.$doneCount.'/'.$allCount;

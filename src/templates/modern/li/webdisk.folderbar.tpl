@@ -3,6 +3,7 @@
 <div class="sidebarHeading">{lng p="createfolder"}</div>
 <center>
 	<form action="webdisk.php?action=createFolder&folder={$folderID}&sid={$sid}" method="post" onsubmit="return webdiskCreateFolder();">
+		{csrffield}
 	<table>
 		<tr>
 			<td width="16"><i class="fa fa-folder-open-o" aria-hidden="true"></i></td>

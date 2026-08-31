@@ -67,6 +67,7 @@
 					<li{if isset($smarty.request.action) && $smarty.request.action=='imprint'} class="active"{/if}><a href="index.php?action=imprint">{lng p="contact"}</a></li>
 				</ul>
 				<form action="{if $ssl_login_enable||($welcomeBack&&$smarty.cookies.bm_savedSSL)}{$ssl_url}{/if}index.php?action=login" method="post" id="loginFormPopover">
+					{csrffield}
 					<input type="hidden" name="do" value="login" />
 					<input type="hidden" name="timezone" value="{$timezone}" />
 
@@ -75,7 +76,6 @@
 							{if $welcomeBack}
 							<input type="hidden" name="email_full" value="{$smarty.cookies.bm_savedUser}" />
 							<input type="hidden" name="password" value="" />
-							<input type="hidden" name="savelogin" value="true" />
 							{if $smarty.cookies.bm_savedSSL}<input type="hidden" name="ssl" value="true" />{/if}
 
 							<div class="btn-group">
@@ -113,7 +113,9 @@
 
 	<div class="modal fade" id="lostPW" tabindex="-1" role="dialog" aria-labelledby="lostPWLabel" aria-hidden="true">
 		<div class="modal-dialog">
-			<form action="index.php?action=lostPassword" method="post">
+			<form action="{if $nliUrlLostPassword}{$nliUrlLostPassword}{else}/lost-password{/if}" method="post">
+				{csrffield}
+				<input type="hidden" name="action" value="lostPassword" />
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">{lng p="cancel"}</span></button>
@@ -175,12 +177,6 @@
 				<label class="sr-only" for="password_p">{lng p="password"}</label>
 				<input type="password" name="password" id="password_p" class="form-control" placeholder="{lng p="password"}" required="true" />
 			</div>
-		</div>
-		<div class="checkbox">
-			<label>
-				<input type="checkbox" name="savelogin" id="savelogin_p" />
-				{lng p="savelogin"}
-			</label>
 		</div>
 		{if $ssl_login_option}<div class="checkbox">
 			<label>

@@ -5,7 +5,7 @@
 	<title>{lng p="showsource"}</title>
 	<meta charset="{$charset}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/tabler-custom.css?{fileDateSig file="style/tabler-custom.css"}" />
 	<script>
@@ -13,7 +13,7 @@
 		var tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="clientlang.php" type="text/javascript"></script>
+	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>

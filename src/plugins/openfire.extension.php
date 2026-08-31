@@ -20,229 +20,281 @@
  */
 class modopenfire extends BMPlugin
 {
-    /*
-    * Eigenschaften des Plugins
-    */
-    public function __construct()
-    {
-        $this->name					= 'Jabber Openfire-Integration';
-		$this->version				= '1.1.4';
-		$this->type					= BMPLUGIN_DEFAULT;
-        $this->designedfor			= '7.4.2';
+	/** @var string Pretty-URL: /admin/plugin/modopenfire/ */
+	public $admin_route_slug = 'modopenfire';
 
-		$this->author				= 'Home of the Sebijk.com';
-		$this->web					= 'http://www.sebijk.com';
-		$this->mail					= 'sebijk@web.de';
+	public function __construct()
+	{
+		$this->name				= 'Jabber Openfire-Integration';
+		$this->version			= '1.2.0';
+		$this->type				= BMPLUGIN_DEFAULT;
+		$this->designedfor		= '7.5.0';
 
-		$this->admin_pages			=  true;
-		$this->admin_page_title		= 'Openfire-Integration';
-		$this->admin_page_icon		= "openfire_icon.png";
-    }
+		$this->author			= 'Home of the Sebijk.com';
+		$this->web				= 'http://www.sebijk.com';
+		$this->mail				= 'sebijk@web.de';
 
-    /*
-     * installation routine
-     */
-    public function Install()
-    {
-        global $db;
+		$this->admin_pages		= true;
+		$this->admin_page_title	= 'Openfire-Integration';
+		$this->admin_page_icon	= 'openfire_icon.png';
+	}
 
-        $DatabaseStructure = [
-            '{pre}mod_openfire' => [
-                'fields' => [
-                    ['enableAuth', 'tinyint(1)', 'NO'],
-                    ['secretkey', 'varchar(255)', 'NO'],
-                    ['domain', 'varchar(255)', 'NO'],
-                    ['port', 'int(10)', 'NO'],
-                    ['https', 'tinyint(1)', 'NO'],
-                ],
-                'indexes' => [],
-            ],
-        ];
-        SyncDBStruct($DatabaseStructure);
+	public function Install()
+	{
+		global $db;
 
-        $db->Query('REPLACE INTO {pre}mod_openfire (enableAuth, secretkey, domain, port, https) VALUES (?,?,?,?,?);',
-            (int) 0,
-            'YourSecretKey',
-            'localhost',
-            (int) 9091,
-            (int) 1);
+		$DatabaseStructure = array(
+			'{pre}mod_openfire' => array(
+				'fields' => array(
+					array('enableAuth', 'tinyint(1)', 'NO'),
+					array('secretkey', 'varchar(255)', 'NO'),
+					array('domain', 'varchar(255)', 'NO'),
+					array('port', 'int(10)', 'NO'),
+					array('https', 'tinyint(1)', 'NO'),
+				),
+				'indexes' => array(),
+			),
+		);
+		SyncDBStruct($DatabaseStructure);
 
-        PutLog('Plugin "'.$this->name.' - '.$this->version.'" wurde erfolgreich installiert.', PRIO_PLUGIN, __FILE__, __LINE__);
+		$db->Query('REPLACE INTO {pre}mod_openfire (enableAuth, secretkey, domain, port, https) VALUES (?,?,?,?,?);',
+			(int)0,
+			'YourSecretKey',
+			'localhost',
+			(int)9091,
+			(int)1);
 
-        return true;
-    }
+		PutLog('Plugin "'.$this->name.' - '.$this->version.'" wurde erfolgreich installiert.', PRIO_PLUGIN, __FILE__, __LINE__);
 
-    /*
-     * uninstallation routine
-     */
-    public function Uninstall()
-    {
-        global $db;
+		return true;
+	}
 
-        // drop von mod_openfire
-        $db->Query('DROP TABLE {pre}mod_openfire;');
+	public function Uninstall()
+	{
+		global $db;
 
-        PutLog('Plugin "'.$this->name.' - '.$this->version.'" wurde erfolgreich deinstalliert.', PRIO_PLUGIN, __FILE__, __LINE__);
+		$db->Query('DROP TABLE {pre}mod_openfire;');
 
-        return true;
-    }
+		PutLog('Plugin "'.$this->name.' - '.$this->version.'" wurde erfolgreich deinstalliert.', PRIO_PLUGIN, __FILE__, __LINE__);
 
-    /*
-    *  Link  und Tabs im Adminbereich
-    */
-    public function AdminHandler()
-    {
-        global $db, $tpl, $lang_admin;
+		return true;
+	}
 
-        $tabs = [
-            0 => [
-                'title' => $lang_admin['prefs'],
-                'link' => $this->_adminLink().'&',
-                'active' => $_REQUEST['plugin'] == 'modopenfire',
-                'icon' => '../plugins/templates/images/openfire_logo.png',
-            ],
-        ];
-        $tpl->assign('tabs', $tabs);
+	/**
+	 * Tab link for page.tpl ({sessionurl file=$tab.link}).
+	 *
+	 * @return string
+	 */
+	protected function _ofTabLink()
+	{
+		return 'plugin.page.php?plugin=' . rawurlencode($this->internal_name) . '&';
+	}
 
-        if (isset($_POST['save'])) {
-            $db->Query('UPDATE {pre}mod_openfire SET domain=?,secretkey=?,enableAuth=?,port=?,https=?',
-                $_POST['openfire_domain'],
-                $_POST['openfire_userservice_secretkey'],
-                (int) isset($_POST['openfire_enableAuth']) ? 1 : 0,
-                (int) $_POST['openfire_port'],
-                (int) isset($_POST['openfire_https']) ? 1 : 0);
+	/**
+	 * Pretty admin URL for this plugin.
+	 *
+	 * @param array<string, mixed> $query
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _ofAdminUrl(array $query = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name), $query);
 
-            $tpl->assign('erfolg', '<b>'.$lang_admin['openfire_updated_data'].'</b><br />');
-        }
+		if(function_exists('AdminSessionUrl'))
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
 
-        $res = $db->Query('SELECT enableAuth, secretkey, domain, port, https FROM {pre}mod_openfire');
-        $openfire_prefs = $res->FetchArray();
-        $res->Free();
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach($params as $key => $val)
+		{
+			if((string)$val === '')
+				continue;
+			$url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+		}
+		if($trailingAmp)
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
 
-        $tpl->assign('openfire_prefs', $openfire_prefs);
-        $tpl->assign('pageURL', $this->_adminLink());
-        $tpl->assign('page', $this->_templatePath('openfire.plugin.prefs.tpl'));
-    }
+		return $url;
+	}
 
-    /*
-    *  Sprach variablen
-    */
-    public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
-    {
-        if ($lang == 'deutsch') {
-            $lang_admin['openfire_domain'] = 'Openfire-Domain';
-            $lang_admin['openfire_port'] = 'Openfire Adminport';
-            $lang_admin['openfire_https'] = 'HTTPS für Adminbereich nutzen';
-            $lang_admin['openfire_secretkey'] = 'Secret Key vom User Service Plugin';
-            $lang_admin['openfire_updated_data'] = 'Die Daten wurden erfolgreich aktualisiert!';
-        }
-        else {
-            $lang_admin['openfire_domain'] = 'Openfire Domain';
-            $lang_admin['openfire_port'] = 'Openfire Adminport';
-            $lang_admin['openfire_https'] = 'Use HTTPS for Admin?';
-            $lang_admin['openfire_secretkey'] = 'Secret Key of User Service Plugin';
-            $lang_admin['openfire_updated_data'] = 'Data successfully updated!';
-        }
-    }
+	/**
+	 * @return array{type: string, text: string}|null
+	 */
+	protected function _ofTakeFlashMsg()
+	{
+		if(!isset($_SESSION['openfire_admin_msg']))
+			return null;
 
-    /*
-     * OnSignup
-     */
-    public function OnSignup($userid, $usermail)
-    {
-        global $suEMailLocal, $suPass1, $suEMail, $suFirstname, $suSurname;
+		$msg = $_SESSION['openfire_admin_msg'];
+		unset($_SESSION['openfire_admin_msg']);
 
-        if ($this->_enableAuth()) {
-            $benutzername = trim($suEMailLocal);
-            $jabber_kennwort = trim($suPass1);
-            $voller_name = trim($suFirstname).' '.trim($suSurname);
+		if(!is_array($msg) || !isset($msg['type'], $msg['text']))
+			return null;
 
-            $url = $this->_getUrl().'&type=add&username='.$this->_toRawUrl($benutzername).'&password='.$this->_toRawUrl($jabber_kennwort).'&name='.$this->_toRawUrl($voller_name).'&email='.$this->_toRawUrl($suEMail);
-            $this->_sendhttp($url);
-        }
-    }
+		return array(
+			'type' => (string)$msg['type'],
+			'text' => (string)$msg['text'],
+		);
+	}
 
-    /*
-     * OnDeleteUser
-     */
-    public function OnDeleteUser($id)
-    {
-        global $db;
+	/**
+	 * Save prefs (POST + CSRF via {csrffield} in template).
+	 */
+	protected function _ofHandlePost()
+	{
+		global $db, $lang_admin;
 
-        if ($this->_enableAuth()) {
-            $res = $db->Query('SELECT email FROM {pre}users WHERE id=?',
-                $id);
-            $jabber = $res->FetchArray();
-            $res->Free();
+		if(!isset($_REQUEST['save']))
+			return;
 
-            $benutzername = explode('@', $jabber['email']);
+		$db->Query('UPDATE {pre}mod_openfire SET domain=?,secretkey=?,enableAuth=?,port=?,https=?',
+			trim((string)($_POST['openfire_domain'] ?? '')),
+			trim((string)($_POST['openfire_userservice_secretkey'] ?? '')),
+			isset($_POST['openfire_enableAuth']) ? 1 : 0,
+			max(1, (int)($_POST['openfire_port'] ?? 9091)),
+			isset($_POST['openfire_https']) ? 1 : 0);
 
-            $url = $this->_getUrl().'&type=delete&username='.$this->_toRawUrl($benutzername[0]);
-            $this->_sendhttp($url);
-        }
-    }
+		$_SESSION['openfire_admin_msg'] = array(
+			'type' => 'success',
+			'text' => $lang_admin['openfire_updated_data'],
+		);
 
-    public function OnUserPasswordChange($userID, $oldPasswordMD5, $newPasswordMD5, $newPasswordPlain)
-    {
-        global $userRow;
+		SessionRedirect($this->_ofAdminUrl(array(), false));
+		exit();
+	}
 
-        if ($this->_enableAuth()) {
-            $voller_name = trim($userRow['vorname']).' '.trim($userRow['nachname']);
-            $benutzername = explode('@', $userRow['email']);
+	public function AdminHandler()
+	{
+		global $db, $tpl, $lang_admin;
 
-            $url = $this->_getUrl().'&type=update&username='.$this->_toRawUrl($benutzername[0]).'&password='.$this->_toRawUrl($newPasswordPlain).'&name='.$this->_toRawUrl($voller_name).'&email='.$this->_toRawUrl($userRow['email']);
-            $this->_sendhttp($url);
-        }
-    }
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+			$this->_ofHandlePost();
 
-    private function _getUrl()
-    {
-        global $db;
+		$tabs = array(
+			0 => array(
+				'title'		=> $lang_admin['prefs'],
+				'link'		=> $this->_ofTabLink(),
+				'active'	=> true,
+				'icon'		=> '../plugins/templates/images/openfire_logo.png',
+			),
+		);
 
-        $res = $db->Query('SELECT https, domain, port, secretkey FROM {pre}mod_openfire');
-        $jabber_row = $res->FetchArray();
-        $res->Free();
+		$res = $db->Query('SELECT enableAuth, secretkey, domain, port, https FROM {pre}mod_openfire');
+		$openfire_prefs = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
 
-        if ($jabber_row['https'] == 1) {
-            $http_modus = 'https';
-        } else {
-            $http_modus = 'http';
-        }
+		$tpl->assign('tabs', $tabs);
+		$tpl->assign('ofPlugin', $this->internal_name);
+		$tpl->assign('pageURL', $this->_ofAdminUrl(array(), true));
+		$tpl->assign('openfire_prefs', $openfire_prefs);
+		$tpl->assign('ofMsg', $this->_ofTakeFlashMsg());
+		$tpl->assign('page', $this->_templatePath('openfire.plugin.prefs.tpl'));
+	}
 
-        return $http_modus.'://'.$jabber_row['domain'].':'.$jabber_row['port'].'/plugins/userService/userservice?secret='.$jabber_row['secretkey'];
-    }
+	public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
+	{
+		if($lang == 'deutsch')
+		{
+			$lang_admin['openfire_domain']		= 'Openfire-Domain';
+			$lang_admin['openfire_port']		= 'Openfire Adminport';
+			$lang_admin['openfire_https']		= 'HTTPS für Adminbereich nutzen';
+			$lang_admin['openfire_secretkey']	= 'Secret Key vom User Service Plugin';
+			$lang_admin['openfire_updated_data']	= 'Die Daten wurden erfolgreich aktualisiert!';
+		}
+		else
+		{
+			$lang_admin['openfire_domain']		= 'Openfire Domain';
+			$lang_admin['openfire_port']		= 'Openfire Adminport';
+			$lang_admin['openfire_https']		= 'Use HTTPS for Admin?';
+			$lang_admin['openfire_secretkey']	= 'Secret Key of User Service Plugin';
+			$lang_admin['openfire_updated_data']	= 'Data successfully updated!';
+		}
+	}
 
-    private function _enableAuth()
-    {
-        global $db;
+	public function OnSignup($userid, $usermail)
+	{
+		global $suEMailLocal, $suPass1, $suEMail, $suFirstname, $suSurname;
 
-        $res = $db->Query('SELECT enableAuth FROM {pre}mod_openfire');
-        $jabber_row = $res->FetchArray();
-        $res->Free();
+		if($this->_enableAuth())
+		{
+			$benutzername = trim($suEMailLocal);
+			$jabber_kennwort = trim($suPass1);
+			$voller_name = trim($suFirstname).' '.trim($suSurname);
 
-        if ($jabber_row['enableAuth'] == 1) {
-            return true;
-        }
+			$url = $this->_getUrl().'&type=add&username='.$this->_toRawUrl($benutzername).'&password='.$this->_toRawUrl($jabber_kennwort).'&name='.$this->_toRawUrl($voller_name).'&email='.$this->_toRawUrl($suEMail);
+			$this->_sendhttp($url);
+		}
+	}
 
-        return false;
-    }
+	public function OnDeleteUser($id)
+	{
+		global $db;
 
-    private function _sendhttp($url)
-    {
-        if (!class_exists('BMHTTP')) {
-            include B1GMAIL_DIR.'serverlib/http.class.php';
-        }
+		if($this->_enableAuth())
+		{
+			$res = $db->Query('SELECT email FROM {pre}users WHERE id=?', $id);
+			$jabber = $res->FetchArray(MYSQLI_ASSOC);
+			$res->Free();
 
-        $http = _new('BMHTTP', [$url]);
-        $result = $http->DownloadToString();
-    }
+			$benutzername = explode('@', $jabber['email']);
 
-    private function _toRawUrl($text)
-    {
-        return rawurlencode($text);
-    }
+			$url = $this->_getUrl().'&type=delete&username='.$this->_toRawUrl($benutzername[0]);
+			$this->_sendhttp($url);
+		}
+	}
+
+	public function OnUserPasswordChange($userID, $oldPasswordMD5, $newPasswordMD5, $newPasswordPlain)
+	{
+		global $userRow;
+
+		if($this->_enableAuth())
+		{
+			$voller_name = trim($userRow['vorname']).' '.trim($userRow['nachname']);
+			$benutzername = explode('@', $userRow['email']);
+
+			$url = $this->_getUrl().'&type=update&username='.$this->_toRawUrl($benutzername[0]).'&password='.$this->_toRawUrl($newPasswordPlain).'&name='.$this->_toRawUrl($voller_name).'&email='.$this->_toRawUrl($userRow['email']);
+			$this->_sendhttp($url);
+		}
+	}
+
+	protected function _getUrl()
+	{
+		global $db;
+
+		$res = $db->Query('SELECT https, domain, port, secretkey FROM {pre}mod_openfire');
+		$jabber_row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		$http_modus = ($jabber_row['https'] == 1) ? 'https' : 'http';
+
+		return $http_modus.'://'.$jabber_row['domain'].':'.$jabber_row['port'].'/plugins/userService/userservice?secret='.$jabber_row['secretkey'];
+	}
+
+	protected function _enableAuth()
+	{
+		global $db;
+
+		$res = $db->Query('SELECT enableAuth FROM {pre}mod_openfire');
+		$jabber_row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		return ($jabber_row['enableAuth'] ?? 0) == 1;
+	}
+
+	protected function _sendhttp($url)
+	{
+		if(!class_exists('BMHTTP'))
+			include B1GMAIL_DIR.'serverlib/http.class.php';
+
+		$http = _new('BMHTTP', array($url));
+		$http->DownloadToString();
+	}
+
+	protected function _toRawUrl($text)
+	{
+		return rawurlencode($text);
+	}
 }
-/*
- * register plugin
- */
+
 $plugins->registerPlugin('modopenfire');

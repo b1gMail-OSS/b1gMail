@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="accentries"}</legend>
 	
-	<form action="payments.php?action=export&do=exportAccEntries&sid={$sid}" method="post" target="_top">
+	<form action="{sessionurl file='payments.php' params="action=export&do=exportAccEntries"}" method="post" target="_top">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="from"}</label>
 			<div class="col-sm-10">
@@ -57,7 +58,8 @@
 <fieldset>
 	<legend>{lng p="invoices"}</legend>
 	
-	<form action="payments.php?action=export&do=exportInvoices&sid={$sid}" method="post" target="_top">
+	<form action="{sessionurl file='payments.php' params="action=export&do=exportInvoices"}" method="post" target="_top">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="from"}</label>
 			<div class="col-sm-10">

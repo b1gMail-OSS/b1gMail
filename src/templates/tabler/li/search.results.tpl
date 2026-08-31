@@ -1,30 +1,26 @@
-<table width="100%" cellspacing="0" cellpadding="0">
 {if isset($results)}
 {foreach from=$results item=resultCat}
 {assign var=first value=true}
 {foreach from=$resultCat.results item=result}
-	<tr>
-		<td class="resultLeft" height="20" width="90">{if $first}{assign var=first value=false}{text value=$resultCat.title}{else}&nbsp;{/if}</td>
-		<td class="resultRight" onclick="{if !empty($result.extLink)}window.open('{$result.extLink}');{else}document.location.href='{$result.link}sid={$sid}';{/if}parent.hideSearchPopup(true);" title="{if isset($result.excerpt)}{text value=$result.excerpt allowEmpty=true stripTags=true}{/if}">
-			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
-			{text value=$result.title cut=25}
-		</td>
-	</tr>
+	{if !empty($result.extLink)}
+	<a class="list-group-item list-group-item-action" href="{$result.extLink}" target="_blank" rel="noopener noreferrer" onclick="hideSearchPopup(true);"{if isset($result.excerpt)} title="{text value=$result.excerpt allowEmpty=true stripTags=true}"{/if}>
+	{else}
+	<a class="list-group-item list-group-item-action" href="{$result.link}" onclick="hideSearchPopup(true);"{if isset($result.excerpt)} title="{text value=$result.excerpt allowEmpty=true stripTags=true}"{/if}>
+	{/if}
+		<span class="d-flex align-items-center gap-2">
+			<span class="text-secondary small text-end" style="min-width:4.5rem;">{if $first}{assign var=first value=false}{text value=$resultCat.title}{/if}</span>
+			<span class="text-truncate">
+				<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
+				{text value=$result.title cut=25}
+			</span>
+		</span>
+	</a>
 {/foreach}
 {/foreach}
-	<tr>
-		<td class="resultLeft" height="20" width="90" style="border-top:3px double #DDD;">&nbsp;</td>
-		<td class="resultRight" style="border-top:3px double #DDD;padding:2px;" onclick="document.location.href='search.php?q={$q}&sid={$sid}';parent.hideSearchPopup(true);">
-			<i class="fa fa-search" aria-hidden="true"></i>
-			{lng p="details"}...
-		</td>
-	</tr>
+	<a class="list-group-item list-group-item-action" href="{sessionurl file='search.php' params="q={$q}"}" onclick="hideSearchPopup(true);">
+		<i class="fa fa-search" aria-hidden="true"></i>
+		{lng p="details"}...
+	</a>
 {else}
-	<tr>
-		<td class="resultLeft" height="20" width="90">&nbsp;</td>
-		<td class="resultRight">
-			{lng p="nothingfound"}
-		</td>
-	</tr>
+	<div class="list-group-item text-secondary">{lng p="nothingfound"}</div>
 {/if}
-</table>

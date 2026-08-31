@@ -7,7 +7,8 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f1" method="post" action="prefs.php?action=autoresponder&do=save&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=autoresponder&do=save'}">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="autoresponder"}</th>

@@ -19,9 +19,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	{if $bmPushEnabled}
-	<link rel="manifest" href="manifest.php" />
+	<link rel="manifest" href="{$selfurl}manifest.php" />
 	<meta name="theme-color" content="#066fd1" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -36,7 +36,7 @@
 	<link href="{$tpldir}style/legacy-addon.css?{fileDateSig file="style/legacy-addon.css"}" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}libs/fontawesome/css/all.min.css?{fileDateSig file="libs/fontawesome/css/all.min.css"}" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}libs/fontawesome/css/v4-shims.min.css?{fileDateSig file="libs/fontawesome/css/v4-shims.min.css"}" rel="stylesheet" type="text/css" />
-	<link href="clientlib/fontawesome/css/font-awesome-animation.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome-animation.min.css"}" rel="stylesheet" type="text/css" />
+	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome-animation.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome-animation.min.css"}" rel="stylesheet" type="text/css" />
 {foreach from=$_cssFiles.li item=_file}	<link rel="stylesheet" type="text/css" href="{$_file}" />
 {/foreach}
 
@@ -44,25 +44,47 @@
 	<!--
 		var currentSID = '{$sid}', tplDir = '{$tpldir}', serverTZ = {$serverTZ}, ftsBGIndexing = {if $ftsBGIndexing}true{else}false{/if}{if $bmNotifyInterval},
 			notifyInterval = {$bmNotifyInterval}, notifySound = {if $bmNotifySound}true{else}false{/if}{/if},
-			bmEnableDarkMode = {if $templatePrefs.enableDarkMode|default:false}true{else}false{/if};
+			bmEnableDarkMode = {if $templatePrefs.enableDarkMode|default:false}true{else}false{/if},
+			bmCsrfToken = '{$csrfToken|escape:'javascript'}';
+		var bmSessionConfig = {
+			sid: '{$sid}',
+			csrfToken: '{$csrfToken|escape:'javascript'}',
+			publicRouting: {if $publicRoutingEnabled|default:false}true{else}false{/if},
+			urlCompat: {if $sessionUrlCompat|default:true}true{else}false{/if},
+			cookieMode: {if $sessionCookieMode|default:false}true{else}false{/if},
+			apiBase: '{$selfurl|escape:'javascript'}',
+			apiUrl: 'start.php',
+			loginUrl: '{$selfurl}index.php?action=login&expired=1',
+			idleTimeout: {$sessionIdleTimeout|default:30},
+			warnBefore: {$sessionWarnBefore|default:2},
+			lifetime: {$sessionLifetime|default:480},
+			unlockError: '{lng p="session_unlock_error" js=true}',
+			csrfErrorTitle: '{lng p="csrf_error_title" js=true}',
+			csrfErrorText: '{lng p="csrf_error_text" js=true}',
+			csrfErrorReload: '{lng p="csrf_error_reload" js=true}',
+			csrfError: '{lng p="csrf_error_text" js=true}'
+		};
 	//-->
 	</script>
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/bm-errors.js?{fileDateSig file="../../clientlib/bm-errors.js"}" type="text/javascript"></script>
+	<script src="{$tpldir}js/session-monitor.js?{fileDateSig file="js/session-monitor.js"}" type="text/javascript"></script>
+	<script src="{$tpldir}js/avatar.js?{fileDateSig file="js/avatar.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js?{fileDateSig file="js/loggedin.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/dtree.js?{fileDateSig file="clientlib/dtree.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/overlay.js?{fileDateSig file="clientlib/overlay.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/modal.js?{fileDateSig file="js/modal.js"}" type="text/javascript"></script>
-	<script src="clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
-	<script src="clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
 	{if $bmPushEnabled}
 	<script type="text/javascript">
 	<!--
 		var bmPushEnabled = true, bmPushAutoSubscribe = {if $bmPushSubscribed}true{else}false{/if}, bmPushPromptDismissed = {if $bmPushPromptDismissed|default:false}true{else}false{/if};
 	//-->
 	</script>
-	<script src="clientlib/push.js?{fileDateSig file="../../clientlib/push.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/push.js?{fileDateSig file="../../clientlib/push.js"}" type="text/javascript"></script>
 	{/if}
 	<script type="text/javascript">
 	{literal}
@@ -77,7 +99,7 @@
 	{hook id="li:index.tpl:head"}
 </head>
 
-<body class="layout-fluid bm-loggedin bm-layout-combo{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
+<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
 
 	{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}
@@ -92,7 +114,7 @@
 				</button>
 
 				<div class="navbar-brand navbar-brand-autodark">
-					<a href="start.php?sid={$sid}" aria-label="{$service_title|escape}">
+					<a href="{sessionurl file='start.php'}" aria-label="{$service_title|escape}">
 						<img src="{$tpldir}images/logo.png" height="32" alt="{$service_title|escape}" class="navbar-brand-image" />
 					</a>
 				</div>
@@ -119,24 +141,13 @@
 		</aside>
 
 		<header class="navbar navbar-expand-md d-none d-lg-flex d-print-none">
-			<div class="container-xl">
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="{lng p="navigation"}">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-
-				<div class="navbar-nav flex-row order-md-last">
-					<div class="d-none d-md-flex">
-						{include file="li/navbar-tools.tpl"}
-					</div>
-					{include file="li/navbar-user.tpl"}
-				</div>
-
-				<div class="collapse navbar-collapse" id="navbar-menu">
+			<div class="container-xl bm-li-topnav-inner">
+				<div class="collapse navbar-collapse bm-li-topnav-tabs" id="navbar-menu">
 					<ul class="navbar-nav">
 						{foreach from=$pageTabs key=tabID item=tab}
 						{if $tabID != 'prefs'}
 						<li class="nav-item{if $activeTab==$tabID} active{/if}">
-							<a class="nav-link{if $activeTab==$tabID} active{/if}" href="{$tab.link}{$sid}" title="{$tab.text|escape}">
+							<a class="nav-link{if $activeTab==$tabID} active{/if}" href="{$tab.link}" title="{$tab.text|escape}">
 								<span class="nav-link-icon d-md-none d-lg-inline-block">{include file="li/tab-icon.tpl" tab=$tab}</span>
 								<span class="nav-link-title">{$tab.text}</span>
 							</a>
@@ -144,6 +155,11 @@
 						{/if}
 						{/foreach}
 					</ul>
+				</div>
+
+				<div class="bm-li-navbar-end">
+					{include file="li/navbar-tools.tpl"}
+					{include file="li/navbar-user.tpl"}
 				</div>
 			</div>
 		</header>
@@ -155,7 +171,7 @@
 						{foreach from=$pageTabs key=tabID item=tab}
 						{if $tabID != 'prefs'}
 						<li class="nav-item" data-tab="{$tabID|escape}">
-							<a class="nav-link{if $activeTab==$tabID} active{/if}" href="{$tab.link}{$sid}" title="{$tab.text|escape}" aria-label="{$tab.text|escape}">
+							<a class="nav-link{if $activeTab==$tabID} active{/if}" href="{$tab.link}" title="{$tab.text|escape}" aria-label="{$tab.text|escape}">
 								<span class="nav-link-icon">{include file="li/tab-icon.tpl" tab=$tab}</span>
 							</a>
 						</li>
@@ -195,18 +211,16 @@
 		</div>
 
 		{comment text="search popup"}
-		<div class="headerBox card shadow bm-li-header-popup" id="searchPopup" style="display:none">
-			<div class="card-body p-2">
-				<div class="input-group input-group-flat">
-					<span class="input-group-text">
-						<i id="searchSpinner" class="fa fa-spinner fa-pulse fa-fw" style="display:none;"></i>
-						<i class="icon ti ti-search icon-1 search-icon-default"></i>
-						<input type="search" class="form-control" id="searchField" name="searchField" placeholder="{lng p="search"}" onkeypress="searchFieldKeyPress(event,{if $searchDetailsDefault}true{else}false{/if})" />
-					</span>
-				</div>
-				<div id="searchResultBody" class="mt-2" style="display:none">
-					<div id="searchResults" class="list-group list-group-flush"></div>
-				</div>
+		<div class="bm-li-search-popup" id="searchPopup" style="display:none" role="dialog" aria-label="{lng p="search"}">
+			<div class="bm-li-search-field">
+				<span class="bm-li-search-field-icon" aria-hidden="true">
+					<i id="searchSpinner" class="fa fa-spinner fa-pulse fa-fw" style="display:none;"></i>
+					<i class="icon ti ti-search icon-1 search-icon-default"></i>
+				</span>
+				<input type="search" class="form-control bm-li-search-input" id="searchField" name="searchField" placeholder="{lng p="search"}" autocomplete="off" oninput="searchFieldInput({if $searchDetailsDefault}true{else}false{/if})" onkeydown="searchFieldKeyPress(event,{if $searchDetailsDefault}true{else}false{/if})" />
+			</div>
+			<div id="searchResultBody" class="bm-li-search-results" hidden>
+				<div id="searchResults" class="list-group list-group-flush"></div>
 			</div>
 		</div>
 
@@ -218,7 +232,7 @@
 					{if array_key_exists('sep', $item)}
 					<div class="dropdown-divider m-0"></div>
 					{else}
-					<a class="dropdown-item" href="{$item.link}{$sid}">
+					<a class="dropdown-item" href="{$item.link}">
 						<span class="me-2">{include file="li/icon.tpl" faIcon=$item.faIcon}</span>
 						{$item.text}...
 					</a>
@@ -235,23 +249,27 @@
 					<h3 class="card-title mb-0">{lng p="notifications"}</h3>
 					<button type="button" class="btn-close ms-auto" onclick="hideNotifications(true); return false;" aria-label="{lng p="close"}"></button>
 				</div>
-				<div class="card-body p-0" id="notifyInner" style="max-height: 320px; overflow-y: auto;"></div>
+				<div class="card-body p-0 inner" id="notifyInner" style="max-height: 320px; overflow-y: auto;"></div>
 			</div>
 		</div>
 
 		{comment text="user menu"}
 		<div class="headerBox bm-li-header-popup dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" id="userMenu" style="display:none">
 			<div class="card">
-				<a href="prefs.php?sid={$sid}" class="dropdown-item">
+				<a href="{sessionurl file='prefs.php'}" class="dropdown-item">
 					<i class="ti ti-settings icon dropdown-item-icon"></i>
 					{lng p="prefs"}
 				</a>
-				<a href="prefs.php?action=faq&amp;sid={$sid}" class="dropdown-item">
+				<a href="{sessionurl file='prefs.php' params='action=faq'}" class="dropdown-item">
 					<i class="ti ti-help icon dropdown-item-icon"></i>
 					{lng p="faq"}
 				</a>
+				<a href="javascript:void(0)" class="dropdown-item" id="bmSessionLockMenu" role="button">
+					<i class="ti ti-lock icon dropdown-item-icon"></i>
+					{lng p="session_lock_now"}
+				</a>
 				<div class="dropdown-divider m-0"></div>
-				<a href="start.php?sid={$sid}&amp;action=logout" class="dropdown-item" onclick="return confirm('{lng p="logoutquestion"}');">
+				<a href="{sessionurl file='start.php' params='action=logout'}" class="dropdown-item" onclick="return confirm('{lng p="logoutquestion"}');">
 					<i class="ti ti-logout icon dropdown-item-icon"></i>
 					{lng p="logout"}
 				</a>
@@ -264,7 +282,7 @@
 				{foreach from=$pageTabs key=tabID item=tab}
 				{if $tabID != 'prefs'}
 				<div class="col-4">
-					<a href="{$tab.link}{$sid}" class="btn btn-ghost-secondary w-100 py-3{if $activeTab==$tabID} active{/if}" title="{$tab.text|escape}">
+					<a href="{$tab.link}" class="btn btn-ghost-secondary w-100 py-3{if $activeTab==$tabID} active{/if}" title="{$tab.text|escape}">
 						{include file="li/tab-icon.tpl" tab=$tab}
 						<span class="d-block small mt-1 text-truncate">{$tab.text}</span>
 					</a>
@@ -276,6 +294,11 @@
 	</div>
 
 	{hook id="li:index.tpl:afterContent"}
+	{if $mfaSetupMode|default:false}
+	{include file="li/mfa_setup_modal.tpl"}
+	<script src="{$tpldir}js/mfa-setup.js?{fileDateSig file="js/mfa-setup.js"}" type="text/javascript"></script>
+	{/if}
+	{include file="li/session-lock.tpl"}
 </body>
 
 </html>

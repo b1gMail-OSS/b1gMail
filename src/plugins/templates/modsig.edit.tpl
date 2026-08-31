@@ -1,20 +1,12 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="{$pageURL}&action=edit&id={$sig.signatureid}&save=true&sid={$sid}" method="post" onsubmit="spin(this);">
-		<div class="mb-3 row">
-			<div class="col-sm-12">
-				<textarea name="text" id="text" class="plainTextArea" style="width:100%;height:120px;font-family:courier;">{text value=$sig.text allowEmpty=true}</textarea>
-			</div>
-		</div>
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-check-label">{lng p="modsig_html"}</label>
-			<div class="col-sm-10">
-				<label class="form-check">
-					<input class="form-check-input" type="checkbox" name="html"{if $sig.html} checked="checked"{/if}>
-				</label>
-			</div>
-		</div>
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$sigPlugin}&do=edit&id={$sig.signatureid}"}" method="post" onsubmit="return modsigFormSubmit(this);">
+		{csrffield}
+		<input type="hidden" name="save" value="1" />
+		{assign var=modsigTextValue value=$sig.text}
+		{assign var=modsigHtmlMode value=($sig.html == 1)}
+		{include file=$modsigTextFieldTpl}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="weight"}</label>
 			<div class="col-sm-10">

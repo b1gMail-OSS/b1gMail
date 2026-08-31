@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAVACL\Xml\Property;
 
 use Sabre\DAV;
@@ -25,10 +27,10 @@ use Sabre\Xml\Writer;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Acl implements Element, HtmlOutput {
-
+class Acl implements Element, HtmlOutput
+{
     /**
-     * List of privileges
+     * List of privileges.
      *
      * @var array
      */
@@ -43,7 +45,7 @@ class Acl implements Element, HtmlOutput {
     protected $prefixBaseUrl;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * This object requires a structure similar to the return value from
      * Sabre\DAVACL\Plugin::getACL().
@@ -56,34 +58,31 @@ class Acl implements Element, HtmlOutput {
      * are already full urls. If this is kept to true, the servers base url
      * will automatically be prefixed.
      *
-     * @param array $privileges
      * @param bool $prefixBaseUrl
      */
-    function __construct(array $privileges, $prefixBaseUrl = true) {
-
+    public function __construct(array $privileges, $prefixBaseUrl = true)
+    {
         $this->privileges = $privileges;
         $this->prefixBaseUrl = $prefixBaseUrl;
-
     }
 
     /**
-     * Returns the list of privileges for this property
+     * Returns the list of privileges for this property.
      *
      * @return array
      */
-    function getPrivileges() {
-
+    public function getPrivileges()
+    {
         return $this->privileges;
-
     }
 
     /**
-     * The xmlSerialize metod is called during xml writing.
+     * The xmlSerialize method is called during xml writing.
      *
      * Use the $writer argument to write its own xml serialization.
      *
      * An important note: do _not_ create a parent element. Any element
-     * implementing XmlSerializble should only ever write what's considered
+     * implementing XmlSerializable should only ever write what's considered
      * its 'inner xml'.
      *
      * The parent of the current element is responsible for writing a
@@ -92,18 +91,12 @@ class Acl implements Element, HtmlOutput {
      * This allows serializers to be re-used for different element names.
      *
      * If you are opening new elements, you must also close them again.
-     *
-     * @param Writer $writer
-     * @return void
      */
-    function xmlSerialize(Writer $writer) {
-
+    public function xmlSerialize(Writer $writer)
+    {
         foreach ($this->privileges as $ace) {
-
             $this->serializeAce($writer, $ace);
-
         }
-
     }
 
     /**
@@ -117,39 +110,38 @@ class Acl implements Element, HtmlOutput {
      * The baseUri parameter is a url to the root of the application, and can
      * be used to construct local links.
      *
-     * @param HtmlOutputHelper $html
      * @return string
      */
-    function toHtml(HtmlOutputHelper $html) {
-
+    public function toHtml(HtmlOutputHelper $html)
+    {
         ob_start();
-        echo "<table>";
-        echo "<tr><th>Principal</th><th>Privilege</th><th></th></tr>";
+        echo '<table>';
+        echo '<tr><th>Principal</th><th>Privilege</th><th></th></tr>';
         foreach ($this->privileges as $privilege) {
-
             echo '<tr>';
             // if it starts with a {, it's a special principal
-            if ($privilege['principal'][0] === '{') {
+            if ('{' === $privilege['principal'][0]) {
                 echo '<td>', $html->xmlName($privilege['principal']), '</td>';
             } else {
                 echo '<td>', $html->link($privilege['principal']), '</td>';
             }
             echo '<td>', $html->xmlName($privilege['privilege']), '</td>';
             echo '<td>';
-            if (!empty($privilege['protected'])) echo '(protected)';
+            if (!empty($privilege['protected'])) {
+                echo '(protected)';
+            }
             echo '</td>';
             echo '</tr>';
-
         }
-        echo "</table>";
-        return ob_get_clean();
+        echo '</table>';
 
+        return ob_get_clean();
     }
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -164,22 +156,20 @@ class Acl implements Element, HtmlOutput {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $elementMap = [
-            '{DAV:}ace'       => 'Sabre\Xml\Element\KeyValue',
-            '{DAV:}privilege' => 'Sabre\Xml\Element\Elements',
-            '{DAV:}principal' => 'Sabre\DAVACL\Xml\Property\Principal',
+            '{DAV:}ace' => \Sabre\Xml\Element\KeyValue::class,
+            '{DAV:}privilege' => \Sabre\Xml\Element\Elements::class,
+            '{DAV:}principal' => \Sabre\DAVACL\Xml\Property\Principal::class,
         ];
 
         $privileges = [];
 
-        foreach ((array)$reader->parseInnerTree($elementMap) as $element) {
-
-            if ($element['name'] !== '{DAV:}ace') {
+        foreach ((array) $reader->parseInnerTree($elementMap) as $element) {
+            if ('{DAV:}ace' !== $element['name']) {
                 continue;
             }
             $ace = $element['value'];
@@ -190,19 +180,18 @@ class Acl implements Element, HtmlOutput {
             $principal = $ace['{DAV:}principal'];
 
             switch ($principal->getType()) {
-                case Principal::HREF :
+                case Principal::HREF:
                     $principal = $principal->getHref();
                     break;
-                case Principal::AUTHENTICATED :
+                case Principal::AUTHENTICATED:
                     $principal = '{DAV:}authenticated';
                     break;
-                case Principal::UNAUTHENTICATED :
+                case Principal::UNAUTHENTICATED:
                     $principal = '{DAV:}unauthenticated';
                     break;
-                case Principal::ALL :
+                case Principal::ALL:
                     $principal = '{DAV:}all';
                     break;
-
             }
 
             $protected = array_key_exists('{DAV:}protected', $ace);
@@ -211,7 +200,7 @@ class Acl implements Element, HtmlOutput {
                 throw new DAV\Exception\NotImplemented('Every {DAV:}ace element must have a {DAV:}grant element. {DAV:}deny is not yet supported');
             }
             foreach ($ace['{DAV:}grant'] as $elem) {
-                if ($elem['name'] !== '{DAV:}privilege') {
+                if ('{DAV:}privilege' !== $elem['name']) {
                     continue;
                 }
 
@@ -222,34 +211,27 @@ class Acl implements Element, HtmlOutput {
                         'privilege' => $priv,
                     ];
                 }
-
             }
-
         }
 
         return new self($privileges);
-
     }
 
     /**
      * Serializes a single access control entry.
-     *
-     * @param Writer $writer
-     * @param array $ace
-     * @return void
      */
-    private function serializeAce(Writer $writer, array $ace) {
-
+    private function serializeAce(Writer $writer, array $ace)
+    {
         $writer->startElement('{DAV:}ace');
 
         switch ($ace['principal']) {
-            case '{DAV:}authenticated' :
+            case '{DAV:}authenticated':
                 $principal = new Principal(Principal::AUTHENTICATED);
                 break;
-            case '{DAV:}unauthenticated' :
+            case '{DAV:}unauthenticated':
                 $principal = new Principal(Principal::UNAUTHENTICATED);
                 break;
-            case '{DAV:}all' :
+            case '{DAV:}all':
                 $principal = new Principal(Principal::ALL);
                 break;
             default:
@@ -271,7 +253,5 @@ class Acl implements Element, HtmlOutput {
         }
 
         $writer->endElement(); // ace
-
     }
-
 }

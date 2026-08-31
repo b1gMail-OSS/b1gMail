@@ -1,4 +1,5 @@
-<form method="post" action="users.php?do=edit&id={$user.id}&save=true&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="{sessionurl file='users.php' params="do=edit&id={$user.id}&save=true"}" onsubmit="spin(this)">
+	{csrffield}
 
 	{if isset($msg)}
 		<div class="alert alert-info">{$msg}</div>
@@ -138,7 +139,7 @@
 				{if $historyCount}
 					<div class="alert alert-warning">
 						{$historyCount} {lng p="oldcontacts"}
-						<a href="users.php?do=contactHistory&id={$user.id}&sid={$sid}">{lng p="show"} &raquo;</a>
+						<a href="{sessionurl file='users.php' params="do=contactHistory&id={$user.id}"}">{lng p="show"} &raquo;</a>
 					</div>
 				{/if}
 			</fieldset>
@@ -192,7 +193,7 @@
 					<div class="col-sm-8">
 						<div class="form-control-plaintext">
 							<i class="fa-regular fa-circle text-{$abuseIndicator}"></i>
-							<a href="abuse.php?do=show&userid={$user.id}&sid={$sid}">
+							<a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}">
 								{if $abuseIndicator!='grey'}
 									{$abusePoints}
 									{lng p="points"}
@@ -298,7 +299,7 @@
 					<label class="col-sm-4 col-form-label">{lng p="assets"}</label>
 					<div class="col-sm-8">
 						<div class="form-control-plaintext">
-							<a href="users.php?do=transactions&id={$user.id}&sid={$sid}">{$staticBalance} {lng p="credits"}</a>
+							<a href="{sessionurl file='users.php' params="do=transactions&id={$user.id}"}">{$staticBalance} {lng p="credits"}</a>
 						</div>
 					</div>
 				</div>
@@ -308,6 +309,24 @@
 						<input type="password" class="form-control" name="passwort" value="" placeholder="{lng p="newpassword"}">
 					</div>
 				</div>
+				{if $mfaLiEnabled}
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="mfa"}</label>
+					<div class="col-sm-8">
+						<div class="form-control-plaintext">
+							{if $mfaEnabled}
+								{lng p="mfa_status_on"}
+								{if $mfaActiveMethod == 'email'} ({lng p="mfa_method_email_active"}){else} ({lng p="mfa_method_totp_active"}){/if}
+								{if $mfaEnabledAtFormatted != ''}<br /><small class="text-secondary">{lng p="mfa_active_since_label"} {$mfaEnabledAtFormatted}</small>{/if}
+							{else}
+								{lng p="mfa_status_off"}
+								{if $mfaSetupRequired} <span class="text-warning">({lng p="mfa_setup_pending"})</span>{/if}
+							{/if}
+						</div>
+						<button type="button" class="btn btn-outline-danger btn-sm mt-2" onclick="if(confirm('{lng p="mfa_reset_confirm"}')) document.getElementById('userResetMfaForm').submit();">{lng p="mfa_reset_btn"}</button>
+					</div>
+				</div>
+				{/if}
 			</fieldset>
 		</div>
 		<div class="col-md-6">
@@ -463,7 +482,7 @@
 													<td><img src="{$tpldir}images/alias.png" border="0" alt="" width="16" height="16" /></td>
 													<td>{email value=$alias.email cut=30}</td>
 													<td>{$alias.type}</td>
-													<td><a href="users.php?do=edit&id={$user.id}&deleteAlias={$alias.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a></td>
+													<td><a href="{sessionurl file='users.php' params="do=edit&id={$user.id}&deleteAlias={$alias.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a></td>
 												</tr>
 											{/foreach}
 										</table>
@@ -505,15 +524,15 @@
 														</div>
 														{if $payment.paymethod<0}
 															<div style="float:right;">
-																<a href="payments.php?do=details&orderid={$payment.orderid}&sid={$sid}" title="{lng p="details"}"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="{lng p="details"}" width="16" height="16" /></a>
+																<a href="{sessionurl file='payments.php' params="do=details&orderid={$payment.orderid}"}" title="{lng p="details"}"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="{lng p="details"}" width="16" height="16" /></a>
 															</div>
 														{/if}
 													</td>
 													<td>{date timestamp=$payment.created nice=true}</td>
 													<td>
-														{if $payment.hasInvoice}<a href="javascript:void(0);" onclick="openWindow('payments.php?action=showInvoice&orderID={$payment.orderid}&sid={$sid}','invoice_{$payment.orderid}',640,480);" title="{lng p="showinvoice"}"><img src="{$tpldir}images/file.png" border="0" alt="{lng p="showinvoice"}" width="16" height="16" /></a>{/if}
-														{if $payment.status==0}<a href="{if $payment.paymethod<0}payments.php?do=details&orderid={$payment.orderid}&sid={$sid}{else}users.php?do=edit&id={$user.id}&activatePayment={$payment.orderid}&sid={$sid}{/if}" title="{lng p="activatepayment"}"><img src="{$tpldir}images/unlock.png" border="0" alt="{lng p="activatepayment"}" width="16" height="16" /></a>{/if}
-														<a href="users.php?do=edit&id={$user.id}&deletePayment={$payment.orderid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
+														{if $payment.hasInvoice}<a href="javascript:void(0);" onclick="openWindow('payments.php?action=showInvoice&orderID={$payment.orderid}{$sessionUrlSuffix}','invoice_{$payment.orderid}',640,480);" title="{lng p="showinvoice"}"><img src="{$tpldir}images/file.png" border="0" alt="{lng p="showinvoice"}" width="16" height="16" /></a>{/if}
+														{if $payment.status==0}<a href="{if $payment.paymethod<0}payments.php?do=details&orderid={$payment.orderid}{$sessionUrlSuffix}{else}users.php?do=edit&id={$user.id}&activatePayment={$payment.orderid}{$sessionUrlSuffix}{/if}" title="{lng p="activatepayment"}"><img src="{$tpldir}images/unlock.png" border="0" alt="{lng p="activatepayment"}" width="16" height="16" /></a>{/if}
+														<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}&deletePayment={$payment.orderid}"}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
 													</td>
 												</tr>
 											{/foreach}
@@ -533,27 +552,27 @@
 			<div style="float: left;">{lng p="action"}:&nbsp;</div>
 			<div style="float: left;">
 				<div class="btn-group btn-group-sm">
-					<select name="massAction" class="form-select form-select-sm">
+					<select name="massAction" id="userAction" class="form-select form-select-sm">
 						<optgroup label="{lng p="actions"}">
 							{if $user.sms_validation_code!=''&&$user.gesperrt=='locked'}
 								{if $regValidation=='email'&&$user.altmail!=''}
-									<option value="users.php?do=edit&id={$user.id}&resendValidationEmail=true&sid={$sid}">{lng p="resend_val_email"}</option>
+									<option value="users.php?do=edit&id={$user.id}&resendValidationEmail=true{$sessionUrlSuffix}">{lng p="resend_val_email"}</option>
 								{elseif $regValidation=='sms'&&$user.mail2sms_nummer!=''}
-									<option value="users.php?do=edit&id={$user.id}&resendValidationSMS=true&sid={$sid}">{lng p="resend_val_sms"}</option>
+									<option value="users.php?do=edit&id={$user.id}&resendValidationSMS=true{$sessionUrlSuffix}">{lng p="resend_val_sms"}</option>
 								{/if}
 							{/if}
 							<option value="mailto:{email value=$user.email}">{lng p="sendmail"}</option>
 							{if $user.altmail!=''}<option value="mailto:{email value=$user.altmail}">{lng p="sendmail"} ({lng p="altmail"})</option>{/if}
-							<option value="popup;users.php?do=login&id={$user.id}&sid={$sid}">{lng p="login"}</option>
-							<option value="users.php?singleAction=emptyTrash&singleID={$user.id}&sid={$sid}">{lng p="emptytrash"}</option>
-							<option value="users.php?singleAction={if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}&singleID={$user.id}&sid={$sid}">{if $user.gesperrt=='no'}{lng p="lock"}{elseif $user.gesperrt=='yes'}{lng p="unlock"}{elseif $user.gesperrt=='locked'}{lng p="activate"}{elseif $user.gesperrt=='delete'}{lng p="restore"}{/if}</option>
-							<option value="users.php?singleAction=delete&singleID={$user.id}&sid={$sid}">{lng p="delete"}</option>
+							<option value="popup;users.php?do=login&id={$user.id}{$sessionUrlSuffix}">{lng p="login"}</option>
+							<option value="users.php?singleAction=emptyTrash&singleID={$user.id}{$sessionUrlSuffix}">{lng p="emptytrash"}</option>
+							<option value="users.php?singleAction={if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}&singleID={$user.id}{$sessionUrlSuffix}">{if $user.gesperrt=='no'}{lng p="lock"}{elseif $user.gesperrt=='yes'}{lng p="unlock"}{elseif $user.gesperrt=='locked'}{lng p="activate"}{elseif $user.gesperrt=='delete'}{lng p="restore"}{/if}</option>
+							<option value="users.php?singleAction=delete&singleID={$user.id}{$sessionUrlSuffix}">{lng p="delete"}</option>
 						</optgroup>
 
 						<optgroup label="{lng p="move"}">
 							{foreach from=$groups item=groupItem key=groupID}
 								{if $groupID!=$user.gruppe}
-									<option value="users.php?do=edit&id={$user.id}&moveToGroup={$groupID}&sid={$sid}">{lng p="moveto"} &quot;{text value=$groupItem.title cut=25}&quot;</option>
+									<option value="users.php?do=edit&id={$user.id}&moveToGroup={$groupID}{$sessionUrlSuffix}">{lng p="moveto"} &quot;{text value=$groupItem.title cut=25}&quot;</option>
 								{/if}
 							{/foreach}
 						</optgroup>
@@ -566,4 +585,8 @@
 			<input class="btn btn-primary" type="submit" value=" {lng p="save"} " />
 		</div>
 	</div>
+</form>
+<form id="userResetMfaForm" method="post" action="{sessionurl file='users.php' params="do=edit&id={$user.id}&resetMfa=1"}" class="d-none">
+	{csrffield}
+	<input type="hidden" name="resetMfa" value="1" />
 </form>

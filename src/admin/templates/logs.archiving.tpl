@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="archiving"}</legend>
 		
-	<form action="logs.php?action=archiving&do=archive&sid={$sid}" method="post" onsubmit="if(EBID('saveCopy').checked || confirm('{lng p="reallynotarc"}')) spin(this); else return(false);">
+	<form action="{sessionurl file='logs.php' params="action=archiving&do=archive"}" method="post" onsubmit="if(EBID('saveCopy').checked || confirm('{lng p="reallynotarc"}')) spin(this); else return(false);">
+		{csrffield}
 		<p>{lng p="logarc_desc"}</p>
 
 		<div class="mb-3 row">

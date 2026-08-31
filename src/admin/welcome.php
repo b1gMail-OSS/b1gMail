@@ -20,6 +20,7 @@
  */
 
 include('../serverlib/admin.inc.php');
+
 RequestPrivileges(PRIVILEGES_ADMIN);
 
 if(!isset($_REQUEST['action']))
@@ -35,13 +36,13 @@ $tabs = array(
 	1 => array(
 		'title'		=> $lang_admin['phpinfo'],
 		'relIcon'	=> 'phpinfo32.png',
-		'link'		=> 'welcome.php?action=phpinfo&',
+		'link'		=> 'welcome.php?action=phpinfo',
 		'active'	=> $_REQUEST['action'] == 'phpinfo'
 	),
 	2 => array(
 		'title'		=> $lang_admin['about'],
 		'relIcon'	=> 'ico_b1gmail.png',
-		'link'		=> 'welcome.php?action=about&',
+		'link'		=> 'welcome.php?action=about',
 		'active'	=> $_REQUEST['action'] == 'about'
 	)
 );
@@ -175,6 +176,20 @@ if($_REQUEST['action'] == 'welcome')
 	//
 	$notices = array();
 
+	// setup folder still on disk?
+	$setupDir = B1GMAIL_DIR . 'setup';
+	if(is_dir($setupDir))
+	{
+		$setupHasLock = is_file($setupDir . '/lock');
+		$setupHasLockUpdate = is_file($setupDir . '/lock_update');
+		if(!$setupHasLock && !$setupHasLockUpdate)
+			$notices[] = array('type'	=> 'error',
+								'text'	=> $lang_admin['setupfolderunlocked']);
+		else
+			$notices[] = array('type'	=> 'warning',
+								'text'	=> $lang_admin['setupfolderlocked']);
+	}
+
 	// self folder?
 	if(!file_exists($bm_prefs['selffolder']))
 		$notices[] = array('type'	=> 'error',
@@ -202,7 +217,7 @@ if($_REQUEST['action'] == 'welcome')
 		{
 			$notices[] = array('type'	=> 'error',
 								'text'	=> $lang_admin['dynnorecvrules'],
-								'link'	=> 'prefs.email.php?action=receive&');
+								'link'	=> 'prefs.email.php?action=receive');
 		}
 	}
 
@@ -235,7 +250,7 @@ if($_REQUEST['action'] == 'welcome')
 		{
 			$notices[] = array('type' 	=> 'warning',
 								'text'	=> sprintf($lang_admin['orphansfound'], $orphanCount, $orphanSize/1024),
-								'link'	=> 'maintenance.php?action=orphans&');
+								'link'	=> 'maintenance.php?action=orphans');
 			$orphansFound = true;
 		}
 	}
@@ -251,7 +266,7 @@ if($_REQUEST['action'] == 'welcome')
 		{
 			$notices[] = array('type' 	=> 'warning',
 								'text'	=> sprintf($lang_admin['diskorphansfound'], $diskOrphanCount, $diskOrphanSize/1024),
-								'link'	=> 'maintenance.php?action=orphans&');
+								'link'	=> 'maintenance.php?action=orphans');
 			$diskOrphansFound = true;
 		}
 	}
@@ -265,14 +280,14 @@ if($_REQUEST['action'] == 'welcome')
 		if((int)$userMailSpace != (int)$emailSize || (int)$userDiskSpace != (int)$diskSize)
 			$notices[] = array('type'	=> 'warning',
 								'text'	=> $lang_admin['cachesizesdiffer'],
-								'link'	=> 'optimize.php?action=cache&');
+								'link'	=> 'optimize.php?action=cache');
 	}
 
 	// no postmaster?
 	if(BMUser::GetID(GetPostmasterMail(), true) == 0)
 		$notices[] = array('type'	=> 'warning',
 							'text'	=> sprintf($lang_admin['nopostmaster'], DecodeEMail(GetPostmasterMail())),
-							'link'	=> 'users.php?action=create&');
+							'link'	=> 'users.php?action=create');
 
 	// dom?
 	if(!class_exists('DOMDocument'))
@@ -331,7 +346,7 @@ if($_REQUEST['action'] == 'welcome')
 	if($logCount > 250000)
 		$notices[] = array('type'	=> 'info',
 							'text'	=> $lang_admin['manylogs'],
-							'link'	=> 'logs.php?action=archiving&');
+							'link'	=> 'logs.php?action=archiving');
 
 	// orders with custom payment methods waiting for activation
 	$res = $db->Query('SELECT COUNT(*) FROM {pre}orders WHERE `paymethod`<0 AND `status`=?',
@@ -370,7 +385,7 @@ if($_REQUEST['action'] == 'welcome')
 	if($notActivatedUserCount > 0)
 		$notices[] = array('type'	=> 'info',
 							'text'	=> sprintf($lang_admin['notactnotice'], $notActivatedUserCount),
-							'link'	=> 'users.php?filter=true&statusNotActivated=true&allGroups=true&');
+							'link'	=> 'users.php?filter=true&statusNotActivated=true&allGroups=true');
 
 	// users waiting for delete
 	$res = $db->Query('SELECT COUNT(*) FROM {pre}users WHERE gesperrt=?',
@@ -380,7 +395,7 @@ if($_REQUEST['action'] == 'welcome')
 	if($deleteCount > 0)
 		$notices[] = array('type'	=> 'info',
 							'text'	=> sprintf($lang_admin['deletenotice'], $deleteCount),
-							'link'	=> 'users.php?filter=true&statusDeleted=true&allGroups=true&');
+							'link'	=> 'users.php?filter=true&statusDeleted=true&allGroups=true');
 
 	//
 	// groups with maxsize > hard limit
@@ -400,6 +415,11 @@ if($_REQUEST['action'] == 'welcome')
 	//
 	// plugin notices
 	//
+	include B1GMAIL_DIR . 'serverlib/scheduledtasks.class.php';
+	$stNotices = BMScheduledTasks::getNotices();
+	if(is_array($stNotices) && count($stNotices) > 0)
+		$notices = array_merge($notices, $stNotices);
+
 	$pluginNotices = $plugins->callFunction('getNotices', false, true);
 	foreach($pluginNotices as $value)
 		$notices = array_merge($notices, $value);

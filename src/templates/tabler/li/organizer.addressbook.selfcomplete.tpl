@@ -12,7 +12,8 @@
 
 	{lng p="completetext"}
 	
-	<form action="organizer.addressbook.php?action=sendSelfComplete&id={$id}&sid={$sid}" method="post">
+	<form action="{sessionurl file='organizer.addressbook.php' params="action=sendSelfComplete&id={$id}"}" method="post">
+		{csrffield}
 		<p>
 			{if $privateMail}
 				<i class="fa fa-check-square-o" aria-hidden="true"></i> 

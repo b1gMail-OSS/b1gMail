@@ -1,4 +1,5 @@
 <form action="search.php?sid={$sid}" method="post" name="searchSideBarForm">
+	{csrffield}
 
 <input type="hidden" name="page" value="1" id="searchSideBarPage" />
 <input type="hidden" name="sort" value="{$sortColumn}" id="searchSideBarSort" />

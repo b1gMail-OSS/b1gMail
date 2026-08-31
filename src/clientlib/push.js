@@ -13,11 +13,29 @@ var bmPush = (function () {
 		return url;
 	}
 
+	function csrfToken() {
+		if (typeof bmCsrfToken !== 'undefined' && bmCsrfToken) {
+			return bmCsrfToken;
+		}
+		if (typeof bmSessionConfig !== 'undefined' && bmSessionConfig && bmSessionConfig.csrfToken) {
+			return bmSessionConfig.csrfToken;
+		}
+		return '';
+	}
+
 	function fetchJson(url, options) {
 		options = options || {};
 		options.credentials = 'same-origin';
-		if (!options.headers) {
-			options.headers = { 'Content-Type': 'application/json' };
+		options.headers = options.headers || {};
+		if (!options.headers['Content-Type']) {
+			options.headers['Content-Type'] = 'application/json';
+		}
+		if ((options.method || 'GET').toUpperCase() === 'POST') {
+			var token = csrfToken();
+			if (token) {
+				options.headers['X-CSRF-TOKEN'] = token;
+			}
+			options.headers['Accept'] = 'application/json';
 		}
 		return fetch(url, options).then(function (r) {
 			return r.json();
@@ -208,9 +226,14 @@ var bmPush = (function () {
 		if (!isSupported() || typeof bmPushEnabled === 'undefined' || !bmPushEnabled) {
 			return Promise.resolve();
 		}
-		return navigator.serviceWorker.ready
-			.then(function (reg) {
-				return reg.pushManager.getSubscription();
+		return fetchJson(apiUrl('status'))
+			.then(function (status) {
+				if (!status || !status.ok || !status.prefsEnabled) {
+					return null;
+				}
+				return navigator.serviceWorker.ready.then(function (reg) {
+					return reg.pushManager.getSubscription();
+				});
 			})
 			.then(function (sub) {
 				if (!sub) {

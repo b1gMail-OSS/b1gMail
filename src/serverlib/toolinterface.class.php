@@ -60,6 +60,12 @@ class BMToolInterface
 	{
 		$result = array();
 
+		if(!ClientApiRateLimitAllow())
+		{
+			$result['status'] = 'Invalid login';
+			return($result);
+		}
+
 		$userName = EncodeEMail($userName);
 		list($res, $param) = BMUser::Login($userName, $passwordPlain, true, true);
 
@@ -67,12 +73,15 @@ class BMToolInterface
 		{
 			$_SESSION['bm_timezone'] = $timezoneOffset;
 			$_SESSION['bm_loginFromClientAPI'] = true;
+			if(isset($_SESSION['bm_userID']))
+				ClientApiRememberPassword((int)$_SESSION['bm_userID'], $passwordPlain);
 			$result['status'] = 'OK';
 			$result['sessionID'] = session_id();
 			$result['sessionSecret'] = $_COOKIE['sessionSecret_'.substr(session_id(), 0, 16)];
 		}
 		else
 		{
+			ClientApiRateLimitFail();
 			$result['status'] = 'Invalid login';
 		}
 
@@ -724,11 +733,17 @@ class BMToolInterface
 	{
 		global $db, $bm_prefs, $plugins;
 
+		if(!ClientApiRateLimitAllow())
+			return(array('loginOK' => 0));
+
 		$userName = EncodeEMail($userName);
+		$passwordHash = strtolower(trim((string)$passwordHash));
 		$userID = BMUser::GetID($userName);
+		$row = false;
+		$accountLocked = false;
 		if($userID != 0)
 		{
-			$res = $db->Query('SELECT passwort,passwort_salt,gesperrt,gruppe,mail2sms_nummer FROM {pre}users WHERE id=?',
+			$res = $db->Query('SELECT passwort,passwort_salt,gesperrt,gruppe,mail2sms_nummer,tbx_pass,last_login_attempt FROM {pre}users WHERE id=?',
 				$userID);
 			if($res->RowCount() == 1)
 			{
@@ -736,8 +751,22 @@ class BMToolInterface
 
 				$user = _new('BMUser', array($userID));
 
-				if(strtolower($row['passwort']) === strtolower(md5($passwordHash.$row['passwort_salt']))
-					&& $row['gesperrt'] == 'no')
+				$accountLocked = ((int)$row['last_login_attempt'] >= 100
+					&& (int)$row['last_login_attempt'] + ACCOUNT_LOCK_TIME >= time());
+				$passwordOK = false;
+				if(!$accountLocked && preg_match('/^[a-f0-9]{32}$/', $passwordHash))
+				{
+					$storedTbx = isset($row['tbx_pass']) ? (string)$row['tbx_pass'] : '';
+					if($storedTbx !== ''
+						&& hash_equals($storedTbx, ClientApiVerifierFromMd5($passwordHash)))
+						$passwordOK = true;
+					else if(!BMUser::PasswordIsModern($row['passwort'])
+						&& hash_equals(strtolower((string)$row['passwort']),
+							strtolower(md5($passwordHash.$row['passwort_salt']))))
+						$passwordOK = true;
+				}
+
+				if($passwordOK && $row['gesperrt'] == 'no')
 				{
 					$group = $user->GetGroup();
 					$groupRow = $group->_row;
@@ -800,12 +829,29 @@ class BMToolInterface
 						$this->_sms = $sms;
 					}
 
+					if((int)$row['last_login_attempt'] != 0)
+						$db->Query('UPDATE {pre}users SET last_login_attempt=0 WHERE id=?', $userID);
+					ClientApiRememberMd5($userID, $passwordHash);
 					$this->_user = $user;
 					return($result);
 				}
 			}
 			$res->Free();
 		}
+
+		if($userID != 0 && is_array($row) && !$accountLocked)
+		{
+			$lastLoginAttempt = (int)$row['last_login_attempt'];
+			if($lastLoginAttempt < 100)
+			{
+				if(++$lastLoginAttempt >= 5)
+					$lastLoginAttempt = time();
+				$db->Query('UPDATE {pre}users SET last_login_attempt=? WHERE id=?',
+					$lastLoginAttempt,
+					$userID);
+			}
+		}
+		ClientApiRateLimitFail();
 		return(array('loginOK' => 0));
 	}
 

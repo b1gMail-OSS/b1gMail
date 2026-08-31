@@ -1,4 +1,4 @@
-{if empty($smarty.get.tableOnly)}<form name="f1" action="email.php?do=action&{$folderString}&sid={$sid}" onsubmit="transferSelectedMailIDs()" method="post">
+{if empty($smarty.get.tableOnly)}<form name="f1" action="email.php?do=action&{$folderString}{$sessionUrlSuffix}" onsubmit="transferSelectedMailIDs()" method="post">
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
 <div id="contentHeader">
@@ -9,7 +9,7 @@
 
 	<div class="right bm-mail-header-actions">
 		{if isset($folderInfo.type)&&$folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
-		<button type="button" class="btn btn-icon btn-ghost-secondary" onclick="showFolderMenu(event);" title="{lng p="folderactions"}" aria-label="{lng p="folderactions"}">
+		<button type="button" class="btn btn-icon btn-ghost-secondary" onclick="showFolderMenu(event, this);" title="{lng p="folderactions"}" aria-label="{lng p="folderactions"}">
 			<i class="ti ti-settings icon" aria-hidden="true"></i>
 		</button>
 		{/if}
@@ -64,7 +64,7 @@
 			</span>
 		</td>
 		<td draggable="false" id="mail_{$mailID}_ncol2" class="narrowRow bm-mail-card-cell">
-			<a draggable="false" class="bm-mail-card-link" href="email.read.php?id={$mailID}&sid={$sid}" onclick="return(false)"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>
+			<a draggable="false" class="bm-mail-card-link" href="{sessionurl file='email.read.php' params="id={$mailID}"}" onclick="return(false)"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>
 				<div class="bm-mail-card-top">
 					<div id="mail_{$mailID}_nspan2" class="sender{if $mail.flags&1} unread{/if}">{if $folderID!=-2}{if $mail.from_name}{text value=$mail.from_name}{else}{if $mail.from_mail}{email value=$mail.from_mail}{else}-{/if}{/if}{else}{if $mail.to_name}{text value=$mail.to_name}{else}{if $mail.to_mail}{email value=$mail.to_mail}{else}-{/if}{/if}{/if}</div>
 					<div id="mail_{$mailID}_nspan1" class="date{if $mail.flags&1} unread{/if}"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>{date timestamp=$mail.timestamp nice=true}</div>

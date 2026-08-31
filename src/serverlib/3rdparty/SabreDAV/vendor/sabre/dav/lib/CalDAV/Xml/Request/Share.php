@@ -1,13 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Request;
 
+use Sabre\CalDAV\Plugin;
+use Sabre\DAV\Xml\Element\Sharee;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
-use Sabre\CalDAV\Plugin;
 
 /**
- * Share POST request parser
+ * Share POST request parser.
  *
  * This class parses the share POST request, as defined in:
  *
@@ -17,47 +20,29 @@ use Sabre\CalDAV\Plugin;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Share implements XmlDeserializable {
+class Share implements XmlDeserializable
+{
+    /**
+     * The list of new people added or updated or removed from the share.
+     *
+     * @var Sharee[]
+     */
+    public $sharees = [];
 
     /**
-     * The list of new people added or updated.
+     * Constructor.
      *
-     * Every element has the following keys:
-     * 1. href - An email address
-     * 2. commonName - Some name
-     * 3. summary - An optional description of the share
-     * 4. readOnly - true or false
-     *
-     * @var array
+     * @param Sharee[] $sharees
      */
-    public $set = [];
-
-    /**
-     * List of people removed from the share list.
-     *
-     * The list is a flat list of email addresses (including mailto:).
-     *
-     * @var array
-     */
-    public $remove = [];
-
-    /**
-     * Constructor
-     *
-     * @param array $set
-     * @param array $remove
-     */
-    function __construct(array $set, array $remove) {
-
-        $this->set = $set;
-        $this->remove = $remove;
-
+    public function __construct(array $sharees)
+    {
+        $this->sharees = $sharees;
     }
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -72,45 +57,51 @@ class Share implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
-        $elems = $reader->parseInnerTree([
-            '{' . Plugin::NS_CALENDARSERVER . '}set'    => 'Sabre\\Xml\\Element\\KeyValue',
-            '{' . Plugin::NS_CALENDARSERVER . '}remove' => 'Sabre\\Xml\\Element\\KeyValue',
+    public static function xmlDeserialize(Reader $reader)
+    {
+        $elems = $reader->parseGetElements([
+            '{'.Plugin::NS_CALENDARSERVER.'}set' => \Sabre\Xml\Element\KeyValue::class,
+            '{'.Plugin::NS_CALENDARSERVER.'}remove' => \Sabre\Xml\Element\KeyValue::class,
         ]);
 
-        $set = [];
-        $remove = [];
+        $sharees = [];
 
         foreach ($elems as $elem) {
             switch ($elem['name']) {
-
-                case '{' . Plugin::NS_CALENDARSERVER . '}set' :
+                case '{'.Plugin::NS_CALENDARSERVER.'}set':
                     $sharee = $elem['value'];
 
-                    $sumElem = '{' . Plugin::NS_CALENDARSERVER . '}summary';
-                    $commonName = '{' . Plugin::NS_CALENDARSERVER . '}common-name';
+                    $sumElem = '{'.Plugin::NS_CALENDARSERVER.'}summary';
+                    $commonName = '{'.Plugin::NS_CALENDARSERVER.'}common-name';
 
-                    $set[] = [
-                        'href'       => $sharee['{DAV:}href'],
-                        'commonName' => isset($sharee[$commonName]) ? $sharee[$commonName] : null,
-                        'summary'    => isset($sharee[$sumElem]) ? $sharee[$sumElem] : null,
-                        'readOnly'   => !array_key_exists('{' . Plugin::NS_CALENDARSERVER . '}read-write', $sharee),
-                    ];
+                    $properties = [];
+                    if (isset($sharee[$commonName])) {
+                        $properties['{DAV:}displayname'] = $sharee[$commonName];
+                    }
+
+                    $access = array_key_exists('{'.Plugin::NS_CALENDARSERVER.'}read-write', $sharee)
+                        ? \Sabre\DAV\Sharing\Plugin::ACCESS_READWRITE
+                        : \Sabre\DAV\Sharing\Plugin::ACCESS_READ;
+
+                    $sharees[] = new Sharee([
+                        'href' => $sharee['{DAV:}href'],
+                        'properties' => $properties,
+                        'access' => $access,
+                        'comment' => isset($sharee[$sumElem]) ? $sharee[$sumElem] : null,
+                    ]);
                     break;
 
-                case '{' . Plugin::NS_CALENDARSERVER . '}remove' :
-                    $remove[] = $elem['value']['{DAV:}href'];
+                case '{'.Plugin::NS_CALENDARSERVER.'}remove':
+                    $sharees[] = new Sharee([
+                        'href' => $elem['value']['{DAV:}href'],
+                        'access' => \Sabre\DAV\Sharing\Plugin::ACCESS_NOACCESS,
+                    ]);
                     break;
-
             }
         }
 
-        return new self($set, $remove);
-
+        return new self($sharees);
     }
-
 }

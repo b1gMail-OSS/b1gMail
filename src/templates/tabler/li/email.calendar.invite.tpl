@@ -68,7 +68,7 @@
 			<div class="flex-fill">
 				<p class="mb-2">{text value=$calendarInviteCard.message}</p>
 				{if $calendarInviteCard.dateID > 0}
-				<a class="btn btn-sm btn-outline-primary bm-mail-open-calendar-date" href="organizer.calendar.php?action=showDate&amp;id={$calendarInviteCard.dateID}&amp;sid={$sid}">
+				<a class="btn btn-sm btn-outline-primary bm-mail-open-calendar-date" href="organizer.calendar.php?action=showDate&amp;id={$calendarInviteCard.dateID}{$sessionUrlSuffixHtml}">
 					<i class="ti ti-calendar icon me-1" aria-hidden="true"></i>{lng p="mail_att_reply_open_event"}
 				</a>
 				{/if}

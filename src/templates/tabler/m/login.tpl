@@ -6,23 +6,17 @@
 	<h2>{lng p="login"}</h2>
 	
 	<form action="index.php?action=login" method="post" data-ajax="false">
+		{csrffield}
 		<input type="hidden" name="do" value="login" />
 	
 		<div data-role="fieldcontain">
 			<label for="email">{lng p="email"}:</label>
-			<input type="email" name="email" id="email" value="{if !empty($smarty.cookies.bm_msavedUser)}{text value=$smarty.cookies.bm_msavedUser allowEmpty=true}{/if}"  />
+			<input type="email" name="email" id="email" value=""  />
 		</div>
 
 		<div data-role="fieldcontain">
 			<label for="password">{lng p="password"}:</label>
-			<input type="password" name="password" id="password" value="{if !empty($smarty.cookies.bm_msavedUser)}{text value=$smarty.cookies.bm_msavedPassword allowEmpty=true}{/if}"  />
-		</div>
-	
-		<div data-role="fieldcontain" class="ui-hide-label">
-		    <fieldset data-role="controlgroup">
-			   <legend>{lng p="savelogin"}:</legend>
-			   <label class="form-check mb-0"><input type="checkbox" class="form-check-input" name="savelogin" id="savelogin"{if !empty($smarty.cookies.bm_msavedUser)} checked="checked"{/if} /><span class="form-check-label">{lng p="savelogin"}</span></label>
-		    </fieldset>
+			<input type="password" name="password" id="password" value="" autocomplete="current-password" />
 		</div>
 	
 		<button type="submit">{lng p="login"}</button>

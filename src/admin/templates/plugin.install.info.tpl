@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="installplugin"}: {text value=$meta.name}</legend>
 	
-	<form action="plugins.php?action=install&do=installPlugin&id={$id}&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='plugins.php' params="action=install&do=installPlugin&id={$id}"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<p>{lng p="install_desc2"}</p>
 
 		<div class="text-center">

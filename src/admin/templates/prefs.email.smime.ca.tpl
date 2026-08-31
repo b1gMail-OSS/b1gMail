@@ -1,4 +1,5 @@
-<form action="prefs.email.php?action=smime&do=editca&set=true&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.email.php' params="action=smime&do=editca&set=true"}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="info"}</legend>
 
@@ -59,7 +60,7 @@
 	</fieldset>
 
 	<div class="row">
-		<div class="col-md-6"><input class="btn btn-muted" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='prefs.email.php?action=smime&sid={$sid}';" /></div>
+		<div class="col-md-6"><input class="btn btn-muted" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='prefs.email.php?action=smime{$sessionUrlSuffix}';" /></div>
 		<div class="col-md-6 text-end"><input class="btn btn-primary" type="submit" value="{lng p="import"}" /></div>
 	</div>
 </form>

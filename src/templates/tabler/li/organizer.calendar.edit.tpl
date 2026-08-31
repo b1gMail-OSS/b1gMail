@@ -1,5 +1,6 @@
 <div class="bm-organizer-page bm-organizer-form-page bm-organizer-date-form">
-	<form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}&sid={$sid}" class="bm-organizer-form" onsubmit="return(checkCalendarDateForm(this));">
+	<form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}{$sessionUrlSuffix}" class="bm-organizer-form" onsubmit="return(checkCalendarDateForm(this));">
+		{csrffield}
 		<div id="contentHeader" class="bm-compose-header">
 			<div class="left">
 				<span class="bm-compose-header-title">{if !empty($eDate)}{lng p="editdate"}{else}{lng p="adddate"}{/if}</span>
@@ -272,3 +273,10 @@
 		</div>
 	</form>
 </div>
+<script>
+<!--
+	var bmOrganizerActionUrls = {
+		attendeePopup: '{sessionurl file='organizer.addressbook.php' params='action=attendeePopup'|escape:'javascript'}'
+	};
+//-->
+</script>

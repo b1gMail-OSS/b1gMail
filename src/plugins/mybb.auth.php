@@ -21,37 +21,35 @@
 
 /**
  * MyBB auth plugin
- *
  */
 class MyBBAuthPlugin extends BMPlugin
 {
+	/** @var string Pretty-URL: /admin/plugin/mybbauthplugin/ */
+	public $admin_route_slug = 'mybbauthplugin';
+
 	var $_uidFormat = 'MyBB:%d';
 
-	/**
-	 * constructor
-	 *
-	 * @return MyBBAuthPlugin
-	 */
 	public function __construct()
 	{
-		// plugin info
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'MyBB Authentication PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.1';
-		$this->designedfor			= '7.4.2';
+		$this->version				= '1.2';
+		$this->designedfor			= '7.5.0';
 
-		// admin pages
 		$this->admin_pages			= true;
 		$this->admin_page_title		= 'MyBB-Auth';
-		$this->admin_page_icon		= "mybb32.png";
+		$this->admin_page_icon		= 'mybb32.png';
 	}
 
-	/**
-	 * installation routine
-	 *
-	 * @return bool
-	 */
+	public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
+	{
+		if($lang == 'deutsch')
+			$lang_admin['mybb_auth_saved'] = 'Einstellungen wurden gespeichert.';
+		else
+			$lang_admin['mybb_auth_saved'] = 'Settings have been saved.';
+	}
+
 	public function Install()
 	{
 		global $db, $bm_prefs;
@@ -70,9 +68,8 @@ class MyBBAuthPlugin extends BMPlugin
                 'indexes' => [],
             ],
         ];
-        SyncDBStruct($DatabaseStructure);	
+        SyncDBStruct($DatabaseStructure);
 
-		// insert initial row
 		list($domain) = GetDomainList();
 		$db->Query('REPLACE INTO {pre}mybb_plugin_prefs(enableAuth, mysqlHost, mysqlUser, mysqlPass, mysqlDB, mysqlPrefix, userDomain) VALUES'
 					. '(?,?,?,?,?,?,?)',
@@ -87,70 +84,146 @@ class MyBBAuthPlugin extends BMPlugin
 		return(true);
 	}
 
-	/**
-	 * uninstallation routine
-	 *
-	 * @return bool
-	 */
 	public function Uninstall()
 	{
 		global $db;
 
-		// drop prefs table
 		$db->Query('DROP TABLE {pre}mybb_plugin_prefs');
 
 		return(true);
 	}
 
 	/**
-	 * authentication handler
-	 *
-	 * @param string $userName
-	 * @param string $userDomain
-	 * @param string $passwordMD5
-	 * @return array
+	 * @return string
 	 */
+	protected function _mybbTabLink()
+	{
+		return 'plugin.page.php?plugin=' . rawurlencode($this->internal_name) . '&';
+	}
+
+	/**
+	 * @param array<string, mixed> $query
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _mybbAdminUrl(array $query = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name), $query);
+
+		if(function_exists('AdminSessionUrl'))
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach($params as $key => $val)
+		{
+			if((string)$val === '')
+				continue;
+			$url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+		}
+		if($trailingAmp)
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
+
+		return $url;
+	}
+
+	/**
+	 * @return array{type: string, text: string}|null
+	 */
+	protected function _mybbTakeFlashMsg()
+	{
+		if(!isset($_SESSION['mybbauth_admin_msg']))
+			return null;
+
+		$msg = $_SESSION['mybbauth_admin_msg'];
+		unset($_SESSION['mybbauth_admin_msg']);
+
+		if(!is_array($msg) || !isset($msg['type'], $msg['text']))
+			return null;
+
+		return array(
+			'type' => (string)$msg['type'],
+			'text' => (string)$msg['text'],
+		);
+	}
+
+	/**
+	 * Legacy GET save → Redirect (CSRF-safe POST forms preferred).
+	 */
+	protected function _mybbRedirectLegacyGet()
+	{
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET')
+			return;
+
+		if(isset($_REQUEST['do']) && (string)$_REQUEST['do'] === 'save')
+		{
+			SessionRedirect($this->_mybbAdminUrl(array(), false));
+			exit();
+		}
+	}
+
+	/**
+	 * Save prefs (POST + CSRF via {csrffield} in template).
+	 */
+	protected function _mybbHandlePost()
+	{
+		global $db, $lang_admin;
+
+		if(!isset($_POST['save']))
+			return;
+
+		$db->Query('UPDATE {pre}mybb_plugin_prefs SET enableAuth=?,mysqlHost=?,mysqlUser=?,mysqlPass=?,mysqlDB=?,mysqlPrefix=?,userDomain=?',
+			isset($_POST['enableAuth']) ? 1 : 0,
+			trim((string)($_POST['mysqlHost'] ?? '')),
+			trim((string)($_POST['mysqlUser'] ?? '')),
+			(string)($_POST['mysqlPass'] ?? ''),
+			trim((string)($_POST['mysqlDB'] ?? '')),
+			trim((string)($_POST['mysqlPrefix'] ?? '')),
+			trim((string)($_POST['userDomain'] ?? '')));
+
+		$_SESSION['mybbauth_admin_msg'] = array(
+			'type' => 'success',
+			'text' => $lang_admin['mybb_auth_saved'],
+		);
+
+		SessionRedirect($this->_mybbAdminUrl(array(), false));
+		exit();
+	}
+
 	public function OnAuthenticate($userName, $userDomain, $passwordMD5, $passwordPlain = '')
 	{
 		global $db, $bm_prefs;
 
-		// get config
 		$res = $db->Query('SELECT * FROM {pre}mybb_plugin_prefs LIMIT 1');
 		$mybb_prefs = $res->FetchArray();
 		$res->Free();
 
-		// enabled?
 		if($mybb_prefs['enableAuth'] != 1)
 			return(false);
 
-		// our domain?
 		if(strtolower($userDomain) != strtolower($mybb_prefs['userDomain']))
 			return(false);
 
-		// connect to MyBB DB
 		$mysql = @mysqli_connect($mybb_prefs['mysqlHost'], $mybb_prefs['mysqlUser'], $mybb_prefs['mysqlPass'], $mybb_prefs['mysqlDB']);
-		
+
 		if($mysql)
 		{
 			if(mysqli_select_db($mysql, $mybb_prefs['mysqlDB']))
 			{
 				$MyBBDB = new DB($mysql);
 
-				// search user
 				$res = $MyBBDB->Query('SELECT uid,salt,password,email FROM ' . $mybb_prefs['mysqlPrefix'] . 'users WHERE username=?',
 					$userName);
 				if($res->RowCount() == 0)
 					return(false);
 				$row = $res->FetchArray(MYSQLI_ASSOC);
 				$res->Free();
-				
-				// check password
+
 				if($row['password'] === md5(md5($row['salt']).$passwordMD5))
 				{
 					$uid = 'MyBB:' . $row['uid'];
 					$myUserName = sprintf('%s@%s', $userName, $userDomain);
 
-					// create user in b1gMail?
 					if(BMUser::GetID($myUserName) == 0)
 					{
 						PutLog(sprintf('Creating b1gMail user for MyBB user <%s> (%d)',
@@ -177,7 +250,6 @@ class MyBBAuthPlugin extends BMPlugin
 							$uid);
 					}
 
-					// return
 					$result = array(
 						'uid'		=> $uid,
 						'profile'	=> array(
@@ -207,10 +279,6 @@ class MyBBAuthPlugin extends BMPlugin
 		return(false);
 	}
 
-	/**
-	 * user page handler
-	 *
-	 */
 	public function FileHandler($file, $action)
 	{
 		global $userRow;
@@ -227,73 +295,48 @@ class MyBBAuthPlugin extends BMPlugin
 		if($file != 'index.php' && ($file != 'prefs.php' || $action != 'contact')
 								&& ($file != 'start.php' || $action != 'logout'))
 		{
-			header('Location: prefs.php?action=contact&sid=' . session_id());
+			header('Location: prefs.php?action=contact');
 			exit();
 		}
 	}
 
-	/**
-	 * admin handler
-	 *
-	 */
 	public function AdminHandler()
 	{
-		global $tpl, $plugins, $lang_admin;
+		global $tpl, $lang_admin;
 
-		if(!isset($_REQUEST['action']))
-			$_REQUEST['action'] = 'prefs';
+		$this->_mybbRedirectLegacyGet();
+
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+			$this->_mybbHandlePost();
 
 		$tabs = array(
 			0 => array(
 				'title'		=> $lang_admin['prefs'],
-				'link'		=> $this->_adminLink() . '&',
-				'active'	=> $_REQUEST['action'] == 'prefs',
-				'icon' => '../plugins/templates/images/mybb32.png',
-			)
+				'link'		=> $this->_mybbTabLink(),
+				'active'	=> true,
+				'icon'		=> '../plugins/templates/images/mybb32.png',
+			),
 		);
 
 		$tpl->assign('tabs', $tabs);
-
-		if($_REQUEST['action'] == 'prefs')
-			$this->_prefsPage();
+		$tpl->assign('mybbPlugin', $this->internal_name);
+		$tpl->assign('pageURL', $this->_mybbAdminUrl(array(), true));
+		$this->_prefsPage();
 	}
 
-	/**
-	 * admin prefs page
-	 *
-	 */
 	private function _prefsPage()
 	{
-		global $tpl, $db, $bm_prefs;
+		global $tpl, $db;
 
-		// save?
-		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'save')
-		{
-			$db->Query('UPDATE {pre}mybb_plugin_prefs SET enableAuth=?,mysqlHost=?,mysqlUser=?,mysqlPass=?,mysqlDB=?,mysqlPrefix=?,userDomain=?',
-				isset($_REQUEST['enableAuth']) ? 1 : 0,
-				$_REQUEST['mysqlHost'],
-				$_REQUEST['mysqlUser'],
-				$_REQUEST['mysqlPass'],
-				$_REQUEST['mysqlDB'],
-				$_REQUEST['mysqlPrefix'],
-				trim($_REQUEST['userDomain']));
-		}
-
-		// get config
 		$res = $db->Query('SELECT * FROM {pre}mybb_plugin_prefs LIMIT 1');
 		$mybb_prefs = $res->FetchArray();
 		$res->Free();
 
-		// assign
 		$tpl->assign('domains', GetDomainList());
 		$tpl->assign('mybb_prefs', $mybb_prefs);
-		$tpl->assign('pageURL', $this->_adminLink());
+		$tpl->assign('mybbMsg', $this->_mybbTakeFlashMsg());
 		$tpl->assign('page', $this->_templatePath('mybbauth.plugin.prefs.tpl'));
 	}
 }
 
-/**
- * register plugin
- */
 $plugins->registerPlugin('MyBBAuthPlugin');
-?>

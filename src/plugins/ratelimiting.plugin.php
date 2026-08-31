@@ -20,17 +20,22 @@
  */
 class RateLimitingPlugin extends BMPlugin
 {
+    /** @var array<string, array{type: string, max_events: int, in_seconds: int}> */
+    public $types = [];
+
     public function __construct()
     {
-        $this->type             = BMPLUGIN_DEFAULT;
-        $this->name             = 'Rate Limiting Plugin';
-        $this->author           = 'b1gMail Project';
-        $this->version          = '1.0.0';
+        $this->type               = BMPLUGIN_DEFAULT;
+        $this->name               = 'Rate Limiting Plugin';
+        $this->author             = 'b1gMail Project';
+        $this->version            = '1.1.0';
+        $this->designedfor        = '7.5.0';
 
-        $this->admin_pages      = true;
-        $this->admin_page_title = 'Rate Limiting';
+        $this->admin_pages        = true;
+        $this->admin_page_title   = 'Rate Limiting';
+        $this->admin_route_slug   = 'ratelimiting';
 
-        $this->types            = [];
+        $this->types              = [];
     }
 
     private function getBucket($timestamp)
@@ -171,58 +176,156 @@ class RateLimitingPlugin extends BMPlugin
     {
         if ($lang === 'deutsch')
         {
-            $lang_admin['ratelimiting_event'] = 'Ereignis';
+            $lang_admin['ratelimiting_event']      = 'Ereignis';
             $lang_admin['ratelimiting_max_events'] = 'Maximale Anzahl';
             $lang_admin['ratelimiting_in_seconds'] = 'In Zeitraum (Sekunden)';
+            $lang_admin['ratelimiting_saved']      = 'Die Einstellungen wurden gespeichert.';
         }
         else
         {
-            $lang_admin['ratelimiting_event'] = 'Event';
+            $lang_admin['ratelimiting_event']      = 'Event';
             $lang_admin['ratelimiting_max_events'] = 'Maximum count';
             $lang_admin['ratelimiting_in_seconds'] = 'In timeframe (seconds)';
+            $lang_admin['ratelimiting_saved']      = 'Settings have been saved.';
         }
     }
 
-    function AdminHandler()
+    /**
+     * Map pretty URLs and legacy query params to do=types.
+     */
+    protected function _rlNormalizeRequest()
     {
-        global $tpl, $lang_admin, $db;
+        $do = $_REQUEST['do'] ?? $_REQUEST['action'] ?? '';
 
-        if (!isset($_REQUEST['action']))
+        if ($do === '' || $do === 'types')
+            $do = 'types';
+        else if ($do === 'save')
         {
-            $_REQUEST['action'] = 'types';
+            $_REQUEST['save'] = true;
+            $do = 'types';
         }
+
+        $_REQUEST['do'] = $do;
+    }
+
+    /**
+     * Pretty admin URL for this plugin.
+     *
+     * @param array<string, mixed> $params
+     * @param bool                 $trailingAmp
+     * @return string
+     */
+    protected function _rlAdminUrl(array $params = array(), $trailingAmp = true)
+    {
+        $params = array_merge(array('plugin' => $this->internal_name, 'do' => 'types'), $params);
+
+        if (function_exists('AdminSessionUrl'))
+            return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+
+        $url = $this->_adminLink();
+        unset($params['plugin']);
+        foreach ($params as $key => $val)
+        {
+            if ((string)$val === '')
+                continue;
+            $url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+        }
+        if ($trailingAmp)
+            $url .= (strpos($url, '?') !== false ? '&' : '?');
+
+        return $url;
+    }
+
+    /**
+     * Save limits (POST + CSRF only).
+     */
+    protected function _rlHandlePost()
+    {
+        global $db, $lang_admin;
+
+        if (!isset($_REQUEST['save']) || !isset($_POST['types']) || !is_array($_POST['types']))
+            return;
+
+        foreach ($_POST['types'] as $type => $prefs)
+        {
+            if (!is_string($type) || $type === '' || !isset($this->types[$type]) || !is_array($prefs))
+                continue;
+
+            $maxEvents = max(1, (int)($prefs['max_events'] ?? 0));
+            $inSeconds = max(1, (int)($prefs['in_seconds'] ?? 0));
+
+            $db->Query('UPDATE {pre}mod_ratelimiting_types SET `max_events`=?, `in_seconds`=? WHERE `type`=?',
+                $maxEvents,
+                $inSeconds,
+                $type);
+        }
+
+        $this->AfterInit();
+
+        $_SESSION['ratelimiting_admin_msg'] = array(
+            'type' => 'success',
+            'text' => $lang_admin['ratelimiting_saved'],
+        );
+
+        SessionRedirect($this->_rlAdminUrl(array(), false));
+        exit();
+    }
+
+    /**
+     * @return array{type: string, text: string}|null
+     */
+    protected function _rlTakeFlashMsg()
+    {
+        if (!isset($_SESSION['ratelimiting_admin_msg']))
+            return null;
+
+        $msg = $_SESSION['ratelimiting_admin_msg'];
+        unset($_SESSION['ratelimiting_admin_msg']);
+
+        if (!is_array($msg) || !isset($msg['type'], $msg['text']))
+            return null;
+
+        return array(
+            'type' => (string)$msg['type'],
+            'text' => (string)$msg['text'],
+        );
+    }
+
+    public function AdminHandler()
+    {
+        global $tpl, $lang_admin;
+
+        $this->_rlNormalizeRequest();
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+            $this->_rlHandlePost();
+
+        $do = $_REQUEST['do'] ?? 'types';
 
         $tabs = [
             0 => [
-                'title'     => 'Rate Limiting',
-                'link'      => $this->_adminLink() . '&',
-                'active'    => $_REQUEST['action'] == 'types',
-                'icon'      => 'templates/images/abuse32.png',
-            ]
+                'title'   => $this->admin_page_title,
+                'relIcon' => 'abuse32.png',
+                'link'   => $this->_rlAdminUrl(array(), true),
+                'active' => $do === 'types',
+            ],
         ];
 
-        $tpl->assign('tabHeaderText',	'Rate Limiting');
-        $tpl->assign('tabs', 			$tabs);
-        $tpl->assign('pageURL', 		$this->_adminLink());
+        $tpl->assign('tabs', $tabs);
+        $tpl->assign('rlPlugin', $this->internal_name);
+        $tpl->assign('pageURL', $this->_rlAdminUrl(array(), true));
 
-        if ($_REQUEST['action'] === 'types')
-        {
-            if (isset($_REQUEST['save']) && isset($_POST['types']))
-            {
-                foreach ($_POST['types'] as $type => $prefs)
-                {
-                    $db->Query('UPDATE {pre}mod_ratelimiting_types SET `max_events`=?, `in_seconds`=? WHERE `type`=?',
-                        $prefs['max_events'],
-                        $prefs['in_seconds'],
-                        $type);
-                }
+        if ($do === 'types')
+            $this->_rlTypesPage();
+    }
 
-                $this->AfterInit();
-            }
+    protected function _rlTypesPage()
+    {
+        global $tpl;
 
-            $tpl->assign('types', $this->types);
-            $tpl->assign('page', $this->_templatePath('ratelimiting.types.tpl'));
-        }
+        $tpl->assign('types', $this->types);
+        $tpl->assign('rlMsg', $this->_rlTakeFlashMsg());
+        $tpl->assign('page', $this->_templatePath('ratelimiting.types.tpl'));
     }
 }
 

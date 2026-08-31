@@ -7,6 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 	<form name="f1" method="post" action="sms.php?action=sendSMS&sid={$sid}">
+		{csrffield}
 		<table class="listTable">
 			<tr>
 				<th class="listTableHead" colspan="2"> {lng p="sendsms"}</th>

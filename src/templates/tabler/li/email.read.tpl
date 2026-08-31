@@ -1,6 +1,6 @@
 <div id="contentHeader" class="bm-mail-read-page-header">
 	<div class="left">
-		<a class="btn btn-sm btn-ghost-secondary" href="email.php?folder={$folderID}&sid={$sid}">
+		<a class="btn btn-sm btn-ghost-secondary" href="email.php?folder={$folderID}{$sessionUrlSuffix}">
 			<i class="ti ti-{if $folderInfo.type == 'inbox'}inbox{elseif $folderInfo.type == 'outbox'}send{elseif $folderInfo.type == 'drafts'}file-pencil{elseif $folderInfo.type == 'spam'}ban{elseif $folderInfo.type == 'trash'}trash{elseif $folderInfo.type == 'intellifolder'}folder{else}folder{/if} icon" aria-hidden="true"></i>
 			{$folderInfo.title}
 		</a>
@@ -102,7 +102,7 @@
 
 	<div id="bigFormToolbar" class="bm-mail-toolbar">
 
-		{if $prevID}<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.read.php?id={$prevID}&sid={$sid}';">
+		{if $prevID}<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.read.php?id={$prevID}{$sessionUrlSuffix}';">
 			<i class="ti ti-chevron-left icon" aria-hidden="true"></i>
 		</button>{/if}
 
@@ -116,34 +116,34 @@
 			{lng p="replyall"}
 		</button>
 
-		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.compose.php?sid={$sid}&forward={$mailID}';">
+		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.compose.php?forward={$mailID}{$sessionUrlSuffix}';">
 			<i class="ti ti-arrow-forward-up icon" aria-hidden="true"></i>
 			{lng p="forward"}
 		</button>
 
-		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.compose.php?sid={$sid}&redirect={$mailID}';">
+		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.compose.php?redirect={$mailID}{$sessionUrlSuffix}';">
 			<i class="ti ti-mail-forward icon" aria-hidden="true"></i>
 			{lng p="redirect"}
 		</button>
 
-		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.read.php?sid={$sid}&action=download&id={$mailID}';">
+		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.read.php?action=download&id={$mailID}{$sessionUrlSuffix}';">
 			<i class="ti ti-download icon" aria-hidden="true"></i>
 			{lng p="download"}
 		</button>
 
-		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="printMail({$mailID},'{$sid}');">
+		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="printMail({$mailID});">
 			<i class="ti ti-printer icon" aria-hidden="true"></i>
 			{lng p="print"}
 		</button>
 
-		{if empty($folderInfo.readonly)}<button type="button" class="btn btn-sm btn-ghost-danger" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} document.location.href='email.php?sid={$sid}&do=deleteMail&id={$mailID}&folder={$folderID}';">
+		{if empty($folderInfo.readonly)}<button type="button" class="btn btn-sm btn-ghost-danger" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} document.location.href='email.php?do=deleteMail&id={$mailID}&folder={$folderID}{$sessionUrlSuffix}';">
 			<i class="ti ti-trash icon" aria-hidden="true"></i>
 			{lng p="delete"}
 		</button>{/if}
 
 		{hook id="email.read.tpl:afterButtons"}
 
-		{if $nextID}<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.read.php?id={$nextID}&sid={$sid}';">
+		{if $nextID}<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.read.php?id={$nextID}{$sessionUrlSuffix}';">
 			<i class="ti ti-chevron-right icon" aria-hidden="true"></i>
 		</button>{/if}
 
@@ -178,7 +178,8 @@
 <div id="afterText">
 {hook id="email.read.tpl:foot"}
 
-<form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
+<form id="quoteForm" action="email.compose.php?reply={$mailID}{$sessionUrlSuffix}" method="post">
+	{csrffield}
 	<input type="hidden" name="text" id="quoteText" value="" />
 </form>
 
@@ -233,11 +234,11 @@
 							</dl>
 						</div>
 						<div class="col-12 col-md-auto d-flex flex-wrap gap-1">
-							<a class="btn btn-sm btn-primary" href="email.read.php?id={$mailID}&action=importVCF&attachment={$key}&sid={$sid}">
+							<a class="btn btn-sm btn-primary" href="email.read.php?id={$mailID}&action=importVCF&attachment={$key}{$sessionUrlSuffix}">
 								<i class="ti ti-upload icon" aria-hidden="true"></i>
 								{lng p="importvcf"}
 							</a>
-							<a class="btn btn-sm btn-ghost-secondary" href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$key}&sid={$sid}">
+							<a class="btn btn-sm btn-ghost-secondary" href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$key}{$sessionUrlSuffix}">
 								<i class="ti ti-download icon" aria-hidden="true"></i>
 								{lng p="download"}
 							</a>
@@ -285,7 +286,7 @@
 	</div>
 
 	<div class="bigForm">
-		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="email.read.php?action=showThread&id={$mailID}&sid={$sid}" border="0" frameborder="0"></iframe>
+		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="email.read.php?action=showThread&id={$mailID}{$sessionUrlSuffix}" border="0" frameborder="0"></iframe>
 	</div>
 </div>
 {/if}
@@ -301,7 +302,8 @@
 		</button>
 	</div>
 
-	<form method="post" action="email.read.php?id={$mailID}&sid={$sid}" class="bm-mail-props-form">
+	<form method="post" action="email.read.php?id={$mailID}{$sessionUrlSuffix}" class="bm-mail-props-form">
+		{csrffield}
 	<input type="hidden" name="do" value="saveMeta" />
 
 	<div class="bm-mail-props-body">

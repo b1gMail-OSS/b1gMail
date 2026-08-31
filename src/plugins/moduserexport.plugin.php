@@ -27,7 +27,7 @@ class moduserexport extends BMPlugin
 	{
 		$this->name					= 'User Export';
 		$this->version				= '1.0.2';
-		$this->designedfor			= '7.4.2';
+		$this->designedfor			= '7.5.0';
 		$this->type					= BMPLUGIN_DEFAULT;
 
 		$this->author				= 'Home of the Sebijk.com';

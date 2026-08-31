@@ -29,6 +29,7 @@
 					{lng p="protected_desc"}
 					
 					<form action="index.php?action=passwordSubmit&user={$user}&folder={$folder}" method="post">
+						{csrffield}
 						<p align="center">
 							{lng p="password"}:
 							<input type="password" name="pw" id="pw" size="26" />

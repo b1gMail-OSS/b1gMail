@@ -23,6 +23,7 @@
 <body style="margin: 0px; background-color: #FFFFFF; background-image: none;">
 
 <form action="prefs.php?action=filters&do=editConditions&do2=save&id={$id}&sid={$sid}" method="post" id="saveForm">
+	{csrffield}
 <input type="hidden" name="submitParent" value="0" />
 <table width="100%" cellspacing="0" cellpadding="0" id="table">
 {foreach from=$conditions item=condition}

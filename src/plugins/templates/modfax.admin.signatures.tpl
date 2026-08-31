@@ -1,59 +1,63 @@
 <fieldset>
 	<legend>{lng p="modfax_signatures"}</legend>
 	
-	<form action="{$pageURL}&action=signatures&sid={$sid}" method="post" name="f1" onsubmit="spin(this)">
-	<table class="list">
-		<tr>
-			<th width="20">&nbsp;</th>
-			<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'sigs[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
-			<th>{lng p="modfax_signature"}</th>
-			<th width="75">{lng p="weight"}</th>
-			<th width="70">{lng p="modfax_used"}</th>
-			<th width="70">&nbsp;</th>
-		</tr>
-		
-		{foreach from=$signatures item=sig}
-		{cycle name=class values="td1,td2" assign=class}
-		<tr class="{$class}">
-			<td align="center"><img src="../plugins/templates/images/modfax_sig.png" border="0" alt="" width="16" height="16" /></td>
-			<td align="center"><input type="checkbox" name="sigs[]" value="{$sig.signatureid}" /></td>
-			<td>{$sig.displayText}</td>
-			<td>{$sig.weight}%</td>
-			<td>{$sig.counter}</td>
-			<td>
-				<a href="{$pageURL}&action=signatures&{if !$sig.paused}de{/if}activate={$sig.signatureid}&sid={$sid}"><img src="{$tpldir}images/{if !$sig.paused}ok{else}error{/if}.png" width="16" height="16" alt="{if $sig.paused}{lng p="continue"}{else}{lng p="pause"}{/if}" border="0" /></a>
-				<a href="{$pageURL}&action=signatures&do=edit&id={$sig.signatureid}&sid={$sid}"><img src="{$tpldir}images/edit.png" border="0" alt="{lng p="edit"}" width="16" height="16" /></a>
-				<a href="{$pageURL}&action=signatures&delete={$sig.signatureid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
-			</td>
-		</tr>
-		{/foreach}
-		
-		<tr>
-			<td class="footer" colspan="8">
-				<div style="float:left;">
-					{lng p="action"}: <select name="massAction" class="smallInput">
-						<option value="-">------------</option>
-						
-						<optgroup label="{lng p="actions"}">
-							<option value="pause">{lng p="pause"}</option>
-							<option value="continue">{lng p="continue"}</option>
-							<option value="delete">{lng p="delete"}</option>
-						</optgroup>
-					</select>&nbsp;
-				</div>
-				<div style="float:left;">
-					<input type="submit" name="executeMassAction" value=" {lng p="execute"} " class="smallInput" />
-				</div>
-			</td>
-		</tr>
-	</table>
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" name="f1" onsubmit="spin(this)">
+		{csrffield}
+	<div class="card">
+		<div class="table-responsive">
+			<table class="table table-vcenter table-striped card-table">
+				<thead>
+				<tr>
+					<th style="width: 25px;"><a href="javascript:invertSelection(document.forms.f1,'sigs[]');" class="text-secondary"><i class="ti ti-selector"></i></a></th>
+					<th>{lng p="modfax_signature"}</th>
+					<th style="width: 75px;">{lng p="weight"}</th>
+					<th style="width: 70px;">{lng p="modfax_used"}</th>
+					<th style="width: 110px;">&nbsp;</th>
+				</tr>
+				</thead>
+				<tbody>
+				{foreach from=$signatures item=sig}
+				<tr>
+					<td class="text-center"><input type="checkbox" class="form-check-input m-0" name="sigs[]" value="{$sig.signatureid}" /></td>
+					<td>{$sig.displayText}</td>
+					<td>{$sig.weight}%</td>
+					<td>{$sig.counter}</td>
+					<td class="text-nowrap">
+						<div class="btn-group btn-group-sm">
+							{if $sig.paused}
+							<button type="submit" name="activate" value="{$sig.signatureid}" class="btn btn-sm" title="{lng p="continue"}"><i class="ti ti-player-play"></i></button>
+							{else}
+							<button type="submit" name="deactivate" value="{$sig.signatureid}" class="btn btn-sm" title="{lng p="pause"}"><i class="ti ti-player-pause"></i></button>
+							{/if}
+							<a href="{$sig.editUrl}{$sessionUrlSuffixHtml}" class="btn btn-sm" title="{lng p="edit"}"><i class="fa-regular fa-pen-to-square"></i></a>
+							<button type="submit" name="delete" value="{$sig.signatureid}" class="btn btn-sm" title="{lng p="delete"}" onclick="return confirm('{lng p="realdel"}');"><i class="fa-regular fa-trash-can"></i></button>
+						</div>
+					</td>
+				</tr>
+				{/foreach}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+		<label class="mb-0">{lng p="action"}:</label>
+		<select name="massAction" class="form-select form-select-sm" style="width: auto;">
+			<option value="-">------------</option>
+			<option value="pause">{lng p="pause"}</option>
+			<option value="continue">{lng p="continue"}</option>
+			<option value="delete">{lng p="delete"}</option>
+		</select>
+		<button type="submit" name="executeMassAction" value="1" class="btn btn-sm btn-primary">{lng p="execute"}</button>
+	</div>
 	</form>
 </fieldset>
 
 <fieldset>
 	<legend>{lng p="modfax_addsignature"}</legend>
 	
-	<form action="{$pageURL}&action=signatures&add=true&sid={$sid}" method="post" onsubmit="spin(this);">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="spin(this);">
+		{csrffield}
+		<input type="hidden" name="add" value="1" />
 		<table width="100%">
 			<tr>
 				<td width="40" valign="top" rowspan="10"><img src="../plugins/templates/images/modfax_sig32.png" border="0" alt="" width="32" height="32" /></td>

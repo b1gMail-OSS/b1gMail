@@ -1,0 +1,11 @@
+# Mail pipe is CLI-only (b1gMailServer / MTA). DAV, clientapi and
+# payment callbacks in this directory stay reachable over HTTP.
+<FilesMatch "^(pipe|pipe-x)\.php$">
+	<IfModule mod_authz_core.c>
+		Require all denied
+	</IfModule>
+	<IfModule !mod_authz_core.c>
+		Order allow,deny
+		Deny from all
+	</IfModule>
+</FilesMatch>

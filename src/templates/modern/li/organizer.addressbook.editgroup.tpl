@@ -2,6 +2,7 @@
 <h1><i class="fa fa-address-book-o" aria-hidden="true"></i> {lng p="editgroup"}</h1>
 
 <form name="f1" method="post" action="organizer.addressbook.php?action=saveGroup&id={$group.id}&sid={$sid}" onsubmit="return(checkGroupForm(this));">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="editgroup"}</th>

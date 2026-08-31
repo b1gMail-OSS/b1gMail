@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/notes.class.php');
 include('./serverlib/todo.class.php');
 RequestPrivileges(PRIVILEGES_USER);
@@ -35,7 +36,7 @@ ModuleFunction('FileHandler',
  */
 if($groupRow['organizer']=='no')
 {
-	header('Location: start.php?sid=' . session_id());
+	SessionRedirect('start.php');
 	exit();
 }
 /**
@@ -124,7 +125,7 @@ else if($_REQUEST['action'] == 'action'
 			}
 		}
 	}
-	header('Location: organizer.notes.php?sid=' . session_id());
+	SessionRedirect('organizer.notes.php');
 }
 
 /**
@@ -134,7 +135,7 @@ else if($_REQUEST['action'] == 'deleteNote'
 		&& isset($_REQUEST['id']))
 {
 	$notes->Delete((int)$_REQUEST['id']);
-	header('Location: organizer.notes.php?sid=' . session_id());
+	SessionRedirect('organizer.notes.php');
 }
 
 /**
@@ -156,7 +157,7 @@ else if($_REQUEST['action'] == 'createNote'
 		&& IsPOSTRequest())
 {
 	$notes->Add((int)$_REQUEST['priority'], $_REQUEST['text']);
-	header('Location: organizer.notes.php?sid=' . session_id());
+	SessionRedirect('organizer.notes.php');
 }
 
 /**
@@ -185,6 +186,6 @@ else if($_REQUEST['action'] == 'saveNote'
 		&& IsPOSTRequest())
 {
 	$notes->Change((int)$_REQUEST['id'], (int)$_REQUEST['priority'], $_REQUEST['text']);
-	header('Location: organizer.notes.php?sid=' . session_id());
+	SessionRedirect('organizer.notes.php');
 }
 ?>

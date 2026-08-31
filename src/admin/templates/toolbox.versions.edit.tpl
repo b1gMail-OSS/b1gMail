@@ -1,4 +1,5 @@
-<form action="toolbox.php?do=saveVersionConfig&versionid={$versionID}&sid={$sid}" method="post" onsubmit="spin(this)" enctype="multipart/form-data">
+<form action="{sessionurl file='toolbox.php' params="do=saveVersionConfig&versionid={$versionID}"}" method="post" onsubmit="spin(this)" enctype="multipart/form-data">
+	{csrffield}
 <input type="hidden" name="save" value="true" />
 
 	{foreach from=$configGroups key=groupName item=group}
@@ -15,7 +16,7 @@
                                 <input class="form-check-input" type="radio" name="prefs[{$groupName}][{$fieldKey}][mode]" value="keep" checked="checked" id="keepRadio_{$groupName}_{$fieldKey}">
                               </span>
 					<span class="input-group-text">{lng p="keepcurrentimg"}</span>
-					<span class="input-group-text"><a href="toolbox.php?do=editVersionConfig&versionid={$versionID}&showImage=true&group={$groupName}&key={$fieldKey}&sid={$sid}" target="_blank">{lng p="show"}</a></span>
+					<span class="input-group-text"><a href="{sessionurl file='toolbox.php' params="do=editVersionConfig&versionid={$versionID}&showImage=true&group={$groupName}&key={$fieldKey}"}" target="_blank">{lng p="show"}</a></span>
 				</div>
 				<div class="input-group mb-2">
                               <span class="input-group-text">

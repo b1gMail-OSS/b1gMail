@@ -2,7 +2,7 @@
 	<legend>{lng p="usagebycategory"}</legend>
 
 	<div class="text-center">
-		<img src="stats.php?action=usage&do=showSpaceByCategory&sid={$sid}" border="0" alt="" class="graph" />
+		<img src="stats.php?action=usage&do=showSpaceByCategory{$sessionUrlSuffix}" border="0" alt="" class="graph" />
 	</div>
 
 	<div class="card">
@@ -42,8 +42,8 @@
 	<legend>{lng p="usagebygroup"} ({lng p="withoutmeta"})</legend>
 
 	<div class="text-center">
-		<img src="stats.php?action=usage&do=showSpaceByGroup&sid={$sid}" border="0" alt="" class="graph" />
-		<img src="stats.php?action=usage&do=showSpaceAverageByGroup&sid={$sid}" border="0" alt="" class="graph" />
+		<img src="stats.php?action=usage&do=showSpaceByGroup{$sessionUrlSuffix}" border="0" alt="" class="graph" />
+		<img src="stats.php?action=usage&do=showSpaceAverageByGroup{$sessionUrlSuffix}" border="0" alt="" class="graph" />
 	</div>
 
 	<div class="card">

@@ -31,19 +31,19 @@ $tabs = array(
 	0 => array(
 		'title'		=> $lang_admin['inactiveusers'],
 		'relIcon'	=> 'user_inactive32.png',
-		'link'		=> 'maintenance.php?',
+		'link'		=> AdminSessionUrl('maintenance.php', [], false),
 		'active'	=> $_REQUEST['action'] == 'inactive'
 	),
 	1 => array(
 		'title'		=> $lang_admin['trash'],
 		'relIcon'	=> 'trash32.png',
-		'link'		=> 'maintenance.php?action=trash&',
+		'link'		=> AdminSessionUrl('maintenance.php', ['action' => 'trash'], false),
 		'active'	=> $_REQUEST['action'] == 'trash'
 	),
 	2 => array(
 		'title'		=> $lang_admin['orphans'],
 		'relIcon'	=> 'orphans32.png',
-		'link'		=> 'maintenance.php?action=orphans&',
+		'link'		=> AdminSessionUrl('maintenance.php', ['action' => 'orphans'], false),
 		'active'	=> $_REQUEST['action'] == 'orphans'
 	)
 );
@@ -53,7 +53,7 @@ if(FTS_SUPPORT)
 	$tabs[] = array(
 		'title'		=> $lang_admin['ftsindex'],
 		'relIcon'	=> 'search32.png',
-		'link'		=> 'maintenance.php?action=fts&',
+		'link'		=> AdminSessionUrl('maintenance.php', ['action' => 'fts'], false),
 		'active'	=> $_REQUEST['action'] == 'fts'
 	);
 }
@@ -63,10 +63,17 @@ if($bm_prefs['receive_method'] == 'pop3')
 	$tabs[] = array(
 		'title'		=> $lang_admin['pop3gateway'],
 		'relIcon'	=> 'fetch.png',
-		'link'		=> 'maintenance.php?action=pop3gateway&',
+		'link'		=> AdminSessionUrl('maintenance.php', ['action' => 'pop3gateway'], false),
 		'active'	=> $_REQUEST['action'] == 'pop3gateway'
 	);
 }
+
+$tabs[] = array(
+	'title'		=> $lang_admin['scheduledtasks'],
+	'relIcon'	=> 'info32.png',
+	'link'		=> AdminSessionUrl('maintenance.php', ['action' => 'scheduler'], false),
+	'active'	=> $_REQUEST['action'] == 'scheduler'
+);
 
 /**
  * inactive users
@@ -107,8 +114,7 @@ if($_REQUEST['action'] == 'inactive')
 		// conditions given?
 		if(count($condition) == 0)
 		{
-			header('Location: maintenance.php?sid=' . session_id());
-			exit();
+			SessionRedirect(AdminSessionUrl('maintenance.php', [], false));
 		}
 		$condition = 'WHERE `id`!=1 AND (' . implode(' AND ', $condition) . ')';
 
@@ -119,7 +125,7 @@ if($_REQUEST['action'] == 'inactive')
 		if($action == 'show')
 		{
 			// single action?
-			if(isset($_REQUEST['singleAction']))
+			if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
 			{
 				if($_REQUEST['singleAction'] == 'lock')
 				{
@@ -207,12 +213,13 @@ if($_REQUEST['action'] == 'inactive')
 			}
 
 			// sort options
-			$sortBy = isset($_REQUEST['sortBy'])
-						? $_REQUEST['sortBy']
-						: 'lastactivity';
-			$sortOrder = isset($_REQUEST['sortOrder'])
-							? strtolower($_REQUEST['sortOrder'])
-							: 'asc';
+			$sortBy = AdminSanitizeSortColumn(
+				isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'lastactivity',
+				array('id', 'email', 'nachname', 'gesperrt', 'lastactivity'),
+				'lastactivity');
+			$sortOrder = AdminSanitizeSortOrder(
+				isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'asc',
+				'asc');
 			$perPage = max(1, isset($_REQUEST['perPage'])
 							? (int)$_REQUEST['perPage']
 							: 50);
@@ -301,7 +308,7 @@ if($_REQUEST['action'] == 'inactive')
 			$tpl->assign('msgTitle', $lang_admin['inactiveusers']);
 			$tpl->assign('msgText', sprintf($lang_admin['activity_done'], $affectedUsers));
 			$tpl->assign('msgIcon', 'info32');
-			$tpl->assign('backLink', 'maintenance.php?');
+			$tpl->assign('backLink', AdminSessionUrl('maintenance.php', [], false));
 			$tpl->assign('page', 'msg.tpl');
 		}
 	}
@@ -388,7 +395,7 @@ else if($_REQUEST['action'] == 'trash')
 		$tpl->assign('msgTitle', $lang_admin['trash']);
 		$tpl->assign('msgText', sprintf($lang_admin['trash_done'], $mails, round($mailSizes/1024/1024, 2)));
 		$tpl->assign('msgIcon', 'info32');
-		$tpl->assign('backLink', 'maintenance.php?action=trash&');
+		$tpl->assign('backLink', AdminSessionUrl('maintenance.php', ['action' => 'trash'], false));
 		$tpl->assign('page', 'msg.tpl');
 	}
 }
@@ -582,7 +589,7 @@ else if($_REQUEST['action'] == 'orphans')
 		$tpl->assign('msgTitle', $lang_admin['mailorphans']);
 		$tpl->assign('msgText', sprintf($lang_admin['orphans_done'], $deletedCount, $deletedSize/1024));
 		$tpl->assign('msgIcon', 'info32');
-		$tpl->assign('backLink', 'maintenance.php?action=orphans&');
+		$tpl->assign('backLink', AdminSessionUrl('maintenance.php', ['action' => 'orphans'], false));
 		$tpl->assign('page', 'msg.tpl');
 	}
 
@@ -610,7 +617,7 @@ else if($_REQUEST['action'] == 'orphans')
 		$tpl->assign('msgTitle', $lang_admin['diskorphans']);
 		$tpl->assign('msgText', sprintf($lang_admin['orphans_done'], $deletedCount, $deletedSize/1024));
 		$tpl->assign('msgIcon', 'info32');
-		$tpl->assign('backLink', 'maintenance.php?action=orphans&');
+		$tpl->assign('backLink', AdminSessionUrl('maintenance.php', ['action' => 'orphans'], false));
 		$tpl->assign('page', 'msg.tpl');
 	}
 }
@@ -644,6 +651,16 @@ else if($_REQUEST['action'] == 'pop3gateway')
 	$tpl->assign('page', 'maintenance.pop3gateway.tpl');
 }
 
+/**
+ * scheduled maintenance tasks (Geplante Aufgaben)
+ */
+else if($_REQUEST['action'] == 'scheduler')
+{
+	include B1GMAIL_DIR . 'serverlib/scheduledtasks.class.php';
+	$scheduledTasks = new BMScheduledTasks();
+	$scheduledTasks->adminHandler();
+}
+
 $tpl->assign('tabs', $tabs);
-$tpl->assign('title', $lang_admin['prefs'] . ' &raquo; ' . $lang_admin['maintenance']);
+$tpl->assign('title', $lang_admin['tools'] . ' &raquo; ' . $lang_admin['maintenance']);
 $tpl->display('page.tpl');

@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="lockedusernames"}</legend>
 
-	<form action="prefs.common.php?action=lockedusernames&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.common.php' params="action=lockedusernames"}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -19,7 +20,7 @@
 							<td><input type="checkbox" name="locked_{$locked.id}" /></td>
 							<td>{$locked.type} &quot;{text value=$locked.username}&quot;</td>
 							<td>
-								<a href="prefs.common.php?action=lockedusernames&delete={$locked.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+								<a href="{sessionurl file='prefs.common.php' params="action=lockedusernames&delete={$locked.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 							</td>
 						</tr>
 					{/foreach}
@@ -44,7 +45,8 @@
 	</form>
 </fieldset>
 
-<form action="prefs.common.php?action=lockedusernames&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.common.php' params="action=lockedusernames&add=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="addlockedusername"}</legend>
 

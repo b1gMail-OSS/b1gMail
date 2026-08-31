@@ -1,6 +1,7 @@
-<form action="{$pageURL}&sid={$sid}&action=msgqueue&do=headers&save=true" method="post" onsubmit="spin(this)">
-	<fieldset>
-		<legend>{lng p="bms_ownheaders"}</legend>
+<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=headers&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
+	<fieldset class="mb-4">
+		<legend class="h4 mb-3">{lng p="bms_ownheaders"}</legend>
 	
 		<table width="100%">
 			<tr>
@@ -20,13 +21,13 @@
 	
 	<p>
 		<div style="float:left" class="buttons">
-			<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='{$pageURL}&action=msgqueue&sid={$sid}';" />
+			<button type="button" class="btn btn-outline-secondary btn-sm"  onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue"}';" >&laquo; {lng p="back"}</button>
 		</div>
 		<div style="float:right" class="buttons">
 			<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
 			{lng p="bms_headersnote"}
 			&nbsp;
-			<input class="button" type="submit" value=" {lng p="save"} " />
+			<button type="submit" class="btn btn-primary"  >{lng p="save"}</button>
 		</div>
 	</p>
 </form>

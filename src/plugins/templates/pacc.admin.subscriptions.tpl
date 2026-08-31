@@ -1,4 +1,9 @@
-<form action="{$pageURL}&action=subscriptions&filter=true&sid={$sid}" method="post" onsubmit="spin(this)" name="f1">
+{if $paccMsg}
+<div class="alert alert-{$paccMsg.type} mb-3" role="alert">{$paccMsg.text}</div>
+{/if}
+
+<form action="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=subscriptions"}" method="post" onsubmit="spin(this)" name="f1">
+	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
 	<input type="hidden" name="sortBy" id="sortBy" value="{$sortBy}" />
 	<input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
@@ -30,13 +35,13 @@
 						{cycle name=class values="td1,td2" assign=class}
 						<tr class="{$class}">
 							<td class="text-center"><input type="checkbox" name="subscriber[{$subscription.id}]" /></td>
-							<td><a href="users.php?do=edit&id={$subscription.user.id}&sid={$sid}">{email value=$subscription.user.email cut=25}</a><br />
+							<td><a href="users.php?do=edit&id={$subscription.user.id}{$sessionUrlSuffixHtml}">{email value=$subscription.user.email cut=25}</a><br />
 								<small>{text value=$subscription.user.nachname cut=20}, {text value=$subscription.user.vorname cut=20}</small></td>
-							<td><a href="{$pageURL}&action=packages&do=edit&id={$subscription.package.id}&sid={$sid}">{if $subscription.package.deleted}<font color="#666666">{/if}{text value=$subscription.package.title cut=20}{if $subscription.package.deleted}</font>{/if}</a></td>
+							<td><a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages&action=edit&id={$subscription.package.id}"}">{if $subscription.package.deleted}<span class="text-secondary">{/if}{text value=$subscription.package.title cut=20}{if $subscription.package.deleted}</span>{/if}</a></td>
 							<td>{date timestamp=$subscription.lastPayment nice=true}</td>
 							<td>{if $subscription.expiration==-1}({lng p="unlimited"}){else}{date timestamp=$subscription.expiration nice=true}{/if}</td>
 							<td>
-								<a href="javascript:singleAction('cancel', '{$subscription.id}');" onclick="return confirm('{lng p="pacc_realcancel"}');" title="{lng p="pacc_cancelsubscr"}" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+								<a href="javascript:singleAction('cancel', '{$subscription.id}');" onclick="return confirm('{lng p="pacc_realcancel"}');" title="{lng p="pacc_cancelsubscr"}" class="btn btn-outline-danger btn-sm"><i class="ti ti-trash"></i></a>
 							</td>
 						</tr>
 					{/foreach}
@@ -53,7 +58,7 @@
 								<option value="extend">{lng p="pacc_extendsubscr"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
+						<button type="submit" name="executeMassAction" value="1" class="btn btn-sm btn-primary">{lng p="execute"}</button>
 					</div>
 				</div>
 				<div class="text-end">
@@ -65,6 +70,7 @@
 
 	<fieldset>
 		<legend>{lng p="filter"}</legend>
+		<input type="hidden" name="filter" value="1" />
 
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-check-label">{lng p="pacc_packages"}</label>
@@ -81,7 +87,7 @@
 		<div class="text-end">
 			{lng p="perpage"}:
 			<input type="text" name="perPage" value="{$perPage}" size="5" />
-			<input class="btn btn-sm btn-primary" type="submit" value=" {lng p="apply"} " />
+			<button type="submit" class="btn btn-sm btn-primary">{lng p="apply"}</button>
 		</div>
 	</fieldset>
 </form>

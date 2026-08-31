@@ -7,6 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 <form name="f1" method="post" action="email.folders.php?action={if isset($folder)}saveFolder&id={$folder.id}{else}createFolder{/if}&sid={$sid}" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {if isset($folder)}{lng p="editfolder"}{else}{lng p="addfolder"}{/if}</th>

@@ -27,7 +27,7 @@ class LogoutHinweis extends BMPlugin
 		$this->name = 'Logout Hinweis';
 		$this->author = 'b1gMail Project, M.Cholys';
 		$this->version = '1.2.0';
-		$this->designedfor = '7.4.1';
+		$this->designedfor = '7.5.0';
 		$this->update_url = 'https://service.b1gmail.org/plugin_updates/';
 	}
 
@@ -134,13 +134,14 @@ class LogoutHinweis extends BMPlugin
 			$sql->Free();
 
 			if ($loggedout3 == 0) {
-				$sql = $db->Query('UPDATE {pre}users SET loggedout2=1 WHERE id=?', $thisUser->_id);
+				$db->Query('UPDATE {pre}users SET loggedout2=1 WHERE id=?', $thisUser->_id);
 				$tpl->assign('title', $lang_user['logouthinweis_title']);
+				$tpl->assign('pageTitle', $lang_user['logouthinweis_title']);
 				$tpl->assign('msg', nl2br($lang_custom['loginhinweis_text']));
 				if ($_SERVER['PHP_SELF'] == '/m/index.php') {  // Wenn mobiles Login
-					$tpl->assign('backLink', 'email.php?sid=' . session_id());
+					$tpl->assign('backLink', 'email.php');
 				} else {
-					$tpl->assign('backLink', 'start.php?sid=' . session_id());
+					$tpl->assign('backLink', 'start.php');
 				}
 				$tpl->assign('page', $this->_templatePath('logouthinweis.plugin.tpl'));
 				$tpl->display('nli/index.tpl');

@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="countries"}</legend>
 
-	<form action="prefs.countries.php?sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.countries.php'}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -26,8 +27,8 @@
 							<td class="text-center">{if $country.vat}{$country.vat} %{/if}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.countries.php?do=edit&id={$country.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="prefs.countries.php?delete={$country.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.countries.php' params="do=edit&id={$country.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='prefs.countries.php' params="delete={$country.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -56,7 +57,8 @@
 <fieldset>
 	<legend>{lng p="addcountry"}</legend>
 
-	<form action="prefs.countries.php?add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.countries.php' params="add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="country"}</label>
 			<div class="col-sm-10">

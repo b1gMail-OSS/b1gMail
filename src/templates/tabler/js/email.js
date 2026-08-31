@@ -24,7 +24,7 @@ var _currentPreviewMailID = 0;
 
 function loadDraft(id)
 {
-	document.location.href = 'email.compose.php?redirect='+encodeURIComponent(id)+'&sid='+currentSID;
+	document.location.href = bmAppendSession('email.compose.php?redirect='+encodeURIComponent(id));
 }
 
 function hideDraftNote(setNoNotify, draftID)
@@ -38,9 +38,9 @@ function hideDraftNote(setNoNotify, draftID)
 	if(setNoNotify)
 	{
 		if(EBID('deleteDraft') && EBID('deleteDraft').checked)
-			MakeXMLRequest('email.compose.php?action=deleteDraft&id='+draftID+'&sid='+currentSID, false);
+			MakeXMLRequest(bmAppendSession('email.compose.php?action=deleteDraft&id='+draftID), false);
 		else
-			MakeXMLRequest('email.compose.php?action=setNoDraftNotify&sid='+currentSID, false);
+			MakeXMLRequest(bmAppendSession('email.compose.php?action=setNoDraftNotify'), false);
 	}
 }
 
@@ -160,7 +160,7 @@ function readMailShowBottomLayer(name)
 
 function updatePreviewPosition(s)
 {
-	document.location.href = 'email.php?folder='+currentFolderID+'&do=setPreviewPosition&pos='+escape(s.value)+'&sid='+currentSID;
+	document.location.href = bmAppendSession('email.php?folder='+currentFolderID+'&do=setPreviewPosition&pos='+escape(s.value));
 }
 
 function _switchFolder(e, retainPreviewMail)
@@ -218,13 +218,13 @@ function switchFolder(folderID, retainPreviewMail)
 				EBID('previewArea').innerHTML = '';
 		}
 		if(EBID('folderLoading')) EBID('folderLoading').style.display = '';
-		MakeXMLRequest('email.php?inline=true&folder='+folderID+(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')+'&sid='+currentSID, function(e) {
+		MakeXMLRequest('email.php?inline=true&folder='+folderID+(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':''), function(e) {
 			_switchFolder(e, retainPreviewMail);
 		});
 	}
 	else
 	{
-		document.location.href = 'email.php?folder='+folderID+'&sid='+currentSID;
+		document.location.href = bmAppendSession('email.php?folder='+folderID);
 	}
 }
 
@@ -246,9 +246,9 @@ function initMailSel()
 		if(typeof(bmIsTablerMobile) != 'undefined' && bmIsTablerMobile())
 		{
 			if(currentFolderID == -3)
-				document.location.href = 'email.compose.php?redirect=' + mailID + '&sid=' + currentSID;
+				document.location.href = bmAppendSession('email.compose.php?redirect=' + mailID );
 			else
-				document.location.href = 'email.read.php?id=' + mailID + '&sid=' + currentSID;
+				document.location.href = bmAppendSession('email.read.php?id=' + mailID );
 			return;
 		}
 
@@ -294,9 +294,9 @@ function initMailSel()
 	sel.cbItemDoubleClick = function(element)
 	{
 		if(currentFolderID == -3)
-			document.location.href = 'email.compose.php?redirect=' + this.getItemID(element) + '&sid=' + currentSID;
+			document.location.href = bmAppendSession('email.compose.php?redirect=' + this.getItemID(element) );
 		else
-			document.location.href = 'email.read.php?id=' + this.getItemID(element) + '&sid=' + currentSID;
+			document.location.href = bmAppendSession('email.read.php?id=' + this.getItemID(element) );
 	}
 	sel.multiContextMenu = true;
 	sel.init();
@@ -309,7 +309,7 @@ function switchPage(page)
 	if(EBID('previewArea'))
 		EBID('previewArea').innerHTML = '';
 	if(EBID('folderLoading')) EBID('folderLoading').style.display = '';
-	MakeXMLRequest('email.php?inline=true&folder='+currentFolderID+(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')+'&page='+page+'&sort='+currentSortColumn+'&order='+currentSortOrder+'&sid='+currentSID, _switchFolder);
+	MakeXMLRequest('email.php?inline=true&folder='+currentFolderID+(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')+'&page='+page+'&sort='+currentSortColumn+'&order='+currentSortOrder, _switchFolder);
 }
 
 function composeSizer(justFire)
@@ -371,10 +371,10 @@ function readSizer()
 
 function folderViewOptions(folderID)
 {
-	openOverlay('email.php?sid=' + currentSID + '&do=viewOptions&folder=' + folderID,
+	openOverlay(bmAppendSession('email.php?do=viewOptions&folder=' + folderID),
 		lang['viewoptions'],
-		650,
-		140,
+		480,
+		180,
 		true);
 }
 
@@ -449,7 +449,7 @@ function reloadFolderList(data)
 		return;
 	}
 
-	MakeXMLRequest('email.php?action=getFolderList&sid=' + currentSID, function(http)
+	MakeXMLRequest(bmAppendSession('email.php?action=getFolderList'), function(http)
 			{
 				if(http.readyState == 4 && http.responseText)
 					reloadFolderList(http.responseText);
@@ -458,7 +458,7 @@ function reloadFolderList(data)
 
 function showMailSource(id)
 {
-	openOverlay('email.read.php?action=showSource&id='+id+'&sid='+currentSID,
+	openOverlay(bmAppendSession('email.read.php?action=showSource&id='+id),
 		lang['source'],
 		620,
 		480,
@@ -467,7 +467,7 @@ function showMailSource(id)
 
 function showDeliveryStatus(mailID)
 {
-	openOverlay('email.read.php?action=deliveryStatus&id='+mailID+'&sid='+currentSID,
+	openOverlay(bmAppendSession('email.read.php?action=deliveryStatus&id='+mailID),
 		lang['deliverystatus'],
 		500,
 		300,
@@ -476,7 +476,7 @@ function showDeliveryStatus(mailID)
 
 function showAttachedMail(mailID, attID, title)
 {
-	openOverlay('email.read.php?action=attachedMail&id='+mailID+'&attachment='+attID+'&sid='+currentSID,
+	openOverlay(bmAppendSession('email.read.php?action=attachedMail&id='+mailID+'&attachment='+attID),
 		title,
 		640,
 		480,
@@ -485,7 +485,7 @@ function showAttachedMail(mailID, attID, title)
 
 function showAttachedZIP(mailID, attID, title)
 {
-	openOverlay('email.read.php?action=attachedZIP&id='+mailID+'&attachment='+attID+'&sid='+currentSID,
+	openOverlay(bmAppendSession('email.read.php?action=attachedZIP&id='+mailID+'&attachment='+attID),
 		title,
 		640,
 		470,
@@ -494,7 +494,7 @@ function showAttachedZIP(mailID, attID, title)
 
 function moveMail(id)
 {
-	openOverlay('email.read.php?action=move&id='+id+'&sid='+currentSID,
+	openOverlay(bmAppendSession('email.read.php?action=move&id='+id),
 		lang['movemail'],
 		450,
 		380,
@@ -503,7 +503,7 @@ function moveMail(id)
 
 function saveAttachmentToWebdisk(id, attachment, fileName, sid)
 {
-	openOverlay('webdisk.php?action=importFromMail&id='+id+'&attachment='+attachment+'&filename='+escape(fileName)+'&sid=' + sid,
+	openOverlay('webdisk.php?action=importFromMail&id='+id+'&attachment='+attachment+'&filename='+escape(fileName),
 		lang['browse'],
 		650,
 		385,
@@ -512,7 +512,7 @@ function saveAttachmentToWebdisk(id, attachment, fileName, sid)
 
 function updateGroupMode(c, fs, sid)
 {
-	document.location.href = 'email.php?sid=' + sid + '&' + fs + '&do=changeGroupMode&groupmode=' + c.value;
+	document.location.href = bmAppendSession('email.php?' + fs + '&do=changeGroupMode&groupmode=' + c.value);
 }
 
 function bmMailIframeDoc(iframe)
@@ -727,7 +727,7 @@ function togglePreviewPane(mailID, tpldir, sid)
 
 		if(EBID('previewLoading')) EBID('previewLoading').style.display = '';
 
-		MakeXMLRequest('email.read.php?preview=true&id=' + mailID + (typeof(previewCompactHeader)!='undefined'?(previewCompactHeader?'&narrow=true':''):(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')) + '&sid=' + sid, _togglePreviewPane);
+		MakeXMLRequest('email.read.php?preview=true&id=' + mailID + (typeof(previewCompactHeader)!='undefined'?(previewCompactHeader?'&narrow=true':''):(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')) , _togglePreviewPane);
 
 		if((EBID('mail_'+mailID+'_nspan1') && EBID('mail_'+mailID+'_nspan1').className.indexOf('unread') >= 0)
 			|| (EBID('mail_'+mailID+'_span1') && EBID('mail_'+mailID+'_span1').className.indexOf('unread') >= 0))
@@ -924,15 +924,56 @@ function hideFolderMenu(e)
 	folderMenu.style.display = 'none';
 }
 
-function showFolderMenu(e)
+function showFolderMenu(e, posElem)
 {
 	document.onmouseup = hideFolderMenu;
 	var folderMenu = EBID('folderMenu');
 	var offsetX = getElementMetrics(folderMenu.parentNode, 'x');
 	var offsetY = getElementMetrics(folderMenu.parentNode, 'y');
-	folderMenu.style.left = (e.clientX + getPageXOffset() - offsetX) + 'px';
-	folderMenu.style.top = (e.clientY + getPageYOffset() - offsetY) + 'px';
+
 	folderMenu.style.display = '';
+
+	var menuW = getElementMetrics(folderMenu, 'w');
+	var menuH = getElementMetrics(folderMenu, 'h');
+	var left, top;
+
+	if(typeof(posElem) != 'undefined' && posElem != null)
+	{
+		left = getElementMetrics(posElem, 'x') + getElementMetrics(posElem, 'w') + getPageXOffset() - offsetX - menuW;
+		top = getElementMetrics(posElem, 'y') + getElementMetrics(posElem, 'h') + getPageYOffset() - offsetY;
+	}
+	else
+	{
+		var oX = menuW, oY = 0;
+
+		if(e.clientY > window.innerHeight - menuH - 40)
+			oY = menuH;
+
+		left = e.clientX + getPageXOffset() - offsetX - oX;
+		top = min(getElementMetrics(folderMenu.parentNode, 'h') - menuH - 20,
+			e.clientY + getPageYOffset() - offsetY - oY);
+	}
+
+	var parentW = getElementMetrics(folderMenu.parentNode, 'w');
+	var parentH = getElementMetrics(folderMenu.parentNode, 'h');
+	var pad = 8;
+
+	if(left + menuW > parentW - pad)
+		left = parentW - menuW - pad;
+	if(left < pad)
+		left = pad;
+	if(top + menuH > parentH - pad)
+	{
+		if(posElem)
+			top = getElementMetrics(posElem, 'y') + getPageYOffset() - offsetY - menuH;
+		else
+			top = top - menuH;
+	}
+	if(top < pad)
+		top = pad;
+
+	folderMenu.style.left = left + 'px';
+	folderMenu.style.top = top + 'px';
 }
 
 function folderFlagMail(id, flag, value)
@@ -953,7 +994,7 @@ function folderFlagMail(id, flag, value)
 	for(var i=0; i<id.length; ++i)
 		idsParam += '&ids['+i+']='+id[i];
 
-	MakeXMLRequest('email.php?action=flagMessage&flag=' + flag + add + '&value=' + (value ? 1 : 0) + idsParam + '&sid=' + currentSID, function(http)
+	MakeXMLRequest('email.php?action=flagMessage&flag=' + flag + add + '&value=' + (value ? 1 : 0) + idsParam , function(http)
 	{
 		if(http.readyState == 4)
 		{
@@ -1048,7 +1089,7 @@ function deleteMail(id)
 	for(var i=0; i<id.length; ++i)
 		idsParam += '&ids['+i+']='+id[i];
 
-	MakeXMLRequest('email.php?do=deleteMail&rpc=true&getFolderList=true&'+idsParam+'&sid=' + currentSID, function(http)
+	MakeXMLRequest(bmAppendSession('email.php?do=deleteMail&rpc=true&getFolderList=true&'+idsParam+''), function(http)
 			{
 				if(http.readyState == 4)
 				{
@@ -1064,7 +1105,7 @@ function moveMails(mails, destFolder)
 	if(!mails) return;
 	if(destFolder == currentFolderID) return;
 
-	MakeXMLRequest('email.php?action=moveMails&getFolderList=true&mails=' + escape(mails) + '&destFolderID=' + destFolder + '&sid=' + currentSID, function(http)
+	MakeXMLRequest('email.php?action=moveMails&getFolderList=true&mails=' + escape(mails) + '&destFolderID=' + destFolder , function(http)
 			{
 				if(http.readyState == 4)
 				{
@@ -1111,7 +1152,7 @@ function _folderColorMail(http)
 }
 function folderColorMail(id, color)
 {
-	MakeXMLRequest('email.php?action=colorMessage&color=' + color + '&id=' + id + '&sid=' + currentSID, _folderColorMail);
+	MakeXMLRequest(bmAppendSession('email.php?action=colorMessage&color=' + color + '&id=' + id ), _folderColorMail);
 }
 function mailReply(mailID, all)
 {
@@ -1136,13 +1177,13 @@ function mailReply(mailID, all)
 	}
 	else
 	{
-		document.location.href = 'email.compose.php?sid='+currentSID+'&reply='+mailID+(all?'&all=true':'');
+		document.location.href = bmAppendSession('email.compose.php?reply='+mailID+(all?'&all=true':''));
 	}
 }
 
 function sendMailConfirmation(id)
 {
-	MakeXMLRequest('email.read.php?action=sendConfirmation&id=' + id + '&sid=' + currentSID, false);
+	MakeXMLRequest(bmAppendSession('email.read.php?action=sendConfirmation&id=' + id ), false);
 	EBID('confirmationDiv').style.display = 'none';
 }
 function setMailSpamStatus(id, spam, interactive)
@@ -1157,7 +1198,7 @@ function setMailSpamStatus(id, spam, interactive)
 	for(var i=0; i<id.length; ++i)
 		idsParam += '&ids['+i+']='+id[i];
 
-	MakeXMLRequest('email.read.php?action=setSpamStatus&spam='+(spam?'true':'false')+idsParam+'&sid=' + currentSID, function(http)
+	MakeXMLRequest('email.read.php?action=setSpamStatus&spam='+(spam?'true':'false')+idsParam+'', function(http)
 		{
 			if(interactive && typeof(currentPageNo) != 'undefined' && http.readyState == 4)
 				switchPage(currentPageNo);
@@ -1177,8 +1218,8 @@ function _checkFolderRefresh(obj)
 }
 function checkFolderRefresh()
 {
-	MakeXMLRequest('cron.php?out=text', null);
-	MakeXMLRequest('email.php?action=getRecentMailCount&folder=' + refreshFolder + '&sid=' + currentSID, _checkFolderRefresh);
+	MakeXMLRequest(bmAppendSession('cron.php?out=text'), null);
+	MakeXMLRequest(bmAppendSession('email.php?action=getRecentMailCount&folder=' + refreshFolder ), _checkFolderRefresh);
 	refreshTimer = window.setTimeout('checkFolderRefresh()', refreshInterval*1000);
 }
 function initFolderRefresh(folder, interval)
@@ -1195,7 +1236,7 @@ function initFolderRefresh(folder, interval)
 		refreshTimer = window.setTimeout('checkFolderRefresh()', refreshInterval*1000);
 	}
 }
-function printMail(id, sid)
+function printMail(id)
 {
 	var enableExternal = false;
 
@@ -1204,7 +1245,7 @@ function printMail(id, sid)
 	else if(parent.frames && parent.frames.textArea && parent.frames.textArea.location)
 		enableExternal = parent.frames.textArea.location.href.indexOf('enableExternal') != -1;
 
-	openWindow('email.read.php?id='+id+'&print=true'+(enableExternal?'&enableExternal=true':'')+'&sid='+sid, 'print'+id, 560, 680);
+	openWindow('email.read.php?id='+id+'&print=true'+(enableExternal?'&enableExternal=true':''), 'print'+id, 560, 680);
 }
 
 /**************************************************************************
@@ -1212,7 +1253,7 @@ function printMail(id, sid)
  *************************************************************************/
 function updateFolderSubscription(id, obj, sid)
 {
-	MakeXMLRequest('email.folders.php?action=setFolderSubscription&id=' + id + '&subscribe=' + (obj.checked ? '1' : '0') + '&sid=' + sid, function(e)
+	MakeXMLRequest('email.folders.php?action=setFolderSubscription&id=' + id + '&subscribe=' + (obj.checked ? '1' : '0') , function(e)
 			{
 				if(e.readyState == 4)
 					reloadFolderList();
@@ -1238,7 +1279,7 @@ function _placeSignature(obj)
 }
 function placeSignature(id)
 {
-	MakeXMLRequest('email.compose.php?action=getSignature&id=' + escape(id) + '&mode=' + escape(editor.mode) + '&sid=' + currentSID,
+	MakeXMLRequest('email.compose.php?action=getSignature&id=' + escape(id) + '&mode=' + escape(editor.mode) ,
 					_placeSignature);
 }
 function initComposeAutoComplete()
@@ -1257,10 +1298,18 @@ function initComposeAutoComplete()
 }
 function addAttachment(sid)
 {
-	openOverlay('email.compose.php?sid=' + sid + '&action=addAttachment&attList=' + escape(EBID('attachments').value),
+	var baseUrl = null;
+	if(typeof bmComposeActionUrls !== 'undefined' && bmComposeActionUrls.addAttachment)
+		baseUrl = bmComposeActionUrls.addAttachment;
+	else if(typeof bmSupportActionUrls !== 'undefined' && bmSupportActionUrls.addAttachment)
+		baseUrl = bmSupportActionUrls.addAttachment;
+	else
+		baseUrl = bmAppendSession('email.compose.php?action=addAttachment');
+	var sep = (baseUrl.indexOf('?') >= 0) ? '&' : '?';
+	openOverlay(baseUrl + sep + 'attList=' + escape(EBID('attachments').value),
 		lang['addattach'],
 		520,
-		150,
+		310,
 		true);
 }
 function dndAttachmentUploaded(response)
@@ -1296,7 +1345,7 @@ function generateAttachmentList()
 			var link = document.createElement('a');
 			link.title = attName;
 			link.target = '_blank';
-			link.href = 'email.compose.php?action=getAttachment&id=' + attID + '&type=' + escape(attType) + '&name=' + escape(attName) + '&sid=' + currentSID;
+			link.href = bmAppendSession('email.compose.php?action=getAttachment&id=' + attID + '&type=' + escape(attType) + '&name=' + escape(attName) );
 			link.appendChild(document.createTextNode(attName));
 
 			var div = document.createElement('div');
@@ -1352,7 +1401,7 @@ function deleteAttachment(id)
 	}
 
 	// delete on server
-	MakeXMLRequest('email.compose.php?action=deleteAttachment&sid=' + currentSID + '&id=' + id, null);
+	MakeXMLRequest(bmAppendSession('email.compose.php?action=deleteAttachment' + '&id=' + id), null);
 
 	// rebuild table
 	attachments.value = newFiles;
@@ -1451,7 +1500,7 @@ function checkSMIME(action)
 							+ '&to=' 		+ escape(EBID('to').value)
 							+ '&cc=' 		+ escape(EBID('cc').value)
 							+ '&bcc=' 		+ escape(EBID('bcc').value)
-							+ '&sid=' 		+ currentSID,
+							,
 						_checkSMIME);
 	}
 	else

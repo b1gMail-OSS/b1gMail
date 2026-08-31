@@ -3,7 +3,8 @@
 
 	<div class="alert alert-warning">{lng p="undowarn"}</div>
 
-	<form action="maintenance.php?action=orphans&do=exec&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{adminurl script='maintenance.php' params='action=orphans&do=exec' trailingAmp='false'}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<p>{lng p="orphans_desc"}</p>
 
 		<div class="text-end">
@@ -17,7 +18,8 @@
 
 	<div class="alert alert-warning">{lng p="undowarn"}</div>
 	
-	<form action="maintenance.php?action=orphans&do=diskExec&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{adminurl script='maintenance.php' params='action=orphans&do=diskExec' trailingAmp='false'}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<p>{lng p="diskorphans_desc"}</p>
 
 		<div class="text-end">

@@ -120,7 +120,7 @@ function initWDSel()
 		if(itemID[0] == 1)
 			switchWebdiskFolder(itemID[1]);
 		else if(!webdiskTryOpenPreviewOnDblClick(parseInt(itemID[0], 10), parseInt(itemID[1], 10)))
-			document.location.href = 'webdisk.php?action=downloadFile&id='+itemID[1]+'&sid='+currentSID;
+			document.location.href = bmAppendSession('webdisk.php?action=downloadFile&id='+itemID[1]);
 	}
 	sel.cbStyleRow = function(element, selected)
 	{
@@ -243,7 +243,7 @@ function webdiskDownloadCurrent()
 		}
 		if(itemID[0] == '2')
 		{
-			document.location.href = 'webdisk.php?action=downloadFile&id=' + itemID[1] + '&sid=' + currentSID;
+			document.location.href = bmAppendSession('webdisk.php?action=downloadFile&id=' + itemID[1] );
 			return;
 		}
 	}
@@ -251,7 +251,7 @@ function webdiskDownloadCurrent()
 	if(currentType == 1 && currentID > 0)
 		webdiskMassDownload();
 	else if(currentType == 2 && currentID > 0)
-		document.location.href = 'webdisk.php?action=downloadFile&id=' + currentID + '&sid=' + currentSID;
+		document.location.href = bmAppendSession('webdisk.php?action=downloadFile&id=' + currentID );
 }
 
 function showWebdiskItemDetails(type, id)
@@ -262,7 +262,7 @@ function showWebdiskItemDetails(type, id)
 	var _requestType = type;
 	var _requestID = id;
 
-	MakeXMLRequest('webdisk.php?action=itemInfo&type='+escape(type)+'&id='+escape(id)+'&sid='+currentSID, function(e)
+	MakeXMLRequest('webdisk.php?action=itemInfo&type='+escape(type)+'&id='+escape(id), function(e)
 			{
 				if(e.readyState == 4)
 				{
@@ -359,7 +359,7 @@ function selectedWebdiskCountChanged(no)
 	var _requestFolder = currentWebdiskFolderID;
 	var _requestCount = no;
 
-	MakeXMLRequest('webdisk.php?action=selectionInfo&items=' + encodeURIComponent(items) + '&sid=' + currentSID, function(e)
+	MakeXMLRequest('webdisk.php?action=selectionInfo&items=' + encodeURIComponent(items) , function(e)
 	{
 		if(e.readyState != 4)
 			return;
@@ -628,7 +628,7 @@ function webdiskSyncUploadModalTargetFolder()
 		? currentWebdiskFolderID
 		: 0;
 
-	form.action = 'webdisk.php?folder=' + folderId + '&sid=' + currentSID;
+	form.action = 'webdisk.php?folder=' + folderId ;
 }
 
 function webdiskCloseUploadModal()
@@ -795,7 +795,7 @@ function webdiskInitUploadModalDnD()
 	_webdiskUploadModalDnDInited = true;
 
 	initDnDUpload(zone,
-		'webdisk.php?sid=' + currentSID + '&action=dndUpload',
+		'webdisk.php?action=dndUpload',
 		function()
 		{
 			webdiskCleanupModalBackdrops();
@@ -834,11 +834,28 @@ function webdiskGetTreeIDbyFolderID(folderID)
 
 	return(0);
 }
+function webdiskReloadThumbnails()
+{
+	var imgs = document.querySelectorAll('#wdContentDiv .bm-webdisk-thumb, #wdContentTable .bm-webdisk-thumb');
+	var i, img, src;
+
+	for(i = 0; i < imgs.length; i++)
+	{
+		img = imgs[i];
+		img.loading = 'eager';
+		src = img.getAttribute('src');
+		if(src)
+		{
+			img.src = '';
+			img.src = src;
+		}
+	}
+}
 function switchWebdiskFolder(folderID)
 {
 	if(EBID('folderLoading')) EBID('folderLoading').style.display = '';
 
-	MakeXMLRequest('webdisk.php?inline=true&folder='+folderID+'&sid='+currentSID, function(e)
+	MakeXMLRequest(bmAppendSession('webdisk.php?inline=true&folder='+folderID+'&_='+Date.now()), function(e)
 			{
 				if(e.readyState == 4)
 				{
@@ -847,9 +864,10 @@ function switchWebdiskFolder(folderID)
 					EBID('mainContentArea').innerHTML = e.responseText;
 					webdiskResetUploadModalState();
 					initWDSel();
+					webdiskReloadThumbnails();
 					if(typeof webdiskReloadPreviewFromDom === 'function')
 						webdiskReloadPreviewFromDom();
-					initDnDUpload(EBID('wdDnDArea'), 'webdisk.php?sid='+currentSID+'&folder='+folderID+'&action=dndUpload', function()
+					initDnDUpload(EBID('wdDnDArea'), bmAppendSession('webdisk.php?folder='+folderID+'&action=dndUpload'), function()
 							{
 								switchWebdiskFolder(currentWebdiskFolderID);
 							}, webdiskDnDFileDone);
@@ -882,7 +900,7 @@ function updateWebdiskViewMode(c, folder, sid)
 		fld = '&folder=' + currentWebdiskFolderID;
 	else if(folder != '')
 		fld = '&folder=' + folder;
-	document.location.href = 'webdisk.php?sid=' + sid + fld + '&do=changeViewMode&viewmode=' + c.value;
+	document.location.href = bmAppendSession('webdisk.php?' + fld + '&do=changeViewMode&viewmode=' + c.value);
 }
 function webdiskClearInfo()
 {
@@ -903,7 +921,7 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 	// details
 	EBID('webdiskDetailInfoNote').style.display = 'none';
 	EBID('webdiskDetailInfo').style.display = '';
-	//EBID('wdExt').src = 'webdisk.php?action=displayExtension&ext=' + ext + '&sid=' + currentSID;
+	//EBID('wdExt').src = 'webdisk.php?action=displayExtension&ext=' + ext ;
 	EBID('wdTitle').innerHTML = title;
 	EBID('wdSize').innerHTML = size;
 	EBID('wdDate').innerHTML = date;
@@ -944,9 +962,9 @@ function webdiskStopShare()
 	if(!confirm(lang['stopsharing_confirm']))
 		return;
 
-	document.location.href = 'webdisk.php?action=stopShare&id=' + currentID
+	document.location.href = bmAppendSession('webdisk.php?action=stopShare&id=' + currentID
 		+ '&folder=' + currentWebdiskFolderID
-		+ '&sid=' + currentSID;
+		);
 }
 function webdiskStopFileShare()
 {
@@ -956,9 +974,9 @@ function webdiskStopFileShare()
 	if(!confirm(lang['stopsharing_confirm']))
 		return;
 
-	document.location.href = 'webdisk.php?action=stopFileShare&id=' + currentID
+	document.location.href = bmAppendSession('webdisk.php?action=stopFileShare&id=' + currentID
 		+ '&folder=' + currentWebdiskFolderID
-		+ '&sid=' + currentSID;
+		);
 }
 function webdiskClipboardAction(action)
 {
@@ -968,7 +986,7 @@ function webdiskClipboardAction(action)
 	transferSelectedWebdiskItems();
 	var itemStr = EBID('selectedWebdiskItems').value;
 
-	MakeXMLRequest('webdisk.php?action=clipboardAction&do=' + action + '&items=' + escape(itemStr) + '&sid=' + currentSID,
+	MakeXMLRequest('webdisk.php?action=clipboardAction&do=' + action + '&items=' + escape(itemStr) ,
 		function (e)
 		{
 			if(e.readyState == 4)
@@ -990,7 +1008,7 @@ function webdiskDoRename(newName, id, type)
 {
 	currentID = id;
 	currentType = type;
-	MakeXMLRequest('webdisk.php?action=renameItem&folder=' + currentFolder + '&type=' + type + '&id=' + id + '&name=' + encodeURIComponent(newName) + '&sid=' + currentSID, function(e)
+	MakeXMLRequest('webdisk.php?action=renameItem&folder=' + currentFolder + '&type=' + type + '&id=' + id + '&name=' + encodeURIComponent(newName) , function(e)
 			{
 				if(e.readyState == 4)
 				{
@@ -1015,7 +1033,7 @@ function webdiskRename(folder, id, type, title)
 function webdiskCreateFolder()
 {
 	var folderName = EBID('folderName').value;
-	MakeXMLRequest('webdisk.php?action=createFolder&rpc=true&folder='+currentWebdiskFolderID+'&folderName='+encodeURIComponent(folderName)+'&sid=' + currentSID, function(e)
+	MakeXMLRequest('webdisk.php?action=createFolder&rpc=true&folder='+currentWebdiskFolderID+'&folderName='+encodeURIComponent(folderName)+'', function(e)
 			{
 				if(e.readyState == 4)
 				{
@@ -1031,7 +1049,7 @@ function reloadWebdiskFolderList()
 	if(!EBID('folderList'))
 		return;
 
-	MakeXMLRequest('webdisk.php?action=getFolderList&sid=' + currentSID, function(http)
+	MakeXMLRequest(bmAppendSession('webdisk.php?action=getFolderList'), function(http)
 			{
 				if(http.readyState == 4 && http.responseText.length > 10 && http.responseText.indexOf('var') >= 0)
 				{
@@ -1045,7 +1063,7 @@ function moveWebdiskItems(items, destFolder)
 	if(!items) return;
 	if(destFolder == currentWebdiskFolderID) return;
 
-	MakeXMLRequest('webdisk.php?action=moveItems&items=' + escape(items) + '&destFolderID=' + destFolder + '&sid=' + currentSID, function(http)
+	MakeXMLRequest('webdisk.php?action=moveItems&items=' + escape(items) + '&destFolderID=' + destFolder , function(http)
 			{
 				if(http.readyState == 4)
 				{

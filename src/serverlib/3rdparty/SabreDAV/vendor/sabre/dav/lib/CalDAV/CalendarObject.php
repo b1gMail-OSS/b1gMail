@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV;
 
 /**
@@ -9,31 +11,33 @@ namespace Sabre\CalDAV;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\DAVACL\IACL {
+class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\DAVACL\IACL
+{
+    use \Sabre\DAVACL\ACLTrait;
 
     /**
-     * Sabre\CalDAV\Backend\BackendInterface
+     * Sabre\CalDAV\Backend\BackendInterface.
      *
-     * @var Sabre\CalDAV\Backend\AbstractBackend
+     * @var Backend\AbstractBackend
      */
     protected $caldavBackend;
 
     /**
-     * Array with information about this CalendarObject
+     * Array with information about this CalendarObject.
      *
      * @var array
      */
     protected $objectData;
 
     /**
-     * Array with information about the containing calendar
+     * Array with information about the containing calendar.
      *
      * @var array
      */
     protected $calendarInfo;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * The following properties may be passed within $objectData:
      *
@@ -45,13 +49,9 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
      *   * size - (optional) The size of the data in bytes.
      *   * lastmodified - (optional) format as a unix timestamp.
      *   * acl - (optional) Use this to override the default ACL for the node.
-     *
-     * @param Backend\BackendInterface $caldavBackend
-     * @param array $calendarInfo
-     * @param array $objectData
      */
-    function __construct(Backend\BackendInterface $caldavBackend, array $calendarInfo, array $objectData) {
-
+    public function __construct(Backend\BackendInterface $caldavBackend, array $calendarInfo, array $objectData)
+    {
         $this->caldavBackend = $caldavBackend;
 
         if (!isset($objectData['uri'])) {
@@ -60,44 +60,43 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
 
         $this->calendarInfo = $calendarInfo;
         $this->objectData = $objectData;
-
     }
 
     /**
-     * Returns the uri for this object
+     * Returns the uri for this object.
      *
      * @return string
      */
-    function getName() {
-
+    public function getName()
+    {
         return $this->objectData['uri'];
-
     }
 
     /**
-     * Returns the ICalendar-formatted object
+     * Returns the ICalendar-formatted object.
      *
      * @return string
      */
-    function get() {
-
+    public function get()
+    {
         // Pre-populating the 'calendardata' is optional, if we don't have it
         // already we fetch it from the backend.
         if (!isset($this->objectData['calendardata'])) {
             $this->objectData = $this->caldavBackend->getCalendarObject($this->calendarInfo['id'], $this->objectData['uri']);
         }
-        return $this->objectData['calendardata'];
 
+        return $this->objectData['calendardata'];
     }
 
     /**
-     * Updates the ICalendar-formatted object
+     * Updates the ICalendar-formatted object.
      *
      * @param string|resource $calendarData
+     *
      * @return string
      */
-    function put($calendarData) {
-
+    public function put($calendarData)
+    {
         if (is_resource($calendarData)) {
             $calendarData = stream_get_contents($calendarData);
         }
@@ -106,33 +105,29 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
         $this->objectData['etag'] = $etag;
 
         return $etag;
-
     }
 
     /**
-     * Deletes the calendar object
-     *
-     * @return void
+     * Deletes the calendar object.
      */
-    function delete() {
-
+    public function delete()
+    {
         $this->caldavBackend->deleteCalendarObject($this->calendarInfo['id'], $this->objectData['uri']);
-
     }
 
     /**
-     * Returns the mime content-type
+     * Returns the mime content-type.
      *
      * @return string
      */
-    function getContentType() {
-
+    public function getContentType()
+    {
         $mime = 'text/calendar; charset=utf-8';
         if (isset($this->objectData['component']) && $this->objectData['component']) {
-            $mime .= '; component=' . $this->objectData['component'];
+            $mime .= '; component='.$this->objectData['component'];
         }
-        return $mime;
 
+        return $mime;
     }
 
     /**
@@ -142,66 +137,49 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
      *
      * @return string
      */
-    function getETag() {
-
+    public function getETag()
+    {
         if (isset($this->objectData['etag'])) {
             return $this->objectData['etag'];
         } else {
-            return '"' . md5($this->get()) . '"';
+            return '"'.md5($this->get()).'"';
         }
-
     }
 
     /**
-     * Returns the last modification date as a unix timestamp
+     * Returns the last modification date as a unix timestamp.
      *
      * @return int
      */
-    function getLastModified() {
-
+    public function getLastModified()
+    {
         return $this->objectData['lastmodified'];
-
     }
 
     /**
-     * Returns the size of this object in bytes
+     * Returns the size of this object in bytes.
      *
      * @return int
      */
-    function getSize() {
-
+    public function getSize()
+    {
         if (array_key_exists('size', $this->objectData)) {
             return $this->objectData['size'];
         } else {
             return strlen($this->get());
         }
-
     }
 
     /**
-     * Returns the owner principal
+     * Returns the owner principal.
      *
      * This must be a url to a principal, or null if there's no owner
      *
      * @return string|null
      */
-    function getOwner() {
-
+    public function getOwner()
+    {
         return $this->calendarInfo['principaluri'];
-
-    }
-
-    /**
-     * Returns a group principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getGroup() {
-
-        return null;
-
     }
 
     /**
@@ -216,8 +194,8 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
      *
      * @return array
      */
-    function getACL() {
-
+    public function getACL()
+    {
         // An alternative acl may be specified in the object data.
         if (isset($this->objectData['acl'])) {
             return $this->objectData['acl'];
@@ -226,65 +204,20 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
         // The default ACL
         return [
             [
-                'privilege' => '{DAV:}read',
+                'privilege' => '{DAV:}all',
                 'principal' => $this->calendarInfo['principaluri'],
                 'protected' => true,
             ],
             [
-                'privilege' => '{DAV:}write',
-                'principal' => $this->calendarInfo['principaluri'],
+                'privilege' => '{DAV:}all',
+                'principal' => $this->calendarInfo['principaluri'].'/calendar-proxy-write',
                 'protected' => true,
             ],
             [
                 'privilege' => '{DAV:}read',
-                'principal' => $this->calendarInfo['principaluri'] . '/calendar-proxy-write',
+                'principal' => $this->calendarInfo['principaluri'].'/calendar-proxy-read',
                 'protected' => true,
             ],
-            [
-                'privilege' => '{DAV:}write',
-                'principal' => $this->calendarInfo['principaluri'] . '/calendar-proxy-write',
-                'protected' => true,
-            ],
-            [
-                'privilege' => '{DAV:}read',
-                'principal' => $this->calendarInfo['principaluri'] . '/calendar-proxy-read',
-                'protected' => true,
-            ],
-
         ];
-
     }
-
-    /**
-     * Updates the ACL
-     *
-     * This method will receive a list of new ACE's.
-     *
-     * @param array $acl
-     * @return void
-     */
-    function setACL(array $acl) {
-
-        throw new \Sabre\DAV\Exception\MethodNotAllowed('Changing ACL is not yet supported');
-
-    }
-
-    /**
-     * Returns the list of supported privileges for this node.
-     *
-     * The returned data structure is a list of nested privileges.
-     * See \Sabre\DAVACL\Plugin::getDefaultSupportedPrivilegeSet for a simple
-     * standard structure.
-     *
-     * If null is returned from this method, the default privilege set is used,
-     * which is fine for most common usecases.
-     *
-     * @return array|null
-     */
-    function getSupportedPrivilegeSet() {
-
-        return null;
-
-    }
-
 }

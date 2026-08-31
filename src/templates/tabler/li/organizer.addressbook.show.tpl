@@ -1,7 +1,7 @@
 <div class="bm-organizer-address-detail">
 	<div class="bm-organizer-address-detail-body">
 		<div class="d-flex align-items-start gap-3 mb-4">
-			<span class="avatar avatar-lg bm-organizer-address-avatar" style="background-image: url({if !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if});"></span>
+			<span class="avatar avatar-lg bm-organizer-address-avatar" style="background-image: url({if !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}{$sessionUrlSuffix}{/if});"></span>
 			<div class="min-w-0">
 				<h3 class="mb-1">
 					{if !$contact.vorname&&!$contact.nachname&&$contact.firma}
@@ -23,7 +23,7 @@
 		{if $contact.email}
 		<tr>
 			<th>{lng p="email"}</th>
-			<td><a href="email.compose.php?to={$privEmailTo}&sid={$sid}">{text value=$contact.email}</a></td>
+			<td><a href="email.compose.php?to={$privEmailTo}{$sessionUrlSuffix}">{text value=$contact.email}</a></td>
 		</tr>
 		{/if}
 		{if $contact.tel}
@@ -58,7 +58,7 @@
 		{if $contact.work_email}
 		<tr class="bm-organizer-address-detail-section">
 			<th>{lng p="email"}</th>
-			<td><a href="email.compose.php?to={$workEmailTo}&sid={$sid}">{text value=$contact.work_email}</a></td>
+			<td><a href="email.compose.php?to={$workEmailTo}{$sessionUrlSuffix}">{text value=$contact.work_email}</a></td>
 		</tr>
 		{/if}
 		{if $contact.work_tel}
@@ -99,7 +99,7 @@
 		{if $contact.web}
 		<tr>
 			<th>{lng p="web"}</th>
-			<td><a target="_blank" rel="noopener noreferrer" href="deref.php?{text value=$contact.web}">{text value=$contact.web}</a></td>
+			<td><a target="_blank" rel="noopener noreferrer" href="{derefurl url=$contact.web}">{text value=$contact.web}</a></td>
 		</tr>
 		{/if}
 		{if $contact.kommentar}
@@ -114,7 +114,7 @@
 
 	<div class="contentFooter bm-organizer-footer">
 		<div class="right bm-organizer-footer-tools">
-			<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='organizer.addressbook.php?action=editContact&id={$contact.id}&sid={$sid}';">
+			<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params="action=editContact&id={$contact.id}"|escape:'javascript'}';">
 				<i class="ti ti-pencil icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="edit"}
 			</button>

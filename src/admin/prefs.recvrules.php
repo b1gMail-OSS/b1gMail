@@ -192,8 +192,7 @@ if($_REQUEST['action'] == 'recvrules')
 				(int)$_REQUEST['value'],
 				(int)$_REQUEST['type'],
 				(int)$_REQUEST['id']);
-			header('Location: prefs.recvrules.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.recvrules.php');
 		}
 
 		// get rule data

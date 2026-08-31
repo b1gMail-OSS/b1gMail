@@ -6,7 +6,9 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=common&do=save&sid={$sid}">
+{include file="li/prefs.avatar-forms.tpl"}
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=common&do=save'}">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 {if $allownewsoptout!='yes'&&$newsletter_optin=='yes'}
 <input type="hidden" name="newsletter_optin" value="true" />
@@ -60,6 +62,8 @@
 			</td>
 		</tr>
 
+{include file="li/prefs.avatar-section.tpl"}
+
 		<tr>
 			<td class="listTableLeftDesc"><i class="fa fa-bell-o" aria-hidden="true"></i></td>
 			<td class="listTableRightDesc">{lng p="notifications"}</td>
@@ -105,6 +109,14 @@
 			<td class="listTableLeft"><label for="newsletter_optin">{lng p="newsletter"}?</label></td>
 			<td class="listTableRight">
 				{include file="li/form-check.tpl" id="newsletter_optin" name="newsletter_optin" checked=($newsletter_optin=='yes') labelKey="subscribe"}
+			</td>
+		</tr>
+		{/if}
+		{if $loginNotifyAllowed}
+		<tr>
+			<td class="listTableLeft"><label for="notify_login_new_ip">{lng p="notify_login_new_ip"}:</label></td>
+			<td class="listTableRight">
+				{include file="li/form-check.tpl" id="notify_login_new_ip" name="notify_login_new_ip" checked=$notifyLoginNewIp labelKey="notify_login_new_ip_desc"}
 			</td>
 		</tr>
 		{/if}

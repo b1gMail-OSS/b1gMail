@@ -22,7 +22,8 @@
 /*
  * show all PHP errors until config file with debug setting is included
  */
-error_reporting(E_ALL);
+#error_reporting(E_ALL);
+#define('DEBUG', true);
 
 /*
  * initialize php config
@@ -42,8 +43,10 @@ if (!defined('ADMIN_MODE')) {
 if (!defined('INTERFACE_MODE')) {
     define('INTERFACE_MODE', false);
 }
-define('B1GMAIL_DIR', substr(__DIR__, 0, -strlen(strrchr(str_replace('\\', '/', __DIR__), '/'))).'/');
-define('B1GMAIL_REL', file_exists('admin/') ? './' : '../');
+if(!defined('B1GMAIL_DIR'))
+	define('B1GMAIL_DIR', substr(__DIR__, 0, -strlen(strrchr(str_replace('\\', '/', __DIR__), '/'))).'/');
+if(!defined('B1GMAIL_REL'))
+	define('B1GMAIL_REL', file_exists('admin/') ? './' : '../');
 define('B1GMAIL_INIT', true);
 define('SERVER_WINDOWS', strtolower(substr(PHP_OS, 0, 3)) == 'win');
 define('SERVER_IIS', SERVER_WINDOWS && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false);
@@ -345,14 +348,36 @@ define('BM_UPDATE_AVAILABLE', 2);
  */
 require B1GMAIL_DIR.'serverlib/config.inc.php';
 
+if(!defined('B1GMAIL_SIGNKEY'))
+{
+	$signKeyFile = B1GMAIL_DIR.'temp/b1gmail_signkey.dat';
+	if(is_readable($signKeyFile))
+	{
+		$stored = trim((string)@file_get_contents($signKeyFile));
+		if($stored !== '' && preg_match('/^[a-f0-9]{32}$/i', $stored))
+			define('B1GMAIL_SIGNKEY', $stored);
+	}
+	if(!defined('B1GMAIL_SIGNKEY'))
+	{
+		$generated = md5(B1GMAIL_DIR.'|'.($mysql['prefix'] ?? '').'|'.($mysql['db'] ?? ''));
+		if(is_writable(B1GMAIL_DIR.'temp/'))
+			@file_put_contents($signKeyFile, $generated);
+		define('B1GMAIL_SIGNKEY', $generated);
+	}
+}
+
 if (!defined('TOOLBOX_SERVER')) {
-    define('TOOLBOX_SERVER', '');
+    #define('TOOLBOX_SERVER', '');
+    define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');
+
 }
 if (!defined('UPDATE_SERVER')) {
-    define('UPDATE_SERVER', '');
+    #define('UPDATE_SERVER', '');
+    define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');
 }
 if (!defined('SIGNATURE_SERVER')) {
-    define('SIGNATURE_SERVER', '');
+    #define('SIGNATURE_SERVER', '');
+    define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');
 }
 if (!defined('EXTENDED_WORKGROUPS')) {
     define('EXTENDED_WORKGROUPS', false);
@@ -372,13 +397,20 @@ if (!defined('LEGACY_WEBDISCICONS')) {
 }
 if (DEBUG) {
     error_reporting(E_ALL);
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
 } elseif (defined('INTERFACE_MODE') && INTERFACE_MODE) {
     error_reporting(0);
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
 } else {
     error_reporting(E_ERROR | E_WARNING | E_PARSE);
-    }
-ini_set('zend.assertions', DEBUG ? 1 : 0);
-ini_set('assert.exception', DEBUG ? 1 : 0);
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+}
+// zend.assertions ist ab PHP 8 nur in php.ini setzbar; @ verhindert Cron/CLI-Warnungen
+@ini_set('zend.assertions', DEBUG ? '1' : '0');
+@ini_set('assert.exception', DEBUG ? '1' : '0');
 
 
 
@@ -387,7 +419,13 @@ ini_set('assert.exception', DEBUG ? 1 : 0);
  */
 include B1GMAIL_DIR.'serverlib/version.inc.php';
 include B1GMAIL_DIR.'serverlib/common.inc.php';
+include B1GMAIL_DIR.'serverlib/session.inc.php';
+include_once B1GMAIL_DIR.'serverlib/route.inc.php';
+include B1GMAIL_DIR.'serverlib/passwordhash.inc.php';
+include B1GMAIL_DIR.'serverlib/mfa.inc.php';
+include B1GMAIL_DIR.'serverlib/loginnotify.inc.php';
 include B1GMAIL_DIR.'serverlib/string.inc.php';
+include B1GMAIL_DIR.'serverlib/avatar.inc.php';
 include B1GMAIL_DIR.'serverlib/cache.class.php';
 include B1GMAIL_DIR.'serverlib/db.class.php';
 include B1GMAIL_DIR.'serverlib/blobstorage.class.php';
@@ -440,6 +478,7 @@ register_shutdown_function('b1gMailShutdown');
 PrepareInputVars();
 ConnectDB();
 ReadConfig();
+ConfigureSessionRuntime();
 
 /*
  * maintenance mode?
@@ -470,10 +509,9 @@ if (MAINTENANCE_MODE || $bm_prefs['cache_type'] == CACHE_DISABLE) {
 $tempFilesToReleaseAtShutdown = [];
 ReadLanguage();
 InitializePlugins();
-if (!MAINTENANCE_MODE) {
-    // module handler
-    ModuleFunction('OnReadLang', [&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $currentLanguage]);
-}
+if(function_exists('RouteInitPluginRoutes'))
+	RouteInitPluginRoutes();
+LoadPluginLanguages($currentLanguage);
 ReadCustomLanguage();
 
 /**
@@ -497,13 +535,24 @@ if (!file_exists($templateFolder)) {
         500);
     exit();
 } elseif (!is_writeable($templateFolder.'cache/')) {
-    // 0x08
-    DisplayError(0x08, 'Template cache folder not writeable', 'The requested template\'s cache folder is not writeable.',
-        sprintf("Template:\n%s", $bm_prefs['template']),
-        __FILE__,
-        __LINE__,
-        500);
-    exit();
+    // 0x08 — CLI cron does not compile templates; do not abort the job.
+    if(PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg')
+    {
+        PutLog(sprintf('Template cache not writeable (CLI continues): %s',
+            $templateFolder.'cache/'),
+            PRIO_WARNING,
+            __FILE__,
+            __LINE__);
+    }
+    else
+    {
+        DisplayError(0x08, 'Template cache folder not writeable', 'The requested template\'s cache folder is not writeable.',
+            sprintf("Template:\n%s", $bm_prefs['template']),
+            __FILE__,
+            __LINE__,
+            500);
+        exit();
+    }
 }
 $tpl = _new('Template');
 
@@ -529,10 +578,10 @@ else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], unserialize($bm_p
  */
 if (isset($_GET['noMobileRedirect'])) {
     if ($_GET['noMobileRedirect'] == 'false') {
-        setcookie('noMobileRedirect', false, time() - TIME_ONE_HOUR, '/');
+        BMSecureSetCookie('noMobileRedirect', '0', time() - TIME_ONE_HOUR);
         unset($_COOKIE['noMobileRedirect']);
     } else {
-        setcookie('noMobileRedirect', true, time() + TIME_ONE_YEAR, '/');
+        BMSecureSetCookie('noMobileRedirect', '1', time() + TIME_ONE_YEAR);
         $_COOKIE['noMobileRedirect'] = true;
     }
 }

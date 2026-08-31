@@ -22,7 +22,7 @@ var currentSignature = 0;
 
 function showStatement()
 {
-	openOverlay('prefs.php?action=membership&do=statement&sid=' + currentSID,
+	openOverlay(bmAppendSession('prefs.php?action=membership&do=statement'),
 		lang['statement'],
 		700,
 		500,
@@ -58,7 +58,7 @@ function showSignature(id)
 	if(id <= 0)
 		return;
 
-	MakeXMLRequest('prefs.php?action=signatures&do=edit&id='+id+'&sid='+currentSID, function(http)
+	MakeXMLRequest(bmAppendSession('prefs.php?action=signatures&do=edit&id='+id), function(http)
 			{
 				if(http.readyState == 4 && http.responseText)
 				{
@@ -73,7 +73,7 @@ function showSignature(id)
 function addSignature()
 {
 	EBID('sigItem').innerHTML = '';
-	MakeXMLRequest('prefs.php?action=signatures&do=add&sid='+currentSID, function(http)
+	MakeXMLRequest(bmAppendSession('prefs.php?action=signatures&do=add'), function(http)
 			{
 				if(http.readyState == 4 && http.responseText)
 				{
@@ -123,7 +123,7 @@ function checkSignatureForm(form)
 }
 function addPublicCert()
 {
-	openOverlay('prefs.php?sid=' + currentSID + '&action=keyring&do=importPublicCertificate',
+	openOverlay(bmAppendSession('prefs.php?action=keyring&do=importPublicCertificate'),
 		lang['addcert'],
 		520,
 		140,
@@ -131,7 +131,7 @@ function addPublicCert()
 }
 function addPrivateCert(pkcs12Support)
 {
-	openOverlay('prefs.php?sid=' + currentSID + '&action=keyring&do=importPrivateCertificate',
+	openOverlay(bmAppendSession('prefs.php?action=keyring&do=importPrivateCertificate'),
 		lang['addcert'],
 		520,
 		pkcs12Support ? 170 : 230,
@@ -139,7 +139,7 @@ function addPrivateCert(pkcs12Support)
 }
 function exportPrivateCert(hash)
 {
-	openOverlay('prefs.php?sid=' + currentSID + '&action=keyring&do=exportPrivateCertificate&hash=' + hash,
+	openOverlay(bmAppendSession('prefs.php?action=keyring&do=exportPrivateCertificate&hash=' + hash),
 		lang['exportcert'],
 		520,
 		140,
@@ -195,7 +195,7 @@ function exportPrivateCert(hash)
 			var pBrowser = bmPush.hasSubscription().then(function (v) {
 				browserSub = !!v;
 			});
-			var pServer = fetch('push-api.php?action=status&sid=' + encodeURIComponent(currentSID), { credentials: 'same-origin' })
+			var pServer = fetch(bmAppendSession('push-api.php?action=status'), { credentials: 'same-origin' })
 				.then(function (r) { return r.json(); })
 				.then(function (data) {
 					if (data && data.ok) {
@@ -285,10 +285,10 @@ function exportPrivateCert(hash)
 								}
 								return;
 							}
-							return fetch('start.php?action=testPush&sid=' + encodeURIComponent(currentSID), { credentials: 'same-origin' });
+							return fetch(bmAppendSession('start.php?action=testPush'), { credentials: 'same-origin' });
 						});
 					}
-					return fetch('start.php?action=testPush&sid=' + encodeURIComponent(currentSID), { credentials: 'same-origin' });
+					return fetch(bmAppendSession('start.php?action=testPush'), { credentials: 'same-origin' });
 				}).then(function (r) {
 					if (!r || !r.json) {
 						return;

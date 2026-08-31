@@ -22,12 +22,35 @@
 				</div>
 			</div>
 		</fieldset>
+
+		<fieldset class="mt-3">
+			<legend>{lng p="admin_email"}</legend>
+			{if isset($emailSaved) && $emailSaved}
+				<div class="alert alert-success" role="alert">{lng p="saveok"}</div>
+			{/if}
+			{if isset($emailError)}
+				<div class="alert alert-danger" role="alert">{$emailError}</div>
+			{/if}
+			<form action="{sessionurl file='admins.php' params="saveEmail=true"}" method="post" onsubmit="spin(this)">
+				{csrffield}
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label" for="admin_email">{lng p="admin_email"}</label>
+					<div class="col-sm-8">
+						<input type="email" class="form-control" id="admin_email" name="email" value="{text allowEmpty=true value=$adminRow.email}" placeholder="{lng p="admin_email"}">
+						<small class="form-hint">{lng p="admin_email_hint"}</small>
+					</div>
+				</div>
+				<div class="text-end"><input class="btn btn-primary" type="submit" value="{lng p="save"}" /></div>
+			</form>
+		</fieldset>
 	</div>
 	<div class="col-md-6">
-		<fieldset>
+		{include file="admins.avatar.tpl"}
+		<fieldset class="mt-3">
 			<legend>{lng p="password"}</legend>
 
-			<form action="admins.php?changePassword=true&sid={$sid}" method="post" onsubmit="spin(this)" autocomplete="off">
+			<form action="{sessionurl file='admins.php' params="changePassword=true"}" method="post" onsubmit="spin(this)" autocomplete="off">
+				{csrffield}
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="newpassword"}</label>
 					<div class="col-sm-8">
@@ -45,3 +68,7 @@
 		</fieldset>
 	</div>
 </div>
+
+{if $mfaAdminMayManage}
+{include file="admins.mfa.tpl"}
+{/if}

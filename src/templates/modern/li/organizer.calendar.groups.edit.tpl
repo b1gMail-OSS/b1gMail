@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f2" method="post" action="organizer.calendar.php?action=groups&do={if $group}save&id={$group.id}{else}add{/if}&sid={$sid}" onsubmit="return(checkCalendarGroupForm(this));">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {if $group}{lng p="editgroup"}{else}{lng p="addgroup"}{/if}</th>

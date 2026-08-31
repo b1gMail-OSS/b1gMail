@@ -1,7 +1,9 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="{$pageURL}&action=gateways&do=edit&save=true&id={$gateway.faxgateid}&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="spin(this)">
+		{csrffield}
+		<input type="hidden" name="save" value="1" />
 		<table width="100%">
 			<tr>
 				<td width="40" valign="top" rowspan="4"><img src="../plugins/templates/images/modfax_gateway.png" border="0" alt="" width="32" height="32" /></td>

@@ -101,7 +101,7 @@
 		</div>
 		<div style="float:right">
 			<input type="submit" value=" {lng p="delete"} " onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='organizer.calendar.php?action=deleteDate&id={$date.id}&sid={$sid}';"/>
-			<input type="submit" value=" {lng p="edit"} " onclick="parent.document.location.href='organizer.calendar.php?action=editDate&id={$date.id}{if $date.repeat_flags!=0}&jumpbackDate={$date.startdate}{/if}&sid={$sid}';" />
+			<input type="submit" value=" {lng p="edit"} " onclick="parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=editDate&id={$date.id}{if $date.repeat_flags!=0}&jumpbackDate={$date.startdate}{/if}"|escape:'javascript'}';" />
 			<input type="submit" value=" {lng p="close"} " onclick="parent.hideOverlay();" />
 		</div>
 	</div>

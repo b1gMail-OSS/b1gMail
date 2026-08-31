@@ -1,4 +1,5 @@
-<form action="prefs.payments.php?action=paymethods&do=edit&methodid={$row.methodid}&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.payments.php' params="action=paymethods&do=edit&methodid={$row.methodid}&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 
 	<fieldset>
 		<legend>{lng p="paymentmethod"}: {text value=$row.title}</legend>
@@ -85,7 +86,7 @@
 	</fieldset>
 
 	<div class="row">
-		<div class="col-md-6"><input class="btn btn-muted" type="button" onclick="document.location.href='prefs.payments.php?action=paymethods&sid={$sid}';" value=" &laquo; {lng p="back"}" /></div>
+		<div class="col-md-6"><input class="btn btn-muted" type="button" onclick="document.location.href='prefs.payments.php?action=paymethods{$sessionUrlSuffix}';" value=" &laquo; {lng p="back"}" /></div>
 		<div class="col-md-6 text-end"><input class="btn btn-primary" type="submit" value="{lng p="save"}" /></div>
 	</div>
 </form>

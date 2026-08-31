@@ -107,7 +107,7 @@
 			{lng p="cancel"}
 		</button>
 		<div class="bm-mail-attachment-dialog-footer-actions">
-			<a class="btn btn-outline-secondary" href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attachment|escape:'url'}&sid={$sid}" target="_blank" rel="noopener">
+			<a class="btn btn-outline-secondary" href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attachment|escape:'url'}{$sessionUrlSuffix}" target="_blank" rel="noopener">
 				<i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="download"}
 			</a>

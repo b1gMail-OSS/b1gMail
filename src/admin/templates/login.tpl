@@ -24,7 +24,7 @@
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
 	<!-- END CUSTOM FONT -->
 </head>
-<body onload="EBID('username').focus();" class="d-flex flex-column" id="loginBody" style="background-color: #333333;">
+<body{if !$sessionActive} onload="EBID('username').focus();"{/if} class="d-flex flex-column" id="loginBody" style="background-color: #333333;">
 <div class="page page-center">
 	<div class="container container-tight py-4">
 		<div class="text-center mb-4">
@@ -33,7 +33,16 @@
 		<div class="card card-md">
 			<div class="card-body">
 				<h2 class="h2 text-center mb-4">{lng p="acp"}</h2>
-				<form action="index.php?action=login" method="post" autocomplete="off">
+				{if $sessionActive}
+				{include file="login.sessionactive.tpl"}
+				{else}
+				{if $error|default:''}
+				<div class="alert alert-danger" role="alert">{text value=$error}</div>
+				{elseif $sessionExpired|default:false}
+				<div class="alert alert-warning" role="alert">{lng p="sess_expired"}</div>
+				{/if}
+				<form action="{sessionurl file='index.php' params='action=login'}" method="post" autocomplete="off">
+					{csrffield}
 					<div class="mb-3">
 						<label class="form-label">{lng p="username"}</label>
 						<input type="text" id="username" name="username" class="form-control" placeholder="{lng p="username"}" autocomplete="off">
@@ -46,15 +55,12 @@
 						<button type="submit" class="btn btn-primary w-100">{lng p="login"}</button>
 					</div>
 				</form>
+				{/if}
 			</div>
 		</div>
 	</div>
 </div>
 
-<script>
-	<!--
-	EBID('timezone').value = (new Date()).getTimezoneOffset() * (-60);
-	//-->
-</script>
+
 </body>
 </html>

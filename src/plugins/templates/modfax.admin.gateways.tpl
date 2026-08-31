@@ -1,55 +1,57 @@
+<p class="mb-3"><a href="{$simpleUrl}{$sessionUrlSuffixHtml}" class="btn btn-outline-secondary btn-sm"><i class="ti ti-arrow-left me-1"></i>{lng p="modfax_gateways_simple"}</a></p>
+
 <fieldset>
 	<legend>{lng p="modfax_gateways_advanced"}</legend>
 
-	<form action="{$pageURL}&action=gateways&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
-	<table class="list">
-		<tr>
-			<th width="20">&nbsp;</th>
-			<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'gateways[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
-			<th>{lng p="title"}</th>
-			<th width="120">{lng p="modfax_protocol"}</th>
-			<th width="60">&nbsp;</th>
-		</tr>
-
-		{foreach from=$gateways item=gateway}
-		{cycle name=class values="td1,td2" assign=class}
-		<tr class="{$class}">
-			<td align="center"><img src="../plugins/templates/images/modfax_gateway.png" border="0" alt="" width="16" height="16" /></td>
-			<td align="center"><input type="checkbox"{if $gateway.default} disabled="disabled"{else} name="gateways[]" value="{$gateway.faxgateid}"{/if} /></td>
-			<td>{text value=$gateway.title}</td>
-			<td>{if $gateway.protocol==1}{lng p="modfax_email"}{else}{lng p="modfax_http"}{/if}</td>
-			<td>
-				<a href="{$pageURL}&action=gateways&do=edit&id={$gateway.faxgateid}&sid={$sid}"><img src="{$tpldir}images/edit.png" border="0" alt="{lng p="edit"}" width="16" height="16" /></a>
-				{if !$gateway.default}<a href="{$pageURL}&action=gateways&delete={$gateway.faxgateid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>{/if}
-			</td>
-		</tr>
-		{/foreach}
-
-		<tr>
-			<td class="footer" colspan="5">
-				<div style="float:left;">
-					{lng p="action"}: <select name="massAction" class="smallInput">
-						<option value="-">------------</option>
-
-						<optgroup label="{lng p="actions"}">
-							<option value="delete">{lng p="delete"}</option>
-							<option value="setdefault">{lng p="setdefault"}</option>
-						</optgroup>
-					</select>&nbsp;
-				</div>
-				<div style="float:left;">
-					<input type="submit" name="executeMassAction" value=" {lng p="execute"} " class="smallInput" />
-				</div>
-			</td>
-		</tr>
-	</table>
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
+	<div class="card">
+		<div class="table-responsive">
+			<table class="table table-vcenter table-striped card-table">
+				<thead>
+				<tr>
+					<th style="width: 25px;"><a href="javascript:invertSelection(document.forms.f1,'gateways[]');" class="text-secondary"><i class="ti ti-selector"></i></a></th>
+					<th>{lng p="title"}</th>
+					<th style="width: 120px;">{lng p="modfax_protocol"}</th>
+					<th style="width: 90px;">&nbsp;</th>
+				</tr>
+				</thead>
+				<tbody>
+				{foreach from=$gateways item=gateway}
+				<tr>
+					<td class="text-center"><input type="checkbox" class="form-check-input m-0"{if $gateway.default} disabled="disabled"{else} name="gateways[]" value="{$gateway.faxgateid}"{/if} /></td>
+					<td>{text value=$gateway.title}{if $gateway.default} <span class="badge bg-blue-lt">{lng p="default"}</span>{/if}</td>
+					<td>{if $gateway.protocol==1}{lng p="modfax_email"}{else}{lng p="modfax_http"}{/if}</td>
+					<td class="text-nowrap">
+						<div class="btn-group btn-group-sm">
+							<a href="{$gateway.editUrl}{$sessionUrlSuffixHtml}" class="btn btn-sm" title="{lng p="edit"}"><i class="fa-regular fa-pen-to-square"></i></a>
+							{if !$gateway.default}<button type="submit" name="delete" value="{$gateway.faxgateid}" class="btn btn-sm" title="{lng p="delete"}" onclick="return confirm('{lng p="realdel"}');"><i class="fa-regular fa-trash-can"></i></button>{/if}
+						</div>
+					</td>
+				</tr>
+				{/foreach}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+		<label class="mb-0">{lng p="action"}:</label>
+		<select name="massAction" class="form-select form-select-sm" style="width: auto;">
+			<option value="-">------------</option>
+			<option value="delete">{lng p="delete"}</option>
+			<option value="setdefault">{lng p="setdefault"}</option>
+		</select>
+		<button type="submit" name="executeMassAction" value="1" class="btn btn-sm btn-primary">{lng p="execute"}</button>
+	</div>
 	</form>
 </fieldset>
 
 <fieldset>
 	<legend>{lng p="addgateway"}</legend>
 
-	<form action="{$pageURL}&action=gateways&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="spin(this)">
+		{csrffield}
+		<input type="hidden" name="add" value="1" />
 		<table width="100%">
 			<tr>
 				<td width="40" valign="top" rowspan="4"><img src="../plugins/templates/images/modfax_gateway.png" border="0" alt="" width="32" height="32" /></td>

@@ -1,5 +1,6 @@
 <div class="innerWidget" style="text-align:center;">
-	<form action="start.php?sid={$sid}&action=search" method="post" target="_blank">
+	<form action="{sessionurl file='start.php' params='action=search'}" method="post" target="_blank">
+		{csrffield}
 		<table cellspacing="0" cellpadding="0" width="100%">
 			<tr>
 				<td><input type="text" name="q" value="" style="width:100%;" /></td>

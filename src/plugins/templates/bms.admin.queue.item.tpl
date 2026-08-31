@@ -1,7 +1,8 @@
-<fieldset>
-	<legend>{lng p="bms_queue"}: {$item.id} ({$item.hexID})</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="bms_queue"}: {$item.id} ({$item.hexID})</legend>
 
-	<form action="{$pageURL}&action=msgqueue&do=queue&delByAttr={$item.id}&sid={$sid}" method="post">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=queue&delByAttr={$item.id}"}" method="post">
+	{csrffield}
 	<table width="100%">
 		<tr>
 			<td align="left" rowspan="10" valign="top" width="40"><img src="../plugins/templates/images/bms_{$item.typeIcon}.png" border="0" alt="" width="32" height="32" /></td>
@@ -52,7 +53,7 @@
 			<td class="td1">{lng p="bms_enqueued_for"}:</td>
 			<td class="td2">
 				{if $item.b1gmail_user>0}
-					<a href="users.php?do=edit&id={$item.b1gmail_user}&sid={$sid}">{$item.b1gmail_user_mail}</a>
+					<a href="users.php?do=edit&id={$item.b1gmail_user}">{$item.b1gmail_user_mail}</a>
 				{elseif $item.b1gmail_user==-1}
 					{lng p="bms_systemuser"}
 				{elseif $item.b1gmail_user==-2}
@@ -68,11 +69,11 @@
 					{if $item.smtp_user<=0}disabled="disabled"{/if} />
 			</td>
 			<td class="td1">{lng p="bms_smtp_user"}:</td>
-			<td class="td2">{if $item.smtp_user>0}<a href="users.php?do=edit&id={$item.smtp_user}&sid={$sid}">{$item.smtp_user_mail}</a>{else}{lng p="unknown"}{/if}</td>
+			<td class="td2">{if $item.smtp_user>0}<a href="users.php?do=edit&id={$item.smtp_user}">{$item.smtp_user_mail}</a>{else}{lng p="unknown"}{/if}</td>
 		</tr>
 		<tr>
 			<td class="td2" colspan="3">
-				<input type="submit" class="button" style="margin-top:0.5em;" value=" {lng p="bms_delbyattr"} " onclick="return confirm('{lng p="bms_reallydelbyattr"}');" />
+				<button type="submit" class="btn btn-outline-danger btn-sm mt-2" onclick="return confirm('{lng p="bms_reallydelbyattr"}');">{lng p="bms_delbyattr"}</button>
 			</td>
 		</tr>
 	</table>
@@ -80,8 +81,8 @@
 </fieldset>
 
 {if $queueRunning}
-<fieldset>
-	<legend>{lng p="bms_headers"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="bms_headers"}</legend>
 
 	<table width="100%">
 		<tr>
@@ -89,7 +90,7 @@
 			<td class="td2">
 				<textarea id="headers" readonly="true" style="width:80%;height:240px;display:none;font-family:courier;"></textarea>
 				<img id="headersLoading" src="{$tpldir}images/load_16.gif" style="display:none;" border="0" alt="" />
-				<input id="headersButton" type="button" class="button" value=" {lng p="show"} " onclick="showQueueItemHeaders({$item.id});" />
+				<button id="headersButton" type="button" class="btn btn-outline-secondary btn-sm" onclick="showQueueItemHeaders({$item.id});">{lng p="show"}</button>
 			</td>
 		</tr>
 	</table>
@@ -98,12 +99,12 @@
 
 <p>
 	<div style="float:left" class="buttons">
-		<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='{$pageURL}&action=msgqueue&do=queue&sid={$sid}';" />
+		<button type="button" class="btn btn-outline-secondary btn-sm"  onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=queue"}';" >&laquo; {lng p="back"}</button>
 	</div>
 
 	<div style="float:right" class="buttons">
 		{if $queueRunning}
-		<input class="button" type="button" value=" {lng p="download"} " onclick="document.location.href='{$pageURL}&action=msgqueue&do=downloadQueueItem&id={$item.id}&sid={$sid}';" />
+		<button type="button" class="btn btn-outline-secondary btn-sm"  onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=downloadQueueItem&id={$item.id}"}';" >{lng p="download"}</button>
 		{/if}
 	</div>
 </p>
@@ -115,7 +116,7 @@
 		EBID('headersLoading').style.display = '';
 		EBID('headersButton').style.display = 'none';
 
-		MakeXMLRequest('{/literal}{$pageURL}&sid={$sid}{literal}&action=msgqueue&do=getQueueItemHeaders&id='+id, function(http)
+		MakeXMLRequest('{/literal}{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=getQueueItemHeaders"}{literal}&id=' + id, function(http)
 		{
 			if(http.readyState == 4)
 			{

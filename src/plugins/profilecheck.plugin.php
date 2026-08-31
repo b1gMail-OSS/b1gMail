@@ -87,7 +87,7 @@ class ProfileCheckPlugin extends BMPlugin
 								&& !($file == 'start.php' && $action == 'logout')
 								&& !($file == 'start.php' && $action == 'usersearch'))
 		{
-			header('Location: prefs.php?action=contact&sid=' . session_id());
+			header('Location: prefs.php?action=contact');
 			exit();
 		}
 

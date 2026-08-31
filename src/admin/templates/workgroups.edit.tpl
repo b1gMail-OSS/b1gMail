@@ -1,4 +1,5 @@
-<form method="post" action="workgroups.php?{if !$create}do=edit&id={$group.id}&save=true{else}action=create&create=true{/if}&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="{sessionurl file='workgroups.php' params="{if !$create}do=edit&id={$group.id}&save=true{else}action=create&create=true{/if}"}" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-{if $create}12{else}6{/if}">
 			<fieldset>
@@ -35,8 +36,8 @@
 								{foreach from=$members item=member}
 									{cycle values="td1,td2" name="class" assign="class"}
 									<tr class="{$class}">
-										<td><a href="users.php?do=edit&id={$member.id}&sid={$sid}">{email value=$member.email}</a></td>
-										<td><a href="workgroups.php?do=edit&id={$group.id}&deleteMember={$member.id}&sid={$sid}" onclick="return(confirm('{lng p="realdel"}'));" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a></td>
+										<td><a href="{sessionurl file='users.php' params="do=edit&id={$member.id}"}">{email value=$member.email}</a></td>
+										<td><a href="{sessionurl file='workgroups.php' params="do=edit&id={$group.id}&deleteMember={$member.id}"}" onclick="return(confirm('{lng p="realdel"}'));" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a></td>
 									</tr>
 								{/foreach}
 							</table>
@@ -69,7 +70,7 @@
 					<select name="groupAction" class="form-select form-select-sm">
 						<optgroup label="{lng p="actions"}">
 							<option value="mailto:{email value=$group.email}">{lng p="sendmail"}</option>
-							<option value="workgroups.php?singleAction=delete&singleID={$group.id}&sid={$sid}">{lng p="delete"}</option>
+							<option value="workgroups.php?singleAction=delete&singleID={$group.id}{$sessionUrlSuffix}">{lng p="delete"}</option>
 						</optgroup>
 					</select>
 					<input type="button" name="executeMassAction" value="{lng p="ok"}" onclick="executeAction('groupAction');" class="btn btn-sm btn-dark-lt" />

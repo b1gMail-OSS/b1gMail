@@ -89,9 +89,8 @@ abstract class BMAuthBackend extends Sabre\DAV\Auth\Backend\AbstractBasic
 		}
 		else
 		{
-			PutLog(sprintf('DAV login as <%s> (pw: %s) failed',
-				$username,
-				$password),
+			PutLog(sprintf('DAV login as <%s> failed',
+				$username),
 				PRIO_DEBUG,
 				__FILE__,
 				__LINE__);

@@ -14,5 +14,5 @@
 </fieldset>
 
 <div class="text-end">
-	<input class="btn btn-primary" type="button" onclick="document.location.href='toolbox.php?do=editVersionConfig&versionid={$versionID}&sid={$sid}';" value=" {lng p="back"} " />
+	<input class="btn btn-primary" type="button" onclick="document.location.href='toolbox.php?do=editVersionConfig&versionid={$versionID}{$sessionUrlSuffix}';" value=" {lng p="back"} " />
 </div>

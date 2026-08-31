@@ -27,7 +27,7 @@
 						</div>
 					</div>
 					<div class="mt-auto pt-1">
-						<button type="button" class="btn btn-primary btn-sm" onclick="document.location.href='prefs.php?action=software&do=download&os=win&sid={$sid}';">
+						<button type="button" class="btn btn-primary btn-sm" onclick="document.location.href='{sessionurl file='prefs.php' params='action=software&do=download&os=win'}';">
 							<i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>
 							{lng p="download"}
 							<span class="text-white text-opacity-75 ms-1">({size bytes=$fileSizes.win})</span>
@@ -52,7 +52,7 @@
 						</div>
 					</div>
 					<div class="mt-auto pt-1">
-						<button type="button" class="btn btn-primary btn-sm" onclick="document.location.href='prefs.php?action=software&do=download&os=mac&sid={$sid}';">
+						<button type="button" class="btn btn-primary btn-sm" onclick="document.location.href='{sessionurl file='prefs.php' params='action=software&do=download&os=mac'}';">
 							<i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>
 							{lng p="download"}
 							<span class="text-white text-opacity-75 ms-1">({size bytes=$fileSizes.mac})</span>

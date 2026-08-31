@@ -1,198 +1,151 @@
-{if $_tplname=='modern'}
-<div id="contentHeader">
+<div class="bm-prefs-page bm-prefs-page-pacc">
+<div id="contentHeader" class="contentHeader bm-organizer-header bm-prefs-header">
 	<div class="left">
-		<i class="fa fa-user-plus" aria-hidden="true"></i>
+		<i class="ti ti-package icon icon-sm" aria-hidden="true"></i>
 		{lng p="pacc_mod"}
 	</div>
 </div>
 
-<div class="scrollContainer"><div class="pad">
-{else}
-<h1><i class="fa fa-user-plus" aria-hidden="true"></i> {lng p="pacc_mod"}</h1>
-{/if}
+<div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 
-<style type="text/css">
-{literal}
-	.pacc-col { background-color: auto; }
-	.pacc-col:nth-child(4n+4) { background-color: #FAFAFA; }
-
-	COL.accent-1
-	{
-		border: 2px solid #D6E9C6;
-	}
-	TH.accent-1, INPUT.accent-1
-	{
-		background-color: #DFF0D8;
-		color: #3C763D;
-	}
-
-	COL.accent-2
-	{
-		border: 2px solid #BCE8F1;
-	}
-	TH.accent-2, INPUT.accent-2
-	{
-		background-color: #D9EDF7;
-		color: #31708F;
-	}
-
-	COL.accent-3
-	{
-		border: 2px solid #FAEBCC;
-	}
-	TH.accent-3, INPUT.accent-3
-	{
-		background-color: #FCF8E3;
-		color: #8A6D3B;
-	}
-
-	COL.pacc-spacer
-	{
-		width: 1px;
-	}
-
-	COL.pacc-spacer:last-of-type
-	{
-		visibility: collapse;
-	}
-
-	.folderGroup
-	{
-		border-top: 1px solid #DDD;
-	}
-{/literal}
-</style>
-
-{lng p="pacc_prefs_intro"}
+<p class="text-secondary mb-4">{lng p="pacc_prefs_intro"}</p>
 
 <h2>{lng p="pacc_activesubscription"}</h2>
+<div class="card bm-pacc-subscription-card">
+<div class="card-body">
 {if !empty($activeSubscription)}
-<table class="listTable">
-	<tr>
-		<th class="listTableHead" colspan="2"> {lng p="pacc_activesubscription"}</th>
-	</tr>
-	<tr>
-		<td class="listTableLeft">{lng p="pacc_package"}:</td>
-		<td class="listTableRight">
-			<a href="javascript:void(0);" onclick="openOverlay('index.php?action=paccPackageDetails&id={$activeSubscription.package.id}','{lng p="pacc_packagedetails"}: {text value=$activeSubscription.package.titel escape=true}',450,{$poHeight});">
-				<i class="fa fa-archive" aria-hidden="true"></i>
-				{text value=$activeSubscription.package.titel}
-			</a>
-		</td>
-	</tr>
-	<tr>
-		<td class="listTableLeft">{lng p="pacc_lastpayment"}:</td>
-		<td class="listTableRight">
-			{date timestamp=$activeSubscription.letzte_zahlung}
-		</td>
-	</tr>
-	<tr>
-		<td class="listTableLeft">{lng p="pacc_validuntil"}:</td>
-		<td class="listTableRight">
-			{if $activeSubscription.ablauf<=1}({lng p="unlimited"}){else}{date timestamp=$activeSubscription.ablauf}{/if}
-		</td>
-	</tr>
+<dl class="row mb-0">
+	<dt class="col-sm-4 col-lg-3 text-secondary">{lng p="pacc_package"}</dt>
+	<dd class="col-sm-8 col-lg-9 mb-2">
+		<a href="javascript:void(0);" onclick="openOverlay('index.php?action=paccPackageDetails&id={$activeSubscription.package.id}','{lng p="pacc_packagedetails"}: {text value=$activeSubscription.package.titel escape=true}',450,{$poHeight});">
+			<i class="ti ti-package icon icon-sm text-secondary me-1" aria-hidden="true"></i>
+			{text value=$activeSubscription.package.titel}
+		</a>
+	</dd>
+	<dt class="col-sm-4 col-lg-3 text-secondary">{lng p="pacc_lastpayment"}</dt>
+	<dd class="col-sm-8 col-lg-9 mb-2">{date timestamp=$activeSubscription.letzte_zahlung}</dd>
+	<dt class="col-sm-4 col-lg-3 text-secondary">{lng p="pacc_validuntil"}</dt>
+	<dd class="col-sm-8 col-lg-9 mb-2">{if $activeSubscription.ablauf<=1}({lng p="unlimited"}){else}{date timestamp=$activeSubscription.ablauf}{/if}</dd>
 	{if !$activeSubscription.package.geloescht&&$activeSubscription.ablauf>=1}
-	<tr>
-		<td class="listTableLeft">&nbsp;</td>
-		<td class="listTableRight">
-			<input type="button" class="primary" value=" {lng p="pacc_renew"} " onclick="document.location.href='prefs.php?action=pacc_mod&do=order&id={$activeSubscription.package.id}&sid={$sid}';" />
-		</td>
-	</tr>
+	<dt class="col-sm-4 col-lg-3">&nbsp;</dt>
+	<dd class="col-sm-8 col-lg-9 mb-0">
+		<button type="button" class="btn btn-primary btn-sm" onclick="document.location.href='{sessionurl file='prefs.php' params="action=pacc_mod&do=order&id={$activeSubscription.package.id}"|escape:'javascript'}';">
+			{lng p="pacc_renew"}
+		</button>
+	</dd>
 	{/if}
-</table>
+</dl>
 {else}
-<i>{lng p="pacc_noactivesubscription"}</i>
+<p class="text-secondary mb-0"><em>{lng p="pacc_noactivesubscription"}</em></p>
 {/if}
+</div>
+</div>
 
 <h2>{lng p="pacc_order"}</h2>
-<table class="listTable" style="border-collapse:collapse;">
+<div class="card bm-prefs-table-card bm-pacc-matrix-card overflow-hidden">
+<div class="table-responsive bm-prefs-table-wrap">
+<table class="table table-vcenter bm-pacc-matrix mb-0">
 	<colgroup>
-		<col />
-		<col />
+		<col class="bm-pacc-label-col" />
 		{foreach from=$matrix.packages item=package}
-		<col id="col_{$package.id}" class="pacc-col{if $package.accentuation} accent-{$package.accentuation}{/if}" />
+		<col id="col_{$package.id}" />
 		<col class="pacc-spacer" />
 		{/foreach}
 	</colgroup>
 
 	<thead>
 	<tr>
-		<th class="listTableHead" colspan="2">&nbsp;</th>
+		<th>&nbsp;</th>
 		{foreach from=$matrix.packages item=package}
-		<th class="listTableHead{if $package.accentuation} accent-{$package.accentuation}{/if}" style="text-align:center;"><strong>{text value=$package.title cut=25}</strong></th>
-		<th class="listTableHead"></th>
+		<th class="text-center{if $package.accentuation==1} bm-pacc-accent bm-pacc-accent-1{elseif $package.accentuation==2} bm-pacc-accent bm-pacc-accent-2{elseif $package.accentuation==3} bm-pacc-accent bm-pacc-accent-3{/if}">
+			{if $package.accentuation==1}<span class="badge bg-success-lt text-success mb-1">{lng p="pacc_accent_1"}</span>
+			{elseif $package.accentuation==2}<span class="badge bg-info-lt text-info mb-1">{lng p="pacc_accent_2"}</span>
+			{elseif $package.accentuation==3}<span class="badge bg-warning-lt text-warning mb-1">{lng p="pacc_accent_3"}</span>
+			{/if}
+			<strong class="d-block">{text value=$package.title cut=25}</strong>
+		</th>
+		<th class="pacc-spacer-cell"></th>
 		{/foreach}
 	</tr>
 	</thead>
 
+	<tbody>
 	<tr>
-		<td colspan="{math equation="2*x+y" x=$matrix.packages|@count y=2}" class="folderGroup">
-			<a style="display:block;" href="javascript:toggleGroup(0);">&nbsp;<img id="groupImage_0" src="{$tpldir}images/contract.png" width="11" height="11" border="0" align="absmiddle" alt="" />
-			&nbsp;{lng p="pacc_infos"}
+		<td colspan="{math equation="x+x+1" x=$matrix.packages|@count}" class="folderGroup">
+			<button type="button" class="bm-pacc-section-toggle" onclick="toggleGroup(0,'pacc0');">
+				<i class="ti ti-chevron-{if isset($smarty.cookies.toggleGroup.pacc0) && $smarty.cookies.toggleGroup.pacc0=='closed'}right{else}down{/if} icon icon-sm text-secondary" id="groupImage_0" aria-hidden="true"></i>
+				{lng p="pacc_infos"}
+			</button>
 		</td>
 	</tr>
-	<tbody id="group_0" style="display:;">
+	</tbody>
+	<tbody id="group_0" style="display:{if isset($smarty.cookies.toggleGroup.pacc0) && $smarty.cookies.toggleGroup.pacc0=='closed'}none{/if};">
 	<tr>
-		<td class="listTableLeft" style="vertical-align:middle;">{lng p="pacc_price"}</td>
-		<td></td>
+		<th scope="row">{lng p="pacc_price"}</th>
 		{foreach from=$matrix.packages item=package}
-		<td align="center">
+		<td class="text-center{if $package.accentuation==1} bm-pacc-accent bm-pacc-accent-1{elseif $package.accentuation==2} bm-pacc-accent bm-pacc-accent-2{elseif $package.accentuation==3} bm-pacc-accent bm-pacc-accent-3{/if}">
 		{if $package.isFree}
-			<small>&nbsp;</small><br />
-			<span style="line-height:20px;"><b>{lng p="pacc_free"}</b></span>
-			<br /><small>&nbsp;</small>
+			<span class="fw-bold">{lng p="pacc_free"}</span>
 		{else}
-			<small>{text value=$package.priceInterval}</small><br />
-			<span style="line-height:20px;"><b>{text value=$package.price}</b></span>
-			<br /><small>{text value=$package.priceTax allowEmpty=true}</small>
+			<small class="text-secondary d-block">{text value=$package.priceInterval}</small>
+			<span class="fw-bold">{text value=$package.price}</span>
+			<small class="text-secondary d-block">{text value=$package.priceTax allowEmpty=true}</small>
 		{/if}
 		</td>
-		<td></td>
+		<td class="pacc-spacer-cell"></td>
 		{/foreach}
 	</tr>
 	</tbody>
 
+	<tbody>
 	<tr>
-		<td colspan="{math equation="2*x+y" x=$matrix.packages|@count y=2}" class="folderGroup">
-			<a style="display:block;" href="javascript:toggleGroup(1);">&nbsp;<img id="groupImage_1" src="{$tpldir}images/contract.png" width="11" height="11" border="0" align="absmiddle" alt="" />
-			&nbsp;{lng p="pacc_features"}
+		<td colspan="{math equation="x+x+1" x=$matrix.packages|@count}" class="folderGroup">
+			<button type="button" class="bm-pacc-section-toggle" onclick="toggleGroup(1,'pacc1');">
+				<i class="ti ti-chevron-{if isset($smarty.cookies.toggleGroup.pacc1) && $smarty.cookies.toggleGroup.pacc1=='closed'}right{else}down{/if} icon icon-sm text-secondary" id="groupImage_1" aria-hidden="true"></i>
+				{lng p="pacc_features"}
+			</button>
 		</td>
 	</tr>
-	<tbody id="group_1" style="display:;">
+	</tbody>
+	<tbody id="group_1" style="display:{if isset($smarty.cookies.toggleGroup.pacc1) && $smarty.cookies.toggleGroup.pacc1=='closed'}none{/if};">
 	{foreach from=$matrix.fields item=fieldTitle key=fieldKey}
 	<tr>
-		<td class="listTableLeft" style="vertical-align:middle;">{$fieldTitle}</td>
-		<td></td>
+		<th scope="row">{$fieldTitle}</th>
 		{foreach from=$matrix.packages item=package}
-		<td align="center">{paccFormatField value=$package.fields.$fieldKey key=$fieldKey cut=25}</td>
-		<td></td>
+		<td class="text-center{if $package.accentuation==1} bm-pacc-accent bm-pacc-accent-1{elseif $package.accentuation==2} bm-pacc-accent bm-pacc-accent-2{elseif $package.accentuation==3} bm-pacc-accent bm-pacc-accent-3{/if}">{paccFormatField value=$package.fields.$fieldKey key=$fieldKey cut=25}</td>
+		<td class="pacc-spacer-cell"></td>
 		{/foreach}
 	</tr>
 	{/foreach}
 	</tbody>
 
+	<tbody>
 	<tr>
-		<td colspan="{math equation="2*x+y" x=$matrix.packages|@count y=2}" class="folderGroup">
-			<a style="display:block;" href="javascript:toggleGroup(2);">&nbsp;<img id="groupImage_2" src="{$tpldir}images/contract.png" width="11" height="11" border="0" align="absmiddle" alt="" />
-			&nbsp;{lng p="pacc_selection"}
+		<td colspan="{math equation="x+x+1" x=$matrix.packages|@count}" class="folderGroup">
+			<button type="button" class="bm-pacc-section-toggle" onclick="toggleGroup(2,'pacc2');">
+				<i class="ti ti-chevron-{if isset($smarty.cookies.toggleGroup.pacc2) && $smarty.cookies.toggleGroup.pacc2=='closed'}right{else}down{/if} icon icon-sm text-secondary" id="groupImage_2" aria-hidden="true"></i>
+				{lng p="pacc_selection"}
+			</button>
 		</td>
 	</tr>
-	<tbody id="group_2" style="display:;">
+	</tbody>
+	<tbody id="group_2" style="display:{if isset($smarty.cookies.toggleGroup.pacc2) && $smarty.cookies.toggleGroup.pacc2=='closed'}none{/if};">
 	<tr>
-		<td class="listTableLeft">&nbsp;</td>
-		<td></td>
+		<th scope="row">&nbsp;</th>
 		{foreach from=$matrix.packages item=package}
-		<td align="center">
-			<input type="button"{if $package.accentuation} class="accent-{$package.accentuation}"{/if} onclick="document.location.href='prefs.php?action=pacc_mod&do=order&id={$package.id}&sid={$sid}';" value=" {lng p="pacc_order"} " style="margin:5px;" />
-			<div style="padding:4px;padding-top:0px;"><small><a href="javascript:void(0);" onclick="openOverlay('prefs.php?action=paccPackageDetails&id={$package.id}&sid={$sid}','{lng p="pacc_packagedetails"}: {text value=$package.title escape=true}',450,{$poHeight});">{lng p="pacc_packagedetails"}</a></small></div>
+		<td class="text-center{if $package.accentuation==1} bm-pacc-accent bm-pacc-accent-1{elseif $package.accentuation==2} bm-pacc-accent bm-pacc-accent-2{elseif $package.accentuation==3} bm-pacc-accent bm-pacc-accent-3{/if}">
+			<button type="button" class="btn btn-sm{if $package.accentuation==1} btn-success{elseif $package.accentuation==2} btn-info{elseif $package.accentuation==3} btn-warning{else} btn-primary{/if} my-1" onclick="document.location.href='{sessionurl file='prefs.php' params="action=pacc_mod&do=order&id={$package.id}"|escape:'javascript'}';">
+				{lng p="pacc_order"}
+			</button>
+			<div class="small"><a href="javascript:void(0);" onclick="openOverlay('{sessionurl file='prefs.php' params="action=paccPackageDetails&id={$package.id}"|escape:'javascript'}','{lng p="pacc_packagedetails"}: {text value=$package.title escape=true}',450,{$poHeight});">{lng p="pacc_packagedetails"}</a></div>
 		</td>
-		<td></td>
+		<td class="pacc-spacer-cell"></td>
 		{/foreach}
 	</tr>
 	</tbody>
 </table>
+</div>
+</div>
 
-{if $_tplname=='modern'}
 </div></div>
-{/if}
+</div>

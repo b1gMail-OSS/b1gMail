@@ -1,4 +1,9 @@
-<form action="{$pageURL}&action=prefs&save=true&sid={$sid}" method="post" id="prefsForm" onsubmit="spin(this)">
+{if $paccMsg}
+<div class="alert alert-{$paccMsg.type} mb-3" role="alert">{$paccMsg.text}</div>
+{/if}
+
+<form action="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=prefs"}" method="post" id="prefsForm" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="common"}</legend>
 
@@ -36,7 +41,10 @@
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="pacc_fields"}</label>
 			<div class="col-sm-10">
-				<input class="btn btn-sm btn-muted" type="button" value=" {lng p="pacc_viewedit"} " onclick="document.location.href='{$pageURL}&action=prefs&do=featureFields&sid={$sid}';" />
+				<a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=prefs&action=featurefields"}" class="btn btn-outline-secondary btn-sm">
+					<i class="ti ti-list-details me-1"></i>
+					{lng p="pacc_viewedit"}
+				</a>
 			</div>
 		</div>
 	</fieldset>
@@ -75,9 +83,20 @@
 				</select>
 			</div>
 		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="pacc_nli_order_buttons"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" id="nli_packages_order_buttons" name="nli_packages_order_buttons"{if $pacc_prefs.nli_packages_order_buttons!='no'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
 	</fieldset>
 
 	<div class="text-end">
-		<input class="btn btn-primary" type="submit" value="{lng p="save"}" />&nbsp;
+		<button type="submit" name="save" value="1" class="btn btn-primary">
+			<i class="ti ti-device-floppy me-1"></i>
+			{lng p="save"}
+		</button>
 	</div>
 </form>

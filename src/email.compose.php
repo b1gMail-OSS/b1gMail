@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('./serverlib/mailbox.class.php');
 include('./serverlib/addressbook.class.php');
@@ -459,7 +460,7 @@ else if($_REQUEST['action'] == 'addAttachment')
 	$tpl->assign('title', $lang_user['addattach']);
 	$tpl->assign('text', $lang_user['addattachtext']);
 	$tpl->assign('multiple', true);
-	$tpl->assign('formAction', 'email.compose.php?action=uploadAttachment&spaceLeft=' . $attLeft . '&sid=' . session_id());
+	$tpl->assign('formAction', SessionUrl('email.compose.php?action=uploadAttachment&spaceLeft=' . $attLeft));
 	$tpl->assign('fieldName', 'attachFile');
 	$tpl->assign('hasWebdisk', isset($groupRow['webdisk']) && (int)$groupRow['webdisk'] > 0);
 	if(!empty($_REQUEST['fileSource']) && $_REQUEST['fileSource'] == 'webdisk')
@@ -1156,7 +1157,7 @@ else if($_REQUEST['action'] == 'sendMail'
 						}
 						else
 						{
-							header('Location: email.php?folder=' . FOLDER_DRAFTS . '&sid=' . session_id());
+							SessionRedirect('email.php?folder=' . FOLDER_DRAFTS);
 							exit();
 						}
 					}
@@ -1192,7 +1193,7 @@ else if($_REQUEST['action'] == 'getSignature'
 		if($_REQUEST['mode'] == 'html')
 		{
 			if(trim(strip_tags($signature['html'])) != '')
-				echo($signature['html']);
+				echo(formatEMailHTMLText($signature['html'], false));
 			else
 				echo(nl2br(HTMLFormat($signature['text'])));
 		}

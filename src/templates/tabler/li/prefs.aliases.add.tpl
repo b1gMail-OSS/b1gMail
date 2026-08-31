@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=aliases&do=create&sid={$sid}" onsubmit="return(checkAliasForm(this));">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=create'}" onsubmit="return(checkAliasForm(this));">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<table class="listTable">
 		<tr>

@@ -1,4 +1,5 @@
-<form method="post" action="groups.php?{if $create}action=create&create=true{else}do=edit&id={$group.id}&save=true{/if}&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="{sessionurl file='groups.php' params="{if $create}action=create&create=true{else}do=edit&id={$group.id}&save=true{/if}"}" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
@@ -521,6 +522,14 @@
 				</div>
 			</fieldset>
 
+			{if $groupOptionsCore|@count > 0}
+			<fieldset>
+				<legend>{lng p="mfa_login_group_section"}</legend>
+				<p class="text-secondary small mb-3">{lng p="mfa_login_group_section_desc"}</p>
+				{include file="groups.groupoption-fields.tpl" groupOptionsList=$groupOptionsCore}
+			</fieldset>
+			{/if}
+
 			<fieldset>
 				<legend>{lng p="misc"}</legend>
 
@@ -551,35 +560,9 @@
 						<textarea class="form-control" name="signatur" placeholder="{lng p="mailsig"}">{text value=$group.signatur allowEmpty=true}</textarea>
 					</div>
 				</div>
-				{foreach from=$groupOptions key=fieldKey item=fieldInfo}
-					<div class="mb-3 row">
-						<label class="col-sm-4 col-form-label">{$fieldInfo.desc}</label>
-						<div class="col-sm-8">
-							{if $fieldInfo.type==16}
-								<textarea class="form-control" name="{$fieldKey}">{text value=$fieldInfo.value allowEmpty=true}</textarea>
-							{elseif $fieldInfo.type==8}
-								{foreach from=$fieldInfo.options item=optionValue key=optionKey}
-									<div class="form-check">
-										<input type="radio" class="form-check-input" name="{$fieldKey}" id="{$fieldKey}_{$optionKey}" value="{$optionKey}"{if $fieldInfo.value==$optionKey} checked="checked"{/if} />
-										<span class="form-check-label">{text value=$optionValue}</span>
-									</div>
-								{/foreach}
-							{elseif $fieldInfo.type==4}
-								<select name="{$fieldKey}" class="form-select">
-									{foreach from=$fieldInfo.options item=optionValue key=optionKey}
-										<option value="{$optionKey}"{if $fieldInfo.value==$optionKey} selected="selected"{/if}>{text value=$optionValue}</option>
-									{/foreach}
-								</select>
-							{elseif $fieldInfo.type==2}
-								<div class="form-check">
-									<input type="checkbox" class="form-check-input" name="{$fieldKey}" value="1"{if $fieldInfo.value} checked="checked"{/if} />
-								</div>
-							{elseif $fieldInfo.type==1}
-								<input type="text" class="form-control" name="{$fieldKey}" value="{if isset($fieldInfo.value)}{text value=$fieldInfo.value allowEmpty=true}{/if}" />
-							{/if}
-						</div>
-					</div>
-				{/foreach}
+				{if $groupOptions|@count > 0}
+					{include file="groups.groupoption-fields.tpl" groupOptionsList=$groupOptions}
+				{/if}
 			</fieldset>
 		</div>
 	</div>
@@ -591,8 +574,8 @@
 				<div class="btn-group btn-group-sm">
 					<select name="groupAction" id="groupAction" class="form-select form-select-sm">
 						<optgroup label="{lng p="actions"}">
-							<option value="newsletter.php?toGroup={$group.id}&sid={$sid}">{lng p="sendmail"}</option>
-							<option value="groups.php?singleAction=delete&singleID={$group.id}&sid={$sid}">{lng p="delete"}</option>
+							<option value="newsletter.php?toGroup={$group.id}{$sessionUrlSuffix}">{lng p="sendmail"}</option>
+							<option value="groups.php?singleAction=delete&singleID={$group.id}{$sessionUrlSuffix}">{lng p="delete"}</option>
 						</optgroup>
 					</select>
 					<input type="button" name="executeMassAction" value="{lng p="ok"}" onclick="executeAction('groupAction');" class="btn btn-sm btn-dark-lt" />

@@ -9,11 +9,11 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/loggedin.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
-	<script src="clientlang.php" type="text/javascript"></script>
+	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
@@ -22,7 +22,8 @@
 
 <body style="margin: 0px; background-color: #FFFFFF; background-image: none;">
 
-<form action="email.folders.php?action=editConditions&do=save&id={$id}&sid={$sid}" method="post" id="saveForm">
+<form action="{sessionurl file='email.folders.php' params="action=editConditions&do=save&id={$id}"}" method="post" id="saveForm">
+	{csrffield}
 <input type="hidden" name="submitParent" value="0" />
 <table width="100%" cellspacing="0" cellpadding="0" id="table">
 {foreach from=$conditions item=condition}

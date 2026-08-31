@@ -3,7 +3,8 @@
 
 	<div class="alert alert-warning">{lng p="undowarn"}</div>
 
-	<form action="maintenance.php?do=exec&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{adminurl script='maintenance.php' params='do=exec' trailingAmp='false'}" method="post" onsubmit="spin(this)">
+		{csrffield}
 
 		<p>{lng p="activity_desc1"}</p>
 

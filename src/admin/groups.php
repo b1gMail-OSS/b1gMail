@@ -228,7 +228,10 @@ if($_REQUEST['action'] == 'groups')
 		// assign
 		$group['saliase'] = implode("\n", array_map('DecodeDomain', array_filter(explode(':', $group['saliase']))));
 		$group['sms_pre'] = str_replace(':', "\n", $group['sms_pre']);
-		$tpl->assign('groupOptions',	$plugins->GetGroupOptions($group['id']));
+		list($groupOptionsCore, $groupOptionsPlugin) = MfaSplitGroupOptionsForTemplate(
+			$plugins->GetGroupOptions($group['id']));
+		$tpl->assign('groupOptionsCore',	$groupOptionsCore);
+		$tpl->assign('groupOptions',		$groupOptionsPlugin);
 		$tpl->assign('group',			$group);
 		$tpl->assign('page', 			'groups.edit.tpl');
 	}
@@ -285,8 +288,7 @@ if($_REQUEST['action'] == 'groups')
 				__FILE__,
 				__LINE__);
 		}
-		header('Location: groups.php?sid=' . session_id());
-		exit();
+		SessionRedirect('groups.php');
 	}
 }
 
@@ -389,8 +391,7 @@ else if($_REQUEST['action'] == 'create')
 				!isset($_REQUEST[$key]) ? 0 : $_REQUEST[$key]);
 		}
 
-		header('Location: groups.php?sid=' . session_id());
-		exit();
+		SessionRedirect('groups.php');
 	}
 
 	// display form
@@ -409,9 +410,12 @@ else if($_REQUEST['action'] == 'create')
 			$group = array();
 
 		// assign
-		$group['saliase'] = implode("\n", array_map('DecodeDomain', explode(':', $group['saliase'])));
+		$group['saliase'] = implode("\n", array_map('DecodeDomain', array_filter(explode(':', $group['saliase']), 'strlen')));
 		$group['sms_pre'] = str_replace(':', "\n", $group['sms_pre']);
-		$tpl->assign('groupOptions',	$plugins->GetGroupOptions($group['id']));
+		list($groupOptionsCore, $groupOptionsPlugin) = MfaSplitGroupOptionsForTemplate(
+			$plugins->GetGroupOptions(isset($group['id']) ? $group['id'] : 0));
+		$tpl->assign('groupOptionsCore',	$groupOptionsCore);
+		$tpl->assign('groupOptions',		$groupOptionsPlugin);
 		$tpl->assign('group',			$group);
 		$tpl->assign('create',			true);
 		$tpl->assign('page', 			'groups.edit.tpl');

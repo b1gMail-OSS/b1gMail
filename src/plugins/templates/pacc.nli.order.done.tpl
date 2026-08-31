@@ -1,11 +1,5 @@
-<div class="container">
-	<div class="page-header"><h1>{lng p="pacc_order"}</h1></div>
+<h2 class="h3 mb-3">{lng p="pacc_order"}</h2>
 
-	<p>
-		<p>
-			{lng p="pacc_thanks"}
-		</p>
-		
-		{include file="li/payment.pay.tpl"}
-	</p>
-</div>
+<p class="text-secondary mb-4">{lng p="pacc_thanks"}</p>
+
+{include file="li/payment.pay.tpl"}

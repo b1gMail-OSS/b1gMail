@@ -6,6 +6,7 @@
 </div>
 
 <form name="f1" method="post" action="search.php?q={text value=$encodedQ}&sid={$sid}">
+	{csrffield}
 <input type="hidden" name="do" value="massAction" />
 
 <div class="scrollContainer withBottomBar">

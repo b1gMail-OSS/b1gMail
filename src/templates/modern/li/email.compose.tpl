@@ -1,4 +1,5 @@
 <form name="f1" method="post" action="email.compose.php?action=sendMail&sid={$sid}" autocomplete="off" onreset="if(!askReset()) return(false);editor.reset();">
+	{csrffield}
 
 <div id="contentHeader">
 	<div class="left">

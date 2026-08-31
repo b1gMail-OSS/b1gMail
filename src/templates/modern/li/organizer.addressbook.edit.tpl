@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="organizer.addressbook.php?action={if isset($contact) && $contact}saveContact&id={$contact.id}{else}createContact{/if}&sid={$sid}" onsubmit="return(checkContactForm(this));">
+	{csrffield}
 	<input type="hidden" id="submitAction" name="submitAction" value="" />
 	<table class="listTable">
 		<tr>

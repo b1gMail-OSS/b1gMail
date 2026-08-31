@@ -22,15 +22,16 @@
 
 	<div id="fileSelector_webdisk_{$name}" class="bm-file-selector-panel mt-2" style="display:none;">
 		<input type="hidden" name="webdiskFile_{$name}_id" id="webdiskFile_{$name}_id" value="" />
-		<div class="input-group">
+		<div class="input-group input-group-flat">
 			<span class="input-group-text text-secondary">
 				<i class="ti ti-cloud icon" aria-hidden="true"></i>
 			</span>
-			<input type="text" class="form-control" id="webdiskFile_{$name}" name="webdiskFile_{$name}" readonly="readonly" placeholder="{lng p="webdiskfile"}" />
-			<button type="button" class="btn btn-outline-secondary" onclick="webdiskDialog('{$sid}', 'open', 'webdiskFile_{$name}')">
-				<i class="ti ti-folder icon" aria-hidden="true"></i>
-				{lng p="browse"}
+			<input type="text" class="form-control" id="webdiskFile_{$name}" name="webdiskFile_{$name}" readonly="readonly" placeholder="{lng p="webdiskfile"}" autocomplete="off" />
+			<button type="button" class="btn btn-outline-primary" onclick="webdiskDialog('{$sid}', 'open', 'webdiskFile_{$name}')">
+				<i class="ti ti-folder-open icon" aria-hidden="true"></i>
+				<span class="d-none d-sm-inline ms-1">{lng p="browse"}</span>
 			</button>
 		</div>
+		<div class="form-hint text-secondary mt-1" id="webdiskFile_{$name}_hint" style="display:none;"></div>
 	</div>
 </div>

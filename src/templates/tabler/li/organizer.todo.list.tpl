@@ -42,8 +42,8 @@
 		<td nowrap="nowrap" class="text-center">{progressBar width=80 value=$task.erledigt max=100}</td>
 		<td nowrap="nowrap" class="text-end bm-organizer-task-col-actions">
 			<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="organizer.todo.php?action=editTask&id={$taskID}&sid={$sid}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="organizer.todo.php?action=deleteTask&taskListID={$taskListID}&id={$taskID}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 		</td>
 	</tr>
@@ -97,8 +97,8 @@
 		<td nowrap="nowrap" class="text-center">{progressBar width=80 value=$task.erledigt max=100}</td>
 		<td nowrap="nowrap" class="text-end bm-organizer-task-col-actions">
 			<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="organizer.todo.php?action=editTask&id={$taskID}&sid={$sid}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="organizer.todo.php?action=deleteTask&taskListID={$taskListID}&id={$taskID}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 		</td>
 	</tr>
@@ -113,7 +113,8 @@
 
 <div id="contentFooter" class="contentFooter bm-organizer-footer">
 	<div class="left bm-organizer-footer-actions">
-		<form name="f1" method="post" action="organizer.todo.php?action=action&sid={$sid}" onsubmit="transferSelectedTasks()">
+		<form name="f1" method="post" action="{sessionurl file='organizer.todo.php' params='action=action'}" onsubmit="transferSelectedTasks()">
+			{csrffield}
 			<input type="hidden" name="taskListID" value="{$taskListID}" />
 			<input type="hidden" name="taskIDs" id="taskIDs" value="" />
 
@@ -128,7 +129,7 @@
 		</form>
 	</div>
 	<div class="right bm-organizer-footer-tools">
-		<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='organizer.todo.php?action=addTask&taskListID={$taskListID}&sid={$sid}';">
+		<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.todo.php' params="action=addTask&taskListID={$taskListID}"|escape:'javascript'}';">
 			<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 			{lng p="addtask"}
 		</button>

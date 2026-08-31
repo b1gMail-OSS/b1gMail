@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="prefs.php?action=aliases&do=update&sid={$sid}">
+	{csrffield}
 	<input type="hidden" name="id" value="{if isset($alias.id)}{text value=$alias.id}{/if}" />
 	<table class="listTable">
 		<tr>

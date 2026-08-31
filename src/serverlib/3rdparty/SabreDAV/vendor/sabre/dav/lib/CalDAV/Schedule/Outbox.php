@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Schedule;
 
-use Sabre\DAV;
 use Sabre\CalDAV;
+use Sabre\DAV;
 use Sabre\DAVACL;
 
 /**
- * The CalDAV scheduling outbox
+ * The CalDAV scheduling outbox.
  *
  * The outbox is mainly used as an endpoint in the tree for a client to do
  * free-busy requests. This functionality is completely handled by the
@@ -17,24 +19,25 @@ use Sabre\DAVACL;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Outbox extends DAV\Collection implements IOutbox {
+class Outbox extends DAV\Collection implements IOutbox
+{
+    use DAVACL\ACLTrait;
 
     /**
-     * The principal Uri
+     * The principal Uri.
      *
      * @var string
      */
     protected $principalUri;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $principalUri
      */
-    function __construct($principalUri) {
-
+    public function __construct($principalUri)
+    {
         $this->principalUri = $principalUri;
-
     }
 
     /**
@@ -44,47 +47,31 @@ class Outbox extends DAV\Collection implements IOutbox {
      *
      * @return string
      */
-    function getName() {
-
+    public function getName()
+    {
         return 'outbox';
-
     }
 
     /**
-     * Returns an array with all the child nodes
+     * Returns an array with all the child nodes.
      *
      * @return \Sabre\DAV\INode[]
      */
-    function getChildren() {
-
+    public function getChildren()
+    {
         return [];
-
     }
 
     /**
-     * Returns the owner principal
+     * Returns the owner principal.
      *
      * This must be a url to a principal, or null if there's no owner
      *
      * @return string|null
      */
-    function getOwner() {
-
+    public function getOwner()
+    {
         return $this->principalUri;
-
-    }
-
-    /**
-     * Returns a group principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getGroup() {
-
-        return null;
-
     }
 
     /**
@@ -99,16 +86,11 @@ class Outbox extends DAV\Collection implements IOutbox {
      *
      * @return array
      */
-    function getACL() {
-
+    public function getACL()
+    {
         return [
             [
-                'privilege' => '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-query-freebusy',
-                'principal' => $this->getOwner(),
-                'protected' => true,
-            ],
-            [
-                'privilege' => '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-post-vevent',
+                'privilege' => '{'.CalDAV\Plugin::NS_CALDAV.'}schedule-send',
                 'principal' => $this->getOwner(),
                 'protected' => true,
             ],
@@ -118,67 +100,20 @@ class Outbox extends DAV\Collection implements IOutbox {
                 'protected' => true,
             ],
             [
-                'privilege' => '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-query-freebusy',
-                'principal' => $this->getOwner() . '/calendar-proxy-write',
-                'protected' => true,
-            ],
-            [
-                'privilege' => '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-post-vevent',
-                'principal' => $this->getOwner() . '/calendar-proxy-write',
+                'privilege' => '{'.CalDAV\Plugin::NS_CALDAV.'}schedule-send',
+                'principal' => $this->getOwner().'/calendar-proxy-write',
                 'protected' => true,
             ],
             [
                 'privilege' => '{DAV:}read',
-                'principal' => $this->getOwner() . '/calendar-proxy-read',
+                'principal' => $this->getOwner().'/calendar-proxy-read',
                 'protected' => true,
             ],
             [
                 'privilege' => '{DAV:}read',
-                'principal' => $this->getOwner() . '/calendar-proxy-write',
+                'principal' => $this->getOwner().'/calendar-proxy-write',
                 'protected' => true,
             ],
         ];
-
     }
-
-    /**
-     * Updates the ACL
-     *
-     * This method will receive a list of new ACE's.
-     *
-     * @param array $acl
-     * @return void
-     */
-    function setACL(array $acl) {
-
-        throw new DAV\Exception\MethodNotAllowed('You\'re not allowed to update the ACL');
-
-    }
-
-    /**
-     * Returns the list of supported privileges for this node.
-     *
-     * The returned data structure is a list of nested privileges.
-     * See Sabre\DAVACL\Plugin::getDefaultSupportedPrivilegeSet for a simple
-     * standard structure.
-     *
-     * If null is returned from this method, the default privilege set is used,
-     * which is fine for most common usecases.
-     *
-     * @return array|null
-     */
-    function getSupportedPrivilegeSet() {
-
-        $default = DAVACL\Plugin::getDefaultSupportedPrivilegeSet();
-        $default['aggregates'][] = [
-            'privilege' => '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-query-freebusy',
-        ];
-        $default['aggregates'][] = [
-            'privilege' => '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-post-vevent',
-        ];
-
-        return $default;
-
-    }
-
 }

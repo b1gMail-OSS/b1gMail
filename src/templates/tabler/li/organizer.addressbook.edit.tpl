@@ -5,13 +5,14 @@
 			{if isset($contact) && $contact}{lng p="editcontact"}{else}{lng p="addcontact"}{/if}
 		</div>
 		<div class="right bm-organizer-header-actions">
-			<a href="organizer.addressbook.php?sid={$sid}" class="btn btn-sm btn-ghost-secondary">
+			<a href="{sessionurl file='organizer.addressbook.php'}" class="btn btn-sm btn-ghost-secondary">
 				<i class="ti ti-arrow-left icon icon-sm me-1" aria-hidden="true"></i>{lng p="back"}
 			</a>
 		</div>
 	</div>
 
-	<form name="f1" method="post" class="bm-organizer-form" action="organizer.addressbook.php?action={if isset($contact) && $contact}saveContact&id={$contact.id}{else}createContact{/if}&sid={$sid}" onsubmit="return(checkContactForm(this));">
+	<form name="f1" method="post" class="bm-organizer-form" action="{if isset($contact) && $contact}{sessionurl file='organizer.addressbook.php' params="action=saveContact&id={$contact.id}"}{else}{sessionurl file='organizer.addressbook.php' params='action=createContact'}{/if}" onsubmit="return(checkContactForm(this));">
+		{csrffield}
 		<input type="hidden" id="submitAction" name="submitAction" value="" />
 
 		<div class="bm-organizer-form-body">
@@ -177,7 +178,7 @@
 							<input type="hidden" name="pictureFile" id="pictureFile" value="" />
 							<input type="hidden" name="pictureMime" id="pictureMime" value="" />
 							<a href="javascript:addrUserPicture({if isset($contact) && $contact}{$contact.id}{else}-1{/if});" class="d-inline-block mb-2">
-								<span class="avatar avatar-xl bm-organizer-contact-avatar" id="pictureDiv" style="background-image: url({if !isset($contact) || !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if});"></span>
+								<span class="avatar avatar-xl bm-organizer-contact-avatar" id="pictureDiv" style="background-image: url({if !isset($contact) || !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}{$sessionUrlSuffix}{/if});"></span>
 							</a>
 							<div class="text-secondary small">{lng p="changepicbyclick"}</div>
 						</div>
@@ -248,7 +249,7 @@
 				<div class="btn-list">
 					<button type="submit" class="btn btn-primary">{lng p="ok"}</button>
 					<button type="reset" class="btn">{lng p="reset"}</button>
-					<a href="organizer.addressbook.php?sid={$sid}" class="btn btn-ghost-secondary">{lng p="cancel"}</a>
+					<a href="{sessionurl file='organizer.addressbook.php'}" class="btn btn-ghost-secondary">{lng p="cancel"}</a>
 				</div>
 			</div>
 		</div>

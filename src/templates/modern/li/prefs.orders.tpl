@@ -29,9 +29,9 @@
 		</td>
 		<td class="listTableTDActive">&nbsp;{date timestamp=$order.created dayonly=true}</td>
 		<td class="{$class}">&nbsp;{text value=$order.amountText}</td>
-		<td class="{$class}" style="text-align:center;">{if $order.invoiceAvailable}<a href="javascript:void(0);" onclick="openOverlay('prefs.php?action=orders&do=showInvoice&id={$order.orderid}&sid={$sid}','{lng p="invoice"}: {$order.invoiceNo}',600,550)"><img src="{$tpldir}images/li/ico_view.png" width="16" height="16" border="0" alt="" /></a>{else}-{/if}</td>
-		<td class="{$class}" style="text-align:center;">{if $order.status==0}<a href="prefs.php?action=orders&do=deleteOrder&id={$order.orderid}&sid={$sid}" title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel_order"}'));">{/if}<img src="{$tpldir}images/li/{if $order.status==1}yes{else}no{/if}.png" width="16" height="16" border="0" alt="" />{if $order.status==0}</a>
-														<a href="prefs.php?action=orders&do=initiatePayment&id={$order.orderid}&sid={$sid}" title="{lng p="pay"}"><img src="{$tpldir}images/li/ico_pay.png" width="16" height="16" border="0" alt="{lng p="pay"}" /></a>{/if}</td>
+		<td class="{$class}" style="text-align:center;">{if $order.invoiceAvailable}<a href="javascript:void(0);" onclick="openOverlay('{sessionurl file='prefs.php' params="action=orders&do=showInvoice&id={$order.orderid}"}','{lng p="invoice"}: {$order.invoiceNo}',600,550)"><img src="{$tpldir}images/li/ico_view.png" width="16" height="16" border="0" alt="" /></a>{else}-{/if}</td>
+		<td class="{$class}" style="text-align:center;">{if $order.status==0}<a href="{sessionurl file='prefs.php' params="action=orders&do=deleteOrder&id={$order.orderid}"}" title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel_order"}'));">{/if}<img src="{$tpldir}images/li/{if $order.status==1}yes{else}no{/if}.png" width="16" height="16" border="0" alt="" />{if $order.status==0}</a>
+														<a href="{sessionurl file='prefs.php' params="action=orders&do=initiatePayment&id={$order.orderid}"}" title="{lng p="pay"}"><img src="{$tpldir}images/li/ico_pay.png" width="16" height="16" border="0" alt="{lng p="pay"}" /></a>{/if}</td>
 	</tr>
 	<tbody id="group_{$order.orderid}" style="display:none;">
 	<tr>

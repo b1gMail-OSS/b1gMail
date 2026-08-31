@@ -13,6 +13,7 @@
 	{lng p="completetext"}
 	
 	<form action="organizer.addressbook.php?action=sendSelfComplete&id={$id}&sid={$sid}" method="post">
+		{csrffield}
 		<p>
 			{if $privateMail}
 				<i class="fa fa-check-square-o" aria-hidden="true"></i> 

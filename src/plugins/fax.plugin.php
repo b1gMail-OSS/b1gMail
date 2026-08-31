@@ -148,6 +148,9 @@ class BMHTTP_POST extends BMHTTP
  */
 class FaxPlugin extends BMPlugin
 {
+	/** @var string Pretty-URL: /admin/plugin/faxplugin/ */
+	public $admin_route_slug = 'faxplugin';
+
 	/**
 	 * fpdf path
 	 *
@@ -190,8 +193,9 @@ class FaxPlugin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMail Fax PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.46';
-		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
+		$this->version				= '1.5.0';
+		$this->designedfor			= '7.5.0';
+		$this->update_url			= '';
 		$this->website				= 'https://www.b1gmail.org/';
 
 		// admin pages
@@ -205,6 +209,12 @@ class FaxPlugin extends BMPlugin
 		{
 			$this->RegisterGroupOption('tbx_fax', FIELD_CHECKBOX, 'Fax in Toolbox?', '', false);
 		}
+	}
+
+	public function RegisterRoutes()
+	{
+		BMRoute()->nli('faxpluginstatuspush', array());
+		BMRoute()->liStart('faxPlugin', 'start/fax');
 	}
 
 	/**
@@ -871,7 +881,7 @@ class FaxPlugin extends BMPlugin
 			'fax'	=> array(
 					'icon'				=> 'modfax_fax',
 					'faIcon'			=> 'fa-fax',
-					'link'				=> 'start.php?action=faxPlugin&sid=',
+					'link'				=> SessionUrl('start.php?action=faxPlugin'),
 					'text'				=> $lang_user['modfax_fax'],
 					'iconDir'			=> './plugins/templates/images/',
 					'order'				=> 201
@@ -911,7 +921,7 @@ class FaxPlugin extends BMPlugin
 		$result[] = array(
 			'icon'		=> 'modfax_fax',
 			'faIcon'	=> 'fa-fax',
-			'link'		=> 'start.php?action=faxPlugin&sid=',
+			'link'		=> SessionUrl('start.php?action=faxPlugin'),
 			'text'		=> $lang_user['modfax_fax'],
 			'iconDir'	=> './plugins/templates/images/',
 			'order'		=> 901
@@ -1007,7 +1017,7 @@ class FaxPlugin extends BMPlugin
 	{
 		global $tpl, $thisUser;
 
-		if($file == 'index.php' && strpos($_SERVER['REQUEST_URI'], '/faxPluginStatusPush/') !== false)
+		if($file == 'index.php' && stripos($_SERVER['REQUEST_URI'], '/faxpluginstatuspush/') !== false)
 		{
 			$this->_httpStatusPush();
 			exit();
@@ -1388,7 +1398,7 @@ class FaxPlugin extends BMPlugin
 					$tpl->assign('accBalance', 	$thisUser->GetBalance());
 					$tpl->assign('title', 		$lang_user['modfax_send']);
 					$tpl->assign('msg', 		$lang_user['modfax_sent']);
-					$tpl->assign('backLink', 	'start.php?action=faxPlugin&sid=' . session_id());
+					$tpl->assign('backLink', 	'start.php?action=faxPlugin');
 					$tpl->assign('pageContent', 'li/msg.tpl');
 				}
 				else
@@ -1433,7 +1443,7 @@ class FaxPlugin extends BMPlugin
 		{
 			$tpl->assign('title', 		$lang_user['modfax_browsepdf']);
 			$tpl->assign('text', 		$lang_user['modfax_browsetext']);
-			$tpl->assign('formAction', 	'start.php?action=faxPlugin&do2=uploadPDFFile&blockID=' . (int)$_REQUEST['blockID'] . '&sid=' . session_id());
+			$tpl->assign('formAction', 	'start.php?action=faxPlugin&do2=uploadPDFFile&blockID=' . (int)$_REQUEST['blockID'] . '');
 			$tpl->assign('fieldName', 	'pdfFile');
 			$tpl->display('li/dialog.openfile.tpl');
 		}
@@ -1528,6 +1538,458 @@ class FaxPlugin extends BMPlugin
 	}
 
 	/**
+	 * @return list<string>
+	 */
+	protected function _faxMainTabs()
+	{
+		return array('overview', 'prefixes', 'gateways', 'signatures', 'stats', 'prefs');
+	}
+
+	/**
+	 * Pretty-URL path segment (do) → internal tab (action).
+	 */
+	protected function _faxNormalizeRequest()
+	{
+		$mainTabs = $this->_faxMainTabs();
+
+		if(!isset($_REQUEST['action']) || $_REQUEST['action'] === '')
+			$_REQUEST['action'] = 'overview';
+
+		$pathDo = isset($_REQUEST['do']) ? strtolower((string)$_REQUEST['do']) : '';
+		$pathAction = isset($_REQUEST['action']) ? strtolower((string)$_REQUEST['action']) : '';
+
+		if($pathDo !== '' && in_array($pathDo, $mainTabs, true))
+		{
+			if($pathAction !== '' && !in_array($pathAction, $mainTabs, true))
+			{
+				$sub = $_REQUEST['action'];
+				$_REQUEST['action'] = $_REQUEST['do'];
+				$_REQUEST['do'] = $sub;
+			}
+			else
+			{
+				$_REQUEST['action'] = $_REQUEST['do'];
+				unset($_REQUEST['do']);
+			}
+		}
+
+		if(!isset($_REQUEST['action']) || $_REQUEST['action'] === '')
+			$_REQUEST['action'] = 'overview';
+
+		$_REQUEST['action'] = strtolower((string)$_REQUEST['action']);
+
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] !== '')
+			$_REQUEST['do'] = strtolower((string)$_REQUEST['do']);
+
+		foreach(array('signatures', 'prefixes', 'gateways') as $section)
+		{
+			if(($_REQUEST['action'] ?? '') === $section && !isset($_REQUEST['do']))
+				$_REQUEST['do'] = 'overview';
+		}
+	}
+
+	/**
+	 * @param string|null          $tab     overview, prefixes, …
+	 * @param array<string, mixed> $query
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _faxAdminUrl($tab = null, array $query = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name), $query);
+
+		if($tab !== null && $tab !== '' && $tab !== 'overview')
+			$params['do'] = $tab;
+
+		if(function_exists('AdminSessionUrl'))
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach($params as $key => $val)
+		{
+			if((string)$val === '')
+				continue;
+			$url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+		}
+		if($trailingAmp)
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
+
+		return $url;
+	}
+
+	protected function _faxTabLink($tab)
+	{
+		if($tab === 'gateways')
+			return $this->_faxAdminUrl('gateways', array('simple' => '1'), true);
+
+		return $this->_faxAdminUrl($tab === 'overview' ? null : $tab, array(), true);
+	}
+
+	/**
+	 * Legacy GET mutations (ohne CSRF) → Redirect, keine Aktion.
+	 */
+	protected function _faxRedirectLegacyGet()
+	{
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET')
+			return;
+
+		$legacy = array(
+			'delete', 'activate', 'deactivate', 'add', 'save',
+			'executeMassAction', 'massAction',
+		);
+
+		foreach($legacy as $key)
+		{
+			if(isset($_REQUEST[$key]))
+			{
+				$tab = $_REQUEST['action'] ?? 'overview';
+				$query = array();
+				if($tab === 'gateways' && !isset($_REQUEST['advanced']))
+					$query['simple'] = '1';
+				SessionRedirect($this->_faxAdminUrl($tab === 'overview' ? null : $tab, $query, false));
+				exit();
+			}
+		}
+	}
+
+	protected function _faxStyleShowonFromPost()
+	{
+		$style = $showon = 0;
+
+		if(isset($_POST['style']) && is_array($_POST['style']))
+			foreach($_POST['style'] as $val)
+				$style |= (int)$val;
+
+		if(isset($_POST['showon']) && is_array($_POST['showon']))
+			foreach($_POST['showon'] as $val)
+				$showon |= (int)$val;
+
+		return array($style, $showon);
+	}
+
+	protected function _faxGroupsFromPost()
+	{
+		return is_array($_POST['groups'] ?? null) ? implode(',', $_POST['groups']) : '*';
+	}
+
+	/**
+	 * POST mutations (CSRF via {csrffield} in templates).
+	 */
+	protected function _faxHandlePost()
+	{
+		global $db;
+
+		$action = $_REQUEST['action'] ?? 'overview';
+
+		if($action === 'prefs' && isset($_POST['save']))
+		{
+			$defaultCountryPrefix = preg_replace('/^(\+|00|0)/', '', (string)($_POST['default_country_prefix'] ?? ''));
+
+			if(isset($_POST['tpl_blocks']) && is_array($_POST['tpl_blocks']) && count($_POST['tpl_blocks']) > 0)
+			{
+				$defaultTemplate = array();
+				$i = 0;
+				foreach($_POST['tpl_blocks'] as $val)
+					if($val >= 0)
+						$defaultTemplate[$i++] = $val;
+			}
+
+			if(!isset($defaultTemplate) || !is_array($defaultTemplate) || count($defaultTemplate) < 1)
+				$defaultTemplate = array(0 => MODFAX_BLOCK_TEXT);
+
+			$db->Query('UPDATE {pre}modfax_prefs SET `allow_ownname`=?,`allow_ownno`=?,`allow_pdf`=?,`default_name`=?,`default_no`=?,`send_safecode`=?,`default_country_prefix`=?,`default_faxgateid`=?,`refund_on_error`=?,`default_template`=?',
+				isset($_POST['allow_ownname']) ? 1 : 0,
+				isset($_POST['allow_ownno']) ? 1 : 0,
+				isset($_POST['allow_pdf']) ? 1 : 0,
+				$_POST['default_name'] ?? '',
+				$_POST['default_no'] ?? '',
+				isset($_POST['send_safecode']) ? 1 : 0,
+				$defaultCountryPrefix,
+				(int)($_POST['default_faxgateid'] ?? 0),
+				isset($_POST['refund_on_error']) ? 1 : 0,
+				serialize($defaultTemplate));
+
+			$this->prefs = $this->_getPrefs();
+			SessionRedirect($this->_faxAdminUrl('prefs', array(), false));
+			exit();
+		}
+
+		if($action === 'stats' && isset($_POST['fax_stats_reset']))
+		{
+			$db->Query('TRUNCATE TABLE {pre}modfax_stats');
+			SessionRedirect($this->_faxAdminUrl('stats', array(), false));
+			exit();
+		}
+
+		if($action === 'gateways' && isset($_POST['save']) && isset($_POST['gateways']) && is_array($_POST['gateways']))
+		{
+			foreach($_POST['gateways'] as $gatewayID => $gatewayPrefs)
+				$db->Query('UPDATE {pre}modfax_gateways SET `user`=?,`pass`=? WHERE `faxgateid`=?',
+					$gatewayPrefs['user'] ?? '',
+					$gatewayPrefs['pass'] ?? '',
+					(int)$gatewayID);
+
+			SessionRedirect($this->_faxAdminUrl('gateways', array('simple' => '1'), false));
+			exit();
+		}
+
+		if($action === 'signatures')
+		{
+			$sub = $_REQUEST['do'] ?? 'overview';
+
+			if($sub === 'edit' && isset($_POST['save']) && isset($_REQUEST['id']))
+			{
+				list($style, $showon) = $this->_faxStyleShowonFromPost();
+
+				$db->Query('UPDATE {pre}modfax_signatures SET `groups`=?,`paused`=?,`weight`=?,`fontname`=?,`fontsize`=?,`align`=?,`style`=?,`text`=?,`showon`=?,`margin`=? WHERE `signatureid`=?',
+					$this->_faxGroupsFromPost(),
+					isset($_POST['paused']) ? 1 : 0,
+					(int)($_POST['weight'] ?? 0),
+					$_POST['fontname'] ?? 'arial',
+					$_POST['fontsize'] ?? 12,
+					$_POST['align'] ?? 'L',
+					$style,
+					$_POST['text'] ?? '',
+					$showon,
+					(int)($_POST['margin'] ?? 0),
+					(int)$_REQUEST['id']);
+
+				SessionRedirect($this->_faxAdminUrl('signatures', array(), false));
+				exit();
+			}
+
+			if($sub === 'overview')
+			{
+				if(isset($_POST['add']))
+				{
+					list($style, $showon) = $this->_faxStyleShowonFromPost();
+
+					$db->Query('INSERT INTO {pre}modfax_signatures(`groups`,`paused`,`weight`,`fontname`,`fontsize`,`align`,`style`,`text`,`showon`,`margin`) '
+						. 'VALUES(?,?,?,?,?,?,?,?,?,?)',
+						$this->_faxGroupsFromPost(),
+						isset($_POST['paused']) ? 1 : 0,
+						(int)($_POST['weight'] ?? 0),
+						$_POST['fontname'] ?? 'arial',
+						$_POST['fontsize'] ?? 12,
+						$_POST['align'] ?? 'L',
+						$style,
+						$_POST['text'] ?? '',
+						$showon,
+						(int)($_POST['margin'] ?? 0));
+				}
+
+				if(isset($_POST['deactivate']))
+					$db->Query('UPDATE {pre}modfax_signatures SET `paused`=1 WHERE `signatureid`=?', (int)$_POST['deactivate']);
+
+				if(isset($_POST['activate']))
+					$db->Query('UPDATE {pre}modfax_signatures SET `paused`=0 WHERE `signatureid`=?', (int)$_POST['activate']);
+
+				if(isset($_POST['delete']))
+					$db->Query('DELETE FROM {pre}modfax_signatures WHERE `signatureid`=?', (int)$_POST['delete']);
+
+				if(isset($_POST['executeMassAction']) && ($_POST['massAction'] ?? '-') !== '-'
+					&& isset($_POST['sigs']) && is_array($_POST['sigs']))
+				{
+					$sigs = $_POST['sigs'];
+					if(($_POST['massAction'] ?? '') === 'pause')
+						$db->Query('UPDATE {pre}modfax_signatures SET `paused`=1 WHERE `signatureid` IN ?', $sigs);
+					else if(($_POST['massAction'] ?? '') === 'continue')
+						$db->Query('UPDATE {pre}modfax_signatures SET `paused`=0 WHERE `signatureid` IN ?', $sigs);
+					else if(($_POST['massAction'] ?? '') === 'delete')
+						$db->Query('DELETE FROM {pre}modfax_signatures WHERE `signatureid` IN ?', $sigs);
+				}
+
+				if(isset($_POST['add']) || isset($_POST['deactivate']) || isset($_POST['activate'])
+					|| isset($_POST['delete']) || isset($_POST['executeMassAction']))
+				{
+					SessionRedirect($this->_faxAdminUrl('signatures', array(), false));
+					exit();
+				}
+			}
+		}
+
+		if($action === 'prefixes')
+		{
+			$sub = $_REQUEST['do'] ?? 'overview';
+
+			if($sub === 'edit' && isset($_POST['save']) && isset($_REQUEST['id']))
+			{
+				$countryPrefix = preg_replace('/^(\+|00|0)/', '', (string)($_POST['country_prefix'] ?? ''));
+				$prefix = preg_replace('/^(\+|00|0)/', '', (string)($_POST['prefix'] ?? ''));
+
+				$db->Query('UPDATE {pre}modfax_prefixes SET `country_prefix`=?,`prefix`=?,`faxgateid`=?,`price_firstpage`=?,`price_nextpages`=? WHERE `prefixid`=?',
+					$countryPrefix,
+					$prefix,
+					(int)($_POST['faxgateid'] ?? 0),
+					(int)($_POST['price_firstpage'] ?? 0),
+					(int)($_POST['price_nextpages'] ?? 0),
+					(int)$_REQUEST['id']);
+
+				SessionRedirect($this->_faxAdminUrl('prefixes', array(), false));
+				exit();
+			}
+
+			if($sub === 'overview')
+			{
+				if(isset($_POST['add']))
+				{
+					$countryPrefix = preg_replace('/^(\+|00|0)/', '', (string)($_POST['country_prefix'] ?? ''));
+					$prefix = preg_replace('/^(\+|00|0)/', '', (string)($_POST['prefix'] ?? ''));
+
+					$db->Query('INSERT INTO {pre}modfax_prefixes(`country_prefix`,`prefix`,`faxgateid`,`price_firstpage`,`price_nextpages`) VALUES(?,?,?,?,?)',
+						$countryPrefix,
+						$prefix,
+						(int)($_POST['faxgateid'] ?? 0),
+						(int)($_POST['price_firstpage'] ?? 0),
+						(int)($_POST['price_nextpages'] ?? 0));
+				}
+
+				if(isset($_POST['delete']))
+					$db->Query('DELETE FROM {pre}modfax_prefixes WHERE `prefixid`=?', (int)$_POST['delete']);
+
+				if(isset($_POST['executeMassAction']) && ($_POST['massAction'] ?? '') === 'delete'
+					&& isset($_POST['prefixes']) && is_array($_POST['prefixes']))
+					$db->Query('DELETE FROM {pre}modfax_prefixes WHERE `prefixid` IN ?', $_POST['prefixes']);
+
+				if(isset($_POST['add']) || isset($_POST['delete']) || isset($_POST['executeMassAction']))
+				{
+					SessionRedirect($this->_faxAdminUrl('prefixes', array(), false));
+					exit();
+				}
+			}
+		}
+
+		if($action === 'gateways' && !isset($_REQUEST['simple']))
+		{
+			$sub = $_REQUEST['do'] ?? 'overview';
+
+			if($sub === 'edit' && isset($_POST['save']) && isset($_REQUEST['id']))
+			{
+				$this->_faxSaveGatewayFromPost((int)$_REQUEST['id']);
+				SessionRedirect($this->_faxAdminUrl('gateways', array(), false));
+				exit();
+			}
+
+			if($sub === 'overview')
+			{
+				if(isset($_POST['add']))
+				{
+					$this->_faxInsertGatewayFromPost();
+					SessionRedirect($this->_faxAdminUrl('gateways', array(), false));
+					exit();
+				}
+
+				if(isset($_POST['delete']))
+				{
+					$db->Query('UPDATE {pre}modfax_prefixes SET `faxgateid`=0 WHERE `faxgateid`=?', (int)$_POST['delete']);
+					$db->Query('DELETE FROM {pre}modfax_gateways WHERE `faxgateid`=?', (int)$_POST['delete']);
+					SessionRedirect($this->_faxAdminUrl('gateways', array(), false));
+					exit();
+				}
+
+				if(isset($_POST['executeMassAction']) && ($_POST['massAction'] ?? '') === 'delete'
+					&& isset($_POST['gateways']) && is_array($_POST['gateways']))
+				{
+					$db->Query('UPDATE {pre}modfax_prefixes SET `faxgateid`=0 WHERE `faxgateid` IN ?', $_POST['gateways']);
+					$db->Query('DELETE FROM {pre}modfax_gateways WHERE `faxgateid` IN ?', $_POST['gateways']);
+					SessionRedirect($this->_faxAdminUrl('gateways', array(), false));
+					exit();
+				}
+
+				if(isset($_POST['executeMassAction']) && ($_POST['massAction'] ?? '') === 'setdefault'
+					&& isset($_POST['gateways']) && is_array($_POST['gateways']))
+				{
+					$gatewayID = array_shift($_POST['gateways']);
+					$db->Query('UPDATE {pre}modfax_prefs SET `default_faxgateid`=?', $gatewayID);
+					$this->prefs['default_faxgateid'] = $gatewayID;
+					SessionRedirect($this->_faxAdminUrl('gateways', array(), false));
+					exit();
+				}
+			}
+		}
+	}
+
+	protected function _faxGatewayPrefsFromPost()
+	{
+		$prefs = $statusPrefs = array();
+		$protocol = $statusMode = 0;
+
+		if((int)($_POST['protocol'] ?? 0) == MODFAX_PROTOCOL_EMAIL)
+		{
+			$protocol = MODFAX_PROTOCOL_EMAIL;
+			$prefs['from'] = $_POST['email_from'] ?? '';
+			$prefs['to'] = $_POST['email_to'] ?? '';
+			$prefs['subject'] = $_POST['email_subject'] ?? '';
+			$prefs['text'] = $_POST['email_text'] ?? '';
+			$prefs['pdffile'] = $_POST['email_pdffile'] ?? '';
+		}
+		else if((int)($_POST['protocol'] ?? 0) == MODFAX_PROTOCOL_HTTP)
+		{
+			$protocol = MODFAX_PROTOCOL_HTTP;
+			$prefs['url'] = $_POST['http_url'] ?? '';
+			$prefs['request'] = $_POST['http_request'] ?? '';
+			$prefs['returnvalue'] = $_POST['http_returnvalue'] ?? '';
+		}
+
+		if((int)($_POST['status_mode'] ?? 0) == MODFAX_STATUSMODE_EMAIL)
+		{
+			$statusMode = MODFAX_STATUSMODE_EMAIL;
+			$statusPrefs['emailfrom'] = $_POST['status_emailfrom'] ?? '';
+			$statusPrefs['emailto'] = $_POST['status_emailto'] ?? '';
+			$statusPrefs['emailsubject'] = $_POST['status_emailsubject'] ?? '';
+			$statusPrefs['code_field'] = $_POST['status_code_field'] ?? '';
+			$statusPrefs['success_field'] = $_POST['status_success_field'] ?? '';
+			$statusPrefs['code_regex'] = $_POST['status_code_regex'] ?? '';
+			$statusPrefs['success_regex'] = $_POST['status_success_regex'] ?? '';
+		}
+		else if((int)($_POST['status_mode'] ?? 0) == MODFAX_STATUSMODE_HTTP)
+		{
+			$statusMode = MODFAX_STATUSMODE_HTTP;
+			$statusPrefs['code_param'] = $_POST['status_code_param'] ?? '';
+			$statusPrefs['result_param'] = $_POST['status_result_param'] ?? '';
+			$statusPrefs['result_regex'] = $_POST['status_result_regex'] ?? '';
+		}
+
+		return array($protocol, $statusMode, $prefs, $statusPrefs);
+	}
+
+	protected function _faxInsertGatewayFromPost()
+	{
+		global $db;
+
+		list($protocol, $statusMode, $prefs, $statusPrefs) = $this->_faxGatewayPrefsFromPost();
+
+		$db->Query('INSERT INTO {pre}modfax_gateways(`title`,`number_format`,`status_mode`,`status_prefs`,`protocol`,`prefs`,`user`,`pass`) VALUES(?,?,?,?,?,?,?,?)',
+			$_POST['title'] ?? '',
+			(int)($_POST['number_format'] ?? 0),
+			$statusMode,
+			serialize($statusPrefs),
+			$protocol,
+			serialize($prefs),
+			$_POST['user'] ?? '',
+			$_POST['pass'] ?? '');
+	}
+
+	protected function _faxSaveGatewayFromPost($id)
+	{
+		global $db;
+
+		list($protocol, $statusMode, $prefs, $statusPrefs) = $this->_faxGatewayPrefsFromPost();
+
+		$db->Query('UPDATE {pre}modfax_gateways SET `title`=?,`number_format`=?,`status_mode`=?,`status_prefs`=?,`protocol`=?,`prefs`=?,`user`=?,`pass`=? WHERE `faxgateid`=?',
+			$_POST['title'] ?? '',
+			(int)($_POST['number_format'] ?? 0),
+			$statusMode,
+			serialize($statusPrefs),
+			$protocol,
+			serialize($prefs),
+			$_POST['user'] ?? '',
+			$_POST['pass'] ?? '',
+			$id);
+	}
+
+	/**
 	 * admin interface handler
 	 *
 	 */
@@ -1535,69 +1997,74 @@ class FaxPlugin extends BMPlugin
 	{
 		global $tpl, $lang_admin;
 
-		// default action
-		if(!isset($_REQUEST['action']))
-			$_REQUEST['action'] = 'overview';
+		$this->_faxNormalizeRequest();
+		$this->_faxRedirectLegacyGet();
+
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+			$this->_faxHandlePost();
+
+		$action = $_REQUEST['action'] ?? 'overview';
 
 		// tabs
 		$tabs = array(
 			0 => array(
 				'title'		=> $lang_admin['overview'],
 				'icon'		=> '../plugins/templates/images/modfax_logo.png',
-				'link'		=> $this->_adminLink() . '&',
-				'active'	=> $_REQUEST['action'] == 'overview'
+				'link'		=> $this->_faxTabLink('overview'),
+				'active'	=> $action == 'overview'
 			),
 			1 => array(
 				'title'		=> $lang_admin['modfax_prefixes'],
 				'icon'		=> '../plugins/templates/images/modfax_prefix.png',
-				'link'		=> $this->_adminLink() . '&action=prefixes&',
-				'active'	=> $_REQUEST['action'] == 'prefixes'
+				'link'		=> $this->_faxTabLink('prefixes'),
+				'active'	=> $action == 'prefixes'
 			),
 			2 => array(
 				'title'		=> $lang_admin['gateways'],
 				'icon'		=> '../plugins/templates/images/modfax_gateway.png',
-				'link'		=> $this->_adminLink() . '&action=gateways&simple=true&',
-				'active'	=> $_REQUEST['action'] == 'gateways'
+				'link'		=> $this->_faxTabLink('gateways'),
+				'active'	=> $action == 'gateways'
 			),
 			3 => array(
 				'title'		=> $lang_admin['modfax_signatures'],
 				'icon'		=> '../plugins/templates/images/modfax_sig32.png',
-				'link'		=> $this->_adminLink() . '&action=signatures&',
-				'active'	=> $_REQUEST['action'] == 'signatures'
+				'link'		=> $this->_faxTabLink('signatures'),
+				'active'	=> $action == 'signatures'
 			),
 			4 => array(
 				'title'		=> $lang_admin['stats'],
 				'icon'		=> '../plugins/templates/images/modfax_stats32.png',
-				'link'		=> $this->_adminLink() . '&action=stats&',
-				'active'	=> $_REQUEST['action'] == 'stats'
+				'link'		=> $this->_faxTabLink('stats'),
+				'active'	=> $action == 'stats'
 			),
 			5 => array(
 				'title'		=> $lang_admin['prefs'],
 				'relIcon'	=> 'ico_prefs_common.png',
-				'link'		=> $this->_adminLink() . '&action=prefs&',
-				'active'	=> $_REQUEST['action'] == 'prefs'
+				'link'		=> $this->_faxTabLink('prefs'),
+				'active'	=> $action == 'prefs'
 			)
 		);
 		$tpl->assign('tabs', 	$tabs);
-		$tpl->assign('pageURL',	$this->_adminLink());
+		$tpl->assign('faxPlugin', $this->internal_name);
+		$tpl->assign('pageURL',	$this->_faxAdminUrl($action === 'overview' ? null : $action, array(), true));
 
 		// actions
-		if($_REQUEST['action'] == 'overview')
+		if($action == 'overview')
 			$this->_overviewAdminPage();
-		else if($_REQUEST['action'] == 'prefixes')
+		else if($action == 'prefixes')
 			$this->_prefixesAdminPage();
-		else if($_REQUEST['action'] == 'gateways')
+		else if($action == 'gateways')
 		{
 			if(isset($_REQUEST['simple']))
 				$this->_simpleGatewaysAdminPage();
 			else
 				$this->_gatewaysAdminPage();
 		}
-		else if($_REQUEST['action'] == 'signatures')
+		else if($action == 'signatures')
 			$this->_signaturesAdminPage();
-		else if($_REQUEST['action'] == 'stats')
+		else if($action == 'stats')
 			$this->_statsAdminPage();
-		else if($_REQUEST['action'] == 'prefs')
+		else if($action == 'prefs')
 			$this->_prefsAdminPage();
 	}
 
@@ -1648,12 +2115,6 @@ class FaxPlugin extends BMPlugin
 
 		if(!class_exists('BMChart'))
 			include(B1GMAIL_DIR . 'serverlib/chart.class.php');
-
-		// reset?
-		if(isset($_REQUEST['do']) && $_REQUEST['do']=='reset')
-		{
-			$db->Query('TRUNCATE TABLE {pre}modfax_stats');
-		}
 
 		// show chart?
 		if(isset($_REQUEST['do']) && $_REQUEST['do']=='showChart'
@@ -1751,7 +2212,7 @@ class FaxPlugin extends BMPlugin
 		$tpl->assign('time', 		$time);
 		$tpl->assign('statType', 	$statType);
 		$tpl->assign('statTypes', 	$statTypes);
-		$tpl->assign('pageURL', 	$this->_adminLink());
+		$tpl->assign('pageURL', 	$this->_faxAdminUrl('stats', array(), true));
 		$tpl->assign('page', 		$this->_templatePath('modfax.admin.stats.tpl'));
 	}
 
@@ -1762,39 +2223,6 @@ class FaxPlugin extends BMPlugin
 	function _prefsAdminPage()
 	{
 		global $db, $tpl;
-
-		// save?
-		if(isset($_REQUEST['save']))
-		{
-			$defaultCountryPrefix = preg_replace('/^(\+|00|0)/', '', $_REQUEST['default_country_prefix']);
-
-			if(isset($_REQUEST['tpl_blocks']) && is_array($_REQUEST['tpl_blocks']) && count($_REQUEST['tpl_blocks']) > 0)
-			{
-				$defaultTemplate = array();
-				$i = 0;
-
-				foreach($_REQUEST['tpl_blocks'] as $val)
-					if($val >= 0)
-						$defaultTemplate[$i++] = $val;
-			}
-
-			if(!isset($defaultTemplate) || !is_array($defaultTemplate) || count($defaultTemplate) < 1)
-				$defaultTemplate = array(0 => MODFAX_BLOCK_TEXT);
-
-			$db->Query('UPDATE {pre}modfax_prefs SET `allow_ownname`=?,`allow_ownno`=?,`allow_pdf`=?,`default_name`=?,`default_no`=?,`send_safecode`=?,`default_country_prefix`=?,`default_faxgateid`=?,`refund_on_error`=?,`default_template`=?',
-				isset($_REQUEST['allow_ownname']) ? 1 : 0,
-				isset($_REQUEST['allow_ownno']) ? 1 : 0,
-				isset($_REQUEST['allow_pdf']) ? 1 : 0,
-				$_REQUEST['default_name'],
-				$_REQUEST['default_no'],
-				isset($_REQUEST['send_safecode']) ? 1 : 0,
-				$defaultCountryPrefix,
-				(int)$_REQUEST['default_faxgateid'],
-				isset($_REQUEST['refund_on_error']) ? 1 : 0,
-				serialize($defaultTemplate));
-
-			$this->prefs = $this->_getPrefs();
-		}
 
 		// template
 		if(!is_array($defaultTemplate = @unserialize($this->prefs['default_template'])))
@@ -1812,6 +2240,7 @@ class FaxPlugin extends BMPlugin
 		$tpl->assign('tplBlocks',		$defaultTemplate);
 		$tpl->assign('faxPrefs',		$this->prefs);
 		$tpl->assign('gateways',		$gateways);
+		$tpl->assign('pageURL',			$this->_faxAdminUrl('prefs', array(), true));
 		$tpl->assign('page',			$this->_templatePath('modfax.admin.prefs.tpl'));
 	}
 
@@ -1902,126 +2331,25 @@ class FaxPlugin extends BMPlugin
 
 		if($_REQUEST['do'] == 'overview')
 		{
-			// add?
-			if(isset($_REQUEST['add']))
-			{
-				$groups	= is_array($_REQUEST['groups']) ? implode(',', $_REQUEST['groups']) : '*';
-				$style 	= $showon = 0;
-
-				if(isset($_REQUEST['style']) && is_array($_REQUEST['style']))
-					foreach($_REQUEST['style'] as $val)
-						$style |= $val;
-
-				if(isset($_REQUEST['showon']) && is_array($_REQUEST['showon']))
-					foreach($_REQUEST['showon'] as $val)
-						$showon |= $val;
-
-				$db->Query('INSERT INTO {pre}modfax_signatures(`groups`,`paused`,`weight`,`fontname`,`fontsize`,`align`,`style`,`text`,`showon`,`margin`) '
-					. 'VALUES(?,?,?,?,?,?,?,?,?,?)',
-					$groups,
-					isset($_REQUEST['paused']) ? 1 : 0,
-					(int)$_REQUEST['weight'],
-					$_REQUEST['fontname'],
-					$_REQUEST['fontsize'],
-					$_REQUEST['align'],
-					$style,
-					$_REQUEST['text'],
-					$showon,
-					(int)$_REQUEST['margin']);
-			}
-
-			// pause?
-			if(isset($_REQUEST['deactivate']))
-			{
-				$db->Query('UPDATE {pre}modfax_signatures SET `paused`=1 WHERE `signatureid`=?',
-					(int)$_REQUEST['deactivate']);
-			}
-
-			// continue?
-			if(isset($_REQUEST['activate']))
-			{
-				$db->Query('UPDATE {pre}modfax_signatures SET `paused`=0 WHERE `signatureid`=?',
-					(int)$_REQUEST['activate']);
-			}
-
-			// delete?
-			if(isset($_REQUEST['delete']))
-			{
-				$db->Query('DELETE FROM {pre}modfax_signatures WHERE `signatureid`=?',
-					(int)$_REQUEST['delete']);
-			}
-
-			// mass action?
-			if(isset($_REQUEST['massAction']) && $_REQUEST['massAction'] != '-'
-				&& isset($_REQUEST['sigs']) && is_array($_REQUEST['sigs']))
-			{
-				$sigs = $_REQUEST['sigs'];
-
-				if($_REQUEST['massAction'] == 'pause')
-				{
-					$db->Query('UPDATE {pre}modfax_signatures SET `paused`=1 WHERE `signatureid` IN ?',
-						$sigs);
-				}
-				else if($_REQUEST['massAction'] == 'continue')
-				{
-					$db->Query('UPDATE {pre}modfax_signatures SET `paused`=0 WHERE `signatureid` IN ?',
-						$sigs);
-				}
-				else if($_REQUEST['massAction'] == 'delete')
-				{
-					$db->Query('DELETE FROM {pre}modfax_signatures WHERE `signatureid` IN ?',
-						$sigs);
-				}
-			}
-
 			// fetch
 			$signatures = array();
 			$res = $db->Query('SELECT * FROM {pre}modfax_signatures ORDER BY `text` ASC');
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
 				$row['displayText'] = nl2br(HTMLFormat($row['text']));
+				$row['editUrl'] = $this->_faxAdminUrl('signatures', array('action' => 'edit', 'id' => $row['signatureid']), true);
 				$signatures[$row['signatureid']] = $row;
 			}
 			$res->Free();
 
 			// assign
 			$tpl->assign('signatures', 	$signatures);
+			$tpl->assign('pageURL',		$this->_faxAdminUrl('signatures', array(), true));
 			$tpl->assign('page', 		$this->_templatePath('modfax.admin.signatures.tpl'));
 		}
 
 		else if($_REQUEST['do'] == 'edit' && isset($_REQUEST['id']))
 		{
-			// save?
-			if(isset($_REQUEST['save']))
-			{
-				$groups	= is_array($_REQUEST['groups']) ? implode(',', $_REQUEST['groups']) : '*';
-				$style 	= $showon = 0;
-
-				if(isset($_REQUEST['style']) && is_array($_REQUEST['style']))
-					foreach($_REQUEST['style'] as $val)
-						$style |= $val;
-
-				if(isset($_REQUEST['showon']) && is_array($_REQUEST['showon']))
-					foreach($_REQUEST['showon'] as $val)
-						$showon |= $val;
-
-				$db->Query('UPDATE {pre}modfax_signatures SET `groups`=?,`paused`=?,`weight`=?,`fontname`=?,`fontsize`=?,`align`=?,`style`=?,`text`=?,`showon`=?,`margin`=? WHERE `signatureid`=?',
-					$groups,
-					isset($_REQUEST['paused']) ? 1 : 0,
-					(int)$_REQUEST['weight'],
-					$_REQUEST['fontname'],
-					$_REQUEST['fontsize'],
-					$_REQUEST['align'],
-					$style,
-					$_REQUEST['text'],
-					$showon,
-					(int)$_REQUEST['margin'],
-					$_REQUEST['id']);
-
-				header('Location: ' . $this->_adminLink() . '&action=signatures&sid=' . session_id());
-				exit();
-			}
-
 			// fetch
 			$res = $db->Query('SELECT * FROM {pre}modfax_signatures WHERE `signatureid`=?',
 				(int)$_REQUEST['id']);
@@ -2047,6 +2375,8 @@ class FaxPlugin extends BMPlugin
 			// assign
 			$tpl->assign('sig', 		$sig);
 			$tpl->assign('groups',		$groupList);
+			$tpl->assign('pageURL',		$this->_faxAdminUrl('signatures', array('action' => 'edit', 'id' => (int)$_REQUEST['id']), true));
+			$tpl->assign('listUrl',		$this->_faxAdminUrl('signatures', array(), true));
 			$tpl->assign('page', 		$this->_templatePath('modfax.admin.signatures.edit.tpl'));
 		}
 	}
@@ -2075,69 +2405,24 @@ class FaxPlugin extends BMPlugin
 
 		if($_REQUEST['do'] == 'overview')
 		{
-			// add?
-			if(isset($_REQUEST['add']))
-			{
-				$countryPrefix 	= preg_replace('/^(\+|00|0)/', '', $_REQUEST['country_prefix']);
-				$prefix 		= preg_replace('/^(\+|00|0)/', '', $_REQUEST['prefix']);
-
-				$db->Query('INSERT INTO {pre}modfax_prefixes(`country_prefix`,`prefix`,`faxgateid`,`price_firstpage`,`price_nextpages`) VALUES(?,?,?,?,?)',
-					$countryPrefix,
-					$prefix,
-					(int)$_REQUEST['faxgateid'],
-					(int)$_REQUEST['price_firstpage'],
-					(int)$_REQUEST['price_nextpages']);
-			}
-
-			// delete?
-			if(isset($_REQUEST['delete']))
-			{
-				$db->Query('DELETE FROM {pre}modfax_prefixes WHERE `prefixid`=?',
-					(int)$_REQUEST['delete']);
-			}
-
-			// mass delete
-			if(isset($_REQUEST['massAction']) && $_REQUEST['massAction'] == 'delete'
-				&& isset($_REQUEST['prefixes']) && is_array($_REQUEST['prefixes']))
-			{
-				$db->Query('DELETE FROM {pre}modfax_prefixes WHERE `prefixid` IN ?',
-					$_REQUEST['prefixes']);
-			}
-
 			// fetch prefixes
 			$prefixes = array();
 			$res = $db->Query('SELECT * FROM {pre}modfax_prefixes ORDER BY `country_prefix` ASC,`prefix` ASC');
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
+				$row['editUrl'] = $this->_faxAdminUrl('prefixes', array('action' => 'edit', 'id' => $row['prefixid']), true);
 				$prefixes[$row['prefixid']] = $row;
 			}
 			$res->Free();
 
 			// assign
 			$tpl->assign('prefixes', 	$prefixes);
+			$tpl->assign('pageURL',		$this->_faxAdminUrl('prefixes', array(), true));
 			$tpl->assign('page', 		$this->_templatePath('modfax.admin.prefixes.tpl'));
 		}
 
 		else if($_REQUEST['do'] == 'edit' && isset($_REQUEST['id']))
 		{
-			// save?
-			if(isset($_REQUEST['save']))
-			{
-				$countryPrefix 	= preg_replace('/^(\+|00|0)/', '', $_REQUEST['country_prefix']);
-				$prefix 		= preg_replace('/^(\+|00|0)/', '', $_REQUEST['prefix']);
-
-				$db->Query('UPDATE {pre}modfax_prefixes SET `country_prefix`=?,`prefix`=?,`faxgateid`=?,`price_firstpage`=?,`price_nextpages`=? WHERE `prefixid`=?',
-					$countryPrefix,
-					$prefix,
-					(int)$_REQUEST['faxgateid'],
-					(int)$_REQUEST['price_firstpage'],
-					(int)$_REQUEST['price_nextpages'],
-					(int)$_REQUEST['id']);
-
-				header('Location: ' . $this->_adminLink() . '&action=prefixes&sid=' . session_id());
-				exit();
-			}
-
 			// fetch
 			$res = $db->Query('SELECT * FROM {pre}modfax_prefixes WHERE `prefixid`=?',
 				(int)$_REQUEST['id']);
@@ -2148,6 +2433,8 @@ class FaxPlugin extends BMPlugin
 
 			// assign
 			$tpl->assign('prefix', 		$prefix);
+			$tpl->assign('pageURL',		$this->_faxAdminUrl('prefixes', array('action' => 'edit', 'id' => (int)$_REQUEST['id']), true));
+			$tpl->assign('listUrl',		$this->_faxAdminUrl('prefixes', array(), true));
 			$tpl->assign('page', 		$this->_templatePath('modfax.admin.prefixes.edit.tpl'));
 		}
 	}
@@ -2159,16 +2446,6 @@ class FaxPlugin extends BMPlugin
 	function _simpleGatewaysAdminPage()
 	{
 		global $tpl, $db;
-
-		// save?
-		if(isset($_REQUEST['save']) && isset($_REQUEST['gateways']) && is_array($_REQUEST['gateways']))
-		{
-			foreach($_REQUEST['gateways'] as $gatewayID=>$gatewayPrefs)
-				$db->Query('UPDATE {pre}modfax_gateways SET `user`=?,`pass`=? WHERE `faxgateid`=?',
-					$gatewayPrefs['user'],
-					$gatewayPrefs['pass'],
-					$gatewayID);
-		}
 
 		// fetch
 		$gateways = array();
@@ -2182,6 +2459,8 @@ class FaxPlugin extends BMPlugin
 
 		// assign
 		$tpl->assign('gateways', $gateways);
+		$tpl->assign('pageURL', $this->_faxAdminUrl('gateways', array('simple' => '1'), true));
+		$tpl->assign('advancedUrl', $this->_faxAdminUrl('gateways', array(), true));
 		$tpl->assign('page', $this->_templatePath('modfax.admin.gateways.simple.tpl'));
 	}
 
@@ -2198,94 +2477,13 @@ class FaxPlugin extends BMPlugin
 
 		if($_REQUEST['do'] == 'overview')
 		{
-			// add
-			if(isset($_REQUEST['add']))
-			{
-				$prefs = $statusPrefs = array();
-				$protocol = $statusMode = 0;
-
-				if((int)$_REQUEST['protocol'] == MODFAX_PROTOCOL_EMAIL)
-				{
-					$protocol						= MODFAX_PROTOCOL_EMAIL;
-					$prefs['from']					= $_REQUEST['email_from'];
-					$prefs['to']					= $_REQUEST['email_to'];
-					$prefs['subject']				= $_REQUEST['email_subject'];
-					$prefs['text']					= $_REQUEST['email_text'];
-					$prefs['pdffile']				= $_REQUEST['email_pdffile'];
-				}
-				else if((int)$_REQUEST['protocol'] == MODFAX_PROTOCOL_HTTP)
-				{
-					$protocol						= MODFAX_PROTOCOL_HTTP;
-					$prefs['url']					= $_REQUEST['http_url'];
-					$prefs['request']				= $_REQUEST['http_request'];
-					$prefs['returnvalue']			= $_REQUEST['http_returnvalue'];
-				}
-
-				if((int)$_REQUEST['status_mode'] == MODFAX_STATUSMODE_EMAIL)
-				{
-					$statusMode						= MODFAX_STATUSMODE_EMAIL;
-					$statusPrefs['emailfrom']		= $_REQUEST['status_emailfrom'];
-					$statusPrefs['emailto']			= $_REQUEST['status_emailto'];
-					$statusPrefs['emailsubject']	= $_REQUEST['status_emailsubject'];
-					$statusPrefs['code_field']		= $_REQUEST['status_code_field'];
-					$statusPrefs['success_field']	= $_REQUEST['status_success_field'];
-					$statusPrefs['code_regex']		= $_REQUEST['status_code_regex'];
-					$statusPrefs['success_regex']	= $_REQUEST['status_success_regex'];
-				}
-				else if((int)$_REQUEST['status_mode'] == MODFAX_STATUSMODE_HTTP)
-				{
-					$statusMode						= MODFAX_STATUSMODE_HTTP;
-					$statusPrefs['code_param']		= $_REQUEST['status_code_param'];
-					$statusPrefs['result_param']	= $_REQUEST['status_result_param'];
-					$statusPrefs['result_regex']	= $_REQUEST['status_result_regex'];
-				}
-
-				$db->Query('INSERT INTO {pre}modfax_gateways(`title`,`number_format`,`status_mode`,`status_prefs`,`protocol`,`prefs`,`user`,`pass`) VALUES(?,?,?,?,?,?,?,?)',
-					$_REQUEST['title'],
-					(int)$_REQUEST['number_format'],
-					$statusMode,
-					serialize($statusPrefs),
-					$protocol,
-					serialize($prefs),
-					$_REQUEST['user'],
-					$_REQUEST['pass']);
-			}
-
-			// delete
-			if(isset($_REQUEST['delete']))
-			{
-				$db->Query('UPDATE {pre}modfax_prefixes SET `faxgateid`=0 WHERE `faxgateid`=?',
-					$_REQUEST['delete']);
-				$db->Query('DELETE FROM {pre}modfax_gateways WHERE `faxgateid`=?',
-					$_REQUEST['delete']);
-			}
-
-			// mass delete
-			if(isset($_REQUEST['massAction']) && $_REQUEST['massAction'] == 'delete'
-				&& isset($_REQUEST['gateways']) && is_array($_REQUEST['gateways']))
-			{
-				$db->Query('UPDATE {pre}modfax_prefixes SET `faxgateid`=0 WHERE `faxgateid` IN ?',
-					$_REQUEST['gateways']);
-				$db->Query('DELETE FROM {pre}modfax_gateways WHERE `faxgateid` IN ?',
-					$_REQUEST['gateways']);
-			}
-
-			// set default
-			if(isset($_REQUEST['massAction']) && $_REQUEST['massAction'] == 'setdefault'
-				&& isset($_REQUEST['gateways']) && is_array($_REQUEST['gateways']))
-			{
-				$gatewayID = array_shift($_REQUEST['gateways']);
-				$db->Query('UPDATE {pre}modfax_prefs SET `default_faxgateid`=?',
-					$gatewayID);
-				$this->prefs['default_faxgateid'] = $gatewayID;
-			}
-
 			// fetch
 			$gateways = array();
 			$res = $db->Query('SELECT `faxgateid`,`title`,`protocol` FROM {pre}modfax_gateways ORDER BY `title` ASC');
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
 				$row['default'] = $this->prefs['default_faxgateid'] == $row['faxgateid'];
+				$row['editUrl'] = $this->_faxAdminUrl('gateways', array('action' => 'edit', 'id' => $row['faxgateid']), true);
 				$gateways[$row['faxgateid']] = $row;
 			}
 			$res->Free();
@@ -2293,72 +2491,17 @@ class FaxPlugin extends BMPlugin
 			// assign
 			$tpl->assign('gateways', $gateways);
 			$tpl->assign('lang', $currentLanguage);
+			$tpl->assign('pageURL', $this->_faxAdminUrl('gateways', array(), true));
+			$tpl->assign('simpleUrl', $this->_faxAdminUrl('gateways', array('simple' => '1'), true));
 			$tpl->assign('page', $this->_templatePath('modfax.admin.gateways.tpl'));
 		}
 
 		else if($_REQUEST['do'] == 'edit'
 			&& isset($_REQUEST['id']))
 		{
-			if(isset($_REQUEST['save'])
-				&& isset($_REQUEST['id']))
-			{
-				$prefs = $statusPrefs = array();
-				$protocol = $statusMode = 0;
-
-				if((int)$_REQUEST['protocol'] == MODFAX_PROTOCOL_EMAIL)
-				{
-					$protocol						= MODFAX_PROTOCOL_EMAIL;
-					$prefs['from']					= $_REQUEST['email_from'];
-					$prefs['to']					= $_REQUEST['email_to'];
-					$prefs['subject']				= $_REQUEST['email_subject'];
-					$prefs['text']					= $_REQUEST['email_text'];
-					$prefs['pdffile']				= $_REQUEST['email_pdffile'];
-				}
-				else if((int)$_REQUEST['protocol'] == MODFAX_PROTOCOL_HTTP)
-				{
-					$protocol						= MODFAX_PROTOCOL_HTTP;
-					$prefs['url']					= $_REQUEST['http_url'];
-					$prefs['request']				= $_REQUEST['http_request'];
-					$prefs['returnvalue']			= $_REQUEST['http_returnvalue'];
-				}
-
-				if((int)$_REQUEST['status_mode'] == MODFAX_STATUSMODE_EMAIL)
-				{
-					$statusMode						= MODFAX_STATUSMODE_EMAIL;
-					$statusPrefs['emailfrom']		= $_REQUEST['status_emailfrom'];
-					$statusPrefs['emailto']			= $_REQUEST['status_emailto'];
-					$statusPrefs['emailsubject']	= $_REQUEST['status_emailsubject'];
-					$statusPrefs['code_field']		= $_REQUEST['status_code_field'];
-					$statusPrefs['success_field']	= $_REQUEST['status_success_field'];
-					$statusPrefs['code_regex']		= $_REQUEST['status_code_regex'];
-					$statusPrefs['success_regex']	= $_REQUEST['status_success_regex'];
-				}
-				else if((int)$_REQUEST['status_mode'] == MODFAX_STATUSMODE_HTTP)
-				{
-					$statusMode						= MODFAX_STATUSMODE_HTTP;
-					$statusPrefs['code_param']		= $_REQUEST['status_code_param'];
-					$statusPrefs['result_param']	= $_REQUEST['status_result_param'];
-					$statusPrefs['result_regex']	= $_REQUEST['status_result_regex'];
-				}
-
-				$db->Query('UPDATE {pre}modfax_gateways SET `title`=?,`number_format`=?,`status_mode`=?,`status_prefs`=?,`protocol`=?,`prefs`=?,`user`=?,`pass`=? WHERE `faxgateid`=?',
-					$_REQUEST['title'],
-					(int)$_REQUEST['number_format'],
-					$statusMode,
-					serialize($statusPrefs),
-					$protocol,
-					serialize($prefs),
-					$_REQUEST['user'],
-					$_REQUEST['pass'],
-					$_REQUEST['id']);
-
-				header('Location: ' . $this->_adminLink() . '&action=gateways&sid=' . session_id());
-				exit();
-			}
-
 			// fetch
 			$res = $db->Query('SELECT * FROM {pre}modfax_gateways WHERE `faxgateid`=?',
-				$_REQUEST['id']);
+				(int)$_REQUEST['id']);
 			if($res->RowCount() == 0) die();
 			$gateway = $res->FetchArray(MYSQLI_ASSOC);
 			$res->Free();
@@ -2367,6 +2510,8 @@ class FaxPlugin extends BMPlugin
 			$tpl->assign('gateway', $gateway);
 			$tpl->assign('prefs', unserialize($gateway['prefs']));
 			$tpl->assign('status_prefs', unserialize($gateway['status_prefs']));
+			$tpl->assign('pageURL', $this->_faxAdminUrl('gateways', array('action' => 'edit', 'id' => (int)$_REQUEST['id']), true));
+			$tpl->assign('listUrl', $this->_faxAdminUrl('gateways', array(), true));
 			$tpl->assign('page', $this->_templatePath('modfax.admin.gateways.edit.tpl'));
 		}
 	}

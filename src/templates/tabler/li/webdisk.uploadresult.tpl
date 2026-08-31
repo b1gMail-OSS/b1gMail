@@ -23,7 +23,7 @@
 				{/foreach}
 			</table>
 			
-			<br /><input type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='webdisk.php?folder={$folderID}&sid={$sid}';" />
+			<br /><input type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='webdisk.php?folder={$folderID}{$sessionUrlSuffix}';" />
 		</td>
 	</tr>
 </table>

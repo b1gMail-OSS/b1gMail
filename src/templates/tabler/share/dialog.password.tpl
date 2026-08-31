@@ -26,6 +26,7 @@
 			<p class="mb-3 text-secondary">{lng p="protected_desc"}</p>
 
 			<form action="index.php?action=passwordSubmit&amp;user={$user|escape:'url'}&amp;folder={$folder}" method="post" class="bm-share-password-form">
+				{csrffield}
 				<div class="mb-3">
 					<label class="form-label" for="pw">{lng p="password"}</label>
 					<input type="password" class="form-control" name="pw" id="pw" autocomplete="current-password" required="required" />

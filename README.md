@@ -3,7 +3,7 @@
     <img width="300" height="212" src="https://www.b1gmail.eu/b1gmaillogo.png">
   </a>
   <br>
-  <h1>b1gMail 7.4 OpenSource version</h1>
+  <h1>b1gMail 7.5 OpenSource version</h1>
   <br>
   <p>
     Email for your website, Modern user interface, Easy to administrate
