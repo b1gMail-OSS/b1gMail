@@ -1,4 +1,5 @@
-<form name="f1" method="post" action="email.compose.php?action=sendMail&sid={$sid}" autocomplete="off" class="bm-compose-form" onreset="if(!askReset()) return(false);editor.reset();">
+<form name="f1" method="post" action="{sessionurl file='email.compose.php' params='action=sendMail'}" autocomplete="off" class="bm-compose-form" onreset="if(!askReset()) return(false);editor.reset();">
+	{csrffield}
 
 <div id="contentHeader" class="bm-compose-header">
 	<div class="left">
@@ -152,8 +153,8 @@
 		{else}
 		<input type="hidden" name="textMode" value="html" />
 		{/if}
-		<script src="./clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
-		<script type="text/javascript" src="./clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
+		<script src="{$selfurl}clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
+		<script type="text/javascript" src="{$selfurl}clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
 		<script>
 		<!--
 			var autoSaveDrafts = {if $autoSaveDrafts}true{else}false{/if};
@@ -162,7 +163,7 @@
 			var editor = new htmlEditor('emailText', '{$tpldir}/images/editor/');
 			editor.ckEditorPrefs.uiColor = bmGetCkEditorUiColor();
 			editor.ckEditorPrefs.contentsCss = [
-				'./clientlib/ckeditor/contents.css?{fileDateSig file="../../clientlib/ckeditor/contents.css"}',
+				'{}clientlib/ckeditor/contents.css?{fileDateSig file="../../clientlib/ckeditor/contents.css"}',
 				'{$tpldir}style/ckeditor-tabler-contents.css?{fileDateSig file="style/ckeditor-tabler-contents.css"}'
 			];
 			editor.modeField = 'textMode';
@@ -233,13 +234,17 @@
 
 <div id="composeLoading" class="bm-compose-loading" style="display:none"><i class="ti ti-loader-2 icon icon-lg bm-spin" aria-hidden="true"></i></div>
 
-<script src="./clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
+<script src="{$selfurl}clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
 
 <script>
 <!--
 	registerLoadAction(initComposeAutoComplete);
 	registerLoadAction(generateAttachmentList);
 	registerLoadAction(composeSizer);
-	initDnDUpload(EBID('mainContent'), 'email.compose.php?action=uploadDnDAttachment&sid=' + currentSID, false, dndAttachmentUploaded, dndAttachmentURLAddition);
+	var bmComposeActionUrls = {
+		addAttachment: '{sessionurl file='email.compose.php' params='action=addAttachment'|escape:'javascript'}',
+		uploadDnDAttachment: '{sessionurl file='email.compose.php' params='action=uploadDnDAttachment'|escape:'javascript'}'
+	};
+	initDnDUpload(EBID('mainContent'), bmComposeActionUrls.uploadDnDAttachment, false, dndAttachmentUploaded, dndAttachmentURLAddition);
 //-->
 </script>

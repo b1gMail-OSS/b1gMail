@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="prefs.ads.php?do=edit&save=true&id={$ad.id}&sid={$sid}" method="post" onsubmit="spin(this);">
+	<form action="{sessionurl file='prefs.ads.php' params="do=edit&save=true&id={$ad.id}"}" method="post" onsubmit="spin(this);">
+		{csrffield}
 		<div class="mb-3 row">
 			<div class="col-sm-12">
 				<textarea name="code" id="code" class="form-control" style="font-family:courier;">{$ad.code}</textarea>

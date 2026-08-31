@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/sms.class.php');
 RequestPrivileges(PRIVILEGES_USER);
 
@@ -35,7 +36,7 @@ ModuleFunction('FileHandler',
  */
 if(!$thisUser->SMSEnabled())
 {
-	header('Location: start.php?sid=' . session_id());
+	SessionRedirect('start.php');
 	exit();
 }
 
@@ -80,7 +81,7 @@ if($validationRequired && $_REQUEST['action'] != 'outbox')
 	{
 		if($thisUser->ValidateMobileNo($_REQUEST['sms_validation_code']))
 		{
-			header('Location: sms.php?sid=' . session_id());
+			SessionRedirect('sms.php');
 			exit();
 		}
 		else
@@ -160,8 +161,8 @@ else if($_REQUEST['action'] == 'sendSMS'
 				? SmartyCellphoneNo('from')
 				: $groupRow['sms_from']);
 		$toNo = SmartyCellphoneNo('to');
-		$typeID = (int)$_REQUEST['type'];
-		$text = $_REQUEST['smsText'];
+		$typeID = (int)($_REQUEST['smsType'] ?? $_REQUEST['type'] ?? 0);
+		$text = $_REQUEST['smsText'] ?? '';
 
 		// check pre
 		if(!BMSMS::PreOK($toNo, $groupRow['sms_pre'])
@@ -185,7 +186,7 @@ else if($_REQUEST['action'] == 'sendSMS'
 			$tpl->assign('accBalance', $thisUser->GetBalance());
 			$tpl->assign('title', $lang_user['sendsms']);
 			$tpl->assign('msg', $lang_user['smssent']);
-			$tpl->assign('backLink', 'sms.php?sid=' . session_id());
+			$tpl->assign('backLink', 'sms.php');
 			$tpl->assign('pageContent', 'li/msg.tpl');
 		}
 		else

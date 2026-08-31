@@ -43,8 +43,8 @@
 		</td>
 		<td class="{$class}" nowrap="nowrap" align="center"><center>{progressBar width=80 value=$task.erledigt max=100}</center></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="organizer.todo.php?action=editTask&id={$taskID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="organizer.todo.php?action=deleteTask&taskListID={$taskListID}&id={$taskID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{else}{assign value=true var=haveDoneTasks}{/if}{/foreach}
@@ -96,8 +96,8 @@
 		</td>
 		<td class="{$class}" nowrap="nowrap" align="center"><center>{progressBar width=80 value=$task.erledigt max=100}</center></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="organizer.todo.php?action=editTask&id={$taskID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="organizer.todo.php?action=deleteTask&taskListID={$taskListID}&id={$taskID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/if}
@@ -113,6 +113,7 @@
 <div class="contentFooter">
 <div class="left">
 	<form name="f1" method="post" action="organizer.todo.php?action=action&sid={$sid}" onsubmit="transferSelectedTasks()">
+		{csrffield}
 	<input type="hidden" name="taskListID" value="{$taskListID}" />
 	<input type="hidden" name="taskIDs" id="taskIDs" value="" />
 	
@@ -126,7 +127,7 @@
 	</form>
 </div>
 <div class="right">
-	<button type="button" class="primary" onclick="document.location.href='organizer.todo.php?action=addTask&taskListID={$taskListID}&sid={$sid}';">
+	<button type="button" class="primary" onclick="document.location.href='{sessionurl file='organizer.todo.php' params="action=addTask&taskListID={$taskListID}"|escape:'javascript'}';">
 		<i class="fa fa-plus-circle"></i>
 		{lng p="addtask"}
 	</button>

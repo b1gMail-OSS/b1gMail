@@ -24,6 +24,9 @@
  */
 class NewsPlugin extends BMPlugin
 {
+    /** @var string Pretty-URL: /admin/plugin/newsplugin/ */
+    public $admin_route_slug = 'newsplugin';
+
     public function __construct()
     {
         // plugin info
@@ -31,13 +34,20 @@ class NewsPlugin extends BMPlugin
         $this->name = 'News';
         $this->author = 'b1gMail Project';
         $this->mail = 'info@b1gmail.org';
-        $this->version = '1.7';
+        $this->version = '1.8';
+        $this->designedfor = '7.5.0';
         $this->update_url = 'https://service.b1gmail.org/plugin_updates/';
         $this->website = 'https://www.b1gmail.org/';
 
         $this->admin_pages = true;
         $this->admin_page_title = 'News';
         $this->admin_page_icon = 'news_icon.png';
+    }
+
+    public function RegisterRoutes()
+    {
+        BMRoute()->nli('news', array('action' => 'newsPlugin'));
+        BMRoute()->liStart('newsPlugin', 'start/news');
     }
 
     public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
@@ -94,51 +104,172 @@ class NewsPlugin extends BMPlugin
         return true;
     }
 
+    /**
+     * Pretty-URL path segment (do) → internal action=news + optional sub-do.
+     */
+    protected function _newsNormalizeRequest()
+    {
+        if (!isset($_REQUEST['action']) || $_REQUEST['action'] === '') {
+            $_REQUEST['action'] = 'news';
+        }
+
+        $pathDo = isset($_REQUEST['do']) ? strtolower((string) $_REQUEST['do']) : '';
+
+        if ($pathDo === 'news') {
+            $_REQUEST['action'] = 'news';
+            unset($_REQUEST['do']);
+        } elseif ($pathDo === 'edit') {
+            $_REQUEST['action'] = 'news';
+        }
+
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] !== '') {
+            $_REQUEST['action'] = strtolower((string) $_REQUEST['action']);
+        }
+
+        if (isset($_REQUEST['do']) && $_REQUEST['do'] !== '') {
+            $_REQUEST['do'] = strtolower((string) $_REQUEST['do']);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    protected function _newsTabLink()
+    {
+        return $this->_newsAdminUrl(null, array(), true);
+    }
+
+    /**
+     * @param string|null          $subDo edit, …
+     * @param array<string, mixed> $query
+     * @param bool                 $trailingAmp
+     * @return string
+     */
+    protected function _newsAdminUrl($subDo = null, array $query = array(), $trailingAmp = true)
+    {
+        $params = array_merge(array('plugin' => $this->internal_name), $query);
+
+        if ($subDo !== null && $subDo !== '') {
+            $params['do'] = $subDo;
+        }
+
+        if (function_exists('AdminSessionUrl')) {
+            return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+        }
+
+        $url = $this->_adminLink();
+        unset($params['plugin']);
+        foreach ($params as $key => $val) {
+            if ((string) $val === '') {
+                continue;
+            }
+            $url .= '&' . rawurlencode((string) $key) . '=' . rawurlencode((string) $val);
+        }
+        if ($trailingAmp) {
+            $url .= (strpos($url, '?') !== false ? '&' : '?');
+        }
+
+        return $url;
+    }
+
+    /**
+     * Legacy GET mutations (ohne CSRF) → Redirect, keine Aktion.
+     */
+    protected function _newsRedirectLegacyGet()
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+            return;
+        }
+
+        if (isset($_REQUEST['delete']) || isset($_REQUEST['add'])) {
+            SessionRedirect($this->_newsAdminUrl(null, array(), false));
+            exit();
+        }
+    }
+
+    /**
+     * POST: add / delete / save (CSRF via {csrffield} in templates).
+     */
+    protected function _newsHandlePost()
+    {
+        global $db;
+
+        if (($_REQUEST['action'] ?? '') !== 'news') {
+            return;
+        }
+
+        if (isset($_POST['delete'])) {
+            $db->Query('DELETE FROM {pre}news WHERE `newsid`=?',
+                (int) $_POST['delete']);
+            SessionRedirect($this->_newsAdminUrl(null, array(), false));
+            exit();
+        }
+
+        if (isset($_POST['add'])) {
+            if (isset($_POST['all_groups'])) {
+                $groups = '*';
+            } else {
+                $groups = implode(',', is_array($_POST['groups'] ?? null) ? $_POST['groups'] : array());
+            }
+            $db->Query('INSERT INTO {pre}news(`title`,`date`,`loggedin`,`groups`,`text`) VALUES(?,?,?,?,?)',
+                $_POST['title'] ?? '',
+                time(),
+                $_POST['loggedin'] ?? 'nli',
+                $groups,
+                $_POST['text'] ?? '');
+            SessionRedirect($this->_newsAdminUrl(null, array(), false));
+            exit();
+        }
+
+        if (($_REQUEST['do'] ?? '') === 'edit' && isset($_POST['save']) && isset($_REQUEST['id'])) {
+            if (isset($_POST['all_groups'])) {
+                $groups = '*';
+            } else {
+                $groups = implode(',', is_array($_POST['groups'] ?? null) ? $_POST['groups'] : array());
+            }
+            $db->Query('UPDATE {pre}news SET `title`=?,`loggedin`=?,`groups`=?,`text`=? WHERE `newsid`=?',
+                $_POST['title'] ?? '',
+                $_POST['loggedin'] ?? 'nli',
+                $groups,
+                $_POST['text'] ?? '',
+                (int) $_REQUEST['id']);
+            SessionRedirect($this->_newsAdminUrl(null, array(), false));
+            exit();
+        }
+    }
+
     public function AdminHandler()
     {
         global $tpl, $bm_prefs, $lang_admin, $db;
 
-        if (!isset($_REQUEST['action'])) {
-            $_REQUEST['action'] = 'news';
+        $this->_newsNormalizeRequest();
+        $this->_newsRedirectLegacyGet();
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+            $this->_newsHandlePost();
         }
+
+        $action = $_REQUEST['action'] ?? 'news';
 
         $tabs = [
             0 => [
                 'title' => $lang_admin['news_news'],
-                'link' => $this->_adminLink().'&',
+                'link' => $this->_newsTabLink(),
                 'icon' => '../plugins/templates/images/news_add.png',
-                'active' => $_REQUEST['action'] == 'news',
+                'active' => $action === 'news',
             ],
         ];
 
         $tpl->assign('tabs', $tabs);
-        $tpl->assign('pageURL', $this->_adminLink());
+        $tpl->assign('newsPlugin', $this->internal_name);
+        $tpl->assign('pageURL', $this->_newsAdminUrl(null, array(), true));
 
-        if ($_REQUEST['action'] == 'news') {
-            //
-            // overview (+ add, delete)
-            //
+        if ($action == 'news') {
             if (!isset($_REQUEST['do'])) {
-                if (isset($_REQUEST['add'])) {
-                    if (isset($_REQUEST['all_groups'])) {
-                        $groups = '*';
-                    } else {
-                        $groups = implode(',', is_array($_REQUEST['groups']) ? $_REQUEST['groups'] : []);
-                    }
-                    $db->Query('INSERT INTO {pre}news(`title`,`date`,`loggedin`,`groups`,`text`) VALUES(?,?,?,?,?)',
-                        $_REQUEST['title'],
-                        time(),
-                        $_REQUEST['loggedin'],
-                        $groups,
-                        $_REQUEST['text']);
-                } elseif (isset($_REQUEST['delete'])) {
-                    $db->Query('DELETE FROM {pre}news WHERE `newsid`=?',
-                        (int) $_REQUEST['delete']);
-                }
-
-                $news = [];
+                $news = array();
                 $res = $db->Query('SELECT `newsid`,`title`,`date`,`loggedin` FROM {pre}news ORDER BY `newsid` DESC');
                 while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+                    $row['editUrl'] = $this->_newsAdminUrl('edit', array('id' => $row['newsid']), true);
                     $news[$row['newsid']] = $row;
                 }
                 $res->Free();
@@ -147,31 +278,9 @@ class NewsPlugin extends BMPlugin
                 $tpl->assign('groups', BMGroup::GetSimpleGroupList());
                 $tpl->assign('news', $news);
                 $tpl->assign('page', $this->_templatePath('news.admin.tpl'));
-            }
-
-            //
-            // edit
-            //
-            elseif ($_REQUEST['do'] == 'edit'
+            } elseif ($_REQUEST['do'] == 'edit'
                 && isset($_REQUEST['id'])) {
-                if (isset($_REQUEST['save'])) {
-                    if (isset($_REQUEST['all_groups'])) {
-                        $groups = '*';
-                    } else {
-                        $groups = implode(',', is_array($_REQUEST['groups']) ? $_REQUEST['groups'] : []);
-                    }
-                    $db->Query('UPDATE {pre}news SET `title`=?,`loggedin`=?,`groups`=?,`text`=? WHERE `newsid`=?',
-                        $_REQUEST['title'],
-                        $_REQUEST['loggedin'],
-                        $groups,
-                        $_REQUEST['text'],
-                        (int) $_REQUEST['id']);
-                    header('Location: '.$this->_adminLink().'&sid='.session_id());
-                    exit();
-                }
-
-                // fetch news
-                $news = [];
+                $news = array();
                 $res = $db->Query('SELECT `newsid`,`title`,`text`,`loggedin`,`groups` FROM {pre}news WHERE `newsid`=?',
                     (int) $_REQUEST['id']);
                 if ($res->RowCount() != 1) {
@@ -180,7 +289,6 @@ class NewsPlugin extends BMPlugin
                 $news = $res->FetchArray();
                 $res->Free();
 
-                // process groups
                 $groups = BMGroup::GetSimpleGroupList();
                 if ($news['groups'] != '*') {
                     $newsGroups = explode(',', $news['groups']);
@@ -192,6 +300,7 @@ class NewsPlugin extends BMPlugin
                     }
                 }
 
+                $tpl->assign('pageURL', $this->_newsAdminUrl('edit', array('id' => $news['newsid']), true));
                 $tpl->assign('usertpldir', B1GMAIL_REL.'templates/'.$bm_prefs['template'].'/');
                 $tpl->assign('groups', $groups);
                 $tpl->assign('news', $news);
@@ -239,8 +348,9 @@ class NewsPlugin extends BMPlugin
 
         return [
             'news' => [
+                'faIcon' => 'fa-newspaper-o',
                 'text' => $lang_user['news_news'],
-                'link' => 'index.php?action=newsPlugin',
+                'link' => PublicNavUrl('index.php?action=newsPlugin'),
             ],
         ];
     }
@@ -280,7 +390,7 @@ class NewsWidget extends BMPlugin
         $this->name = 'News widget';
         $this->author = 'b1gMail Project';
         $this->mail = 'info@b1gmail.org';
-        $this->version = '1.7';
+        $this->version = '1.8';
         $this->widgetTemplate = 'widget.news.tpl';
         $this->widgetTitle = 'News';
         $this->update_url = 'https://service.b1gmail.org/plugin_updates/';

@@ -1,14 +1,14 @@
 {if !$listOnly}<div data-role="header" data-position="fixed">
-	<a href="email.php?action=folders&sid={$sid}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{lng p="folders"}</a>
+	<a href="email.php?action=folders" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{lng p="folders"}</a>
 	<h1>{$pageTitle}</h1>
-	<a href="email.php?action=compose&sid={$sid}" data-icon="forward" data-iconpos="right" data-dom-cache="false">{lng p="sendmail"}</a>
+	<a href="email.php?action=compose" data-icon="forward" data-iconpos="right" data-dom-cache="false">{lng p="sendmail"}</a>
 </div>
 
 <div data-role="content">
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="{lng p="search"}..." id="mailList">{/if}
 	{foreach from=$mails item=mail key=mailID}
 		<li>
-			<a href="email.php?action=read&id={$mailID}&sid={$sid}" data-transition="slide">
+			<a href="email.php?action=read&id={$mailID}" data-transition="slide">
 				{if $mail.flags&1}
 				<img src="{$selfurl}{$_tpldir}images/m/dot.png" class="ui-li-icon" style="margin-top:0.75em;" />
 				{elseif $mail.flags&2}

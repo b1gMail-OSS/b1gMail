@@ -100,7 +100,7 @@
 
 <div id="contentFooter">
 	<div class="right">
-		<button type="button" class="primary" onclick="document.location.href='organizer.calendar.php?action=addDate&date={$theDate}&sid={$sid}';">
+		<button type="button" class="primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params="action=addDate&date={$theDate}"|escape:'javascript'}';">
 			<i class="fa fa-plus-circle"></i>
 			{lng p="adddate"}
 		</button>

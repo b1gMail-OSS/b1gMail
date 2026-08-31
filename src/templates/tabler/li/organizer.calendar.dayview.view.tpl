@@ -18,7 +18,7 @@
 	</script>
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}css/tabler.min.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/loggedin.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/tabler-custom.css" rel="stylesheet" type="text/css" />
@@ -30,13 +30,13 @@
 		var currentSID = '{$sid}', tplDir = '{$tpldir}', serverTZ = {$serverTZ};
 	//-->
 	</script>
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/organizer.js" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/dtree.js" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/overlay.js" type="text/javascript"></script>
-	<script src="clientlib/autocomplete.js" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/autocomplete.js" type="text/javascript"></script>
 </head>
 
 <body onload="initCalendar()" style="background-color:var(--tblr-bg-surface, #fff);background-image:none;">
@@ -46,7 +46,7 @@
 		<tr>
 		{if $smarty.section.halfHours.index%2==0}
 			<td class="calendarDayTimeCell" rowspan="2">
-				<div class="calendarDayTimeCellText"><a href="organizer.calendar.php?action=addDate&date={$dateStart}&time={halfHourToTime value=$smarty.section.halfHours.index dateStart=$dateStart}&sid={$sid}" target="_top">{halfHourToTime value=$smarty.section.halfHours.index}</a></div>
+				<div class="calendarDayTimeCellText"><a href="{sessionurl file='organizer.calendar.php' params="action=addDate&date={$dateStart}&time={halfHourToTime value=$smarty.section.halfHours.index dateStart=$dateStart}"}" target="_top">{halfHourToTime value=$smarty.section.halfHours.index}</a></div>
 			</td>
 		{/if}
 		{if $smarty.section.halfHours.index==0}

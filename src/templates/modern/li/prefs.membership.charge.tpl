@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form action="prefs.php?action=membership&do=chargeAccount&sid={$sid}" method="post">
+	{csrffield}
 <table class="listTable">
 	<tr>
 		<th class="listTableHead" colspan="2"> {lng p="charge"}</th>
@@ -39,6 +40,7 @@
 {if $credits}
 <br />
 <form action="prefs.php?action=membership&do=chargeAccount&sid={$sid}" method="post">
+	{csrffield}
 <input type="hidden" name="credits" value="{$credits}" />
 <input type="hidden" name="submitOrder" value="true" />
 {include file="li/payment.form.tpl"}

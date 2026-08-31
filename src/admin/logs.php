@@ -36,7 +36,7 @@ $tabs = array(
 	1 => array(
 		'title'		=> $lang_admin['archiving'],
 		'relIcon'	=> 'archiving.png',
-		'link'		=> 'logs.php?action=archiving&',
+		'link'		=> 'logs.php?action=archiving',
 		'active'	=> $_REQUEST['action'] == 'archiving'
 	)
 );

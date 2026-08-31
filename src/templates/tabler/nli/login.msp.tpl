@@ -4,7 +4,18 @@
 			{include file="nli/login.brand.tpl"}
 		</div>
 
-		{if $welcomeBack}
+		{if $sessionActive}
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-lg-5">
+				<div class="card card-md">
+					{include file="nli/msp.tabs.tpl"}
+					<div class="card-body">
+						{include file="nli/login.sessionactive.tpl"}
+					</div>
+				</div>
+			</div>
+		</div>
+		{elseif $welcomeBack}
 		<div class="row justify-content-center">
 			<div class="col-md-6 col-lg-5">
 				<div class="card card-md">
@@ -32,7 +43,7 @@
 									{lng p="signup"}
 								</h3>
 								<div class="text-secondary mb-3">{lng p="notmembertxt"}</div>
-								<a href="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup" class="btn btn-primary">
+								<a href="{if $ssl_signup_enable}{$nliUrlSignupSsl}{else}{$nliUrlSignup}{/if}" class="btn btn-primary">
 									{lng p="signup"}
 								</a>
 							</div>
@@ -53,7 +64,7 @@
 					{if $_regEnabled||(!$templatePrefs.hideSignup)}
 					<div class="card-footer text-center text-secondary">
 						{lng p="notmember"}?
-						<a href="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup">{lng p="signup"}</a>
+						<a href="{if $ssl_signup_enable}{$nliUrlSignupSsl}{else}{$nliUrlSignup}{/if}">{lng p="signup"}</a>
 					</div>
 					{/if}
 				</div>

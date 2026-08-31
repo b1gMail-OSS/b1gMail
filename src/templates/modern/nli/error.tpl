@@ -26,7 +26,7 @@
 					<h2>{$description}</h2>
 					
 					<hr size="1" color="#DDDDDD" width="100%" noshade="noshade" />
-					<input type="button" value="&nbsp; {lng p="start"} &nbsp;" onclick="document.location.href='./';" style="padding: 1px;" />
+					<input type="button" value="&nbsp; {lng p="start"} &nbsp;" onclick="document.location.href='{$nliUrlHome|escape:'javascript'}';" style="padding: 1px;" />
 					
 				</td>
 			</tr>

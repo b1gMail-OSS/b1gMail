@@ -1,83 +1,80 @@
-{if $success}
-	<div class="alert alert-success">{$success}</div>
-{elseif $error}
-	<div class="alert alert-danger">{$error}</div>
+{if $plzMsg}
+<div class="alert alert-{$plzMsg.type} mb-3" role="alert">{$plzMsg.text}</div>
 {/if}
 
-<div class="row">
+<div class="row g-3">
 	<div class="col-md-6">
-		<form action="{$pageURL}&sid={$sid}&action=editor&do=test" method="post" onsubmit="spin(this)">
-			<fieldset>
-				<legend>{lng p="plzeditor_test"}</legend>
-				<div class="mb-3 row">
-					<div class="col-sm-10"><img src="../plugins/templates/images/plzeditor_test.png" border="0" alt="" width="32" height="32" /</div>
+		<form action="{sessionurl file='plugin.page.php' params="plugin={$plzPlugin}&do=editor&action=test"}" method="post" onsubmit="spin(this)">
+			{csrffield}
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">
+						<img src="../plugins/templates/images/plzeditor_test.png" alt="" width="24" height="24" class="me-2 align-text-bottom" />
+						{lng p="plzeditor_test"}
+					</h3>
 				</div>
-
-				<div class="mb-3 row">
-					<label class="col-sm-2 col-form-label">{lng p="country"}</label>
-					<div class="col-sm-10">
-						<select name="country" class="form-select">
+				<div class="card-body">
+					<div class="mb-3">
+						<label class="form-label" for="plz_test_country">{lng p="country"}</label>
+						<select name="country" id="plz_test_country" class="form-select">
 							{foreach from=$plzFiles item=countryName key=countryID}
 								<option value="{$countryID}"{if $countryID==$defaultCountryID} selected="selected"{/if}>{$countryName}</option>
 							{/foreach}
 						</select>
 					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-2 col-form-label">{lng p="plzeditor_zip"}</label>
-					<div class="col-sm-10">
-						<input type="text" class="form-control" name="zip" value="" placeholder="{lng p="plzeditor_zip"}">
+					<div class="mb-3">
+						<label class="form-label" for="plz_test_zip">{lng p="plzeditor_zip"}</label>
+						<input type="text" class="form-control" name="zip" id="plz_test_zip" value="" placeholder="{lng p="plzeditor_zip"}" required="required" />
+					</div>
+					<div class="mb-3">
+						<label class="form-label" for="plz_test_city">{lng p="plzeditor_city"}</label>
+						<input type="text" class="form-control" name="city" id="plz_test_city" value="" placeholder="{lng p="plzeditor_city"}" required="required" />
 					</div>
 				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-2 col-form-label">{lng p="plzeditor_city"}</label>
-					<div class="col-sm-10">
-						<input type="text" class="form-control" name="city" value="" placeholder="{lng p="plzeditor_city"}">
-					</div>
+				<div class="card-footer text-end">
+					<button type="submit" class="btn btn-primary">
+						<i class="ti ti-search me-1"></i>
+						{lng p="plzeditor_test"}
+					</button>
 				</div>
-
-				<div class="text-end">
-					<input class="btn btn-primary" type="submit" value="{lng p="plzeditor_test"}" />
-				</div>
-			</fieldset>
+			</div>
 		</form>
 	</div>
 	<div class="col-md-6">
-		<form action="{$pageURL}&sid={$sid}&action=editor&do=add" method="post" onsubmit="spin(this)">
-			<fieldset>
-				<legend>{lng p="plzeditor_add"}</legend>
-
-				<div class="mb-3 row">
-					<div class="col-sm-10"><img src="../plugins/templates/images/plzeditor_add.png" border="0" alt="" width="32" height="32" /</div>
+		<form action="{sessionurl file='plugin.page.php' params="plugin={$plzPlugin}&do=editor&action=add"}" method="post" onsubmit="spin(this)">
+			{csrffield}
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">
+						<img src="../plugins/templates/images/plzeditor_add.png" alt="" width="24" height="24" class="me-2 align-text-bottom" />
+						{lng p="plzeditor_add"}
+					</h3>
 				</div>
-
-				<div class="mb-3 row">
-					<label class="col-sm-2 col-form-label">{lng p="country"}</label>
-					<div class="col-sm-10">
-						<select name="country" class="form-select">
+				<div class="card-body">
+					<div class="mb-3">
+						<label class="form-label" for="plz_add_country">{lng p="country"}</label>
+						<select name="country" id="plz_add_country" class="form-select">
 							{foreach from=$plzFiles item=countryName key=countryID}
 								<option value="{$countryID}"{if $countryID==$defaultCountryID} selected="selected"{/if}>{$countryName}</option>
 							{/foreach}
 						</select>
 					</div>
-				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-2 col-form-label">{lng p="plzeditor_zip"}</label>
-					<div class="col-sm-10">
-						<input type="text" class="form-control" name="zip" value="" placeholder="{lng p="plzeditor_zip"}">
+					<div class="mb-3">
+						<label class="form-label" for="plz_add_zip">{lng p="plzeditor_zip"}</label>
+						<input type="text" class="form-control" name="zip" id="plz_add_zip" value="" placeholder="{lng p="plzeditor_zip"}" required="required" />
+					</div>
+					<div class="mb-3">
+						<label class="form-label" for="plz_add_city">{lng p="plzeditor_city"}</label>
+						<input type="text" class="form-control" name="city" id="plz_add_city" value="" placeholder="{lng p="plzeditor_city"}" required="required" />
 					</div>
 				</div>
-				<div class="mb-3 row">
-					<label class="col-sm-2 col-form-label">{lng p="plzeditor_city"}</label>
-					<div class="col-sm-10">
-						<input type="text" class="form-control" name="city" value="" placeholder="{lng p="plzeditor_city"}">
-					</div>
+				<div class="card-footer text-end">
+					<button type="submit" class="btn btn-primary">
+						<i class="ti ti-plus me-1"></i>
+						{lng p="plzeditor_add"}
+					</button>
 				</div>
-
-				<div class="text-end">
-					<input class="btn btn-primary" type="submit" value="{lng p="plzeditor_add"}" />
-				</div>
-			</fieldset>
+			</div>
 		</form>
 	</div>
 </div>

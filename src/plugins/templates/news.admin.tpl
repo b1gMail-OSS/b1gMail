@@ -6,7 +6,6 @@
 			<table class="table table-vcenter table-striped">
 				<thead>
 				<tr>
-					<th style="width: 30px;">&nbsp;</th>
 					<th>{lng p="title"}</th>
 					<th style="width: 150px;">{lng p="type"}</th>
 					<th style="width: 55px;">&nbsp;</th>
@@ -16,9 +15,6 @@
 				{foreach from=$news item=item}
 					{cycle name=class values="td1,td2" assign=class}
 					<tr class="{$class}">
-						<td class="text-center">
-								<i class="fa-solid fa-newspaper"></i>
-						</td>
 						<td>
 							{text value=$item.title cut=55}<br />
 							<small>{date timestamp=$item.date dayonly=true}</small>
@@ -26,8 +22,12 @@
 						<td>{lng p=$item.loggedin}</td>
 						<td class="text-nowrap">
 							<div class="btn-group btn-group-sm">
-								<a href="{$pageURL}&action=news&do=edit&id={$item.newsid}&sid={$sid}" title="{lng p="edit"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-								<a href="{$pageURL}&action=news&delete={$item.newsid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+								<a href="{$item.editUrl}{$sessionUrlSuffixHtml}" title="{lng p="edit"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+								<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" class="d-inline" onsubmit="return confirm('{lng p="realdel"}');">
+									{csrffield}
+									<input type="hidden" name="delete" value="{$item.newsid}" />
+									<button type="submit" class="btn btn-sm" title="{lng p="delete"}"><i class="fa-regular fa-trash-can"></i></button>
+								</form>
 							</div>
 						</td>
 					</tr>
@@ -41,7 +41,9 @@
 <fieldset>
 	<legend>{lng p="news_addnews"}</legend>
 
-	<form action="{$pageURL}&action=news&add=true&sid={$sid}" method="post" onsubmit="EBID('title').focus();if(EBID('title').value.length<2) return(false);editor.submit();spin(this)">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="EBID('title').focus();if(EBID('title').value.length<2) return(false);editor.submit();spin(this)">
+		{csrffield}
+		<input type="hidden" name="add" value="1" />
 		<div class="row">
 			<div class="col-md-8">
 				<div class="mb-3 row">

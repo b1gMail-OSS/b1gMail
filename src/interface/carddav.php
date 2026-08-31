@@ -21,7 +21,8 @@
 
 define('INTERFACE_MODE', 		true);
 
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 include('../serverlib/dav.inc.php');
 include('../serverlib/organizerdav.inc.php');
 include('../serverlib/addressbook.class.php');
@@ -610,7 +611,8 @@ $server = new DAV\Server($nodes);
 $server->setBaseUri($_SERVER['SCRIPT_NAME']);
 
 $authBackend = new BMCardDAVAuthBackend;
-$authPlugin = new DAV\Auth\Plugin($authBackend, $bm_prefs['titel'] . ' ' . $lang_user['addressbook']);
+$authBackend->setRealm($bm_prefs['titel'] . ' ' . $lang_user['addressbook']);
+$authPlugin = new DAV\Auth\Plugin($authBackend);
 $server->addPlugin($authPlugin);
 
 $server->addPlugin(new \Sabre\CardDAV\Plugin());

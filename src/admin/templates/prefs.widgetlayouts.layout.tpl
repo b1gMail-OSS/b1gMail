@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="defaultlayout"}</legend>
 
-	<form action="prefs.widgetlayouts.php?action={$action}&saveOrder=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.widgetlayouts.php' params="action={$action}&saveOrder=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<input type="hidden" name="order" id="order" value="{$widgetOrder}" />
 
 		<div id="dashboard" style="border: 0px; background-color: #FEFEFE; padding: 10px; position: relative;">
@@ -23,7 +24,7 @@
 		</script>
 
 		<div class="row mb-3" style="margin-top: 20px;">
-			<div class="col-md-6"><a href="prefs.widgetlayouts.php?action={$action}&do=addremove&sid={$sid}" class="btn btn-muted"><i class="fa-solid fa-puzzle-piece"></i>&nbsp; {lng p="layout_addremove"}</a></div>
+			<div class="col-md-6"><a href="{sessionurl file='prefs.widgetlayouts.php' params="action={$action}&do=addremove"}" class="btn btn-muted"><i class="fa-solid fa-puzzle-piece"></i>&nbsp; {lng p="layout_addremove"}</a></div>
 			<div class="col-md-6 text-end"><input class="btn btn-primary" type="submit" value="{lng p="save"}" /></div>
 		</div>
 	</form>
@@ -34,7 +35,8 @@
 
 	<div class="alert alert-warning">{lng p="undowarn"}</div>
 
-	<form action="prefs.widgetlayouts.php?action={$action}&resetOrder=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.widgetlayouts.php' params="action={$action}&resetOrder=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<p>{lng p="layout_resetdesc"}</p>
 
 		<div class="mb-3 row">

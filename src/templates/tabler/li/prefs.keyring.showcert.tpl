@@ -10,7 +10,7 @@
 	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
@@ -19,7 +19,7 @@
 		var tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="clientlang.php" type="text/javascript"></script>
+	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
@@ -143,7 +143,7 @@
 	
 	<div>
 		<div style="float:left">
-			<input type="button" value=" {lng p="download"} " onclick="document.location.href='prefs.php?action=keyring&do=downloadCertificate&hash={$certInfo.hash}&sid={$sid}';" />
+			<input type="button" value=" {lng p="download"} " onclick="document.location.href='{sessionurl file='prefs.php' params="action=keyring&do=downloadCertificate&hash={$certInfo.hash}"}';" />
 		</div>
 		<div style="float:right">
 			<input type="button" value=" {lng p="close"} " onclick="parent.hideOverlay();" />

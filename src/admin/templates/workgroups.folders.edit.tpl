@@ -1,4 +1,5 @@
-<form method="post" action="workgroups.php?action=folders&do=edit&id={$folder.id}&save=true&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="{sessionurl file='workgroups.php' params="action=folders&do=edit&id={$folder.id}&save=true"}" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="edit"}: {text value=$folder.titel}</legend>
 		
@@ -40,7 +41,7 @@
 
 	<p>
 		<div style="float:left" class="buttons">
-			<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='workgroups.php?action=folders&sid={$sid}';" />
+			<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='workgroups.php?action=folders{$sessionUrlSuffix}';" />
 		</div>
 		<div style="float:right" class="buttons">
 			<input class="button" type="submit" value=" {lng p="save"} " />

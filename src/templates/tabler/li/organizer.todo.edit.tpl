@@ -6,7 +6,8 @@
 		</div>
 	</div>
 
-	<form name="f1" method="post" action="organizer.todo.php?action={if isset($task)}saveTask&id={$task.id}{else}createTask{/if}&sid={$sid}" class="card bm-organizer-form-card" onsubmit="return(checkTodoForm(this));">
+	<form name="f1" method="post" action="organizer.todo.php?action={if isset($task)}saveTask&id={$task.id}{else}createTask{/if}{$sessionUrlSuffix}" class="card bm-organizer-form-card" onsubmit="return(checkTodoForm(this));">
+		{csrffield}
 		<div class="card-body">
 			<h3 class="card-title mb-4">{if isset($task)}{lng p="edittask"}{else}{lng p="addtask"}{/if}</h3>
 

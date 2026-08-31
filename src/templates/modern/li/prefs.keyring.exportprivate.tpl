@@ -26,6 +26,7 @@
 		{lng p="exportprivcerttext"}
 		
 		<form action="prefs.php?action=keyring&do=downloadPrivateCertificate&hash={text value=$hash}&sid={$sid}" method="post" autocomplete="off">
+			{csrffield}
 			<br /><br />
 			<table width="100%" cellspacing="0" cellpadding="2">
 				<tr>

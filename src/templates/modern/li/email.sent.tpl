@@ -20,6 +20,7 @@
 			{lng p="addraddtext"}
 			<br /><br />
 			<form action="organizer.addressbook.php?action=quickAdd&sid={$sid}" method="post" onsubmit="return ajaxFormSubmit(this);">
+				{csrffield}
 				{*<table class="listTable">
 					<tr>
 						<th class="listTableHead" width="24">&nbsp;</th>

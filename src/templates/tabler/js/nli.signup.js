@@ -6,6 +6,28 @@ var emailTimeout = false, emailValueOld = '', emailLastChecked = '';
 var emailCheckPending = false, emailCheckState = 'unknown';
 var suggestionsTimeout = false, suggestionsRequest = null;
 
+function bmSignupCsrfData(data)
+{
+	data = data || {};
+	var token = '';
+	if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+		token = bmCsrfToken;
+	else
+	{
+		var $inp = $('input[name="csrf_token"]').first();
+		if($inp.length)
+			token = $inp.val() || '';
+	}
+	if(token)
+		data.csrf_token = token;
+	return data;
+}
+
+function bmSignupCheckFailText()
+{
+	return lang['addrcheckfail'] || lang['addrinvalid'] || '';
+}
+
 function bmEmailAlertShow($alert)
 {
 	$alert.removeClass('d-none');
@@ -110,8 +132,8 @@ function loadAddressSuggestions(target)
 		$('#email_suggestions_wrap').removeClass('d-none');
 
 	suggestionsRequest = $.post('index.php',
-		{ 'action': 'showAddressSugestions', 'firstName': firstName, 'lastName': lastName,
-			'choice': choice, 'domain': domain },
+		bmSignupCsrfData({ 'action': 'showAddressSugestions', 'firstName': firstName, 'lastName': lastName,
+			'choice': choice, 'domain': domain }),
 		function(data)
 		{
 			suggestionsRequest = null;
@@ -120,6 +142,9 @@ function loadAddressSuggestions(target)
 				$('#suggestionsBody').html(html);
 			else
 				bmSuggestionsShow(html);
+		}).fail(function() {
+			suggestionsRequest = null;
+			$body.html('<div class="text-danger">' + bmSignupCheckFailText() + '</div>');
 		});
 }
 
@@ -361,7 +386,12 @@ function checkEMailAvailability(e)
 			else
 				emailCheckState = 'unknown';
 		},
-		'xml');
+		'xml').fail(function() {
+			emailCheckPending = false;
+			emailCheckState = 'unknown';
+			bmEmailAlertSet($alert, 'danger', bmSignupCheckFailText());
+			bmEmailAlertShow($alert);
+		});
 
 	emailLastChecked = emailAddr;
 }

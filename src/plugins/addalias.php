@@ -27,7 +27,7 @@ class addalias extends BMPlugin
 	{
 		$this->name					= "Add Alias";
 		$this->version				= '1.2.0';
-        $this->designedfor         	= '7.4.2';
+        $this->designedfor         	= '7.5.0';
 		$this->type					= BMPLUGIN_DEFAULT;
 		
 		$this->author				= 'b1gMail.eu Project, dotaachen';
@@ -47,31 +47,31 @@ class addalias extends BMPlugin
     {
         global $tpl, $lang_admin;
 
-        // Standardaktion setzen
-        $action = $_REQUEST['action'] ?? 'page1';
+        // Standardaktion (do = Pretty-URL-Segment; action nur Legacy)
+        $do = $_REQUEST['do'] ?? $_REQUEST['action'] ?? 'page1';
 
         // Tabs im Adminbereich
         $tabs = [
 			[
 				'title'		=> $lang_admin['create'],
-				'link'		=> $this->_adminLink() . '&action=page1&',
-				'active'	=> $action == 'page1',
-				'icon'		=> '../plugins/templates/images/addalias_logo.png'
+				'link'		=> $this->_adminLink() . '&do=page1&',
+				'active'	=> $do == 'page1',
+				'icon'		=> '../plugins/templates/images/addalias_icon.png'
 			],
 			[
 				'title'		=> $lang_admin['faq'],
-				'link'		=> $this->_adminLink() . '&action=page2&',
-				'active'	=> $action == 'page2',
+				'link'		=> $this->_adminLink() . '&do=page2&',
+				'active'	=> $do == 'page2',
 				'icon'		=> './templates/images/faq32.png'
 			],
 		];
         $tpl->assign('tabs', $tabs);
 
         // Plugin aufruf mit Action 
-        if ($action === 'page1') {
+        if ($do === 'page1') {
             $tpl->assign('page', $this->_templatePath('addalias1.pref.tpl'));
             $this->_Page1();
-        } elseif ($action === 'page2') {
+        } elseif ($do === 'page2') {
             $tpl->assign('page', $this->_templatePath('addalias2.pref.tpl'));
         }
     }

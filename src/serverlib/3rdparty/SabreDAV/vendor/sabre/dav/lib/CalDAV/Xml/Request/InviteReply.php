@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Request;
 
-use Sabre\Xml\Reader;
-use Sabre\Xml\XmlDeserializable;
-use Sabre\Xml\Element\KeyValue;
-use Sabre\DAV\Exception\BadRequest;
 use Sabre\CalDAV\Plugin;
 use Sabre\CalDAV\SharingPlugin;
+use Sabre\DAV;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\Xml\Element\KeyValue;
+use Sabre\Xml\Reader;
+use Sabre\Xml\XmlDeserializable;
 
 /**
- * Invite-reply POST request parser
+ * Invite-reply POST request parser.
  *
  * This class parses the invite-reply POST request, as defined in:
  *
@@ -20,8 +23,8 @@ use Sabre\CalDAV\SharingPlugin;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class InviteReply implements XmlDeserializable {
-
+class InviteReply implements XmlDeserializable
+{
     /**
      * The sharee calendar user address.
      *
@@ -39,14 +42,14 @@ class InviteReply implements XmlDeserializable {
     public $calendarUri;
 
     /**
-     * The id of the invite message that's being responded to
+     * The id of the invite message that's being responded to.
      *
      * @var string
      */
     public $inReplyTo;
 
     /**
-     * An optional message
+     * An optional message.
      *
      * @var string
      */
@@ -60,28 +63,27 @@ class InviteReply implements XmlDeserializable {
     public $status;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $href
      * @param string $calendarUri
      * @param string $inReplyTo
      * @param string $summary
-     * @param int $status
+     * @param int    $status
      */
-    function __construct($href, $calendarUri, $inReplyTo, $summary, $status) {
-
+    public function __construct($href, $calendarUri, $inReplyTo, $summary, $status)
+    {
         $this->href = $href;
         $this->calendarUri = $calendarUri;
         $this->inReplyTo = $inReplyTo;
         $this->summary = $summary;
         $this->status = $status;
-
     }
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -96,11 +98,10 @@ class InviteReply implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $elems = KeyValue::xmlDeserialize($reader);
 
         $href = null;
@@ -110,40 +111,35 @@ class InviteReply implements XmlDeserializable {
         $status = null;
 
         foreach ($elems as $name => $value) {
-
             switch ($name) {
-
-                case '{' . Plugin::NS_CALENDARSERVER . '}hosturl' :
+                case '{'.Plugin::NS_CALENDARSERVER.'}hosturl':
                     foreach ($value as $bla) {
-                        if ($bla['name'] === '{DAV:}href') {
+                        if ('{DAV:}href' === $bla['name']) {
                             $calendarUri = $bla['value'];
                         }
                     }
                     break;
-                case '{' . Plugin::NS_CALENDARSERVER . '}invite-accepted' :
-                    $status = SharingPlugin::STATUS_ACCEPTED;
+                case '{'.Plugin::NS_CALENDARSERVER.'}invite-accepted':
+                    $status = DAV\Sharing\Plugin::INVITE_ACCEPTED;
                     break;
-                case '{' . Plugin::NS_CALENDARSERVER . '}invite-declined' :
-                    $status = SharingPlugin::STATUS_DECLINED;
+                case '{'.Plugin::NS_CALENDARSERVER.'}invite-declined':
+                    $status = DAV\Sharing\Plugin::INVITE_DECLINED;
                     break;
-                case '{' . Plugin::NS_CALENDARSERVER . '}in-reply-to' :
+                case '{'.Plugin::NS_CALENDARSERVER.'}in-reply-to':
                     $inReplyTo = $value;
                     break;
-                case '{' . Plugin::NS_CALENDARSERVER . '}summary' :
+                case '{'.Plugin::NS_CALENDARSERVER.'}summary':
                     $summary = $value;
                     break;
-                case '{DAV:}href' :
+                case '{DAV:}href':
                     $href = $value;
                     break;
             }
-
         }
         if (is_null($calendarUri)) {
             throw new BadRequest('The {http://calendarserver.org/ns/}hosturl/{DAV:}href element must exist');
         }
 
         return new self($href, $calendarUri, $inReplyTo, $summary, $status);
-
     }
-
 }

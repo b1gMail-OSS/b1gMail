@@ -7,7 +7,8 @@
 		</div>
 		<div class="card bm-signup-card">
 			{include file="nli/msp.tabs.tpl"}
-			<form action="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup" method="post" id="signupForm" class="bm-signup-form">
+			<form action="{if $ssl_signup_enable}{$nliUrlSignupSsl}{else}{$nliUrlSignup}{/if}" method="post" id="signupForm" class="bm-signup-form">
+				{csrffield}
 			<div class="card-body">
 {else}
 {include file="nli/page.open.tpl"}

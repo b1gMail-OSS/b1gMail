@@ -2,7 +2,8 @@
 	<fieldset>
 		<legend>{lng p="filecache"}</legend>
 
-		<form action="optimize.php?action=cache&do=cleanupFileCache&sid={$sid}" method="post" onsubmit="spin(this)">
+		<form action="{sessionurl file='optimize.php' params="action=cache&do=cleanupFileCache"}" method="post" onsubmit="spin(this)">
+			{csrffield}
 			<p>{lng p="filecachedesc"}</p>
 
 			<div class="row">

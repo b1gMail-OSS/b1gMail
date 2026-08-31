@@ -7,7 +7,7 @@
 	{elseif ($attachment.openKind|default:'')=='viewable'||($attachment.openKind|default:'')=='vcf'||($attachment.openKind|default:'')=='ics'}
 		{assign var=attHref value="javascript:mailOpenAttachment({$mailID}, '{$attID}', '{$attachment.openKind}', '{text value=$attachment.filename cut=45 escape=true}', '{text value=$attachment.filename escape=true}', '{text value=$attachment.mimetype escape=true}');"}
 	{else}
-		{assign var=attHref value="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&sid={$sid}"}
+		{assign var=attHref value="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}{$sessionUrlSuffix}"}
 	{/if}
 	{if isset($selectable) && $selectable}
 	<div class="bm-mail-attachment-chip bm-mail-attachment-chip-selectable">

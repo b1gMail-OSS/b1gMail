@@ -29,8 +29,8 @@
 						<td class="text-nowrap">
 							{if $version.status=='created'}
 								<div class="btn-group btn-group-sm">
-									<a href="toolbox.php?do=editVersionConfig&versionid={$versionID}&sid={$sid}" title="{lng p="prefs"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="toolbox.php?do=release&versionid={$versionID}&sid={$sid}" title="{lng p="release"}" class="btn btn-sm"><i class="fa-solid fa-code-compare"></i></a>
+									<a href="{sessionurl file='toolbox.php' params="do=editVersionConfig&versionid={$versionID}"}" title="{lng p="prefs"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='toolbox.php' params="do=release&versionid={$versionID}"}" title="{lng p="release"}" class="btn btn-sm"><i class="fa-solid fa-code-compare"></i></a>
 								</div>
 							{/if}
 						</td>
@@ -45,7 +45,8 @@
 <fieldset>
 	<legend>{lng p="addversion"}</legend>
 
-	<form action="toolbox.php?do=addVersion&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='toolbox.php' params="do=addVersion"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-4 col-form-label">{lng p="baseversion"}</label>
 			<div class="col-sm-8">

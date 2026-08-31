@@ -28,7 +28,7 @@ class BMPlugin_logFailedLogins extends BMPlugin
         $this->web = 'http://www.b1gmail.eu';
 
         $this->version = '1.0.0';
-        $this->designedfor = '7.4.1';
+        $this->designedfor = '7.5.0';
 
         $this->type = BMPLUGIN_DEFAULT;
 
@@ -54,12 +54,19 @@ class BMPlugin_logFailedLogins extends BMPlugin
     {
         global $db;
 
-        $res = $db->Query('(SELECT `id` FROM bm60_users WHERE email=?) UNION (SELECT `user` FROM bm60_aliase WHERE email=? AND login=\'yes\')', $userMail, $userMail);
-        $row = $res->FetchArray();
-        $userId = $row['id'];
+        $res = $db->Query('(SELECT `id` FROM {pre}users WHERE email=?) UNION (SELECT `user` AS id FROM {pre}aliase WHERE email=? AND login=\'yes\')',
+            $userMail,
+            $userMail);
+        $userId = 0;
+        if($res->RowCount() > 0)
+        {
+            $row = $res->FetchArray(MYSQLI_ASSOC);
+            $userId = isset($row['id']) ? (int)$row['id'] : 0;
+        }
         $res->Free();
 
-        if (!empty($userId)) {
+        if($userId > 0)
+        {
             $failedloginlog = '['.date('c').'] - Web Login '.$userMail.' - Browser '.substr($_SERVER['HTTP_USER_AGENT'], 0, 250).' - IP '.$_SERVER['REMOTE_ADDR'].PHP_EOL;
             file_put_contents(B1GMAIL_DIR.'logs/b1gmail_failedlogins.log', $failedloginlog, FILE_APPEND);
         }

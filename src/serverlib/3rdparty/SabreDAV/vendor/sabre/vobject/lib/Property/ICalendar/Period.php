@@ -2,13 +2,12 @@
 
 namespace Sabre\VObject\Property\ICalendar;
 
-use
-    Sabre\VObject\Property,
-    Sabre\VObject\Parser\MimeDir,
-    Sabre\VObject\DateTimeParser;
+use Sabre\VObject\DateTimeParser;
+use Sabre\VObject\Property;
+use Sabre\Xml;
 
 /**
- * Period property
+ * Period property.
  *
  * This object represents PERIOD values, as defined here:
  *
@@ -18,13 +17,13 @@ use
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Period extends Property {
-
+class Period extends Property
+{
     /**
      * In case this is a multi-value property. This string will be used as a
      * delimiter.
      *
-     * @var string|null
+     * @var string
      */
     public $delimiter = ',';
 
@@ -35,12 +34,10 @@ class Period extends Property {
      * not yet done, but parameters are not included.
      *
      * @param string $val
-     * @return void
      */
-    public function setRawMimeDirValue($val) {
-
+    public function setRawMimeDirValue($val)
+    {
         $this->setValue(explode($this->delimiter, $val));
-
     }
 
     /**
@@ -48,10 +45,9 @@ class Period extends Property {
      *
      * @return string
      */
-    public function getRawMimeDirValue() {
-
+    public function getRawMimeDirValue()
+    {
         return implode($this->delimiter, $this->getParts());
-
     }
 
     /**
@@ -62,32 +58,30 @@ class Period extends Property {
      *
      * @return string
      */
-    public function getValueType() {
-
-        return "PERIOD";
-
+    public function getValueType()
+    {
+        return 'PERIOD';
     }
 
     /**
      * Sets the json value, as it would appear in a jCard or jCal object.
      *
      * The value must always be an array.
-     *
-     * @param array $value
-     * @return void
      */
-    public function setJsonValue(array $value) {
-
+    public function setJsonValue(array $value)
+    {
         $value = array_map(
-            function($item) {
-
-                return strtr(implode('/', $item), array(':' => '', '-' => ''));
-
+            function ($item) {
+                return strtr(implode('/', $item), [':' => '', '-' => '']);
             },
             $value
         );
         parent::setJsonValue($value);
+    }
 
+    public function appendUtc(string $strDate)
+    {
+        return !str_ends_with($strDate, 'Z') ? '' : 'Z';
     }
 
     /**
@@ -97,33 +91,50 @@ class Period extends Property {
      *
      * @return array
      */
-    public function getJsonValue() {
-
-        $return = array();
-        foreach($this->getParts() as $item) {
-
+    public function getJsonValue()
+    {
+        $return = [];
+        foreach ($this->getParts() as $item) {
             list($start, $end) = explode('/', $item, 2);
 
-            $start = DateTimeParser::parseDateTime($start);
+            $startDt = DateTimeParser::parseDateTime($start)->format('Y-m-d\\TH:i:s').$this->appendUtc($start);
 
             // This is a duration value.
-            if ($end[0]==='P') {
-                $return[] = array(
-                    $start->format('Y-m-d\\TH:i:s'),
-                    $end
-                );
+            if ('P' === $end[0]) {
+                $return[] = [
+                    $startDt,
+                    $end,
+                ];
             } else {
-                $end = DateTimeParser::parseDateTime($end);
-                $return[] = array(
-                    $start->format('Y-m-d\\TH:i:s'),
-                    $end->format('Y-m-d\\TH:i:s'),
-                );
+                $endDt = DateTimeParser::parseDateTime($end)->format('Y-m-d\\TH:i:s').$this->appendUtc($end);
+                $return[] = [
+                    $startDt,
+                    $endDt,
+                ];
             }
-
         }
 
         return $return;
-
     }
 
+    /**
+     * This method serializes only the value of a property. This is used to
+     * create xCard or xCal documents.
+     *
+     * @param Xml\Writer $writer XML writer
+     */
+    protected function xmlSerializeValue(Xml\Writer $writer)
+    {
+        $writer->startElement(strtolower($this->getValueType()));
+        $value = $this->getJsonValue();
+        $writer->writeElement('start', $value[0][0]);
+
+        if ('P' === $value[0][1][0]) {
+            $writer->writeElement('duration', $value[0][1]);
+        } else {
+            $writer->writeElement('end', $value[0][1]);
+        }
+
+        $writer->endElement();
+    }
 }

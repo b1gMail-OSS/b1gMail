@@ -122,8 +122,7 @@ if($_REQUEST['action'] == 'faq')
 				$_REQUEST['required'],
 				$_REQUEST['antwort'],
 				(int)$_REQUEST['id']);
-			header('Location: prefs.faq.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.faq.php');
 		}
 
 		// fetch

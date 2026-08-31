@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAV\Xml\Request;
 
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\Xml\Element\KeyValue;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
-use Sabre\Xml\Element\KeyValue;
-use Sabre\DAV\Exception\BadRequest;
 
 /**
  * SyncCollection request parser.
@@ -18,8 +20,8 @@ use Sabre\DAV\Exception\BadRequest;
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class SyncCollectionReport implements XmlDeserializable {
-
+class SyncCollectionReport implements XmlDeserializable
+{
     /**
      * The sync-token the client supplied for the report.
      *
@@ -44,14 +46,14 @@ class SyncCollectionReport implements XmlDeserializable {
     /**
      * The list of properties that are being requested for every change.
      *
-     * @var null|array
+     * @var array|null
      */
     public $properties;
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -66,16 +68,15 @@ class SyncCollectionReport implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $self = new self();
 
         $reader->pushContext();
 
-        $reader->elementMap['{DAV:}prop']   = 'Sabre\Xml\Element\Elements';
+        $reader->elementMap['{DAV:}prop'] = \Sabre\Xml\Element\Elements::class;
         $elems = KeyValue::xmlDeserialize($reader);
 
         $reader->popContext();
@@ -87,10 +88,9 @@ class SyncCollectionReport implements XmlDeserializable {
 
         foreach ($required as $elem) {
             if (!array_key_exists($elem, $elems)) {
-                throw new BadRequest('The ' . $elem . ' element in the {DAV:}sync-collection report is required');
+                throw new BadRequest('The '.$elem.' element in the {DAV:}sync-collection report is required');
             }
         }
-
 
         $self->properties = $elems['{DAV:}prop'];
         $self->syncToken = $elems['{DAV:}sync-token'];
@@ -98,25 +98,21 @@ class SyncCollectionReport implements XmlDeserializable {
         if (isset($elems['{DAV:}limit'])) {
             $nresults = null;
             foreach ($elems['{DAV:}limit'] as $child) {
-                if ($child['name'] === '{DAV:}nresults') {
-                    $nresults = (int)$child['value'];
+                if ('{DAV:}nresults' === $child['name']) {
+                    $nresults = (int) $child['value'];
                 }
             }
             $self->limit = $nresults;
         }
 
         if (isset($elems['{DAV:}sync-level'])) {
-
             $value = $elems['{DAV:}sync-level'];
-            if ($value === 'infinity') {
+            if ('infinity' === $value) {
                 $value = \Sabre\DAV\Server::DEPTH_INFINITY;
             }
             $self->syncLevel = $value;
-
         }
 
         return $self;
-
     }
-
 }

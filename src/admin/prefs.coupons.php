@@ -147,8 +147,7 @@ if($_REQUEST['action'] == 'coupons')
 				isset($_REQUEST['valid_loggedin']) ? 'yes' : 'no',
 				isset($_REQUEST['valid_signup']) ? 'yes' : 'no',
 				$_REQUEST['id']);
-			header('Location: prefs.coupons.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.coupons.php');
 		}
 
 		// fetch

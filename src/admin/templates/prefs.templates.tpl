@@ -18,7 +18,7 @@
 						<td>{text value=$templateInfo.title}<br /><small>{text value=$template}</small></td>
 						<td>{text value=$templateInfo.author}<br /><small>{text value=$templateInfo.website allowEmpty=true}</small></td>
 						<td>
-							{if $templateInfo.prefs}<a href="prefs.templates.php?do=prefs&template={$template}&sid={$sid}" class="btn btn-sm"><i class="fa-solid fa-gear"></i></a>{/if}
+							{if $templateInfo.prefs}<a href="{sessionurl file='prefs.templates.php' params="do=prefs&template={$template}"}" class="btn btn-sm"><i class="fa-solid fa-gear"></i></a>{/if}
 						</td>
 					</tr>
 				{/foreach}
@@ -31,7 +31,8 @@
 <fieldset>
 	<legend>{lng p="defaultemplate"}</legend>
 
-	<form action="prefs.templates.php?save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.templates.php' params="save=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="template"}</label>
 			<div class="col-sm-10">

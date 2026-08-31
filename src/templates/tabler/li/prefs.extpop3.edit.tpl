@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=extpop3&do={if $account}saveAccount&id={$account.id}{else}createAccount{/if}&sid={$sid}" onsubmit="return checkPOP3AccountForm(this);">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params="action=extpop3&do={if $account}saveAccount&id={$account.id}{else}createAccount{/if}"}" onsubmit="return checkPOP3AccountForm(this);">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<table class="listTable">
 		<tr>

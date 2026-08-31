@@ -22,6 +22,18 @@
 // chdir to file dir
 chdir(__DIR__);
 
+if(PHP_SAPI !== 'cli')
+{
+	if(!headers_sent())
+	{
+		http_response_code(403);
+		header('Content-Type: text/plain; charset=utf-8');
+		header('X-Robots-Tag: noindex');
+	}
+	echo 'Forbidden';
+	exit;
+}
+
 define('INTERFACE_MODE', true);
 include('../serverlib/init.inc.php');
 include(B1GMAIL_DIR . 'serverlib/mailprocessor.class.php');
@@ -33,9 +45,11 @@ function ProcessPipeMail(&$tempFileFP, $inputSize, $recps, &$error, &$errorCode,
 	// empty?
 	if($inputSize < 3)
 	{
-		// yes -> log, do not process
-		PutLog('Message not processed (input size < 3 bytes)',
-			PRIO_DEBUG,
+		$recpInfo = count($recps) > 0 ? implode(', ', $recps) : '(none)';
+		PutLog(sprintf('Message not processed (input size %d bytes; recipients: %s)',
+			$inputSize,
+			$recpInfo),
+			PRIO_WARNING,
 			__FILE__,
 			__LINE__);
 		$error = 'Message processing aborted (no input)';
@@ -61,11 +75,28 @@ function ProcessPipeMail(&$tempFileFP, $inputSize, $recps, &$error, &$errorCode,
 	}
 
 	// process mail
-	$mailProcessor = _new('BMMailProcessor', array($tempFileFP));
-	if(count($recps) > 0)
-		$mailProcessor->SetRecipients($recps);
-	$mailProcessor->Setb1gMailServerFlags($flags);
-	$mailProcessor->ProcessMail();
+	try
+	{
+		$mailProcessor = _new('BMMailProcessor', array($tempFileFP));
+		if(count($recps) > 0)
+			$mailProcessor->SetRecipients($recps);
+		$mailProcessor->Setb1gMailServerFlags($flags);
+		$mailProcessor->ProcessMail();
+	}
+	catch(Throwable $e)
+	{
+		$recpInfo = count($recps) > 0 ? implode(', ', $recps) : '(none)';
+		PutLog(sprintf('Pipe processing failed for <%s>: %s',
+			$recpInfo,
+			$e->getMessage()),
+			PRIO_WARNING,
+			$e->getFile(),
+			$e->getLine());
+		$error = 'Message processing aborted (internal error)';
+		$errorCode = 451;
+		return(false);
+	}
+
 	$error = 'Message delivered';
 	$errorCode = 250;
 
@@ -138,6 +169,13 @@ if(!$keepAlive)
 	}
 	else
 	{
+		if($error != '')
+			PutLog(sprintf('Pipe rejected mail (recipients: %s): %s',
+				count($recps) > 0 ? implode(', ', $recps) : '(none)',
+				$error),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__);
 		echo $error;
 		$exitCode = -1;
 	}

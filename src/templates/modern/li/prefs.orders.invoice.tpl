@@ -29,7 +29,7 @@
 	{if !$print}
 	<div style="position:fixed;top:0px;left:0px;width:100%;background-image:url({$tpldir}images/li/bar.png);padding:6px;">
 		<div style="float:left;">
-			<a href="javascript:void(0);" onclick="openWindow('prefs.php?action=orders&do=showInvoice&id={$id}&print=true&sid={$sid}','printInvoice_{$id}',640,480);" style="color:#FFFFFF;text-decoration:none;">
+			<a href="javascript:void(0);" onclick="openWindow('{sessionurl file='prefs.php' params="action=orders&do=showInvoice&id={$id}&print=true"}','printInvoice_{$id}',640,480);" style="color:#FFFFFF;text-decoration:none;">
 				<i class="fa fa-print" aria-hidden="true"></i>
 				<span style="text-decoration:underline;">{lng p="printinvoice"}</span>
 			</a>

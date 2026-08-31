@@ -22,6 +22,9 @@
 if(!defined('B1GMAIL_INIT'))
 	die('Directly calling this file is not supported');
 
+if(!defined('B1GMAIL_DIR_PERM'))
+	define('B1GMAIL_DIR_PERM', 0750);
+
 /**
  * Prepare to start page output using compression (if enabled)
  */
@@ -104,6 +107,8 @@ function EncodeEMail($email)
  */
 function EncodeDomain($domain)
 {
+	if($domain === '' || $domain === null)
+		return '';
 	if(IDN_SUPPORT)
 	{
 		$domain = CharsetDecode($domain, false, 'utf8');
@@ -120,6 +125,8 @@ function EncodeDomain($domain)
  */
 function DecodeDomain($domain)
 {
+	if($domain === '' || $domain === null)
+		return '';
 	if(IDN_SUPPORT)
 	{
 		$domain = idn_to_utf8($domain);
@@ -830,12 +837,96 @@ function XORCrypt($str, $key)
 /**
  * crypt private key passphrase
  *
+ * New values use AES-256-GCM. Legacy XOR blobs (no aes1: prefix) still decrypt.
+ *
  * @param string $str Input
+ * @param bool $decrypt True to decrypt, false to encrypt
  * @return string
  */
-function CryptPKPassPhrase($str)
+function CryptPKPassPhrase($str, $decrypt = false)
 {
-	return(XORCrypt($str, B1GMAIL_SIGNKEY));
+	$str = (string)$str;
+	if($decrypt)
+		return CryptPKPassPhraseDecrypt($str);
+	return CryptPKPassPhraseEncrypt($str);
+}
+
+/**
+ * @return string 32-byte AES key
+ */
+function CryptPKPassPhraseKey()
+{
+	return hash('sha256', B1GMAIL_SIGNKEY, true);
+}
+
+/**
+ * @param string $str Plaintext
+ * @return string
+ */
+function CryptPKPassPhraseEncrypt($str)
+{
+	if(function_exists('openssl_encrypt') && function_exists('random_bytes'))
+	{
+		$iv = random_bytes(12);
+		$tag = '';
+		$ct = openssl_encrypt($str, 'aes-256-gcm', CryptPKPassPhraseKey(), OPENSSL_RAW_DATA, $iv, $tag, '', 16);
+		if($ct !== false && $tag !== '')
+			return 'aes1:' . base64_encode($iv . $tag . $ct);
+	}
+	return XORCrypt($str, B1GMAIL_SIGNKEY);
+}
+
+/**
+ * @param string $str Ciphertext
+ * @return string
+ */
+function CryptPKPassPhraseDecrypt($str)
+{
+	if(strncmp($str, 'aes1:', 5) === 0)
+	{
+		$raw = base64_decode(substr($str, 5), true);
+		if($raw === false || strlen($raw) < 28)
+			return '';
+		$plain = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', CryptPKPassPhraseKey(),
+			OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16));
+		return $plain === false ? '' : $plain;
+	}
+	return XORCrypt($str, B1GMAIL_SIGNKEY);
+}
+
+/**
+ * Build a Location URL from the configured search_engine template.
+ * Rejects non-http(s) templates and host/scheme changes via the query.
+ *
+ * @param string $template
+ * @param string $query
+ * @return string|false
+ */
+function SearchEngineBuildRedirect($template, $query)
+{
+	$template = trim((string)$template);
+	if($template === '' || substr_count($template, '%s') !== 1)
+		return false;
+	if(!preg_match('#^https?://#i', $template))
+		return false;
+
+	$tplParts = parse_url($template);
+	if(empty($tplParts['scheme']) || empty($tplParts['host']))
+		return false;
+
+	$url = sprintf($template, rawurlencode((string)$query));
+	if($url === '' || strpbrk($url, "\r\n") !== false)
+		return false;
+
+	$parts = parse_url($url);
+	if(empty($parts['scheme']) || empty($parts['host']))
+		return false;
+	if(!in_array(strtolower($parts['scheme']), array('http', 'https'), true))
+		return false;
+	if(strcasecmp($parts['host'], $tplParts['host']) !== 0)
+		return false;
+
+	return $url;
 }
 
 /**
@@ -847,6 +938,9 @@ function CryptPKPassPhrase($str)
 function HTMLFormat($in, $allowDoubleEncoding = false, $allowEncodingRepair = true)
 {
 	global $currentCharset;
+
+	if($in === null)
+		$in = '';
 
 	$res = @htmlspecialchars($in, ENT_COMPAT, $currentCharset, $allowDoubleEncoding);
 
@@ -895,14 +989,14 @@ function SessionToken()
 
 	$token = 'sessionToken';
 	if($bm_prefs['ip_lock'] == 'yes')
-		$token .= $_SERVER['REMOTE_ADDR'];
+		$token .= function_exists('SessionClientIp') ? SessionClientIp() : $_SERVER['REMOTE_ADDR'];
 	if($bm_prefs['cookie_lock'] == 'yes')
 		if(isset($_COOKIE['sessionSecret_' . substr(session_id(), 0, 16)]))
 			$token .= $_COOKIE['sessionSecret_' . substr(session_id(), 0, 16)];
 		else if(strpos(strtolower($_SERVER['PHP_SELF']), 'webdisk.php') !== false
 			&& isset($_POST['key']))
 			$token .= $_POST['key'];
-	return(md5($token));
+	return hash_hmac('sha256', $token, B1GMAIL_SIGNKEY);
 }
 
 /**
@@ -1247,23 +1341,24 @@ function SyncDBStruct($databaseStructure)
 					if(defined('DB_CHARSET')) {
 						if(DB_CHARSET=='utf8mb4') $utf8_collate = ' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
 					}
+					$fieldDefault = isset($field[4]) && $field[4] !== null ? (string)$field[4] : '';
 					$mysqlFunctions = ['CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME', 'NOW()', 'CURDATE()', 'CURTIME()'];
-					$isMySQLFunction = in_array(strtoupper($field[4]), $mysqlFunctions);
+					$isMySQLFunction = in_array(strtoupper($fieldDefault), $mysqlFunctions, true);
 					$syncQueries[] = sprintf('ALTER TABLE %s %s `%s` %s%s%s%s%s',
 						$tableName,
 						$op,
 						$field[0],
 						$field[1],
-						$bm_prefs['db_is_utf8'] == 1 ? (strpos($field[1], 'char') !== false || strpos($field[2], 'text') !== false
+						$bm_prefs['db_is_utf8'] == 1 ? (strpos($field[1], 'char') !== false || strpos($field[1], 'text') !== false
 														? $utf8_collate
 														: '') : '',
 						$field[2] == 'NO' ? ' NOT NULL' : '',
-						$field[4] == 'NULL' ? ' DEFAULT NULL' : ($field[4] != ''
+						$fieldDefault === 'NULL' ? ' DEFAULT NULL' : ($fieldDefault !== ''
 							? ($isMySQLFunction
-									? ' DEFAULT ' . $field[4]
-									: (is_numeric($field[4])
-										? ' DEFAULT ' . $field[4]
-										: ' DEFAULT \'' . $db->Escape($field[4]) . '\''))
+									? ' DEFAULT ' . $fieldDefault
+									: (is_numeric($fieldDefault)
+										? ' DEFAULT ' . $fieldDefault
+										: ' DEFAULT \'' . $db->Escape($fieldDefault) . '\''))
 							: ''),
 						isset($field[5]) && $field[5] != '' ? ' ' . $field[5] : '');
 				}
@@ -1386,6 +1481,29 @@ function SyncDBStruct($databaseStructure)
 }
 
 /**
+ * User ID for SMTP submission of system mail (b1gMailServer requires a local account).
+ *
+ * @param string $from From header (typically passmail_abs)
+ * @return int
+ */
+function SystemMailSmtpUserID($from)
+{
+	$fromAddr = ExtractMailAddress($from);
+	if($fromAddr !== '')
+	{
+		$uid = BMUser::GetID($fromAddr, true);
+		if($uid > 0)
+			return (int)$uid;
+	}
+
+	$uid = BMUser::GetID(GetPostmasterMail(), true);
+	if($uid > 0)
+		return (int)$uid;
+
+	return USERID_SYSTEM;
+}
+
+/**
  * send system mail
  *
  * @param string $from Sender
@@ -1420,7 +1538,7 @@ function SystemMail($from, $to, $subject, $templateName, $vars, $forUser = -1)
 
 	// create mail
 	$mail = _new('BMMailBuilder', array(true));
-	$mail->SetUserID(USERID_SYSTEM);
+	$mail->SetUserID(SystemMailSmtpUserID($from));
 	$mail->AddHeaderField('From',			$from);
 	$mail->AddHeaderField('To',				$to);
 	$mail->AddHeaderField('Subject',		$subject);
@@ -1474,7 +1592,7 @@ function GetPhraseForUser($userID, $var, $phrase)
 		(int)$userID);
 	list($language) = $res->FetchArray(MYSQLI_NUM);
 	$res->Free();
-	if(trim($language) == '')
+	if(trim((string)$language) == '')
 		$language = $bm_prefs['language'];
 
 	// return phrase
@@ -1822,6 +1940,148 @@ function IsPOSTRequest()
 }
 
 /**
+ * Build absolute deref URL for an external target (email, contacts, search, …).
+ *
+ * With pretty URLs: {selfurl}deref?url=… (install root, not under /mail/).
+ * Legacy fallback: deref.php?url=…
+ *
+ * @param string $targetUrl
+ * @return string
+ */
+function DerefUrl($targetUrl)
+{
+	global $bm_prefs;
+
+	$targetUrl = trim((string)$targetUrl);
+	if($targetUrl === '')
+		return '';
+
+	if(!preg_match('~^(https?|ftp)://~i', $targetUrl))
+	{
+		if(strncmp($targetUrl, '//', 2) === 0)
+			$targetUrl = 'https:' . $targetUrl;
+		else
+			$targetUrl = 'https://' . $targetUrl;
+	}
+
+	$params = array('url' => str_replace('%23', '#', $targetUrl));
+
+	if(function_exists('PublicBuildPath') && function_exists('PublicRoutingActive') && PublicRoutingActive())
+		return PublicBuildPath('deref.php', $params);
+
+	$query = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+
+	if(function_exists('PublicFqdnSelfUrl'))
+		return PublicFqdnSelfUrl() . 'deref.php?' . $query;
+
+	$base = (isset($bm_prefs['selfurl']) && $bm_prefs['selfurl'] !== '')
+		? rtrim((string)$bm_prefs['selfurl'], '/') . '/'
+		: '';
+
+	return $base . 'deref.php?' . $query;
+}
+
+/**
+ * Extract external target URL from deref.php request (url= param or legacy format).
+ *
+ * @return string
+ */
+function DerefExtractTargetUrl()
+{
+	if(isset($_GET['url']))
+	{
+		$url = $_GET['url'];
+		if(is_array($url))
+			$url = reset($url);
+		$url = trim((string)$url);
+		if($url !== '')
+			return str_replace('%23', '#', $url);
+	}
+
+	$uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+	$sepPos = strpos($uri, '?');
+	if($sepPos === false)
+		return '';
+
+	$targetURL = substr($uri, $sepPos + 1);
+	if($targetURL === '')
+		return '';
+
+	if(strpos($targetURL, 'url=') !== false)
+	{
+		parse_str($targetURL, $qs);
+		if(isset($qs['url']) && trim((string)$qs['url']) !== '')
+			return str_replace('%23', '#', (string)$qs['url']);
+	}
+
+	return str_replace('%23', '#', rawurldecode($targetURL));
+}
+
+/**
+ * Strip tracking params from external target URLs (Outlook safelinks, UTM, …).
+ *
+ * @param string $targetURL
+ * @return string
+ */
+function DerefCleanTargetUrl($targetURL)
+{
+	$parsedUrl = parse_url($targetURL);
+	if(!is_array($parsedUrl) || empty($parsedUrl['host']))
+		return $targetURL;
+
+	$queryParams = array();
+	if(!empty($parsedUrl['query']))
+		parse_str($parsedUrl['query'], $queryParams);
+
+	if(strpos($targetURL, 'safelinks.protection.outlook') !== false)
+	{
+		if(isset($queryParams['url']))
+		{
+			$decodedUrl = urldecode($queryParams['url']);
+			$parsedUrl = parse_url($decodedUrl);
+			if(!empty($parsedUrl['query']))
+				parse_str($parsedUrl['query'], $queryParams);
+			else
+				$queryParams = array();
+		}
+	}
+
+	foreach(array('utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content') as $utmParam)
+		unset($queryParams[$utmParam]);
+
+	$cleanUrlParam = http_build_query($queryParams);
+	$scheme = isset($parsedUrl['scheme']) ? $parsedUrl['scheme'] : 'https';
+
+	return $scheme . '://' . $parsedUrl['host'] . ($parsedUrl['path'] ?? '')
+		. (!empty($cleanUrlParam) ? '?' . $cleanUrlParam : '');
+}
+
+/**
+ * Assign Smarty vars for deref warning pages (raw url + host label).
+ *
+ * @param string $targetURL
+ */
+function DerefAssignTplVars($targetURL)
+{
+	global $tpl;
+
+	$targetURL = trim((string)$targetURL);
+	$tpl->assign('url', $targetURL);
+
+	$host = '';
+	$parsed = parse_url($targetURL);
+	if(is_array($parsed) && !empty($parsed['host']))
+	{
+		$host = $parsed['host'];
+		if(isset($parsed['port']) && $parsed['port'] !== ''
+			&& !in_array((int)$parsed['port'], array(80, 443), true))
+			$host .= ':' . $parsed['port'];
+	}
+
+	$tpl->assign('deref_host', $host);
+}
+
+/**
  * format html e-mail text
  *
  * @param string $in Input
@@ -1846,13 +2106,13 @@ function formatEMailHTMLText($in, $showExternal = false, $attachments = array(),
 
 	if($mobile)
 	{
-		$formatter->setComposeBaseURL('email.php?action=compose&sid=' . session_id() . '&to=');
-		$formatter->setAttachmentBaseURL('email.php?action=attachment&view=true&id=' . $mailID . '&sid=' . session_id() . '&attachment=');
+		$formatter->setComposeBaseURL('email.php?action=compose&to=');
+		$formatter->setAttachmentBaseURL('email.php?action=attachment&view=true&id=' . $mailID . '&attachment=');
 	}
 	else
 	{
-		$formatter->setComposeBaseURL('email.compose.php?sid=' . session_id() . '&to=');
-		$formatter->setAttachmentBaseURL('email.read.php?action=downloadAttachment&view=true&id=' . $mailID . '&sid=' . session_id() . '&attachment=');
+		$formatter->setComposeBaseURL('email.compose.php?to=');
+		$formatter->setAttachmentBaseURL('email.read.php?action=downloadAttachment&view=true&id=' . $mailID . '&attachment=');
 	}
 
 	$result = $formatter->format();
@@ -1905,16 +2165,17 @@ function formatEMailText($in, $html = true, $mobile = false)
 			{
 				$match = HTMLEntities($matches[0]);
 				return(!$mobile
-						? '<a target="_top" href="email.compose.php?to='.$match.'&sid=' . session_id() . '">'.$match.'</a>'
-						: '<a target="_top" href="email.php?action=compose&to='.$match.'&sid=' . session_id() . '">'.$match.'</a>');
+						? '<a target="_top" href="email.compose.php?to='.$match.'">'.$match.'</a>'
+						: '<a target="_top" href="email.php?action=compose&to='.$match.'">'.$match.'</a>');
 			},
 			$in);
 
 		// build links
 		foreach($bmLinks as $i=>$link)
 		{
+			$derefHref = htmlspecialchars(DerefUrl($link), ENT_QUOTES, 'UTF-8');
 			$in = str_replace(sprintf(':::_b1gMailLink:%d_:::', $i),
-							  sprintf('<a href="deref.php?%s" title="%s" target="_blank" rel="noopener noreferrer">%s</a>', $link, $link, $link),
+							  sprintf('<a href="%s" title="%s" target="_blank" rel="noopener noreferrer">%s</a>', $derefHref, HTMLFormat($link), HTMLFormat($link)),
 							  $in);
 		}
 	}
@@ -2452,6 +2713,28 @@ function ExplodeOutsideOfQuotation($string, $separator, $preserveQuotes = false)
 }
 
 /**
+ * Create a directory that is never world-writable.
+ *
+ * Override the default 0750 via B1GMAIL_DIR_PERM in config.inc.php
+ * (e.g. 0770 if PHP and b1gMailServer share a group).
+ *
+ * @param string $dir
+ * @param bool $recursive
+ * @return bool
+ */
+function CreateSecureDir($dir, $recursive = false)
+{
+	if(is_dir($dir))
+		return true;
+	$mode = defined('B1GMAIL_DIR_PERM') ? (int)B1GMAIL_DIR_PERM : 0750;
+	$mode &= ~0002;
+	if(!@mkdir($dir, $mode, $recursive))
+		return false;
+	@chmod($dir, $mode);
+	return true;
+}
+
+/**
  * get filename of data item
  *
  * @param int $id Item ID
@@ -2489,8 +2772,7 @@ function DataFilename($id, $fx = 'msg', $readOnly = false)
 			$dir .= '/';
 			if(!$readOnly && !file_exists($dir) && $bm_prefs['structstorage'] == 'yes' && ($i<strlen((string)$id)-1))
 			{
-				@mkdir($dir, 0777);
-				@chmod($dir, 0777);
+				CreateSecureDir($dir);
 			}
 		}
 	}
@@ -2609,13 +2891,14 @@ function RequestPrivileges($privileges, $return = false)
 	$ok = true;
 
 	// sessions are always needed for more privileges
-	@session_start();
+	SessionStart();
 
 	// user privileges?
 	if(($privileges & PRIVILEGES_USER) != 0)
 		if(!isset($_SESSION['bm_userLoggedIn']) || !$_SESSION['bm_userLoggedIn']
 			|| !isset($_SESSION['bm_userID']) || !isset($_SESSION['bm_sessionToken'])
-			|| $_SESSION['bm_sessionToken'] != SessionToken())
+			|| !hash_equals((string)$_SESSION['bm_sessionToken'], SessionToken())
+			|| BMUser::GetSessionEpoch((int)$_SESSION['bm_userID']) > (int)($_SESSION['bm_sessionEpoch'] ?? 0))
 		{
 			$ok = false;
 		}
@@ -2625,7 +2908,7 @@ function RequestPrivileges($privileges, $return = false)
 			$userRow = $thisUser->Fetch();
 
 			if(isset($tpl) && is_object($tpl))
-				$tpl->assign('sid', session_id());
+				AssignTemplateSessionUrlVars($tpl);
 
 			if($userRow !== false && is_array($userRow) && $userRow['gesperrt'] == 'no')
 			{
@@ -2665,31 +2948,36 @@ function RequestPrivileges($privileges, $return = false)
 		if(!isset($_SESSION['bm_adminLoggedIn']) || !$_SESSION['bm_adminLoggedIn']
 			|| !isset($_SESSION['bm_adminID'])
 			|| !isset($_SESSION['bm_adminAuth']) || !isset($_SESSION['bm_sessionToken'])
-			|| $_SESSION['bm_sessionToken'] != SessionToken())
+			|| !hash_equals((string)$_SESSION['bm_sessionToken'], SessionToken()))
 		{
 			$ok = false;
 		}
 		else
 		{
 			if(isset($tpl) && is_object($tpl))
-				$tpl->assign('sid', session_id());
+				AssignTemplateSessionUrlVars($tpl);
 
 			$ok = false;
 
-			$res = $db->Query('SELECT * FROM {pre}admins WHERE `adminid`=?', $_SESSION['bm_adminID']);
-			while($row = $res->FetchArray(MYSQLI_ASSOC))
+			if(function_exists('AdminSessionAuthEquals'))
 			{
-				if(hash('sha512', $row['password'].$_SERVER['HTTP_USER_AGENT']) === $_SESSION['bm_adminAuth'] &&
-				@$_COOKIE['bm_admin_sessionSecret_'.substr(session_id(), 0, 16)] == $_SESSION['adminsessionSecret'])
+				$res = $db->Query('SELECT * FROM {pre}admins WHERE `adminid`=?', $_SESSION['bm_adminID']);
+				while($row = $res->FetchArray(MYSQLI_ASSOC))
 				{
-					$ok = true;
-					$row['privileges'] = @unserialize($row['privileges']);
-					if(!is_array($row['privileges']))
-						$row['privileges'] = array();
-					$adminRow = $row;
+					$secretCookie = 'bm_admin_sessionSecret_'.substr(session_id(), 0, 16);
+					if(AdminSessionAuthEquals($row['password'], (int)$row['adminid'], $_SESSION['bm_adminAuth'])
+						&& isset($_COOKIE[$secretCookie], $_SESSION['adminsessionSecret'])
+						&& hash_equals((string)$_SESSION['adminsessionSecret'], (string)$_COOKIE[$secretCookie]))
+					{
+						$ok = true;
+						$row['privileges'] = @unserialize($row['privileges'], array('allowed_classes' => false));
+						if(!is_array($row['privileges']))
+							$row['privileges'] = array();
+						$adminRow = $row;
+					}
 				}
+				$res->Free();
 			}
-			$res->Free();
 
 			if($ok && isset($_SESSION['bm_timezone']) && $bm_prefs['auto_tz'] == 'yes')
 				SetTimeZoneByOffsetSeconds((int)$_SESSION['bm_timezone']);
@@ -2703,15 +2991,41 @@ function RequestPrivileges($privileges, $return = false)
 	if(($privileges & PRIVILEGES_CLIENTAPI) != 0 && $ok)
 		$ok = true;
 
+	// MFA setup wizard blocks normal LI access
+	if($ok && ($privileges & PRIVILEGES_USER) && !$return && !BMMfa::AllowUserRequest(
+			isset($groupRow['id']) ? (int)$groupRow['id'] : 0))
+	{
+		SessionRedirect('start.php?action=mfaSetup');
+		exit();
+	}
+
+	// idle lock / max session lifetime (after successful auth)
+	if($ok && !$return)
+		SessionProcessLifecycleAfterAuth($privileges, SessionAllowsLockedAccess());
+
 	// requested action not allowed
 	if(!$ok && !$return)
 	{
+		if(SessionIsLogoutRequest() && !ADMIN_MODE)
+		{
+			SessionHandleUserLogout();
+			exit();
+		}
+
 		if(ADMIN_MODE)
 		{
+			$adminLoggedIn = isset($_SESSION['bm_adminLoggedIn']) && $_SESSION['bm_adminLoggedIn'];
+			if(($privileges & PRIVILEGES_ADMIN) != 0 && !$adminLoggedIn)
+			{
+				SessionRedirect('index.php?expired=1');
+				exit();
+			}
+
 			DisplayError(0x02, 'Unauthorized', 'You are not authorized to view or change this dataset or page. Possible reasons are too few permissions or an expired session.',
-				sprintf("Requested privileges:\n%d\n\nLogged in:\n%s",
+				sprintf("Requested privileges:\n%d\n\nUser logged in:\n%s\nAdmin logged in:\n%s",
 					$privileges,
-					isset($_SESSION['bm_userLoggedIn']) && $_SESSION['bm_userLoggedIn'] ? 'Yes' : 'No'),
+					isset($_SESSION['bm_userLoggedIn']) && $_SESSION['bm_userLoggedIn'] ? 'Yes' : 'No',
+					$adminLoggedIn ? 'Yes' : 'No'),
 				__FILE__,
 				__LINE__,
 				401);
@@ -2720,6 +3034,10 @@ function RequestPrivileges($privileges, $return = false)
 		{
 			$tpl->assign('title', $lang_user['sess_expired']);
 			$tpl->assign('description', $lang_user['sess_expired_desc']);
+			if(function_exists('PublicNavUrl'))
+				$tpl->assign('nliUrlHome', PublicNavUrl('index.php'));
+			else
+				$tpl->assign('nliUrlHome', $bm_prefs['selfurl']);
 
 			if(($privileges & PRIVILEGES_MOBILE) != 0)
 			{
@@ -3101,21 +3419,20 @@ function GetLanguageInfo($file)
 			if(substr($line, 0, strlen('// b1gMailLang::')) == '// b1gMailLang::')
 			{
 				$fields = explode('::', trim($line));
-				list(, $langTitle,
-						$langAuthor,
-						$langAuthorMail,
-						$langAuthorWeb,
-						$langCharset,
-						$langLocale,
-						$langCode) = $fields;
 				$result['ctime'] = filemtime($fileName);
-				$result['title'] = $langTitle;
-				$result['author'] = $langAuthor;
-				$result['authorMail'] = $langAuthorMail;
-				$result['authorWeb'] = $langAuthorWeb;
-				$result['charset'] = $langCharset;
-				$result['locale'] = $langLocale;
-				$result['code'] = isset($fields[7]) ? $fields[7] : '';
+				$result['title'] = isset($fields[1]) ? $fields[1] : '';
+				$result['author'] = isset($fields[2]) ? $fields[2] : '';
+				$result['authorMail'] = isset($fields[3]) ? $fields[3] : '';
+				$result['authorWeb'] = isset($fields[4]) ? $fields[4] : '';
+				$result['charset'] = isset($fields[5]) ? $fields[5] : '';
+				$result['locale'] = isset($fields[6]) ? $fields[6] : '';
+				$langCode = isset($fields[7]) ? $fields[7] : '';
+				if($langCode === '' && isset($fields[6]) && $fields[6] !== '')
+				{
+					$localeParts = explode('|', $fields[6]);
+					$langCode = (string)end($localeParts);
+				}
+				$result['code'] = $langCode;
 				$result['writeable'] = is_writeable(B1GMAIL_DIR . 'languages/' . $file . '.lang.php');
 				$result['default'] = $bm_prefs['language'] == $file;
 				break;
@@ -3576,6 +3893,23 @@ function InitializePlugins()
 
 	$plugins = _new('BMPluginInterface');
 	$plugins->loadPlugins();
+	MfaRegisterCoreGroupOptions();
+}
+
+/**
+ * Merge plugin language strings into global lang arrays.
+ *
+ * @param string|false $language
+ */
+function LoadPluginLanguages($language = false)
+{
+	global $plugins, $lang_admin, $lang_user, $lang_client, $lang_custom, $currentLanguage;
+
+	if($language === false || $language === '')
+		$language = $currentLanguage;
+
+	if(isset($plugins) && is_object($plugins))
+		$plugins->readPluginLanguages($lang_user, $lang_client, $lang_custom, $lang_admin, $language);
 }
 
 /**
@@ -3596,7 +3930,141 @@ function b1gMailShutdown()
 		}
 	}
 
-	@mysqli_close($db->_handle);
+	if(isset($db) && is_object($db) && isset($db->_handle) && $db->_handle instanceof mysqli)
+		@mysqli_close($db->_handle);
+}
+
+/**
+ * @return array
+ */
+function BmErrorPageLangStrings()
+{
+	global $lang_user, $lang_admin;
+
+	if(defined('ADMIN_MODE') && ADMIN_MODE && isset($lang_admin) && is_array($lang_admin))
+		return $lang_admin;
+
+	if(isset($lang_user) && is_array($lang_user))
+		return $lang_user;
+
+	return array();
+}
+
+/**
+ * Unified standalone error page (DisplayError, CSRF, IP whitelist, …).
+ *
+ * Options: title, text, code (int), httpCode, debug (string), actions (array of
+ * label, primary, onclick, href), footer (string).
+ *
+ * @param array $opts
+ */
+function BmErrorPageHtmlResponse(array $opts)
+{
+	$title = isset($opts['title']) ? (string)$opts['title'] : 'Error';
+	$text = isset($opts['text']) ? (string)$opts['text'] : '';
+	$code = isset($opts['code']) ? (int)$opts['code'] : null;
+	$httpCode = isset($opts['httpCode']) ? (int)$opts['httpCode'] : 400;
+	$debug = isset($opts['debug']) ? (string)$opts['debug'] : '';
+	$footer = isset($opts['footer']) ? (string)$opts['footer'] : '';
+	$actions = (isset($opts['actions']) && is_array($opts['actions'])) ? $opts['actions'] : array();
+
+	if(!headers_sent())
+	{
+		header('Content-Type: text/html; charset=utf-8');
+		http_response_code($httpCode);
+	}
+
+	$lang = BmErrorPageLangStrings();
+	$debugTitle = isset($lang['error_debug_title']) ? $lang['error_debug_title'] : 'Technical details';
+
+	$titleEsc = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+	$textEsc = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+	$pageTitle = htmlspecialchars($title . ' – b1gMail', ENT_QUOTES, 'UTF-8');
+
+	$codeHtml = '';
+	if($code !== null)
+		$codeHtml = '<div class="bm-error-code">Error 0x' . sprintf('%02X', $code) . '</div>';
+
+	$debugHtml = '';
+	if($debug !== '')
+	{
+		$debugHtml = '<details class="bm-error-debug">'
+			. '<summary>' . htmlspecialchars($debugTitle, ENT_QUOTES, 'UTF-8') . '</summary>'
+			. '<pre>' . htmlspecialchars($debug, ENT_QUOTES, 'UTF-8') . '</pre>'
+			. '</details>';
+	}
+
+	$actionsHtml = '';
+	if(count($actions) > 0)
+	{
+		$actionsHtml = '<div class="bm-error-actions">';
+		foreach($actions as $action)
+		{
+			if(!is_array($action) || empty($action['label']))
+				continue;
+
+			$label = htmlspecialchars((string)$action['label'], ENT_QUOTES, 'UTF-8');
+			$primary = !isset($action['primary']) || $action['primary'];
+			$class = 'bm-error-btn' . ($primary ? '' : ' bm-error-btn--secondary');
+
+			if(!empty($action['href']))
+			{
+				$href = htmlspecialchars((string)$action['href'], ENT_QUOTES, 'UTF-8');
+				$actionsHtml .= '<a class="' . $class . '" href="' . $href . '">' . $label . '</a>';
+			}
+			else
+			{
+				$onclick = isset($action['onclick']) ? (string)$action['onclick'] : 'location.reload()';
+				$actionsHtml .= '<button type="button" class="' . $class . '" onclick="'
+					. htmlspecialchars($onclick, ENT_QUOTES, 'UTF-8') . '">' . $label . '</button>';
+			}
+		}
+		$actionsHtml .= '</div>';
+	}
+
+	$footerHtml = '';
+	if($footer !== '')
+		$footerHtml = '<p class="bm-error-footer">' . htmlspecialchars($footer, ENT_QUOTES, 'UTF-8') . '</p>';
+
+	$marginText = ($actionsHtml !== '' || $footerHtml !== '' || $debugHtml !== '') ? ' 0 1.25rem' : '';
+
+	echo('<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">'
+		. '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+		. '<meta name="color-scheme" content="light dark">'
+		. '<title>' . $pageTitle . '</title>'
+		. '<style>'
+		. '*,*::before,*::after{box-sizing:border-box}'
+		. ':root{color-scheme:light dark;--bm-bg:#f6f8fb;--bm-card:#fff;--bm-text:#1f2937;--bm-muted:#6b7280;--bm-primary:#066fd1;--bm-danger:#d63939;--bm-border:rgba(0,0,0,.08)}'
+		. '@media (prefers-color-scheme:dark){:root{--bm-bg:#0f172a;--bm-card:#1e293b;--bm-text:#e2e8f0;--bm-muted:#94a3b8;--bm-border:rgba(255,255,255,.1)}.bm-error-debug pre{background:rgba(255,255,255,.06)}}'
+		. 'html{-webkit-text-size-adjust:100%;text-size-adjust:100%}'
+		. 'body{margin:0;overflow-x:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bm-bg);color:var(--bm-text)}'
+		. '.bm-error-page{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:1rem;padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left))}'
+		. '.bm-error-card{max-width:32rem;width:100%;background:var(--bm-card);border:1px solid var(--bm-border);border-radius:.75rem;padding:1.5rem 1.25rem;text-align:center;box-shadow:0 8px 24px rgba(15,23,42,.08)}'
+		. '.bm-error-icon{width:3.25rem;height:3.25rem;margin:0 auto .875rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(214,57,57,.12);color:var(--bm-danger);font-size:1.5rem;font-weight:700;flex-shrink:0}'
+		. '.bm-error-code{display:inline-block;margin:0 0 .5rem;padding:.2rem .55rem;border-radius:999px;background:rgba(214,57,57,.1);color:var(--bm-danger);font-size:.75rem;font-weight:600;letter-spacing:.02em}'
+		. '.bm-error-title{margin:0 0 .625rem;font-size:clamp(1.05rem,4.5vw,1.3rem);line-height:1.35;font-weight:600;overflow-wrap:anywhere;word-wrap:break-word;hyphens:auto}'
+		. '.bm-error-text{margin:0' . $marginText . ';color:var(--bm-muted);line-height:1.55;font-size:clamp(.9rem,3.8vw,.95rem);overflow-wrap:anywhere;word-wrap:break-word;hyphens:auto}'
+		. '.bm-error-debug{margin:1rem 0 0;text-align:left;width:100%}'
+		. '.bm-error-debug summary{cursor:pointer;font-size:.85rem;color:var(--bm-muted);font-weight:500}'
+		. '.bm-error-debug pre{margin:.5rem 0 0;padding:.75rem;background:rgba(0,0,0,.04);border:1px solid var(--bm-border);border-radius:.375rem;font-size:.75rem;line-height:1.45;overflow:auto;max-height:min(12rem,40vh);white-space:pre-wrap;word-break:break-word}'
+		. '.bm-error-footer{margin:1.25rem 0 0;font-size:.8rem;color:var(--bm-muted);line-height:1.5}'
+		. '.bm-error-actions{display:flex;flex-direction:column;gap:.5rem;width:100%;margin-top:.25rem}'
+		. '.bm-error-btn{display:inline-flex;align-items:center;justify-content:center;min-height:2.75rem;padding:.65rem 1.25rem;border:0;border-radius:.5rem;background:var(--bm-primary);color:#fff;font-size:1rem;font-weight:500;cursor:pointer;text-decoration:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}'
+		. '.bm-error-btn--secondary{background:transparent;color:var(--bm-primary);border:1px solid var(--bm-primary)}'
+		. '.bm-error-btn:hover{filter:brightness(1.05)}'
+		. '.bm-error-btn:active{filter:brightness(.95)}'
+		. '@media (max-width:480px){.bm-error-page{align-items:flex-start;padding-top:max(1.25rem,env(safe-area-inset-top))}.bm-error-card{padding:1.25rem 1rem;border-radius:.625rem;box-shadow:0 4px 16px rgba(15,23,42,.06)}.bm-error-btn{width:100%}}'
+		. '@media (min-width:481px){.bm-error-card{padding:2rem 1.75rem}.bm-error-actions{flex-direction:row;justify-content:center;flex-wrap:wrap}.bm-error-btn{min-width:10rem}}'
+		. '</style></head><body><div class="bm-error-page"><div class="bm-error-card" role="alert">'
+		. '<div class="bm-error-icon" aria-hidden="true">!</div>'
+		. $codeHtml
+		. '<h1 class="bm-error-title">' . $titleEsc . '</h1>'
+		. '<p class="bm-error-text">' . $textEsc . '</p>'
+		. $debugHtml
+		. $footerHtml
+		. $actionsHtml
+		. '</div></div></body></html>');
+	exit();
 }
 
 /**
@@ -3612,9 +4080,10 @@ function b1gMailShutdown()
  */
 function DisplayError($number, $title, $description, $text = false, $file = '', $line = '', $httpcode=400)
 {
-	http_response_code($httpcode);
-	if(INTERFACE_MODE)
+	if(INTERFACE_MODE || PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg')
 	{
+		http_response_code($httpcode);
+
 		if(isset($_SERVER['HTTP_USER_AGENT']))
 			echo '<pre>';
 
@@ -3633,66 +4102,55 @@ function DisplayError($number, $title, $description, $text = false, $file = '', 
 
 		if(isset($_SERVER['HTTP_USER_AGENT']))
 			echo '</pre>';
+
+		exit();
 	}
-	else
+
+	$lang = BmErrorPageLangStrings();
+
+	if($number === 0x02)
 	{
-	?>
-<html>
-<head>
-	<title>b1gMail: Error <?php echo(sprintf('0x%02X', $number)); ?></title>
-	<style>
-	<!--
-		*			{ font-family: tahoma, arial, verdana; font-size: 12px; }
-		H1			{ font-size: 16px; font-weight: bold; border-bottom: 1px solid #DDDDDD; }
-		H2			{ font-size: 14px; font-weight: normal; }
-		.addInfo	{ font-family: courier, courier new; font-size: 10px; height: 100px; overflow: auto;
-						border: 1px solid #DDDDDD; padding: 5px; }
-		.box		{ width: 600px; border: 1px solid #CCC; border-radius: 10px; background-color: #FFF;
-						padding: 30px 15px; margin-top: 3em; margin-left: auto; margin-right: auto; }
-	//-->
-	</style>
-	<link href="<?php echo(B1GMAIL_REL); ?>/clientlib/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-</head>
-<body bgcolor="#F1F2F6">
-
-	<div class="box">
-		<table width="100%">
-			<tr>
-				<td align="center" width="80" valign="top"><i class="fa fa-exclamation-triangle fa-5x" aria-hidden="true"></td>
-				<td valign="top" align="left">
-
-					<h1><?php echo(sprintf('%s (Error 0x%02X)', HTMLFormat($title), $number)); ?></h1>
-					<h2><?php echo(HTMLFormat($description)); ?></h2>
-
-					<hr size="1" color="#DDDDDD" width="100%" noshade="noshade" />
-
-					<?php if(DEBUG) { ?>
-					Additional information:<br /><br />
-
-					<div class="addInfo">
-						Module:<br /><?php echo(str_replace(B1GMAIL_DIR, '', $file)); ?><br /><br />
-						Line:<br /><?php echo($line); ?><br /><br />
-						<?php if($text !== false && $text != '') echo(nl2br(HTMLFormat($text))); ?>
-					</div>
-
-					<hr size="1" color="#DDDDDD" width="100%" noshade="noshade" />
-					<?php } ?>
-					A notification about this error has been sent to the administrator. The problem
-					will be fixed as soon as possible.
-
-					<br /><br />
-					<input type="button" value="&nbsp; Try again &nbsp;" onclick="document.location.reload()" style="padding: 1px;" />
-					<input type="button" value="&nbsp; Start page &nbsp;" onclick="document.location.href='<?php echo(B1GMAIL_REL); ?>';" style="padding: 1px;" />
-
-				</td>
-			</tr>
-		</table>
-	</div>
-
-</body>
-</html>
-	<?php
+		if(isset($lang['error_unauthorized_title']) && $lang['error_unauthorized_title'] !== '')
+			$title = $lang['error_unauthorized_title'];
+		if(isset($lang['error_unauthorized_text']) && $lang['error_unauthorized_text'] !== '')
+			$description = $lang['error_unauthorized_text'];
 	}
+
+	$tryAgain = isset($lang['error_try_again']) ? $lang['error_try_again'] : 'Try again';
+	$startPage = isset($lang['start']) ? $lang['start'] : 'Start page';
+	$footer = isset($lang['error_page_notice'])
+		? $lang['error_page_notice']
+		: 'The administrator has been notified about this error. The problem will be fixed as soon as possible.';
+
+	$debug = '';
+	if(DEBUG)
+	{
+		$debug = 'Module: ' . str_replace(B1GMAIL_DIR, '', $file) . "\n"
+			. 'Line: ' . $line;
+		if($text !== false && $text != '')
+			$debug .= "\n\n" . $text;
+	}
+
+	BmErrorPageHtmlResponse(array(
+		'title'    => $title,
+		'code'     => $number,
+		'text'     => $description,
+		'httpCode' => $httpcode,
+		'debug'    => $debug,
+		'footer'   => $footer,
+		'actions'  => array(
+			array(
+				'label'   => $tryAgain,
+				'onclick' => 'location.reload()',
+				'primary' => true,
+			),
+			array(
+				'label'   => $startPage,
+				'href'    => B1GMAIL_REL,
+				'primary' => false,
+			),
+		),
+	));
 }
 
 /**
@@ -3736,6 +4194,381 @@ function ConnectDB()
 }
 
 /**
+ * Ensure cron_secret exists and is filled (idempotent).
+ *
+ * Override via B1GMAIL_CRON_KEY in config.inc.php.
+ */
+function EnsureCronAuthColumns()
+{
+	global $db, $bm_prefs;
+
+	$res = $db->Query('SHOW COLUMNS FROM {pre}prefs LIKE ?', 'cron_secret');
+	$exists = $res->RowCount() > 0;
+	$res->Free();
+	if(!$exists)
+		$db->Query('ALTER TABLE {pre}prefs ADD COLUMN `cron_secret` varchar(64) NOT NULL DEFAULT \'\'');
+
+	$current = '';
+	if(is_array($bm_prefs) && isset($bm_prefs['cron_secret']))
+		$current = trim((string)$bm_prefs['cron_secret']);
+	if($current === '')
+	{
+		$res = $db->Query('SELECT cron_secret FROM {pre}prefs LIMIT 1');
+		if($res->RowCount() == 1)
+		{
+			$row = $res->FetchArray(MYSQLI_NUM);
+			$current = trim((string)$row[0]);
+		}
+		$res->Free();
+	}
+	if($current === '')
+	{
+		$current = bin2hex(random_bytes(16));
+		$db->Query('UPDATE {pre}prefs SET cron_secret=?', $current);
+	}
+	if(is_array($bm_prefs))
+		$bm_prefs['cron_secret'] = $current;
+}
+
+/**
+ * Toolbox RPC killswitch + verifier column (idempotent).
+ *
+ * New installs: clientapi_enable defaults to no (OSS has no Toolbox build
+ * server). Existing rows get yes so a running BMToolbox keeps working.
+ */
+function EnsureClientApiColumns()
+{
+	global $db, $bm_prefs;
+
+	$res = $db->Query('SHOW COLUMNS FROM {pre}prefs LIKE ?', 'clientapi_enable');
+	$exists = $res->RowCount() > 0;
+	$res->Free();
+	if(!$exists)
+	{
+		$db->Query('ALTER TABLE {pre}prefs ADD COLUMN `clientapi_enable` enum(\'yes\',\'no\') NOT NULL DEFAULT \'no\'');
+		$db->Query('UPDATE {pre}prefs SET clientapi_enable=?', 'yes');
+	}
+
+	$res = $db->Query('SHOW COLUMNS FROM {pre}users LIKE ?', 'tbx_pass');
+	$tbxExists = $res->RowCount() > 0;
+	$res->Free();
+	if(!$tbxExists)
+		$db->Query('ALTER TABLE {pre}users ADD COLUMN `tbx_pass` varchar(64) NOT NULL DEFAULT \'\'');
+
+	if(is_array($bm_prefs) && !isset($bm_prefs['clientapi_enable']))
+	{
+		$res = $db->Query('SELECT clientapi_enable FROM {pre}prefs LIMIT 1');
+		if($res->RowCount() == 1)
+		{
+			$row = $res->FetchArray(MYSQLI_ASSOC);
+			$bm_prefs['clientapi_enable'] = $row['clientapi_enable'];
+		}
+		$res->Free();
+	}
+}
+
+/**
+ * @return bool
+ */
+function ClientApiEnabled()
+{
+	global $bm_prefs;
+
+	if(defined('B1GMAIL_CLIENTAPI'))
+	{
+		$v = B1GMAIL_CLIENTAPI;
+		if($v === true || $v === 1 || $v === '1' || $v === 'yes')
+			return true;
+		return false;
+	}
+
+	return is_array($bm_prefs)
+		&& isset($bm_prefs['clientapi_enable'])
+		&& $bm_prefs['clientapi_enable'] === 'yes';
+}
+
+/**
+ * Methods the official BMToolbox (and Fax plugin) actually call.
+ *
+ * @return array
+ */
+function ClientApiAllowedMethods()
+{
+	return array(
+		'CheckLogin',
+		'CheckForMails',
+		'CreateWebSession',
+		'SendSMS',
+		'GetSMSOutbox',
+		'GetSMSAddressbook',
+		'GetWebdiskFolder',
+		'CreateWebdiskFolder',
+		'DeleteWebdiskFile',
+		'DeleteWebdiskFolder',
+		'GetWebdiskFileInfo',
+		'CreateWebdiskFile',
+		'GetWebdiskFile',
+		'CreateDraft',
+		'DownloadCurrentVersion',
+		'GetFaxPrice',
+		'SendFax',
+	);
+}
+
+/**
+ * @param string $method
+ * @return bool
+ */
+function ClientApiMethodAllowed($method)
+{
+	return in_array((string)$method, ClientApiAllowedMethods(), true);
+}
+
+/**
+ * @return string
+ */
+function ClientApiPepper()
+{
+	return defined('B1GMAIL_SIGNKEY') ? (string)B1GMAIL_SIGNKEY : '';
+}
+
+/**
+ * HMAC of the MD5 the Toolbox sends (md5 of UTF-8 password).
+ *
+ * @param string $passwordMd5
+ * @return string
+ */
+function ClientApiVerifierFromMd5($passwordMd5)
+{
+	return hash_hmac('sha256', strtolower(trim((string)$passwordMd5)), ClientApiPepper());
+}
+
+/**
+ * Store Toolbox verifier after a plaintext password is known.
+ *
+ * @param int    $userID
+ * @param string $passwordPlain
+ */
+function ClientApiRememberPassword($userID, $passwordPlain)
+{
+	global $db;
+
+	$userID = (int)$userID;
+	$passwordPlain = (string)$passwordPlain;
+	if($userID <= 0 || $passwordPlain === '')
+		return;
+
+	$hashes = array(md5($passwordPlain));
+	$decoded = CharsetDecode($passwordPlain, false, 'ISO-8859-15');
+	if($decoded !== '' && $decoded !== $passwordPlain)
+		$hashes[] = md5($decoded);
+
+	$verifier = ClientApiVerifierFromMd5($hashes[0]);
+	$db->Query('UPDATE {pre}users SET tbx_pass=? WHERE id=?',
+		$verifier,
+		$userID);
+}
+
+/**
+ * @param int    $userID
+ * @param string $passwordMd5
+ */
+function ClientApiRememberMd5($userID, $passwordMd5)
+{
+	global $db;
+
+	$userID = (int)$userID;
+	$passwordMd5 = strtolower(trim((string)$passwordMd5));
+	if($userID <= 0 || !preg_match('/^[a-f0-9]{32}$/', $passwordMd5))
+		return;
+
+	$db->Query('UPDATE {pre}users SET tbx_pass=? WHERE id=?',
+		ClientApiVerifierFromMd5($passwordMd5),
+		$userID);
+}
+
+/**
+ * IP fail window for Toolbox CheckLogin / CreateWebSession.
+ *
+ * @return bool
+ */
+function ClientApiRateLimitAllow()
+{
+	$ip = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0';
+	$dir = B1GMAIL_DIR . 'temp/';
+	if(!is_dir($dir) || !is_writable($dir))
+		return true;
+
+	$file = $dir . 'clientapi_rl_' . hash('sha256', $ip) . '.tmp';
+	$now = time();
+	$window = 15 * TIME_ONE_MINUTE;
+	$max = 20;
+
+	$times = array();
+	if(is_file($file))
+	{
+		$decoded = json_decode((string)@file_get_contents($file), true);
+		if(is_array($decoded))
+			$times = $decoded;
+	}
+
+	$fresh = array();
+	foreach($times as $stamp)
+	{
+		if((int)$stamp > $now - $window)
+			$fresh[] = (int)$stamp;
+	}
+
+	return count($fresh) < $max;
+}
+
+function ClientApiRateLimitFail()
+{
+	$ip = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0';
+	$dir = B1GMAIL_DIR . 'temp/';
+	if(!is_dir($dir) || !is_writable($dir))
+		return;
+
+	$file = $dir . 'clientapi_rl_' . hash('sha256', $ip) . '.tmp';
+	$now = time();
+	$window = 15 * TIME_ONE_MINUTE;
+
+	$times = array();
+	if(is_file($file))
+	{
+		$decoded = json_decode((string)@file_get_contents($file), true);
+		if(is_array($decoded))
+			$times = $decoded;
+	}
+
+	$fresh = array();
+	foreach($times as $stamp)
+	{
+		if((int)$stamp > $now - $window)
+			$fresh[] = (int)$stamp;
+	}
+	$fresh[] = $now;
+	@file_put_contents($file, json_encode($fresh), LOCK_EX);
+}
+
+/**
+ * @return string
+ */
+function CronSecret()
+{
+	global $bm_prefs;
+
+	if(defined('B1GMAIL_CRON_KEY') && (string)B1GMAIL_CRON_KEY !== '')
+		return (string)B1GMAIL_CRON_KEY;
+	if(is_array($bm_prefs) && isset($bm_prefs['cron_secret']))
+		return trim((string)$bm_prefs['cron_secret']);
+	return '';
+}
+
+/**
+ * @return bool
+ */
+function CronRequestIsCli()
+{
+	if(PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg')
+		return true;
+	return !isset($_SERVER['REQUEST_METHOD']) && empty($_SERVER['HTTP_HOST']) && empty($_SERVER['REMOTE_ADDR']);
+}
+
+/**
+ * @return string
+ */
+function CronClientIp()
+{
+	$ip = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '';
+	if(stripos($ip, '::ffff:') === 0)
+		$ip = substr($ip, 7);
+	return $ip;
+}
+
+/**
+ * Loopback or same address as the HTTP vhost (typical on-server wget/curl).
+ *
+ * @return bool
+ */
+function CronRequestIsLocal()
+{
+	$ip = CronClientIp();
+	if($ip === '127.0.0.1' || $ip === '::1')
+		return true;
+
+	$server = isset($_SERVER['SERVER_ADDR']) ? (string)$_SERVER['SERVER_ADDR'] : '';
+	if(stripos($server, '::ffff:') === 0)
+		$server = substr($server, 7);
+	if($server !== '' && $ip !== '' && hash_equals($server, $ip))
+		return true;
+
+	return false;
+}
+
+/**
+ * @return bool
+ */
+function CronRequestHasValidKey()
+{
+	$secret = CronSecret();
+	if($secret === '')
+		return false;
+
+	$provided = '';
+	if(isset($_REQUEST['key']))
+		$provided = trim((string)$_REQUEST['key']);
+	else if(isset($_REQUEST['cron_key']))
+		$provided = trim((string)$_REQUEST['cron_key']);
+	else if(isset($_SERVER['HTTP_X_CRON_KEY']))
+		$provided = trim((string)$_SERVER['HTTP_X_CRON_KEY']);
+
+	if($provided === '' || strlen($provided) !== strlen($secret))
+		return false;
+	return hash_equals($secret, $provided);
+}
+
+/**
+ * CLI, localhost, matching secret, or (optional) already authenticated session.
+ *
+ * @param bool $allowUserSession
+ * @return bool
+ */
+function CronInvokeAllowed($allowUserSession = false)
+{
+	if(CronRequestIsCli() || CronRequestIsLocal() || CronRequestHasValidKey())
+		return true;
+
+	if($allowUserSession
+		&& (isset($_REQUEST['sid']) || !empty($_COOKIE[session_name()]))
+		&& RequestPrivileges(PRIVILEGES_USER, true))
+		return true;
+
+	return false;
+}
+
+/**
+ * Deny unauthenticated HTTP cron. CLI and local crontab keep working without a key.
+ *
+ * @param bool $allowUserSession
+ * @return void
+ */
+function CronRequireAllowed($allowUserSession = false)
+{
+	if(CronInvokeAllowed($allowUserSession))
+		return;
+
+	if(!headers_sent())
+	{
+		header('HTTP/1.1 403 Forbidden');
+		header('Cache-Control: no-store');
+		header('Content-Type: text/plain; charset=utf-8');
+	}
+	echo 'Forbidden';
+	exit();
+}
+
+/**
  * fetch configuration from db
  *
  */
@@ -3747,6 +4580,18 @@ function ReadConfig()
 	if($res->RowCount() == 1)
 		$bm_prefs = $res->FetchArray(MYSQLI_ASSOC);
 	$res->Free();
+
+	EnsureSessionPrefColumns();
+	SessionApplyPrefDefaults();
+	EnsureUrlRoutingPrefColumns();
+	UrlRoutingApplyPrefDefaults();
+	EnsurePasswordHashPrefColumns();
+	PasswordHashApplyPrefDefaults();
+	EnsurePwResetColumns();
+	EnsureCronAuthColumns();
+	EnsureClientApiColumns();
+	EnsureMfaSchema();
+	MfaApplyPrefDefaults();
 
 	// for backward compatibility
 	$bm_prefs['domains'] = GetDomainList();

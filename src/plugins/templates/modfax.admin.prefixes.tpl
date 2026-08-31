@@ -1,58 +1,58 @@
 <fieldset>
 	<legend>{lng p="modfax_prefixes"}</legend>
 	
-	<form action="{$pageURL}&action=prefixes&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
-	<table class="list">
-		<tr>
-			<th width="20">&nbsp;</th>
-			<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'prefixes[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
-			<th>{lng p="modfax_prefix"}</th>
-			<th width="210">{lng p="gateway"}</th>
-			<th width="145">{lng p="modfax_price_firstpage"}</th>
-			<th width="145">{lng p="modfax_price_nextpages"}</th>
-			<th width="60">&nbsp;</th>
-		</tr>
-		
-		{foreach from=$prefixes item=prefix}
-		{cycle name=class values="td1,td2" assign=class}
-		<tr class="{$class}">
-			<td align="center"><img src="../plugins/templates/images/modfax_prefix.png" border="0" alt="" width="16" height="16" /></td>
-			<td align="center"><input type="checkbox" name="prefixes[]" value="{$prefix.prefixid}" /></td>
-			<td>{if $prefix.prefix!='*'}(0){/if}{$prefix.prefix}<br /><small>{lng p="modfax_country_prefix"}: {if $prefix.country_prefix!='*'}+{/if}{$prefix.country_prefix}</small></td>
-			<td>{if $prefix.faxgateid==-1}({lng p="modfax_forbidno"}){elseif $prefix.faxgateid==0}({lng p="defaultgateway"}){else}{text value=$gateways[$prefix.faxgateid]}{/if}</td>
-			<td>{if $prefix.faxgateid==-1} - {else}{$prefix.price_firstpage} {lng p="credits"}{/if}</td>
-			<td>{if $prefix.faxgateid==-1} - {else}{$prefix.price_nextpages} {lng p="credits"}{/if}</td>
-			<td>
-				<a href="{$pageURL}&action=prefixes&do=edit&id={$prefix.prefixid}&sid={$sid}"><img src="{$tpldir}images/edit.png" border="0" alt="{lng p="edit"}" width="16" height="16" /></a>
-				<a href="{$pageURL}&action=prefixes&delete={$prefix.prefixid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
-			</td>
-		</tr>		
-		{/foreach}
-		
-		<tr>
-			<td class="footer" colspan="7">
-				<div style="float:left;">
-					{lng p="action"}: <select name="massAction" class="smallInput">
-						<option value="-">------------</option>
-						
-						<optgroup label="{lng p="actions"}">
-							<option value="delete">{lng p="delete"}</option>
-						</optgroup>
-					</select>&nbsp;
-				</div>
-				<div style="float:left;">
-					<input type="submit" name="executeMassAction" value=" {lng p="execute"} " class="smallInput" />
-				</div>
-			</td>
-		</tr>
-	</table>
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
+	<div class="card">
+		<div class="table-responsive">
+			<table class="table table-vcenter table-striped card-table">
+				<thead>
+				<tr>
+					<th style="width: 25px;"><a href="javascript:invertSelection(document.forms.f1,'prefixes[]');" class="text-secondary"><i class="ti ti-selector"></i></a></th>
+					<th>{lng p="modfax_prefix"}</th>
+					<th>{lng p="gateway"}</th>
+					<th>{lng p="modfax_price_firstpage"}</th>
+					<th>{lng p="modfax_price_nextpages"}</th>
+					<th style="width: 90px;">&nbsp;</th>
+				</tr>
+				</thead>
+				<tbody>
+				{foreach from=$prefixes item=prefix}
+				<tr>
+					<td class="text-center"><input type="checkbox" class="form-check-input m-0" name="prefixes[]" value="{$prefix.prefixid}" /></td>
+					<td>{if $prefix.prefix!='*'}(0){/if}{$prefix.prefix}<br /><small class="text-secondary">{lng p="modfax_country_prefix"}: {if $prefix.country_prefix!='*'}+{/if}{$prefix.country_prefix}</small></td>
+					<td>{if $prefix.faxgateid==-1}({lng p="modfax_forbidno"}){elseif $prefix.faxgateid==0}({lng p="defaultgateway"}){else}{text value=$gateways[$prefix.faxgateid]}{/if}</td>
+					<td>{if $prefix.faxgateid==-1} &mdash; {else}{$prefix.price_firstpage} {lng p="credits"}{/if}</td>
+					<td>{if $prefix.faxgateid==-1} &mdash; {else}{$prefix.price_nextpages} {lng p="credits"}{/if}</td>
+					<td class="text-nowrap">
+						<div class="btn-group btn-group-sm">
+							<a href="{$prefix.editUrl}{$sessionUrlSuffixHtml}" class="btn btn-sm" title="{lng p="edit"}"><i class="fa-regular fa-pen-to-square"></i></a>
+							<button type="submit" name="delete" value="{$prefix.prefixid}" class="btn btn-sm" title="{lng p="delete"}" onclick="return confirm('{lng p="realdel"}');"><i class="fa-regular fa-trash-can"></i></button>
+						</div>
+					</td>
+				</tr>
+				{/foreach}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+		<label class="mb-0">{lng p="action"}:</label>
+		<select name="massAction" class="form-select form-select-sm" style="width: auto;">
+			<option value="-">------------</option>
+			<option value="delete">{lng p="delete"}</option>
+		</select>
+		<button type="submit" name="executeMassAction" value="1" class="btn btn-sm btn-primary">{lng p="execute"}</button>
+	</div>
 	</form>
 </fieldset>
 
 <fieldset>
 	<legend>{lng p="modfax_addprefix"}</legend>
 	
-	<form action="{$pageURL}&action=prefixes&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="spin(this)">
+		{csrffield}
+		<input type="hidden" name="add" value="1" />
 		<table width="100%">
 			<tr>
 				<td width="40" valign="top" rowspan="5"><img src="../plugins/templates/images/modfax_prefix.png" border="0" alt="" width="32" height="32" /></td>

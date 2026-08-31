@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="profilefields"}</legend>
 
-	<form action="prefs.profilefields.php?sid={$sid}" method="post" name="f1" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.profilefields.php'}" method="post" name="f1" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -26,8 +27,8 @@
 							<td><input type="checkbox" disabled="disabled"{if $field.pflicht} checked="checked"{/if} /></td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.profilefields.php?do=edit&id={$field.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="prefs.profilefields.php?delete={$field.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.profilefields.php' params="do=edit&id={$field.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='prefs.profilefields.php' params="delete={$field.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 
@@ -57,7 +58,8 @@
 <fieldset>
 	<legend>{lng p="addprofilefield"}</legend>
 
-	<form action="prefs.profilefields.php?add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.profilefields.php' params="add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="field"}</label>
 			<div class="col-sm-10">

@@ -1,0 +1,26 @@
+RewriteEngine On
+RewriteBase /
+RewriteOptions inherit
+Options -MultiViews
+
+# Well-known service discovery (DAV)
+RewriteRule ^\.well-known/carddav/?$ /interface/carddav.php [R=301,L]
+RewriteRule ^\.well-known/caldav/?$ /interface/caldav.php [R=301,L]
+RewriteRule ^\.well-known/webdav/?$ /interface/webdav.php [R=301,L]
+
+# Legacy NLI entry → front controller (GET/POST must share bootstrap with /login)
+RewriteRule ^index\.php$ app.php [QSA,L]
+
+# Static files and directories — no rewrite
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Admin pretty URLs → front controller (b1gMail core)
+RewriteRule ^admin(?:/.*)?$ admin/app.php [QSA,L]
+
+# Static / internal paths (no front controller)
+RewriteRule ^(?:interface|clientlib|plugins|templates|languages|temp|serverlib|plz|mobile)(?:/|$) - [L]
+
+# NLI / LI pretty URLs → public front controller
+RewriteRule ^ app.php [QSA,L]

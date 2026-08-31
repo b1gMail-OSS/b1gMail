@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/todo.class.php');
 include('./serverlib/dashboard.class.php');
 RequestPrivileges(PRIVILEGES_USER);
@@ -36,7 +37,7 @@ ModuleFunction('FileHandler',
  */
 if($groupRow['organizer']=='no')
 {
-	header('Location: start.php?sid=' . session_id());
+	SessionRedirect('start.php');
 	exit();
 }
 /**
@@ -125,7 +126,7 @@ else if($_REQUEST['action'] == 'saveCustomize')
 
 	$thisUser->SetPref('widgetOrderOrganizer', $newOrder);
 
-	header('Location: organizer.php?sid=' . session_id());
+	SessionRedirect('organizer.php');
 	exit();
 }
 ?>

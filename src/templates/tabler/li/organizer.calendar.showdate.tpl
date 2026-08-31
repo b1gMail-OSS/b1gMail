@@ -38,7 +38,7 @@
 				<p class="text-secondary mb-0"><i>({lng p="none"})</i></p>
 			{else}
 				{foreach from=$attendees item=person}
-				<div class="addressItem bm-calendar-attendee-item" onclick="parent.document.location.href='organizer.addressbook.php?sid={$sid}&action=editContact&id={$person.id}';">
+				<div class="addressItem bm-calendar-attendee-item" onclick="parent.document.location.href='{sessionurl file='organizer.addressbook.php' params="action=editContact&id={$person.id}"|escape:'javascript'}';">
 					{if $person.partstat == 'accepted'}
 						<i class="ti ti-circle-check-filled icon icon-sm text-success me-1" title="{lng p="mail_att_partstat_accepted"}" aria-hidden="true"></i>
 					{elseif $person.partstat == 'declined'}
@@ -63,18 +63,18 @@
 	<div class="modal-footer bm-calendar-showdate-footer">
 		<div class="bm-calendar-showdate-footer-start">
 			{if $attendees}
-			<button type="button" class="btn btn-ghost-primary" onclick="parent.document.location.href='email.compose.php?to={$mailTo}&subject={$mailSubject}&sid={$sid}';">
+			<button type="button" class="btn btn-ghost-primary" onclick="parent.document.location.href='email.compose.php?to={$mailTo}&subject={$mailSubject}{$sessionUrlSuffix}';">
 				<i class="ti ti-mail icon" aria-hidden="true"></i>
 				{lng p="mailattendees"}
 			</button>
 			{/if}
 		</div>
 		<div class="bm-calendar-showdate-footer-actions">
-			<button type="button" class="btn btn-ghost-danger" onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='organizer.calendar.php?action=deleteDate&id={$date.id}&sid={$sid}';">
+			<button type="button" class="btn btn-ghost-danger" onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=deleteDate&id={$date.id}"|escape:'javascript'}';">
 				<i class="ti ti-trash icon" aria-hidden="true"></i>
 				{lng p="delete"}
 			</button>
-			<button type="button" class="btn btn-primary" onclick="parent.document.location.href='organizer.calendar.php?action=editDate&id={$date.id}{if $date.repeat_flags!=0}&jumpbackDate={$date.startdate}{/if}&sid={$sid}';">
+			<button type="button" class="btn btn-primary" onclick="parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=editDate&id={$date.id}{if $date.repeat_flags!=0}&jumpbackDate={$date.startdate}{/if}"|escape:'javascript'}';">
 				<i class="ti ti-pencil icon" aria-hidden="true"></i>
 				{lng p="edit"}
 			</button>

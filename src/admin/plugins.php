@@ -203,7 +203,7 @@ elseif ($_REQUEST['action'] == 'install') {
     //
     // form
     //
-    if (!isset($_REQUEST['do'])) {
+    if (!isset($_REQUEST['do']) || trim((string) $_REQUEST['do']) === '') {
         $tpl->assign('page', 'plugins.install.tpl');
     }
 
@@ -252,7 +252,7 @@ elseif ($_REQUEST['action'] == 'install') {
             $tpl->assign('msgTitle', $lang_admin['install']);
             $tpl->assign('msgText', $lang_admin['plugin_formaterr']);
             $tpl->assign('msgIcon', 'error32');
-            $tpl->assign('backLink', 'plugins.php?action=install&');
+            $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
             $tpl->assign('page', 'msg.tpl');
         }
     }
@@ -294,14 +294,21 @@ elseif ($_REQUEST['action'] == 'install') {
     // install
     //
     elseif (isset($_REQUEST['do']) && $_REQUEST['do'] == 'installPlugin'
-        && isset($_REQUEST['id']) && ValidTempFile(0, (int) $_REQUEST['id'])) {
+        && isset($_REQUEST['id'])) {
+        $id = (int) $_REQUEST['id'];
+
+        if (!ValidTempFile(0, $id)) {
+            $tpl->assign('msgTitle', $lang_admin['install']);
+            $tpl->assign('msgText', $lang_admin['plugin_insterr']);
+            $tpl->assign('msgIcon', 'error32');
+            $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
+            $tpl->assign('page', 'msg.tpl');
+        } else {
         if (isset($_REQUEST['step'])) {
             $step = max(1, min(2, (int) $_REQUEST['step']));
         } else {
             $step = 1;
         }
-
-        $id = (int) $_REQUEST['id'];
         $tempFileName = TempFileName($id);
 
         // open file
@@ -309,17 +316,18 @@ elseif ($_REQUEST['action'] == 'install') {
         if ($package->ParseFile()) {
             if ($step == 1) {
                 if ($package->InstallStep1()) {
-                    $url = sprintf('plugins.php?action=install&do=installPlugin&id=%d&step=2&sid=%s',
-                        $id,
-                        session_id());
-                    header('Location: '.$url);
                     fclose($fp);
-                    exit();
+                    SessionRedirect(AdminUrl('plugins.php', [
+                        'action' => 'install',
+                        'do' => 'installPlugin',
+                        'id' => $id,
+                        'step' => 2,
+                    ], false));
                 } else {
                     $tpl->assign('msgTitle', $lang_admin['install']);
                     $tpl->assign('msgText', $lang_admin['plugin_insterr']);
                     $tpl->assign('msgIcon', 'error32');
-                    $tpl->assign('backLink', 'plugins.php?action=install&');
+                    $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
                     $tpl->assign('page', 'msg.tpl');
                     fclose($fp);
                     ReleaseTempFile(0, $id);
@@ -330,13 +338,13 @@ elseif ($_REQUEST['action'] == 'install') {
                     $tpl->assign('msgTitle', $lang_admin['install']);
                     $tpl->assign('msgText', $lang_admin['plugin_installed']);
                     $tpl->assign('msgIcon', 'info32');
-                    $tpl->assign('backLink', 'plugins.php?');
+                    $tpl->assign('backLink', AdminUrl('plugins.php', [], true));
                     $tpl->assign('page', 'msg.tpl');
                 } else {
                     $tpl->assign('msgTitle', $lang_admin['install']);
                     $tpl->assign('msgText', $lang_admin['plugin_insterr']);
                     $tpl->assign('msgIcon', 'error32');
-                    $tpl->assign('backLink', 'plugins.php?action=install&');
+                    $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
                     $tpl->assign('page', 'msg.tpl');
                 }
 
@@ -344,8 +352,28 @@ elseif ($_REQUEST['action'] == 'install') {
                 fclose($fp);
                 ReleaseTempFile(0, $id);
             }
+        } else {
+            $tpl->assign('msgTitle', $lang_admin['install']);
+            $tpl->assign('msgText', $lang_admin['plugin_insterr']);
+            $tpl->assign('msgIcon', 'error32');
+            $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
+            $tpl->assign('page', 'msg.tpl');
+        }
         }
     }
+
+    if (!$tpl->getTemplateVars('page')) {
+        $tpl->assign('page', 'plugins.install.tpl');
+    }
+}
+
+$page = $tpl->getTemplateVars('page');
+if (!is_string($page) || trim($page) === '') {
+    $tpl->assign('msgTitle', $lang_admin['plugins']);
+    $tpl->assign('msgText', $lang_admin['plugin_insterr']);
+    $tpl->assign('msgIcon', 'error32');
+    $tpl->assign('backLink', AdminUrl('plugins.php', [], true));
+    $tpl->assign('page', 'msg.tpl');
 }
 
 $tpl->assign('tabs', $tabs);

@@ -21,13 +21,15 @@
 			{hook id="webdisk.folder.tpl:head"}
 
 			{if $isShared}
-			<form action="email.compose.php?sid={$sid}" method="post" name="mailForm">
+			<form action="{sessionurl file='email.compose.php'}" method="post" name="mailForm">
+				{csrffield}
 				<input type="hidden" name="subject" value="{if isset($shareMailSubject)}{text value=$shareMailSubject allowEmpty=true}{/if}" />
 				<textarea name="text" style="display:none">{if isset($shareMail)}{text value=$shareMail allowEmpty=true}{/if}</textarea>
 			</form>
 			{/if}
 
-			<form enctype="multipart/form-data" action="webdisk.php?folder={$folderID}&sid={$sid}" method="post" name="f1" onsubmit="transferSelectedWebdiskItems();" class="bm-webdisk-form">
+			<form enctype="multipart/form-data" action="webdisk.php?folder={$folderID}{$sessionUrlSuffix}" method="post" name="f1" onsubmit="transferSelectedWebdiskItems();" class="bm-webdisk-form">
+				{csrffield}
 				<input type="hidden" name="" value="" id="wdAction" />
 				<input type="hidden" name="massAction" value="" id="wdMassAction" />
 				<input type="hidden" name="selectedWebdiskItems" id="selectedWebdiskItems" value="" />
@@ -73,9 +75,9 @@
 							<a id="wli_{$item.type}_{$item.id}"
 								class="webdiskItem bm-webdisk-item card-body"
 								title="{text value=$item.title}"{if $item.type==2 && $item.viewable} data-viewable="1"{/if}>
-								<span class="bm-webdisk-item-icon-wrap{if $item.thumbnail} bm-webdisk-item-icon-wrap--thumb{/if}">
-									{if $item.thumbnail}
-									<img class="bm-webdisk-thumb" src="webdisk.php?action=thumbnail&amp;id={$item.id}&amp;sid={$sid}" alt="" loading="lazy" draggable="false" />
+								<span class="bm-webdisk-item-icon-wrap{if !empty($item.thumbnail)} bm-webdisk-item-icon-wrap--thumb{/if}">
+									{if !empty($item.thumbnail)}
+									<img class="bm-webdisk-thumb" src="webdisk.php?action=thumbnail&amp;id={$item.id}&amp;m={$item.modified}{$sessionUrlSuffixHtml}" alt="" loading="eager" draggable="false" />
 									{else}
 									{assign var='wdicons_size_class' value='bm-webdisk-icon-lg' scope='global'}
 									{assign var='wdicons_additionalparam' value='draggable="true"' scope='global'}
@@ -105,8 +107,8 @@
 							{foreach from=$folderContent item=item}
 							<tr id="wli_{$item.type}_{$item.id}"{if $item.type==2 && $item.viewable} data-viewable="1"{/if}>
 								<td class="text-center">
-									{if $item.thumbnail}
-									<img class="bm-webdisk-thumb bm-webdisk-thumb--list" src="webdisk.php?action=thumbnail&amp;id={$item.id}&amp;sid={$sid}" alt="" loading="lazy" draggable="false" width="32" height="32" />
+									{if !empty($item.thumbnail)}
+									<img class="bm-webdisk-thumb bm-webdisk-thumb--list" src="webdisk.php?action=thumbnail&amp;id={$item.id}&amp;m={$item.modified}{$sessionUrlSuffixHtml}" alt="" loading="eager" draggable="false" width="32" height="32" />
 									{else}
 									{assign var='wdicons_size_class' value='bm-webdisk-icon-sm' scope='global'}
 									{assign var='wdicons_additionalparam' value='draggable="true"' scope='global'}
@@ -149,7 +151,7 @@
 			{include file="li/webdisk.upload.modal.tpl"}
 
 			{if !isset($smarty.post.inline)}
-			<script src="./clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
+			<script src="{$selfurl}clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
 			<script type="application/json" id="webdiskPreviewManifest">{$webdiskPreviewFilesJSON}</script>
 			<script type="application/json" id="webdiskPreviewItems">{$webdiskPreviewItemsJSON}</script>
 			<script>
@@ -167,7 +169,7 @@
 			{/if}
 				registerLoadAction('webdiskInitPreview()');
 				registerLoadAction('webdiskEnsureUploadModalInBody()');
-				initDnDUpload(EBID('mainContent'), 'webdisk.php?sid='+currentSID+'&folder={$folderID}&action=dndUpload', function() {literal}{{/literal} document.location.href='webdisk.php?sid='+currentSID+'&folder={$folderID}'; {literal}}{/literal}, webdiskDnDFileDone);
+				initDnDUpload(EBID('mainContent'), bmAppendSession('webdisk.php?folder={$folderID}&action=dndUpload'), function() {literal}{{/literal} document.location.href=bmAppendSession('webdisk.php?folder={$folderID}'); {literal}}{/literal}, webdiskDnDFileDone);
 				currentWebdiskFolderID = {$folderID};
 				var treeID = webdiskGetTreeIDbyFolderID({$folderID});
 				if(treeID > 0) {

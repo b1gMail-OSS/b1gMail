@@ -8,7 +8,8 @@
 
 	<div class="bm-dashboard-body">
 		<div class="card bm-dashboard-card">
-			<form name="f1" method="post" action="start.php?action=saveCustomize&amp;sid={$sid}">
+			<form name="f1" method="post" action="{sessionurl file='start.php' params='action=saveCustomize'}">
+				{csrffield}
 				<div class="list-group list-group-flush">
 					{foreach from=$possibleWidgets key=widget item=info}
 					<label class="list-group-item list-group-item-action form-check d-flex align-items-center gap-2 mb-0">

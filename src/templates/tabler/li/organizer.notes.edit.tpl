@@ -6,7 +6,8 @@
 		</div>
 	</div>
 
-	<form name="f1" method="post" action="organizer.notes.php?action={if isset($note)}saveNote&id={$note.id}{else}createNote{/if}&sid={$sid}" class="card bm-organizer-form-card" onsubmit="return(checkNoteForm(this));">
+	<form name="f1" method="post" action="organizer.notes.php?action={if isset($note)}saveNote&id={$note.id}{else}createNote{/if}{$sessionUrlSuffix}" class="card bm-organizer-form-card" onsubmit="return(checkNoteForm(this));">
+		{csrffield}
 		<div class="card-body">
 			<h3 class="card-title mb-4">{if isset($note)}{lng p="editnote"}{else}{lng p="addnote"}{/if}</h3>
 

@@ -1,4 +1,5 @@
-<form action="prefs.common.php?action=captcha&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.common.php' params="action=captcha&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>

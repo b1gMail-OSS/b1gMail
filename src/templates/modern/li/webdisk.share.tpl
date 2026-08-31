@@ -10,6 +10,7 @@
 <div class="mailWarning" style="margin-bottom:10px;">{$shareError}</div>
 {/if}
 <form action="webdisk.php?action=saveShareSettings&folder={$folderID}&id={$id}&sid={$sid}" method="post">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="sharing"}</th>

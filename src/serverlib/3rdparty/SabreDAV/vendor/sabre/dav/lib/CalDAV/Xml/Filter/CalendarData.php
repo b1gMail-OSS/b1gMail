@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Filter;
 
+use Sabre\CalDAV\Plugin;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\VObject\DateTimeParser;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
-use Sabre\DAV\Exception\BadRequest;
-use Sabre\CalDAV\Plugin;
-use Sabre\VObject\DateTimeParser;
 
 /**
  * CalendarData parser.
@@ -25,12 +27,12 @@ use Sabre\VObject\DateTimeParser;
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class CalendarData implements XmlDeserializable {
-
+class CalendarData implements XmlDeserializable
+{
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -45,25 +47,22 @@ class CalendarData implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $result = [
             'contentType' => $reader->getAttribute('content-type') ?: 'text/calendar',
-            'version'     => $reader->getAttribute('version') ?: '2.0',
+            'version' => $reader->getAttribute('version') ?: '2.0',
         ];
 
-        $elems = (array)$reader->parseInnerTree();
+        $elems = (array) $reader->parseInnerTree();
         foreach ($elems as $elem) {
-
             switch ($elem['name']) {
-                case '{' . Plugin::NS_CALDAV . '}expand' :
-
+                case '{'.Plugin::NS_CALDAV.'}expand':
                     $result['expand'] = [
                         'start' => isset($elem['attributes']['start']) ? DateTimeParser::parseDateTime($elem['attributes']['start']) : null,
-                        'end'   => isset($elem['attributes']['end']) ? DateTimeParser::parseDateTime($elem['attributes']['end']) : null,
+                        'end' => isset($elem['attributes']['end']) ? DateTimeParser::parseDateTime($elem['attributes']['end']) : null,
                     ];
 
                     if (!$result['expand']['start'] || !$result['expand']['end']) {
@@ -74,11 +73,8 @@ class CalendarData implements XmlDeserializable {
                     }
                     break;
             }
-
         }
 
         return $result;
-
     }
-
 }

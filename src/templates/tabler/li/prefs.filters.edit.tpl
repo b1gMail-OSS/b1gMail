@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=filters&do=saveFilter&id={$filter.id}&sid={$sid}" onsubmit="if(checkFilterForm(this)) {literal}{ if(!formSubmitOK) { parent.frames.condition_frame.document.forms.saveForm.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit(); return(false); } else { return(true); } }{/literal} return(false);">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params="action=filters&do=saveFilter&id={$filter.id}"}" onsubmit="if(checkFilterForm(this)) {literal}{ if(!formSubmitOK) { parent.frames.condition_frame.document.forms.saveForm.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit(); return(false); } else { return(true); } }{/literal} return(false);">
+{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<table class="listTable">
 		<tr>
@@ -28,7 +29,7 @@
 		<tr>
 			<td class="listTableLeft">* {lng p="conditions"}:</td>
 			<td class="listTableRight">
-				<iframe id="condition_frame" name="condition_frame" class="conditionIFrame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="prefs.php?action=filters&do=editConditions&id={$filter.id}&sid={$sid}"></iframe>
+				<iframe id="condition_frame" name="condition_frame" class="conditionIFrame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="{sessionurl file='prefs.php' params="action=filters&do=editConditions&id={$filter.id}"}"></iframe>
 				<div class="linkBox">
 					{lng p="filterrequiredis"}
 					<select name="link">
@@ -43,7 +44,7 @@
 		<tr>
 			<td class="listTableLeft">* {lng p="actions"}:</td>
 			<td class="listTableRight">
-				<iframe id="action_frame" name="action_frame" class="conditionIFrame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="prefs.php?action=filters&do=editActions&id={$filter.id}&sid={$sid}"></iframe>
+				<iframe id="action_frame" name="action_frame" class="conditionIFrame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="{sessionurl file='prefs.php' params="action=filters&do=editActions&id={$filter.id}"}"></iframe>
 			</td>
 		</tr>
 		

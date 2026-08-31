@@ -11,7 +11,7 @@
 		<div class="card bm-prefs-overview-card">
 			<div class="list-group list-group-flush bm-prefs-overview-list">
 				{foreach from=$prefsItems item=null key=item}
-				<a href="prefs.php?action={$item}&sid={$sid}" class="list-group-item list-group-item-action bm-prefs-overview-item">
+				<a href="{sessionurl file='prefs.php' params="action={$item}"}" class="list-group-item list-group-item-action bm-prefs-overview-item">
 					<span class="avatar avatar-sm bg-primary-lt text-primary bm-prefs-overview-icon">
 						{include file="li/prefs.item-icon.tpl"}
 					</span>
@@ -27,7 +27,7 @@
 		{else}
 		<div class="bm-prefs-overview-grid">
 			{foreach from=$prefsItems item=null key=item}
-			<a href="prefs.php?action={$item}&sid={$sid}" class="card bm-prefs-overview-tile">
+			<a href="{sessionurl file='prefs.php' params="action={$item}"}" class="card bm-prefs-overview-tile">
 				<div class="card-body bm-prefs-overview-tile-body">
 					<span class="avatar avatar-sm bg-primary-lt text-primary bm-prefs-overview-icon">
 						{include file="li/prefs.item-icon.tpl"}

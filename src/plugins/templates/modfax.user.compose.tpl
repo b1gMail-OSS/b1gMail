@@ -1,4 +1,4 @@
-{if $_tplname=='modern'}
+{if $_tplname=='modern' || $_tplname=='tabler'}
 <div id="contentHeader">
 	<div class="left">
 		<i class="fa fa-paper-plane-o" aria-hidden="true"></i>
@@ -15,7 +15,8 @@
 
 <div class="note" style="margin-bottom:1em;display:none;" id="faxError"></div>
 
-<form name="f0" id="faxFormStep1" method="post" action="start.php?action=faxPlugin&do2=prepareSend&sid={$sid}" target="faxFormPrepareSendIFrame" style="display:;" onsubmit="EBID('step1SubmitButton').disabled=true;">
+<form name="f0" id="faxFormStep1" method="post" action="start.php?action=faxPlugin&do2=prepareSend{$sessionUrlSuffixHtml}" target="faxFormPrepareSendIFrame" style="display:;" onsubmit="EBID('step1SubmitButton').disabled=true;">
+	{csrffield}
 	<table class="listTable">
 		<tbody id="faxFormHeadline">
 			<tr>
@@ -89,7 +90,8 @@
 	</table>
 </form>
 
-<form name="f1" id="faxFormStep2" method="post" action="start.php?action=faxPlugin&do2=send&sid={$sid}" style="display:none;" onsubmit="EBID('step2BackButton').disabled=true;EBID('step2SubmitButton').disabled=true;">
+<form name="f1" id="faxFormStep2" method="post" action="start.php?action=faxPlugin&do2=send{$sessionUrlSuffixHtml}" style="display:none;" onsubmit="EBID('step2BackButton').disabled=true;EBID('step2SubmitButton').disabled=true;">
+	{csrffield}
 	<input type="hidden" name="fileID" id="previewFileID" value="0" />
 	<input type="hidden" name="fromname" id="previewFromName" value="" />
 	<input type="hidden" name="fromno" id="previewFromNo" value="" />
@@ -256,7 +258,8 @@
 	
 	function faxFormChoseFile(blockID)
 	{
-		openOverlay('start.php?action=faxPlugin&do2=addPDFFile&blockID=' + blockID + '&sid=' + currentSID,
+		var url = 'start.php?action=faxPlugin&do2=addPDFFile&blockID=' + blockID;
+		openOverlay((typeof bmAppendSession === 'function' ? bmAppendSession(url) : url),
 			lang['modfax_browsepdf'],
 			520,
 			140,
@@ -265,7 +268,8 @@
 	
 	function openFaxAddressbook()
 	{	
-		openOverlay('start.php?action=faxPlugin&do=addressBook&sid=' + currentSID,
+		var url = 'start.php?action=faxPlugin&do=addressBook';
+		openOverlay((typeof bmAppendSession === 'function' ? bmAppendSession(url) : url),
 			lang['addressbook'],
 			450,
 			380,
@@ -282,7 +286,10 @@
 	
 	function faxFormStep2(fileID, pageCount, price)
 	{
-		EBID('previewDownloadLink').href 	= 'start.php?action=faxPlugin&do2=downloadPreview&fileID=' + fileID + '&sid=' + currentSID;
+		(function() {
+			var url = 'start.php?action=faxPlugin&do2=downloadPreview&fileID=' + fileID;
+			EBID('previewDownloadLink').href = (typeof bmAppendSession === 'function' ? bmAppendSession(url) : url);
+		})();
 		EBID('previewPages').innerHTML 		= pageCount;
 		EBID('previewPrice').innerHTML 		= price;
 		EBID('previewFileID').value 		= fileID;
@@ -340,7 +347,7 @@
 	
 	function initFaxForm()
 	{
-		MakeXMLRequest('start.php?action=faxPlugin&do2=getFormBlockCode&sid=' + currentSID, _initFaxForm);
+		MakeXMLRequest((typeof bmAppendSession === 'function' ? bmAppendSession('start.php?action=faxPlugin&do2=getFormBlockCode') : 'start.php?action=faxPlugin&do2=getFormBlockCode'), _initFaxForm);
 	}
 
 	registerLoadAction(initFaxForm);
@@ -348,6 +355,6 @@
 //-->
 </script>
 
-{if $_tplname=='modern'}
+{if $_tplname=='modern' || $_tplname=='tabler'}
 </div></div>
 {/if}

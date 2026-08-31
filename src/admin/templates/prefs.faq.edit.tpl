@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="prefs.faq.php?do=edit&id={$faq.id}&save=true&sid={$sid}" method="post" onsubmit="editor.submit();spin(this);">
+	<form action="{sessionurl file='prefs.faq.php' params="do=edit&id={$faq.id}&save=true"}" method="post" onsubmit="editor.submit();spin(this);">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="question"}</label>
 			<div class="col-sm-10">

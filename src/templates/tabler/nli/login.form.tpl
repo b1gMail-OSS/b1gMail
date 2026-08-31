@@ -1,6 +1,7 @@
-<form action="{if $ssl_login_enable}{$ssl_url}{/if}index.php?action=login" method="post" id="loginFormMain" autocomplete="on">
+<form action="{$nliUrlLogin}" method="post" id="loginFormMain" autocomplete="on">
 	<input type="hidden" name="do" value="login" />
 	<input type="hidden" name="timezone" value="{$timezone}" />
+	{csrffield}
 
 	<div class="alert alert-danger" style="display:none;" role="alert"></div>
 
@@ -42,13 +43,6 @@
 				</a>
 			</span>
 		</div>
-	</div>
-
-	<div class="mb-2">
-		<label class="form-check">
-			<input type="checkbox" class="form-check-input" name="savelogin" id="savelogin" />
-			<span class="form-check-label">{lng p="savelogin"}</span>
-		</label>
 	</div>
 
 	{if $ssl_login_option}

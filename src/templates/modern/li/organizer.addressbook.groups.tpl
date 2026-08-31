@@ -60,6 +60,7 @@
 		<tr>
 			<td align="left">
 				<form action="organizer.addressbook.php?action=groups&do=add&sid={$sid}" method="post">
+					{csrffield}
 					<input type="text" name="title" value="" style="width:180px;" />
 					<input type="submit" value=" {lng p="add"} " />
 				</form>

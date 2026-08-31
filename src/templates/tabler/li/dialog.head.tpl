@@ -30,10 +30,10 @@
 
 	<script type="text/javascript">
 	<!--
-		var tplDir = '{$tpldir}';
+		var currentSID = '{$sid}', tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="{$selfurl}clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js?{fileDateSig file="js/loggedin.js"}" type="text/javascript"></script>

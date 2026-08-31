@@ -3,14 +3,15 @@
 		<fieldset>
 			<legend>{lng p="prefs"}</legend>
 
-			<input class="btn btn-primary" type="button" value=" {lng p="setedit"} " onclick="document.location.href='prefs.email.php?action=smime&do=editca&sid={$sid}';" />
+			<input class="btn btn-primary" type="button" value=" {lng p="setedit"} " onclick="document.location.href='prefs.email.php?action=smime&do=editca{$sessionUrlSuffix}';" />
 		</fieldset>
 	</div>
 	<div class="col-md-6">
 		<fieldset>
 			<legend>{lng p="addrootcert"}</legend>
 
-			<form action="prefs.email.php?action=smime&add=true&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+			<form action="{sessionurl file='prefs.email.php' params="action=smime&add=true"}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+				{csrffield}
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-check-label">{lng p="certfile"}</label>
 					<div class="col-sm-8">
@@ -34,7 +35,8 @@
 <fieldset>
 	<legend>{lng p="rootcerts"}</legend>
 
-	<form action="prefs.email.php?action=smime&sid={$sid}" name="f1" method="post">
+	<form action="{sessionurl file='prefs.email.php' params="action=smime"}" name="f1" method="post">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -55,8 +57,8 @@
 							<td>{if !$cert.valid}<font color="red">{/if}{lng p="to"} {date timestamp=$cert.validto dayonly=true}<br /><small>{lng p="from"} {date timestamp=$cert.validfrom dayonly=true}</small>{if !$cert.valid}</font>{/if}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.email.php?action=smime&export={$cert.certificateid}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-circle-down"></i></a>
-									<a href="prefs.email.php?action=smime&delete={$cert.certificateid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.email.php' params="action=smime&export={$cert.certificateid}"}" class="btn btn-sm"><i class="fa-regular fa-circle-down"></i></a>
+									<a href="{sessionurl file='prefs.email.php' params="action=smime&delete={$cert.certificateid}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>

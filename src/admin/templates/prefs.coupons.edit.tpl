@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 
-	<form action="prefs.coupons.php?do=edit&save=true&id={$coupon.id}&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.coupons.php' params="do=edit&save=true&id={$coupon.id}"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="code"}</label>
 			<div class="col-sm-10">
@@ -109,7 +110,7 @@
 					{cycle name=class values="td1,td2" assign=class}
 					<tr class="{$class}">
 						<td>{$user.id}</td>
-						<td><a href="users.php?do=edit&id={$user.id}&sid={$sid}">{$user.email}</a><br /><small>{text value=$user.aliases cut=45 allowEmpty=true}</small></td>
+						<td><a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}">{$user.email}</a><br /><small>{text value=$user.aliases cut=45 allowEmpty=true}</small></td>
 						<td>{text value=$user.nachname cut=20}, {text value=$user.vorname cut=20}<br /><small>{text value=$user.strasse cut=20} {text value=$user.hnr cut=5}, {text value=$user.plz cut=8} {text value=$user.ort cut=20}</small></td>
 					</tr>
 				{/foreach}

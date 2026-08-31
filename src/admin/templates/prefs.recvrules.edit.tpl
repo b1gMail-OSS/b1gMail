@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="prefs.recvrules.php?do=edit&id={$rule.id}&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.recvrules.php' params="do=edit&id={$rule.id}&save=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="field"}</label>
 			<div class="col-sm-10">

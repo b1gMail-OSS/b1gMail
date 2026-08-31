@@ -1,4 +1,5 @@
 <form action="organizer.calendar.php?sid={$sid}" method="post">
+	{csrffield}
 <table cellspacing="0" cellpadding="0">
 	<tr>
 		{comment text="viewmode"}

@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="languages"}</legend>
 
-	<form action="prefs.languages.php?sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.languages.php'}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -22,8 +23,8 @@
 							<td>{text value=$language.author}<br /><small>{text value=$language.authorWeb allowEmpty=true}</small></td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.languages.php?action=texts&lang={$langID}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-comment"></i></a>
-									{if $language.writeable && !$language.default}<a href="prefs.languages.php?delete={$langID}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
+									<a href="{sessionurl file='prefs.languages.php' params="action=texts&lang={$langID}"}" class="btn btn-sm"><i class="fa-regular fa-comment"></i></a>
+									{if $language.writeable && !$language.default}<a href="{sessionurl file='prefs.languages.php' params="delete={$langID}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
 								</div>
 							</td>
 						</tr>
@@ -52,7 +53,8 @@
 <fieldset>
 	<legend>{lng p="addlanguage"}</legend>
 
-	<form action="prefs.languages.php?add=true&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.languages.php' params="add=true"}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+		{csrffield}
 		<div class="alert alert-warning">{lng p="sourcewarning"}</div>
 		<p>{lng p="addlang_desc"}</p>
 

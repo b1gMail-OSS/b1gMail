@@ -19,7 +19,8 @@
  *
  */
 
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 if(!class_exists('BMWebdisk'))
 	include('../serverlib/webdisk.class.php');
 if(!class_exists('BMZIP'))
@@ -238,7 +239,10 @@ else if($_REQUEST['action'] == 'downloadFolder'
 	// determine zip filename
 	$zipName = $folderInfo['titel'];
 	$zipName = preg_replace('/[^a-zA-Z0-9\-\_]/', '_', $zipName);
-	if(empty($zipName)) $zipName = 'files.zip';
+	if(empty($zipName))
+		$zipName = 'files';
+	if(preg_match('/\.zip$/i', $zipName))
+		$zipName = substr($zipName, 0, -4);
 
 	// create ZIP file
 	$fp = fopen($tempFileName, 'wb+');

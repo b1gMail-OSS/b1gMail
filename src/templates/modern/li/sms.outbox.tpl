@@ -5,6 +5,7 @@
 </div>
 
 <form name="f1" method="post" action="sms.php?action=outbox&do=action&sid={$sid}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar">
 	

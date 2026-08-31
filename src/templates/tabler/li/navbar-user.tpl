@@ -1,7 +1,7 @@
-<div class="nav-item me-3">
-	<a href="#" class="nav-link d-flex lh-1 p-0 px-2" onclick="showUserMenu(this); return false;" aria-label="{lng p="prefs"}">
-		<span class="avatar avatar-sm">{$_userInitials|escape}</span>
-		<div class="d-none d-xl-block ps-2">
+<div class="nav-item bm-li-navbar-user">
+	<a href="#" class="nav-link d-flex lh-1 text-reset p-0 px-2" onclick="showUserMenu(this); return false;" aria-label="{lng p="prefs"}">
+		{include file="li/user-avatar.tpl" avatarSize="sm" avatarBgPrimary=true}
+		<div class="d-none d-lg-block ps-2 bm-li-user-label">
 			<div>
 				{if $_userDisplayName|default:'' != ''}
 				{text value=$_userDisplayName allowEmpty=true}

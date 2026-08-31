@@ -142,7 +142,7 @@ if(class_exists('DOMDocument'))
 
 				if($lcName == 'href' && preg_match('~^(http|https|ftp)://~i', $val))
 				{
-					$val = ($this->replyMode ? '' : 'deref.php?') . str_replace('#','%23',$val);
+					$val = ($this->replyMode ? '' : DerefUrl(str_replace('#', '%23', $val)));
 					$allow = true;
 				}
 				else if($lcName == 'href' && preg_match('~^mailto:~i', $val))
@@ -176,8 +176,8 @@ if(class_exists('DOMDocument'))
 				}
 				else if($lcName == 'style')
 				{
-					if(!$this->isExternalCSS($val) || $this->allowExternal)
-						$allow = true;
+					$val = $this->sanitizeCSS($val);
+					$allow = $val !== '';
 
 					if($allow && preg_match('~cid:~i', $val) && !$this->replyMode)
 					{
@@ -200,7 +200,86 @@ if(class_exists('DOMDocument'))
 
 		protected function isExternalCSS($css)
 		{
-			return(preg_match('~url~i', $css) || preg_match('~import~i', $css));
+			return (bool)preg_match('~@import|url\s*\(~i', (string)$css);
+		}
+
+		/**
+		 * Decode CSS escapes/entities and drop scriptable or remote constructs.
+		 *
+		 * @param string $css
+		 * @return string
+		 */
+		protected function sanitizeCSS($css)
+		{
+			$css = (string)$css;
+			if($css === '')
+				return '';
+
+			$css = preg_replace('~/\*.*?\*/~s', '', $css);
+			$prev = null;
+			while($prev !== $css)
+			{
+				$prev = $css;
+				$css = html_entity_decode($css, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				$css = preg_replace_callback('~\\\\([0-9a-fA-F]{1,6})[ \t\r\n\f]?~', function($m)
+				{
+					$cp = hexdec($m[1]);
+					if($cp < 32 || $cp === 0x7F)
+						return '';
+					if(function_exists('mb_chr'))
+					{
+						$ch = mb_chr($cp, 'UTF-8');
+						return $ch !== false ? $ch : '';
+					}
+					return $cp < 256 ? chr($cp) : '';
+				}, $css);
+			}
+			$css = preg_replace('~[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]~', '', $css);
+
+			$dangerous = (bool)preg_match('~expression|javascript|vbscript|behavior|-moz-binding|</\s*style|<\s*script~i', $css);
+			$remote = $this->isExternalCSS($css);
+			if($remote && !$this->allowExternal)
+			{
+				$this->externalFiltered = true;
+				$css = preg_replace('~[^{};@]*?(?:@import|url\s*\()[^{};]*;?~i', '', $css);
+				$remote = $this->isExternalCSS($css);
+			}
+			if($dangerous || ($remote && !$this->allowExternal))
+			{
+				$css = preg_replace('~[^{};]*?(?:expression|javascript|vbscript|behavior|-moz-binding)[^{};]*;?~i', '', $css);
+			}
+
+			$css = preg_replace('~</\s*style[^>]*>~i', '', $css);
+			$css = preg_replace('~<\s*script[^>]*>~i', '', $css);
+			$css = str_replace(array('<', '>'), '', $css);
+			$css = trim($css);
+
+			if($css !== '' && ($this->isExternalCSS($css) && !$this->allowExternal
+				|| preg_match('~expression|javascript|vbscript|behavior|-moz-binding~i', $css)))
+				return '';
+
+			return $css;
+		}
+
+		/**
+		 * @param \DOMNode $node
+		 * @return string
+		 */
+		protected function collectText($node)
+		{
+			$text = '';
+			if(!$node->hasChildNodes())
+				return $text;
+
+			for($child = $node->firstChild; $child; $child = $child->nextSibling)
+			{
+				if($child->nodeType == XML_TEXT_NODE || $child->nodeType == XML_CDATA_SECTION_NODE)
+					$text .= $child->nodeValue;
+				else if($child->nodeType == XML_ELEMENT_NODE)
+					$text .= $this->collectText($child);
+			}
+
+			return $text;
 		}
 
 		protected function formatNode($node)
@@ -217,7 +296,7 @@ if(class_exists('DOMDocument'))
 					}
 					else if($node->nodeType == XML_CDATA_SECTION_NODE)
 					{
-						$result .= $node->nodeValue;
+						$result .= HTMLFormat($node->nodeValue);
 					}
 					else if($node->nodeType == XML_HTML_DOCUMENT_NODE)
 					{
@@ -239,15 +318,10 @@ if(class_exists('DOMDocument'))
 
 						if($lcTag == 'style')
 						{
-							if($this->isExternalCSS($this->formatNode($node)))
-							{
-								if($this->allowExternal)
-									$allow = true;
-								else
-									$this->externalFiltered = true;
-							}
-							else
-								$allow = true;
+							$css = $this->sanitizeCSS($this->collectText($node));
+							if($css !== '')
+								$result .= '<style type="text/css">'.$css.'</style>';
+							continue;
 						}
 
 						if($allow)
@@ -380,13 +454,20 @@ else
 				'onabort', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onerror', 'onfocus',
 				'onkeydown', 'onkeypress', 'onkeyup', 'onload', 'onmousedown', 'onmousemove',
 				'onmouseout', 'onmouseover', 'onmouseup', 'onreset', 'onresize', 'onselect', 'onsubmit',
-				'onunload'
+				'onunload', 'onpointerdown', 'onpointerup', 'onpointermove', 'ontouchstart',
+				'ontouchend', 'onanimationend', 'ontransitionend', 'onwheel', 'onpaste', 'oninput'
 			);
 
 			$in = $this->htmlCode;
+			$in = preg_replace_callback('~<!\[CDATA\[(.*?)\]\]>~is', function($m)
+			{
+				return HTMLFormat($m[1]);
+			}, $in);
+			$in = preg_replace('~<style\b[^>]*>.*?</style>~is', '', $in);
+			$in = preg_replace('~\sstyle\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)~i', '', $in);
 			$in = preg_replace("/(" . implode('|', $scriptParams) . ")=([\"']*)/i", "blocked_\\1=\\2", $in);
-			$in = preg_replace("/<(object|embed|script)([^>]*)>/i", "<span blocked=\"\\1\" style=\"display:none;\">", $in);
-			$in = preg_replace("/<\/(object|embed|script)([^>]*)>/i", "</span>", $in);
+			$in = preg_replace("/<(object|embed|script|iframe|svg|math|link|meta)([^>]*)>/i", "<span blocked=\"\\1\" style=\"display:none;\">", $in);
+			$in = preg_replace("/<\/(object|embed|script|iframe|svg|math|link|meta)([^>]*)>/i", "</span>", $in);
 			$in = preg_replace("/href=([\"']*)javascript\:/i", "blocked_href=\\1javascript:", $in);
 			$in = preg_replace_callback('/<[^>]*>/', array($this, 'tagProcessor'), $in);
 
@@ -396,10 +477,16 @@ else
 			}
 			else
 			{
-				$in = preg_replace("/href=\"([a-zA-Z]{3,6}):\/\//i", 'target="_blank" href="deref.php?\\1://', $in);
+				$in = preg_replace_callback(
+					'/href="((?:https?|ftp):\/\/[^"]+)"/i',
+					function($matches)
+					{
+						return 'target="_blank" href="' . htmlspecialchars(DerefUrl($matches[1]), ENT_QUOTES, 'UTF-8') . '"';
+					},
+					$in);
 			}
 
-			$in = preg_replace("/href=\"mailto\:([a-zA-Z0-9\.\_-]*\@[a-zA-Z0-9\.\_-]*\.[a-zA-Z0-9\.\_-]*)([\?]*)([^&]*)\"/i", 'target="_top" href="' . $composeBaseURL . '\\1&\\3"', $in);
+			$in = preg_replace("/href=\"mailto\:([a-zA-Z0-9\.\_-]*\@[a-zA-Z0-9\.\_-]*\.[a-zA-Z0-9\.\_-]*)([\?]*)([^&]*)\"/i", 'target="_top" href="' . $this->composeBaseURL . '\\1&\\3"', $in);
 
 			if(count($this->cidMap) > 0)
 			{

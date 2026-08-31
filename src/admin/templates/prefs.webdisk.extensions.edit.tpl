@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="prefs.webdisk.php?action=extensions&do=edit&id={$extension.id}&save=true&sid={$sid}" method="post" onsubmit="spin(this)" enctype="multipart/form-data">
+	<form action="{sessionurl file='prefs.webdisk.php' params="action=extensions&do=edit&id={$extension.id}&save=true"}" method="post" onsubmit="spin(this)" enctype="multipart/form-data">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="filetypes"}</label>
 			<div class="col-sm-10">

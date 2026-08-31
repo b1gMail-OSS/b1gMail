@@ -24,8 +24,9 @@ function _fillContent(req)
 {
 	if(req.readyState == 4)
 	{
-		EBID('fileList').innerHTML = req.responseText;
-		EBID('fileList').scrollLeft = EBID('fileList').scrollWidth;
+		var list = EBID('fileList');
+		list.innerHTML = req.responseText;
+		list.className = 'fileList bm-webdisk-file-list bm-webdisk-loaded';
 		lastPath = nextPath;
 		lastFile = -1;
 	}
@@ -48,39 +49,91 @@ function createFolder()
 	var folderName = prompt(lang['folderprompt'], lang['newfolder']);
 	if(folderName)
 	{
-		MakeXMLRequest('webdisk.php?sid=' + mySID + '&action=webdiskDialogCreateFolder&path=' + lastPath + '&title=' + escape(folderName),
+		MakeXMLRequest(bmAppendSession('webdisk.php?action=webdiskDialogCreateFolder&path=' + lastPath + '&title=' + escape(folderName)),
 			_createFolder);
 	}
 }
 
+function _bmWebdiskDialogHeight()
+{
+	var el = EBID('fileList'),
+		h;
+
+	if(!el)
+		return 360;
+
+	h = el.clientHeight;
+	if(h >= 120)
+		return h;
+
+	if(el.closest)
+	{
+		var page = el.closest('.bm-webdisk-picker-dialog') || el.closest('.bm-dialog-page-fill') || el.closest('.bm-dialog-page');
+		if(page)
+		{
+			var actions = page.querySelector('.modal-footer') || page.querySelector('.bm-dialog-actions'),
+				actionsH = actions ? actions.offsetHeight : 56;
+			h = page.clientHeight - actionsH - 20;
+			if(h >= 120)
+				return h;
+		}
+	}
+
+	h = (window.innerHeight || document.documentElement.clientHeight || 600) - 120;
+	return Math.max(280, Math.min(520, h));
+}
+
 function dialogInit(sid)
 {
-	dHeight = EBID('fileList').clientHeight;
 	mySID = sid;
-	changePath(0);
+	window.setTimeout(function()
+	{
+		dHeight = _bmWebdiskDialogHeight();
+		changePath(0);
+	}, 0);
 }
 
 function changePath(id)
 {
 	nextPath = id;
-	MakeXMLRequest('webdisk.php?sid=' + mySID + '&action=webdiskDialogContent&path=' + id + '&height=' + dHeight, _fillContent);
+	MakeXMLRequest(bmAppendSession('webdisk.php?action=webdiskDialogContent&path=' + id + '&height=' + dHeight), _fillContent);
 }
 
 function changeFile(id, path, title)
 {
 	EBID('filename').value = title;
 	EBID('fileid').value = id;
-	EBID('file_' + id).className = 'contentItemActive';
-	if(lastFile != -1)
-		EBID('file_' + lastFile).className = 'contentItem';
+	if(lastFile != -1 && lastFile != id)
+	{
+		var oldEl = EBID('file_' + lastFile);
+		if(oldEl)
+			oldEl.className = 'contentItem bm-webdisk-item bm-webdisk-file-item';
+	}
+	var newEl = EBID('file_' + id);
+	if(newEl)
+		newEl.className = 'contentItem bm-webdisk-item bm-webdisk-file-item bm-webdisk-item-active contentItemActive';
 	lastFile = id;
 	lastPath = path;
 }
 
 function closeOpenDialog(field, param)
 {
-	parent.overlayDocument().document.getElementById(field).value = EBID('filename').value;
-	parent.overlayDocument().document.getElementById(field + '_id').value = lastFile;
+	var doc = parent.overlayDocument().document,
+		fileName = EBID('filename').value,
+		fileId = EBID('fileid').value || lastFile,
+		target = doc.getElementById(field),
+		targetId = doc.getElementById(field + '_id'),
+		hint = doc.getElementById(field + '_hint');
+
+	if(target)
+		target.value = fileName;
+	if(targetId)
+		targetId.value = fileId;
+	if(hint && fileName)
+	{
+		hint.textContent = fileName;
+		hint.style.display = '';
+	}
 	parent.hideOverlay();
 }
 

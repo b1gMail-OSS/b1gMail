@@ -1,4 +1,5 @@
-<form action="prefs.templates.php?do=prefs&template={$template}&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.templates.php' params="do=prefs&template={$template}"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 <input type="hidden" name="save" value="true" />
 
 	<fieldset>

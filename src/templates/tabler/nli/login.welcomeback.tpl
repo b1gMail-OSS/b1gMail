@@ -5,12 +5,12 @@
 	<h2 class="h3 mb-2">{lng p="welcome"}</h2>
 	<p class="text-secondary mb-0">{text value=$smarty.cookies.bm_savedUser}</p>
 </div>
-<form action="{if $smarty.cookies.bm_savedSSL}{$ssl_url}{/if}index.php?action=login" method="post">
+<form action="{$nliUrlLogin}" method="post">
 	<input type="hidden" name="do" value="login" />
 	<input type="hidden" name="timezone" value="{$timezone}" />
+	{csrffield}
 	<input type="hidden" name="email_full" value="{$smarty.cookies.bm_savedUser}" />
 	<input type="hidden" name="password" value="" />
-	<input type="hidden" name="savelogin" value="true" />
 	{if $smarty.cookies.bm_savedSSL}<input type="hidden" name="ssl" value="true" />{/if}
 	<div class="form-footer">
 		<button type="submit" class="btn btn-primary w-100">
@@ -20,5 +20,5 @@
 	</div>
 </form>
 <div class="text-center mt-3">
-	<a href="index.php?action=forgetCookie" class="text-secondary">{lng p="logout"}</a>
+	<a href="{$nliUrlForgetCookie}" class="text-secondary">{lng p="logout"}</a>
 </div>

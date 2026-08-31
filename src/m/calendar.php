@@ -19,7 +19,8 @@
  *
  */
 
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 if(!class_exists('BMCalendar'))
 	include('../serverlib/calendar.class.php');
 if(!class_exists('BMAddressbook'))

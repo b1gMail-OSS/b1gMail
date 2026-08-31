@@ -628,14 +628,156 @@ function invertSelection2(form, prefix, suffix)
     }
 }
 
+function adminCsrfToken()
+{
+    if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+        return bmCsrfToken;
+    var inp = document.querySelector('form input[name="csrf_token"]');
+    return inp ? inp.value : '';
+}
+
+function adminPostNavigate(url, targetBlank)
+{
+    if(!url)
+        return;
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = url;
+    form.style.display = 'none';
+    if(targetBlank)
+        form.target = '_blank';
+    var csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrf_token';
+    csrf.value = adminCsrfToken();
+    form.appendChild(csrf);
+    document.body.appendChild(form);
+    form.submit();
+}
+
 function executeAction(f)
 {
     var url = EBID(f).value;
     if(url && url.length>1)
-        if(url.substring(0, 6) == 'popup;')
-            window.open(url.substring(6));
-        else
+    {
+        if(url.substring(0, 7) == 'mailto:')
             document.location.href = url;
+        else if(url.substring(0, 6) == 'popup;')
+            adminPostNavigate(url.substring(6), true);
+        else
+            adminPostNavigate(url, false);
+    }
+}
+
+/**
+ * Pretty admin URL for maintenance.php (matches serverlib AdminUrl).
+ *
+ * @param {Object} params Query parameters, e.g. {action: 'trash', do: 'exec', pos: 0}
+ * @return {string}
+ */
+function bmAdminMaintenanceUrl(params)
+{
+    params = params || {};
+    var url;
+
+    if(typeof bmSessionConfig !== 'undefined' && bmSessionConfig.adminRouting)
+    {
+        url = 'maintenance';
+        if(params.action != null && String(params.action) !== ''
+            && String(params.action).toLowerCase() !== 'maintenance')
+        {
+            url += '/' + encodeURIComponent(String(params.action).toLowerCase());
+        }
+
+        var q = [], k;
+        for(k in params)
+        {
+            if(!params.hasOwnProperty(k) || k === 'action')
+                continue;
+            if(params[k] == null || params[k] === '')
+                continue;
+            q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+        }
+        if(q.length > 0)
+            url += '?' + q.join('&');
+    }
+    else
+    {
+        url = 'maintenance.php';
+        var parts = [], key;
+        for(key in params)
+        {
+            if(!params.hasOwnProperty(key))
+                continue;
+            if(params[key] == null || params[key] === '')
+                continue;
+            parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+        }
+        if(parts.length > 0)
+            url += '?' + parts.join('&');
+    }
+
+    if(typeof bmSessionAppendUrl === 'function')
+        return bmSessionAppendUrl(url);
+
+    if(typeof currentSID !== 'undefined' && currentSID && url.indexOf('sid=') === -1)
+        return url + (url.indexOf('?') !== -1 ? '&' : '?') + 'sid=' + encodeURIComponent(currentSID);
+
+    return url;
+}
+
+/**
+ * @param {string} queryString Legacy query without leading ? or &, e.g. "action=trash&do=exec"
+ * @return {string}
+ */
+function bmMaintenanceLegacyQuery(queryString)
+{
+    var params = {}, part, i, eq, key, val;
+    queryString = (queryString || '').replace(/^[?&]/, '');
+
+    if(queryString !== '')
+    {
+        part = queryString.split('&');
+        for(i = 0; i < part.length; i++)
+        {
+            if(!part[i])
+                continue;
+            eq = part[i].indexOf('=');
+            if(eq >= 0)
+            {
+                key = decodeURIComponent(part[i].substring(0, eq));
+                val = decodeURIComponent(part[i].substring(eq + 1));
+            }
+            else
+            {
+                key = decodeURIComponent(part[i]);
+                val = '';
+            }
+            if(key)
+                params[key] = val;
+        }
+    }
+
+    return bmAdminMaintenanceUrl(params);
+}
+
+/**
+ * Navigate to an admin back link (msg.tpl); respects cookie session / bmSessionAppendUrl.
+ *
+ * @param {HTMLElement} el Button with data-href
+ */
+function bmNavigateBack(el)
+{
+    var u = el ? el.getAttribute('data-href') : '';
+    if(!u)
+        return;
+
+    if(typeof bmSessionAppendUrl === 'function')
+        u = bmSessionAppendUrl(u);
+    else if(typeof currentSID !== 'undefined' && currentSID && u.indexOf('sid=') === -1)
+        u += (u.indexOf('?') !== -1 ? '&' : '?') + 'sid=' + encodeURIComponent(currentSID);
+
+    document.location.href = u;
 }
 
 function _fetchPOP3(e)
@@ -646,7 +788,7 @@ function _fetchPOP3(e)
 
         if(text == 'DONE')
         {
-            document.location.href = 'maintenance.php?action=pop3gateway&sid=' + currentSID + '&do=done';
+            document.location.href = bmAdminMaintenanceUrl({action: 'pop3gateway', do: 'done'});
         }
         else
         {
@@ -663,11 +805,11 @@ function _fetchPOP3(e)
                 rc_statusdiv.innerHTML = rc_fetched + ' / ' + rc_all + ' ...';
             }
 
-            MakeXMLRequest('maintenance.php?sid=' + currentSID
-                + '&action=pop3gateway'
-                + '&do=fetch'
-                + '&perpage=' + escape(rc_perpage),
-                _fetchPOP3);
+            MakeXMLRequest(bmAdminMaintenanceUrl({
+                action: 'pop3gateway',
+                do: 'fetch',
+                perpage: rc_perpage
+            }), _fetchPOP3);
         }
     }
 }
@@ -696,11 +838,11 @@ function fetchPOP3()
     form.innerHTML = '';
     form.insertBefore(center, form.firstChild);
 
-    MakeXMLRequest('maintenance.php?sid=' + currentSID
-        + '&action=pop3gateway'
-        + '&do=fetch'
-        + '&perpage=' + escape(rc_perpage),
-        _fetchPOP3);
+    MakeXMLRequest(bmAdminMaintenanceUrl({
+        action: 'pop3gateway',
+        do: 'fetch',
+        perpage: rc_perpage
+    }), _fetchPOP3);
 }
 
 function rebuildBlobStor()
@@ -860,7 +1002,7 @@ function buildIndex()
 
             if(text == 'DONE')
             {
-                document.location.href = 'maintenance.php?action=fts&sid=' + currentSID;
+                document.location.href = bmAdminMaintenanceUrl({action: 'fts'});
             }
             else
             {
@@ -877,21 +1019,21 @@ function buildIndex()
                     statusdiv.innerHTML = fetched + ' / ' + all + ' ...';
                 }
 
-                MakeXMLRequest('maintenance.php?sid=' + currentSID
-                    + '&action=fts'
-                    + '&do=buildIndex'
-                    + '&perpage=' + escape(perpage)
-                    + '&all=' + escape(all),
-                    _buildIndex);
+                MakeXMLRequest(bmAdminMaintenanceUrl({
+                    action: 'fts',
+                    do: 'buildIndex',
+                    perpage: perpage,
+                    all: all
+                }), _buildIndex);
             }
         }
     };
 
-    MakeXMLRequest('maintenance.php?sid=' + currentSID
-        + '&action=fts'
-        + '&do=buildIndex'
-        + '&perpage=' + escape(perpage),
-        _buildIndex);
+    MakeXMLRequest(bmAdminMaintenanceUrl({
+        action: 'fts',
+        do: 'buildIndex',
+        perpage: perpage
+    }), _buildIndex);
 }
 
 function optimizeIndex()
@@ -922,7 +1064,7 @@ function optimizeIndex()
 
             if(text == 'DONE')
             {
-                document.location.href = 'maintenance.php?action=fts&sid=' + currentSID;
+                document.location.href = bmAdminMaintenanceUrl({action: 'fts'});
             }
             else
             {
@@ -939,23 +1081,23 @@ function optimizeIndex()
                     statusdiv.innerHTML = pos + ' / ' + all + ' ...';
                 }
 
-                MakeXMLRequest('maintenance.php?sid=' + currentSID
-                    + '&action=fts'
-                    + '&do=optimizeIndex'
-                    + '&pos=' + escape(pos)
-                    + '&perpage=' + escape(perpage)
-                    + '&all=' + escape(all),
-                    _buildIndex);
+                MakeXMLRequest(bmAdminMaintenanceUrl({
+                    action: 'fts',
+                    do: 'optimizeIndex',
+                    pos: pos,
+                    perpage: perpage,
+                    all: all
+                }), _buildIndex);
             }
         }
     };
 
-    MakeXMLRequest('maintenance.php?sid=' + currentSID
-        + '&action=fts'
-        + '&do=optimizeIndex'
-        + '&pos=' + escape(pos)
-        + '&perpage=' + escape(perpage),
-        _buildIndex);
+    MakeXMLRequest(bmAdminMaintenanceUrl({
+        action: 'fts',
+        do: 'optimizeIndex',
+        pos: pos,
+        perpage: perpage
+    }), _buildIndex);
 }
 
 var _trashExecParams, _trashExecLastPos = 0;
@@ -968,7 +1110,7 @@ function _trashExec(e)
 
         if(text == 'DONE')
         {
-            document.location.href = 'maintenance.php?action=trash&sid=' + currentSID;
+            document.location.href = bmAdminMaintenanceUrl({action: 'trash'});
         }
         else
         {
@@ -989,12 +1131,10 @@ function _trashExec(e)
 
             _trashExecLastPos = text[0];
 
-            MakeXMLRequest('maintenance.php?sid=' + currentSID
-                + '&action=trash'
-                + '&do=exec'
+            MakeXMLRequest(bmMaintenanceLegacyQuery('action=trash&do=exec'
                 + _trashExecParams
                 + '&perpage=' + escape(rc_perpage)
-                + '&pos=' + text[0],
+                + '&pos=' + text[0]),
                 _trashExec);
         }
     }
@@ -1005,7 +1145,7 @@ function trashExec()
     _trashExecParams = '&days='+encodeURIComponent(EBID('days').value)
         + '&size='+encodeURIComponent(EBID('size').value)
         + (EBID('daysOnly').checked ? '&daysOnly=true' : '')
-        + (EBID('sizesOnly').checked ? '&daysOnly=true' : '');
+        + (EBID('sizesOnly').checked ? '&sizesOnly=true' : '');
     var inputs = document.getElementsByTagName('input');
     for(var i=0; i<inputs.length; i++)
     {
@@ -1039,12 +1179,10 @@ function trashExec()
     form.innerHTML = '';
     form.insertBefore(center, form.firstChild);
 
-    MakeXMLRequest('maintenance.php?sid=' + currentSID
-        + '&action=trash'
-        + '&do=exec'
+    MakeXMLRequest(bmMaintenanceLegacyQuery('action=trash&do=exec'
         + _trashExecParams
         + '&perpage=' + escape(rc_perpage)
-        + '&pos=0',
+        + '&pos=0'),
         _trashExec);
 }
 

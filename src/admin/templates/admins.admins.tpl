@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="admins"}</legend>
 
-	<form action="admins.php?action=admins&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='admins.php' params="action=admins"}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -9,6 +10,8 @@
 					<tr>
 						<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'admin_');"><img src="{$tpldir}images/dot.png" alt="" width="16" /></a></th>
 						<th>{lng p="name"}</th>
+						<th>{lng p="admin_email"}</th>
+						{if $mfaAdminEnabled}<th class="text-center" style="width: 2.5rem;" title="{lng p="mfa_col"}">{lng p="mfa_col"}</th>{/if}
 						<th style="width: 200px;">{lng p="status"}</th>
 						<th style="width: 80px;">&nbsp;</th>
 					</tr>
@@ -20,12 +23,32 @@
 							<td class="text-center">{if $admin.adminid!=1}<input type="checkbox" name="admin_{$admin.adminid}" />{/if}</td>
 							<td>{text value=$admin.firstname} {text value=$admin.lastname} ({text value=$admin.username})</td>
 							<td>
+								{if $admin.email|default:'' != ''}
+									<a href="mailto:{email value=$admin.email}">{email value=$admin.email}</a>
+								{/if}
+							</td>
+							{if $mfaAdminEnabled}
+							<td class="text-center">
+								{if $admin.mfaStatus == 'active'}
+									<i class="ti ti-shield-check text-success" title="{$admin.mfaStatusTitle|escape}" aria-label="{$admin.mfaStatusTitle|escape}"></i>
+								{elseif $admin.mfaStatus == 'pending'}
+									<i class="ti ti-shield-half text-danger" title="{$admin.mfaStatusTitle|escape}" aria-label="{$admin.mfaStatusTitle|escape}"></i>
+								{elseif $admin.mfaStatus == 'setup'}
+									<i class="ti ti-shield text-warning" title="{$admin.mfaStatusTitle|escape}" aria-label="{$admin.mfaStatusTitle|escape}"></i>
+								{elseif $admin.mfaStatus == 'partial'}
+									<i class="ti ti-shield-exclamation text-warning" title="{$admin.mfaStatusTitle|escape}" aria-label="{$admin.mfaStatusTitle|escape}"></i>
+								{elseif $admin.mfaStatus == 'none'}
+									<i class="ti ti-shield-off text-secondary opacity-50" title="{$admin.mfaStatusTitle|escape}" aria-label="{$admin.mfaStatusTitle|escape}"></i>
+								{/if}
+							</td>
+							{/if}
+							<td>
 								{if $admin.type==0}{lng p="superadmin"}{else}{lng p="admin"}{/if}
 							</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="admins.php?action=admins&do=edit&id={$admin.adminid}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									{if $admin.adminid!=1}<a href="admins.php?action=admins&delete={$admin.adminid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
+									<a href="{sessionurl file='admins.php' params="action=admins&do=edit&id={$admin.adminid}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									{if $admin.adminid!=1}<a href="{sessionurl file='admins.php' params="action=admins&delete={$admin.adminid}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
 								</div>
 							</td>
 						</tr>
@@ -54,7 +77,8 @@
 <fieldset>
 	<legend>{lng p="addadmin"}</legend>
 
-	<form action="admins.php?action=admins&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='admins.php' params="action=admins&add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="row">
 			<div class="col-md-6">
 				<div class="mb-3 row">
@@ -73,6 +97,12 @@
 					<label class="col-sm-4 col-form-label">{lng p="lastname"}</label>
 					<div class="col-sm-8">
 						<input type="text" class="form-control" id="lastname" name="lastname" placeholder="{lng p="lastname"}">
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label" for="email">{lng p="admin_email"}</label>
+					<div class="col-sm-8">
+						<input type="email" class="form-control" id="email" name="email" placeholder="{lng p="admin_email"}">
 					</div>
 				</div>
 				<div class="mb-3 row">

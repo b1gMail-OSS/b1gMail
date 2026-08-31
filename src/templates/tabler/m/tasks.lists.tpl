@@ -6,7 +6,7 @@
 	<ul data-role="listview" data-filter="true" data-filter-placeholder="{lng p="search"}...">	
 	{foreach from=$lists key=taskListID item=taskList}
 		<li>
-			<a href="tasks.php?list={$taskListID}&sid={$sid}" data-transition="slide">{text value=$taskList.title}</a>
+			<a href="tasks.php?list={$taskListID}" data-transition="slide">{text value=$taskList.title}</a>
 		</li>
 	{/foreach}
 	</ul>

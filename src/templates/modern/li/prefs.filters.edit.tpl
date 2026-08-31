@@ -7,6 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 <form name="f1" method="post" action="prefs.php?action=filters&do=saveFilter&id={$filter.id}&sid={$sid}" onsubmit="if(checkFilterForm(this)) {literal}{ if(!formSubmitOK) { parent.frames.condition_frame.document.forms.saveForm.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit(); return(false); } else { return(true); } }{/literal} return(false);">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="editfilter"}</th>

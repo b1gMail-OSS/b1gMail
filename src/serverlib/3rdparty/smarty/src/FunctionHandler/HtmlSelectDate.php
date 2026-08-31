@@ -345,7 +345,8 @@ class HtmlSelectDate extends Base {
 		}
 		// order the fields for output
 		$_html = '';
-		for ($i = 0; $i <= 2; $i++) {
+		$field_order_len = strlen((string) $field_order);
+		for ($i = 0; $i < $field_order_len; $i++) {
 			switch ($field_order[$i]) {
 				case 'Y':
 				case 'y':

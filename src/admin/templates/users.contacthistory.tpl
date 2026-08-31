@@ -38,6 +38,6 @@
 </fieldset>
 
 <div class="row">
-	<div class="col-md-6"><input class="btn btn-primary" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='users.php?do=edit&id={$user.id}&sid={$sid}';" /></div>
-	<div class="col-md-6 text-end"><input class="btn btn-primary" type="button" value="{lng p="clearhistory"}" onclick="document.location.href='users.php?do=clearHistory&id={$user.id}&sid={$sid}';" /></div>
+	<div class="col-md-6"><input class="btn btn-primary" type="button" value="&laquo; {lng p="back"}" onclick="document.location.href='users.php?do=edit&id={$user.id}{$sessionUrlSuffix}';" /></div>
+	<div class="col-md-6 text-end"><input class="btn btn-primary" type="button" value="{lng p="clearhistory"}" onclick="document.location.href='users.php?do=clearHistory&id={$user.id}{$sessionUrlSuffix}';" /></div>
 </div>

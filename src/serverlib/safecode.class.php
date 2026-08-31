@@ -116,10 +116,10 @@ class BMCaptchaGenerator
 		$bgH = imagesy($bgImg);
 
 		// area rect
-		$areaW = min($bgW, mt_rand($this->w/4, $this->w*4));
-		$areaH = min($bgH, mt_rand($this->h/4, $this->h*4));
-		$areaX = mt_rand(0, $bgW-$areaW);
-		$areaY = mt_rand(0, $bgH-$areaH);
+		$areaW = min($bgW, mt_rand((int)($this->w / 4), (int)($this->w * 4)));
+		$areaH = min($bgH, mt_rand((int)($this->h / 4), (int)($this->h * 4)));
+		$areaX = mt_rand(0, max(0, $bgW - $areaW));
+		$areaY = mt_rand(0, max(0, $bgH - $areaH));
 
 		// copy area to image
 		imagecopyresampled($this->img, $bgImg, 0, 0, $areaX, $areaY, $this->w, $this->h, $areaW, $areaH);
@@ -143,19 +143,18 @@ class BMCaptchaGenerator
 			$yArea = $this->letterH - $h;
 
 			if($xArea < 0) { // Workaround for PHP 8, detecting if xArea is negative
-				$x_mtrand = mt_rand($xArea/2, ($xArea/2)*-1);
+				$x_mtrand = mt_rand((int)($xArea / 2), (int)(($xArea / 2) * -1));
 			}
 			else {
-				$x_mtrand = mt_rand(($xArea/2)*-1, $xArea/2);
+				$x_mtrand = mt_rand((int)(($xArea / 2) * -1), (int)($xArea / 2));
 			}
 
 			$x = max($this->borderSpacing, $this->borderSpacing + $i*$this->letterW
 					+ $x_mtrand);
-			$y = ($this->h-2*$this->borderSpacing)/2 - $h/2
-					+ @mt_rand(($yArea/2)*-1, $yArea/2);
+			$y = (int)(($this->h - 2 * $this->borderSpacing) / 2 - $h / 2)
+					+ mt_rand((int)(($yArea / 2) * -1), (int)($yArea / 2));
 
 			imagecopy($this->img, $letterImg, $x, $y, 0, 0, $w, $h);
-			imagedestroy($letterImg);
 		}
 	}
 
@@ -202,9 +201,7 @@ class BMCaptchaGenerator
 
 		if(function_exists('imagerotate'))
 		{
-			$newImg = imagerotate($img, $fontAngle, $white);
-			imagedestroy($img);
-			return($newImg);
+			return imagerotate($img, $fontAngle, $white);
 		}
 		else
 			return($img);
@@ -253,9 +250,12 @@ class BMCaptchaGenerator
 	 */
 	public function Output()
 	{
+		while(ob_get_level() > 0)
+			ob_end_clean();
 		$this->_generateCaptcha();
 		header('Content-Type: image/png');
 		imagepng($this->img);
+		exit();
 	}
 }
 

@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=aliases&do=update&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=update'}">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<input type="hidden" name="id" value="{if isset($alias.id)}{text value=$alias.id}{/if}" />
 	<table class="listTable">

@@ -3,7 +3,8 @@
  * b1gMail – Web App Manifest (customer area).
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 
 header('Content-Type: application/manifest+json; charset=utf-8');
 

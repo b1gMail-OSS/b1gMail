@@ -22,7 +22,7 @@
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
-	<link href="clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
+	<link href="clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file={$sessionUrlSuffixHtml}"../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
 </head>
 
 <body onload="documentLoader()">

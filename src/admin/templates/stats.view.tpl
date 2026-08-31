@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{$modeTitle}</legend>
 
-	<form action="stats.php?action={$mode}&sid={$sid}" method="post">
+	<form action="{sessionurl file='stats.php' params="action={$mode}"}" method="post">
+		{csrffield}
 		<div class="row">
 			<div class="col-md-6">
 				<div class="input-group mb-2">

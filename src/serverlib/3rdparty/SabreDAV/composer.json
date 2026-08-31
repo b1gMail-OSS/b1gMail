@@ -1,0 +1,13 @@
+{
+    "name": "b1gmail/sabredav",
+    "description": "SabreDAV for b1gMail CalDAV, CardDAV and WebDAV",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "sabre/dav": "^4.7.1"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

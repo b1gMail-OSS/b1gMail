@@ -39,7 +39,7 @@
 							zip.config.useLines = false;
 							zip.add(-2, -1, ' {text value=$filename cut=65 escape=true noentities=true}', '', '{text value=$filename escape=true noentities=true}', '', '{$tpldir}images/li/ico_zip.png', '{$tpldir}images/li/ico_zip.png'); 
 							{foreach from=$files item=file}
-							zip.add({$file.fileNo}, {$file.parentID}, ' {text value=$file.baseName cut=65 escape=true noentities=true}', '{if $file.type=='file'}email.read.php?action=attachedZIP&id={$id}&attachment={$attachment}&do=extract&fileNo={$file.fileNo}&sid={$sid}{/if}', '{text value=$file.baseName escape=true noentities=true}{if $file.type=='file'} ({size bytes=$file.uncompressedSize}){/if}', '', '{$tpldir}images/li/webdisk_{if $file.type=='folder'}folder{else}file{/if}.png', '{$tpldir}images/li/webdisk_{if $file.type=='folder'}folder{else}file{/if}.png'); 
+							zip.add({$file.fileNo}, {$file.parentID}, ' {text value=$file.baseName cut=65 escape=true noentities=true}', '{if $file.type=='file'}email.read.php?action=attachedZIP&id={$id}&attachment={$attachment}&do=extract&fileNo={$file.fileNo}{$sessionUrlSuffix}{/if}', '{text value=$file.baseName escape=true noentities=true}{if $file.type=='file'} ({size bytes=$file.uncompressedSize}){/if}', '', '{$tpldir}images/li/webdisk_{if $file.type=='folder'}folder{else}file{/if}.png', '{$tpldir}images/li/webdisk_{if $file.type=='folder'}folder{else}file{/if}.png'); 
 							{/foreach}
 							document.write(zip);
 						//-->
@@ -50,7 +50,7 @@
 		</tr>
 		<tr>
 			<td align="left">
-				<input type="button" onclick="document.location.href='email.read.php?id={$id}&action=downloadAttachment&attachment={$attachment}&sid={$sid}';" value="{lng p="download"}" />
+				<input type="button" onclick="document.location.href='email.read.php?id={$id}&action=downloadAttachment&attachment={$attachment}{$sessionUrlSuffix}';" value="{lng p="download"}" />
 			</td>
 			<td align="right">
 				<input type="button" onclick="parent.hideOverlay()" value="{lng p="close"}" />

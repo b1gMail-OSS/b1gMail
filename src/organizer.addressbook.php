@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/todo.class.php');
 include('./serverlib/vcard.class.php');
 include('./serverlib/addressbook.class.php');
@@ -38,7 +39,7 @@ ModuleFunction('FileHandler',
  */
 if($groupRow['organizer']=='no')
 {
-	header('Location: start.php?sid=' . session_id());
+	header('Location: start.php');
 	exit();
 }
 /**
@@ -395,12 +396,12 @@ else if($_REQUEST['action'] == 'createContact'
 	if(isset($_REQUEST['submitAction']) && $_REQUEST['submitAction'] == 'selfComplete')
 	{
 		// self complete page
-		header('Location: organizer.addressbook.php?action=selfComplete&id=' . (int)$contactID . '&sid=' . session_id());
+		SessionRedirect('organizer.addressbook.php?action=selfComplete&id=' . (int)$contactID);
 	}
 	else
 	{
 		// back to list
-		header('Location: organizer.addressbook.php?sid=' . session_id());
+		SessionRedirect('organizer.addressbook.php');
 	}
 }
 
@@ -512,7 +513,7 @@ else if($_REQUEST['action'] == 'saveContact'
 	if(isset($_REQUEST['submitAction']) && $_REQUEST['submitAction'] == 'selfComplete')
 	{
 		// self complete page
-		header('Location: organizer.addressbook.php?action=selfComplete&id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+		SessionRedirect('organizer.addressbook.php?action=selfComplete&id=' . (int)$_REQUEST['id']);
 	}
 
 	// send mail?
@@ -522,7 +523,7 @@ else if($_REQUEST['action'] == 'saveContact'
 		$email = urlencode($_REQUEST['default'] == 'work'
 			? $_REQUEST['work_email']
 			: $_REQUEST['email']);
-		header('Location: email.compose.php?to=' . $email . '&sid=' . session_id());
+		SessionRedirect('email.compose.php?to=' . $email);
 	}
 
 	// vcf?
@@ -574,14 +575,14 @@ else if($_REQUEST['action'] == 'saveContact'
 			$mailbox->UpdateCondition($conditionID, $folderID, MAILFIELD_FROM, BMOP_CONTAINS, $value);
 		}
 
-		header('Location: email.folders.php?action=editFolder&id=' . $folderID . '&sid=' . session_id());
+		SessionRedirect('email.folders.php?action=editFolder&id=' . $folderID);
 	}
 
 	// default
 	else
 	{
 		// back to list
-		header('Location: organizer.addressbook.php?sid=' . session_id());
+		SessionRedirect('organizer.addressbook.php');
 	}
 }
 
@@ -609,7 +610,7 @@ else if($_REQUEST['action'] == 'sendSelfComplete'
 		$tpl->assign('pageContent', 'li/msg.tpl');
 	}
 
-	$tpl->assign('backLink', 'organizer.addressbook.php?action=editContact&id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+	$tpl->assign('backLink', 'organizer.addressbook.php?action=editContact&id=' . (int)$_REQUEST['id']);
 	$tpl->display('li/index.tpl');
 }
 
@@ -630,17 +631,17 @@ else if($_REQUEST['action'] == 'selfComplete'
 		if(strpos($workMail, '@') === false && strpos($privateMail, '@') === false)
 		{
 			$tpl->assign('msg', $lang_user['complete_noemail']);
-			$tpl->assign('backLink', 'organizer.addressbook.php?action=editContact&id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+			$tpl->assign('backLink', SessionUrl('organizer.addressbook.php?action=editContact&id=' . (int)$_REQUEST['id']));
 			$tpl->assign('pageContent', 'li/error.tpl');
 		}
 		else if(trim($contact['invitationCode']) != ''
 			&& !isset($_REQUEST['anyhow']))
 		{
 			$tpl->assign('msg', $lang_user['complete_invited']);
-			$tpl->assign('backLink', 'organizer.addressbook.php?action=editContact&id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+			$tpl->assign('backLink', SessionUrl('organizer.addressbook.php?action=editContact&id=' . (int)$_REQUEST['id']));
 			$tpl->assign('otherButton', array(
 				'caption' 	=> $lang_user['send_anyhow'],
-				'href'		=> 'organizer.addressbook.php?action=selfComplete&id=' . (int)$_REQUEST['id'] . '&sid=' . session_id() . '&anyhow=true'
+				'href'		=> SessionUrl('organizer.addressbook.php?action=selfComplete&id=' . (int)$_REQUEST['id'] . '&anyhow=true')
 			));
 			$tpl->assign('pageContent', 'li/error.tpl');
 		}
@@ -697,7 +698,7 @@ else if($_REQUEST['action'] == 'vcfImportDialog')
 {
 	$tpl->assign('title', $lang_user['importvcf']);
 	$tpl->assign('text', $lang_user['importvcftext']);
-	$tpl->assign('formAction', 'organizer.addressbook.php?action=vcfImportDialogSubmit&sid=' . session_id());
+	$tpl->assign('formAction', 'organizer.addressbook.php?action=vcfImportDialogSubmit');
 	$tpl->assign('fieldName', 'vcfFile');
 	$tpl->display('li/dialog.openfile.tpl');
 }
@@ -749,7 +750,7 @@ else if($_REQUEST['action'] == 'deleteContact'
 		&& isset($_REQUEST['id']))
 {
 	$book->Delete((int)$_REQUEST['id']);
-	header('Location: organizer.addressbook.php?sid=' . session_id());
+	header('Location: organizer.addressbook.php');
 }
 
 /**
@@ -804,7 +805,7 @@ else if($_REQUEST['action'] == 'action')
 		}
 
 		$toList = urlencode(implode(', ', $to));
-		header('Location: email.compose.php?sid=' . session_id() . '&to=' . $toList);
+		header('Location: email.compose.php' . '&to=' . $toList);
 		exit();
 	}
 	else if($_REQUEST['do'] == 'export')
@@ -831,7 +832,7 @@ else if($_REQUEST['action'] == 'action')
 		foreach($addrIDs as $id)
 			$book->ContactGroup($id, $groupID);
 	}
-	header('Location: organizer.addressbook.php?sid=' . session_id());
+	header('Location: organizer.addressbook.php');
 }
 
 /**
@@ -891,7 +892,7 @@ else if($_REQUEST['action'] == 'groupAction')
 		if(!$book->GroupExists($_REQUEST['title']))
 		{
 			$book->GroupAdd($_REQUEST['title']);
-			header('Location: organizer.addressbook.php?sid=' . session_id());
+			header('Location: organizer.addressbook.php');
 		}
 		else
 		{
@@ -913,7 +914,7 @@ else if($_REQUEST['action'] == 'groupAction')
 				$book->DeleteGroup((int)$id);
 			}
 		}
-		header('Location: organizer.addressbook.php?sid=' . session_id());
+		header('Location: organizer.addressbook.php');
 	}
 
 	// export as CSV
@@ -966,14 +967,14 @@ else if($_REQUEST['action'] == 'groupAction')
 
 		// redirect
 		$toList = urlencode(implode(', ', $to));
-		header('Location: email.compose.php?sid=' . session_id() . '&to=' . $toList);
+		header('Location: email.compose.php' . '&to=' . $toList);
 		exit();
 	}
 
 	// no / invalid action
 	else
 	{
-		header('Location: organizer.addressbook.php?sid=' . session_id());
+		header('Location: organizer.addressbook.php');
 		exit();
 	}
 }
@@ -985,7 +986,7 @@ else if($_REQUEST['action'] == 'deleteGroup'
 		&& isset($_REQUEST['id']))
 {
 	$book->DeleteGroup((int)$_REQUEST['id']);
-	header('Location: organizer.addressbook.php?sid=' . session_id());
+	header('Location: organizer.addressbook.php');
 }
 
 /**
@@ -1023,7 +1024,7 @@ else if($_REQUEST['action'] == 'saveGroup'
 	else
 	{
 		$book->ChangeGroup((int)$_REQUEST['id'], $_REQUEST['title']);
-		header('Location: organizer.addressbook.php?sid=' . session_id());
+		header('Location: organizer.addressbook.php');
 	}
 }
 
@@ -1035,7 +1036,7 @@ else if($_REQUEST['action'] == 'userPictureDialog'
 {
 	$tpl->assign('title', $lang_user['userpicture']);
 	$tpl->assign('text', $lang_user['userpicturetext']);
-	$tpl->assign('formAction', 'organizer.addressbook.php?action=userPictureDialogSubmit&id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+	$tpl->assign('formAction', 'organizer.addressbook.php?action=userPictureDialogSubmit&id=' . (int)$_REQUEST['id']);
 	$tpl->assign('fieldName', 'pictureFile');
 	$tpl->display('li/dialog.openfile.tpl');
 }
@@ -1059,14 +1060,14 @@ else if($_REQUEST['action'] == 'userPictureDialogSubmit'
 	{
 		if($_REQUEST['id'] == -1)
 		{
-			$pictureURL = 'organizer.addressbook.php?action=addressbookPicture&id=-1&contentType=' . urlencode($uploadFile['type']) . '&tempID=' . $tempID . '&sid=' . session_id();
+			$pictureURL = 'organizer.addressbook.php?action=addressbookPicture&id=-1&contentType=' . urlencode($uploadFile['type']) . '&tempID=' . $tempID;
 			echo 'parent.document.getElementById(\'pictureFile\').value = ' . $tempID . ';' . "\n";
 			echo 'parent.document.getElementById(\'pictureMime\').value = \'' . addslashes($uploadFile['type']) . '\';' . "\n";
 		}
 		else
 		{
 			if($book->ChangePicture((int)$_REQUEST['id'], $tempName, $uploadFile['type']))
-				$pictureURL = 'organizer.addressbook.php?action=addressbookPicture&id=' . (int)$_REQUEST['id'] . '&t=' . time() . '&sid=' . session_id();
+				$pictureURL = 'organizer.addressbook.php?action=addressbookPicture&id=' . (int)$_REQUEST['id'] . '&t=' . time();
 		}
 
 		if(isset($pictureURL))
@@ -1130,7 +1131,7 @@ else if($_REQUEST['action'] == 'importDialog'
 {
 	$tpl->assign('title', $lang_user['import']);
 	$tpl->assign('text', $lang_user['addrimporttext']);
-	$tpl->assign('formAction', 'organizer.addressbook.php?action=importDialogSubmit&type=' . urlencode($_REQUEST['type']) . '&encoding=' . urlencode($_REQUEST['encoding']) . '&sid=' . session_id());
+	$tpl->assign('formAction', 'organizer.addressbook.php?action=importDialogSubmit&type=' . urlencode($_REQUEST['type']) . '&encoding=' . urlencode($_REQUEST['encoding']));
 	$tpl->assign('fieldName', 'importFile');
 	$tpl->display('li/dialog.openfile.tpl');
 }
@@ -1178,7 +1179,7 @@ else if($_REQUEST['action'] == 'importDialogSubmit'
 
 	if($fileOK)
 	{
-		echo 'parent.document.location.href = \'organizer.addressbook.php?action=importFile&type=' . addslashes($_REQUEST['type']) . '&encoding=' . $encoding . '&sid=' . session_id() . '&tempID=' . $tempID . '\';';
+		echo 'parent.document.location.href = \'organizer.addressbook.php?action=importFile&type=' . addslashes($_REQUEST['type']) . '&encoding=' . $encoding . '&tempID=' . $tempID . '\';';
 	}
 	else
 	{
@@ -1371,7 +1372,7 @@ else if($_REQUEST['action'] == 'importCSV'
 	$tpl->assign('pageTitle', $lang_user['import']);
 	$tpl->assign('title', $lang_user['import']);
 	$tpl->assign('msg', sprintf($lang_user['importdone'], $importedDatasets));
-	$tpl->assign('backLink', 'organizer.addressbook.php?sid=' . session_id());
+	$tpl->assign('backLink', 'organizer.addressbook.php');
 	$tpl->assign('pageContent', 'li/msg.tpl');
 	$tpl->display('li/index.tpl');
 

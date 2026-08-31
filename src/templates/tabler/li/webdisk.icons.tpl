@@ -9,7 +9,7 @@
 {if $use_fa_icons==1}
 	<i class="ti {if isset($item.icon)}{$item.icon}{else}ti-file{/if} icon" aria-hidden="true"></i>
 {else}
-	<img src="webdisk.php?action=displayExtension&ext={$item.ext}&sid={$sid}" alt="" {$wdicons_imgattr} />
+	<img src="webdisk.php?action=displayExtension&ext={$item.ext}{$sessionUrlSuffix}" alt="" {$wdicons_imgattr} />
 {/if}
 {if isset($item.share) && $item.share}
 	<i class="ti ti-arrow-up-right icon bm-webdisk-shared-badge" aria-hidden="true"></i>

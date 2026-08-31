@@ -5,30 +5,31 @@
 			{lng p="folderadmin"}
 		</div>
 		<div class="right">
-			<button class="btn btn-sm btn-outline-primary" onclick="document.location.href='email.folders.php?action=addFolder&sid={$sid}';" type="button">
+			<button class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='email.folders.php' params='action=addFolder'}';" type="button">
 				<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>{lng p="addfolder"}
 			</button>
 		</div>
 	</div>
 
-	<form name="f1" method="post" action="email.folders.php?action=action&sid={$sid}" class="card bm-folder-admin-card">
+	<form name="f1" method="post" action="{sessionurl file='email.folders.php' params='action=action'}" class="card bm-folder-admin-card">
+		{csrffield}
 		<div class="table-responsive">
 			<table class="table table-vcenter table-hover card-table bm-folder-admin-table" id="folderAdminTable">
 				<thead>
 				<tr>
 					<th class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'folder');" aria-label="{lng p="selaction"}" /></label></th>
 					<th class="bm-folder-col-title">
-						<a class="bm-folder-sort-link" href="email.folders.php?sid={$sid}&sort=titel&order={$sortOrderInv}">{lng p="title"}</a>
+						<a class="bm-folder-sort-link" href="{sessionurl file='email.folders.php' params="sort=titel&order={$sortOrderInv}"}">{lng p="title"}</a>
 						{if $sortColumn=='titel'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
 					</th>
 					<th class="bm-folder-col-parent d-none d-md-table-cell">
-						<a class="bm-folder-sort-link" href="email.folders.php?sid={$sid}&sort=parent&order={$sortOrderInv}">{lng p="parentfolder"}</a>
+						<a class="bm-folder-sort-link" href="{sessionurl file='email.folders.php' params="sort=parent&order={$sortOrderInv}"}">{lng p="parentfolder"}</a>
 						{if $sortColumn=='parent'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
 					</th>
 					<th class="bm-folder-col-size d-none d-lg-table-cell">{lng p="size"}</th>
 					<th class="bm-folder-col-status">{lng p="status"}</th>
 					<th class="bm-folder-col-subscribed">
-						<a class="bm-folder-sort-link" href="email.folders.php?sid={$sid}&sort=subscribed&order={$sortOrderInv}">{lng p="subscribed"}</a>
+						<a class="bm-folder-sort-link" href="{sessionurl file='email.folders.php' params="sort=subscribed&order={$sortOrderInv}"}">{lng p="subscribed"}</a>
 						{if $sortColumn=='subscribed'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
 					</th>
 					<th class="bm-folder-col-actions"></th>
@@ -49,7 +50,7 @@
 				<tr class="bm-folder-row">
 					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" disabled="disabled" aria-hidden="true" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
-						<a class="bm-folder-title-link" href="email.php?sid={$sid}&folder={$folderID}">
+						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
 							<span class="bm-folder-title-icon"><i class="ti {if $folder.type == 'inbox'}ti-inbox{elseif $folder.type == 'outbox'}ti-send{elseif $folder.type == 'drafts'}ti-file-pencil{elseif $folder.type == 'spam'}ti-ban{elseif $folder.type == 'trash'}ti-trash{else}ti-folder{/if} icon" aria-hidden="true"></i></span>
 							<span class="bm-folder-title-text">
 								<span class="bm-folder-name">{text value=$folder.titel cut=40}</span>
@@ -68,7 +69,7 @@
 					</td>
 					<td class="bm-folder-col-subscribed"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" checked="checked" disabled="disabled" aria-hidden="true" /></label></td>
 					<td class="bm-folder-col-actions">
-						<a href="email.folders.php?action=editFolder&id={$folderID}&sid={$sid}" class="btn btn-sm btn-ghost-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+						<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}" class="btn btn-sm btn-ghost-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
 					</td>
 				</tr>
 				{/foreach}
@@ -89,7 +90,7 @@
 				<tr class="bm-folder-row">
 					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="folder_{$folderID}" name="folder_{$folderID}" aria-label="{text value=$folder.titel cut=40}" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
-						<a class="bm-folder-title-link" href="email.php?sid={$sid}&folder={$folderID}">
+						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
 							<span class="bm-folder-title-icon"><i class="ti {if $folder.intelligent==1}ti-folder-cog{else}ti-folder{/if} icon" aria-hidden="true"></i></span>
 							<span class="bm-folder-title-text">
 								<span class="bm-folder-name">{text value=$folder.titel cut=40}</span>
@@ -109,8 +110,8 @@
 					<td class="bm-folder-col-subscribed{if $sortColumn=='subscribed'} bm-folder-col-sorted{/if}"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" {if $folder.subscribed==1}checked="checked" {/if} onchange="updateFolderSubscription('{$folderID}', this, '{$sid}')" aria-label="{lng p="subscribed"}" /></label></td>
 					<td class="bm-folder-col-actions">
 						<div class="btn-list flex-nowrap justify-content-end">
-							<a href="email.folders.php?action=editFolder&id={$folderID}&sid={$sid}" class="btn btn-sm btn-ghost-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-							<a onclick="return confirm('{lng p="realdel"}');" href="email.folders.php?action=deleteFolder&id={$folderID}&sid={$sid}" class="btn btn-sm btn-ghost-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+							<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}" class="btn btn-sm btn-ghost-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+							<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='email.folders.php' params="action=deleteFolder&id={$folderID}"}" class="btn btn-sm btn-ghost-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 						</div>
 					</td>
 				</tr>
@@ -132,7 +133,7 @@
 				<tr class="bm-folder-row">
 					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="folder_{$folderID}" name="folder_{$folderID}" aria-label="{text value=$folder.titel cut=40}" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
-						<a class="bm-folder-title-link" href="email.php?sid={$sid}&folder={$folderID}">
+						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
 							<span class="bm-folder-title-icon"><i class="ti ti-share-3 icon" aria-hidden="true"></i></span>
 							<span class="bm-folder-title-text">
 								<span class="bm-folder-name">{text value=$folder.titel cut=40}{if $folder.readonly} <span class="text-secondary fw-normal">({lng p="readonly"})</span>{/if}</span>

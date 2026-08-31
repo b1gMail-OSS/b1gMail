@@ -23,6 +23,7 @@
 <body>
 
 		<form action="email.php?folder={$folderID}&do=setViewOptions&overlay=true&sid={$sid}" method="post">
+			{csrffield}
 			<fieldset>
 				<legend>{lng p="viewoptions"}</legend>
 				

@@ -10,7 +10,7 @@
 		<div class="bm-push-prompt-actions">
 			<button type="button" class="btn btn-primary btn-sm bm-push-prompt-enable">{lng p="push_enable"}</button>
 			<button type="button" class="btn btn-outline-secondary btn-sm bm-push-prompt-decline">{lng p="push_prompt_decline"}</button>
-			<a href="prefs.php?action=common&amp;sid={$sid}" class="btn btn-ghost-primary btn-sm">{lng p="prefs"}</a>
+			<a href="{sessionurl file='prefs.php' params='action=common'}" class="btn btn-ghost-primary btn-sm">{lng p="prefs"}</a>
 		</div>
 	</div>
 	{else}
@@ -19,7 +19,7 @@
 			<div class="flex-fill">{lng p="push_prompt_text"}</div>
 			<button type="button" class="btn btn-primary btn-sm bm-push-prompt-enable">{lng p="push_enable"}</button>
 			<button type="button" class="btn btn-outline-secondary btn-sm bm-push-prompt-decline">{lng p="push_prompt_decline"}</button>
-			<a href="prefs.php?action=common&amp;sid={$sid}" class="btn btn-outline-primary btn-sm">{lng p="prefs"}</a>
+			<a href="{sessionurl file='prefs.php' params='action=common'}" class="btn btn-outline-primary btn-sm">{lng p="prefs"}</a>
 			<button type="button" class="btn btn-ghost-secondary btn-sm bm-push-prompt-dismiss" aria-label="{lng p="close"}">&times;</button>
 		</div>
 	</div>

@@ -97,7 +97,7 @@
 						{/if}
 					</td>
 					<td class="align-top">{$notice.text}</td>
-					<td class="align-top" style="width: 60px;">{if isset($notice.link)}<a href="{$notice.link}sid={$sid}"><i class="fa-solid fa-square-arrow-up-right"></i></a>{else}&nbsp;{/if}</td>
+					<td class="align-top" style="width: 60px;">{if isset($notice.link)}<a href="{$notice.link}{$sessionUrlSuffixHtml}"><i class="fa-solid fa-square-arrow-up-right"></i></a>{else}&nbsp;{/if}</td>
 				</tr>
 			{/foreach}
 		</table>

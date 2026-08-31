@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="layout_addremove"}</legend>
 
-	<form action="prefs.widgetlayouts.php?action={$action}&do=addremove&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.widgetlayouts.php' params="action={$action}&do=addremove"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<input type="hidden" name="save" value="true" />
 
 		<div class="card">

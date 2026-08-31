@@ -9,7 +9,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=aliases&do=action&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=action'}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar bm-prefs-body bm-prefs-list-body">
 <div class="card bm-prefs-table-card">
@@ -18,11 +19,11 @@
 	<tr>
 		<th class="bm-prefs-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'alias');" aria-label="{lng p="selaction"}" /></label></th>
 		<th>
-			<a href="prefs.php?sid={$sid}&action=aliases&sort=email&order={$sortOrderInv}">{lng p="alias"}</a>
+			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=email&order={$sortOrderInv}"}">{lng p="alias"}</a>
 			{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="220">
-			<a href="prefs.php?sid={$sid}&action=aliases&sort=type&order={$sortOrderInv}">{lng p="type"}</a>
+			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=type&order={$sortOrderInv}"}">{lng p="type"}</a>
 			{if $sortColumn=='type'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th class="bm-prefs-col-actions">&nbsp;</th>
@@ -38,8 +39,8 @@
 		<td class="{if $sortColumn=='type'}listTableTDActive{else}{$class}{/if}">{$alias.typeText}</td>
 		<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
 			<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="prefs.php?action=aliases&do=edit&id={$aliasID}&sid={$sid}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=aliases&do=delete&id={$aliasID}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='prefs.php' params="action=aliases&do=edit&id={$aliasID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=aliases&do=delete&id={$aliasID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 		</td>
 	</tr>
@@ -62,7 +63,7 @@
 		</div>
 	</div>
 	<div class="right">
-		{if $allowAdd}<button class="btn btn-sm btn-primary" type="button" onclick="document.location.href='prefs.php?action=aliases&do=add&sid={$sid}';">
+		{if $allowAdd}<button class="btn btn-sm btn-primary" type="button" onclick="document.location.href='{sessionurl file='prefs.php' params='action=aliases&do=add'}';">
 			<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 			{lng p="addalias"}
 		</button>{/if}

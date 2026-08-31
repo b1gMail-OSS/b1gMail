@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAV\Xml\Element;
 
 use Sabre\DAV\Xml\Property\Complex;
-use Sabre\Xml\XmlDeserializable;
 use Sabre\Xml\Reader;
+use Sabre\Xml\XmlDeserializable;
 
 /**
  * This class is responsible for decoding the {DAV:}prop element as it appears
@@ -17,12 +19,12 @@ use Sabre\Xml\Reader;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Prop implements XmlDeserializable {
-
+class Prop implements XmlDeserializable
+{
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -37,14 +39,14 @@ class Prop implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         // If there's no children, we don't do anything.
         if ($reader->isEmptyElement) {
             $reader->next();
+
             return [];
         }
 
@@ -52,22 +54,17 @@ class Prop implements XmlDeserializable {
 
         $reader->read();
         do {
-
-            if ($reader->nodeType === Reader::ELEMENT) {
-
+            if (Reader::ELEMENT === $reader->nodeType) {
                 $clark = $reader->getClark();
                 $values[$clark] = self::parseCurrentElement($reader)['value'];
-
             } else {
                 $reader->read();
             }
-
-        } while ($reader->nodeType !== Reader::END_ELEMENT);
+        } while (Reader::END_ELEMENT !== $reader->nodeType);
 
         $reader->read();
 
         return $values;
-
     }
 
     /**
@@ -80,37 +77,34 @@ class Prop implements XmlDeserializable {
      *   * name - A clark-notation XML element name.
      *   * value - The parsed value.
      *
-     * @param Reader $reader
      * @return array
      */
-    private static function parseCurrentElement(Reader $reader) {
-
+    private static function parseCurrentElement(Reader $reader)
+    {
         $name = $reader->getClark();
 
         if (array_key_exists($name, $reader->elementMap)) {
             $deserializer = $reader->elementMap[$name];
-            if (is_subclass_of($deserializer, 'Sabre\\Xml\\XmlDeserializable')) {
-                $value = call_user_func([ $deserializer, 'xmlDeserialize' ], $reader);
+            if (is_subclass_of($deserializer, \Sabre\Xml\XmlDeserializable::class)) {
+                $value = call_user_func([$deserializer, 'xmlDeserialize'], $reader);
             } elseif (is_callable($deserializer)) {
                 $value = call_user_func($deserializer, $reader);
             } else {
                 $type = gettype($deserializer);
-                if ($type === 'string') {
-                    $type .= ' (' . $deserializer . ')';
-                } elseif ($type === 'object') {
-                    $type .= ' (' . get_class($deserializer) . ')';
+                if ('string' === $type) {
+                    $type .= ' ('.$deserializer.')';
+                } elseif ('object' === $type) {
+                    $type .= ' ('.get_class($deserializer).')';
                 }
-                throw new \LogicException('Could not use this type as a deserializer: ' . $type);
+                throw new \LogicException('Could not use this type as a deserializer: '.$type);
             }
         } else {
             $value = Complex::xmlDeserialize($reader);
         }
 
         return [
-            'name'  => $name,
+            'name' => $name,
             'value' => $value,
         ];
-
     }
-
 }

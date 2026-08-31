@@ -27,6 +27,7 @@
 		{$text}
 
 		<form action="{$formAction}" enctype="multipart/form-data" method="post">
+			{csrffield}
 			<br /><br />
 			<table width="100%" cellspacing="0" cellpadding="0">
 				<tr>

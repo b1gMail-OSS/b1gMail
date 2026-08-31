@@ -1,4 +1,5 @@
-<form action="prefs.sms.php?save=true&sid={$sid}" method="post" onsubmit="spin(this)" id="prefsForm">
+<form action="{sessionurl file='prefs.sms.php' params="save=true"}" method="post" onsubmit="spin(this)" id="prefsForm">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
@@ -116,5 +117,5 @@
 	<input type="hidden" name="projectsnotification_http_activated" value="1" />
 	<input type="hidden" name="projectsnotification_http_url" value="{$bm_prefs.selfurl}interface/su_callback.php" />
 	<input type="hidden" name="projectsnotification_http_method" value="1" />
-	<input type="hidden" name="backlink" value="{$bm_prefs.selfurl}admin/prefs.sms.php?do=suBack&sid={$sid}&prjPass={$prjPass}" />
+	<input type="hidden" name="backlink" value="{$bm_prefs.selfurl}admin/prefs.sms.php?do=suBack{$sessionUrlSuffix}&prjPass={$prjPass}" />
 </form>

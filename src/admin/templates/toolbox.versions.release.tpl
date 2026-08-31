@@ -10,7 +10,7 @@
 		<div class="col-sm-10">
 			<button class="btn btn-muted" id="testButton_win" onclick="tbxTest({$versionID},'win');"><i class="fa-brands fa-windows"></i>&nbsp; {lng p="test"} (Windows)</button>
 			<span id="testLoad_win" style="display:none;"><img src="{$tpldir}images/load_16.gif" border="0" alt="" align="absmiddle" />&nbsp; {lng p="preparing"}...</span>
-			<span id="testLink_win" style="display:none;"><a href="toolbox.php?do=downloadVersion&versionid={$versionID}&os=win&sid={$sid}" target="_blank"><i class="fa-solid fa-download"></i>&nbsp; {lng p="download"} (Windows)</a></span>
+			<span id="testLink_win" style="display:none;"><a href="{sessionurl file='toolbox.php' params="do=downloadVersion&versionid={$versionID}&os=win"}" target="_blank"><i class="fa-solid fa-download"></i>&nbsp; {lng p="download"} (Windows)</a></span>
 		</div>
 	</div>
 	<div class="mb-3 row">
@@ -18,7 +18,7 @@
 		<div class="col-sm-10">
 			<button class="btn btn-muted" id="testButton_mac" onclick="tbxTest({$versionID},'mac');"><i class="fa-brands fa-apple"></i>&nbsp; {lng p="test"} (Mac)</button>
 			<span id="testLoad_win" style="display:none;"><img src="{$tpldir}images/load_16.gif" border="0" alt="" align="absmiddle" />&nbsp; {lng p="preparing"}...</span>
-			<span id="testLink_mac" style="display:none;"><a href="toolbox.php?do=downloadVersion&versionid={$versionID}&os=mac&sid={$sid}" target="_blank"><i class="fa-solid fa-download"></i>&nbsp; {lng p="download"} (Mac)</a></span>
+			<span id="testLink_mac" style="display:none;"><a href="{sessionurl file='toolbox.php' params="do=downloadVersion&versionid={$versionID}&os=mac"}" target="_blank"><i class="fa-solid fa-download"></i>&nbsp; {lng p="download"} (Mac)</a></span>
 		</div>
 	</div>
 	<div class="mb-3 row">

@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/webdisk.class.php');
 include('./serverlib/webdisk.thumbnail.inc.php');
 WebdiskThumbnailsEnsureSchema();
@@ -318,6 +319,8 @@ if($_REQUEST['action'] == 'folder')
 
 	if(isset($_REQUEST['inline']))
 	{
+		header('Cache-Control: no-store, no-cache, must-revalidate');
+		header('Pragma: no-cache');
 		$tpl->display('li/webdisk.folder.tpl');
 	}
 	else
@@ -426,6 +429,7 @@ else if($_REQUEST['action'] == 'thumbnail'
 	if(!isset($groupRow['wd_thumbnails']) || $groupRow['wd_thumbnails'] != 'yes' || !function_exists('imagecreatetruecolor'))
 	{
 		header('HTTP/1.1 404 Not Found');
+		header('Cache-Control: no-store');
 		exit();
 	}
 
@@ -433,6 +437,7 @@ else if($_REQUEST['action'] == 'thumbnail'
 	if($fileInfo === false || !WebdiskThumbnailIsSupportedType($fileInfo))
 	{
 		header('HTTP/1.1 404 Not Found');
+		header('Cache-Control: no-store');
 		exit();
 	}
 
@@ -440,6 +445,7 @@ else if($_REQUEST['action'] == 'thumbnail'
 	if($cachePath === false)
 	{
 		header('HTTP/1.1 404 Not Found');
+		header('Cache-Control: no-store');
 		exit();
 	}
 
@@ -645,7 +651,7 @@ else if($_REQUEST['action'] == 'createFolder' && isset($_REQUEST['folderName']))
 		if(isset($_REQUEST['rpc']))
 			die('1');
 		else
-			header('Location: webdisk.php?folder=' . $folderID . '&sid=' . session_id());
+			header('Location: ' . SessionUrl('webdisk.php?folder=' . $folderID));
 	}
 }
 
@@ -784,7 +790,7 @@ else if($_REQUEST['action'] == 'saveFileShareSettings' && isset($_REQUEST['id'])
 	else
 		$webdisk->StopFileShare($fileID);
 
-	header('Location: webdisk.php?folder=' . (int)$fileInfo['ordner'] . '&sid=' . session_id());
+	header('Location: ' . SessionUrl('webdisk.php?folder=' . (int)$fileInfo['ordner']));
 }
 
 /**
@@ -894,7 +900,7 @@ else if($_REQUEST['action'] == 'saveShareSettings' && isset($_REQUEST['id']) && 
 	}
 
 	$webdisk->SetShareSettings($folderID, $shareFolder, $sharePW, $shareUntil);
-	header('Location: webdisk.php?folder=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+	header('Location: ' . SessionUrl('webdisk.php?folder=' . (int)$_REQUEST['id']));
 }
 
 /**
@@ -909,7 +915,7 @@ else if($_REQUEST['action'] == 'stopShare' && isset($_REQUEST['id']) && $groupRo
 		$webdisk->SetShareSettings($folderID, false, '');
 
 	$redirectFolder = isset($_REQUEST['folder']) ? (int)$_REQUEST['folder'] : $folderID;
-	header('Location: webdisk.php?folder=' . $redirectFolder . '&sid=' . session_id());
+	header('Location: ' . SessionUrl('webdisk.php?folder=' . $redirectFolder));
 }
 
 /**
@@ -923,7 +929,7 @@ else if($_REQUEST['action'] == 'stopFileShare' && isset($_REQUEST['id']) && $gro
 		$webdisk->StopFileShare($fileID);
 
 	$redirectFolder = $fileInfo !== false ? (int)$fileInfo['ordner'] : (isset($_REQUEST['folder']) ? (int)$_REQUEST['folder'] : 0);
-	header('Location: webdisk.php?folder=' . $redirectFolder . '&sid=' . session_id());
+	header('Location: ' . SessionUrl('webdisk.php?folder=' . $redirectFolder));
 }
 
 /**
@@ -1044,7 +1050,7 @@ else if($_REQUEST['action'] == 'doExtractFile' && isset($_REQUEST['id'])
 		if($deleteZIP)
 			$webdisk->DeleteFile($zipFileID);
 
-		header('Location: webdisk.php?folder='.$folderID.'&sid='.session_id());
+		header('Location: ' . SessionUrl('webdisk.php?folder='.$folderID));
 		exit();
 	}
 }
@@ -1100,7 +1106,7 @@ else if($_REQUEST['action'] == 'deleteItem'
 	{
 		$webdisk->DeleteFolder((int)$_REQUEST['id']);
 	}
-	header('Location: webdisk.php?folder=' . $folderID . '&sid=' . session_id());
+	header('Location: ' . SessionUrl('webdisk.php?folder=' . $folderID));
 }
 
 /**
@@ -1284,7 +1290,7 @@ else if($_REQUEST['action'] == 'pasteHere')
 
 	if($ok)
 	{
-		header('Location: webdisk.php?folder=' . $folderID . '&sid=' . session_id());
+		SessionRedirect('webdisk.php?folder=' . $folderID . '&_=' . time());
 	}
 	else
 	{
@@ -1451,7 +1457,7 @@ else if($_REQUEST['action'] == 'uploadFiles'
 	if(count($error) > 0 || count($success) > 0)
 		WebdiskStoreUploadFeedback($folderID, $error, $success);
 
-	header('Location: webdisk.php?folder=' . $folderID . '&sid=' . session_id());
+	header('Location: ' . SessionUrl('webdisk.php?folder=' . $folderID));
 	exit();
 }
 
@@ -1493,31 +1499,32 @@ else if($_REQUEST['action'] == 'webdiskDialogContent')
 	else
 		$path = (int)$_REQUEST['path'];
 
-	// get path
-	$pathArray = array_merge(array(0 => array('id' => '0', 'title' => '/')), $webdisk->GetFolderPath($path));
-	$pathIDs = array();
-	foreach($pathArray as $item)
-		$pathIDs[] = $item['id'];
+	$pathFolders = $webdisk->GetFolderPath($path);
+	$history = array_merge(
+		array(array('id' => '0', 'title' => '/')),
+		$pathFolders ? $pathFolders : array()
+	);
 
-	// process path
-	$contentColumns = array();
-	foreach($pathArray as $pathFolder)
+	$parentID = ($path > 0) ? (int)$webdisk->GetFolderParent($path) : -1;
+
+	$folders = array();
+	$files = array();
+	$content = $webdisk->GetFolderContent($path, 'dateiname', 'ASC');
+	foreach($content as $item)
 	{
-		$content = $webdisk->GetFolderContent($pathFolder['id'], 'dateiname', 'ASC');
-		foreach($content as $key=>$val)
-		{
-			$content[$key]['folderID'] = $pathFolder['id'];
-			if($val['type'] == WEBDISK_ITEM_FOLDER && in_array($val['id'], $pathIDs))
-				$content[$key]['inPath'] = true;
-		}
-		$contentColumns[] = $content;
+		if($item['type'] == WEBDISK_ITEM_FOLDER)
+			$folders[] = $item;
+		else
+			$files[] = $item;
 	}
 
 	// assign & display
 	$tpl->assign('height', (int)$_REQUEST['height']);
-	$tpl->assign('columns', $contentColumns);
 	$tpl->assign('pathID', $path);
-	$tpl->assign('history', array_reverse($pathArray));
+	$tpl->assign('parentID', $parentID);
+	$tpl->assign('history', $history);
+	$tpl->assign('folders', $folders);
+	$tpl->assign('files', $files);
 	$tpl->display('li/webdisk.dialog.content.tpl');
 }
 
@@ -1526,7 +1533,7 @@ else if($_REQUEST['action'] == 'webdiskDialogContent')
  */
 else if($_REQUEST['action'] == 'importFromMail')
 {
-	$tpl->assign('params', 'webdisk.php?action=doImportFromMail&sid=' . session_id() . '&id=' . (int)$_REQUEST['id'] . '&attachment=' . preg_replace('/[^\.0-9]/', '', $_REQUEST['attachment']));
+	$tpl->assign('params', 'webdisk.php?action=doImportFromMail' . '&id=' . (int)$_REQUEST['id'] . '&attachment=' . preg_replace('/[^\.0-9]/', '', $_REQUEST['attachment']));
 	$tpl->assign('filename', _unescape($_REQUEST['filename']));
 	$tpl->assign('type', 'save');
 	$tpl->display('li/webdisk.dialog.tpl');

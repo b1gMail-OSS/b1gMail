@@ -35,7 +35,7 @@
 		<tr>
 		{if $smarty.section.halfHours.index%2==0}
 			<td class="calendarDayTimeCell" rowspan="2">
-				<div class="calendarDayTimeCellText"><a href="organizer.calendar.php?action=addDate&date={$dateStart}&time={halfHourToTime value=$smarty.section.halfHours.index dateStart=$dateStart}&sid={$sid}" target="_top">{halfHourToTime value=$smarty.section.halfHours.index}</a></div>
+				<div class="calendarDayTimeCellText"><a href="{sessionurl file='organizer.calendar.php' params="action=addDate&date={$dateStart}&time={halfHourToTime value=$smarty.section.halfHours.index dateStart=$dateStart}"}" target="_top">{halfHourToTime value=$smarty.section.halfHours.index}</a></div>
 			</td>
 		{/if}
 		{if $smarty.section.halfHours.index==0}

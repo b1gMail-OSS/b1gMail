@@ -3,7 +3,8 @@
  * b1gMail – Web Push subscription API (customer area).
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include B1GMAIL_DIR.'serverlib/push.class.php';
 
 header('Content-Type: application/json; charset=utf-8');

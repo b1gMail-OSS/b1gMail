@@ -19,7 +19,26 @@
  *
  */
 
-require './serverlib/init.inc.php';
+ob_start();
+
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
+
+/**
+ * Captcha image (binary) — before templates/plugins to avoid corrupting PNG output.
+ */
+if(isset($_REQUEST['action']) && $_REQUEST['action'] === 'codegen')
+{
+	$prevReporting = error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+	if(!class_exists('BMCaptcha'))
+		include(B1GMAIL_DIR . 'serverlib/captcha.class.php');
+	while(ob_get_level() > 0)
+		ob_end_clean();
+	$captcha = BMCaptcha::createDefaultProvider();
+	$captcha->generate();
+	error_reporting($prevReporting);
+	exit();
+}
 
 /**
  * languages
@@ -38,22 +57,72 @@ $tpl->assign('year',				date('Y'));
 $tpl->assign('mobileURL',			$bm_prefs['mobile_url']);
 
 /**
+ * default action = login
+ */
+if(!isset($_REQUEST['action']))
+	$_REQUEST['action'] = 'login';
+
+// Stable session cookie for CSRF on all NLI pages (GET form → POST login/MFA).
+SessionEnsureActiveWithCookie();
+
+$isPost = isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
+
+if($isPost)
+	CsrfRehydrateFromCookie();
+
+RouteRedirectLegacyPublicLoginHttpsIfNeeded();
+
+// Lost-password POST before FileHandler: plugins (e.g. smspw) must not swallow the request.
+if($isPost
+		&& isset($_REQUEST['action']) && $_REQUEST['action'] == 'lostPassword'
+		&& ((isset($_REQUEST['email_local'])
+				&& isset($_REQUEST['email_domain'])
+				&& trim($_REQUEST['email_local']) != '')
+			|| (isset($_REQUEST['email_full'])
+				&& trim($_REQUEST['email_full']) != '')))
+{
+	CsrfEnforceOnPost();
+	$userMail = EncodeEMail(isset($_REQUEST['email_full'])
+					? trim($_REQUEST['email_full'])
+					: trim($_REQUEST['email_local']) . '@' . $_REQUEST['email_domain']);
+	BMUser::LostPassword($userMail);
+	$doneUrl = function_exists('PublicNavUrl')
+		? PublicNavUrl('index.php?action=lostPassword', 'ssl_login_enable')
+		: '/lost-password';
+	if($doneUrl === '')
+		$doneUrl = '/lost-password';
+	$doneUrl .= (strpos($doneUrl, '?') !== false ? '&' : '?') . 'pwreset=ok';
+	SessionRedirect($doneUrl);
+}
+
+// GET: template/session vars before FileHandler (plugins may render nli/index.tpl and exit).
+if(!$isPost)
+{
+	AssignTemplateSessionUrlVars($tpl);
+	RouteRedirectLegacyPublicIndexIfNeeded();
+}
+
+/**
  * file handler for modules
  */
 ModuleFunction('FileHandler',
 	array(substr(__FILE__, strlen(__DIR__)+1),
 	isset($_REQUEST['action']) ? $_REQUEST['action'] : ''));
 
-/**
- * default action = login
- */
-if(!isset($_REQUEST['action']))
-	$_REQUEST['action'] = 'login';
+// Repeat login click after success: session exists, CSRF was rotated — redirect instead of 403.
+if($isPost && isset($_REQUEST['do']) && $_REQUEST['do'] === 'login')
+	SessionRedirectUserHomeIfLoggedIn();
+
+if($isPost)
+	CsrfEnforceOnPost();
+
+if($isPost)
+	AssignTemplateSessionUrlVars($tpl);
 
 /**
  * mobile redirection?
  */
-$nonMobileActions = array('codegen', 'checkAddressAvailability', 'resetPassword', 'forgetCookie', 'confirmAlias', 'readCertMail', 'completeAddressBookEntry', 'activateAccount', 'showAddressSugestions', 'initiateSession');
+$nonMobileActions = array('codegen', 'checkAddressAvailability', 'resetPassword', 'forgetCookie', 'confirmAlias', 'readCertMail', 'completeAddressBookEntry', 'activateAccount', 'showAddressSugestions', 'initiateSession', 'mfaVerify', 'lostPassword');
 if($bm_prefs['redirect_mobile'] == 'yes'
 	&& IsMobileUserAgent()
 	&& !isset($_COOKIE['noMobileRedirect'])
@@ -70,7 +139,8 @@ if($_REQUEST['action'] == 'tos')
 {
 	// terms of service
 	$tpl->assign('pageTitle', $lang_user['tos']);
-	$tpl->assign('tos', nl2br(HTMLFormat($lang_custom['tos'])));
+    $tpl->assign('tos', nl2br(HTMLFormat($lang_custom['tos'])));
+	$tpl->assign('tos_html', nl2br($lang_custom['tos']));
 	$tpl->assign('page', 'nli/tos.tpl');
 }
 
@@ -305,6 +375,26 @@ else if($_REQUEST['action'] == 'signup')
 				$suSurname = trim($_POST['surname']);
 				if(strlen($suSurname) < 2)
 					$invalidFields[] = 'surname';
+
+				// 'company'-field
+				if($bm_prefs['f_company'] != 'n')
+				{
+					$suCompany = trim($_POST['company']);
+					if((strlen($suCompany) < 2) && (strlen($suCompany) > 0 || $bm_prefs['f_company'] == 'p'))
+						$invalidFields[] = 'company';
+				}
+				else
+					$suCompany = '';
+
+				// 'taxid'-field
+				if($bm_prefs['f_taxid'] != 'n')
+				{
+					$suTaxid = trim($_POST['taxid']);
+					if((strlen($suTaxid) < 2) && (strlen($suTaxid) > 0 || $bm_prefs['f_taxid'] == 'p'))
+						$invalidFields[] = 'taxid';
+				}
+				else
+					$suTaxid = '';
 
 				// salutation
 				if($bm_prefs['f_anrede'] != 'n')
@@ -574,7 +664,9 @@ else if($_REQUEST['action'] == 'signup')
 						true,
 						'',
 						$suSalutation,
-						$isInDNSBL);
+						$isInDNSBL,
+						$suCompany,
+						$suTaxid);
 
 					// successful?
 					if($userId !== false && $userId > 0)
@@ -655,6 +747,8 @@ else if($_REQUEST['action'] == 'signup')
 
 				// required fields
 				$tpl->assign('f_anrede', 			$bm_prefs['f_anrede']);
+				$tpl->assign('f_company', 			$bm_prefs['f_company']);
+				$tpl->assign('f_taxid', 			$bm_prefs['f_taxid']);
 				$tpl->assign('f_strasse', 			$bm_prefs['f_strasse']);
 				$tpl->assign('f_telefon', 			$bm_prefs['f_telefon']);
 				$tpl->assign('f_fax', 				$bm_prefs['f_fax']);
@@ -688,10 +782,6 @@ else if($_REQUEST['action'] == 'signup')
  */
 else if($_REQUEST['action'] == 'codegen')
 {
-	if(!class_exists('BMCaptcha'))
-		include(B1GMAIL_DIR . 'serverlib/captcha.class.php');
-	$captcha = BMCaptcha::createDefaultProvider();
-	$captcha->generate();
 	exit();
 }
 
@@ -707,6 +797,12 @@ else if($_REQUEST['action'] == 'checkAddressAvailability')
 	}
 	else if($bm_prefs['regenabled'] == 'yes' && ($bm_prefs['user_count_limit'] == 0 || BMUser::GetUserCount() < $bm_prefs['user_count_limit']))
 	{
+		$res = $db->Query('SELECT COUNT(*) FROM {pre}users WHERE reg_ip=? AND reg_date>?',
+			$_SERVER['REMOTE_ADDR'],
+			time()-$bm_prefs['reg_iplock']);
+		$row = $res->FetchArray();
+		$res->Free();
+
 		// dnsbl check
 		$isInDNSBL = false;
 		if($row[0] == 0 && $bm_prefs['signup_dnsbl_enable'] == 'yes' && $bm_prefs['signup_dnsbl'] != '')
@@ -775,6 +871,8 @@ else if($_REQUEST['action'] == 'checkAddressAvailability')
 		'available'		=> $result
 	);
 
+	while(ob_get_level() > 0)
+		ob_end_clean();
 	Array2XML($response);
 	exit();
 }
@@ -794,9 +892,9 @@ else if($_REQUEST['action'] == 'page' && isset($_GET['page']))
 else if($_REQUEST['action'] == 'forgetCookie')
 {
 	// delete cookies
-	setcookie('bm_savedUser', 		'',		 		time() - TIME_ONE_HOUR);
-	setcookie('bm_savedPassword', 	'',		 		time() - TIME_ONE_HOUR);
-	setcookie('bm_savedToken', 		'',		 		time() - TIME_ONE_HOUR);
+	BMSecureSetCookie('bm_savedUser', '', time() - TIME_ONE_HOUR);
+	BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
+	BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
 
 	// reload
 	header('Location: index.php');
@@ -804,71 +902,70 @@ else if($_REQUEST['action'] == 'forgetCookie')
 }
 
 /**
- * forgot password
- */
-else if($_REQUEST['action'] == 'lostPassword'
-		&& ((isset($_REQUEST['email_local'])
-				&& isset($_REQUEST['email_domain'])
-				&& trim($_REQUEST['email_local']) != '')
-			|| (isset($_REQUEST['email_full'])
-				&& trim($_REQUEST['email_full']) != '')))
-{
-	$tpl->assign('pageTitle', $lang_user['lostpw']);
-
-	$userMail = EncodeEMail(isset($_REQUEST['email_full'])
-					? trim($_REQUEST['email_full'])
-					: trim($_REQUEST['email_local']) . '@' . $_REQUEST['email_domain']);
-
-	if(BMUser::LostPassword($userMail))
-	{
-		// send PW link
-		$tpl->assign('msg', $lang_user['pwresetsuccess']);
-	}
-	else
-	{
-		// unknown address
-		$tpl->assign('msg', $lang_user['pwresetfailed']);
-	}
-
-	$tpl->assign('title', $lang_user['lostpw']);
-	$tpl->assign('page', 'nli/msg.tpl');
-}
-
-/**
  * reset password
  */
-else if($_REQUEST['action'] == 'resetPassword'
-		&& isset($_REQUEST['user'])
-		&& isset($_REQUEST['key']))
+else if($_REQUEST['action'] == 'resetPassword')
 {
 	header('Pragma: no-cache');
 	header('Cache-Control: no-cache');
 	header('X-Robots-Tag: noindex');
 	$tpl->assign('robotsNoIndex', true);
 
-	$tpl->assign('pageTitle', $lang_user['lostpw']);
-
-	$userID = (int)$_REQUEST['user'];
-	$resetKey = trim($_REQUEST['key']);
-
-	if(BMUser::ResetPassword($userID, $resetKey))
+	$resetKey = isset($_REQUEST['key']) ? trim((string)$_REQUEST['key']) : '';
+	if(BMUser::FindUserByResetToken($resetKey) <= 0)
 	{
-		// delete cookies
-		setcookie('bm_savedUser', 		'',		 		time() - TIME_ONE_HOUR);
-		setcookie('bm_savedToken', 		'',		 		time() - TIME_ONE_HOUR);
-		setcookie('bm_savedPassword', 	'',		 		time() - TIME_ONE_HOUR);
-
-		// ok
-		$tpl->assign('msg', $lang_user['pwresetsuccess2']);
+		PutLog(sprintf('Password reset link rejected (key_len=%d, IP: %s)',
+			strlen($resetKey),
+			isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+			PRIO_NOTE,
+			__FILE__,
+			__LINE__);
+		$tpl->assign('pageTitle', $lang_user['lostpw']);
+		$tpl->assign('title', $lang_user['lostpw']);
+		$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetfailed2']));
+		$tpl->assign('page', 'nli/msg.tpl');
 	}
 	else
 	{
-		// invalid id/key
-		$tpl->assign('msg', $lang_user['pwresetfailed2']);
-	}
+		$showResetForm = true;
+		$tpl->assign('pageTitle', $lang_user['resetpw']);
+		$tpl->assign('title', $lang_user['resetpw']);
+		$tpl->assign('resetPasswordUrl', NliUrl('index.php', array(
+			'action' => 'resetPassword',
+			'key'    => $resetKey,
+		)));
+		$tpl->assign('resetPasswordKey', $resetKey);
 
-	$tpl->assign('title', $lang_user['lostpw']);
-	$tpl->assign('page', 'nli/msg.tpl');
+		if($isPost && isset($_REQUEST['do']) && $_REQUEST['do'] === 'setPassword')
+		{
+			$pass1 = isset($_POST['pass1']) ? (string)$_POST['pass1'] : '';
+			$pass2 = isset($_POST['pass2']) ? (string)$_POST['pass2'] : '';
+			$pass1Check = CharsetDecode($pass1, false, 'ISO-8859-15');
+			$pass2Check = CharsetDecode($pass2, false, 'ISO-8859-15');
+			if(strlen($pass1Check) < (int)$bm_prefs['min_pass_length'] || $pass1Check !== $pass2Check)
+			{
+				$tpl->assign('errorInfo', sprintf($lang_user['pwerror'], $bm_prefs['min_pass_length']));
+			}
+			else if(BMUser::CompletePasswordReset($resetKey, $pass1))
+			{
+				BMSecureSetCookie('bm_savedUser', '', time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
+				SessionRedirect('/login?pwactivated=1');
+			}
+			else
+			{
+				$showResetForm = false;
+				$tpl->assign('pageTitle', $lang_user['lostpw']);
+				$tpl->assign('title', $lang_user['lostpw']);
+				$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetfailed2']));
+				$tpl->assign('page', 'nli/msg.tpl');
+			}
+		}
+
+		if($showResetForm)
+			$tpl->assign('page', 'nli/resetpassword.tpl');
+	}
 }
 
 /**
@@ -1106,7 +1203,7 @@ else if($_REQUEST['action'] == 'switchLanguage'
 		&& isset($_REQUEST['lang']))
 {
 	if(isset($availableLanguages[$_REQUEST['lang']]))
-		setcookie('bm_language', $_REQUEST['lang'], time()+TIME_ONE_YEAR);
+		BMSecureSetCookie('bm_language', $_REQUEST['lang'], time()+TIME_ONE_YEAR);
 	header('Location: index.php' . (isset($_REQUEST['target']) ? '?action=' . urlencode($_REQUEST['target']) : ''));
 	exit();
 }
@@ -1249,23 +1346,132 @@ else if($_REQUEST['action'] == 'initiateSession'
 	&& isset($_REQUEST['target'])
 	&& isset($_REQUEST['sid']))
 {
-	if(isset($_REQUEST['secret']))
+	$sid = (string)$_REQUEST['sid'];
+	$targets = array(
+		'compose'		=> 'email.compose.php',
+		'membership'	=> 'prefs.php?action=membership',
+		'inbox'			=> 'email.php',
+		'webdisk'		=> 'webdisk.php',
+	);
+	$target = isset($targets[$_REQUEST['target']])
+		? $targets[$_REQUEST['target']]
+		: 'start.php';
+
+	if(!preg_match('/^[A-Za-z0-9,-]{16,128}$/', $sid))
+		SessionRedirect('index.php?action=login');
+
+	if(session_status() === PHP_SESSION_ACTIVE)
+		session_write_close();
+
+	session_id($sid);
+	SessionStart();
+
+	if(empty($_SESSION['bm_userLoggedIn']) || empty($_SESSION['bm_userID']))
+		SessionRedirect('index.php?action=login');
+
+	if(!empty($_SESSION['bm_sessionCookieSecret']))
 	{
-		setcookie('sessionSecret_'.substr($_REQUEST['sid'], 0, 16), $_REQUEST['secret'], 0, '/');
+		BMSecureSetCookie(
+			'sessionSecret_'.substr(session_id(), 0, 16),
+			$_SESSION['bm_sessionCookieSecret'],
+			0
+		);
 	}
 
-	if($_REQUEST['target'] == 'compose')
-		header('Location: email.compose.php?sid='.$_REQUEST['sid']);
-	else if($_REQUEST['target'] == 'membership')
-		header('Location: prefs.php?sid='.$_REQUEST['sid'].'&action=membership');
-	else if($_REQUEST['target'] == 'inbox')
-		header('Location: email.php?sid='.$_REQUEST['sid']);
-	else if($_REQUEST['target'] == 'webdisk')
-		header('Location: webdisk.php?sid='.$_REQUEST['sid']);
-	else
-		header('Location: start.php?sid='.$_REQUEST['sid']);
+	SessionRedirect($target);
+}
 
-	exit();
+/**
+ * MFA verification (after password, before session)
+ */
+else if($_REQUEST['action'] == 'mfaVerify')
+{
+	@session_start();
+	$pending = BMMfa::GetPending();
+	if($pending === false)
+		SessionRedirect('index.php');
+
+	if($pending['type'] === 'user')
+	{
+		$mfaRow = BMMfa::GetAccount('user', (int)$pending['account_id']);
+		if(!is_array($mfaRow) || !BMMfa::RequiresMfaVerifyAtLogin($mfaRow))
+		{
+			if(!empty($_SESSION['bm_userLoggedIn']))
+			{
+				BMMfa::ClearPending();
+				SessionRedirect('start.php');
+			}
+
+			$redirect = BMMfa::FinalizeUserLoginFromPending();
+			BMMfa::ClearPending();
+			if($redirect !== false)
+				SessionRedirect($redirect);
+			SessionRedirect('index.php');
+		}
+	}
+
+	$tpl->assign('pageTitle', isset($lang_user['mfa_verify_title']) ? $lang_user['mfa_verify_title'] : 'Two-factor authentication');
+	$tpl->assign('recoveryMode', !empty($pending['meta']['recovery']));
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'mfaVerify'
+		&& isset($_POST['mfa_code']))
+	{
+		$code = trim((string)$_POST['mfa_code']);
+		$isBackup = isset($_POST['mfa_use_backup']) && $_POST['mfa_use_backup'] == '1';
+		if(BMMfa::VerifyPendingCode($code, $isBackup))
+		{
+			$redirect = BMMfa::FinalizeUserLoginFromPending();
+			if($redirect !== false)
+				SessionRedirect($redirect);
+		}
+		$tpl->assign('mfaError', isset($lang_user['mfa_verify_failed']) ? $lang_user['mfa_verify_failed'] : 'Invalid code.');
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'mfaResend')
+	{
+		$row = BMMfa::GetAccount($pending['type'], $pending['account_id']);
+		if(is_array($row) && $row['email_enabled'] == 'yes')
+		{
+			$to = !empty($pending['meta']['recovery'])
+				? BMMfa::RecoveryEmailForUser((int)$pending['account_id'])
+				: BMMfa::EmailAddressForUserMfa((int)$pending['account_id']);
+			if($to === false)
+				$to = DecodeEMail($pending['meta']['email']);
+			if($to !== false && $to !== '')
+				BMMfa::SendEmailCode((int)$row['id'], $to, (int)$pending['account_id'], 'login_resend');
+		}
+		$tpl->assign('mfaInfo', isset($lang_user['mfa_code_sent']) ? $lang_user['mfa_code_sent'] : 'A new code has been sent.');
+	}
+
+	$tpl->assign('page', 'nli/mfa_verify.tpl');
+}
+
+/**
+ * lost password (pretty URL /lost-password)
+ */
+else if($_REQUEST['action'] == 'lostPassword')
+{
+	header('Pragma: no-cache');
+	header('Cache-Control: no-cache');
+	header('X-Robots-Tag: noindex');
+	$tpl->assign('robotsNoIndex', true);
+	$tpl->assign('pageTitle', $lang_user['lostpw']);
+	$tpl->assign('title', $lang_user['lostpw']);
+
+	if(isset($_REQUEST['pwreset']))
+	{
+		$tpl->assign('msg', $lang_user['pwresetsuccess']);
+		$tpl->assign('page', 'nli/msg.tpl');
+	}
+	else if(isset($_REQUEST['pwactivated']))
+	{
+		if($_REQUEST['pwactivated'] === '1')
+			$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetsuccess2']));
+		else
+			$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetfailed2']));
+		$tpl->assign('page', 'nli/msg.tpl');
+	}
+	else
+		$tpl->assign('page', 'nli/lostpassword.tpl');
 }
 
 /**
@@ -1275,18 +1481,32 @@ else
 {
 	if(isset($_REQUEST['do']) && $_REQUEST['do']=='login')
 	{
-		// get login
-		$password 	= isset($_REQUEST['password']) && !empty($_REQUEST['password'])
-						? AjaxCharsetDecode($_REQUEST['password'])
-						: (isset($_REQUEST['passwordMD5']) ? $_REQUEST['passwordMD5'] : '');
+		// get login (plaintext only; never accept passwordMD5)
+		$password 	= isset($_POST['password']) && (string)$_POST['password'] !== ''
+						? AjaxCharsetDecode($_POST['password'])
+						: '';
 		$email 		= EncodeEMail(isset($_REQUEST['email_full'])
 						? AjaxCharsetDecode($_REQUEST['email_full'])
 						: AjaxCharsetDecode($_REQUEST['email_local'] . '@' . $_REQUEST['email_domain']));
+		if($password === '')
+			$password = SessionPendingLoginPassword($email);
 
 		// saved login?
+		$result = null;
 		if($password == '' && isset($_COOKIE['bm_savedToken']))
 		{
-			$password = BMUser::LoadLogin($_COOKIE['bm_savedToken']);
+			$remember = BMUser::ValidateRememberMe($_COOKIE['bm_savedToken']);
+			if($remember !== false)
+			{
+				ob_start();
+				list($result, $param) = BMUser::LoginByUserID($remember['userID'], true, true);
+				ob_end_clean();
+			}
+			else
+			{
+				BMUser::DeleteSavedLogin($_COOKIE['bm_savedToken']);
+				BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
+			}
 		}
 
 		// validation
@@ -1296,11 +1516,34 @@ else
 								: '';
 
 		// login
-		list($result, $param) = BMUser::Login($email, $password, true, true, $ValidationCode);
+		if($result === null)
+		{
+			ob_start();
+			list($result, $param) = BMUser::Login($email, $password, true, true, $ValidationCode);
+			ob_end_clean();
+		}
 
 		// login ok?
-		if($result == USER_OK)
+		if($result === USER_OK)
 		{
+			SessionPendingLoginClear();
+
+			if(isset($_SESSION['bm_userID']))
+				BMMfa::ClearPendingIfVerifyNotRequired('user', (int)$_SESSION['bm_userID']);
+
+			if(BMMfa::GetPending() && empty($_SESSION['bm_userLoggedIn']))
+			{
+				if(isset($_REQUEST['ajax']))
+					IndexLoginJsonResponse(array(
+						'action' => 'redirect',
+						'url'    => SessionUrl('index.php?action=mfaVerify'),
+					));
+				SessionRedirect('index.php?action=mfaVerify');
+				exit();
+			}
+			else if(BMMfa::GetPending())
+				BMMfa::ClearPending();
+
 			// delete token?
 			if(isset($_COOKIE['bm_savedToken']))
 				BMUser::DeleteSavedLogin($_COOKIE['bm_savedToken']);
@@ -1311,25 +1554,26 @@ else
 			// save login?
 			if(isset($_POST['savelogin']))
 			{
-				$cookieToken = BMUser::SaveLogin($password);
+				$cookieToken = BMUser::SaveLogin((int)$_SESSION['bm_userID']);
 
 				// set cookies
-				setcookie('bm_savedUser', 		$email, 		time() + TIME_ONE_YEAR);
+				BMSecureSetCookie('bm_savedUser', $email, time() + TIME_ONE_YEAR);
 				if(isset($_COOKIE['savedPassword']))
-					setcookie('bm_savedPassword', 	'',		 	time() - TIME_ONE_HOUR);
-				setcookie('bm_savedToken',		$cookieToken,	time() + TIME_ONE_YEAR);
-				setcookie('bm_savedSSL',
-					isset($_POST['ssl']) ? true : false,
+					BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
+				if($cookieToken !== false)
+					BMSecureSetCookie('bm_savedToken', $cookieToken, time() + TIME_ONE_YEAR);
+				BMSecureSetCookie('bm_savedSSL',
+					isset($_POST['ssl']) ? '1' : '0',
 					time() + TIME_ONE_YEAR);
 			}
 			else
 			{
 				// delete cookies
-				setcookie('bm_savedUser', 		'', 			time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedUser', '', time() - TIME_ONE_HOUR);
 				if(isset($_COOKIE['savedPassword']))
-					setcookie('bm_savedPassword', 	'', 		time() - TIME_ONE_HOUR);
-				setcookie('bm_savedToken', 		'', 			time() - TIME_ONE_HOUR);
-				setcookie('bm_savedSSL', 		'', 			time() - TIME_ONE_HOUR);
+					BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
+				BMSecureSetCookie('bm_savedSSL', '', time() - TIME_ONE_HOUR);
 			}
 
 			// register timezone
@@ -1337,37 +1581,77 @@ else
 										? (int)$_REQUEST['timezone']
 										: date('Z');
 
+			if(!empty($_SESSION['bm_userID']))
+			{
+				$loginUserID = (int)$_SESSION['bm_userID'];
+				$loginGroupID = 0;
+				$res = $db->Query('SELECT gruppe FROM {pre}users WHERE id=?', $loginUserID);
+				if($res->RowCount() == 1)
+				{
+					list($loginGroupID) = $res->FetchArray(MYSQLI_NUM);
+					$loginGroupID = (int)$loginGroupID;
+				}
+				$res->Free();
+				BMMfa::SyncSetupRequiredSession($loginUserID, $loginGroupID);
+			}
+
+			if(!empty($_SESSION['bm_mfaSetupRequired']))
+			{
+				$setupUrl = SessionUrl('start.php?action=mfaSetup');
+				if(isset($_REQUEST['ajax']))
+					IndexLoginJsonResponse(array('action' => 'redirect', 'url' => $setupUrl));
+				SessionRedirect('start.php?action=mfaSetup');
+				exit();
+			}
+
 			// redirect to target page
 			if(isset($_REQUEST['ajax']))
 			{
-				header('Access-Control-Allow-Origin: *');
-				header('Content-Type: application/json');
-				printf('{ "action": "redirect", "url" : "start.php?sid=%s" }', $param);
+				$homeUrl = 'start.php';
+				if(isset($_REQUEST['target']) && $_REQUEST['target'] == 'inbox')
+					$homeUrl = 'email.php?folder=0';
+				else if(isset($_REQUEST['target']) && $_REQUEST['target'] == 'webdisk')
+					$homeUrl = 'webdisk.php';
+				else if(isset($_REQUEST['target']) && $_REQUEST['target'] == 'membership')
+					$homeUrl = 'prefs.php?action=membership';
+				IndexLoginJsonResponse(array(
+					'action' => 'redirect',
+					'url'    => SessionUrl($homeUrl),
+				));
 			}
 			else if(!isset($_REQUEST['target']))
 			{
-				header('Location: start.php?sid=' . $param);
+				SessionRedirect('start.php');
 			}
 			else if($_REQUEST['target'] == 'inbox')
 			{
-				header('Location: email.php?folder=0&sid=' . $param);
+				SessionRedirect('email.php?folder=0');
 			}
 			else if($_REQUEST['target'] == 'compose')
 			{
-				header('Location: email.compose.php?sid=' . $param
-					. (isset($_REQUEST['draft']) && $_REQUEST['draft']!='' ? '&redirect=' . (int)($_REQUEST['draft']) : '')
-					. (isset($_REQUEST['to']) && $_REQUEST['to']!='' ? '&to=' . urlencode($_REQUEST['to']) : '')
-					. (isset($_REQUEST['cc']) && $_REQUEST['cc']!='' ? '&subject=' . urlencode($_REQUEST['cc']) : '')
-					. (isset($_REQUEST['subject']) && $_REQUEST['subject']!='' ? '&subject=' . urlencode($_REQUEST['subject']) : '')
-					. (isset($_REQUEST['text']) && $_REQUEST['text']!='' ? '&text=' . urlencode($_REQUEST['text']) : ''));
+				$composeParams = array();
+				if(isset($_REQUEST['draft']) && $_REQUEST['draft'] != '')
+					$composeParams[] = 'redirect=' . (int)$_REQUEST['draft'];
+				if(isset($_REQUEST['to']) && $_REQUEST['to'] != '')
+					$composeParams[] = 'to=' . urlencode($_REQUEST['to']);
+				if(isset($_REQUEST['cc']) && $_REQUEST['cc'] != '')
+					$composeParams[] = 'subject=' . urlencode($_REQUEST['cc']);
+				if(isset($_REQUEST['subject']) && $_REQUEST['subject'] != '')
+					$composeParams[] = 'subject=' . urlencode($_REQUEST['subject']);
+				if(isset($_REQUEST['text']) && $_REQUEST['text'] != '')
+					$composeParams[] = 'text=' . urlencode($_REQUEST['text']);
+				$composeUrl = 'email.compose.php';
+				if(count($composeParams) > 0)
+					$composeUrl .= '?' . implode('&', $composeParams);
+				SessionRedirect($composeUrl);
 			}
 			else if($_REQUEST['target'] == 'membership')
 			{
-				header('Location: prefs.php?sid=' . $param . '&action=membership');
+				SessionRedirect('prefs.php?action=membership');
 			}
 			else if($_REQUEST['target'] == 'webdisk')
 			{
-				header('Location: webdisk.php?sid=' . $param);
+				SessionRedirect('webdisk.php');
 			}
 			exit();
 		}
@@ -1377,13 +1661,10 @@ else
 			if($result == USER_LOCKED
 				&& $requiresValidation)
 			{
+				SessionPendingLoginRemember($email, $password);
+
 				if(isset($_REQUEST['ajax']))
-				{
-					header('Access-Control-Allow-Origin: *');
-					header('Content-Type: application/json');
-					printf('{ "action": "resubmit" }');
-					exit();
-				}
+					IndexLoginJsonResponse(array('action' => 'resubmit'));
 
 				if($bm_prefs['reg_validation_max_resend_times'] > 0)
 				{
@@ -1472,12 +1753,13 @@ else
 				}
 
 				$tpl->assign('email',		$email);
-				$tpl->assign('password',	strlen($password) == 32 ? $password : md5($password));
 				$tpl->assign('savelogin',	isset($_POST['savelogin']));
 				$tpl->assign('page',		'nli/login.smsvalidation.tpl');
 			}
 			else
 			{
+				SessionPendingLoginClear();
+
 				// tell user what happened
 				$msg = '?';
 				switch($result)
@@ -1497,11 +1779,7 @@ else
 				}
 
 				if(isset($_REQUEST['ajax']))
-				{
-					header('Content-Type: application/json');
-					printf('{ "action": "msg", "msg" : "%s" }', addslashes($msg));
-					exit();
-				}
+					IndexLoginJsonResponse(array('action' => 'msg', 'msg' => $msg));
 				else
 				{
 					$tpl->assign('msg',		$msg);
@@ -1512,24 +1790,54 @@ else
 	}
 	else
 	{
-		// lost password and no email entered?
-		if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'lostPassword')
+		if(isset($_REQUEST['pwreset']))
 		{
-			$tpl->assign('invalidFields', array('email_local_pw'));
+			$tpl->assign('pageTitle', $lang_user['lostpw']);
+			$tpl->assign('title', $lang_user['lostpw']);
+			if($_REQUEST['pwreset'] === 'ok')
+				$tpl->assign('msg', $lang_user['pwresetsuccess']);
+			else
+				$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetfailed']));
+			$tpl->assign('page', 'nli/msg.tpl');
 		}
-		$tpl->assign('page', 				'nli/login.tpl');
+		else if(isset($_REQUEST['pwactivated']))
+		{
+			$tpl->assign('pageTitle', $lang_user['lostpw']);
+			$tpl->assign('title', $lang_user['lostpw']);
+			if($_REQUEST['pwactivated'] === '1')
+				$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetsuccess2']));
+			else
+				$tpl->assign('msg', NliResolveMessageLinks($lang_user['pwresetfailed2']));
+			$tpl->assign('page', 'nli/msg.tpl');
+		}
+		else
+		{
+			if(isset($_GET['csrf_error']) && (string)$_GET['csrf_error'] === '1')
+			{
+				$l = CsrfErrorLang(false);
+				$tpl->assign('msg', $l['text']);
+				$tpl->assign('page', 'nli/loginresult.tpl');
+			}
+			else
+			{
+				$tpl->assign('page', 'nli/login.tpl');
+			}
+		}
 	}
 }
 
-// welcome back
-if(isset($_COOKIE['bm_savedUser']))
+// welcome back / active session
+if(!SessionAssignLoginPageActive('user'))
 {
-	header('Pragma: no-cache');
-	header('Cache-Control: no-cache');
-	$tpl->assign('welcomeBack', sprintf($lang_user['welcomeback'], $_COOKIE['bm_savedUser']));
-}
-else {
-	$tpl->assign('welcomeBack', FALSE);
+	if(isset($_COOKIE['bm_savedUser']))
+	{
+		header('Pragma: no-cache');
+		header('Cache-Control: no-cache');
+		$tpl->assign('welcomeBack', sprintf($lang_user['welcomeback'], $_COOKIE['bm_savedUser']));
+	}
+	else {
+		$tpl->assign('welcomeBack', FALSE);
+	}
 }
 
 $tpl->display('nli/index.tpl');

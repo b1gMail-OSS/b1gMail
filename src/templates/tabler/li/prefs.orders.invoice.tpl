@@ -10,7 +10,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
@@ -19,7 +19,7 @@
 		var tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="clientlang.php" type="text/javascript"></script>
+	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
@@ -30,7 +30,7 @@
 	{if !$print}
 	<div style="position:fixed;top:0px;left:0px;width:100%;background-image:url({$tpldir}images/li/bar.png);padding:6px;">
 		<div style="float:left;">
-			<a href="javascript:void(0);" onclick="openWindow('prefs.php?action=orders&do=showInvoice&id={$id}&print=true&sid={$sid}','printInvoice_{$id}',640,480);" style="color:#FFFFFF;text-decoration:none;">
+			<a href="javascript:void(0);" onclick="openWindow('{sessionurl file='prefs.php' params="action=orders&do=showInvoice&id={$id}&print=true"}','printInvoice_{$id}',640,480);" style="color:#FFFFFF;text-decoration:none;">
 				<i class="fa fa-print" aria-hidden="true"></i>
 				<span style="text-decoration:underline;">{lng p="printinvoice"}</span>
 			</a>

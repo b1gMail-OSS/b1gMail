@@ -1,33 +1,38 @@
-<fieldset>
-	<legend>{lng p="stats"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="stats"}</legend>
 	
-	<form action="{$pageURL}&action=stats&sid={$sid}" method="post">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=stats"}" method="post">
+	{csrffield}
 		<table width="100%">
 			<tr>
-				<td align="left">
-					<img src="{$tpldir}images/stats.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-					<select name="statType">
-					{foreach from=$statTypes item=type}
-						<option value="{$type}"{if $statType==$type} selected="selected"{/if}>{lng p=$type}</option>
-					{/foreach}
-					</select>
-					&nbsp;&nbsp;
-					<img src="{$tpldir}images/calendar.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-					{html_select_date prefix="time" start_year="-5" time=$time display_days=false}
-					<input class="button" type="submit" value=" {lng p="show"} &raquo; " />
+				<td class="td2" align="left">
+					<div class="input-group input-group-wide">
+						<select class="form-select" name="statType" style="max-width:12rem;">
+						{foreach from=$statTypes item=type}
+							<option value="{$type}"{if $statType==$type} selected="selected"{/if}>{lng p=$type}</option>
+						{/foreach}
+						</select>
+						{html_select_date prefix="time" start_year="-5" time=$time display_days=false field_separator="" all_extra='class="form-select"'}
+						<button type="submit" class="btn btn-primary">{lng p="show"} &raquo;</button>
+					</div>
 				</td>
 				<td align="right">
 					<img src="../plugins/templates/images/bms_stats_reset.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-					<a href="#" onclick="if(confirm('{lng p="bms_real_reset"}')) document.location.href='{$pageURL}&action=stats&do=reset&sid={$sid}';">{lng p="bms_reset_stats"}</a>
+					<button type="submit" class="btn btn-link p-0 align-baseline" form="bmsResetStatsForm" onclick="return confirm('{lng p="bms_real_reset"}');">{lng p="bms_reset_stats"}</button>
 				</td>
 			</tr>
 		</table>
 	</form>
+
+	<form id="bmsResetStatsForm" method="post" action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=stats"}" style="display:none;" aria-hidden="true">
+		{csrffield}
+		<input type="hidden" name="do" value="reset" />
+	</form>
 </fieldset>
 	
 {foreach from=$stats item=stat}
-<fieldset>
-	<legend>{$stat.title}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{$stat.title}</legend>
 	
 	<center>
 		<table class="statsTable">

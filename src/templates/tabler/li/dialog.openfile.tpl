@@ -1,18 +1,21 @@
-{include file="li/dialog.head.tpl" title=$title dialogBodyClass="bm-dialog-openfile"}
+{include file="li/dialog.head.tpl" title=$title dialogBodyClass="bm-dialog-openfile bm-dialog-modal-sections"}
 
-<div class="bm-dialog-page">
-	<p class="text-secondary bm-dialog-intro mb-3">{$text}</p>
-
+<div class="bm-openfile-dialog">
 	<form action="{$formAction}" enctype="multipart/form-data" method="post" class="bm-dialog-form">
-		{include file="li/file.selector.tpl" name=$fieldName multiple=$multiple sid=$sid hasWebdisk=$hasWebdisk}
+		{csrffield}
+		<div class="modal-body">
+			<p class="text-secondary bm-dialog-intro mb-3">{$text}</p>
 
-		{if $bar}
-		<div class="mt-3">
-			{progressBar value=$bar.value max=$bar.max width=100}
+			{include file="li/file.selector.tpl" name=$fieldName multiple=$multiple sid=$sid hasWebdisk=$hasWebdisk}
+
+			{if $bar}
+			<div class="mt-3">
+				{progressBar value=$bar.value max=$bar.max width=100}
+			</div>
+			{/if}
 		</div>
-		{/if}
 
-		<div class="bm-dialog-actions">
+		<div class="modal-footer bm-openfile-dialog-footer">
 			<button type="button" class="btn btn-ghost-secondary" onclick="parent.hideOverlay()">{lng p="cancel"}</button>
 			<button type="submit" class="btn btn-primary">
 				<i class="ti ti-check icon" aria-hidden="true"></i>

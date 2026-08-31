@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="paymentmethods"}</legend>
 
-	<form action="prefs.payments.php?action=paymethods&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.payments.php' params="action=paymethods"}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -20,9 +21,9 @@
 							<td>{text value=$method.title}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.payments.php?action=paymethods&{if $method.enabled}dis{else}en{/if}able={$method.methodid}&sid={$sid}" title="{if $method.enabled}{lng p="disable"}{else}{lng p="enable"}{/if}" class="btn btn-sm">{if $method.enabled}<i class="fa-regular fa-square-check" title="{lng p="disable"}"></i>{else}<i class="fa-regular fa-square" title="{lng p="enable"}"></i>{/if}</a>
-									<a href="prefs.payments.php?action=paymethods&do=edit&methodid={$method.methodid}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="prefs.payments.php?action=paymethods&delete={$method.methodid}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.payments.php' params="action=paymethods&{if $method.enabled}dis{else}en{/if}able={$method.methodid}"}" title="{if $method.enabled}{lng p="disable"}{else}{lng p="enable"}{/if}" class="btn btn-sm">{if $method.enabled}<i class="fa-regular fa-square-check" title="{lng p="disable"}"></i>{else}<i class="fa-regular fa-square" title="{lng p="enable"}"></i>{/if}</a>
+									<a href="{sessionurl file='prefs.payments.php' params="action=paymethods&do=edit&methodid={$method.methodid}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='prefs.payments.php' params="action=paymethods&delete={$method.methodid}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -51,7 +52,8 @@
 <fieldset>
 	<legend>{lng p="addpaymethod"}</legend>
 
-	<form action="prefs.payments.php?action=paymethods&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.payments.php' params="action=paymethods&add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
 			<div class="col-sm-10">

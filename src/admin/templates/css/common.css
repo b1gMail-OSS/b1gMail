@@ -268,3 +268,27 @@ fieldset.collapsed .content {
     text-align: center;
     font-size: 9px;
 }
+
+/* Tabler/Bootstrap-5 input groups – see tabler-custom.css (loaded last for plugin overrides) */
+.page .input-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    width: 100%;
+}
+
+.page .input-group > .form-control,
+.page .input-group > .form-select,
+.page .input-group > .form-floating {
+    flex: 1 1 auto !important;
+    width: 1% !important;
+    min-width: 0 !important;
+}
+
+.page .input-group > .input-group-text,
+.page .input-group > .btn {
+    display: flex !important;
+    align-items: center;
+    flex-shrink: 0;
+    width: auto !important;
+}

@@ -1,4 +1,5 @@
-<form action="prefs.email.php?action=antispam&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.email.php' params="action=antispam&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
@@ -53,7 +54,7 @@
 					<div class="col-sm-8">
 						<div class="input-group">
 							<span class="input-group-text">{$bayesWordCount} {lng p="entries"}</span>
-							<input{if $bayesWordCount==0} disabled="disabled"{/if} class="btn" type="button" value=" {lng p="reset"} " onclick="if(confirm('{lng p="bayesresetq"}')) document.location.href='prefs.email.php?action=antispam&resetBayesDB=true&sid={$sid}';" />
+							<input{if $bayesWordCount==0} disabled="disabled"{/if} class="btn" type="button" value=" {lng p="reset"} " onclick="if(confirm('{lng p="bayesresetq"}')) document.location.href='prefs.email.php?action=antispam&resetBayesDB=true{$sessionUrlSuffix}';" />
 						</div>
 					</div>
 				</div>

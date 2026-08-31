@@ -1,4 +1,5 @@
-<form action="prefs.email.php?action=send&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.email.php' params="action=send&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="sendmethod"}</legend>
 

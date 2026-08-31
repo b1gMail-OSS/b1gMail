@@ -52,9 +52,19 @@ class BMCaptchaProvider_Default extends BMAbstractCaptchaProvider
 		global $lang_user;
 
 		$codeID = $this->Safecode->RequestCode();
+		if(function_exists('PublicRoutingActive') && PublicRoutingActive())
+			$captchaUrl = NliUrl('index.php', array('action' => 'codegen', 'id' => $codeID));
+		else
+		{
+			$captchaUrl = SessionUrl('index.php?action=codegen&id=' . $codeID);
+			if(strpos($captchaUrl, '://') === false && strpos($captchaUrl, '/') !== 0)
+				$captchaUrl = '/' . ltrim($captchaUrl, '/');
+		}
+		$randSep = (strpos($captchaUrl, '?') !== false) ? '&' : '?';
+
 		return '<input type="hidden" name="codeID" value="' . $codeID . '" />'
-			. '<img src="index.php?action=codegen&id=' . $codeID . '" style="cursor:pointer;" '
-			. 'onclick="this.src=\'index.php?action=codegen&id=' . $codeID . '&rand=\'+parseInt(Math.random()*10000);" '
+			. '<img src="' . HTMLFormat($captchaUrl) . '" style="cursor:pointer;" '
+			. 'onclick="this.src=\'' . addslashes($captchaUrl . $randSep . 'rand=') . '\'+parseInt(Math.random()*10000);" '
 			. 'data-toggle="tooltip" data-placement="bottom" title="' . $lang_user['notreadable'] . '" />';
 	}
 

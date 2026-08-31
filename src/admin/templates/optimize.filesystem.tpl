@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="tempfiles"}</legend>
 
-	<form action="optimize.php?action=filesystem&do=cleanupTempFiles&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='optimize.php' params="action=filesystem&do=cleanupTempFiles"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<p>{lng p="tempdesc"}</p>
 
 		<div class="row">

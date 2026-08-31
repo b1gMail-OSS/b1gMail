@@ -7,7 +7,11 @@
 	
 	<script>
 	<!--
-		initDnDUpload(EBID('wdDnDArea'), 'webdisk.php?sid='+currentSID+'&folder=0&action=dndUpload', function() {literal}{{/literal} document.location.href='webdisk.php?sid='+currentSID+'&folder=0'; {literal}}{/literal});
+	(function() {
+		var uploadUrl = bmAppendSession('{sessionurl file='webdisk.php' params='folder=0&action=dndUpload'|escape:'javascript'}');
+		var doneUrl = bmAppendSession('{sessionurl file='webdisk.php' params='folder=0'|escape:'javascript'}');
+		initDnDUpload(EBID('wdDnDArea'), uploadUrl, function() { document.location.href = doneUrl; });
+	})();
 	//-->
 	</script>
 </div>

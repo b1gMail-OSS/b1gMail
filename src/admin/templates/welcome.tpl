@@ -9,15 +9,15 @@
 					<table class="table table-vcenter table-striped card-table">
 						<tbody>
 						<tr>
-							<td style="width: 150px;"><a href="users.php?sid={$sid}">{lng p="users"}</a></td>
+							<td style="width: 150px;"><a href="{sessionurl file='users.php'}">{lng p="users"}</a></td>
 							<td>{$userCount}</td>
 						</tr>
 						<tr>
-							<td><a href="users.php?filter=true&statusNotActivated=true&allGroups=true&sid={$sid}">{lng p="notactivated"}</a></td>
+							<td><a href="{sessionurl file='users.php' params="filter=true&statusNotActivated=true&allGroups=true"}">{lng p="notactivated"}</a></td>
 							<td>{$notActivatedUserCount}</td>
 						</tr>
 						<tr>
-							<td><a href="users.php?filter=true&statusLocked=true&allGroups=true&sid={$sid}">{lng p="locked"}</a></td>
+							<td><a href="{sessionurl file='users.php' params="filter=true&statusLocked=true&allGroups=true"}">{lng p="locked"}</a></td>
 							<td>{$lockedUserCount}</td>
 						</tr>
 						</tbody>
@@ -134,7 +134,8 @@
 
 		<div class="card mb-3">
 			<div class="card-header"><strong>{lng p="notes"}</strong></div>
-			<form action="welcome.php?sid={$sid}&do=saveNotes" method="post" onsubmit="spin(this)">
+			<form action="{sessionurl file='welcome.php' params='do=saveNotes'}" method="post" onsubmit="spin(this)">
+				{csrffield}
 				<textarea class="form-control" style="border: 0px; min-height: 78px; padding-left: 24px;" name="notes" placeholder="{lng p="notes"}">{text value=$notes allowEmpty=true}</textarea>
 				<div class="card-footer text-end">
 					<input type="submit" value="{lng p="save"}" class="btn btn-sm btn-primary" />
@@ -193,7 +194,7 @@
 					<td class="align-top">{$notice.text}</td>
 					<td class="align-top" style="width: 50px;">
 						{if isset($notice.link)}
-							<a href="{$notice.link}sid={$sid}"><i class="fa-solid fa-square-arrow-up-right"></i></a>
+							<a href="{$notice.link}"><i class="fa-solid fa-square-arrow-up-right"></i></a>
 						{else}&nbsp;{/if}
 					</td>
 				</tr>

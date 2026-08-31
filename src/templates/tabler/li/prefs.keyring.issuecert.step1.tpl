@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=keyring&do=issuePrivateCertificate&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=keyring&do=issuePrivateCertificate'}">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<input type="hidden" name="step" value="2" />
 

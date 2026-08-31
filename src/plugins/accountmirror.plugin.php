@@ -25,6 +25,9 @@
  */
 class AccountMirror extends BMPlugin
 {
+	/** @var string Pretty-URL: /admin/plugin/accountmirror/ */
+	public $admin_route_slug = 'accountmirror';
+
 	function __construct()
 	{
 		$this->name					= 'Account mirror';
@@ -32,9 +35,9 @@ class AccountMirror extends BMPlugin
 		$this->web					= 'https://www.b1gmail.org/';
 		$this->mail					= 'info@b1gmail.org';
 		$this->version				= '1.4.1';
-		$this->designedfor			= '7.4.0';
+		$this->designedfor			= '7.5.0';
 		$this->type					= BMPLUGIN_DEFAULT;
-		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
+		$this->update_url			= '';
 		$this->website				= 'https://www.b1gmail.org/';
 
 		$this->admin_pages			= true;
@@ -65,6 +68,8 @@ class AccountMirror extends BMPlugin
 			$lang_admin['am_error_2']			= 'Der Ziel-Account darf nicht die Quelle einer anderen Spiegelmaßnahme sein.';
 			$lang_admin['am_error_3']			= 'Der Endzeitpunkt darf nicht vor dem Anfangszeitpunkt liegen.';
 			$lang_admin['am_reason']			= 'Grund';
+			$lang_admin['am_added']				= 'Die Spiegelung wurde hinzugef&uuml;gt.';
+			$lang_admin['am_deleted']			= 'Die Spiegelung wurde gel&ouml;scht.';
 		}
 		else
 		{
@@ -87,6 +92,152 @@ class AccountMirror extends BMPlugin
 			$lang_admin['am_error_2']			= 'The target account may not be the source account of another mirroring.';
 			$lang_admin['am_error_3']			= 'The end time may not be before the start time.';
 			$lang_admin['am_reason']			= 'Reason';
+			$lang_admin['am_added']				= 'Mirroring has been added.';
+			$lang_admin['am_deleted']			= 'Mirroring has been deleted.';
+		}
+	}
+
+	/**
+	 * @param array<string, mixed> $params
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _amAdminUrl(array $params = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name), $params);
+
+		if (function_exists('AdminSessionUrl')) {
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+		}
+
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach ($params as $key => $val) {
+			if ((string) $val === '') {
+				continue;
+			}
+			$url .= '&' . rawurlencode((string) $key) . '=' . rawurlencode((string) $val);
+		}
+		if ($trailingAmp) {
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
+		}
+
+		return $url;
+	}
+
+	/**
+	 * @return list<array{type: string, text: string}>
+	 */
+	protected function _amTakeFlashMsgs()
+	{
+		if (!isset($_SESSION['accountmirror_admin_msgs'])) {
+			return array();
+		}
+
+		$msgs = $_SESSION['accountmirror_admin_msgs'];
+		unset($_SESSION['accountmirror_admin_msgs']);
+
+		if (!is_array($msgs)) {
+			return array();
+		}
+
+		$out = array();
+		foreach ($msgs as $msg) {
+			if (!is_array($msg) || !isset($msg['type'], $msg['text'])) {
+				continue;
+			}
+			$out[] = array(
+				'type' => (string) $msg['type'],
+				'text' => (string) $msg['text'],
+			);
+		}
+
+		return $out;
+	}
+
+	protected function _amFlashAndRedirect($type, $text)
+	{
+		$_SESSION['accountmirror_admin_msgs'] = array(array(
+			'type' => (string) $type,
+			'text' => (string) $text,
+		));
+		SessionRedirect($this->_amAdminUrl(array(), false));
+		exit();
+	}
+
+	protected function _amRedirectLegacyGet()
+	{
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+			return;
+		}
+
+		if (isset($_REQUEST['delete']) || isset($_REQUEST['add']) || isset($_REQUEST['save'])) {
+			SessionRedirect($this->_amAdminUrl(array(), false));
+			exit();
+		}
+	}
+
+	protected function _amHandlePost()
+	{
+		global $db, $lang_admin;
+
+		if (isset($_POST['am_add'])) {
+			$userID = BMUser::GetID($_POST['email_source'] ?? '');
+			$mirrorTo = BMUser::GetID($_POST['email_dest'] ?? '');
+			$reason = trim((string) ($_POST['reason'] ?? ''));
+
+			if ($userID == 0 || $mirrorTo == 0) {
+				$this->_amFlashAndRedirect('danger', $lang_admin['am_error_0']);
+			}
+
+			if ($userID == $mirrorTo) {
+				$this->_amFlashAndRedirect('danger', $lang_admin['am_error_1']);
+			}
+
+			$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_accountmirror WHERE `userid`=?',
+				$mirrorTo);
+			list($count) = $res->FetchArray(MYSQLI_NUM);
+			$res->Free();
+
+			if ($count != 0) {
+				$this->_amFlashAndRedirect('danger', $lang_admin['am_error_2']);
+			}
+
+			$begin = isset($_POST['von_unlim']) ? 0 : SmartyDateTime('von');
+			$end = isset($_POST['bis_unlim']) ? 0 : SmartyDateTime('bis');
+
+			if ($end != 0 && $begin != 0 && $end < $begin) {
+				$this->_amFlashAndRedirect('danger', $lang_admin['am_error_3']);
+			}
+
+			$db->Query('INSERT INTO {pre}mod_accountmirror(`userid`,`mirror_to`,`begin`,`end`,`reason`) VALUES(?,?,?,?,?)',
+				$userID,
+				$mirrorTo,
+				$begin,
+				$end,
+				$reason);
+
+			$this->_amFlashAndRedirect('success', $lang_admin['am_added']);
+		}
+
+		if (isset($_POST['am_delete_id'])) {
+			$db->Query('DELETE FROM {pre}mod_accountmirror WHERE `mirrorid`=?',
+				(int) $_POST['am_delete_id']);
+			$this->_amFlashAndRedirect('success', $lang_admin['am_deleted']);
+		}
+
+		if (isset($_POST['executeMassAction']) && ($_POST['massAction'] ?? '') === 'delete') {
+			$mirrorIDs = array();
+			foreach ($_POST as $key => $val) {
+				if (substr((string) $key, 0, 10) === 'mirroring_') {
+					$mirrorIDs[] = (int) substr((string) $key, 10);
+				}
+			}
+
+			if (count($mirrorIDs) > 0) {
+				$db->Query('DELETE FROM {pre}mod_accountmirror WHERE `mirrorid` IN(' . implode(',', $mirrorIDs) . ')');
+				$this->_amFlashAndRedirect('success', $lang_admin['am_deleted']);
+			}
 		}
 	}
 
@@ -132,99 +283,32 @@ class AccountMirror extends BMPlugin
 
 	function AdminHandler()
 	{
-		global $tpl, $db, $lang_admin;
+		global $tpl, $db;
+
+		$this->_amRedirectLegacyGet();
+
+		if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+			CsrfEnforceOnPost();
+			$this->_amHandlePost();
+		}
 
 		$tabs = array(
 			0 => array(
-				'title'		=> 'Account Mirror',
+				'title'		=> $this->admin_page_title,
 				'icon'		=> '../plugins/templates/images/accountmirror_logo.png',
-				'link'		=> $this->_adminLink() . '&',
-				'active'	=> true
-			)
+				'link'		=> $this->_amAdminUrl(array(), true),
+				'active'	=> true,
+			),
 		);
 
-		$tpl->assign('pageURL', 	$this->_adminLink());
-		$tpl->assign('tabs', 		$tabs);
-
-		if(isset($_REQUEST['add']))
-		{
-			$userID = BMUser::GetID($_POST['email_source']);
-			$mirrorTo = BMUser::GetID($_POST['email_dest']);
-			$reason = !empty($_REQUEST['reason']) ? $_POST['reason']:'';
-
-			if($userID == 0 || $mirrorTo == 0)
-			{
-				$tpl->assign('msgText',		$lang_admin['am_error_0']);
-				$tpl->assign('msgTitle',	$lang_admin['error']);
-				$tpl->assign('msgIcon',		'error32');
-				$tpl->assign('page', 		'msg.tpl');
-				return;
-			}
-
-			if($userID == $mirrorTo)
-			{
-				$tpl->assign('msgText',		$lang_admin['am_error_1']);
-				$tpl->assign('msgTitle',	$lang_admin['error']);
-				$tpl->assign('msgIcon',		'error32');
-				$tpl->assign('page', 		'msg.tpl');
-				return;
-			}
-
-			$res = $db->Query('SELECT COUNT(*) FROM {pre}mod_accountmirror WHERE `userid`=?',
-				$mirrorTo);
-			list($count) = $res->FetchArray(MYSQLI_NUM);
-			$res->Free();
-
-			if($count != 0)
-			{
-				$tpl->assign('msgText',		$lang_admin['am_error_2']);
-				$tpl->assign('msgTitle',	$lang_admin['error']);
-				$tpl->assign('msgIcon',		'error32');
-				$tpl->assign('page', 		'msg.tpl');
-				return;
-			}
-
-			$begin = isset($_REQUEST['von_unlim']) ? 0 : SmartyDateTime('von');
-			$end = isset($_REQUEST['bis_unlim']) ? 0 : SmartyDateTime('bis');
-
-			if($end != 0 && $begin != 0 && $end < $begin)
-			{
-				$tpl->assign('msgText',		$lang_admin['am_error_3']);
-				$tpl->assign('msgTitle',	$lang_admin['error']);
-				$tpl->assign('msgIcon',		'error32');
-				$tpl->assign('page', 		'msg.tpl');
-				return;
-			}
-			$db->Query('INSERT INTO {pre}mod_accountmirror(`userid`,`mirror_to`,`begin`,`end`,`reason`) VALUES(?,?,?,?,?)',
-				$userID,
-				$mirrorTo,
-				$begin,
-				$end,
-				$reason);
-		}
-
-		if(isset($_REQUEST['delete']))
-		{
-			$db->Query('DELETE FROM {pre}mod_accountmirror WHERE `mirrorid`=?',
-				$_REQUEST['delete']);
-		}
-
-		if(isset($_REQUEST['executeMassAction']))
-		{
-			$mirrorIDs = array();
-			foreach($_POST as $key=>$val)
-				if(substr($key, 0, 10) == 'mirroring_')
-					$mirrorIDs[] = (int)substr($key, 10);
-
-			if(count($mirrorIDs) > 0)
-				if($_REQUEST['massAction'] == 'delete')
-					$db->Query('DELETE FROM {pre}mod_accountmirror WHERE `mirrorid` IN(' . implode(',', $mirrorIDs) . ')');
-		}
+		$tpl->assign('tabs', $tabs);
+		$tpl->assign('amPlugin', $this->internal_name);
+		$tpl->assign('pageURL', $this->_amAdminUrl(array(), true));
+		$tpl->assign('amMsgs', $this->_amTakeFlashMsgs());
 
 		$mirrorings = array();
 		$res = $db->Query('SELECT * FROM {pre}mod_accountmirror ORDER BY `mirrorid` ASC');
-		while($row = $res->FetchArray(MYSQLI_ASSOC))
-		{
+		while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
 			$source = _new('BMUser', array($row['userid']));
 			$dest = _new('BMUser', array($row['mirror_to']));
 
@@ -236,7 +320,7 @@ class AccountMirror extends BMPlugin
 		$res->Free();
 
 		$tpl->assign('mirrorings', $mirrorings);
-		$tpl->assign('page', $this->_templatePath('accountmirror.main.tpl'));
+		$tpl->assign('page', $this->_templatePath('accountmirror.acp.main.tpl'));
 	}
 
 	function AfterStoreMail($mailID, &$mail, &$mailbox)

@@ -194,7 +194,14 @@ class BMPushWeb
         $ctx = stream_context_create($opts);
         $response = @file_get_contents($url, false, $ctx);
         $status = 0;
-        if (isset($http_response_header[0]) && preg_match('/\d{3}/', $http_response_header[0], $m)) {
+        $responseHeaders = array();
+        if (function_exists('http_get_last_response_headers')) {
+            $headers = http_get_last_response_headers();
+            if (is_array($headers)) {
+                $responseHeaders = $headers;
+            }
+        }
+        if (isset($responseHeaders[0]) && preg_match('/\d{3}/', $responseHeaders[0], $m)) {
             $status = (int) $m[0];
         }
         $ok = $status >= 200 && $status < 300;

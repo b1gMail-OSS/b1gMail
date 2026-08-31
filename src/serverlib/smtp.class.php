@@ -209,6 +209,7 @@ class BMSMTP
             }
 
             // send RCPT TO
+            $accepted = 0;
             foreach ($to as $address) {
                 $rcptAdd = '';
 
@@ -218,12 +219,27 @@ class BMSMTP
                     $this->_dsIDs[$dsID] = $address;
                 }
 
-                fwrite($this->_sock, 'RCPT TO:<'.$address.'>'.$rcptAdd."\r\n")
-                    && $this->_getResponse();
+                if (!fwrite($this->_sock, 'RCPT TO:<'.$address.'>'.$rcptAdd."\r\n")) {
+                    continue;
+                }
+
+                $response = $this->_getResponse();
+                $code = substr($response, 0, 3);
+                if ($code == '250' || $code == '251') {
+                    ++$accepted;
+                } else {
+                    PutLog(sprintf('SMTP server <%s:%d> rejected recipient <%s>: %s',
+                        $this->_host,
+                        $this->_port,
+                        $address,
+                        trim($response)),
+                        PRIO_WARNING,
+                        __FILE__,
+                        __LINE__);
+                }
             }
 
-            // ok!
-            return true;
+            return $accepted > 0;
         } else {
             PutLog(sprintf('SMTP server <%s:%d> did not accept sender address <%s>',
                 $this->_host,

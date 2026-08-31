@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="recvrules"}</legend>
 
-	<form action="prefs.recvrules.php?sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.recvrules.php'}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -28,8 +29,8 @@
 							<td>{$rule.type}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.recvrules.php?do=edit&id={$rule.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="prefs.recvrules.php?delete={$rule.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.recvrules.php' params="do=edit&id={$rule.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='prefs.recvrules.php' params="delete={$rule.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -61,7 +62,8 @@
 		<fieldset>
 			<legend>{lng p="addrecvrule"}</legend>
 
-			<form action="prefs.recvrules.php?add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+			<form action="{sessionurl file='prefs.recvrules.php' params="add=true"}" method="post" onsubmit="spin(this)">
+				{csrffield}
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="field"}</label>
 					<div class="col-sm-8">
@@ -111,7 +113,8 @@
 		<fieldset>
 			<legend>{lng p="import"}</legend>
 
-			<form action="prefs.recvrules.php?import=true&sid={$sid}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+			<form action="{sessionurl file='prefs.recvrules.php' params="import=true"}" method="post" enctype="multipart/form-data" onsubmit="spin(this)">
+				{csrffield}
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-check-label">{lng p="rulefile"}</label>
 					<div class="col-sm-8">

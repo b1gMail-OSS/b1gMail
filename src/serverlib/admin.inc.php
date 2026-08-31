@@ -19,8 +19,28 @@
  *
  */
 
-define('ADMIN_MODE', true);
+if(!defined('ADMIN_MODE'))
+	define('ADMIN_MODE', true);
 include '../serverlib/init.inc.php';
+AdminIpWhitelistEnforce();
+
+// Resume session cookie from login (legacy sid mode keeps use_cookies=0 in init).
+SessionEnsureActiveWithCookie();
+
+$sessionApiActions = array('sessionStatus', 'sessionUnlock', 'sessionKeepAlive', 'sessionLock', 'sessionLockNow');
+if(isset($_REQUEST['action']) && in_array($_REQUEST['action'], $sessionApiActions, true))
+{
+	if(!RequestPrivileges(PRIVILEGES_ADMIN, true))
+		SessionJsonResponse(array(
+			'ok'             => false,
+			'sessionExpired' => true,
+			'redirect'       => SessionLoginRedirectUrl(true),
+		), 401);
+
+	SessionProcessLifecycleAfterAuth(PRIVILEGES_ADMIN, SessionAllowsLockedAccess());
+	SessionHandleAdminApi($_REQUEST['action']);
+	exit();
+}
 if (defined('TOOLBOX_SERVER')) {
     $toolbox_serverurl = TOOLBOX_SERVER;
 }
@@ -557,4 +577,83 @@ function DeleteUser($userID, $qAddAND = '')
         __LINE__);
 
     return true;
+}
+
+/**
+ * @return bool
+ */
+function AdminRequestIsPost()
+{
+	return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
+}
+
+/**
+ * Whitelist ORDER BY column names (never pass request values through).
+ *
+ * @param mixed $sortBy
+ * @param array $allowed
+ * @param string $default
+ * @return string
+ */
+function AdminSanitizeSortColumn($sortBy, $allowed, $default)
+{
+	$sortBy = (string)$sortBy;
+	return in_array($sortBy, $allowed, true) ? $sortBy : $default;
+}
+
+/**
+ * @param mixed $sortOrder
+ * @param string $default
+ * @return string
+ */
+function AdminSanitizeSortOrder($sortOrder, $default = 'asc')
+{
+	$sortOrder = strtolower((string)$sortOrder);
+	if($sortOrder === 'asc' || $sortOrder === 'desc')
+		return $sortOrder;
+	return ($default === 'desc') ? 'desc' : 'asc';
+}
+
+/**
+ * Bind admin session to password hash and admin id (HMAC, not User-Agent).
+ *
+ * @param string $passwordHash
+ * @param int $adminId
+ * @return string
+ */
+function AdminSessionAuthBind($passwordHash, $adminId)
+{
+	return hash_hmac('sha256', (string)$passwordHash . "\0" . (int)$adminId, B1GMAIL_SIGNKEY);
+}
+
+/**
+ * @param string $passwordHash
+ * @param int $adminId
+ * @param mixed $stored
+ * @return bool
+ */
+function AdminSessionAuthEquals($passwordHash, $adminId, $stored)
+{
+	if(!is_string($stored) || $stored === '')
+		return false;
+	return hash_equals(AdminSessionAuthBind($passwordHash, $adminId), $stored);
+}
+
+/**
+ * Relative ACP target after login. Rejects external and protocol-relative URLs.
+ *
+ * @param mixed $jump
+ * @param string $default
+ * @return string
+ */
+function AdminLoginJumpTarget($jump, $default = 'welcome.php')
+{
+	$jump = str_replace(array('\\', "\r", "\n", "\0"), '', trim((string)$jump));
+	if($jump === '' || strpos($jump, '..') !== false)
+		return $default;
+	if(preg_match('#^(https?:)?//#i', $jump))
+		return $default;
+	if(!preg_match('/^[a-zA-Z0-9_.-]+\.php(?:[?#][a-zA-Z0-9_&=%+.,~-]*)?$/', $jump))
+		return $default;
+	return $jump;
 }

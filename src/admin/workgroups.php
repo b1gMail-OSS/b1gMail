@@ -290,8 +290,7 @@ else if(EXTENDED_WORKGROUPS && $_REQUEST['action'] == 'folders')
 				}
 			}
 
-			header('Location: workgroups.php?action=folders&sid=' . session_id());
-			exit();
+			SessionRedirect('workgroups.php?action=folders');
 		}
 
 		// fetch workgroups

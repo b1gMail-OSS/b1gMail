@@ -6,7 +6,7 @@
 				<h3 class="alert-title mb-2">{lng p="sendmail"}</h3>
 				<div class="text-secondary">{lng p="mailsent"}</div>
 				<div class="mt-3">
-					<a href="email.php?sid={$sid}" class="btn btn-sm btn-ghost-secondary">
+					<a href="{sessionurl file='email.php'}" class="btn btn-sm btn-ghost-secondary">
 						<i class="ti ti-arrow-left icon icon-sm me-1" aria-hidden="true"></i>{lng p="back"}
 					</a>
 				</div>
@@ -24,7 +24,8 @@
 		<div class="card-body">
 			<p class="text-secondary mb-4">{lng p="addraddtext"}</p>
 
-			<form action="organizer.addressbook.php?action=quickAdd&sid={$sid}" method="post" onsubmit="return ajaxFormSubmit(this);" class="bm-mail-sent-address-form">
+			<form action="{sessionurl file='organizer.addressbook.php' params='action=quickAdd'}" method="post" onsubmit="return ajaxFormSubmit(this);" class="bm-mail-sent-address-form">
+				{csrffield}
 				{foreach from=$addrMails item=item key=i}
 				<div class="card bm-mail-sent-contact mb-3">
 					<div class="card-header py-2">

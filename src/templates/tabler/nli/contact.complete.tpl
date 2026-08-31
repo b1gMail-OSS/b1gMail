@@ -6,6 +6,7 @@
 </p>
 
 <form action="index.php?action=completeAddressBookEntry&contact={$contact.id}&key={$contact.invitationCode}" method="post">
+	{csrffield}
 		<input type="hidden" name="do" value="save" />
 
 		<div class="panel panel-default">

@@ -85,6 +85,10 @@ class BMHTTP
 	 */
 	private function createSocket()
 	{
+		$this->_fp = false;
+		$errNo = 0;
+		$errStr = '';
+
 		if($this->_protocol === 'https')
 		{
 			$streamContext = stream_context_create([
@@ -95,8 +99,7 @@ class BMHTTP
 					'cafile' => B1GMAIL_DIR . 'res/ca.pem'
 				]
 			]);
-			$errNo = $errStr = null;
-			$this->_fp = stream_socket_client('ssl://' . $this->_host . ':' . $this->_port,
+			$this->_fp = @stream_socket_client('ssl://' . $this->_host . ':' . $this->_port,
 				$errNo,
 				$errStr,
 				SOCKET_TIMEOUT,
@@ -105,9 +108,11 @@ class BMHTTP
 		}
 		else
 		{
-			$this->_fp = fsockopen($this->_host, $this->_port,
+			$this->_fp = @fsockopen($this->_host, $this->_port,
 				$errNo, $errStr, SOCKET_TIMEOUT);
 		}
+
+		return is_resource($this->_fp);
 	}
 
 	/**
@@ -125,12 +130,14 @@ class BMHTTP
 			.	$crlf;
 
 		// fetch
-		$this->createSocket();
+		if(!$this->createSocket())
+			return('');
 		fwrite($this->_fp, $req);
 		$response = '';
 		while(is_resource($this->_fp) && $this->_fp && !feof($this->_fp))
 			$response .= fread($this->_fp, 1024);
 		fclose($this->_fp);
+		$this->_fp = false;
 
 		// split header and body
 		$pos = strpos($response, $crlf . $crlf);
@@ -150,7 +157,7 @@ class BMHTTP
 		if(isset($headers['location']))
 		{
 			$http = new BMHTTP($headers['location']);
-			return($http->DownloadToString($http));
+			return($http->DownloadToString());
 		}
 		else
 		{
@@ -177,13 +184,15 @@ class BMHTTP
 			.	$crlf;
 
 		// fetch
-		$this->createSocket();
+		if(!$this->createSocket())
+			return('');
 		fwrite($this->_fp, $req);
 		fwrite($this->_fp, $postData);
 		$response = '';
 		while(is_resource($this->_fp) && $this->_fp && !feof($this->_fp))
 			$response .= fread($this->_fp, 1024);
 		fclose($this->_fp);
+		$this->_fp = false;
 
 		// split header and body
 		$pos = strpos($response, $crlf . $crlf);
@@ -202,7 +211,7 @@ class BMHTTP
 		// redirection?
 		if(isset($headers['location']))
 		{
-			$http = new BMHTTP_POST($headers['location']);
+			$http = new BMHTTP($headers['location']);
 			return($http->DownloadToString_POST($postData, $contentType, $headers));
 		}
 		else
@@ -230,8 +239,7 @@ class BMHTTP
 			.	$crlf;
 
 		// fetch
-		$this->createSocket();
-		if(!$this->_fp)
+		if(!$this->createSocket())
 			return(false);
 		fwrite($this->_fp, $req);
 		fwrite($this->_fp, $postData);

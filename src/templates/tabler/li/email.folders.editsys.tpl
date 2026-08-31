@@ -6,7 +6,8 @@
 		</div>
 	</div>
 
-	<form name="f1" method="post" action="email.folders.php?action=saveFolder&id={$folderID}&sid={$sid}" class="card bm-folder-admin-card bm-folder-edit-form">
+	<form name="f1" method="post" action="{sessionurl file='email.folders.php' params="action=saveFolder&id={$folderID}"}" class="card bm-folder-admin-card bm-folder-edit-form">
+		{csrffield}
 		<div class="card-body bm-folder-edit-body">
 			<div class="bm-folder-edit-fields">
 				<div class="bm-folder-edit-row">

@@ -2,8 +2,8 @@
 
 <div class="sidebarHeading">{lng p="email"}</div>
 <div class="contentMenuIcons">
-	<a href="email.compose.php?sid={$sid}">{include file="li/icon.tpl" faIcon="fa-envelope-o"} {lng p="sendmail"}</a><br />
-	<a href="email.folders.php?sid={$sid}">{include file="li/icon.tpl" faIcon="fa-folder-open-o"} {lng p="folderadmin"}</a><br />
+	<a href="{sessionurl file='email.compose.php'}">{include file="li/icon.tpl" faIcon="fa-envelope-o"} {lng p="sendmail"}</a><br />
+	<a href="{sessionurl file='email.folders.php'}">{include file="li/icon.tpl" faIcon="fa-folder-open-o"} {lng p="folderadmin"}</a><br />
 	{hook id="email.sidebar.tpl:email"}
 </div>
 

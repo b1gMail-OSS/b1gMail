@@ -11,7 +11,7 @@
 		<span class="text-secondary" aria-hidden="true">·</span>
 		<a href="{$mobileURL}" class="text-secondary">{lng p="mobilepda"}</a>
 		<span class="text-secondary" aria-hidden="true">·</span>
-		<a href="index.php?action=imprint" class="text-secondary">{lng p="contact"}</a>
+		<a href="{$nliUrlImprint}" class="text-secondary">{lng p="contact"}</a>
 		{foreach from=$pluginUserPages item=item}{if !$item.top|default:false}
 		<span class="text-secondary" aria-hidden="true">·</span>
 		<a href="{$item.link}" class="text-secondary">{$item.text}</a>

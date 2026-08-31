@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/todo.class.php');
 include('./serverlib/calendar.class.php');
 include('./serverlib/addressbook.class.php');
@@ -37,7 +38,7 @@ ModuleFunction('FileHandler',
  */
 if($groupRow['organizer']=='no')
 {
-	header('Location: start.php?sid=' . session_id());
+	SessionRedirect('start.php');
 	exit();
 }
 
@@ -394,7 +395,7 @@ else if($_REQUEST['action'] == 'createDate'
 		bmCalendarSendInvites($userRow, $thisUser, $row, $attendees);
 	}
 
-	header('Location: organizer.calendar.php?sid=' . session_id() . '&date=' . $row['startdate']);
+	SessionRedirect('organizer.calendar.php?date=' . $row['startdate']);
 	exit();
 }
 
@@ -405,7 +406,7 @@ else if($_REQUEST['action'] == 'deleteDate'
 		&& isset($_REQUEST['id']))
 {
 	$calendar->DeleteDate((int)$_REQUEST['id']);
-	header('Location: organizer.calendar.php?sid=' . session_id());
+	SessionRedirect('organizer.calendar.php');
 	exit();
 }
 
@@ -508,7 +509,7 @@ else if($_REQUEST['action'] == 'saveDate'
 
 	$jumpbackDate = isset($_REQUEST['jumpbackDate']) ? (int)$_REQUEST['jumpbackDate'] : $row['startdate'];
 
-	header('Location: organizer.calendar.php?sid=' . session_id() . '&date=' . $jumpbackDate);
+	SessionRedirect('organizer.calendar.php?date=' . $jumpbackDate);
 	exit();
 }
 ?>

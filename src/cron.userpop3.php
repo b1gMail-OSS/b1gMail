@@ -19,7 +19,9 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
+CronRequireAllowed();
 include('./serverlib/userpop3gateway.class.php');
 
 // try to prevent abortion

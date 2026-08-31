@@ -15,7 +15,8 @@
 <div class="alert alert-danger" role="alert">{lng p="invalidsmscode"}</div>
 {/if}
 
-<form name="f1" method="post" action="sms.php?do=validate&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='sms.php' params='do=validate'}">
+	{csrffield}
 <div class="card bm-sms-validate-card">
 	<div class="card-header">
 		<h3 class="card-title mb-0">{lng p="smsvalidation2"}</h3>
@@ -45,7 +46,7 @@
 			<div class="flex-fill min-w-0">
 				<h3 class="mb-2">{lng p="smsvalidation2"}</h3>
 				<p class="text-secondary mb-3">{lng p="pleasevalidate"}</p>
-				<button type="button" class="btn btn-primary" onclick="document.location.href='prefs.php?action=contact&sid={$sid}';">
+				<button type="button" class="btn btn-primary" onclick="document.location.href='{sessionurl file='prefs.php' params='action=contact'}';">
 					{lng p="ok"} &raquo;
 				</button>
 			</div>

@@ -67,7 +67,7 @@
 			<i id="mail_{$mailID}_nicon" class="{if !empty($mail.isCalendarInvite)}fa fa-calendar bm-mail-invite-icon{else}fa fa-envelope{if !($mail.flags&1)}-o{/if}{/if}"></i>
 		</td>
 		<td draggable="false" id="mail_{$mailID}_ncol2" class="narrowRow" nowrap="nowrap">
-			<a draggable="false" href="email.read.php?id={$mailID}&sid={$sid}" onclick="return(false)"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>
+			<a draggable="false" href="{sessionurl file='email.read.php' params="id={$mailID}"}" onclick="return(false)"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>
 				<div id="mail_{$mailID}_nspan1" class="date{if $mail.flags&1} unread{/if}"{if $mail.flags&8} style="text-decoration:line-through;"{/if}>{date timestamp=$mail.timestamp nice=true}</div>
 				<div id="mail_{$mailID}_nspan2" class="sender{if $mail.flags&1} unread{/if}">{if $folderID!=-2}{if $mail.from_name}{text value=$mail.from_name}{else}{if $mail.from_mail}{email value=$mail.from_mail}{else}-{/if}{/if}{else}{if $mail.to_name}{text value=$mail.to_name}{else}{if $mail.to_mail}{email value=$mail.to_mail}{else}-{/if}{/if}{/if}</div>
 				<div class="subject">

@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="coupons"}</legend>
 
-	<form action="prefs.coupons.php?sid={$sid}" method="post" name="f1" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.coupons.php'}" method="post" name="f1" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -29,8 +30,8 @@
 							<td>{$coupon.used} / {if $coupon.anzahl==-1}({lng p="unlimited"}){else}{$coupon.anzahl}{/if}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.coupons.php?do=edit&id={$coupon.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="prefs.coupons.php?delete={$coupon.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='prefs.coupons.php' params="do=edit&id={$coupon.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='prefs.coupons.php' params="delete={$coupon.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -59,7 +60,8 @@
 <fieldset>
 	<legend>{lng p="addcoupon"}</legend>
 
-	<form action="prefs.coupons.php?add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.coupons.php' params="add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="codes"}</label>
 			<div class="col-sm-10">

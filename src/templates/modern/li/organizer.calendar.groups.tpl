@@ -6,6 +6,7 @@
 </div>
 
 <form name="f1" method="post" action="organizer.calendar.php?action=groups&do=action&sid={$sid}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar">
 <table class="bigTable">

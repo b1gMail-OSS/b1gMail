@@ -1,4 +1,5 @@
-<form action="prefs.common.php?action=signup&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.common.php' params="action=signup&save=true"}" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
@@ -152,6 +153,18 @@
 						<td style="text-align:center;"><input type="radio" name="f_anrede" value="n"{if $bm_prefs.f_anrede=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
+						<td>{lng p="company"}</td>
+						<td style="text-align:center;"><input type="radio" name="f_company" value="p"{if $bm_prefs.f_company=='p'} checked="checked"{/if} /></td>
+						<td style="text-align:center;"><input type="radio" name="f_company" value="v"{if $bm_prefs.f_company=='v'} checked="checked"{/if} /></td>
+						<td style="text-align:center;"><input type="radio" name="f_company" value="n"{if $bm_prefs.f_company=='n'} checked="checked"{/if} /></td>
+					</tr>
+					<tr>
+						<td>{lng p="taxid"}</td>
+						<td style="text-align:center;"><input type="radio" name="f_taxid" value="p"{if $bm_prefs.f_taxid=='p'} checked="checked"{/if} /></td>
+						<td style="text-align:center;"><input type="radio" name="f_taxid" value="v"{if $bm_prefs.f_taxid=='v'} checked="checked"{/if} /></td>
+						<td style="text-align:center;"><input type="radio" name="f_taxid" value="n"{if $bm_prefs.f_taxid=='n'} checked="checked"{/if} /></td>
+					</tr>
+					<tr>
 						<td>{lng p="address"}</td>
 						<td style="text-align:center;"><input type="radio" name="f_strasse" value="p"{if $bm_prefs.f_strasse=='p'} checked="checked"{/if} /></td>
 						<td style="text-align:center;"><input type="radio" name="f_strasse" value="v"{if $bm_prefs.f_strasse=='v'} checked="checked"{/if} /></td>
@@ -191,7 +204,7 @@
 				</table>
 			</div>
 			<div class="card-footer text-end">
-				{lng p="customfieldsat"} <a href="prefs.profilefields.php?sid={$sid}">&raquo; {lng p="profilefields"}</a>.
+				{lng p="customfieldsat"} <a href="{sessionurl file='prefs.profilefields.php'}">&raquo; {lng p="profilefields"}</a>.
 			</div>
 		</div>
 	</fieldset>

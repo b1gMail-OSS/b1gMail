@@ -1,86 +1,83 @@
 <fieldset>
 	<legend>{lng p="modfax_fax"}</legend>
-
-	<table width="100%">
-		<tr>
-			<td rowspan="2" width="40" align="center" valign="top"><img src="../plugins/templates/images/modfax_logo.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1" width="24%">{lng p="version"}:</td>
-			<td class="td2" width="26%">{$version}</td>
-
-			<td rowspan="2" colspan="3">&nbsp;</td>
-		</tr>
-	</table>
+	<p class="text-secondary mb-0">{lng p="version"}: <strong>{$version|escape}</strong></p>
 </fieldset>
 
 <fieldset>
 	<legend>{lng p="overview"}</legend>
-
-	<table width="100%">
-		<tr>
-			<td rowspan="3" width="40" align="center" valign="top"><img src="../plugins/templates/images/modfax_fax32.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1">{lng p="modfax_faxtoday"}:</td>
-			<td class="td2" width="15%">{$faxToday}</td>
-
-			<td rowspan="3" width="40" align="center" valign="top"><img src="../plugins/templates/images/modfax_faxerr32.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1">{lng p="modfax_errtoday"}:</td>
-			<td class="td2" width="15%">{$errToday}</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="modfax_faxmonth"}:</td>
-			<td class="td2" width="15%">{$faxMonth}</td>
-
-			<td class="td1">{lng p="modfax_errmonth"}:</td>
-			<td class="td2" width="15%">{$errMonth}</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="modfax_faxall"}:</td>
-			<td class="td2" width="15%">{$faxAll}</td>
-
-			<td class="td1">{lng p="modfax_errall"}:</td>
-			<td class="td2" width="15%">{$errAll}</td>
-		</tr>
-
-		<tr>
-			<td colspan="6">&nbsp;</td>
-		</tr>
-		<tr>
-			<td rowspan="3" width="40" align="center" valign="top"><img src="../plugins/templates/images/modfax_credits32.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1">{lng p="modfax_creditstoday"}:</td>
-			<td class="td2" width="15%">{$creditsToday}</td>
-
-			<td rowspan="3" width="40" align="center" valign="top"><img src="../plugins/templates/images/modfax_refunds32.png" border="0" alt="" width="32" heigh="32" /></td>
-			<td class="td1">{lng p="modfax_refundstoday"}:</td>
-			<td class="td2" width="15%">{$refundsToday}</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="modfax_creditsmonth"}:</td>
-			<td class="td2">{$creditsMonth}</td>
-
-			<td class="td1">{lng p="modfax_refundsmonth"}:</td>
-			<td class="td2" width="15%">{$refundsMonth}</td>
-		</tr>
-		<tr>
-			<td class="td1">{lng p="modfax_creditsall"}:</td>
-			<td class="td2">{$creditsAll}</td>
-
-			<td class="td1">{lng p="modfax_refundsall"}:</td>
-			<td class="td2" width="15%">{$refundsAll}</td>
-		</tr>
-	</table>
+	<div class="row g-3">
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title"><i class="ti ti-printer me-1"></i> {lng p="modfax_faxtoday"} / {lng p="modfax_faxmonth"} / {lng p="modfax_faxall"}</h3>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-vcenter table-striped card-table mb-0">
+						<tr><td class="text-secondary">{lng p="modfax_faxtoday"}</td><td class="text-end"><strong>{$faxToday}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_faxmonth"}</td><td class="text-end"><strong>{$faxMonth}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_faxall"}</td><td class="text-end"><strong>{$faxAll}</strong></td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title"><i class="ti ti-alert-triangle me-1"></i> {lng p="modfax_errtoday"} / {lng p="modfax_errmonth"} / {lng p="modfax_errall"}</h3>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-vcenter table-striped card-table mb-0">
+						<tr><td class="text-secondary">{lng p="modfax_errtoday"}</td><td class="text-end"><strong>{$errToday}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_errmonth"}</td><td class="text-end"><strong>{$errMonth}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_errall"}</td><td class="text-end"><strong>{$errAll}</strong></td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title"><i class="ti ti-coins me-1"></i> {lng p="credits"}</h3>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-vcenter table-striped card-table mb-0">
+						<tr><td class="text-secondary">{lng p="modfax_creditstoday"}</td><td class="text-end"><strong>{$creditsToday}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_creditsmonth"}</td><td class="text-end"><strong>{$creditsMonth}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_creditsall"}</td><td class="text-end"><strong>{$creditsAll}</strong></td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title"><i class="ti ti-receipt-refund me-1"></i> {lng p="modfax_refundstoday"}</h3>
+				</div>
+				<div class="table-responsive">
+					<table class="table table-vcenter table-striped card-table mb-0">
+						<tr><td class="text-secondary">{lng p="modfax_refundstoday"}</td><td class="text-end"><strong>{$refundsToday}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_refundsmonth"}</td><td class="text-end"><strong>{$refundsMonth}</strong></td></tr>
+						<tr><td class="text-secondary">{lng p="modfax_refundsall"}</td><td class="text-end"><strong>{$refundsAll}</strong></td></tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 </fieldset>
 
+{if $notices|@count > 0}
 <fieldset>
 	<legend>{lng p="notices"}</legend>
-
-	<table width="100%" id="noticeTable">
-	{foreach from=$notices item=notice}
-		<tr>
-			<td width="20" valign="top"><img src="{$tpldir}images/{$notice.type}.png" width="16" height="16" border="0" alt="" align="absmiddle" /></td>
-			<td valign="top">{$notice.text}</td>
-			<td align="right" valign="top" width="20">{if $notice.link}<a href="{$notice.link}sid={$sid}"><img src="{$tpldir}images/go.png" border="0" alt="" width="16" height="16" /></a>{else}&nbsp;{/if}</td>
-		</tr>
-	{/foreach}
-	</table>
+	<div class="card">
+		<div class="list-group list-group-flush">
+		{foreach from=$notices item=notice}
+			<div class="list-group-item d-flex align-items-start gap-2">
+				{if $notice.type == 'error'}<i class="ti ti-alert-circle text-danger"></i>{else}<i class="ti ti-info-circle text-info"></i>{/if}
+				<div class="flex-fill">{$notice.text}</div>
+				{if $notice.link}<a href="{$notice.link}{$sessionUrlSuffixHtml}" class="btn btn-sm btn-ghost-primary"><i class="ti ti-external-link"></i></a>{/if}
+			</div>
+		{/foreach}
+		</div>
+	</div>
 </fieldset>
-
-<!--<script src="https://service.b1gmail.org/fax/updates/?do=noticeJS&version={$version}&lang={$lang}"></script>-->
+{/if}

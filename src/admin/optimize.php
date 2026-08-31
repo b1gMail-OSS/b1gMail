@@ -36,13 +36,13 @@ $tabs = array(
 	1 => array(
 		'title'		=> $lang_admin['filesystem'],
 		'relIcon'	=> 'tempfiles.png',
-		'link'		=> 'optimize.php?action=filesystem&',
+		'link'		=> 'optimize.php?action=filesystem',
 		'active'	=> $_REQUEST['action'] == 'filesystem'
 	),
 	2 => array(
 		'title'		=> $lang_admin['cache'],
 		'relIcon'	=> 'cache.png',
-		'link'		=> 'optimize.php?action=cache&',
+		'link'		=> 'optimize.php?action=cache',
 		'active'	=> $_REQUEST['action'] == 'cache'
 	)
 );

@@ -8,7 +8,7 @@
 			{if $templatePrefs.showUserEmail}
 			<span class="bm-dashboard-header-email text-secondary">{$_userEmail}</span>
 			{/if}
-			<a href="start.php?action=customize&amp;sid={$sid}" class="btn btn-sm btn-outline-primary">
+			<a href="{sessionurl file='start.php' params='action=customize'}" class="btn btn-sm btn-outline-primary">
 				<i class="ti ti-layout-grid-add icon"></i>
 				{lng p="customize"}
 			</a>

@@ -32,12 +32,12 @@
 		</td>
 		<td class="listTableTDActive bm-prefs-col-date">{date timestamp=$order.created dayonly=true}</td>
 		<td class="{$class} bm-prefs-col-amount">{text value=$order.amountText}</td>
-		<td class="{$class} bm-prefs-col-invoice">{if $order.invoiceAvailable}<a href="javascript:void(0);" onclick="openOverlay('prefs.php?action=orders&do=showInvoice&id={$order.orderid}&sid={$sid}','{lng p="invoice"}: {$order.invoiceNo}',600,550)" class="btn btn-outline-secondary btn-icon" title="{lng p="invoice"}" aria-label="{lng p="invoice"}"><i class="ti ti-file-text icon" aria-hidden="true"></i></a>{else}<span class="text-secondary">–</span>{/if}</td>
+		<td class="{$class} bm-prefs-col-invoice">{if $order.invoiceAvailable}<a href="javascript:void(0);" onclick="openOverlay('{sessionurl file='prefs.php' params="action=orders&do=showInvoice&id={$order.orderid}"}','{lng p="invoice"}: {$order.invoiceNo}',600,550)" class="btn btn-outline-secondary btn-icon" title="{lng p="invoice"}" aria-label="{lng p="invoice"}"><i class="ti ti-file-text icon" aria-hidden="true"></i></a>{else}<span class="text-secondary">–</span>{/if}</td>
 		<td class="{$class} bm-prefs-col-completed text-end">
 			{if $order.status==0}
 			<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="prefs.php?action=orders&do=initiatePayment&id={$order.orderid}&sid={$sid}" class="btn btn-outline-secondary btn-icon" title="{lng p="pay"}" aria-label="{lng p="pay"}"><i class="ti ti-credit-card icon" aria-hidden="true"></i></a>
-				<a href="prefs.php?action=orders&do=deleteOrder&id={$order.orderid}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}" onclick="return(confirm('{lng p="realdel_order"}'));"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='prefs.php' params="action=orders&do=initiatePayment&id={$order.orderid}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="pay"}" aria-label="{lng p="pay"}"><i class="ti ti-credit-card icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='prefs.php' params="action=orders&do=deleteOrder&id={$order.orderid}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}" onclick="return(confirm('{lng p="realdel_order"}'));"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 			{else}
 			<i class="ti ti-circle-check icon text-success" aria-hidden="true" title="{lng p="completed"}"></i>

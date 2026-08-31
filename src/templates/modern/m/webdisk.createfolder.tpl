@@ -4,6 +4,7 @@
 
 <div data-role="content">
 	<form action="webdisk.php?do=createFolder&folder={$folderID}&sid={$sid}" method="post">
+		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="title">{lng p="title"}:</label>
 			<input type="text" name="title" id="title" value=""  />

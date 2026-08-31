@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="webdiskicons"}</legend>
 
-	<form action="prefs.extensions.php?sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.extensions.php'}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -22,8 +23,8 @@
 							<td>{text value=$ext.ctype}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.extensions.php?do=edit&id={$ext.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									{if $ext.ext[0]!='.'}<a href="prefs.extensions.php?delete={$ext.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
+									<a href="{sessionurl file='prefs.extensions.php' params="do=edit&id={$ext.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									{if $ext.ext[0]!='.'}<a href="{sessionurl file='prefs.extensions.php' params="delete={$ext.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
 								</div>
 							</td>
 						</tr>
@@ -52,7 +53,8 @@
 <fieldset>
 	<legend>{lng p="addwebdiskicon"}</legend>
 	
-	<form action="prefs.extensions.php?add=true&sid={$sid}" method="post" onsubmit="spin(this)" enctype="multipart/form-data">
+	<form action="{sessionurl file='prefs.extensions.php' params="add=true"}" method="post" onsubmit="spin(this)" enctype="multipart/form-data">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="filetypes"}</label>
 			<div class="col-sm-10">

@@ -1,7 +1,8 @@
 {hook id="webdisk.folderbar.tpl:head"}
 
 <div class="sidebarHeading">{lng p="createfolder"}</div>
-<form action="webdisk.php?action=createFolder&folder={$folderID}&sid={$sid}" method="post" onsubmit="return webdiskCreateFolder();" class="bm-webdisk-create-folder-form">
+<form action="webdisk.php?action=createFolder&folder={$folderID}{$sessionUrlSuffix}" method="post" onsubmit="return webdiskCreateFolder();" class="bm-webdisk-create-folder-form">
+	{csrffield}
 	<div class="input-group input-group-sm">
 		<span class="input-group-text"><i class="ti ti-folder-plus icon icon-sm" aria-hidden="true"></i></span>
 		<input type="text" class="form-control" name="folderName" id="folderName" placeholder="{lng p="createfolder"}" aria-label="{lng p="createfolder"}" autocomplete="off" />

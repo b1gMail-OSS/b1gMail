@@ -7,7 +7,8 @@
 		</div>
 	</div>
 	
-	<form name="f1" method="post" action="prefs.php?action=keyring&do=action&sid={$sid}">
+	<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=keyring&do=action'}">
+		{csrffield}
 	<div class="scrollContainer withBottomBar bm-prefs-body bm-prefs-list-body">
 	<div class="card bm-prefs-table-card">
 	<div class="table-responsive bm-prefs-table-wrap">
@@ -15,15 +16,15 @@
 			<tr>
 				<th class="bm-prefs-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allCheckerOwn" onclick="checkAll(this.checked, document.forms.f1, 'cert');" aria-label="{lng p="selaction"}" /></label></th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=cn&order={$sortOrderInv}">{lng p="name"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=cn&order={$sortOrderInv}"}">{lng p="name"}</a>
 					{if $sortColumn=='cn'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th class="bm-prefs-col-email">
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=email&order={$sortOrderInv}">{lng p="email"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=email&order={$sortOrderInv}"}">{lng p="email"}</a>
 					{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th class="bm-prefs-col-validto">
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=validto&order={$sortOrderInv}">{lng p="validto"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=validto&order={$sortOrderInv}"}">{lng p="validto"}</a>
 					{if $sortColumn=='validto'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th class="bm-prefs-col-actions">&nbsp;</th>
@@ -43,7 +44,7 @@
 					<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 						<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');" class="btn btn-outline-secondary btn-icon" title="{lng p="view"}" aria-label="{lng p="view"}"><i class="ti ti-eye icon" aria-hidden="true"></i></a>
 						{if $pkcs12Support}<a href="javascript:void(0);" onclick="exportPrivateCert('{$cert.hash}');" class="btn btn-outline-secondary btn-icon" title="{lng p="download"}" aria-label="{lng p="download"}"><i class="ti ti-download icon" aria-hidden="true"></i></a>{/if}
-						<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=keyring&do=delete&type=2&hash={$cert.hash}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=2&hash={$cert.hash}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 					</div>
 				</td>
 			</tr>
@@ -86,7 +87,7 @@
 				<i class="ti ti-upload icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="addcert"}
 			</button>{/if}
-			{if $issueCerts}<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='prefs.php?action=keyring&do=issuePrivateCertificate&sid={$sid}';">
+			{if $issueCerts}<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='prefs.php' params='action=keyring&do=issuePrivateCertificate'}';">
 				<i class="ti ti-certificate icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="requestcert"}
 			</button>{/if}
@@ -103,7 +104,8 @@
 		</div>
 	</div>
 	
-	<form name="f2" method="post" action="prefs.php?action=keyring&do=action&sid={$sid}">
+	<form name="f2" method="post" action="{sessionurl file='prefs.php' params='action=keyring&do=action'}">
+		{csrffield}
 	<div class="scrollContainer withBottomBar bm-prefs-body bm-prefs-list-body">
 	<div class="card bm-prefs-table-card">
 	<div class="table-responsive bm-prefs-table-wrap">
@@ -111,15 +113,15 @@
 			<tr>
 				<th class="bm-prefs-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allCheckerPublic" onclick="checkAll(this.checked, document.forms.f2, 'cert');" aria-label="{lng p="selaction"}" /></label></th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=cn&order={$sortOrderInv}">{lng p="name"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=cn&order={$sortOrderInv}"}">{lng p="name"}</a>
 					{if $sortColumn=='cn'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th class="bm-prefs-col-email">
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=email&order={$sortOrderInv}">{lng p="email"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=email&order={$sortOrderInv}"}">{lng p="email"}</a>
 					{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th class="bm-prefs-col-validto">
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=validto&order={$sortOrderInv}">{lng p="validto"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=validto&order={$sortOrderInv}"}">{lng p="validto"}</a>
 					{if $sortColumn=='validto'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th class="bm-prefs-col-actions">&nbsp;</th>
@@ -138,7 +140,7 @@
 				<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
 					<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 						<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');" class="btn btn-outline-secondary btn-icon" title="{lng p="view"}" aria-label="{lng p="view"}"><i class="ti ti-eye icon" aria-hidden="true"></i></a>
-						<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=keyring&do=delete&type=1&hash={$cert.hash}&sid={$sid}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=1&hash={$cert.hash}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 					</div>
 				</td>
 			</tr>

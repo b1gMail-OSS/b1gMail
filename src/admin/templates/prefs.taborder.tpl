@@ -1,5 +1,6 @@
 <link href="{$selfurl}clientlib/fontawesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
-<form action="prefs.common.php?action=taborder&save=true&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+<form action="{sessionurl file='prefs.common.php' params="action=taborder&save=true"}" name="f1" method="post" onsubmit="spin(this)">
+	{csrffield}
 	<fieldset>
 		<legend>{lng p="taborder"}</legend>
 

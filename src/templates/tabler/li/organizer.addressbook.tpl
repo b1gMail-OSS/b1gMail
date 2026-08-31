@@ -7,7 +7,7 @@
 		<div class="right bm-organizer-header-actions">
 			<div class="d-flex flex-wrap align-items-center gap-2">
 				<label class="small text-secondary mb-0" for="abLetterFilter">{lng p="view"}:</label>
-				<select class="form-select form-select-sm" id="abLetterFilter" style="width:auto;min-width:4rem;" onchange="document.location.href='organizer.addressbook.php?sid='+currentSID+'&group={$currentGroup}&letter='+this.value;">
+				<select class="form-select form-select-sm" id="abLetterFilter" style="width:auto;min-width:4rem;" onchange="document.location.href=bmAppendSession('organizer.addressbook.php?group={$currentGroup}&letter='+this.value);">
 					<option value="">{lng p="all"}</option>
 					{foreach from=$alpha key=key item=letter}
 					<option value="{$key}"{if $smarty.request.letter==$key} selected="selected"{/if}>{$letter}</option>
@@ -59,7 +59,7 @@
 					<tr class="bm-organizer-section-row">
 						<td class="bm-organizer-task-gutter">
 							<button type="button" class="bm-organizer-section-toggle bm-organizer-section-toggle-icon" onclick="toggleGroup('{$letter}','addr{$letter}');" aria-label="{$letter}">
-								<i class="ti ti-chevron-{if $smarty.cookies.toggleGroup.$groupID=='closed'}right{else}down{/if} icon icon-sm" id="groupImage_{$letter}" aria-hidden="true"></i>
+								<i class="ti ti-chevron-{if isset($smarty.cookies.toggleGroup.$groupID) && $smarty.cookies.toggleGroup.$groupID=='closed'}right{else}down{/if} icon icon-sm" id="groupImage_{$letter}" aria-hidden="true"></i>
 							</button>
 						</td>
 						<td>
@@ -70,7 +70,7 @@
 					</tr>
 					</tbody>
 
-					<tbody id="group_{$letter}" style="display:{if $smarty.cookies.toggleGroup.$groupID=='closed'}none{/if};">
+					<tbody id="group_{$letter}" style="display:{if isset($smarty.cookies.toggleGroup.$groupID) && $smarty.cookies.toggleGroup.$groupID=='closed'}none{/if};">
 
 					{foreach from=$addresses key=addressID item=address}
 					<tr id="addr_{$addressID}">
@@ -99,7 +99,8 @@
 				</table>
 			</div>
 
-			<form name="f1" method="post" action="organizer.addressbook.php?action=action&sid={$sid}" onsubmit="transferSelectedAddresses();">
+			<form name="f1" method="post" action="{sessionurl file='organizer.addressbook.php' params='action=action'}" onsubmit="transferSelectedAddresses();">
+				{csrffield}
 			<input name="addrIDs" id="addrIDs" value="" type="hidden" />
 
 			<div id="contentFooter" class="contentFooter bm-organizer-footer">
@@ -125,7 +126,7 @@
 				</div>
 
 				<div class="right bm-organizer-footer-tools">
-					<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='organizer.addressbook.php?action=addContact&sid={$sid}';">
+					<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params='action=addContact'}';">
 						<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 						{lng p="add"}
 					</button>

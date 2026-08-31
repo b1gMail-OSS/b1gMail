@@ -307,6 +307,33 @@ class BMPush
     }
 
     /**
+     * Pause push delivery by removing server subscriptions (e.g. on logout).
+     * Browser subscription and user prefs stay intact for re-activation on login.
+     */
+    public static function unsubscribeAll($area, $targetId)
+    {
+        global $db;
+
+        self::ensureSchema();
+
+        $targetId = (int) $targetId;
+        if ($targetId <= 0) {
+            return false;
+        }
+
+        $db->Query(
+            'DELETE FROM {pre}push_subscriptions WHERE `area`=? AND '
+            .($area == self::AREA_USER ? '`userid`=?' : '`adminid`=?'),
+            $area,
+            $targetId
+        );
+
+        ModuleFunction('OnPushUnsubscribeAll', [$area, $targetId]);
+
+        return true;
+    }
+
+    /**
      * Send push to one user/admin (all subscriptions).
      *
      * @param array $message keys: area, targetId, type, title, body, url, icon, tag
@@ -377,6 +404,16 @@ class BMPush
             return ['sent' => 0, 'failed' => 0, 'removed' => 0, 'reason' => 'prefs_blocked'];
         }
 
+        $pushSessionState = $area == self::AREA_USER
+            ? SessionUserGetPushSessionState($targetId)
+            : ($area == self::AREA_ADMIN ? SessionAdminGetPushSessionState($targetId) : 'none');
+
+        if ($pushSessionState === 'none') {
+            self::logPushResult($targetId, $type, 0, 0, self::countSubscriptions($area, $targetId), 'no_active_session');
+
+            return ['sent' => 0, 'failed' => 0, 'removed' => 0, 'reason' => 'no_active_session'];
+        }
+
         $payload = [
             'title' => isset($message['title']) ? self::plainText($message['title']) : '',
             'body' => isset($message['body']) ? self::plainText($message['body']) : '',
@@ -387,6 +424,10 @@ class BMPush
             'url' => isset($message['url']) ? $message['url'] : '',
             'type' => $type,
         ];
+
+        if ($pushSessionState === 'locked') {
+            self::applyLockedScreenPushPrivacy($payload, $type, $area);
+        }
 
         $abort = false;
         ModuleFunction('OnBeforePushSend', [&$payload, &$message, &$abort]);
@@ -898,24 +939,113 @@ class BMPush
         return $notifyEmail == 'yes';
     }
 
-    public static function adminAllowsType($adminId, $type)
+    public static function getAdminPushPrefs($adminId)
     {
         global $db;
 
-        $res = $db->Query('SELECT push_prefs FROM {pre}admins WHERE `adminid`=?', (int) $adminId);
-        if ($res->RowCount() != 1) {
-            $res->Free();
+        self::ensureAdminPushPrefsColumn();
 
-            return true;
+        $prefs = [];
+        $res = $db->Query('SELECT push_prefs FROM {pre}admins WHERE `adminid`=?', (int) $adminId);
+        if ($res->RowCount() == 1) {
+            list($raw) = $res->FetchArray(MYSQLI_NUM);
+            $decoded = @unserialize($raw);
+            if (is_array($decoded)) {
+                $prefs = $decoded;
+            }
         }
-        list($raw) = $res->FetchArray(MYSQLI_NUM);
         $res->Free();
 
-        $prefs = @unserialize($raw);
-        if (!is_array($prefs) || !isset($prefs['enabled']) || !$prefs['enabled']) {
+        return self::normalizeAdminPushPrefs($prefs);
+    }
+
+    /**
+     * Merge admin push prefs; new plugin types default to enabled.
+     */
+    public static function normalizeAdminPushPrefs($prefs)
+    {
+        if (!is_array($prefs)) {
+            $prefs = [];
+        }
+
+        if (!isset($prefs['types']) || !is_array($prefs['types'])) {
+            return $prefs;
+        }
+
+        $normalized = [];
+        foreach (self::getPushTypes(self::AREA_ADMIN) as $typeKey => $label) {
+            $postKey = str_replace('.', '_', $typeKey);
+            if (array_key_exists($typeKey, $prefs['types'])) {
+                $normalized[$typeKey] = !empty($prefs['types'][$typeKey]);
+            } elseif (array_key_exists($postKey, $prefs['types'])) {
+                $normalized[$typeKey] = !empty($prefs['types'][$postKey]);
+            } else {
+                $normalized[$typeKey] = true;
+            }
+        }
+        $prefs['types'] = $normalized;
+
+        return $prefs;
+    }
+
+    public static function setAdminPushPrefs($adminId, $prefs)
+    {
+        global $db;
+
+        self::ensureAdminPushPrefsColumn();
+
+        $existing = self::getAdminPushPrefs($adminId);
+        if (!is_array($prefs)) {
+            $prefs = [];
+        }
+        $merged = array_merge($existing, $prefs);
+        $merged = self::normalizeAdminPushPrefs($merged);
+
+        $db->Query(
+            'UPDATE {pre}admins SET push_prefs=? WHERE adminid=?',
+            serialize($merged),
+            (int) $adminId
+        );
+    }
+
+    /**
+     * Enable all admin push types (e.g. after browser subscribe / sync).
+     */
+    public static function enableAdminPushTypes($adminId, $enabledFlag = true)
+    {
+        $types = [];
+        foreach (array_keys(self::getPushTypes(self::AREA_ADMIN)) as $t) {
+            $types[$t] = true;
+        }
+
+        self::setAdminPushPrefs($adminId, [
+            'enabled' => $enabledFlag,
+            'types' => $types,
+        ]);
+    }
+
+    public static function adminHasPushDelivery($adminId, $prefs = null)
+    {
+        if ($prefs === null) {
+            $prefs = self::getAdminPushPrefs($adminId);
+        }
+        if (!empty($prefs['enabled'])) {
+            return true;
+        }
+
+        return self::countSubscriptions(self::AREA_ADMIN, (int) $adminId) > 0;
+    }
+
+    public static function adminAllowsType($adminId, $type)
+    {
+        $prefs = self::getAdminPushPrefs($adminId);
+        if (!self::adminHasPushDelivery($adminId, $prefs)) {
             return false;
         }
-        if (!isset($prefs['types']) || !is_array($prefs['types'])) {
+        if (!isset($prefs['types']) || !is_array($prefs['types']) || count($prefs['types']) === 0) {
+            return true;
+        }
+        if (!array_key_exists($type, $prefs['types'])) {
             return true;
         }
 
@@ -982,6 +1112,47 @@ class BMPush
     private static function pushNotificationTag($type)
     {
         return 'bm-push-'.str_replace('.', '-', $type);
+    }
+
+    /**
+     * Generic notification text when session is locked (no sender/subject on lock screen).
+     */
+    private static function genericPushBodyForType($type, $area = self::AREA_USER)
+    {
+        global $lang_user, $lang_admin;
+
+        $lang = ($area == self::AREA_ADMIN && !empty($lang_admin['push_privacy_body'])) ? $lang_admin : $lang_user;
+        $map = [
+            self::TYPE_MAIL => 'push_privacy_body_mail',
+            self::TYPE_MAIL_FILTER => 'push_privacy_body_mail_filter',
+            self::TYPE_CALENDAR => 'push_privacy_body_calendar',
+            self::TYPE_BIRTHDAY => 'push_privacy_body_birthday',
+            self::TYPE_TASK => 'push_privacy_body_task',
+            self::TYPE_WEBDISK => 'push_privacy_body_webdisk',
+        ];
+
+        if (isset($map[$type]) && !empty($lang[$map[$type]])) {
+            return self::plainText($lang[$map[$type]]);
+        }
+
+        return self::plainText(!empty($lang['push_privacy_body']) ? $lang['push_privacy_body'] : 'New notification');
+    }
+
+    /**
+     * Strip sensitive details from push payload (idle lock / UI locked).
+     *
+     * @param array  $payload
+     * @param string $type
+     * @param string $area
+     */
+    private static function applyLockedScreenPushPrivacy(&$payload, $type, $area)
+    {
+        global $bm_prefs;
+
+        $payload['title'] = self::plainText(!empty($bm_prefs['titel']) ? $bm_prefs['titel'] : 'b1gMail');
+        $payload['body'] = self::genericPushBodyForType($type, $area);
+        $payload['url'] = ($area == self::AREA_ADMIN) ? 'index.php' : 'start.php';
+        $payload['tag'] = self::pushNotificationTag($type).'-private';
     }
 
     /**
@@ -1059,48 +1230,15 @@ class BMPush
      */
     private static function findUserSessionId($userId)
     {
-        $userId = (int) $userId;
-        if ($userId <= 0) {
-            return '';
-        }
+        return SessionFindActivePushSessionId((int) $userId, false);
+    }
 
-        $sessionPath = B1GMAIL_DIR.'temp/session/';
-        if (!is_dir($sessionPath) || !is_readable($sessionPath)) {
-            return '';
-        }
-
-        $needle = 'bm_userID|i:'.$userId.';';
-        $bestSid = '';
-        $bestMtime = 0;
-
-        $files = @scandir($sessionPath);
-        if (!is_array($files)) {
-            return '';
-        }
-
-        foreach ($files as $file) {
-            if ($file === '.' || $file === '..') {
-                continue;
-            }
-            $fullPath = $sessionPath.$file;
-            if (!is_file($fullPath) || !is_readable($fullPath)) {
-                continue;
-            }
-            $mtime = @filemtime($fullPath);
-            if ($mtime === false) {
-                $mtime = 0;
-            }
-            $data = @file_get_contents($fullPath);
-            if ($data === false || strpos($data, $needle) === false || strpos($data, 'bm_userLoggedIn|b:1') === false) {
-                continue;
-            }
-            if ($mtime >= $bestMtime) {
-                $bestMtime = $mtime;
-                $bestSid = (strpos($file, 'sess_') === 0) ? substr($file, 5) : $file;
-            }
-        }
-
-        return $bestSid;
+    /**
+     * Newest active PHP session for admin (push from LI/cron has no admin session).
+     */
+    private static function findAdminSessionId($adminId)
+    {
+        return SessionFindActivePushSessionId((int) $adminId, true);
     }
 
     private static function appendSid($url, $userId)
@@ -1129,11 +1267,24 @@ class BMPush
 
     private static function appendAdminSid($url, $adminId)
     {
-        if (strpos($url, 'sid=') !== false) {
+        if ($url == '' || strpos($url, 'sid=') !== false) {
             return $url;
         }
+
+        $sid = '';
+        global $adminRow;
+        if (isset($adminRow) && is_array($adminRow) && (int) ($adminRow['adminid'] ?? 0) === (int) $adminId && session_id() != '') {
+            $sid = session_id();
+        }
+        if ($sid == '') {
+            $sid = self::findAdminSessionId($adminId);
+        }
+        if ($sid == '') {
+            return $url;
+        }
+
         $sep = strpos($url, '?') !== false ? '&' : '?';
 
-        return $url.$sep.'sid='.session_id();
+        return $url.$sep.'sid='.rawurlencode($sid);
     }
 }

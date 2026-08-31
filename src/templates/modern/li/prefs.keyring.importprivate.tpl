@@ -30,6 +30,7 @@
 		{/if}
 		
 		<form action="prefs.php?action=keyring&do=uploadPrivateCertificate&sid={$sid}" enctype="multipart/form-data" method="post" autocomplete="off">
+			{csrffield}
 			<br /><br />
 			<table width="100%" cellspacing="0" cellpadding="2">
 			{if $pkcs12Support}	

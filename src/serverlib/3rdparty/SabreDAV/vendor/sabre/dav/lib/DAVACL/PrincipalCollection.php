@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAVACL;
 
 use Sabre\DAV\Exception\InvalidResourceType;
-use Sabre\DAV\Exception\Forbidden;
 use Sabre\DAV\IExtendedCollection;
 use Sabre\DAV\MkCol;
 
 /**
- * Principals Collection
+ * Principals Collection.
  *
  * This collection represents a list of users.
  * The users are instances of Sabre\DAVACL\Principal
@@ -17,7 +18,9 @@ use Sabre\DAV\MkCol;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class PrincipalCollection extends AbstractPrincipalCollection implements IExtendedCollection, IACL {
+class PrincipalCollection extends AbstractPrincipalCollection implements IExtendedCollection, IACL
+{
+    use ACLTrait;
 
     /**
      * This method returns a node for a principal.
@@ -26,13 +29,11 @@ class PrincipalCollection extends AbstractPrincipalCollection implements IExtend
      * at least contain a uri item. Other properties may or may not be
      * supplied by the authentication backend.
      *
-     * @param array $principal
      * @return \Sabre\DAV\INode
      */
-    function getChildForPrincipal(array $principal) {
-
+    public function getChildForPrincipal(array $principal)
+    {
         return new Principal($this->principalBackend, $principal);
-
     }
 
     /**
@@ -55,43 +56,19 @@ class PrincipalCollection extends AbstractPrincipalCollection implements IExtend
      * property for you.
      *
      * @param string $name
-     * @param MkCol $mkCol
-     * @throws Exception\InvalidResourceType
-     * @return void
+     *
+     * @throws InvalidResourceType
      */
-    function createExtendedCollection($name, MkCol $mkCol) {
-
+    public function createExtendedCollection($name, MkCol $mkCol)
+    {
         if (!$mkCol->hasResourceType('{DAV:}principal')) {
             throw new InvalidResourceType('Only resources of type {DAV:}principal may be created here');
         }
 
         $this->principalBackend->createPrincipal(
-            $this->principalPrefix . '/' . $name,
+            $this->principalPrefix.'/'.$name,
             $mkCol
         );
-
-    }
-
-    /**
-     * Returns the owner principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getOwner() {
-        return null;
-    }
-
-    /**
-     * Returns a group principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getGroup() {
-        return null;
     }
 
     /**
@@ -106,7 +83,8 @@ class PrincipalCollection extends AbstractPrincipalCollection implements IExtend
      *
      * @return array
      */
-    function getACL() {
+    public function getACL()
+    {
         return [
             [
                 'principal' => '{DAV:}authenticated',
@@ -115,37 +93,4 @@ class PrincipalCollection extends AbstractPrincipalCollection implements IExtend
             ],
         ];
     }
-
-    /**
-     * Updates the ACL
-     *
-     * This method will receive a list of new ACE's as an array argument.
-     *
-     * @param array $acl
-     * @return void
-     */
-    function setACL(array $acl) {
-
-        throw new Forbidden('Updating ACLs is not allowed on this node');
-
-    }
-
-    /**
-     * Returns the list of supported privileges for this node.
-     *
-     * The returned data structure is a list of nested privileges.
-     * See Sabre\DAVACL\Plugin::getDefaultSupportedPrivilegeSet for a simple
-     * standard structure.
-     *
-     * If null is returned from this method, the default privilege set is used,
-     * which is fine for most common usecases.
-     *
-     * @return array|null
-     */
-    function getSupportedPrivilegeSet() {
-
-        return null;
-
-    }
-
 }

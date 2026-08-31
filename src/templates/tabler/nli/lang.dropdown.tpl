@@ -6,7 +6,7 @@
 	<ul class="dropdown-menu{if $langDropdownMenuEnd|default:false} dropdown-menu-end{/if}">
 		{foreach from=$languageList key=langKey item=langInfo}
 		<li{if $langInfo.active} class="active"{/if}>
-			<a class="dropdown-item" href="index.php?action=switchLanguage&amp;lang={$langKey}{if !empty($smarty.get.action)}&amp;target={text value=$smarty.get.action}{/if}">{$langInfo.title}</a>
+			<a class="dropdown-item" href="{sessionurl file='index.php' params="action=switchLanguage&lang={$langKey}{if !empty($smarty.request.action)}&target={$smarty.request.action|escape:url}{/if}"}">{$langInfo.title}</a>
 		</li>
 		{/foreach}
 	</ul>

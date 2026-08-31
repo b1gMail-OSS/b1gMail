@@ -1,4 +1,5 @@
-<form action="{$pageURL}&action=msgqueue&do=queue&filter=true&sid={$sid}" method="post" onsubmit="spin(this)" name="f1">
+<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=queue&filter=true"}" method="post" onsubmit="spin(this)" name="f1">
+	{csrffield}
 <input type="hidden" name="page" id="page" value="{$pageNo}" />
 <input type="hidden" name="sortBy" id="sortBy" value="{$sortBy}" />
 <input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
@@ -7,10 +8,10 @@
 
 {if isset($msg)}<div class="note" style="margin:10px;width:auto;">{$msg}</div>{/if}
 
-<fieldset>
-	<legend>{lng p="bms_queue"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="bms_queue"}</legend>
 
-	<table class="list">
+	<div class="card mb-3"><div class="table-responsive"><table class="table table-vcenter table-striped card-table">
 		<tr>
 			<th width="20">&nbsp;</th>
 			<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'items[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
@@ -28,10 +29,9 @@
 		</tr>
 		
 		{foreach from=$queue item=item}
-		{cycle name=class values="td1,td2" assign=class}
-		<tr class="{$class}">
+		<tr>
 			<td align="center"><img src="../plugins/templates/images/bms_{$item.typeIcon}.png" border="0" alt="" width="16" height="16" /></td>
-			<td align="center"><input type="checkbox" name="items[]" value="{$item.id}" /></td>
+			<td class="text-center"><label class="form-check justify-content-center mb-0"><input class="form-check-input" type="checkbox" name="items[]" value="{$item.id}" /></label></td>
 			<td>{$item.id}<br /><small>{$item.hexID}</small></td>
 			<td><a title="{text value=$item.from}">{text value=$item.from cut=25}</a><br />
 				<small>{date timestamp=$item.date nice=true}</td>
@@ -39,8 +39,8 @@
 			<td>{size bytes=$item.size}</td>
 			<td>{if !empty($item.active)}{lng p="active"}{else}{if $item.last_attempt==0}-{else}{date timestamp=$item.last_attempt nice=true}{/if}{/if}{if $item.last_attempt!=0}<br /><small>{$item.attempts} {lng p="bms_attempts"}</small>{/if}</td>
 			<td>
-				<a href="{$pageURL}&action=msgqueue&do=showQueueItem&id={$item.id}&sid={$sid}" title="{lng p="show"}"><img src="../plugins/templates/images/bms_show.png" border="0" alt="{lng p="show"}" width="16" height="16" /></a>
-				{if $queueRunning}<a href="{$pageURL}&action=msgqueue&do=downloadQueueItem&id={$item.id}&sid={$sid}" title="{lng p="bms_download"}" target="_blank"><img src="../plugins/templates/images/bms_download.png" border="0" alt="{lng p="bms_download"}" width="16" height="16" /></a>{/if}
+				<a href="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=showQueueItem&id={$item.id}"}" title="{lng p="show"}"><img src="../plugins/templates/images/bms_show.png" border="0" alt="{lng p="show"}" width="16" height="16" /></a>
+				{if $queueRunning}<a href="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=downloadQueueItem&id={$item.id}"}" title="{lng p="bms_download"}" target="_blank"><img src="../plugins/templates/images/bms_download.png" border="0" alt="{lng p="bms_download"}" width="16" height="16" /></a>{/if}
 				<a href="javascript:if(confirm('{lng p="realdel"}')) singleAction('delete', '{$item.id}');" title="{lng p="delete"}"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
 			</td>
 		</tr>
@@ -65,21 +65,19 @@
 				</div>
 			</td>
 		</tr>
-	</table>
+	</table></div></div>
 </fieldset>
 
-<fieldset>
-	<legend>{lng p="filter"}</legend>
+<fieldset class="mb-4">
+	<legend class="h4 mb-3">{lng p="filter"}</legend>
 	
 	<table width="100%">
 		<tr>
 			<td width="40" valign="top" rowspan="4"><img src="{$tpldir}images/filter.png" border="0" alt="" width="32" height="32" /></td>
 			<td class="td1" width="80">{lng p="types"}:</td>
 			<td class="td2">
-				<input type="checkbox" name="types[0]" id="type_0"{if $types[0]} checked="checked"{/if} />
-					<label for="type_0"><b>{lng p="bms_inbound"}</b></label><br />
-				<input type="checkbox" name="types[1]" id="type_1"{if $types[1]} checked="checked"{/if} />
-					<label for="type_1"><b>{lng p="bms_outbound"}</b></label><br />
+				<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox" name="types[0]" id="type_0"{if $types[0]} checked="checked"{/if} /><span class="form-check-label" for="type_0"><b>{lng p="bms_inbound"}</b></span></label><br />
+				<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox" name="types[1]" id="type_1"{if $types[1]} checked="checked"{/if} /><span class="form-check-label" for="type_1"><b>{lng p="bms_outbound"}</b></span></label><br />
 			</td>
 		</tr>
 		<tr>
@@ -111,21 +109,21 @@
 		<tr>
 			<td class="td1" width="80">{lng p="searchfor"}:</td>
 			<td class="td2">
-				<input type="text" name="query" size="36" value="{if isset($query)}{text value=$query allowEmpty=true}{/if}" />
+				<input class="form-control" type="text" name="query" size="36" value="{if isset($query)}{text value=$query allowEmpty=true}{/if}" />
 			</td>
 		</tr>
 	</table>
 
 	<p align="right">
 		{lng p="perpage"}: 
-		<input type="text" name="perPage" value="{$perPage}" size="5" />
-		<input class="button" type="submit" value=" {lng p="apply"} " />
+		<input class="form-control" type="text" name="perPage" value="{$perPage}" size="5" />
+		<button type="submit" class="btn btn-primary"  >{lng p="apply"}</button>
 	</p>
 </fieldset>
 	
 <p>
-	<div style="float:left" class="buttons">
-		<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='{$pageURL}&action=msgqueue&sid={$sid}';" />
+	<div class="mt-3 mb-2">
+		<button type="button" class="btn btn-outline-secondary" onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue"}';"><i class="ti ti-chevron-left me-1"></i> {lng p="back"}</button>
 	</div>
 </p>
 

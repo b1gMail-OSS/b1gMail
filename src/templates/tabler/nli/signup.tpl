@@ -3,7 +3,7 @@
 
 <p class="text-secondary mb-4">{if $signupText}{$signupText}{else}{lng p="signuptxt"}{/if} {if $code}{lng p="signuptxt_code"}{/if}</p>
 
-{if !$nliCompactLayout|default:false}<form action="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup" method="post" id="signupForm">{/if}
+{if !$nliCompactLayout|default:false}<form action="{if $ssl_signup_enable}{$nliUrlSignupSsl}{else}{$nliUrlSignup}{/if}" method="post" id="signupForm">{/if}
 		<input type="hidden" name="do" value="createAccount" />
 		<input type="hidden" name="transPostVars" value="true" />
 		<input type="hidden" name="codeID" value="{$codeID}" />
@@ -56,6 +56,27 @@
 							</div>
 						</div>
 					</div>
+
+					{if $f_company!="n"||$f_taxid!="n"}
+					<div class="row">
+						{if $f_company!="n"}
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="form-label{if $f_company=="p"} required{/if}" for="company">{lng p="company"}</label>
+								<input type="text" class="form-control"{if $f_company=="p"} required="true"{/if} name="company" id="company" value="{if isset($_safePost.company)}{$_safePost.company}{/if}" />
+							</div>
+						</div>
+						{/if}
+						{if $f_taxid!="n"}
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="form-label{if $f_taxid=="p"} required{/if}" for="taxid">{lng p="taxid"}</label>
+								<input type="text" class="form-control"{if $f_taxid=="p"} required="true"{/if} name="taxid" id="taxid" value="{if isset($_safePost.taxid)}{$_safePost.taxid}{/if}" />
+							</div>
+						</div>
+						{/if}
+					</div>
+					{/if}
 
 					<div class="row bm-signup-section-email">
 						<div class="col-12">

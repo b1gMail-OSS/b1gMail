@@ -6,7 +6,8 @@
 		</div>
 	</div>
 
-	<form name="f1" method="post" action="email.folders.php?action={if isset($folder)}saveFolder&id={$folder.id}{else}createFolder{/if}&sid={$sid}" class="card bm-folder-admin-card bm-folder-edit-form" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
+	<form name="f1" method="post" action="{sessionurl file='email.folders.php' params="{if isset($folder)}action=saveFolder&id={$folder.id}{else}action=createFolder{/if}"}" class="card bm-folder-admin-card bm-folder-edit-form" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
+		{csrffield}
 		<div class="card-body bm-folder-edit-body">
 			<div class="bm-folder-edit-fields">
 				<div class="bm-folder-edit-row">
@@ -66,7 +67,7 @@
 				<div class="bm-folder-edit-row bm-folder-edit-row-conditions">
 					<label class="bm-folder-edit-label required">{lng p="conditions"}</label>
 					<div class="bm-folder-edit-field">
-						<iframe id="condition_frame" name="condition_frame" class="conditionIFrame bm-folder-condition-frame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="email.folders.php?action=editConditions&id={$folder.id}&sid={$sid}"></iframe>
+						<iframe id="condition_frame" name="condition_frame" class="conditionIFrame bm-folder-condition-frame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="{sessionurl file='email.folders.php' params="action=editConditions&id={$folder.id}"}"></iframe>
 						<div class="bm-folder-link-box linkBox">
 							{lng p="requiredis"}
 							<select class="form-select form-select-sm d-inline-block w-auto" name="intelligent_link">

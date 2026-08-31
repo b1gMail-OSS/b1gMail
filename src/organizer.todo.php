@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 include('./serverlib/todo.class.php');
 RequestPrivileges(PRIVILEGES_USER);
 
@@ -34,7 +35,7 @@ ModuleFunction('FileHandler',
  */
 if($groupRow['organizer']=='no')
 {
-	header('Location: start.php?sid=' . session_id());
+	SessionRedirect('start.php');
 	exit();
 }
 /**
@@ -186,7 +187,7 @@ else if($_REQUEST['action'] == 'action'
 		}
 	}
 
-	header('Location: organizer.todo.php?taskListID='.$taskListID.'&sid=' . session_id());
+	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
 }
 
 /**
@@ -197,7 +198,7 @@ else if($_REQUEST['action'] == 'deleteTask'
 {
 	$taskListID = isset($_REQUEST['taskListID']) ? (int)$_REQUEST['taskListID'] : 0;
 	$todo->Delete((int)$_REQUEST['id']);
-	header('Location: organizer.todo.php?taskListID='.$taskListID.'&sid=' . session_id());
+	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
 }
 
 /**
@@ -234,7 +235,7 @@ else if($_REQUEST['action'] == 'createTask'
 				(int)$_REQUEST['erledigt'],
 				$_REQUEST['comments'],
 				$taskListID);
-	header('Location: organizer.todo.php?taskListID='.$taskListID.'&sid=' . session_id());
+	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
 }
 
 /**
@@ -277,6 +278,6 @@ else if($_REQUEST['action'] == 'saveTask'
 				(int)$_REQUEST['erledigt'],
 				$_REQUEST['comments'],
 				$taskListID);
-	header('Location: organizer.todo.php?taskListID='.$taskListID.'&sid=' . session_id());
+	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
 }
 ?>

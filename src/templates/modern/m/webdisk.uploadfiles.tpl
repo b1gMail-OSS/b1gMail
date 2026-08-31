@@ -4,6 +4,7 @@
 
 <div data-role="content">
 	<form action="webdisk.php?do=uploadFiles&folder={$folderID}&sid={$sid}" data-ajax="false" enctype="multipart/form-data" method="post">
+		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="file1">{lng p="file"} 1:</label>
 			<input type="file" name="file1" id="file1" />

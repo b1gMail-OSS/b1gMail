@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="{$pageURL}&action=news&do=edit&id={$news.newsid}&sid={$sid}" method="post" onsubmit="EBID('title').focus();if(EBID('title').value.length<2) return(false);editor.submit();spin(this)">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="EBID('title').focus();if(EBID('title').value.length<2) return(false);editor.submit();spin(this)">
+		{csrffield}
 		<input type="hidden" name="save" value="true" />
 
 		<div class="row">

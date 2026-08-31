@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="prefs.php?action=keyring&do=issuePrivateCertificate&sid={$sid}">
+	{csrffield}
 	<input type="hidden" name="step" value="2" />
 
 	<table class="listTable">

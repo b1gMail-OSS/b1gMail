@@ -6,7 +6,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=signatures&do={if isset($signature)}saveSignature&id={$signature.id}{else}createSignature{/if}&sid={$sid}" onsubmit="{literal}if(checkSignatureForm(this)) { editor.submit(); return(true); } else return(false);{/literal}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params="action=signatures&do={if isset($signature)}saveSignature&id={$signature.id}{else}createSignature{/if}"}" onsubmit="{literal}if(checkSignatureForm(this)) { editor.submit(); return(true); } else return(false);{/literal}">
+	{csrffield}
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 	<table class="listTable">
 		<tr>
@@ -29,13 +30,13 @@
 			<td class="listTableRight">
 				<div style="border:1px solid #DDDDDD;">
 					<textarea name="html" id="html" style="width:100%;height:150px;">{if isset($signature)}{text value=$signature.html allowEmpty=true}{/if}</textarea>
-					<script src="./clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
-					<script type="text/javascript" src="./clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
+					<script src="{$selfurl}clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
+					<script type="text/javascript" src="{$selfurl}clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
 					<script>
 						var editor = new htmlEditor('html', '{$tpldir}/images/editor/');
 						editor.ckEditorPrefs.uiColor = bmGetCkEditorUiColor();
 						editor.ckEditorPrefs.contentsCss = [
-							'./clientlib/ckeditor/contents.css?{fileDateSig file="../../clientlib/ckeditor/contents.css"}',
+							'{}clientlib/ckeditor/contents.css?{fileDateSig file="../../clientlib/ckeditor/contents.css"}',
 							'{$tpldir}style/ckeditor-tabler-contents.css?{fileDateSig file="style/ckeditor-tabler-contents.css"}'
 						];
 						editor.init();

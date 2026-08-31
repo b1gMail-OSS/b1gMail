@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="workgroups"}</legend>
 
-	<form name="f1" action="workgroups.php?sid={$sid}" method="post">
+	<form name="f1" action="{sessionurl file='workgroups.php'}" method="post">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -18,12 +19,12 @@
 						{cycle name=class values="td1,td2" assign=class}
 						<tr class="{$class}">
 							<td class="text-center"><input type="checkbox" name="group_{$group.id}" /></td>
-							<td><a href="workgroups.php?do=edit&id={$group.id}&sid={$sid}">{text value=$group.title}</a><br /><small>{$group.members} {lng p="members"}</small></td>
+							<td><a href="{sessionurl file='workgroups.php' params="do=edit&id={$group.id}"}">{text value=$group.title}</a><br /><small>{$group.members} {lng p="members"}</small></td>
 							<td>{email value=$group.email}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="workgroups.php?do=edit&id={$group.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="workgroups.php?delete={$group.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+									<a href="{sessionurl file='workgroups.php' params="do=edit&id={$group.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='workgroups.php' params="delete={$group.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -52,7 +53,8 @@
 <fieldset>
 	<legend>{lng p="add"}</legend>
 
-	<form method="post" action="workgroups.php?create=true&sid={$sid}" onsubmit="spin(this)">
+	<form method="post" action="{sessionurl file='workgroups.php' params="create=true"}" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
 			<div class="col-sm-10">

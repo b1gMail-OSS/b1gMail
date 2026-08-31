@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('./serverlib/mailbox.class.php');
 include('./serverlib/zip.class.php');
@@ -221,7 +222,7 @@ if($_REQUEST['action'] == 'folder')
 			// forward
 			else if($_REQUEST['massAction'] == 'forward')
 			{
-				$url = 'email.compose.php?sid=' . session_id();
+				$url = 'email.compose.php';
 				foreach($mailIDs as $mailKey=>$mailID)
 					$url .= '&forward[' . $mailKey . ']=' . $mailID;
 				header('Location: ' . $url);

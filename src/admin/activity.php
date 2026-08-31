@@ -49,7 +49,7 @@ if($_REQUEST['action'] == 'activity')
 	if($_REQUEST['do'] == 'list')
 	{
 		// single action?
-		if(isset($_REQUEST['singleAction']))
+		if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
 		{
 			if($_REQUEST['singleAction'] == 'lock')
 			{
@@ -137,12 +137,13 @@ if($_REQUEST['action'] == 'activity')
 		}
 
 		// sort options
-		$sortBy = isset($_REQUEST['sortBy'])
-					? $_REQUEST['sortBy']
-					: 'mailspace_used';
-		$sortOrder = isset($_REQUEST['sortOrder'])
-						? strtolower($_REQUEST['sortOrder'])
-						: 'desc';
+		$sortBy = AdminSanitizeSortColumn(
+			isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'mailspace_used',
+			array('id', 'email', 'mailspace_used', 'diskspace_used', 'traffic', 'received_mails', 'sent_mails'),
+			'mailspace_used');
+		$sortOrder = AdminSanitizeSortOrder(
+			isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'desc',
+			'desc');
 		$perPage = 50;
 
 		// groups

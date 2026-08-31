@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 
-	<form action="prefs.sms.php?action=gateways&do=edit&save=true&id={$gateway.id}&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.sms.php' params="action=gateways&do=edit&save=true&id={$gateway.id}"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
 			<div class="col-sm-10">

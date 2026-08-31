@@ -1,4 +1,5 @@
-<form action="{$pageURL}&action=packages&delete={$id}&sid={$sid}" method="post">
+<form action="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages&delete={$id}"}" method="post">
+	{csrffield}
 <fieldset>
 	<legend>{lng p="pacc_deletepackage"}</legend>
 	
@@ -13,8 +14,15 @@
 			</select>
 		</div>
 	</div>
-	<div class="text-end">
-		<input class="btn btn-primary" type="submit" value="{lng p="delete"}" />
+	<div class="d-flex justify-content-between">
+		<a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages"}" class="btn btn-outline-secondary">
+			<i class="ti ti-arrow-left me-1"></i>
+			{lng p="back"}
+		</a>
+		<button type="submit" class="btn btn-danger">
+			<i class="ti ti-trash me-1"></i>
+			{lng p="delete"}
+		</button>
 	</div>
 </fieldset>
 </form>

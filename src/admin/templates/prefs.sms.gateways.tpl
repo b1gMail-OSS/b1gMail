@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="gateways"}</legend>
 
-	<form action="prefs.sms.php?action=gateways&sid={$sid}" name="f1" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.sms.php' params="action=gateways"}" name="f1" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -20,8 +21,8 @@
 							<td>{text value=$gateway.titel}</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="prefs.sms.php?action=gateways&do=edit&id={$gateway.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									{if !$gateway.default}<a href="prefs.sms.php?action=gateways&delete={$gateway.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
+									<a href="{sessionurl file='prefs.sms.php' params="action=gateways&do=edit&id={$gateway.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									{if !$gateway.default}<a href="{sessionurl file='prefs.sms.php' params="action=gateways&delete={$gateway.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
 								</div>
 							</td>
 						</tr>
@@ -50,7 +51,8 @@
 <fieldset>
 	<legend>{lng p="addgateway"}</legend>
 
-	<form action="prefs.sms.php?action=gateways&add=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='prefs.sms.php' params="action=gateways&add=true"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
 			<div class="col-sm-10">
@@ -78,7 +80,7 @@
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="password"}</label>
 			<div class="col-sm-10">
-				<input type="password" class="form-control" name="password" value="" placeholder="{lng p="password"}" autocomplete="off">
+				<input type="password" class="form-control" name="pass" value="" placeholder="{lng p="password"}" autocomplete="off">
 			</div>
 		</div>
 

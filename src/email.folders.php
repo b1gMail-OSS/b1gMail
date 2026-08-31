@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('./serverlib/mailbox.class.php');
 RequestPrivileges(PRIVILEGES_USER);
@@ -93,7 +94,7 @@ else if($_REQUEST['action'] == 'action'
 			}
 		}
 	}
-	header('Location: email.folders.php?sid=' . session_id());
+	SessionRedirect('email.folders.php');
 }
 
 /**
@@ -243,7 +244,7 @@ else if($_REQUEST['action'] == 'saveFolder'
 				: BMLINK_AND);
 	}
 
-	header('Location: email.folders.php?sid=' . session_id());
+	SessionRedirect('email.folders.php');
 }
 
 /**
@@ -271,9 +272,9 @@ else if($_REQUEST['action'] == 'createFolder'
 		isset($_REQUEST['intelligent']));
 
 	if(isset($_REQUEST['intelligent']))
-		header('Location: email.folders.php?action=editFolder&id=' . $id . '&sid=' . session_id());
+		SessionRedirect('email.folders.php?action=editFolder&id=' . $id);
 	else
-		header('Location: email.folders.php?sid=' . session_id());
+		SessionRedirect('email.folders.php');
 }
 
 /**
@@ -283,6 +284,6 @@ else if($_REQUEST['action'] == 'deleteFolder'
 		&& isset($_REQUEST['id']))
 {
 	$mailbox->DeleteFolder((int)$_REQUEST['id']);
-	header('Location: email.folders.php?sid=' . session_id());
+	SessionRedirect('email.folders.php');
 }
 ?>

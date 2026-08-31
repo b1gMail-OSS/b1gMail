@@ -3,7 +3,10 @@
 		<div class="container container-tight my-5 px-lg-5">
 			{include file="nli/login.brand.tpl"}
 
-			{if $welcomeBack}
+			{if $sessionActive}
+			{include file="nli/login.sessionactive.tpl"}
+			{include file="nli/login.cover-footer.tpl"}
+			{elseif $welcomeBack}
 			{include file="nli/login.welcomeback.tpl"}
 			{include file="nli/login.cover-footer.tpl"}
 			{else}
@@ -15,9 +18,9 @@
 			<div class="text-center text-secondary mt-4 small">
 				<div>&copy; {$year} {$service_title}</div>
 				<div class="mt-1">
-					<a href="index.php?action=faq" class="text-secondary">{lng p="faq"}</a>
+					<a href="{$nliUrlFaq}" class="text-secondary">{lng p="faq"}</a>
 					<span class="mx-1">·</span>
-					<a href="index.php?action=imprint" class="text-secondary">{lng p="contact"}</a>
+					<a href="{$nliUrlImprint}" class="text-secondary">{lng p="contact"}</a>
 					<span class="mx-1">·</span>
 					<a href="{$mobileURL}" class="text-secondary">{lng p="mobilepda"}</a>
 				</div>

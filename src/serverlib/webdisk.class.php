@@ -1515,7 +1515,8 @@ class BMWebdisk
 				'accessed'	=> $this->FolderDate($row['id'], 'accessed', $row['accessed']),
 				'modified'	=> $this->FolderDate($row['id'], 'modified', $row['modified']),
 				'ext'		=> $row['share']=='yes' ? '.SHAREDFOLDER' : '.FOLDER',
-				'viewable'	=> true
+				'viewable'	=> true,
+				'thumbnail'	=> false
 			);
 			$folderItem['icon'] = function_exists('WebdiskGetItemIcon')
 				? WebdiskGetItemIcon($folderItem)

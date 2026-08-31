@@ -1,30 +1,30 @@
-<form action="{$pageURL}&action=common&do=banlist&sid={$sid}" method="post" onsubmit="spin(this)" name="f1">
+<form action="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=common&action=banlist"}" method="post" onsubmit="spin(this)" name="f1">
+	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
 	
-	<fieldset>
-		<legend>{lng p="bms_failban"}</legend>
+	<fieldset class="mb-4">
+		<legend class="h4 mb-3">{lng p="bms_failban"}</legend>
 		
-		<table class="list">
+		<div class="card mb-3"><div class="table-responsive"><table class="table table-vcenter table-striped card-table">
 			<tr>
 				<th>{lng p="bms_ip"}</th>
-				<th width="160">{lng p="bms_fb_banneduntil"}</th>
-				<th width="160">{lng p="bms_fb_lastupdate"}</th>
+				<th class="text-nowrap">{lng p="bms_fb_banneduntil"}</th>
+				<th class="text-nowrap">{lng p="bms_fb_lastupdate"}</th>
 				<th width="160">{lng p="bms_fb_type"}</th>
 				<th width="70">{lng p="delete"}</th>
 			</tr>
 			
 			{foreach from=$banlist item=item key=key}
-			{cycle name=class values="td1,td2" assign=class}
-			<tr class="{$class}">
+			<tr>
 				{if $item.ip6}
-				<td><span id="ip_{$item.ip6}"><a href="javascript:bms_lookupIP('{$item.ip6}');">{$item.ip6}</a></span></td>
+				<td><span data-bms-ip="{$item.ip6|escape:'html'}"><a href="#" onclick="bms_lookupIP(this); return false;" data-bms-ip="{$item.ip6|escape:'html'}">{$item.ip6}</a></span></td>
 				{else}
-				<td><span id="ip_{$item.ip}"><a href="javascript:bms_lookupIP('{$item.ip}');">{$item.ip}</a></span></td>
+				<td><span data-bms-ip="{$item.ip|escape:'html'}"><a href="#" onclick="bms_lookupIP(this); return false;" data-bms-ip="{$item.ip|escape:'html'}">{$item.ip}</a></span></td>
 				{/if}
-				<td>{date timestamp=$item.banned_until}</td>
-				<td>{date timestamp=$item.last_update}</td>
+				<td class="text-nowrap">{date timestamp=$item.banned_until}</td>
+				<td class="text-nowrap">{date timestamp=$item.last_update}</td>
 				<td>{$item.type_text}</td>
-				<td><input type="checkbox" name="delete[]" value="{$key}" /></td>
+				<td class="text-center"><label class="form-check justify-content-center mb-0"><input class="form-check-input" type="checkbox" name="delete[]" value="{$key}" /></label></td>
 			</tr>
 			{/foreach}
 			
@@ -35,43 +35,71 @@
 					</div>
 				</td>
 			</tr>
-		</table>
+		</table></div></div>
 	</fieldset>
 	
-	<p>
-		<div style="float:left" class="buttons">
-			<input class="button" type="button" value=" &laquo; {lng p="back"} " onclick="document.location.href='{$pageURL}&action=common&sid={$sid}';" />
-		</div>
-		<div style="float:right" class="buttons">
-			<input class="button" type="submit" value=" {lng p="save"} " />
-		</div>
-	</p>
+	<div class="d-flex justify-content-between mt-3 mb-2">
+		<button type="button" class="btn btn-outline-secondary" onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=common"}';"><i class="ti ti-chevron-left me-1"></i> {lng p="back"}</button>
+		<button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i> {lng p="save"}</button>
+	</div>
 </form>
 
+<span id="bmsLookupIpUrl" class="d-none" data-url="{text value=$bmsLookupIpUrl noentities=true}" data-wait="{lng p="pleasewait"}"></span>
 <script>
-{literal}<!--
-	function _bms_lookupIP(e)
+{literal}
+	function _bms_lookupIPReset(el)
 	{
-		if(e.readyState == 4)
+		if(!el)
+			return;
+		el.classList.remove('pe-none', 'text-muted');
+		el.removeAttribute('data-bms-busy');
+		var spin = el.parentNode ? el.parentNode.querySelector('.bms-lookup-spin') : null;
+		if(spin)
+			spin.remove();
+	}
+
+	function _bms_lookupIP(e, el)
+	{
+		if(e.readyState != 4)
+			return;
+		var data = null;
+		if(e.status == 200)
 		{
-			var text = e.responseText;
-			text = text.split('/');
-
-			if(text.length == 2)
-			{
-				var ip = text[0], hostName = text[1];
-				if(EBID('ip_'+ip))
-					EBID('ip_'+ip).innerHTML = hostName + ' (' + ip + ')';
-			}
+			try { data = JSON.parse(e.responseText); } catch (ex) { data = null; }
 		}
+		if(data && data.ip)
+		{
+			var wrap = el && el.parentNode ? el.parentNode : document.querySelector('span[data-bms-ip="' + String(data.ip).replace(/"/g, '') + '"]');
+			if(wrap)
+				wrap.textContent = data.host + ' (' + data.ip + ')';
+			return;
+		}
+		_bms_lookupIPReset(el);
 	}
 
-	function bms_lookupIP(ip)
+	function bms_lookupIP(el)
 	{
-		MakeXMLRequest('{/literal}{$pageURL}{literal}&sid=' + currentSID
-							+ '&action=lookupIP'
-							+ '&ip=' + escape(ip),
-						_bms_lookupIP);
+		if(!el || el.getAttribute('data-bms-busy'))
+			return;
+		var ip = el.getAttribute('data-bms-ip');
+		var holder = document.getElementById('bmsLookupIpUrl');
+		var url = holder ? holder.getAttribute('data-url') : '';
+		if(!url || !ip)
+			return;
+		if(/[?&]ip=/.test(url))
+			url = url.replace(/([?&]ip=)[^&]*/, '$1' + encodeURIComponent(ip));
+		else
+			url += (url.indexOf('?') >= 0 ? '&' : '?') + 'ip=' + encodeURIComponent(ip);
+		el.setAttribute('data-bms-busy', '1');
+		el.classList.add('pe-none', 'text-muted');
+		var spin = document.createElement('span');
+		spin.className = 'spinner-border spinner-border-sm text-secondary ms-2 bms-lookup-spin';
+		spin.setAttribute('role', 'status');
+		var wait = holder ? holder.getAttribute('data-wait') : '';
+		if(wait)
+			spin.setAttribute('title', wait);
+		el.after(spin);
+		MakeXMLRequest(url, _bms_lookupIP, el);
 	}
-//-->{/literal}
+{/literal}
 </script>

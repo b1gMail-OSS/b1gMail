@@ -20,7 +20,7 @@
  *
  */
 
-// b1gMailLang::Francais::Roger::roger@guigma.com::http://::UTF-8::fr.UTF-8|fr|fr_FR.UTF-8|fr_FR|french|fr
+// b1gMailLang::Francais::Roger::roger@guigma.com::http://::UTF-8::fr.UTF-8|fr|fr_FR.UTF-8|fr_FR|french|fr::fr
 // Translation: Roger / roger@guigma.com
 
 /**
@@ -41,6 +41,7 @@ $lang_client['push_test_fail_mailtype']	= 'Le type « Nouveaux e-mails » est d�
 $lang_client['addravailable']	= 'Adresse disponible!';
 $lang_client['addrtaken']		= 'Adresse indisponible!';
 $lang_client['addrinvalid']		= 'Adresse invalide!';
+$lang_client['addrcheckfail']	= 'L\'adresse n\'a pas pu être vérifiée. Veuillez réessayer.';
 $lang_client['fillin']			= 'Veuillez remplir tous les champs obligatoire!';
 $lang_client['selecttext']		= 'Sélectionnez d\'abord un texte!';
 $lang_client['fillinname']		= 'Remplissez au moins le prénom et le nom de famille du contact!';
@@ -154,14 +155,23 @@ $lang_custom['selfcomp_text']	= 'Cher Monsieur ou Madame,' . "\n\n"
 								.	'Merci d\'avance!!' . "\n\n"
 								.	'(Ce message a été généré automatiquement au nom de %%vorname%% %%nachname%%)';
 $lang_custom['passmail_sub']	= 'Mot de passe oublié';
-$lang_custom['passmail_text']	= 'Dear %%vorname%% %%nachname%%,' . "\n\n" 
-								.	'a password request has been requested for your account %%mail%%.' . "\n\n"
-								. 	'Your new password is: %%passwort%%' . "\n\n"
-								.	'Please click the following link to activate your new password:' . "\n\n"
+$lang_custom['passmail_text']	= 'Cher/Chère %%vorname%% %%nachname%%,' . "\n\n"
+								.	'une réinitialisation du mot de passe a été demandée pour votre compte %%mail%%.' . "\n\n"
+								.	'Veuillez cliquer sur le lien suivant pour choisir un nouveau mot de passe. Le lien est valable une heure :' . "\n\n"
 								. 	'%%link%%' . "\n\n"
-								.	'After clicking the link you can log in using the password given above.' . "\n\n"
-								.	'CAUTION: When resetting your password, all saved private key passwords will become invalid. You will have to re-import all your private certificates!' . "\n\n"
-								.	'(This message has been generated automatically)';
+								.	'Si vous n\'êtes pas à l\'origine de cette demande, ignorez ce message. Votre mot de passe actuel reste valable.' . "\n\n"
+								.	'ATTENTION : Lors de la réinitialisation du mot de passe, tous les mots de passe de clés privées enregistrés deviennent invalides. Vous devrez réimporter vos certificats privés !' . "\n\n"
+								.	'(Ce message a été généré automatiquement)';
+$lang_custom['login_notify_sub']		= 'Connexion depuis une nouvelle adresse IP';
+$lang_custom['login_notify_new_ip']	= 'Cher Monsieur ou Madame,' . "\n\n"
+								.	'une connexion à votre compte (%%account%%) a été détectée.' . "\n\n"
+								.	'Heure : %%time%%' . "\n"
+								.	'Adresse IP : %%hostname%%' . "\n"
+								.	'Navigateur : %%browser%%' . "\n"
+								.	'Système : %%os%%' . "\n"
+								.	'Langue du navigateur : %%language%%' . "\n\n"
+								.	'Si vous n\'êtes pas à l\'origine de cette connexion, changez immédiatement votre mot de passe et contactez le support.' . "\n\n"
+								.	'(Ce message a été généré automatiquement)';
 $lang_custom['certmail']		= 'Cher Monsieur ou Madame,' . "\n\n" 
 								.	'%%user_name%% (%%user_mail%%) sent you a certified message. To get the message and forward it to your email account, please click the following link or paste it into your browser.' . "\n\n" 
 								.	'%%url%%' . "\n\n" 
@@ -309,6 +319,8 @@ $lang_user['notify_sound']		= 'Jouer son';
 $lang_user['notify_types']		= 'Me prévenir de';
 $lang_user['notify_email']		= 'nouveaux emails';
 $lang_user['notify_birthday']	= 'Anniversaires de mes contacts';
+$lang_user['notify_login_new_ip'] = 'Alerte connexion';
+$lang_user['notify_login_new_ip_desc'] = 'E-mail en cas de connexion depuis une nouvelle IP (y compris adresse alternative)';
 $lang_user['push_browser']		= 'Notifications push';
 $lang_user['push_browser_desc']	= 'Alertes même lorsque l\'onglet est fermé (HTTPS et activation requis).';
 $lang_user['push_prompt_text']	= 'Les notifications du navigateur sont disponibles. Activez le push pour être informé des nouveaux e-mails et rendez-vous sans garder l\'onglet ouvert.';
@@ -487,6 +499,23 @@ $lang_user['kto_subject']		= 'Objet';
 $lang_user['pay']				= 'Payer';
 $lang_user['completed']			= 'Terminé';
 $lang_user['setmailcolor']		= 'Définir couleur';
+$lang_user['avatar_source']						= 'Avatar';
+$lang_user['avatar_source_initials']			= 'Initiales';
+$lang_user['avatar_source_libravatar']			= 'Libravatar';
+$lang_user['avatar_source_gravatar']			= 'Gravatar';
+$lang_user['avatar_source_libravatar_gravatar_initials'] = 'Libravatar, Gravatar, initiales (secours)';
+$lang_user['avatar_source_upload']					= 'Photo personnelle';
+$lang_user['avatar_upload']							= 'Photo de profil';
+$lang_user['avatar_upload_btn']						= 'Téléverser';
+$lang_user['avatar_upload_hint']					= 'JPEG, PNG, GIF ou WebP, max. 2 Mo. Image recadrée en carré.';
+$lang_user['avatar_upload_ok']						= 'Photo enregistrée.';
+$lang_user['avatar_delete_btn']						= 'Supprimer la photo';
+$lang_user['avatar_delete_confirm']					= 'Supprimer la photo de profil ?';
+$lang_user['avatar_delete_ok']						= 'Photo supprimée.';
+$lang_user['avatar_upload_failed']					= 'Impossible d\'enregistrer la photo.';
+$lang_user['avatar_upload_too_large']				= 'Fichier trop volumineux (max. 2 Mo).';
+$lang_user['avatar_upload_invalid_type']				= 'Format d\'image non valide.';
+$lang_user['avatar_upload_no_gd']					= 'Traitement d\'image indisponible (GD).';
 $lang_user['hotkeys']			= 'Touches de raccourci';
 $lang_user['to3']				= 'à';
 $lang_user['with']				= 'avec';
@@ -529,10 +558,14 @@ $lang_user['faqtxt']			= 'Voici les réponses aux questions les plus fréquemmen
 // lost password
 $lang_user['lostpw']			= 'Mot de passe oublié';
 $lang_user['requestpw']			= 'Demander mot de passe';
-$lang_user['pwresetfailed']		= 'L\'utilisateur de cette adresse e-mail n\'a pas été trouvé ou n\'a pas d\'email alternatif nécessaire pour recevoir un nouveau mot de passe. Veuillez vérifier votre adresse email saisi et essayez à nouveau.<br /><br /> En cas de doute, <a href="index.php?action=imprint"> nous contacter pour la restauration de votre  mot de passe.';
-$lang_user['pwresetsuccess']	= 'Un nouveau mot de passe pour votre compte a été généré et envoyé à l\'adresse e-mail alternative que vous avez indiquée dans votre profil. Pour compléter l\'activation de votre nouveau mot de passe, cliquez sur le lien dans le message. Après avoir cliqué sur le lien, vous pourrez utiliser le nouveau mot de passe.';
-$lang_user['pwresetfailed2']	= 'Le nouveau mot de passe n\'a pas pu être activé car le lien de confirmation n\'a pas été ouvert correctement ou parce que le nouveau mot de passe avait déjà été activé. Veuillez ouvrir le lien exactement comme vous l\'avez reçu dans le message.<br /><br />En cas de doute <a href="index.php?action=imprint"> veuillez nous contacter pour la restauration de votre mot de passe </a>.';
-$lang_user['pwresetsuccess2']	= 'Votre nouveau mot de passe a été activé avec succès. Vous pouvez maintenant vous connecter avec votre adresse e-mail et votre nouveau mot de passe <a href="index.php">Connexion</a>.';
+$lang_user['pwresetfailed']		= 'Si un compte existe pour cette adresse et qu\'une adresse e-mail alternative est enregistrée, nous y avons envoyé un lien pour définir un nouveau mot de passe. Le lien est valable une heure.';
+$lang_user['pwresetsuccess']	= 'Si un compte existe pour cette adresse et qu\'une adresse e-mail alternative est enregistrée, nous y avons envoyé un lien pour définir un nouveau mot de passe. Le lien est valable une heure.';
+$lang_user['pwresetfailed2']	= 'Le lien de réinitialisation est invalide ou a expiré. Veuillez demander un nouveau lien si nécessaire.<br /><br />En cas de doute <a href="index.php?action=imprint">veuillez nous contacter</a>.';
+$lang_user['pwresetsuccess2']	= 'Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre adresse e-mail et votre nouveau mot de passe <a href="index.php">Connexion</a>.';
+$lang_user['resetpw']			= 'Définir un nouveau mot de passe';
+$lang_user['resetpwhint']		= 'Veuillez choisir un nouveau mot de passe pour votre compte.';
+$lang_user['resetpwsubmit']		= 'Enregistrer le mot de passe';
+$lang_user['lostpwhint']		= 'Saisissez l\'adresse e-mail de votre compte. Si un compte existe, nous enverrons un lien à l\'adresse alternative enregistrée.';
 
 
 
@@ -1577,6 +1610,8 @@ $lang_admin['widgetlayouts']	= 'Widget layouts';
 $lang_admin['taborder']			= 'Tab order';
 $lang_admin['payments']			= 'Payments';
 $lang_admin['invalidselffolder'] 		= 'The configured absolute path to b1gMail (<code>%s</code>) does not exist. Please correct the path!';
+$lang_admin['setupfolderunlocked']	= 'Le dossier d&rsquo;installation (<code>setup/</code>) est encore pr&eacute;sent et non verrouill&eacute;. Les fichiers <code>lock</code> et <code>lock_update</code> sont absents. L&rsquo;installation et la mise &agrave; jour restent ex&eacute;cutables. Supprimez le dossier apr&egrave;s la fin ou d&eacute;posez les fichiers de verrouillage.';
+$lang_admin['setupfolderlocked']	= 'Le dossier d&rsquo;installation (<code>setup/</code>) est encore pr&eacute;sent. M&ecirc;me si un fichier de verrouillage a &eacute;t&eacute; trouv&eacute;, vous devriez le supprimer du serveur pour des raisons de s&eacute;curit&eacute;.';
 $lang_admin['auto_tz']			= 'Timezone auto detect';
 $lang_admin['check_double_altmail']		= 'Check for double alt. mail';
 $lang_admin['check_double_cellphone']	= 'Check for double cellphone no';
@@ -1639,6 +1674,7 @@ $lang_admin['login']			= 'Login';
 $lang_admin['dattempt']		 	= 'This is your %d. attempt to log in, after 5 attempts log-in will be blocked for 5 minutes.';
 $lang_admin['dattempt2']		= 'Due to too many failed login attempts login for this account will be blocked until %s .';
 $lang_admin['loginerror']		= 'Invalid password. Please try again.';
+$lang_admin['sess_expired']		= 'Session a expiré';
 $lang_admin['welcome']			= 'Welcome';
 $lang_admin['usersgroups']		= 'Users &amp; Groups';
 $lang_admin['users']			= 'Users';
@@ -1677,6 +1713,7 @@ $lang_admin['about']			= 'About b1gMail';
 $lang_admin['version']			= 'Version';
 $lang_admin['nonotices']		= 'Currently there are no new notifications.';
 $lang_admin['save']				= 'Save';
+$lang_admin['saveok']			= 'Your changes have been saved.';
 $lang_admin['notactivated']		= 'Not activated';
 $lang_admin['locked']			= 'Locked';
 $lang_admin['emails']			= 'Emails';
@@ -1919,6 +1956,68 @@ $lang_admin['optionsdesc']		= '(only for radio button or dropdown field, use com
 $lang_admin['brokenperms']		= 'The following files and folders are not writeable: <code>%s</code>. Please check the access rights!';
 $lang_admin['brokenhtaccess']	= 'The following .htaccess files do not exist: <code>%s</code>. Please upload the files again - without these files some of the data files are not protected from unauthorized access!';
 $lang_admin['maintenance']		= 'Maintenance';
+$lang_admin['scheduledtasks']	= 'T&acirc;ches planifi&eacute;es';
+$lang_admin['sched.new_task']		= 'Nouvelle t&acirc;che';
+$lang_admin['sched.task_params']	= 'Param&egrave;tres';
+$lang_admin['sched.task_label']	= 'T&acirc;che';
+$lang_admin['sched.toolbar_hint']	= 'Cr&eacute;er, modifier et ex&eacute;cuter des t&acirc;ches de maintenance planifi&eacute;es.';
+$lang_admin['sched.tasks_title']	= 'T&acirc;ches configur&eacute;es';
+$lang_admin['sched.no_tasks']		= 'Aucune t&acirc;che configur&eacute;e';
+$lang_admin['sched.enabled']		= 'Activ&eacute;';
+$lang_admin['sched.disabled']		= 'Inactif';
+$lang_admin['sched.next_run']		= 'Prochaine ex&eacute;cution';
+$lang_admin['sched.task_running']	= 'La t&acirc;che est peut-&ecirc;tre en cours d\'ex&eacute;cution...';
+$lang_admin['sched.task_ok']		= 'La t&acirc;che s\'est termin&eacute;e avec succ&egrave;s.';
+$lang_admin['sched.task_failed']	= 'La t&acirc;che ne s\'est pas termin&eacute;e correctement.';
+$lang_admin['sched.task_failed_notice']	= '%u t&acirc;che(s) ne se sont pas termin&eacute;es correctement.';
+$lang_admin['sched.server_time']	= 'Heure du serveur';
+$lang_admin['sched.schedule']		= 'Planification';
+$lang_admin['sched.month_days']	= 'Jours du mois';
+$lang_admin['sched.weekdays']		= 'Jours de la semaine';
+$lang_admin['sched.weekdays_array']	= array('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche');
+$lang_admin['sched.months']		= 'Mois';
+$lang_admin['sched.hours_label']	= 'Heures';
+$lang_admin['sched.minutes_label']	= 'Minutes';
+$lang_admin['sched.weekdays_short']	= array('Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di');
+$lang_admin['sched.schedule_hint']	= 'S&eacute;lectionnez au moins une valeur par section. Vide = cette partie de l\'heure ne s\'applique pas. Utilisez Tout / Aucun pour basculer rapidement les groupes.';
+$lang_admin['sched.select_all']	= 'Tout';
+$lang_admin['sched.select_none']	= 'Aucun';
+$lang_admin['sched.eta']			= 'Dans ';
+$lang_admin['sched.eta_days']		= 'jours';
+$lang_admin['sched.eta_hours']		= 'heures';
+$lang_admin['sched.eta_minutes']	= 'minutes';
+$lang_admin['sched.eta_seconds']	= 'secondes';
+$lang_admin['sched.eta_1day']		= 'un jour';
+$lang_admin['sched.eta_1hour']		= 'une heure';
+$lang_admin['sched.eta_1minute']	= 'une minute';
+$lang_admin['sched.eta_1second']	= 'une seconde';
+$lang_admin['sched.user_delete_confirm']	= 'Supprimer les utilisateurs d&eacute;finitivement';
+$lang_admin['sched.user_filter_hint']	= 'Uniquement les utilisateurs qui...';
+$lang_admin['sched.move_to_group']	= 'Vers';
+$lang_admin['sched.trash_desc']	= 'Vider toutes les corbeilles des utilisateurs qui...';
+$lang_admin['sched.spam_desc']		= 'Vider tous les dossiers spam des utilisateurs qui...';
+$lang_admin['sched.keep_last']		= 'Conserver les derniers';
+$lang_admin['sched.task.db_optimize']	= 'Base de donn&eacute;es : optimiser';
+$lang_admin['sched.task.db_repair']	= 'Base de donn&eacute;es : r&eacute;parer';
+$lang_admin['sched.task.db_struct']	= 'Base de donn&eacute;es : r&eacute;parer la structure';
+$lang_admin['sched.task.fs_cleanup']	= 'Nettoyer les fichiers temporaires';
+$lang_admin['sched.task.cc_cleanup']	= 'Vider le cache';
+$lang_admin['sched.task.us_lock']	= 'Utilisateurs inactifs : bloquer';
+$lang_admin['sched.task.us_move']	= 'Utilisateurs inactifs : d&eacute;placer vers un groupe';
+$lang_admin['sched.task.us_delete']	= 'Utilisateurs inactifs : supprimer';
+$lang_admin['sched.task.us_na_delete']	= 'Utilisateurs non activ&eacute;s : supprimer';
+$lang_admin['sched.task.us_nl_delete']	= 'Utilisateurs sans connexion : supprimer';
+$lang_admin['sched.task.tr_delete']	= 'Vider la corbeille';
+$lang_admin['sched.task.tr_sp_delete']	= 'Vider le dossier spam';
+$lang_admin['sched.task.lg_archive']	= 'Archiver les journaux';
+$lang_admin['sched.task.lg_bs_archive']	= 'Archiver les journaux (b1gMailServer)';
+$lang_admin['sched.task.se_delete']	= 'Supprimer les sessions';
+$lang_admin['sched.task.st_reset']	= 'R&eacute;initialiser les statistiques';
+$lang_admin['sched.logging']		= 'Journalisation';
+$lang_admin['sched.logging_debug']	= 'Journaliser les messages de d&eacute;bogage';
+$lang_admin['sched.logging_notices']	= 'Journaliser les notices';
+$lang_admin['sched.logging_warnings']	= 'Journaliser les avertissements';
+$lang_admin['sched.logging_errors']	= 'Journaliser les erreurs';
 $lang_admin['inactiveusers']	= 'Inactive users';
 $lang_admin['trash']			= 'Trash';
 $lang_admin['pop3gateway']		= 'POP3 gateway';
@@ -2099,6 +2198,13 @@ $lang_admin['structstorage']	= 'Structured storage';
 $lang_admin['structrec']	 	= 'The PHP safe mode is disabled. Under these circumstances the structured data storage will enhance performance. Enabling the structured data storage is recommended.';
 $lang_admin['dnsblreq']			= 'Required positive tests';
 $lang_admin['croninterval']		= 'Minimum cronjob interval';
+$lang_admin['cronauth']			= 'Appel du cron';
+$lang_admin['cronauthdesc']		= 'CLI et requêtes depuis localhost ou l’IP du serveur fonctionnent sans clé. Les autres appels HTTP nécessitent la clé (crontab : wget/curl avec ?key=…).';
+$lang_admin['croncli']			= 'CLI (crontab)';
+$lang_admin['cronhttp']			= 'HTTP avec clé';
+$lang_admin['cronregen']		= 'Régénérer la clé';
+$lang_admin['clientapi']		= 'API Toolbox';
+$lang_admin['clientapidesc']	= 'Autoriser interface/clientapi.php pour l’ancienne BMToolbox. Désactivé à l’installation (pas de serveur de build). À activer seulement si des clients Toolbox sont encore utilisés.';
 $lang_admin['logouturl']		= 'Logout URL';
 $lang_admin['addtype']			= 'Add type';
 $lang_admin['price']			= 'Price';

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\DAV\Xml\Request;
 
 use Sabre\Xml\Element;
@@ -17,8 +19,8 @@ use Sabre\Xml\Writer;
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class PropPatch implements Element {
-
+class PropPatch implements Element
+{
     /**
      * The list of properties that will be updated and removed.
      *
@@ -29,12 +31,12 @@ class PropPatch implements Element {
     public $properties = [];
 
     /**
-     * The xmlSerialize metod is called during xml writing.
+     * The xmlSerialize method is called during xml writing.
      *
      * Use the $writer argument to write its own xml serialization.
      *
      * An important note: do _not_ create a parent element. Any element
-     * implementing XmlSerializble should only ever write what's considered
+     * implementing XmlSerializable should only ever write what's considered
      * its 'inner xml'.
      *
      * The parent of the current element is responsible for writing a
@@ -43,32 +45,26 @@ class PropPatch implements Element {
      * This allows serializers to be re-used for different element names.
      *
      * If you are opening new elements, you must also close them again.
-     *
-     * @param Writer $writer
-     * @return void
      */
-    function xmlSerialize(Writer $writer) {
-
+    public function xmlSerialize(Writer $writer)
+    {
         foreach ($this->properties as $propertyName => $propertyValue) {
-
             if (is_null($propertyValue)) {
-                $writer->startElement("{DAV:}remove");
+                $writer->startElement('{DAV:}remove');
                 $writer->write(['{DAV:}prop' => [$propertyName => $propertyValue]]);
                 $writer->endElement();
             } else {
-                $writer->startElement("{DAV:}set");
+                $writer->startElement('{DAV:}set');
                 $writer->write(['{DAV:}prop' => [$propertyName => $propertyValue]]);
                 $writer->endElement();
             }
-
         }
-
     }
 
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -83,36 +79,31 @@ class PropPatch implements Element {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $self = new self();
 
         $elementMap = $reader->elementMap;
-        $elementMap['{DAV:}prop']   = 'Sabre\DAV\Xml\Element\Prop';
-        $elementMap['{DAV:}set']    = 'Sabre\Xml\Element\KeyValue';
-        $elementMap['{DAV:}remove'] = 'Sabre\Xml\Element\KeyValue';
+        $elementMap['{DAV:}prop'] = \Sabre\DAV\Xml\Element\Prop::class;
+        $elementMap['{DAV:}set'] = \Sabre\Xml\Element\KeyValue::class;
+        $elementMap['{DAV:}remove'] = \Sabre\Xml\Element\KeyValue::class;
 
         $elems = $reader->parseInnerTree($elementMap);
 
         foreach ($elems as $elem) {
-            if ($elem['name'] === '{DAV:}set') {
+            if ('{DAV:}set' === $elem['name']) {
                 $self->properties = array_merge($self->properties, $elem['value']['{DAV:}prop']);
             }
-            if ($elem['name'] === '{DAV:}remove') {
-
+            if ('{DAV:}remove' === $elem['name']) {
                 // Ensuring there are no values.
                 foreach ($elem['value']['{DAV:}prop'] as $remove => $value) {
                     $self->properties[$remove] = null;
                 }
-
             }
         }
 
         return $self;
-
     }
-
 }

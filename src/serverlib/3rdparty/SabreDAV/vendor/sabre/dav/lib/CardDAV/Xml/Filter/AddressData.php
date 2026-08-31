@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CardDAV\Xml\Filter;
 
 use Sabre\Xml\Reader;
@@ -21,12 +23,12 @@ use Sabre\Xml\XmlDeserializable;
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class AddressData implements XmlDeserializable {
-
+class AddressData implements XmlDeserializable
+{
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -41,19 +43,24 @@ class AddressData implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $result = [
             'contentType' => $reader->getAttribute('content-type') ?: 'text/vcard',
-            'version'     => $reader->getAttribute('version') ?: '3.0',
+            'version' => $reader->getAttribute('version') ?: '3.0',
         ];
 
-        $reader->next();
+        $elems = (array) $reader->parseInnerTree();
+        $elems = array_filter($elems, function ($element) {
+            return '{urn:ietf:params:xml:ns:carddav}prop' === $element['name'] &&
+                isset($element['attributes']['name']);
+        });
+        $result['addressDataProperties'] = array_map(function ($element) {
+            return $element['attributes']['name'];
+        }, $elems);
+
         return $result;
-
     }
-
 }

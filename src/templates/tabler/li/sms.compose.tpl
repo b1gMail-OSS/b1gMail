@@ -1,4 +1,5 @@
-<form name="f1" method="post" action="sms.php?action=sendSMS&sid={$sid}" class="bm-compose-form" onreset="return askReset();">
+<form name="f1" method="post" action="{sessionurl file='sms.php' params='action=sendSMS'}" class="bm-compose-form" onreset="return askReset();">
+	{csrffield}
 
 <div id="contentHeader" class="contentHeader bm-compose-header">
 	<div class="left">
@@ -6,7 +7,7 @@
 		{lng p="sendsms"}
 	</div>
 	<div class="right bm-compose-header-tools">
-		<select name="type" id="type" class="form-select form-select-sm bm-compose-control" onchange="smsTypeChanged()">
+		<select name="smsType" id="smsType" class="form-select form-select-sm bm-compose-control" onchange="smsTypeChanged()">
 		{foreach from=$smsTypes key=typeID item=type}
 			<option value="{$typeID}"{if $type.default} selected="selected"{/if}>{text value=$type.title} ({$type.price} {lng p="credits"})</option>
 		{/foreach}

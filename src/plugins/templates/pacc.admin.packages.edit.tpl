@@ -1,10 +1,16 @@
+{if $paccMsg}
+<div class="alert alert-{$paccMsg.type} mb-3" role="alert">{$paccMsg.text}</div>
+{/if}
+
 <script src="../clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
 <script type="text/javascript" src="../clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
 
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 
-	<form action="{$pageURL}&action=packages&do=edit&save=true&id={$package.id}&sid={$sid}" method="post" onsubmit="submitEditors();spin(this)">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages&action=edit&id={$package.id}"}" method="post" onsubmit="submitEditors();spin(this)">
+		{csrffield}
+		<input type="hidden" name="save" value="1" />
 
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
@@ -178,7 +184,10 @@
 		{/foreach}
 
 		<div class="text-end">
-			<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
+			<button type="submit" class="btn btn-primary">
+				<i class="ti ti-device-floppy me-1"></i>
+				{lng p="save"}
+			</button>
 		</div>
 	</form>
 </fieldset>

@@ -5,12 +5,12 @@
     "homepage" : "https://sabre.io/xml/",
     "license" : "BSD-3-Clause",
     "require" : {
-        "php" : ">=5.4.1",
+        "php" : "^7.1 || ^8.0",
         "ext-xmlwriter" : "*",
         "ext-xmlreader" : "*",
         "ext-dom" : "*",
         "lib-libxml" : ">=2.6.20",
-        "sabre/uri" : "~1.0"
+        "sabre/uri" : ">=1.0,<3.0.0"
     },
     "authors" : [
         {
@@ -38,13 +38,30 @@
             "lib/Serializer/functions.php"
         ]
     },
-    "bin" : [
-    ],
-    "require-dev": {
-        "sabre/cs": "~0.0.2",
-        "phpunit/phpunit" : "*"
+    "autoload-dev" : {
+        "psr-4" : {
+            "Sabre\\Xml\\" : "tests/Sabre/Xml/"
+        }
     },
-    "config" : {
-        "bin-dir" : "bin/"
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "~2.17.1||3.63.2",
+        "phpstan/phpstan": "^0.12",
+        "phpunit/phpunit" : "^7.5 || ^8.5 || ^9.6"
+    },
+    "scripts": {
+        "phpstan": [
+            "phpstan analyse lib tests"
+        ],
+        "cs-fixer": [
+            "PHP_CS_FIXER_IGNORE_ENV=true php-cs-fixer fix"
+        ],
+        "phpunit": [
+            "phpunit --configuration tests/phpunit.xml"
+        ],
+        "test": [
+            "composer phpstan",
+            "composer cs-fixer",
+            "composer phpunit"
+        ]
     }
 }

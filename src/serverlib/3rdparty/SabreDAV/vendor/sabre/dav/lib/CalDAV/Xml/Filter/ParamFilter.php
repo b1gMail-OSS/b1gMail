@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Filter;
 
+use Sabre\CalDAV\Plugin;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
-use Sabre\CalDAV\Plugin;
 
 /**
  * PropFilter parser.
@@ -20,12 +22,12 @@ use Sabre\CalDAV\Plugin;
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class ParamFilter implements XmlDeserializable {
-
+class ParamFilter implements XmlDeserializable
+{
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -40,15 +42,14 @@ class ParamFilter implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $result = [
-            'name'           => null,
+            'name' => null,
             'is-not-defined' => false,
-            'text-match'     => null,
+            'text-match' => null,
         ];
 
         $att = $reader->parseAttributes();
@@ -56,27 +57,23 @@ class ParamFilter implements XmlDeserializable {
 
         $elems = $reader->parseInnerTree();
 
-        if (is_array($elems)) foreach ($elems as $elem) {
-
-            switch ($elem['name']) {
-
-                case '{' . Plugin::NS_CALDAV . '}is-not-defined' :
+        if (is_array($elems)) {
+            foreach ($elems as $elem) {
+                switch ($elem['name']) {
+                case '{'.Plugin::NS_CALDAV.'}is-not-defined':
                     $result['is-not-defined'] = true;
                     break;
-                case '{' . Plugin::NS_CALDAV . '}text-match' :
+                case '{'.Plugin::NS_CALDAV.'}text-match':
                     $result['text-match'] = [
-                        'negate-condition' => isset($elem['attributes']['negate-condition']) && $elem['attributes']['negate-condition'] === 'yes',
-                        'collation'        => isset($elem['attributes']['collation']) ? $elem['attributes']['collation'] : 'i;ascii-casemap',
-                        'value'            => $elem['value'],
+                        'negate-condition' => isset($elem['attributes']['negate-condition']) && 'yes' === $elem['attributes']['negate-condition'],
+                        'collation' => isset($elem['attributes']['collation']) ? $elem['attributes']['collation'] : 'i;ascii-casemap',
+                        'value' => $elem['value'],
                     ];
                     break;
-
             }
-
+            }
         }
 
         return $result;
-
     }
-
 }

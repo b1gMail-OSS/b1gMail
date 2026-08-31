@@ -195,25 +195,25 @@ class BMUser
 			time());
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
-			switch ($row['icon']) {
-				case '%%tpldir%%images/li/notify_newemail.png':
-					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_newemail.png', 'fa-envelope-square', $row['icon']);
-					break;
-				case '%%tpldir%%images/li/notify_email.png':
-					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_email.png', 'fa-envelope-o', $row['icon']);
-					break;
-				case '%%tpldir%%images/li/notify_birthday.png':
-					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_birthday.png', 'fa-birthday-cake', $row['icon']);
-					break;
-				case '%%tpldir%%images/li/notify_calendar.png':
-					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_calendar.png', 'fa-calendar', $row['icon']);
-					break;
-				case '%%tpldir%%images/li/notify_webdisk.png':
-					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_webdisk.png', 'fa-cloud', $row['icon']);
-					break;
-				case '%%tpldir%%images/li/notify_webdisk_download.png':
-					$row['faIcon'] = str_replace('%%tpldir%%images/li/notify_webdisk_download.png', 'fa-download', $row['icon']);
-					break;
+			if($row['icon'] !== '')
+			{
+				static $notificationFaIcons = null;
+				if($notificationFaIcons === null)
+				{
+					$notificationFaIcons = array(
+						'notify_newemail.png'			=> 'fa-envelope-square',
+						'notify_email.png'				=> 'fa-envelope-o',
+						'notify_birthday.png'			=> 'fa-birthday-cake',
+						'notify_calendar.png'			=> 'fa-calendar',
+						'notify_webdisk.png'			=> 'fa-cloud',
+						'notify_webdisk_download.png'	=> 'fa-download',
+						'notify_datenschutz.png'		=> 'fa-user-shield',
+						'datenschutz.png'				=> 'fa-user-shield',
+						'supportsystem.png'				=> 'fa-ticket',
+					);
+				}
+				$iconBase = basename($row['icon']);
+				$row['faIcon'] = $notificationFaIcons[$iconBase] ?? 'fa-bell';
 			}
 			$row['icon'] = str_replace('%%tpldir%%', $tpl->tplDir, $row['icon']);
 
@@ -221,6 +221,9 @@ class BMUser
 				$row['text_phrase'] = $lang_custom[ $row['text_phrase'] ];
 
 			$row['text'] = vsprintf($row['text_phrase'], ExplodeOutsideOfQuotation($row['text_params'], ','));
+
+			if($row['link'] != '')
+				$row['link'] = SessionUrl(rtrim($row['link'], '&'));
 
 			$row['old'] = $row['read'] && $row['date'] < mktime(0, 0, 0);
 
@@ -553,133 +556,231 @@ class BMUser
 	}
 
 	/**
-	 * password reset / activation
-	 *
-	 * @param int $userID User ID
-	 * @param string $resetKey Reset key
+	 * @param string $token
+	 * @return bool
 	 */
-	public static function ResetPassword($userID, $resetKey)
+	public static function ResetTokenIsValidFormat($token)
 	{
-		global $db;
-
-		$result = false;
-
-		// prepare variables
-		$userID = (int)$userID;
-		$resetKey = trim($resetKey);
-
-		// do not accept empty keys
-		if(strlen($resetKey) == 32
-			&& $userID > 0)
-		{
-			// check key, activate password
-			$db->Query('UPDATE {pre}users SET passwort=pw_reset_new,pw_reset_new=?,pw_reset_key=? WHERE id=? AND LENGTH(pw_reset_new)=32 AND LENGTH(pw_reset_key)=32 AND pw_reset_key=?',
-				'',
-				'',
-				$userID,
-				$resetKey);
-			$result = ($db->AffectedRows() == 1);
-		}
-
-		// log & return
-		if($result)
-		{
-			// log
-			PutLog(sprintf('Password reset for user <%d> confirmed (key: %s, IP: %s)',
-				$userID,
-				$resetKey,
-				$_SERVER['REMOTE_ADDR']),
-				PRIO_NOTE,
-				__FILE__,
-				__LINE__);
-			return(true);
-		}
-		else
-		{
-			// log
-			PutLog(sprintf('Password reset for user <%d> failed (key: %s, IP: %s)',
-				$userID,
-				$resetKey,
-				$_SERVER['REMOTE_ADDR']),
-				PRIO_NOTE,
-				__FILE__,
-				__LINE__);
-			return(false);
-		}
+		return is_string($token) && strlen($token) === 64 && ctype_xdigit($token);
 	}
 
 	/**
-	 * password reset request
+	 * @param string $token
+	 * @return string
+	 */
+	public static function ResetTokenHash($token)
+	{
+		return hash('sha256', $token);
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function ClearPwResetState($userID)
+	{
+		global $db;
+
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return;
+
+		$db->Query('UPDATE {pre}users SET pw_reset_new=?,pw_reset_key=?,pw_reset_expires=? WHERE id=?',
+			'',
+			'',
+			0,
+			$userID);
+	}
+
+	/**
+	 * Look up a valid, unexpired reset token. Does not consume it.
+	 *
+	 * @param string $token
+	 * @return int User ID or 0
+	 */
+	public static function FindUserByResetToken($token)
+	{
+		global $db;
+
+		$token = trim((string)$token);
+		if(!self::ResetTokenIsValidFormat($token))
+			return 0;
+
+		$hash = self::ResetTokenHash($token);
+		$res = $db->Query('SELECT id,pw_reset_key,pw_reset_expires FROM {pre}users WHERE pw_reset_key=? LIMIT 1',
+			$hash);
+		if($res->RowCount() != 1)
+		{
+			$res->Free();
+			return 0;
+		}
+
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		if(!hash_equals(trim((string)$row['pw_reset_key']), $hash))
+			return 0;
+
+		$userID = (int)$row['id'];
+		if((int)$row['pw_reset_expires'] < time())
+		{
+			self::ClearPwResetState($userID);
+			return 0;
+		}
+
+		return $userID;
+	}
+
+	/**
+	 * Set a new password from a reset token and invalidate the token.
+	 *
+	 * @param string $token
+	 * @param string $newPassword Plain password in the current charset
+	 * @return bool
+	 */
+	public static function CompletePasswordReset($token, $newPassword)
+	{
+		$userID = self::FindUserByResetToken($token);
+		if($userID <= 0)
+		{
+			PutLog(sprintf('Password reset failed (invalid or expired token, IP: %s)',
+				isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+				PRIO_NOTE,
+				__FILE__,
+				__LINE__);
+			return false;
+		}
+
+		PasswordHashSetUserPassword($userID, $newPassword);
+		self::ClearPwResetState($userID);
+		self::InvalidateAuthForUser($userID);
+
+		if(BMMfa::RecoveryEmailForUser($userID) !== false)
+			BMMfa::ResetAccount('user', $userID, 'invalidate_totp', array('setup_required' => true));
+		else
+			BMMfa::ResetAccount('user', $userID, 'full', array('setup_required' => true));
+
+		PutLog(sprintf('Password reset for user <%d> confirmed (IP: %s)',
+			$userID,
+			isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+			PRIO_NOTE,
+			__FILE__,
+			__LINE__);
+		return true;
+	}
+
+	/**
+	 * IP rate limit for lost-password requests (5 / 15 minutes).
+	 *
+	 * @return bool
+	 */
+	public static function LostPasswordRateLimitAllow()
+	{
+		$ip = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '0';
+		$dir = B1GMAIL_DIR . 'temp/';
+		if(!is_dir($dir) || !is_writable($dir))
+			return true;
+
+		$file = $dir . 'pwreset_rl_' . hash('sha256', $ip) . '.tmp';
+		$now = time();
+		$window = 15 * TIME_ONE_MINUTE;
+		$max = 5;
+
+		$times = array();
+		if(is_file($file))
+		{
+			$raw = @file_get_contents($file);
+			$decoded = json_decode((string)$raw, true);
+			if(is_array($decoded))
+				$times = $decoded;
+		}
+
+		$fresh = array();
+		foreach($times as $stamp)
+		{
+			if((int)$stamp > $now - $window)
+				$fresh[] = (int)$stamp;
+		}
+		$fresh[] = $now;
+
+		@file_put_contents($file, json_encode($fresh), LOCK_EX);
+
+		return count($fresh) <= $max;
+	}
+
+	/**
+	 * password reset request (no plaintext password; always safe to treat as success in the UI)
 	 *
 	 * @param string $email User's E-Mail address
-	 * @return bool
+	 * @return bool True only if a mail was actually sent
 	 */
 	public static function LostPassword($email)
 	{
 		global $db, $bm_prefs, $lang_custom;
 
-		// user ID?
+		if(!self::LostPasswordRateLimitAllow())
+			return false;
+
 		$userID = BMUser::GetID($email, true);
-		if($userID > 0)
+		if($userID <= 0)
+			return false;
+
+		$res = $db->Query('SELECT altmail,vorname,nachname,anrede,pw_reset_expires FROM {pre}users WHERE id=?',
+			$userID);
+		if($res->RowCount() != 1)
 		{
-			// get alt. mail address
-			$res = $db->Query('SELECT altmail,vorname,nachname,anrede,passwort_salt FROM {pre}users WHERE id=?',
-				$userID);
-			list($altMail, $firstName, $lastName, $salutation, $salt) = $res->FetchArray(MYSQLI_NUM);
 			$res->Free();
+			return false;
+		}
+		list($altMail, $firstName, $lastName, $salutation, $resetExpires) = $res->FetchArray(MYSQLI_NUM);
+		$res->Free();
 
-			// extract mail address
-			$altMail = ExtractMailAddress($altMail);
+		if((int)$resetExpires > time())
+			return false;
 
-			// alt mail specified?
-			if(strlen(trim($altMail)) > 5)
-			{
-				// generate new password
-				$pwResetNew = '';
-				for($i=0; $i<PASSWORD_LENGTH; $i++)
-					$pwResetNew .= substr(PASSWORD_CHARS, mt_rand(0, strlen(PASSWORD_CHARS)-1), 1);
+		$altMail = ExtractMailAddress(DecodeEMail($altMail));
+		if(strlen(trim($altMail)) <= 5)
+			return false;
 
-				// generate key
-				$pwResetKey = GenerateRandomKey('pwResetKey');
+		$token = bin2hex(random_bytes(32));
+		$hash = self::ResetTokenHash($token);
+		$expires = time() + TIME_ONE_HOUR;
 
-				// update row
-				$db->Query('UPDATE {pre}users SET pw_reset_new=?,pw_reset_key=? WHERE id=?',
-					md5(md5($pwResetNew).$salt),
-					$pwResetKey,
-					$userID);
+		$db->Query('UPDATE {pre}users SET pw_reset_new=?,pw_reset_key=?,pw_reset_expires=? WHERE id=?',
+			'',
+			$hash,
+			$expires,
+			$userID);
 
-				// link
-				$vars = array(
-					'mail'		=> DecodeEMail($email),
-					'anrede'	=> ucfirst($salutation),
-					'vorname'	=> $firstName,
-					'nachname'	=> $lastName,
-					'passwort'	=> $pwResetNew,
-					'link'		=> sprintf('%sindex.php?action=resetPassword&user=%d&key=%s',
-						$bm_prefs['selfurl'],
-						$userID,
-						$pwResetKey)
-				);
-				if(SystemMail($bm_prefs['passmail_abs'],
-					$altMail,
-					$lang_custom['passmail_sub'],
-					'passmail_text',
-					$vars))
-				{
-					// log
-					PutLog(sprintf('User <%s> (%d) requested password reset (IP: %s)',
-						$email,
-						$userID,
-						$_SERVER['REMOTE_ADDR']),
-						PRIO_NOTE,
-						__FILE__,
-						__LINE__);
-					return(true);
-				}
-			}
+		$vars = array(
+			'mail'		=> DecodeEMail($email),
+			'anrede'	=> ucfirst($salutation),
+			'vorname'	=> $firstName,
+			'nachname'	=> $lastName,
+			'passwort'	=> '',
+			'link'		=> NliUrl('index.php', array(
+				'action' => 'resetPassword',
+				'key'    => $token,
+			)),
+		);
+
+		if(SystemMail($bm_prefs['passmail_abs'],
+			$altMail,
+			$lang_custom['passmail_sub'],
+			'passmail_text',
+			$vars))
+		{
+			PutLog(sprintf('User <%s> (%d) requested password reset (IP: %s)',
+				$email,
+				$userID,
+				isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+				PRIO_NOTE,
+				__FILE__,
+				__LINE__);
+			return true;
 		}
 
-		return(false);
+		self::ClearPwResetState($userID);
+		return false;
 	}
 
 	/**
@@ -702,7 +803,7 @@ class BMUser
 	 * @param bool $allowNotification
 	 * @return int User ID
 	 */
-	public static function CreateAccount($email, $firstname, $surname, $street, $no, $zip, $city, $country, $phone, $fax, $altmail, $mobile_nr, $password, $profilefields = array(), $allowNotification = true, $c_uid = '', $salutation = '', $createLocked = false)
+	public static function CreateAccount($email, $firstname, $surname, $street, $no, $zip, $city, $country, $phone, $fax, $altmail, $mobile_nr, $password, $profilefields = array(), $allowNotification = true, $c_uid = '', $salutation = '', $createLocked = false, $company = '', $taxid = '')
 	{
 		global $db, $bm_prefs, $currentCharset, $currentLanguage, $lang_custom;
 
@@ -744,12 +845,13 @@ class BMUser
 			else
 				$ValidationCode = '';
 
-			// create salt
-			$salt = GenerateRandomSalt(8);
+			$passwordHash = PasswordHashCreate(
+				CharsetDecode($password, false, 'ISO-8859-15'),
+				'li');
 
 			// create account
-			$db->Query('INSERT INTO {pre}users(email,vorname,nachname,strasse,hnr,plz,ort,land,tel,fax,altmail,mail2sms_nummer,passwort,passwort_salt,gruppe,gesperrt,mail2sms,c_firstday,lastlogin,reg_ip,reg_date,profilfelder,datumsformat,charset,language,soforthtml,uid,sms_validation_code,sms_validation_last_send,sms_validation_send_times,anrede,preview) '
-						. 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,\'no\',\'1\',?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+			$db->Query('INSERT INTO {pre}users(email,vorname,nachname,strasse,hnr,plz,ort,land,tel,fax,altmail,mail2sms_nummer,passwort,passwort_salt,gruppe,gesperrt,mail2sms,c_firstday,lastlogin,reg_ip,reg_date,profilfelder,datumsformat,charset,language,soforthtml,uid,sms_validation_code,sms_validation_last_send,sms_validation_send_times,anrede,preview,company,taxid) '
+						. 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,\'no\',\'1\',?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
 						$email,
 						$firstname,
 						$surname,
@@ -762,8 +864,8 @@ class BMUser
 						$fax,
 						$altmail,
 						$mobile_nr,
-						!LooksLikeMD5Hash($password) ? md5(md5($password).$salt) : md5($password.$salt),
-						$salt,
+						$passwordHash,
+						'',
 						$bm_prefs['std_gruppe'],
 						$userStatus,
 						0,
@@ -779,8 +881,12 @@ class BMUser
 						$ValidationCode != '' ? time() : 0,
 						0,
 						$salutation,
-						'yes');
+						'yes',
+						$company,
+						$taxid);
 			$uid = $db->InsertId();
+			if(function_exists('ClientApiRememberPassword'))
+				ClientApiRememberPassword((int)$uid, $password);
 
 			// prefs
 			if($bm_prefs['hotkeys_default'] == 'yes')
@@ -1143,6 +1249,89 @@ class BMUser
 	}
 
 	/**
+	 * @param string $hash
+	 * @return bool
+	 */
+	public static function PasswordIsModern($hash)
+	{
+		return is_string($hash) && strlen($hash) >= 4 && $hash[0] === '$';
+	}
+
+	/**
+	 * Verify a user password against a DB row (MD5 legacy or password_hash).
+	 *
+	 * @param string $passwordPlain
+	 * @param array  $row
+	 * @return bool
+	 */
+	public static function VerifyPassword($passwordPlain, $row)
+	{
+		if(!is_array($row) || !isset($row['passwort']))
+			return false;
+
+		$passwordPlain = CharsetDecode($passwordPlain, false, 'ISO-8859-15');
+
+		if(self::PasswordIsModern($row['passwort']))
+			return password_verify($passwordPlain, $row['passwort']);
+
+		$password = md5($passwordPlain);
+		$salt = isset($row['passwort_salt']) ? $row['passwort_salt'] : '';
+		$saltedPassword = md5($password . $salt);
+
+		return strtolower($row['passwort']) === strtolower($saltedPassword);
+	}
+
+	/**
+	 * Verify password for session unlock (DB hash + plugin auth, same rules as login).
+	 *
+	 * @param int    $userID
+	 * @param string $passwordPlain
+	 * @return bool
+	 */
+	public static function AuthenticatePasswordForSession($userID, $passwordPlain)
+	{
+		global $db;
+
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return false;
+
+		$passwordPlain = trim((string)$passwordPlain);
+		if($passwordPlain === '')
+			return false;
+
+		$passwordPlainDecoded = CharsetDecode($passwordPlain, false, 'ISO-8859-15');
+		$passwordMD5 = md5($passwordPlainDecoded);
+
+		$res = $db->Query('SELECT id,email,passwort,passwort_salt FROM {pre}users WHERE id=?', $userID);
+		if($res->RowCount() != 1)
+		{
+			$res->Free();
+			return false;
+		}
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		$pluginAuth = self::_pluginAuth($row['email'], $passwordMD5, $passwordPlainDecoded);
+		if(is_array($pluginAuth))
+			return true;
+
+		return self::VerifyPassword($passwordPlain, $row);
+	}
+
+	/**
+	 * Upgrade legacy MD5 password hashes after successful login.
+	 *
+	 * @param int    $userID
+	 * @param string $passwordPlain
+	 * @param array  $row
+	 */
+	public static function RehashPasswordIfNeeded($userID, $passwordPlain, $row)
+	{
+		PasswordHashUpgradeUser((int)$userID, $passwordPlain, $row);
+	}
+
+	/**
 	 * login a user
 	 *
 	 * @param string $email E-Mail
@@ -1161,7 +1350,7 @@ class BMUser
 		$result = array(USER_DOES_NOT_EXIST, false);
 		$row = false;
 		$userID = 0;
-		$password = LooksLikeMD5Hash($passwordPlain) ? $passwordPlain : md5($passwordPlain);
+		$password = md5($passwordPlain);
 
 		// try plugin authentication first
 		$pluginAuth = BMUser::_pluginAuth($email, $password, $passwordPlain);
@@ -1217,40 +1406,23 @@ class BMUser
 
 		if(isset($row) && $userID > 0)
 		{
-			$adminAuthOK = false;
-			if(isset($_REQUEST['adminAuth']))
+			$adminAuthOK = !empty($_REQUEST['impersonate'])
+				&& self::ConsumeAdminImpersonationGrant($userID);
+
+			if($adminAuthOK)
+				return self::LoginByUserID($userID, $createSession, $successLog, true);
+
+			$passwordOK = false;
+			if(trim($passwordPlain) !== '')
 			{
-				$adminAuth = @explode(',', @base64_decode($_REQUEST['adminAuth']));
-
-				if(is_array($adminAuth) && count($adminAuth) == 3 && $adminAuth[0] == $userID)
-				{
-					$ares = $db->Query('SELECT * FROM {pre}admins WHERE `adminid`=?', $adminAuth[1]);
-					while($arow = $ares->FetchArray(MYSQLI_ASSOC))
-					{
-						$adminPrivs = @unserialize($arow['privileges']);
-						if(!is_array($adminPrivs)) $adminPrivs = array();
-						if($arow['type'] != 0 && !in_array('users', $adminPrivs)) continue;
-
-						$correctToken = md5(sprintf('%d,%d', $userID, $adminAuth[1]).md5($arow['password'].$_SERVER['HTTP_USER_AGENT']));
-
-						if($correctToken === $adminAuth[2])
-							$adminAuthOK = true;
-					}
-					$ares->Free();
-				}
-			}
-
-			if($skipSalting)
-			{
-				$saltedPassword = $passwordPlain;
-			}
-			else
-			{
-				$saltedPassword = md5($password.$row['passwort_salt']);
+				if($skipSalting)
+					$passwordOK = strtolower($row['passwort']) === strtolower($passwordPlain);
+				else
+					$passwordOK = BMUser::VerifyPassword($passwordPlain, $row);
 			}
 
 			// user exists
-			if((strtolower($row['passwort']) === strtolower($saltedPassword) || $adminAuthOK)
+			if($passwordOK
 				&& ($row['last_login_attempt'] < 100 || $row['last_login_attempt']+ACCOUNT_LOCK_TIME < time()))
 			{
 				// validation unlock?
@@ -1273,6 +1445,11 @@ class BMUser
 					if(!isset($availableLanguages[$userLanguage]))
 						$userLanguage = false;
 
+					if(!$adminAuthOK && !$skipSalting)
+						BMUser::RehashPasswordIfNeeded($userID, $passwordPlain, $row);
+
+					$mfaDeferred = false;
+
 					// okay => update user row
 					$db->Query('UPDATE {pre}users SET ip=?,lastlogin=?,last_login_attempt=0,charset=?,language=?,last_timezone=? WHERE id=?',
 						$adminAuthOK ? $row['ip'] : $_SERVER['REMOTE_ADDR'],
@@ -1285,31 +1462,53 @@ class BMUser
 					// create session
 					if($createSession)
 					{
-						@session_start();
-						$sessionID = session_id();
+						$mfaDeferred = false;
+						if(!$adminAuthOK
+							&& BMMfa::DeferUserLoginForMfa($userID, $row, $passwordPlain))
+							$mfaDeferred = true;
 
-						if($bm_prefs['cookie_lock'] == 'yes')
+						if(!$mfaDeferred)
 						{
-							$sessionSecret = GenerateRandomKey('sessionSecret');
-							setcookie('sessionSecret_'.substr($sessionID, 0, 16), $sessionSecret, 0, '/');
-							$_COOKIE['sessionSecret_'.substr($sessionID, 0, 16)] = $sessionSecret;
+							BMMfa::ClearPending();
+							@session_start();
+							SessionRegenerateOnLogin();
+							$sessionID = session_id();
+
+							if($bm_prefs['cookie_lock'] == 'yes')
+							{
+								$sessionSecret = GenerateRandomKey('sessionSecret');
+								$secretCookie = 'sessionSecret_'.substr($sessionID, 0, 16);
+								$_COOKIE[$secretCookie] = $sessionSecret;
+								$_SESSION['bm_sessionCookieSecret'] = $sessionSecret;
+								BMSecureSetCookie($secretCookie, $sessionSecret, 0);
+							}
+
+							$_SESSION['bm_userLoggedIn']	= true;
+							$_SESSION['bm_userID']			= $userID;
+							$_SESSION['bm_sessionToken']	= SessionToken();
+							$_SESSION['bm_xorCryptKey']		= BMUser::GenerateXORCryptKey($userID, $passwordPlain);
+							BMUser::SyncSessionEpochToSession($userID);
+							SessionInitLoginTimestamps(false);
+
+							if($userLanguage)
+								$_SESSION['bm_sessionLanguage'] = $userLanguage;
+
+							$groupID = (int)$row['gruppe'];
+							BMMfa::ClearStaleSetupRequired('user', $userID);
+							BMMfa::SyncSetupRequiredSession($userID, $groupID);
+							if(empty($_SESSION['bm_mfaSetupRequired']) && class_exists('BMLoginNotify'))
+								BMLoginNotify::OnSuccessfulLogin('user', $userID, DecodeEMail($email), $groupID);
 						}
-
-						$_SESSION['bm_userLoggedIn']	= true;
-						$_SESSION['bm_userID']			= $userID;
-						$_SESSION['bm_loginTime']		= time();
-						$_SESSION['bm_sessionToken']	= SessionToken();
-						$_SESSION['bm_xorCryptKey']		= BMUser::GenerateXORCryptKey($userID, $passwordPlain);
-
-						if($userLanguage)
-							$_SESSION['bm_sessionLanguage'] = $userLanguage;
+						else
+							$sessionID = session_id();
 					}
 					else
 						$sessionID = $userID;
 
 					// set result
 					$result = array(USER_OK, $sessionID);
-					ModuleFunction('OnLogin', array($userID));
+					if(!$mfaDeferred)
+						ModuleFunction('OnLogin', array($userID));
 				}
 				else
 				{
@@ -1377,20 +1576,192 @@ class BMUser
 	}
 
 	/**
+	 * One-time, session-bound grant for ACP "login as user" (support).
+	 *
+	 * @param int $userID
+	 * @param int $adminID
+	 */
+	public static function CreateAdminImpersonationGrant($userID, $adminID)
+	{
+		SessionStart();
+		$_SESSION['bm_impersonateGrant'] = array(
+			'userID'	=> (int)$userID,
+			'adminID'	=> (int)$adminID,
+			'expires'	=> time() + 90
+		);
+	}
+
+	/**
+	 * Consume an ACP impersonation grant. Single-use, bound to the current
+	 * admin session; leftover URL tokens (adminAuth) are no longer accepted.
+	 *
+	 * @param int $userID
+	 * @return bool
+	 */
+	public static function ConsumeAdminImpersonationGrant($userID)
+	{
+		global $db;
+
+		SessionStart();
+
+		if(empty($_SESSION['bm_impersonateGrant']) || !is_array($_SESSION['bm_impersonateGrant']))
+			return false;
+
+		$grant = $_SESSION['bm_impersonateGrant'];
+		unset($_SESSION['bm_impersonateGrant']);
+
+		if((int)$grant['userID'] !== (int)$userID
+			|| (int)$grant['expires'] < time()
+			|| empty($_SESSION['bm_adminLoggedIn'])
+			|| (int)$_SESSION['bm_adminID'] !== (int)$grant['adminID'])
+			return false;
+
+		$ares = $db->Query('SELECT `type`,`privileges` FROM {pre}admins WHERE `adminid`=?',
+			(int)$grant['adminID']);
+		if($ares->RowCount() != 1)
+		{
+			$ares->Free();
+			return false;
+		}
+		$arow = $ares->FetchArray(MYSQLI_ASSOC);
+		$ares->Free();
+
+		$adminPrivs = @unserialize($arow['privileges']);
+		if(!is_array($adminPrivs))
+			$adminPrivs = array();
+		if((int)$arow['type'] != 0 && !in_array('users', $adminPrivs))
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * Login using a validated remember-me token (no password).
+	 *
+	 * @param int  $userID
+	 * @param bool $createSession
+	 * @param bool $successLog
+	 * @return array
+	 */
+	public static function LoginByUserID($userID, $createSession = true, $successLog = true, $adminImpersonate = false)
+	{
+		global $db, $currentCharset, $currentLanguage, $bm_prefs;
+
+		$userID = (int)$userID;
+		$result = array(USER_DOES_NOT_EXIST, false);
+
+		if($userID <= 0)
+			return($result);
+
+		$res = $db->Query('SELECT id,gesperrt,email,gruppe,last_login_attempt,preferred_language,last_timezone,ip,lastlogin FROM {pre}users WHERE id=? LIMIT 1',
+			$userID);
+		if($res->RowCount() != 1)
+			return($result);
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		if($row['gesperrt'] != 'no'
+			|| ($row['last_login_attempt'] >= 100 && $row['last_login_attempt'] + ACCOUNT_LOCK_TIME >= time()))
+		{
+			$result = array($row['gesperrt'] != 'no' ? USER_LOCKED : USER_LOGIN_BLOCK, false);
+			return($result);
+		}
+
+		$email = $row['email'];
+		$userLanguage = !empty($row['preferred_language']) ? $row['preferred_language'] : false;
+		$availableLanguages = GetAvailableLanguages();
+		if(!isset($availableLanguages[$userLanguage]))
+			$userLanguage = false;
+
+		$db->Query('UPDATE {pre}users SET ip=?,lastlogin=?,last_login_attempt=0,charset=?,language=?,last_timezone=? WHERE id=?',
+			$adminImpersonate ? $row['ip'] : $_SERVER['REMOTE_ADDR'],
+			$adminImpersonate ? $row['lastlogin'] : time(),
+			$currentCharset,
+			$userLanguage ? $userLanguage : $currentLanguage,
+			isset($_SESSION['bm_timezone']) ? (int)$_SESSION['bm_timezone'] : (isset($_REQUEST['timezone']) ? $_REQUEST['timezone'] : $row['last_timezone']),
+			$userID);
+
+		$mfaDeferred = false;
+		if($createSession)
+		{
+			if(!$adminImpersonate && BMMfa::DeferUserLoginForMfa($userID, $row, ''))
+				$mfaDeferred = true;
+			else
+			{
+				BMMfa::ClearPending();
+				@session_start();
+				SessionRegenerateOnLogin();
+				$sessionID = session_id();
+
+				if($bm_prefs['cookie_lock'] == 'yes')
+				{
+					$sessionSecret = GenerateRandomKey('sessionSecret');
+					$secretCookie = 'sessionSecret_'.substr($sessionID, 0, 16);
+					$_COOKIE[$secretCookie] = $sessionSecret;
+					$_SESSION['bm_sessionCookieSecret'] = $sessionSecret;
+					BMSecureSetCookie($secretCookie, $sessionSecret, 0);
+				}
+
+				$_SESSION['bm_userLoggedIn']	= true;
+				$_SESSION['bm_userID']			= $userID;
+				$_SESSION['bm_sessionToken']	= SessionToken();
+				BMUser::SyncSessionEpochToSession($userID);
+				SessionInitLoginTimestamps(false);
+
+				if($userLanguage)
+					$_SESSION['bm_sessionLanguage'] = $userLanguage;
+
+				$groupID = (int)$row['gruppe'];
+				BMMfa::ClearStaleSetupRequired('user', $userID);
+				BMMfa::SyncSetupRequiredSession($userID, $groupID);
+				if(empty($_SESSION['bm_mfaSetupRequired']) && class_exists('BMLoginNotify'))
+					BMLoginNotify::OnSuccessfulLogin('user', $userID, DecodeEMail($email), $groupID);
+			}
+			if($mfaDeferred)
+				$sessionID = session_id();
+		}
+		else
+			$sessionID = $userID;
+
+		$result = array(USER_OK, $sessionID);
+		if(!$mfaDeferred)
+			ModuleFunction('OnLogin', array($userID));
+
+		if($successLog)
+			PutLog(sprintf('Login attempt as <%s> succeeded (remember-me; IP: %s)',
+				$email,
+				$_SERVER['REMOTE_ADDR']), PRIO_NOTE, __FILE__, __LINE__);
+
+		return($result);
+	}
+
+	/**
 	 * log out
 	 *
 	 */
 	public function Logout()
 	{
-		ModuleFunction('OnLogout', array($_SESSION['bm_userID']));
+		$userID = isset($_SESSION['bm_userID']) ? (int) $_SESSION['bm_userID'] : -1;
+
+		ModuleFunction('OnLogout', array($userID));
+
+		if ($userID > 0) {
+			if (!class_exists('BMPush', false)) {
+				@include_once B1GMAIL_DIR.'serverlib/push.class.php';
+			}
+			if (class_exists('BMPush', false) && BMPush::isEnabled()) {
+				BMPush::unsubscribeAll(BMPush::AREA_USER, $userID);
+			}
+		}
 
 		$_SESSION['bm_userLoggedIn']	= false;
 		$_SESSION['bm_userID']			= -1;
 
 		if(!isset($_SESSION['bm_adminLoggedIn']))
 		{
-			if(isset($_COOKIE['sessionSecret_'.substr(session_id(), 0, 16)]))
-				setcookie('sessionSecret_'.substr(session_id(), 0, 16), '', time()-TIME_ONE_HOUR, '/');
+			$cookieName = 'sessionSecret_'.substr(session_id(), 0, 16);
+			if(isset($_COOKIE[$cookieName]))
+				BMSecureSetCookie($cookieName, '', time() - TIME_ONE_HOUR);
 			session_destroy();
 		}
 	}
@@ -2798,13 +3169,13 @@ class BMUser
 	 * @return bool
 	 */
 	public function UpdateCommonSettings($inboxRefresh, $instantHTML, $firstDayOfWeek, $dateFormat, $senderName, $defaultSender, $rePrefix, $fwdPrefix, $mailToSMS, $forwardEnabled, $forwardTo, $forwardDelete, $enablePreview, $conversationView, $newsletterOptIn, $plaintextCourier, $replyQuote, $hotkeys, $attCheck, $searchDetailsDefault, $preferredLanguage,
-		$notifySound, $notifyEMail, $notifyBirthday, $autoSaveDrafts, $autoSaveDraftsInterval)
+		$notifySound, $notifyEMail, $notifyBirthday, $notifyLoginNewIp, $autoSaveDrafts, $autoSaveDraftsInterval)
 	{
 		global $db, $bm_prefs;
 
 		$this->SetPref('hotkeys', $hotkeys);
 
-		$db->Query('UPDATE {pre}users SET in_refresh=?, soforthtml=?, c_firstday=?, datumsformat=?, absendername=?, defaultSender=?, re=?, fwd=?, mail2sms=?, forward=?, forward_to=?, forward_delete=?, preview=?, conversation_view=?, newsletter_optin=?, plaintext_courier=?, reply_quote=?, attcheck=?, search_details_default=?, preferred_language=?, notify_sound=?, notify_email=?, notify_birthday=?, auto_save_drafts=?, auto_save_drafts_interval=? WHERE id=?',
+		$db->Query('UPDATE {pre}users SET in_refresh=?, soforthtml=?, c_firstday=?, datumsformat=?, absendername=?, defaultSender=?, re=?, fwd=?, mail2sms=?, forward=?, forward_to=?, forward_delete=?, preview=?, conversation_view=?, newsletter_optin=?, plaintext_courier=?, reply_quote=?, attcheck=?, search_details_default=?, preferred_language=?, notify_sound=?, notify_email=?, notify_birthday=?, notify_login_new_ip=?, auto_save_drafts=?, auto_save_drafts_interval=? WHERE id=?',
 			$inboxRefresh,
 			$instantHTML ? 'yes' : 'no',
 			$firstDayOfWeek,
@@ -2828,6 +3199,7 @@ class BMUser
 			$notifySound ? 'yes' : 'no',
 			$notifyEMail ? 'yes' : 'no',
 			$notifyBirthday ? 'yes' : 'no',
+			$notifyLoginNewIp ? 'yes' : 'no',
 			$autoSaveDrafts ? 'yes' : 'no',
 			max($bm_prefs['min_draft_save_interval'], $autoSaveDraftsInterval),
 			$this->_id);
@@ -2928,6 +3300,8 @@ class BMUser
 				// pw changed?
 				if($userID == 0 && ($this->_row['passwort'] != $userRow['passwort']))
 				{
+					if($passwordPlain !== false && function_exists('ClientApiRememberPassword'))
+						ClientApiRememberPassword((int)$this->_id, $passwordPlain);
 					ModuleFunction('OnUserPasswordChange', array($this->_id, $this->_row['passwort'], $userRow['passwort'], $passwordPlain));
 
 					if(isset($_SESSION['bm_xorCryptKey']) && $passwordPlain !== false)
@@ -3601,67 +3975,162 @@ class BMUser
 	}
 
 	/**
-	 * OTP-encrypt user password and store key in DB
+	 * Create an opaque remember-me token for a user.
 	 *
-	 * @param string $passwordPlain Plaintext password
- 	 * @return string Encrypted password (cookie token)
- 	 */
-	public static function SaveLogin($passwordPlain)
+	 * @param int $userID
+	 * @return string|false Cookie token
+	 */
+	/**
+	 * Session epoch stored in userprefs; bumped on password reset to invalidate LI sessions.
+	 *
+	 * @param int $userID
+	 * @return int
+	 */
+	public static function GetSessionEpoch($userID)
+	{
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return 0;
+
+		$user = _new('BMUser', array($userID));
+		$value = $user->GetPref('session_epoch');
+
+		return ($value !== false && $value !== '') ? (int)$value : 0;
+	}
+
+	/**
+	 * @param int $userID
+	 */
+	public static function BumpSessionEpoch($userID)
+	{
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return;
+
+		$user = _new('BMUser', array($userID));
+		$user->SetPref('session_epoch', (string)time());
+	}
+
+	/**
+	 * Store current session epoch in $_SESSION (call after successful login).
+	 *
+	 * @param int $userID
+	 */
+	public static function SyncSessionEpochToSession($userID)
+	{
+		$_SESSION['bm_sessionEpoch'] = self::GetSessionEpoch($userID);
+	}
+
+	/**
+	 * Invalidate other web sessions after an in-session password change.
+	 * Keeps the current browser session valid.
+	 *
+	 * @param int $userID
+	 */
+	public static function InvalidateOtherSessionsForUser($userID)
+	{
+		self::BumpSessionEpoch($userID);
+		self::SyncSessionEpochToSession($userID);
+	}
+
+	/**
+	 * Invalidate remember-me tokens, stored login IPs and all active web sessions.
+	 *
+	 * @param int $userID
+	 */
+	public static function InvalidateAuthForUser($userID)
+	{
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return;
+
+		self::BumpSessionEpoch($userID);
+		self::InvalidateRememberMeForUser($userID);
+
+		if(class_exists('BMLoginNotify'))
+			BMLoginNotify::ClearKnownLogins('user', $userID);
+	}
+
+	/**
+	 * Remove all remember-me tokens for a user.
+	 *
+	 * @param int $userID
+	 */
+	public static function InvalidateRememberMeForUser($userID)
 	{
 		global $db;
 
-		$pwLength = strlen($passwordPlain);
-		$cookieToken = '';
-		$dbToken = '';
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return;
 
-		for($i=0; $i<$pwLength; $i++)
+		$res = $db->Query('SELECT id,token FROM {pre}savedlogins WHERE expires>?', time());
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
-			$rand 			= mt_rand(0, 255);
-			$dbToken 		.= chr($rand);
-			$cookieToken 	.= chr(ord($passwordPlain[$i]) ^ $rand);
+			if(strpos($row['token'], ':') === false)
+				continue;
+			list($uid,) = explode(':', $row['token'], 2);
+			if((int)$uid === $userID)
+				$db->Query('DELETE FROM {pre}savedlogins WHERE id=?', (int)$row['id']);
 		}
+		$res->Free();
+	}
 
-		$dbToken 	 = base64_encode($dbToken);
-		$cookieToken = base64_encode($cookieToken);
+	public static function SaveLogin($userID)
+	{
+		global $db;
+
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return false;
+
+		$secret = bin2hex(random_bytes(32));
+		$dbToken = $userID . ':' . password_hash($secret, PASSWORD_DEFAULT);
 
 		$db->Query('INSERT INTO {pre}savedlogins(`expires`,`token`) VALUES(?,?)',
 			time()+TIME_ONE_YEAR,
 			$dbToken);
-		return($db->InsertId() . ':' . $cookieToken);
+
+		return($db->InsertId() . ':' . $secret);
 	}
 
 	/**
-	 * decrypt saved password using DB token
+	 * Validate an opaque remember-me cookie token.
 	 *
 	 * @param string $token Cookie token
-	 * @return string
+	 * @return array|false array('userID' => int) or false
 	 */
-	public static function LoadLogin($token)
+	public static function ValidateRememberMe($token)
 	{
 		global $db;
 
 		if(strlen($token) < 3 || strpos($token, ':') === false)
 			return(false);
 
-		list($tokenID, $encryptedPW) = explode(':', $token);
-		$res = $db->Query('SELECT `token` FROM {pre}savedlogins WHERE `id`=?',
+		list($tokenID, $secret) = explode(':', $token, 2);
+		$tokenID = (int)$tokenID;
+		if($tokenID <= 0 || $secret === '')
+			return(false);
+
+		$res = $db->Query('SELECT `expires`,`token` FROM {pre}savedlogins WHERE `id`=?',
 			$tokenID);
 		if($res->RowCount() != 1)
 			return(false);
-		list($dbToken) = $res->FetchArray(MYSQLI_NUM);
+		$row = $res->FetchArray(MYSQLI_ASSOC);
 		$res->Free();
 
-		$dbToken 		= base64_decode($dbToken);
-		$encryptedPW 	= base64_decode($encryptedPW);
-
-		if(strlen($dbToken) != strlen($encryptedPW))
+		if((int)$row['expires'] < time())
 			return(false);
 
-		$passwordPlain = '';
-		for($i=0; $i<strlen($dbToken); $i++)
-			$passwordPlain .= chr(ord($encryptedPW[$i]) ^ ord($dbToken[$i]));
+		if(strpos($row['token'], ':') === false)
+			return(false);
 
-		return($passwordPlain);
+		list($userID, $hash) = explode(':', $row['token'], 2);
+		$userID = (int)$userID;
+		if($userID <= 0 || !password_verify($secret, $hash))
+			return(false);
+
+		return(array('userID' => $userID));
 	}
 
 	/**

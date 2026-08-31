@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="organizer.addressbook.php?action=importCSV&sid={$sid}" onsubmit="return(checkNoteForm(this));">
+	{csrffield}
 <input type="hidden" name="encoding" value="{if isset($encoding)}{text value=$encoding allowEmpty=true}{/if}" />
 <input type="hidden" name="tempID" value="{$tempID}" />
 	<table class="listTable">

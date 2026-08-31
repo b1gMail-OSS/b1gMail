@@ -4,6 +4,7 @@
 
 <div data-role="content">
 	<form action="tasks.php?do=add&list={$taskListID}&sid={$sid}" method="post">
+		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="title">{lng p="title"}:</label>
 			<input type="text" name="titel" id="title" value=""  />

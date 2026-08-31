@@ -1,5 +1,6 @@
 <div class="col-12 bm-li-email-toolbar py-0">
-	<form action="organizer.calendar.php?sid={$sid}" method="post" class="d-flex flex-wrap align-items-center gap-2 gap-md-3 w-100">
+	<form action="{sessionurl file='organizer.calendar.php'}" method="post" class="d-flex flex-wrap align-items-center gap-2 gap-md-3 w-100">
+		{csrffield}
 		<div class="bm-li-toolbar-item d-flex align-items-center gap-2 flex-grow-1 flex-md-grow-0">
 			<span class="bm-li-toolbar-label" aria-label="{lng p="viewmode"}">
 				<i class="icon ti ti-layout-list icon-1" aria-hidden="true"></i>
@@ -42,14 +43,14 @@
 
 			<div class="bm-li-toolbar-nav d-flex flex-wrap align-items-center gap-2">
 				{if $viewMode=='day'}
-				<a href="organizer.calendar.php?sid={$sid}&date={$date-86400}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
+				<a href="organizer.calendar.php?date={$date-86400}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
 				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date start_year="-5" end_year="+5" field_order="DMY"}</span>
 				<button type="submit" class="btn btn-sm btn-ghost-secondary bm-li-toolbar-btn" name="jumpToday">{lng p="today"}</button>
 				<button type="submit" class="btn btn-sm btn-ghost-primary bm-li-toolbar-btn">{lng p="ok"}</button>
-				<a href="organizer.calendar.php?sid={$sid}&date={$date+86400}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
+				<a href="organizer.calendar.php?date={$date+86400}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
 
 				{elseif $viewMode=='week'}
-				<a href="organizer.calendar.php?sid={$sid}&date={$prevWeek}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
+				<a href="organizer.calendar.php?date={$prevWeek}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
 				<select class="form-select form-select-sm bm-li-toolbar-select" name="date_Week">
 					{section name=w start=1 loop=53 step=1}
 					<option value="{$smarty.section.w.index}"{if isset($calWeekNo) && $smarty.section.w.index==$calWeekNo} selected="selected"{/if}>{lng p="cw"} {$smarty.section.w.index}</option>
@@ -58,14 +59,14 @@
 				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date start_year="-5" end_year="+5" field_order="Y"}</span>
 				<button type="submit" class="btn btn-sm btn-ghost-secondary bm-li-toolbar-btn" name="jumpToday">{lng p="today"}</button>
 				<button type="submit" class="btn btn-sm btn-ghost-primary bm-li-toolbar-btn">{lng p="ok"}</button>
-				<a href="organizer.calendar.php?sid={$sid}&date={$nextWeek}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
+				<a href="organizer.calendar.php?date={$nextWeek}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
 
 				{elseif $viewMode=='month'}
-				<a href="organizer.calendar.php?sid={$sid}&date={$prevMonth}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
+				<a href="organizer.calendar.php?date={$prevMonth}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
 				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date display_days=false start_year="-5" end_year="+5" field_order="MY"}</span>
 				<button type="submit" class="btn btn-sm btn-ghost-secondary bm-li-toolbar-btn" name="jumpToday">{lng p="today"}</button>
 				<button type="submit" class="btn btn-sm btn-ghost-primary bm-li-toolbar-btn">{lng p="ok"}</button>
-				<a href="organizer.calendar.php?sid={$sid}&date={$nextMonth}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
+				<a href="organizer.calendar.php?date={$nextMonth}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
 				{/if}
 			</div>
 		</div>

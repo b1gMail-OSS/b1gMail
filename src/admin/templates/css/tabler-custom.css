@@ -19,3 +19,161 @@
         z-index: 1000;
     }
 }
+
+.bm-session-lock-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+}
+
+.bm-session-lock-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(6px);
+}
+
+.bm-session-lock-panel {
+    position: relative;
+    z-index: 1;
+    min-height: 100%;
+}
+
+body.bm-session-locked .page-wrapper,
+body.bm-session-locked .navbar {
+    filter: blur(8px);
+    pointer-events: none;
+    user-select: none;
+}
+
+body.bm-session-locked .bm-session-lock-overlay {
+    filter: none;
+    pointer-events: auto;
+    user-select: auto;
+}
+
+/*
+ * Bootstrap-5/Tabler input groups (flex). Legacy plugin CSS (survey.css, datenschutz.css, …)
+ * sets .input-group { display: table } without table-cell children – addons stack vertically.
+ * Loaded last via page.tpl so this wins over plugin stylesheets.
+ */
+.page .input-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    width: 100%;
+    border-collapse: separate;
+}
+
+.page .input-group > .form-control,
+.page .input-group > .form-select,
+.page .input-group > .form-floating {
+    position: relative;
+    flex: 1 1 auto !important;
+    width: 1% !important;
+    min-width: 0 !important;
+}
+
+.page .input-group > .input-group-text,
+.page .input-group > .btn {
+    display: flex !important;
+    align-items: center;
+    flex-shrink: 0;
+    width: auto !important;
+}
+
+/*
+ * Kompakte Input-Gruppen in Plugin-Tabellen (z. B. b1gMailServer): nur Inhaltsbreite,
+ * ein gemeinsamer Fokus-Ring statt Schatten pro Feld (width:100% oben sonst „schwebend“).
+ */
+.page .td2 > .input-group {
+    width: fit-content;
+    max-width: 100%;
+}
+
+.page .td2 > .input-group.input-group-wide {
+    width: 100%;
+}
+
+.page .td2 > .input-group .form-control:focus,
+.page .td2 > .input-group .form-select:focus {
+    box-shadow: none;
+}
+
+.page .td2 > .input-group:focus-within {
+    box-shadow: 0 0 0 0.25rem rgba(var(--tblr-primary-rgb, 6, 111, 209), 0.25);
+    border-radius: var(--tblr-border-radius, var(--bs-border-radius, 0.375rem));
+}
+
+.page .td2 > .input-group:focus-within .form-control,
+.page .td2 > .input-group:focus-within .form-select,
+.page .td2 > .input-group:focus-within .input-group-text,
+.page .td2 > .input-group:focus-within .btn {
+    border-color: #83b7e8;
+}
+
+/* Kompakte Gruppen: Felder nicht auf volle Zeilenbreite strecken */
+.page .td2 > .input-group:not(.input-group-wide) > .form-control,
+.page .td2 > .input-group:not(.input-group-wide) > .form-select {
+    flex: 0 1 auto !important;
+    width: auto !important;
+}
+
+/* Nur Feld + Einheit/Button zusammenführen, nicht Select neben Select */
+.page .td2 > .input-group > .form-control:has(+ .input-group-text),
+.page .td2 > .input-group > .form-control:has(+ .btn),
+.page .td2 > .input-group > .form-select:has(+ .input-group-text),
+.page .td2 > .input-group > .form-select:has(+ .btn) {
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.page .td2 > .input-group > .input-group-text + .form-control,
+.page .td2 > .input-group > .input-group-text + .form-select,
+.page .td2 > .input-group > .btn + .form-control,
+.page .td2 > .input-group > .btn + .form-select,
+.page .td2 > .input-group > .form-select + .form-select,
+.page .td2 > .input-group > .form-control + .form-control,
+.page .td2 > .input-group > .form-select + .form-control,
+.page .td2 > .input-group > .form-control + .form-select {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.page .td2 > .input-group > .input-group-text:not(:first-child),
+.page .td2 > .input-group > .btn:not(:first-child) {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.page .td2 > .input-group > :first-child {
+    border-top-left-radius: var(--tblr-border-radius, var(--bs-border-radius, 0.375rem));
+    border-bottom-left-radius: var(--tblr-border-radius, var(--bs-border-radius, 0.375rem));
+}
+
+.page .td2 > .input-group > :last-child {
+    border-top-right-radius: var(--tblr-border-radius, var(--bs-border-radius, 0.375rem));
+    border-bottom-right-radius: var(--tblr-border-radius, var(--bs-border-radius, 0.375rem));
+}
+
+/* Profilfoto (ACP): Datei + Upload + Entfernen in einer Zeile */
+.bm-admin-avatar-upload {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    max-width: 42rem;
+}
+
+.bm-admin-avatar-upload > .form-control {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 1% !important;
+}
+
+.bm-admin-avatar-upload > .btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap;
+}

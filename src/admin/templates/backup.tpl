@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="createbackup"}</legend>
 	
-	<form action="backup.php?sid={$sid}&do=createBackup" method="post">
+	<form action="{sessionurl file='backup.php' params='do=createBackup'}" method="post">
+		{csrffield}
 	<table>
 		<tr>
 			<td align="left" rowspan="3" valign="top" width="40"><img src="{$tpldir}images/backup32.png" border="0" alt="" width="32" height="32" /></td>

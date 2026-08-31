@@ -13,7 +13,7 @@
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
@@ -23,19 +23,26 @@
 <body>
 
 		<form action="{$widgetPrefsURL}" method="post">
+			{csrffield}
 			<input type="hidden" name="save" value="true" />
 			
 			<fieldset>
 				<legend>{lng p="prefs"}</legend>
 				
-				<input type="checkbox" name="hideSystemFolders" id="hideSystemFolders"{if $hideSystemFolders} checked="checked"{/if} />
-				<label for="hideSystemFolders">{lng p="hidesystemfolders"}</label><br />
+				<label class="form-check mb-2">
+					<input type="checkbox" class="form-check-input" name="hideSystemFolders" id="hideSystemFolders"{if $hideSystemFolders} checked="checked"{/if} />
+					<span class="form-check-label">{lng p="hidesystemfolders"}</span>
+				</label>
 				
-				<input type="checkbox" name="hideCustomFolders" id="hideCustomFolders"{if $hideCustomFolders} checked="checked"{/if} />
-				<label for="hideCustomFolders">{lng p="hidecustomfolders"}</label><br />
+				<label class="form-check mb-2">
+					<input type="checkbox" class="form-check-input" name="hideCustomFolders" id="hideCustomFolders"{if $hideCustomFolders} checked="checked"{/if} />
+					<span class="form-check-label">{lng p="hidecustomfolders"}</span>
+				</label>
 				
-				<input type="checkbox" name="hideIntelliFolders" id="hideIntelliFolders"{if $hideIntelliFolders} checked="checked"{/if} />
-				<label for="hideIntelliFolders">{lng p="hideintellifolders"}</label>
+				<label class="form-check mb-0">
+					<input type="checkbox" class="form-check-input" name="hideIntelliFolders" id="hideIntelliFolders"{if $hideIntelliFolders} checked="checked"{/if} />
+					<span class="form-check-label">{lng p="hideintellifolders"}</span>
+				</label>
 			</fieldset>
 	
 			<p align="right">

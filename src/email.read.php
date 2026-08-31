@@ -19,7 +19,8 @@
  *
  */
 
-require './serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require './serverlib/init.inc.php';
 if(!class_exists('BMMailbox'))
 	include('./serverlib/mailbox.class.php');
 include('./serverlib/vcard.class.php');
@@ -589,6 +590,7 @@ if($_REQUEST['action'] == 'move'
 		else
 		{
 			$tpl->assign('mailID', (int)$_REQUEST['id']);
+			$tpl->assign('moveFolderList', $mailbox->GetMoveFolderList());
 			$tpl->display('li/email.read.move.tpl');
 		}
 	}
@@ -742,7 +744,7 @@ else if($_REQUEST['action'] == 'importVCF'
 		if($mail->AttachmentToFP($_REQUEST['attachment'], $cardFP))
 		{
 			fclose($cardFP);
-			bmMailOverlayParentRedirect('organizer.addressbook.php?sid=' . session_id()
+			bmMailOverlayParentRedirect('organizer.addressbook.php'
 				. '&action=addContact&importFile=' . $tempID);
 		}
 		else
@@ -920,10 +922,10 @@ else if($_REQUEST['action'] == 'importICS'
 	if($result['ok'])
 	{
 		bmMailOverlayParentRedirect('email.read.php?id=' . (int)$_REQUEST['id']
-			. '&sid=' . session_id() . '&calendarAdded=1');
+			. '' . '&calendarAdded=1');
 	}
 
-	bmMailOverlayParentRedirect('email.read.php?id=' . (int)$_REQUEST['id'] . '&sid=' . session_id());
+	bmMailOverlayParentRedirect('email.read.php?id=' . (int)$_REQUEST['id']);
 }
 
 /**

@@ -5,6 +5,7 @@
 </div>
 
 <form name="f1" method="post" action="email.folders.php?action=action&sid={$sid}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar">
 <table class="bigTable">

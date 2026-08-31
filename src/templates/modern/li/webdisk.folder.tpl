@@ -14,12 +14,14 @@
 	
 	{if $isShared}
 	<form action="email.compose.php?sid={$sid}" method="post" name="mailForm">
+		{csrffield}
 		<input type="hidden" name="subject" value="{if isset($shareMailSubject)}{text value=$shareMailSubject allowEmpty=true}{/if}" />
 		<textarea name="text" style="display:none">{if isset($shareMail)}{text value=$shareMail allowEmpty=true}{/if}</textarea>
 	</form>
 	{/if}
 	
 	<form enctype="multipart/form-data" action="webdisk.php?folder={$folderID}&sid={$sid}" method="post" name="f1" onsubmit="transferSelectedWebdiskItems();">
+		{csrffield}
 	<input type="hidden" name="" value="" id="wdAction" />
 	<input type="hidden" name="massAction" value="" id="wdMassAction" />
 	<input type="hidden" name="selectedWebdiskItems" id="selectedWebdiskItems" value="" />

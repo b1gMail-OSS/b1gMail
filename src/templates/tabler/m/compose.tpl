@@ -1,11 +1,12 @@
 <div data-role="header" data-position="fixed">
-	<a href="email.php?sid={$sid}" data-icon="delete">{lng p="cancel"}</a>
+	<a href="email.php" data-icon="delete">{lng p="cancel"}</a>
 	<h1>{$pageTitle}</h1>
 	<a data-icon="check" data-theme="b" onclick="$('#composeForm').trigger('submit');">{lng p="submit"}</a>
 </div>
 
 <div data-role="content">
-	<form action="email.php?action=sendMail&sid={$sid}" method="post" id="composeForm">
+	<form action="email.php?action=sendMail" method="post" id="composeForm">
+		{csrffield}
 		<input type="hidden" name="actionToken" value="{$actionToken}" />
 		{if isset($smarty.get.reply)}<input type="hidden" name="reference" value="reply:{text value=$smarty.get.reply}" />{/if}
 		{if isset($smarty.get.forward)}<input type="hidden" name="reference" value="forward:{text value=$smarty.get.forward}" />{/if}

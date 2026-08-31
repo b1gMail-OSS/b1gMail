@@ -1,3 +1,7 @@
+{if $paccMsg}
+<div class="alert alert-{$paccMsg.type} mb-3" role="alert">{$paccMsg.text}</div>
+{/if}
+
 <script src="../clientlib/wysiwyg.js?{fileDateSig file="../../clientlib/wysiwyg.js"}"></script>
 <script type="text/javascript" src="../clientlib/ckeditor/ckeditor.js?{fileDateSig file="../../clientlib/ckeditor/ckeditor.js"}"></script>
 
@@ -25,7 +29,7 @@
 								<i class="fa-solid fa-box"></i>
 							</td>
 						<td>{text value=$package.title cut=35}<br />
-							<small><a href="{$pageURL}&action=subscriptions&filter=true&packages[{$package.id}]=true&sid={$sid}">{$package.subscribers} {lng p="pacc_subscribers"}</a></small></td>
+							<small><a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=subscriptions&filter=true&packages[{$package.id}]=true"}">{$package.subscribers} {lng p="pacc_subscribers"}</a></small></td>
 						<td>{text value=$package.group cut=25}<br />
 							<small>{lng p="pacc_fallbackgroup"}: {text value=$package.fallback_group cut=25}</small></td>
 						<td>{$package.periodPrice}<br />
@@ -33,8 +37,8 @@
 						<td>{$package.order}</td>
 						<td class="text-nowrap">
 							<div class="btn-group btn-group-sm">
-								<a href="{$pageURL}&action=packages&do=edit&id={$package.id}&sid={$sid}" title="{lng p="edit"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-								<a href="{$pageURL}&action=packages&delete={$package.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>
+								<a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages&action=edit&id={$package.id}"}" title="{lng p="edit"}" class="btn btn-outline-secondary btn-sm"><i class="ti ti-pencil"></i></a>
+								<a href="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages&delete={$package.id}"}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}" class="btn btn-outline-danger btn-sm"><i class="ti ti-trash"></i></a>
 							</div>
 						</td>
 					</tr>
@@ -48,7 +52,9 @@
 <fieldset>
 	<legend>{lng p="pacc_addpackage"}</legend>
 
-	<form action="{$pageURL}&action=packages&add=true&sid={$sid}" method="post" onsubmit="submitEditors();spin(this)">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$paccPlugin}&do=packages"}" method="post" onsubmit="submitEditors();spin(this)">
+		{csrffield}
+		<input type="hidden" name="add" value="1" />
 
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
@@ -184,7 +190,10 @@
 		</div>
 
 		<div class="text-end">
-			<input class="btn btn-primary" type="submit" value="{lng p="add"}" />
+			<button type="submit" class="btn btn-primary">
+				<i class="ti ti-plus me-1"></i>
+				{lng p="add"}
+			</button>
 		</div>
 	</form>
 </fieldset>

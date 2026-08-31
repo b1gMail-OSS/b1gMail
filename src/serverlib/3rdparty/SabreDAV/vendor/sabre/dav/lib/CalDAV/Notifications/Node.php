@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Notifications;
 
-use Sabre\DAV;
 use Sabre\CalDAV;
 use Sabre\CalDAV\Xml\Notification\NotificationInterface;
+use Sabre\DAV;
 use Sabre\DAVACL;
 
 /**
@@ -18,176 +20,93 @@ use Sabre\DAVACL;
  * @author Evert Pot (http://evertpot.com/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class Node extends DAV\File implements INode, DAVACL\IACL {
+class Node extends DAV\File implements INode, DAVACL\IACL
+{
+    use DAVACL\ACLTrait;
 
     /**
-     * The notification backend
+     * The notification backend.
      *
-     * @var Sabre\CalDAV\Backend\NotificationSupport
+     * @var CalDAV\Backend\NotificationSupport
      */
     protected $caldavBackend;
 
     /**
-     * The actual notification
+     * The actual notification.
      *
-     * @var Sabre\CalDAV\Notifications\INotificationType
+     * @var NotificationInterface
      */
     protected $notification;
 
     /**
-     * Owner principal of the notification
+     * Owner principal of the notification.
      *
      * @var string
      */
     protected $principalUri;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param CalDAV\Backend\NotificationSupport $caldavBackend
      * @param string $principalUri
-     * @param NotificationInterface $notification
      */
-    function __construct(CalDAV\Backend\NotificationSupport $caldavBackend, $principalUri, NotificationInterface $notification) {
-
+    public function __construct(CalDAV\Backend\NotificationSupport $caldavBackend, $principalUri, NotificationInterface $notification)
+    {
         $this->caldavBackend = $caldavBackend;
         $this->principalUri = $principalUri;
         $this->notification = $notification;
-
     }
 
     /**
-     * Returns the path name for this notification
+     * Returns the path name for this notification.
      *
-     * @return id
+     * @return string
      */
-    function getName() {
-
-        return $this->notification->getId() . '.xml';
-
+    public function getName()
+    {
+        return $this->notification->getId().'.xml';
     }
 
     /**
      * Returns the etag for the notification.
      *
-     * The etag must be surrounded by litteral double-quotes.
+     * The etag must be surrounded by literal double-quotes.
      *
      * @return string
      */
-    function getETag() {
-
+    public function getETag()
+    {
         return $this->notification->getETag();
-
     }
 
     /**
      * This method must return an xml element, using the
-     * Sabre\CalDAV\Notifications\INotificationType classes.
+     * Sabre\CalDAV\Xml\Notification\NotificationInterface classes.
      *
-     * @return INotificationType
+     * @return NotificationInterface
      */
-    function getNotificationType() {
-
+    public function getNotificationType()
+    {
         return $this->notification;
-
     }
 
     /**
-     * Deletes this notification
-     *
-     * @return void
+     * Deletes this notification.
      */
-    function delete() {
-
+    public function delete()
+    {
         $this->caldavBackend->deleteNotification($this->getOwner(), $this->notification);
-
     }
 
     /**
-     * Returns the owner principal
+     * Returns the owner principal.
      *
-     * This must be a url to a principal, or null if there's no owner
+     * This must be an url to a principal, or null if there's no owner
      *
      * @return string|null
      */
-    function getOwner() {
-
+    public function getOwner()
+    {
         return $this->principalUri;
-
     }
-
-    /**
-     * Returns a group principal
-     *
-     * This must be a url to a principal, or null if there's no owner
-     *
-     * @return string|null
-     */
-    function getGroup() {
-
-        return null;
-
-    }
-
-    /**
-     * Returns a list of ACE's for this node.
-     *
-     * Each ACE has the following properties:
-     *   * 'privilege', a string such as {DAV:}read or {DAV:}write. These are
-     *     currently the only supported privileges
-     *   * 'principal', a url to the principal who owns the node
-     *   * 'protected' (optional), indicating that this ACE is not allowed to
-     *      be updated.
-     *
-     * @return array
-     */
-    function getACL() {
-
-        return [
-            [
-                'principal' => $this->getOwner(),
-                'privilege' => '{DAV:}read',
-                'protected' => true,
-            ],
-            [
-                'principal' => $this->getOwner(),
-                'privilege' => '{DAV:}write',
-                'protected' => true,
-            ]
-        ];
-
-    }
-
-    /**
-     * Updates the ACL
-     *
-     * This method will receive a list of new ACE's as an array argument.
-     *
-     * @param array $acl
-     * @return void
-     */
-    function setACL(array $acl) {
-
-        throw new DAV\Exception\NotImplemented('Updating ACLs is not implemented here');
-
-    }
-
-    /**
-     * Returns the list of supported privileges for this node.
-     *
-     * The returned data structure is a list of nested privileges.
-     * See Sabre\DAVACL\Plugin::getDefaultSupportedPrivilegeSet for a simple
-     * standard structure.
-     *
-     * If null is returned from this method, the default privilege set is used,
-     * which is fine for most common usecases.
-     *
-     * @return array|null
-     */
-    function getSupportedPrivilegeSet() {
-
-        return null;
-
-    }
-
 }

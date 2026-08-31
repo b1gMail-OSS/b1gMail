@@ -99,7 +99,7 @@
 
 <div class="contentFooter">
 	<div class="right">
-		<button type="button" class="primary" onclick="document.location.href='organizer.addressbook.php?action=editContact&id={$contact.id}&sid={$sid}';">
+		<button type="button" class="primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params="action=editContact&id={$contact.id}"|escape:'javascript'}';">
 			<i class="fa fa-edit"></i>
 			{lng p="edit"}
 		</button>

@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="language"}</legend>
 
-	<form action="prefs.languages.php?action=texts&sid={$sid}" method="post">
+	<form action="{sessionurl file='prefs.languages.php' params="action=texts"}" method="post">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="language"}</label>
 			<div class="col-sm-10">
@@ -30,7 +31,8 @@
 	<fieldset>
 		<legend>{lng p="customtexts"}</legend>
 
-		<form action="prefs.languages.php?action=texts&lang={$selectedLang}&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+		<form action="{sessionurl file='prefs.languages.php' params="action=texts&lang={$selectedLang}&save=true"}" method="post" onsubmit="spin(this)">
+			{csrffield}
 			<div class="mb-3 text-end">
 				<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
 			</div>

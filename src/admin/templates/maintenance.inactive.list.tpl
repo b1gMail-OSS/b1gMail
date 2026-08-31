@@ -1,4 +1,5 @@
-<form action="maintenance.php?sid={$sid}" method="post" onsubmit="return userMassActionFormSubmit(this);" name="f1">
+<form action="{adminurl script='maintenance.php' trailingAmp='false'}" method="post" onsubmit="return userMassActionFormSubmit(this);" name="f1">
+	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
 	<input type="hidden" name="sortBy" id="sortBy" value="{$sortBy}" />
 	<input type="hidden" name="sortOrder" id="sortOrder" value="{$sortOrder}" />
@@ -6,10 +7,12 @@
 	<input type="hidden" name="singleID" id="singleID" value="" />
 	<input type="hidden" name="do" value="exec" />
 	<input type="hidden" name="queryAction" value="show" />
-	{if $smarty.post.queryTypeLogin}<input type="hidden" name="queryTypeLogin" value="on" />{/if}
-	{if $smarty.post.queryTypeGroups}<input type="hidden" name="queryTypeGroups" value="on" />{/if}
-	{if $smarty.post.loginDays}<input type="hidden" name="loginDays" value="{if isset($smarty.post.loginDays)}{text value=$smarty.post.loginDays allowEmpty=true}{/if}" />{/if}
+	{if isset($smarty.post.queryTypeLogin)}<input type="hidden" name="queryTypeLogin" value="on" />{/if}
+	{if isset($smarty.post.queryTypeGroups)}<input type="hidden" name="queryTypeGroups" value="on" />{/if}
+	{if isset($smarty.post.loginDays)}<input type="hidden" name="loginDays" value="{text value=$smarty.post.loginDays allowEmpty=true}" />{/if}
+	{if isset($smarty.post.groups) && is_array($smarty.post.groups)}
 	{foreach from=$smarty.post.groups item=item key=key}<input type="hidden" name="groups[{$key}]" value="{if isset($item)}{text value=$item allowEmpty=true}{/if}" />{/foreach}
+	{/if}
 
 	<fieldset>
 		<legend>{lng p="inactiveusers"}</legend>
@@ -54,7 +57,7 @@
 							</td>
 							<td class="text-center"><input type="checkbox" name="user_{$user.id}" /></td>
 							<td>{$user.id}</td>
-							<td><a href="users.php?do=edit&id={$user.id}&sid={$sid}">{email value=$user.email}</a><br /><small>{text value=$user.aliases cut=45 allowEmpty=true}</small></td>
+							<td><a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}">{email value=$user.email}</a><br /><small>{text value=$user.aliases cut=45 allowEmpty=true}</small></td>
 							<td>{text value=$user.nachname cut=20}, {text value=$user.vorname cut=20}<br /><small>{text value=$user.strasse cut=20} {text value=$user.hnr cut=5}, {text value=$user.plz cut=8} {text value=$user.ort cut=20}</small></td>
 							{foreach from=$fields item=field key=fieldID}{if $field.checked}
 								<td{if $field.typ==2} style="text-align:center;"{/if}>
@@ -80,10 +83,10 @@
 							</td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="users.php?do=edit&id={$user.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
 									<a href="javascript:singleAction('{if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='no'}<i class="fa-solid fa-lock"></i>{elseif $user.gesperrt=='yes'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='locked'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='unlock'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='delete'}<i class="fa-solid fa-hammer"></i>{/if}</a>
 									<a href="javascript:singleAction('delete', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='delete'}<i class="fa-regular fa-trash-can text-danger"></i>{else}<i class="fa-regular fa-trash-can"></i>{/if}</a>
-									<a href="users.php?do=login&id={$user.id}&sid={$sid}" target="_blank" onclick="return confirm('{lng p="loginwarning"}');" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
+									<a href="#" target="_blank" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('{sessionurl file='users.php' params="do=login&id={$user.id}"}', true); return false;" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
 								</div>
 							</td>
 						</tr>
@@ -104,7 +107,7 @@
 								<option value="restore">{lng p="restore"}</option>
 							</optgroup>
 							<optgroup label="{lng p="move"}">
-								{foreach from=$groups item=group key=groupID}
+								{foreach from=$groups|default:[] item=group key=groupID}
 									<option value="moveto_{$groupID}">{lng p="moveto"} &quot;{text value=$group.title cut=25}&quot;</option>
 								{/foreach}
 							</optgroup>

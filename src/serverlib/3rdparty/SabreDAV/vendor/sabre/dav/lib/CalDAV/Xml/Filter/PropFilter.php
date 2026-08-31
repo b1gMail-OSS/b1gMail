@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Sabre\CalDAV\Xml\Filter;
 
+use Sabre\CalDAV\Plugin;
+use Sabre\DAV\Exception\BadRequest;
+use Sabre\VObject\DateTimeParser;
 use Sabre\Xml\Reader;
 use Sabre\Xml\XmlDeserializable;
-use Sabre\DAV\Exception\BadRequest;
-use Sabre\CalDAV\Plugin;
-use Sabre\VObject\DateTimeParser;
 
 /**
  * PropFilter parser.
@@ -22,12 +24,12 @@ use Sabre\VObject\DateTimeParser;
  * @author Evert Pot (http://www.rooftopsolutions.nl/)
  * @license http://sabre.io/license/ Modified BSD License
  */
-class PropFilter implements XmlDeserializable {
-
+class PropFilter implements XmlDeserializable
+{
     /**
      * The deserialize method is called during xml parsing.
      *
-     * This method is called statictly, this is because in theory this method
+     * This method is called statically, this is because in theory this method
      * may be used as a type of constructor, or factory method.
      *
      * Often you want to return an instance of the current class, but you are
@@ -42,17 +44,16 @@ class PropFilter implements XmlDeserializable {
      * $reader->parseInnerTree() will parse the entire sub-tree, and advance to
      * the next element.
      *
-     * @param Reader $reader
      * @return mixed
      */
-    static function xmlDeserialize(Reader $reader) {
-
+    public static function xmlDeserialize(Reader $reader)
+    {
         $result = [
-            'name'           => null,
+            'name' => null,
             'is-not-defined' => false,
-            'param-filters'  => [],
-            'text-match'     => null,
-            'time-range'     => false,
+            'param-filters' => [],
+            'text-match' => null,
+            'time-range' => [],
         ];
 
         $att = $reader->parseAttributes();
@@ -60,39 +61,35 @@ class PropFilter implements XmlDeserializable {
 
         $elems = $reader->parseInnerTree();
 
-        if (is_array($elems)) foreach ($elems as $elem) {
-
-            switch ($elem['name']) {
-
-                case '{' . Plugin::NS_CALDAV . '}param-filter' :
+        if (is_array($elems)) {
+            foreach ($elems as $elem) {
+                switch ($elem['name']) {
+                case '{'.Plugin::NS_CALDAV.'}param-filter':
                     $result['param-filters'][] = $elem['value'];
                     break;
-                case '{' . Plugin::NS_CALDAV . '}is-not-defined' :
+                case '{'.Plugin::NS_CALDAV.'}is-not-defined':
                     $result['is-not-defined'] = true;
                     break;
-                case '{' . Plugin::NS_CALDAV . '}time-range' :
+                case '{'.Plugin::NS_CALDAV.'}time-range':
                     $result['time-range'] = [
                         'start' => isset($elem['attributes']['start']) ? DateTimeParser::parseDateTime($elem['attributes']['start']) : null,
-                        'end'   => isset($elem['attributes']['end']) ? DateTimeParser::parseDateTime($elem['attributes']['end']) : null,
+                        'end' => isset($elem['attributes']['end']) ? DateTimeParser::parseDateTime($elem['attributes']['end']) : null,
                     ];
                     if ($result['time-range']['start'] && $result['time-range']['end'] && $result['time-range']['end'] <= $result['time-range']['start']) {
                         throw new BadRequest('The end-date must be larger than the start-date');
                     }
                     break;
-                case '{' . Plugin::NS_CALDAV . '}text-match' :
+                case '{'.Plugin::NS_CALDAV.'}text-match':
                     $result['text-match'] = [
-                        'negate-condition' => isset($elem['attributes']['negate-condition']) && $elem['attributes']['negate-condition'] === 'yes',
-                        'collation'        => isset($elem['attributes']['collation']) ? $elem['attributes']['collation'] : 'i;ascii-casemap',
-                        'value'            => $elem['value'],
+                        'negate-condition' => isset($elem['attributes']['negate-condition']) && 'yes' === $elem['attributes']['negate-condition'],
+                        'collation' => isset($elem['attributes']['collation']) ? $elem['attributes']['collation'] : 'i;ascii-casemap',
+                        'value' => $elem['value'],
                     ];
                     break;
-
             }
-
+            }
         }
 
         return $result;
-
     }
-
 }

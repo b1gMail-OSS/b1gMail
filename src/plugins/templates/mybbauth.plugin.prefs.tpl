@@ -1,7 +1,12 @@
+{if $mybbMsg}
+<div class="alert alert-{$mybbMsg.type} mb-3" role="alert">{$mybbMsg.text}</div>
+{/if}
+
 <fieldset>
 	<legend>{lng p="prefs"}</legend>
 
-	<form action="{$pageURL}&sid={$sid}&do=save" method="post" onsubmit="spin(this)">
+	<form action="{sessionurl file='plugin.page.php' params="plugin={$mybbPlugin}"}" method="post" onsubmit="spin(this)">
+		{csrffield}
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-check-label">{lng p="enable"}</label>
 			<div class="col-sm-10">
@@ -52,7 +57,7 @@
 		</div>
 
 		<div class="text-end">
-			<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
+			<button type="submit" name="save" value="1" class="btn btn-primary">{lng p="save"}</button>
 		</div>
 	</form>
 </fieldset>

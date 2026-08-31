@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /admin/
+Options -MultiViews
+
+# Keep direct access to existing files/directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Admin pretty URLs -> admin front controller
+RewriteRule ^ app.php [QSA,L]

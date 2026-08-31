@@ -72,9 +72,12 @@ function __bmModalIframeHeight(h)
 	if(maxBodyH < minBodyH)
 		maxBodyH = minBodyH;
 
-	/* legacy openOverlay() heights (e.g. 130–170px) are too small for Tabler modals */
-	if(!h || h <= 0 || h < 240)
+	if(!h || h <= 0)
 		return Math.min(Math.max(minBodyH, 360), maxBodyH);
+
+	/* Kompakte Dialoge (z. B. Anlage hinzufügen, inkl. modal-footer) */
+	if(h < minBodyH)
+		return Math.min(Math.max(280, h), maxBodyH);
 
 	return Math.max(minBodyH, Math.min(h, maxBodyH));
 }

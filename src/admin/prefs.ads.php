@@ -148,8 +148,7 @@ if($_REQUEST['action'] == 'banners')
 				$_REQUEST['category'],
 				$_REQUEST['comments'],
 				(int)$_REQUEST['id']);
-			header('Location: prefs.ads.php?sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.ads.php');
 		}
 
 		// fetch

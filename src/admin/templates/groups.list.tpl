@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="groups"}</legend>
 
-	<form name="f1" action="groups.php?sid={$sid}" method="post">
+	<form name="f1" action="{sessionurl file='groups.php'}" method="post">
+		{csrffield}
 		<div class="card">
 			<div class="table-responsive">
 				<table class="table table-vcenter table-striped">
@@ -19,11 +20,11 @@
 						<tr class="{$class}">
 							<td align="center"><i class="fa-solid fa-user-group{if $group.default} text-green{/if}"></i></td>
 							<td align="center"><input type="checkbox" name="group_{$group.id}" /></td>
-							<td><a href="groups.php?do=edit&id={$group.id}&sid={$sid}">{text value=$group.titel}</a><br /><small><a href="users.php?onlyGroup={$group.id}&sid={$sid}">{$group.members} {lng p="members"}</a></small></td>
+							<td><a href="{sessionurl file='groups.php' params="do=edit&id={$group.id}"}">{text value=$group.titel}</a><br /><small><a href="{sessionurl file='users.php' params="onlyGroup={$group.id}"}">{$group.members} {lng p="members"}</a></small></td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-								<a href="groups.php?do=edit&id={$group.id}&sid={$sid}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-								{if !$group.default}<a href="groups.php?do=delete&id={$group.id}&sid={$sid}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
+								<a href="{sessionurl file='groups.php' params="do=edit&id={$group.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+								{if !$group.default}<a href="{sessionurl file='groups.php' params="do=delete&id={$group.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{/if}
 								</div>
 							</td>
 						</tr>

@@ -9,6 +9,7 @@
 			</div>
 			<div class="panel-body">
 				<form action="{if $ssl_login_enable}{$ssl_url}{/if}index.php?action=login" method="post" id="loginFormMain">
+					{csrffield}
 					<input type="hidden" name="do" value="login" />
 					<input type="hidden" name="timezone" value="{$timezone}" />
 
@@ -39,12 +40,6 @@
 							<label class="sr-only" for="password">{lng p="password"}</label>
 							<input type="password" name="password" id="password" class="form-control" placeholder="{lng p="password"}" required="true" />
 						</div>
-					</div>
-					<div class="checkbox">
-						<label>
-							<input type="checkbox" name="savelogin" id="savelogin" />
-							{lng p="savelogin"}
-						</label>
 					</div>
 					{if $ssl_login_option}<div class="checkbox">
 						<label>

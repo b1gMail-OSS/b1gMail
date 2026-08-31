@@ -8,6 +8,7 @@
 <div class="scrollContainer"><div class="pad">
 
 <form name="f1" method="post" action="prefs.php?action=extpop3&do={if $account}saveAccount&id={$account.id}{else}createAccount{/if}&sid={$sid}" onsubmit="return checkPOP3AccountForm(this);">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {if $account}{lng p="editpop3"}{else}{lng p="addpop3"}{/if}</th>

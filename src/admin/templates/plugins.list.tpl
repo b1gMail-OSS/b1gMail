@@ -22,7 +22,7 @@
 						{if $pluginPackage.name}<b>{lng p="package"}:</b> {text value=$pluginPackage.name}{else}{lng p="withoutpackage"}{/if}
 					</td>
 					<td class="text-end">
-						{if $packageSignature}<a href="plugins.php?action={$action}&do=deletePackage&package={$packageSignature}&sid={$sid}" onclick="return confirm('{lng p="realpackage"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{else}&nbsp;{/if}
+						{if $packageSignature}<a href="{sessionurl file='plugins.php' params="action={$action}&do=deletePackage&package={$packageSignature}"}" onclick="return confirm('{lng p="realpackage"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a>{else}&nbsp;{/if}
 					</td>
 				</tr>
 				</thead>
@@ -41,8 +41,8 @@
 							{if $plugin.paused}<small>{lng p="paused"}</small>{/if}</td>
 						<td class="text-nowrap text-end">
 							<div class="btn-group btn-group-sm">
-								<a href="plugins.php?action={$action}&sid={$sid}&do={if $plugin.installed}de{/if}activatePlugin&plugin={$plugin.name}" title="{lng p="acdeactivate"}" onclick="return confirm('{lng p="reallyplugin"}');" class="btn btn-sm"><i class="fa-solid fa-toggle-off"></i></a>
-								{if $plugin.installed}<a href="plugins.php?action={$action}&sid={$sid}&do={if $plugin.paused}un{/if}pausePlugin&plugin={$plugin.name}" title="{if $plugin.paused}{lng p="continue"}{else}{lng p="pause"}{/if}" class="btn btn-sm">{if $plugin.paused}error{else}<i class="fa-regular fa-circle-check"></i>{/if}</a>{/if}
+								<a href="{sessionurl file='plugins.php' params="action={$action}&do={if $plugin.installed}de{/if}activatePlugin&plugin={$plugin.name}"}" title="{lng p="acdeactivate"}" onclick="return confirm('{lng p="reallyplugin"}');" class="btn btn-sm"><i class="fa-solid fa-toggle-off"></i></a>
+								{if $plugin.installed}<a href="{sessionurl file='plugins.php' params="action={$action}&do={if $plugin.paused}un{/if}pausePlugin&plugin={$plugin.name}"}" title="{if $plugin.paused}{lng p="continue"}{else}{lng p="pause"}{/if}" class="btn btn-sm">{if $plugin.paused}error{else}<i class="fa-regular fa-circle-check"></i>{/if}</a>{/if}
 							</div>
 						</td>
 					</tr>
@@ -57,7 +57,7 @@
 {if isset($reloadMenu)}
 <script>
 <!--
-	parent.frames['menu'].location.href = 'main.php?action=menu&item=4&sid={$sid}';
+	parent.frames['menu'].location.href = 'main.php?action=menu&item=4{$sessionUrlSuffix}';
 //-->
 </script>
 {/if}

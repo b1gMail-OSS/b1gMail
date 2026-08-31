@@ -1,7 +1,9 @@
 <fieldset>
 	<legend>{lng p="edit"}</legend>
 	
-	<form action="{$pageURL}&action=prefixes&do=edit&id={$prefix.prefixid}&save=true&sid={$sid}" method="post" onsubmit="spin(this)">
+	<form action="{$pageURL}{$sessionUrlSuffixHtml}" method="post" onsubmit="spin(this)">
+		{csrffield}
+		<input type="hidden" name="save" value="1" />
 		<table width="100%">
 			<tr>
 				<td width="40" valign="top" rowspan="5"><img src="../plugins/templates/images/modfax_prefix.png" border="0" alt="" width="32" height="32" /></td>

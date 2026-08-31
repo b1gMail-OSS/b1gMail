@@ -1,7 +1,7 @@
 {if !$omitTable}<div id="contentHeader">
 	<div class="left">
 		<i class="fa fa-shopping-cart" aria-hidden="true"></i>
-		<a href="prefs.php?action=orders&sid={$sid}">{lng p="order"}</a>: {text value=$_pf.invoiceNo}
+		<a href="{sessionurl file='prefs.php' params='action=orders'}">{lng p="order"}</a>: {text value=$_pf.invoiceNo}
 	</div>
 </div>
 

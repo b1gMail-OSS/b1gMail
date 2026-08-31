@@ -1,4 +1,5 @@
 <form name="f1" action="email.php?do=action&{$folderString}&sid={$sid}" onsubmit="transferSelectedMailIDs()" method="post">
+	{csrffield}
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
 <div id="contentHeader">
@@ -83,7 +84,7 @@
 	<tbody id="group_{$mailID}" style="display:{if isset($smarty.cookies.toggleGroup.$mailGroupID) && $smarty.cookies.toggleGroup.$mailGroupID=='closed'}none{/if};">
 	{assign var=first value=false}
 	{else}
-	<tr _draggable="true" _ondragstart="mailDragStart(event,{$mailID})" class="{$class}" id="mail_{$mailID}_ntr" _onmousedown="return mailMouseDown(event,{$mailID});" _onmouseup="mailMouseUp(event,{$mailID});" {if $folderID==-3}_ondblclick="document.location.href='email.compose.php?redirect={$mailID}&sid={$sid}';"{else}_ondblclick="document.location.href='email.read.php?id={$mailID}&sid={$sid}';"{/if} _oncontextmenu="return(false);">
+	<tr _draggable="true" _ondragstart="mailDragStart(event,{$mailID})" class="{$class}" id="mail_{$mailID}_ntr" _onmousedown="return mailMouseDown(event,{$mailID});" _onmouseup="mailMouseUp(event,{$mailID});" {if $folderID==-3}_ondblclick="document.location.href='email.compose.php?redirect={$mailID}&sid={$sid}';"{else}_ondblclick="document.location.href='{sessionurl file='email.read.php' params="id={$mailID}"|escape:'javascript'}';"{/if} _oncontextmenu="return(false);">
 		{if $templatePrefs.showCheckboxes}
 		<td style="text-align:center;width:24px;">
 			<input type="checkbox" id="selecTable_{$mailID}" />
@@ -105,7 +106,7 @@
 		</a></span>&nbsp;</td>
 		{/if}
 		<td id="mail_{$mailID}_col3"{if $sortColumn=='betreff'&&$mail.color==0} class="listTableTDActive"{elseif $mail.color>0} class="mailColor_{$mail.color}"{/if} nowrap="nowrap">
-			<a draggable="false" href="email.read.php?id={$mailID}&sid={$sid}" onclick="return(false)">
+			<a draggable="false" href="{sessionurl file='email.read.php' params="id={$mailID}"}" onclick="return(false)">
 				&nbsp;
 				{if $mail.flags&8}<s>{/if}<i id="maildone_{$mailID}" class="{if $mail.flags&4096}fa fa-check{/if}"></i> {if !empty($mail.isCalendarInvite)}<i class="fa fa-calendar" aria-hidden="true"></i> {/if}{if $mail.flags&128}<i class="fa fa-bug" aria-hidden="true"></i> {/if}{if $mail.flags&256}<i class="fa fa-ban" aria-hidden="true"></i> {/if}<span style="background:transparent;" id="mail_{$mailID}_span2" class="{if $mail.flags&1}un{/if}readMail">{text value=$mail.subject}</span>
 				{if $mail.flags&8}</s>{/if}
@@ -114,7 +115,7 @@
 		<td id="mail_{$mailID}_col4"{if $sortColumn=='fetched'&&$mail.color==0} class="listTableTDActive"{elseif $mail.color>0} class="mailColor_{$mail.color}"{/if} nowrap="nowrap">&nbsp;{if $mail.flags&8}<s>{/if}{date timestamp=$mail.timestamp nice=true}{if $mail.flags&8}</s>{/if}&nbsp;</td>
 		<td{if $sortColumn=='size'&&$mail.color==0} class="listTableTDActive"{/if} nowrap="nowrap">&nbsp;{if $mail.flags&8}<s>{/if}{size bytes=$mail.size}{if $mail.flags&8}</s>{/if}&nbsp;</td>
 		<td nowrap="nowrap">
-			<a href="email.read.php?id={$mailID}&sid={$sid}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='email.read.php' params="id={$mailID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 			<a href="javascript:void(0);" onclick="currentSID='{$sid}';currentID={$mailID};currentSortColumn='{$sortColumn}';showMailMenu(event);"><i class="fa fa-bars" aria-hidden="true"></i></a>
 			<a href="email.php?do=deleteMail&id={$mailID}&{$folderString}&sid={$sid}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>

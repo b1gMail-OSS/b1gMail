@@ -5,25 +5,32 @@
 		{lng p="cancelmembership"}
 	</div>
 </div>
-
+dasfd
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 
-<form action="prefs.php?sid={$sid}" method="post">
+<form action="{sessionurl file='prefs.php'}" method="post">
+	{csrffield}
 <input type="hidden" name="action" value="membership" />
 <input type="hidden" name="do" value="reallyCancelAccount" />
 <input type="hidden" name="really" id="really" value="false" />
 
-<table>
-	<tr>
-		<td valign="top" width="64" align="center"><i class="fa fa-info-circle fa-5x" aria-hidden="true"></i></td>
-		<td valign="top">
-			{lng p="canceltext"}
-			<br /><br />
-			<input type="button" value="&laquo; {lng p="back"}" onclick="history.back();" />
-			<input type="submit" value=" {lng p="cancelmembership"} (30) " disabled="disabled" id="cancelButton" />
-		</td>
-	</tr>
-</table>
+<div class="alert alert-info" role="alert">
+	<div class="alert-icon">
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+			<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+			<path d="M12 9h.01"></path>
+			<path d="M11 12h1v4h1"></path>
+		</svg>
+	</div>
+	<div>
+		<div class="alert-description">{lng p="canceltext"}</div>
+	</div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+	<input type="button" class="btn btn-outline-secondary" value="&laquo; {lng p="back"}" onclick="history.back();" />
+	<input type="submit" class="btn btn-danger" value=" {lng p="cancelmembership"} (30) " disabled="disabled" id="cancelButton" />
+</div>
 </form>
 
 <script>
@@ -38,7 +45,7 @@
 		{
 			EBID('cancelButton').value = '{/literal}{lng p="cancelmembership"}{literal}';
 			EBID('cancelButton').disabled = false;
-			EBID('cancelButton').className = 'primary';
+			EBID('cancelButton').className = 'btn btn-danger';
 			EBID('really').value = 'true';
 		}
 		else

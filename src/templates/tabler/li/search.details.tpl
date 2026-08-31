@@ -5,7 +5,8 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="search.php?q={text value=$encodedQ}&sid={$sid}">
+<form name="f1" method="post" action="search.php?q={text value=$encodedQ}{$sessionUrlSuffix}">
+	{csrffield}
 <input type="hidden" name="do" value="massAction" />
 
 <div class="scrollContainer withBottomBar">
@@ -53,7 +54,7 @@
 			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
 		</td>
 		<td nowrap="nowrap" style="padding:4px;">
-			<a title="{text value=$result.title}" href="{if !empty($result.extLink)}{$result.extLink}{else}{$result.link}sid={$sid}{/if}"{if !empty($result.extLink)} target="_blank"{/if}>
+			<a title="{text value=$result.title}" href="{if !empty($result.extLink)}{$result.extLink}{else}{$result.link}{/if}"{if !empty($result.extLink)} target="_blank"{/if}>
 				<div style="text-overflow:ellipsis;overflow:hidden;{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">
 					{text value=$result.title}
 				</div>

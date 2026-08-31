@@ -8,7 +8,7 @@
 			{date timestamp=$weekEndDate dayonly=true}
 		</div>
 		<div class="right">
-			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='organizer.calendar.php?action=groups&sid={$sid}';">
+			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 				<i class="ti ti-users-group icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="editgroups"}
 			</button>
@@ -101,7 +101,7 @@
 
 	<div id="contentFooter" class="contentFooter bm-organizer-footer">
 		<div class="right">
-			<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='organizer.calendar.php?action=addDate&date={$theDate}&sid={$sid}';">
+			<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params="action=addDate&date={$theDate}"|escape:'javascript'}';">
 				<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="adddate"}
 			</button>

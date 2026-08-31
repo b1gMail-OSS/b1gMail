@@ -75,14 +75,15 @@ class B1GMailServerAdmin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMailServer Administration PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.152';
+		$this->version				= '1.154';
 		$this->website				= 'https://www.b1gmail.org/';
-		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
+		$this->update_url			= '';
 
 		// admin pages
 		$this->admin_pages			= true;
 		$this->admin_page_title		= 'b1gMailServer';
 		$this->admin_page_icon		= 'bms_logo.png';
+		$this->admin_route_slug		= 'bms';
 
 		// group options
 		$this->RegisterGroupOption('wdhttpadsig',
@@ -125,6 +126,12 @@ class B1GMailServerAdmin extends BMPlugin
 				'',
 				60);
 		}
+	}
+
+	public function RegisterRoutes()
+	{
+		BMRoute()->nli('autodiscover/autodiscover.xml', array());
+		BMRoute()->nli('mail/config-v1.1.xml', array());
 	}
 
 	/**
@@ -785,13 +792,17 @@ class B1GMailServerAdmin extends BMPlugin
 			$_lang_admin['bms_serverport']			= 'Server / Port';
 			$_lang_admin['bms_setvaliduntil']		= 'Hinterlegt, g&uuml;ltig bis';
 			$_lang_admin['bms_notset']				= 'Nicht hinterlegt';
+			$_lang_admin['bms_legacy']				= 'Legacy';
 			$_lang_admin['bms_apns']				= 'Apple Push-Service';
-			$_lang_admin['bms_apnsnote']			= 'zur Aktivierung muss zuerst ein Zertifikat hinterlegt werden';
+			$_lang_admin['bms_apnsnote']			= 'ohne g&uuml;ltiges Apple-XServer-Zertifikat nicht aktivierbar';
+			$_lang_admin['bms_apnslegacy']			= 'Diese Funktion ist Legacy und de facto abgek&uuml;ndigt. Apple stellt f&uuml;r Drittanbieter-Mailserver keine neuen XServer-Push-Zertifikate mehr aus. Push in die iOS-Mail-App funktioniert nur noch mit einem bereits vorhandenen, g&uuml;ltigen Apple-XServer-Zertifikat. Ohne dieses Zertifikat bleibt die Funktion wirkungslos.';
 			$_lang_admin['bms_pushcertificate']		= 'Push-Zertifikat';
 			$_lang_admin['bms_tls_ssl']				= 'Sicherheit';
 			$_lang_admin['bms_ssl_cipher_list']		= 'SSL-/TLS-Cipher-Liste';
 			$_lang_admin['bms_ssl_ciphersuites']		= 'TLSv1.3-Cipher-Suites';
 			$_lang_admin['bms_ssl_minmaxversion']		= 'Protokoll-Version min/max';
+			$_lang_admin['bms_ssl_min']				= 'Min';
+			$_lang_admin['bms_ssl_max']				= 'Max';
 			$_lang_admin['bms_tlsarecord']			= 'Vorgeschlagener TLSA-Record';
 			$_lang_admin['bms_mysqlconnection']		= 'MySQL-Verbindung';
 			$_lang_admin['bms_closeduringidle']		= 'Zwischen IDLE-Polls freigeben';
@@ -1033,13 +1044,17 @@ class B1GMailServerAdmin extends BMPlugin
 			$_lang_admin['bms_serverport']			= 'Server / Port';
 			$_lang_admin['bms_setvaliduntil']		= 'Set, valid until';
 			$_lang_admin['bms_notset']				= 'Not set';
+			$_lang_admin['bms_legacy']				= 'Legacy';
 			$_lang_admin['bms_apns']				= 'Apple Push Service';
-			$_lang_admin['bms_apnsnote']			= 'to enable, please set a certificate first';
+			$_lang_admin['bms_apnsnote']			= 'cannot be enabled without a valid Apple XServer certificate';
+			$_lang_admin['bms_apnslegacy']			= 'This feature is legacy and effectively discontinued. Apple no longer issues new XServer push certificates for third-party mail servers. Push to the iOS Mail app only works with an existing, valid Apple XServer certificate. Without that certificate, this feature has no effect.';
 			$_lang_admin['bms_pushcertificate']		= 'Push certificate';
 			$_lang_admin['bms_tls_ssl']				= 'Security';
 			$_lang_admin['bms_ssl_cipher_list']		= 'SSL/TLS cipher list';
 			$_lang_admin['bms_ssl_ciphersuites']		= 'TLSv1.3 cipher suites';
 			$_lang_admin['bms_ssl_minmaxversion']		= 'Protocol version min/max';
+			$_lang_admin['bms_ssl_min']				= 'Min';
+			$_lang_admin['bms_ssl_max']				= 'Max';
 			$_lang_admin['bms_tlsarecord']			= 'Suggested TLSA record';
 			$_lang_admin['bms_mysqlconnection']		= 'MySQL connection';
 			$_lang_admin['bms_closeduringidle']		= 'Release between IDLE polls';
@@ -1576,7 +1591,7 @@ class B1GMailServerAdmin extends BMPlugin
 		if(($this->prefs['loglevel'] & BMS_LOG_DEBUG) != 0)
 			$notices[] = array('type'	=> 'info',
 								'text'	=> 'b1gMailServer: ' . $lang_admin['bms_debugmode'],
-								'link'	=> $this->_adminLink() . '&action=common&');
+								'link'	=> $this->_bmsTabLink('common'));
 
 		// many logs?
 		$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_logs');
@@ -1585,16 +1600,429 @@ class B1GMailServerAdmin extends BMPlugin
 		if($logCount > 250000)
 			$notices[] = array('type'	=> 'info',
 								'text'	=> 'b1gMailServer: ' . $lang_admin['manylogs'],
-								'link'	=> $this->_adminLink() . '&action=logs&');
+								'link'	=> $this->_bmsTabLink('logs'));
 
 		// do limits make sense?
 		if($this->prefs['smtp_size_limit'] < $bm_prefs['mailmax'])
 			$notices[] = array('type'	=> 'warning',
 								'text'	=> 'b1gMailServer: ' . $lang_admin['bms_sizelimitissue'],
-								'link'	=> $this->_adminLink() . '&action=smtp&');
+								'link'	=> $this->_bmsTabLink('smtp'));
 
 
 		return($notices);
+	}
+
+	/**
+	 * Main admin sections (legacy: action=…).
+	 *
+	 * @return array<int, string>
+	 */
+	protected function _bmsMainActions()
+	{
+		return array(
+			'overview', 'common', 'pop3', 'imap', 'smtp',
+			'msgqueue', 'plugins', 'stats', 'logs', 'lookupip', 'lookupIP',
+		);
+	}
+
+	/**
+	 * Restore camelCase sub-page keys from lowercase pretty-URL segments.
+	 *
+	 * @param string $do
+	 * @return string
+	 */
+	protected function _bmsRestoreSubDo($do)
+	{
+		static $map = array(
+			'showqueueitem'       => 'showQueueItem',
+			'downloadqueueitem'   => 'downloadQueueItem',
+			'getqueueitemheaders' => 'getQueueItemHeaders',
+			'deliveryrules'       => 'deliveryRules',
+			'subnetrules'         => 'subnetRules',
+			'dnsblrules'          => 'dnsblRules',
+			'tlsarecord'          => 'tlsaRecord',
+			'updatecheck'         => 'updateCheck',
+			'showchart'           => 'showChart',
+			'activateplugin'      => 'activatePlugin',
+			'deactivateplugin'    => 'deactivatePlugin',
+			'lookupip'            => 'lookupIP',
+		);
+
+		$lower = strtolower((string)$do);
+
+		return isset($map[$lower]) ? $map[$lower] : $do;
+	}
+
+	/**
+	 * Ensure DNSBL table has type/match_ips (older installs may lack them).
+	 *
+	 * @return void
+	 */
+	protected function _bmsEnsureDnsblSchema()
+	{
+		global $db;
+
+		$res = $db->Query('SHOW COLUMNS FROM {pre}bms_dnsbl LIKE ?', 'type');
+		$hasType = $res && $res->RowCount() > 0;
+		if($res)
+			$res->Free();
+		if(!$hasType)
+			$db->Query("ALTER TABLE {pre}bms_dnsbl ADD COLUMN `type` enum('ipv4','ipv6','both') NOT NULL DEFAULT 'ipv4'");
+
+		$res = $db->Query('SHOW COLUMNS FROM {pre}bms_dnsbl LIKE ?', 'match_ips');
+		$hasMatch = $res && $res->RowCount() > 0;
+		if($res)
+			$res->Free();
+		if(!$hasMatch)
+			$db->Query("ALTER TABLE {pre}bms_dnsbl ADD COLUMN `match_ips` varchar(255) NOT NULL DEFAULT ''");
+	}
+
+	/**
+	 * Map pretty-URL path segments to legacy action/do request keys.
+	 */
+	/**
+	 * Split leftover query pairs from a path segment (e.g. lookupip&ip=1.2.3.4).
+	 *
+	 * @param string $key
+	 * @return void
+	 */
+	protected function _bmsSplitQueryFromPathParam($key)
+	{
+		if(!isset($_REQUEST[$key]) || !is_string($_REQUEST[$key]))
+			return;
+
+		$val = $_REQUEST[$key];
+		if(strpos($val, '&') === false)
+			return;
+
+		$parts = explode('&', $val);
+		$_REQUEST[$key] = array_shift($parts);
+		$_GET[$key] = $_REQUEST[$key];
+
+		foreach($parts as $part)
+		{
+			if($part === '')
+				continue;
+			parse_str($part, $extra);
+			if(!is_array($extra))
+				continue;
+			foreach($extra as $name => $value)
+			{
+				if($name === '' || (isset($_REQUEST[$name]) && $_REQUEST[$name] !== ''))
+					continue;
+				$_REQUEST[$name] = $value;
+				$_GET[$name] = $value;
+			}
+		}
+	}
+
+	protected function _bmsNormalizeRequest()
+	{
+		$this->_bmsSplitQueryFromPathParam('do');
+		$this->_bmsSplitQueryFromPathParam('action');
+
+		$mainActions = $this->_bmsMainActions();
+
+		if(!isset($_REQUEST['action']) || $_REQUEST['action'] === '')
+			$_REQUEST['action'] = 'overview';
+
+		$pathDo = isset($_REQUEST['do']) ? strtolower((string)$_REQUEST['do']) : '';
+		$pathAction = isset($_REQUEST['action']) ? strtolower((string)$_REQUEST['action']) : '';
+
+		if($pathDo !== '' && in_array($pathDo, $mainActions, true))
+		{
+			if($pathAction !== '' && !in_array($pathAction, $mainActions, true))
+			{
+				$sub = $_REQUEST['action'];
+				$_REQUEST['action'] = $_REQUEST['do'];
+				$_REQUEST['do'] = $sub;
+			}
+			else
+			{
+				$_REQUEST['action'] = $_REQUEST['do'];
+				unset($_REQUEST['do']);
+			}
+		}
+
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] !== '')
+			$_REQUEST['do'] = $this->_bmsRestoreSubDo($_REQUEST['do']);
+		if(isset($_REQUEST['action']) && $_REQUEST['action'] !== '')
+			$_REQUEST['action'] = $this->_bmsRestoreSubDo($_REQUEST['action']);
+	}
+
+	/**
+	 * Sub-page key for pageURL (omit AJAX / one-off handlers).
+	 *
+	 * @return string|null
+	 */
+	protected function _bmsSubDoForUrl()
+	{
+		if(!isset($_REQUEST['do']) || $_REQUEST['do'] === '')
+			return null;
+
+		$do = (string)$_REQUEST['do'];
+		static $omit = array(
+			'activateplugin', 'deactivateplugin', 'reset', 'export', 'archive',
+			'updatecheck', 'showchart', 'lookupip', 'tlsarecord',
+			'getqueueitemheaders', 'downloadqueueitem', 'showqueueitem',
+		);
+
+		if(in_array(strtolower($do), $omit, true))
+			return null;
+
+		return $do;
+	}
+
+	/**
+	 * Tab / notice link for page.tpl ({sessionurl file=$tab.link}).
+	 *
+	 * @param string      $action
+	 * @param string|null $subDo
+	 * @return string
+	 */
+	protected function _bmsTabLink($action, $subDo = null)
+	{
+		$url = 'plugin.page.php?plugin=' . rawurlencode($this->internal_name);
+		if($action !== '' && $action !== 'overview')
+			$url .= '&do=' . rawurlencode($action);
+		if($subDo !== null && $subDo !== '')
+			$url .= '&action=' . rawurlencode($subDo);
+		$url .= '&';
+
+		return $url;
+	}
+
+	/**
+	 * Pretty admin URL for this plugin.
+	 *
+	 * @param string               $action
+	 * @param string|null          $subDo
+	 * @param array<string, mixed> $query
+	 * @param bool                 $trailingAmp
+	 * @return string
+	 */
+	protected function _bmsAdminUrl($action = 'overview', $subDo = null, array $query = array(), $trailingAmp = true)
+	{
+		$params = array_merge(array('plugin' => $this->internal_name), $query);
+
+		if($action !== '' && $action !== 'overview')
+			$params['do'] = $action;
+
+		if($subDo !== null && $subDo !== '')
+			$params['action'] = $subDo;
+
+		if(function_exists('AdminSessionUrl'))
+			return AdminSessionUrl('plugin.page.php', $params, $trailingAmp);
+
+		$url = $this->_adminLink();
+		unset($params['plugin']);
+		foreach($params as $key => $val)
+		{
+			if((string)$val === '')
+				continue;
+			$url .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((string)$val);
+		}
+		if($trailingAmp)
+			$url .= (strpos($url, '?') !== false ? '&' : '?');
+
+		return $url;
+	}
+
+	/**
+	 * Assign bmsPlugin + pageURL for templates.
+	 *
+	 * @param string|null $action
+	 * @param string|null $subDo
+	 */
+	protected function _bmsAssignTplUrls($action = null, $subDo = null)
+	{
+		global $tpl;
+
+		if($action === null)
+			$action = $_REQUEST['action'];
+		if($subDo === null)
+			$subDo = $this->_bmsSubDoForUrl();
+
+		$tpl->assign('bmsPlugin', $this->internal_name);
+		$tpl->assign('pageURL', $this->_bmsAdminUrl($action, $subDo));
+		$tpl->assign('bmsLookupIpUrl', $this->_bmsAdminUrl('lookupIP', null, array('ip' => ''), false));
+		$tpl->assign('bmsSaveFooterTpl', $this->_templatePath('bms.admin.save-footer.tpl'));
+		$tpl->assign('bmsBackSaveFooterTpl', $this->_templatePath('bms.admin.back-save-footer.tpl'));
+		$tpl->assign('bmsSslMinMaxTpl', $this->_templatePath('bms.admin.ssl-minmax-version.tpl'));
+	}
+
+	/**
+	 * Legacy GET mutations → redirect (CSRF-safe forms preferred).
+	 */
+	protected function _bmsHandleLegacyGet()
+	{
+		global $db;
+
+		$action = $_REQUEST['action'];
+
+		if($action === 'common' && isset($_REQUEST['resetBanList']))
+		{
+			$db->Query('TRUNCATE TABLE {pre}bms_failban');
+			SessionRedirect($this->_bmsAdminUrl('common', null, array(), false));
+			exit();
+		}
+
+		if($action === 'smtp' && isset($_REQUEST['resetGreyList']))
+		{
+			$db->Query('TRUNCATE TABLE {pre}bms_greylist');
+			SessionRedirect($this->_bmsAdminUrl('smtp', null, array(), false));
+			exit();
+		}
+
+		if($action === 'msgqueue'
+			&& (isset($_REQUEST['flushQueue']) || isset($_REQUEST['clearQueue']) || isset($_REQUEST['restartQueue'])))
+		{
+			if(isset($_REQUEST['flushQueue']))
+			{
+				if($fp = $this->_openControlChannel())
+				{
+					$this->_queueControlCommand($fp, 'FLUSH_MSGQUEUE');
+					$this->_closeControlChannel($fp);
+				}
+				else
+				{
+					$db->Query('UPDATE {pre}bms_queue SET `last_attempt`=0 WHERE `deleted`=0');
+					@touch('/opt/b1gmailserver/queue/state');
+				}
+				SessionRedirect($this->_bmsAdminUrl('msgqueue', 'prefs', array(), false));
+				exit();
+			}
+			if(isset($_REQUEST['clearQueue']))
+			{
+				if($fp = $this->_openControlChannel())
+				{
+					$this->_queueControlCommand($fp, 'CLEAR_MSGQUEUE');
+					$this->_closeControlChannel($fp);
+				}
+				else
+				{
+					$db->Query('UPDATE {pre}bms_queue SET `deleted`=1 WHERE `active`=0');
+					@touch('/opt/b1gmailserver/queue/state');
+				}
+				SessionRedirect($this->_bmsAdminUrl('msgqueue', 'prefs', array(), false));
+				exit();
+			}
+			if(isset($_REQUEST['restartQueue']))
+			{
+				if($fp = $this->_openControlChannel())
+				{
+					$this->_queueControlCommand($fp, 'RESTART_MSGQUEUE');
+					$this->_closeControlChannel($fp);
+				}
+				SessionRedirect($this->_bmsAdminUrl('msgqueue', 'prefs', array(), false));
+				exit();
+			}
+		}
+
+		if($action === 'stats' && isset($_REQUEST['do']) && $_REQUEST['do'] === 'reset')
+		{
+			$db->Query('TRUNCATE TABLE {pre}bms_stats');
+			SessionRedirect($this->_bmsAdminUrl('stats', null, array(), false));
+			exit();
+		}
+
+		if($action === 'plugins'
+			&& isset($_REQUEST['do'], $_REQUEST['filename'])
+			&& in_array($_REQUEST['do'], array('activatePlugin', 'deactivatePlugin'), true))
+		{
+			if($_REQUEST['do'] === 'activatePlugin')
+				$db->Query('UPDATE bm60_bms_mods SET `active`=1 WHERE `filename`=?', $_REQUEST['filename']);
+			else
+				$db->Query('UPDATE bm60_bms_mods SET `active`=0 WHERE `filename`=?', $_REQUEST['filename']);
+
+			SessionRedirect($this->_bmsAdminUrl('plugins', null, array(), false));
+			exit();
+		}
+	}
+
+	/**
+	 * State-changing POST actions (CSRF-protected forms).
+	 */
+	protected function _bmsHandlePost()
+	{
+		global $db;
+
+		$action = $_REQUEST['action'];
+
+		if($action === 'common' && isset($_REQUEST['resetBanList']))
+		{
+			$db->Query('TRUNCATE TABLE {pre}bms_failban');
+			SessionRedirect($this->_bmsAdminUrl('common', null, array(), false));
+			exit();
+		}
+
+		if($action === 'smtp' && isset($_REQUEST['resetGreyList']))
+		{
+			$db->Query('TRUNCATE TABLE {pre}bms_greylist');
+			SessionRedirect($this->_bmsAdminUrl('smtp', null, array(), false));
+			exit();
+		}
+
+		if($action === 'msgqueue'
+			&& (isset($_REQUEST['flushQueue']) || isset($_REQUEST['clearQueue']) || isset($_REQUEST['restartQueue'])))
+		{
+			if(isset($_REQUEST['flushQueue']))
+			{
+				if($fp = $this->_openControlChannel())
+				{
+					$this->_queueControlCommand($fp, 'FLUSH_MSGQUEUE');
+					$this->_closeControlChannel($fp);
+				}
+				else
+				{
+					$db->Query('UPDATE {pre}bms_queue SET `last_attempt`=0 WHERE `deleted`=0');
+					@touch('/opt/b1gmailserver/queue/state');
+				}
+			}
+			if(isset($_REQUEST['clearQueue']))
+			{
+				if($fp = $this->_openControlChannel())
+				{
+					$this->_queueControlCommand($fp, 'CLEAR_MSGQUEUE');
+					$this->_closeControlChannel($fp);
+				}
+				else
+				{
+					$db->Query('UPDATE {pre}bms_queue SET `deleted`=1 WHERE `active`=0');
+					@touch('/opt/b1gmailserver/queue/state');
+				}
+			}
+			if(isset($_REQUEST['restartQueue']))
+			{
+				if($fp = $this->_openControlChannel())
+				{
+					$this->_queueControlCommand($fp, 'RESTART_MSGQUEUE');
+					$this->_closeControlChannel($fp);
+				}
+			}
+			SessionRedirect($this->_bmsAdminUrl('msgqueue', 'prefs', array(), false));
+			exit();
+		}
+
+		if($action === 'stats' && isset($_REQUEST['do']) && $_REQUEST['do'] === 'reset')
+		{
+			$db->Query('TRUNCATE TABLE {pre}bms_stats');
+			SessionRedirect($this->_bmsAdminUrl('stats', null, array(), false));
+			exit();
+		}
+
+		if($action === 'plugins'
+			&& isset($_REQUEST['do'], $_REQUEST['filename'])
+			&& in_array($_REQUEST['do'], array('activatePlugin', 'deactivatePlugin'), true))
+		{
+			if($_REQUEST['do'] === 'activatePlugin')
+				$db->Query('UPDATE bm60_bms_mods SET `active`=1 WHERE `filename`=?', $_REQUEST['filename']);
+			else
+				$db->Query('UPDATE bm60_bms_mods SET `active`=0 WHERE `filename`=?', $_REQUEST['filename']);
+
+			SessionRedirect($this->_bmsAdminUrl('plugins', null, array(), false));
+			exit();
+		}
 	}
 
 	/**
@@ -1609,65 +2037,71 @@ class B1GMailServerAdmin extends BMPlugin
 		if(!isset($this->prefs) || !is_array($this->prefs))
 			$this->prefs = $this->_getPrefs();
 
-		// default action
-		if(!isset($_REQUEST['action']))
-			$_REQUEST['action'] = 'overview';
+		$this->_bmsNormalizeRequest();
+		$this->_bmsHandleLookupIP();
+
+		if(($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST')
+			$this->_bmsHandlePost();
+		else
+			$this->_bmsHandleLegacyGet();
+
+		$curAction = $_REQUEST['action'];
 
 		// tabs
 		$tabs = array(
 			0 => array(
 				'title'		=> $lang_admin['overview'],
 				'icon'		=> '../plugins/templates/images/bms_logo.png',
-				'link'		=> $this->_adminLink() . '&',
-				'active'	=> $_REQUEST['action'] == 'overview'
+				'link'		=> $this->_bmsTabLink('overview'),
+				'active'	=> $curAction == 'overview'
 			),
 			1 => array(
 				'title'		=> $lang_admin['common'],
-				'relIcon'	=> 'ico_prefs_common.png',
-				'link'		=> $this->_adminLink() . '&action=common&',
-				'active'	=> $_REQUEST['action'] == 'common'
+				'icon'		=> '../plugins/templates/images/bms_common.png',
+				'link'		=> $this->_bmsTabLink('common'),
+				'active'	=> $curAction == 'common'
 			),
 			2 => array(
 				'title'		=> $lang_admin['pop3'],
 				'icon'		=> '../plugins/templates/images/bms_pop3.png',
-				'link'		=> $this->_adminLink() . '&action=pop3&',
-				'active'	=> $_REQUEST['action'] == 'pop3'
+				'link'		=> $this->_bmsTabLink('pop3'),
+				'active'	=> $curAction == 'pop3'
 			),
 			3 => array(
 				'title'		=> $lang_admin['imap'],
-				'link'		=> $this->_adminLink() . '&action=imap&',
+				'link'		=> $this->_bmsTabLink('imap'),
 				'icon'		=> '../plugins/templates/images/bms_imap.png',
-				'active'	=> $_REQUEST['action'] == 'imap'
+				'active'	=> $curAction == 'imap'
 			),
 			4 => array(
 				'title'		=> $lang_admin['smtp'],
-				'link'		=> $this->_adminLink() . '&action=smtp&',
+				'link'		=> $this->_bmsTabLink('smtp'),
 				'icon'		=> '../plugins/templates/images/bms_smtp.png',
-				'active'	=> $_REQUEST['action'] == 'smtp'
+				'active'	=> $curAction == 'smtp'
 			),
 			5 => array(
 				'title'		=> $lang_admin['bms_msgqueue'],
 				'icon'		=> '../plugins/templates/images/bms_queue.png',
-				'link'		=> $this->_adminLink() . '&action=msgqueue&',
-				'active'	=> $_REQUEST['action'] == 'msgqueue'
+				'link'		=> $this->_bmsTabLink('msgqueue'),
+				'active'	=> $curAction == 'msgqueue'
 			),
 			6 => array(
 				'title'		=> $lang_admin['plugins'],
 				'relIcon'	=> 'plugin32.png',
-				'link'		=> $this->_adminLink() . '&action=plugins&',
-				'active'	=> $_REQUEST['action'] == 'plugins'
+				'link'		=> $this->_bmsTabLink('plugins'),
+				'active'	=> $curAction == 'plugins'
 			),
 			7 => array(
 				'title'		=> $lang_admin['stats'],
 				'relIcon'	=> 'stats32.png',
-				'link'		=> $this->_adminLink() . '&action=stats&',
-				'active'	=> $_REQUEST['action'] == 'stats'
+				'link'		=> $this->_bmsTabLink('stats'),
+				'active'	=> $curAction == 'stats'
 			),
 			8 => array(
 				'title'		=> $lang_admin['logs'],
 				'relIcon'	=> 'filter.png',
-				'link'		=> $this->_adminLink() . '&action=logs&',
-				'active'	=> $_REQUEST['action'] == 'logs'
+				'link'		=> $this->_bmsTabLink('logs'),
+				'active'	=> $curAction == 'logs'
 			)
 		);
 
@@ -1675,6 +2109,11 @@ class B1GMailServerAdmin extends BMPlugin
 		$tpl->assign('tabHeaderText',	'b1gMailServer');
 		$tpl->assign('tabs', 			$tabs);
 		$tpl->assign('bms_prefs', 		$this->prefs);
+
+		if($curAction === 'msgqueue' && (!isset($_REQUEST['do']) || $_REQUEST['do'] === ''))
+			$_REQUEST['do'] = 'prefs';
+
+		$this->_bmsAssignTplUrls();
 
 		// call page function
 		if($_REQUEST['action'] == 'overview')
@@ -1695,15 +2134,36 @@ class B1GMailServerAdmin extends BMPlugin
 			$this->_statsPage();
 		else if($_REQUEST['action'] == 'logs')
 			$this->_logsPage();
-		else if($_REQUEST['action'] == 'lookupIP'
-			&& isset($_REQUEST['ip']))
+	}
+
+	/**
+	 * AJAX reverse-DNS lookup (pretty URL: /admin/plugin/bms/lookupip?ip=…).
+	 *
+	 * @return void
+	 */
+	protected function _bmsHandleLookupIP()
+	{
+		global $lang_admin;
+
+		$isLookup = (isset($_REQUEST['action']) && strcasecmp((string)$_REQUEST['action'], 'lookupIP') === 0)
+			|| (isset($_REQUEST['do']) && strcasecmp((string)$_REQUEST['do'], 'lookupIP') === 0);
+		if(!$isLookup || !isset($_REQUEST['ip']))
+			return;
+
+		$ip = trim((string)$_REQUEST['ip']);
+		if(filter_var($ip, FILTER_VALIDATE_IP) === false)
 		{
-			$hostName = @gethostbyaddr($_REQUEST['ip']);
-			if(!$hostName || $hostName == $_REQUEST['ip'])
-				$hostName = $lang_admin['unknown'];
-			echo $_REQUEST['ip'] . '/' . $hostName;
+			header('HTTP/1.1 400 Bad Request');
 			exit();
 		}
+
+		$hostName = @gethostbyaddr($ip);
+		if(!$hostName || $hostName == $ip)
+			$hostName = isset($lang_admin['unknown']) ? $lang_admin['unknown'] : $ip;
+
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode(array('ip' => $ip, 'host' => $hostName));
+		exit();
 	}
 
 	/**
@@ -1763,12 +2223,6 @@ class B1GMailServerAdmin extends BMPlugin
 				$tpl->assign('bms_prefs', $this->prefs);
 			}
 
-			// reset ban list?
-			if(isset($_REQUEST['resetBanList']))
-			{
-				$db->Query('TRUNCATE TABLE {pre}bms_failban');
-			}
-
 			// ban list
 			$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_failban WHERE `banned_until`>=?',
 				time());
@@ -1778,7 +2232,6 @@ class B1GMailServerAdmin extends BMPlugin
 			// assign
 			$tpl->assign('queueRunning',	$this->_isQueueRunning());
 			$tpl->assign('banCount',		$banCount);
-			$tpl->assign('pageURL', 		$this->_adminLink());
 			$tpl->assign('page', 			$this->_templatePath('bms.admin.common.tpl'));
 		}
 		else if($_REQUEST['do'] == 'banlist')
@@ -1832,7 +2285,6 @@ class B1GMailServerAdmin extends BMPlugin
 			$tpl->assign('pageNo',		$pageNo);
 			$tpl->assign('pageCount',	$pageCount);
 			$tpl->assign('banlist',		$banlist);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.common.banlist.tpl'));
 		}
 		else if($_REQUEST['do'] == 'tlsaRecord')
@@ -1933,7 +2385,6 @@ class B1GMailServerAdmin extends BMPlugin
 		$tpl->assign('notices',			$this->getNotices());
 		$tpl->assign('adminVersion',	$this->version);
 		$tpl->assign('coreVersion',		explode(' ', $this->prefs['core_version'])[0]);
-		$tpl->assign('pageURL', 		$this->_adminLink());
 		$tpl->assign('lang',			$currentLanguage);
 		$tpl->assign('page', 			$this->_templatePath('bms.admin.overview.tpl'));
 	}
@@ -1968,7 +2419,6 @@ class B1GMailServerAdmin extends BMPlugin
 
 		// assign
 		$tpl->assign('pop3Folders',	$pop3Folders);
-		$tpl->assign('pageURL', 	$this->_adminLink());
 		$tpl->assign('page', 		$this->_templatePath('bms.admin.pop3.tpl'));
 	}
 
@@ -2026,7 +2476,6 @@ class B1GMailServerAdmin extends BMPlugin
 			$tpl->assign('apnsValid', $apnsValid);
 
 			// assign
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.imap.tpl'));
 		}
 
@@ -2135,7 +2584,6 @@ class B1GMailServerAdmin extends BMPlugin
 				}
 
 				// assign
-				$tpl->assign('pageURL', 	$this->_adminLink());
 				$tpl->assign('page', 		$this->_templatePath('bms.admin.imap.apns.tpl'));
 			}
 		}
@@ -2219,16 +2667,8 @@ class B1GMailServerAdmin extends BMPlugin
 		global $db, $tpl, $lang_admin;
 
 		if(!isset($_REQUEST['do'])
-			|| in_array($_REQUEST['do'], array('activatePlugin', 'deactivatePlugin')))
+			|| in_array($_REQUEST['do'], array('activatePlugin', 'deactivatePlugin'), true))
 		{
-			// activate?
-			if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'activatePlugin')
-				$db->Query('UPDATE bm60_bms_mods SET `active`=1 WHERE `filename`=?',
-					$_REQUEST['filename']);
-			if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'deactivatePlugin')
-				$db->Query('UPDATE bm60_bms_mods SET `active`=0 WHERE `filename`=?',
-					$_REQUEST['filename']);
-
 			// fetch
 			$plugins = array();
 			$res = $db->Query('SELECT `filename`,`name`,`title`,`version`,`author`,`author_website`,`update_url`,`active` FROM bm60_bms_mods ORDER BY `active` DESC, `title` ASC');
@@ -2239,7 +2679,6 @@ class B1GMailServerAdmin extends BMPlugin
 			// assign
 			$tpl->assign('updateCheck',	isset($_REQUEST['updateCheck']));
 			$tpl->assign('plugins',		$plugins);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.plugins.tpl'));
 		}
 
@@ -2384,7 +2823,6 @@ class B1GMailServerAdmin extends BMPlugin
 		$tpl->assign('time', 		$time);
 		$tpl->assign('statType', 	$statType);
 		$tpl->assign('statTypes', 	$statTypes);
-		$tpl->assign('pageURL', 	$this->_adminLink());
 		$tpl->assign('page', 		$this->_templatePath('bms.admin.stats.tpl'));
 	}
 
@@ -2454,7 +2892,8 @@ class B1GMailServerAdmin extends BMPlugin
 			fwrite($fp, '#' . "\n");
 			fwrite($fp, "\n");
 
-			$res = $db->Query('SELECT iComponent,iSeverity,iDate,szEntry FROM {pre}bms_logs WHERE iDate<'.$date.' ORDER BY id ASC');
+			$res = $db->Query('SELECT iComponent,iSeverity,iDate,szEntry FROM {pre}bms_logs WHERE iDate<? ORDER BY id ASC',
+				(int)$date);
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
 				fwrite($fp, sprintf('[%s] %s [%d]: %s' . "\n",
@@ -2468,7 +2907,8 @@ class B1GMailServerAdmin extends BMPlugin
 			fclose($fp);
 		}
 
-		$db->Query('DELETE FROM {pre}bms_logs WHERE iDate<'.$date);
+		$db->Query('DELETE FROM {pre}bms_logs WHERE iDate<?',
+			(int)$date);
 		$archivedLogEntryCount = $db->AffectedRows();
 		return(true);
 	}
@@ -2509,14 +2949,26 @@ class B1GMailServerAdmin extends BMPlugin
 		$prio = isset($_REQUEST['prio']) && is_array($_REQUEST['prio'])
 					? $_REQUEST['prio']
 					: array(1 => true, 2 => true, 4 => true);
-		$addQ = isset($_REQUEST['q']) && trim($_REQUEST['q']) != ''
-					? ' AND szEntry LIKE \'%' . $db->Escape($_REQUEST['q']) . '%\''
-					: '';
+		$start = (int)$start;
+		$end = (int)$end;
+		$logQ = isset($_REQUEST['q']) ? trim((string)$_REQUEST['q']) : '';
+		$addQ = $logQ !== '' ? ' AND szEntry LIKE ?' : '';
+		$allowedPrio = array(BMS_LOG_DEBUG, BMS_LOG_ERROR, BMS_LOG_NOTICE, BMS_LOG_WARNING);
+		$allowedComp = array(BMS_CMP_CORE, BMS_CMP_POP3, BMS_CMP_IMAP, BMS_CMP_HTTP,
+			BMS_CMP_FTP, BMS_CMP_SMTP, BMS_CMP_MSGQUEUE, BMS_CMP_PLUGIN);
+		$prioKeys = array_values(array_intersect(array_map('intval', array_keys($prio)), $allowedPrio));
+		$compKeys = array_values(array_intersect(array_map('intval', array_keys($component)), $allowedComp));
+		if(count($prioKeys) === 0)
+			$prioKeys = array(BMS_LOG_NOTICE, BMS_LOG_WARNING, BMS_LOG_ERROR);
+		if(count($compKeys) === 0)
+			$compKeys = $allowedComp;
+		$logParams = array($start, $end, $prioKeys, $compKeys);
+		if($addQ !== '')
+			$logParams[] = '%' . $logQ . '%';
 
 		// get log count
-		$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_logs WHERE iDate>='.$start.' AND iDate<='.$end . ' AND iSeverity IN ? AND iComponent IN ?' . $addQ,
-			array_keys($prio),
-			array_keys($component));
+		$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_logs WHERE iDate>=? AND iDate<=? AND iSeverity IN ? AND iComponent IN ?' . $addQ,
+			...$logParams);
 		list($logCount) = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
@@ -2562,10 +3014,9 @@ class B1GMailServerAdmin extends BMPlugin
 		}
 
 		$entries = array();
-		$res = $db->Query('SELECT iComponent,iSeverity,iDate,szEntry FROM {pre}bms_logs WHERE iDate>='.$start.' AND iDate<='.$end.' AND iSeverity IN ? AND iComponent IN ?'.$addQ.' ORDER BY id DESC'
-			. (!$exportMode ? ' LIMIT ' . ($pageNo-1)*$itemsPerPage . ',' . $itemsPerPage : ''),
-			array_keys($prio),
-			array_keys($component));
+		$res = $db->Query('SELECT iComponent,iSeverity,iDate,szEntry FROM {pre}bms_logs WHERE iDate>=? AND iDate<=? AND iSeverity IN ? AND iComponent IN ?'.$addQ.' ORDER BY id DESC'
+			. (!$exportMode ? ' LIMIT ' . ((int)$pageNo-1)*(int)$itemsPerPage . ',' . (int)$itemsPerPage : ''),
+			...$logParams);
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
 			if($exportMode)
@@ -2586,11 +3037,10 @@ class B1GMailServerAdmin extends BMPlugin
 						$row['szEntry']);
 				}
 				$row['szEntry']			= preg_replace('/^\#([0-9]*)/',
-					sprintf('<a href="%s&action=logs&q=%%23$1%%20-&start=%d&end=%d&sid=%s" style="color:blue;">$0</a>',
-						$this->_adminLink(),
+					sprintf('<a href="%s&q=%%23$1%%20-&start=%d&end=%d" style="color:blue;">$0</a>',
+						$this->_bmsAdminUrl('logs', null, array(), false),
 						$start,
-						$end,
-						session_id()),
+						$end),
 					$row['szEntry']);
 
 				$row['componentName']	= $componentNames[$row['iComponent']];
@@ -2620,7 +3070,6 @@ class B1GMailServerAdmin extends BMPlugin
 		$tpl->assign('entries', 	$entries);
 		$tpl->assign('pageNo',		$pageNo);
 		$tpl->assign('pageCount',	$pageCount);
-		$tpl->assign('pageURL', 	$this->_adminLink());
 		$tpl->assign('page', 		$this->_templatePath('bms.admin.logs.tpl'));
 	}
 
@@ -2632,8 +3081,10 @@ class B1GMailServerAdmin extends BMPlugin
 	{
 		global $db, $tpl;
 
-		if(!isset($_REQUEST['do']))
+		if(!isset($_REQUEST['do']) || $_REQUEST['do'] === '')
 			$_REQUEST['do'] = 'prefs';
+		else
+			$_REQUEST['do'] = $this->_bmsRestoreSubDo($_REQUEST['do']);
 
 		//
 		// prefs
@@ -2670,10 +3121,6 @@ class B1GMailServerAdmin extends BMPlugin
 				$tpl->assign('bms_prefs', $this->prefs);
 			}
 
-			// reset grey list?
-			if(isset($_REQUEST['resetGreyList']))
-				$db->Query('DELETE FROM {pre}bms_greylist');
-
 			// get grey list entry count
 			$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_greylist');
 			list($greyCount) = $res->FetchArray(MYSQLI_NUM);
@@ -2693,7 +3140,6 @@ class B1GMailServerAdmin extends BMPlugin
 			$tpl->assign('subnetCount',	$subnetCount);
 			$tpl->assign('dnsblCount',	$dnsblCount);
 			$tpl->assign('greyCount',	$greyCount);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.smtp.tpl'));
 		}
 
@@ -2751,7 +3197,6 @@ class B1GMailServerAdmin extends BMPlugin
 
 			// assign
 			$tpl->assign('subnets',		$subnets);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.subnetrules.tpl'));
 		}
 
@@ -2760,6 +3205,8 @@ class B1GMailServerAdmin extends BMPlugin
 		//
 		else if($_REQUEST['do'] == 'dnsblRules')
 		{
+			$this->_bmsEnsureDnsblSchema();
+
 			// save?
 			if(isset($_REQUEST['save'])
 				&& isset($_REQUEST['dnsbls'])
@@ -2767,27 +3214,36 @@ class B1GMailServerAdmin extends BMPlugin
 			{
 				foreach($_REQUEST['dnsbls'] as $key=>$val)
 				{
-					if($key == 0 && strlen(trim($val['host'])) > 4)
+					if(!is_array($val))
+						continue;
+
+					$host = isset($val['host']) ? trim((string)$val['host']) : '';
+					$matchIps = isset($val['match_ips']) ? trim((string)$val['match_ips']) : '';
+					$type = isset($val['type']) ? (string)$val['type'] : 'ipv4';
+					if(!in_array($type, array('ipv4', 'ipv6', 'both'), true))
+						$type = 'ipv4';
+					$classification = isset($val['classification']) ? (int)$val['classification'] : 3;
+
+					if($key == 0 && strlen($host) > 4)
 					{
 						$db->Query('INSERT INTO {pre}bms_dnsbl(host,classification,`type`,`match_ips`) VALUES(?,?,?,?)',
-							$val['host'],
-							$val['classification'],
-							$val['type'],
-							trim($val['match_ips']));
+							$host,
+							$classification,
+							$type,
+							$matchIps);
 					}
 					else if(isset($val['delete']))
 					{
 						$db->Query('DELETE FROM {pre}bms_dnsbl WHERE id=?',
 							$key);
 					}
-					else if($key > 0
-						&& strlen(trim($val['host'])) > 4)
+					else if($key > 0 && strlen($host) > 4)
 					{
 						$db->Query('UPDATE {pre}bms_dnsbl SET host=?,classification=?,`type`=?,`match_ips`=? WHERE id=?',
-							$val['host'],
-							$val['classification'],
-							$val['type'],
-							trim($val['match_ips']),
+							$host,
+							$classification,
+							$type,
+							$matchIps,
 							$key);
 					}
 				}
@@ -2796,21 +3252,23 @@ class B1GMailServerAdmin extends BMPlugin
 			// get dnsbls
 			$dnsbls  = array();
 			$res = $db->Query('SELECT id,host,classification,`type`,`match_ips` FROM {pre}bms_dnsbl ORDER BY host');
-			while($row = $res->FetchArray(MYSQLI_ASSOC))
+			if($res)
 			{
-				$dnsbls[$row['id']] = array(
-					'id'				=> $row['id'],
-					'host'				=> $row['host'],
-					'classification'	=> $row['classification'],
-					'type'				=> $row['type'],
-					'match_ips'				=> $row['match_ips']
-				);
+				while($row = $res->FetchArray(MYSQLI_ASSOC))
+				{
+					$dnsbls[$row['id']] = array(
+						'id'				=> $row['id'],
+						'host'				=> $row['host'],
+						'classification'	=> $row['classification'],
+						'type'				=> isset($row['type']) ? $row['type'] : 'ipv4',
+						'match_ips'			=> isset($row['match_ips']) ? $row['match_ips'] : ''
+					);
+				}
+				$res->Free();
 			}
-			$res->Free();
 
 			// assign
 			$tpl->assign('dnsbls',		$dnsbls);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.dnsblrules.tpl'));
 		}
 
@@ -2858,7 +3316,6 @@ class B1GMailServerAdmin extends BMPlugin
 			$tpl->assign('pageNo',		$pageNo);
 			$tpl->assign('pageCount',	$pageCount);
 			$tpl->assign('greylist',	$greylist);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.greylist.tpl'));
 		}
 
@@ -2923,7 +3380,6 @@ class B1GMailServerAdmin extends BMPlugin
 			// assign
 			$tpl->assign('milters',		$milters);
 			$tpl->assign('nextPos',		$lastPos+10);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.milters.tpl'));
 		}
 	}
@@ -3078,7 +3534,9 @@ class B1GMailServerAdmin extends BMPlugin
 			$res->Free();
 
 			// get flushable entry count
-			$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_queue WHERE `last_attempt`>=('.time().'-`attempts`*'.$this->prefs['queue_retry'].') AND `deleted`=0 AND `active`=0');
+			$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_queue WHERE `last_attempt`>=(?-`attempts`*?) AND `deleted`=0 AND `active`=0',
+				time(),
+				(int)$this->prefs['queue_retry']);
 			list($flushableCount) = $res->FetchArray(MYSQLI_NUM);
 			$res->Free();
 
@@ -3105,7 +3563,6 @@ class B1GMailServerAdmin extends BMPlugin
 			$tpl->assign('allowFlush',		$flushableCount > 0);
 			$tpl->assign('queueCount',		$queueCount);
 			$tpl->assign('queueSize',		$queueSize);
-			$tpl->assign('pageURL',			$this->_adminLink());
 			$tpl->assign('page',			$this->_templatePath('bms.admin.msgqueue.tpl'));
 		}
 
@@ -3144,7 +3601,6 @@ class B1GMailServerAdmin extends BMPlugin
 				$tpl->assign('bms_prefs', $this->prefs);
 			}
 
-			$tpl->assign('pageURL',			$this->_adminLink());
 			$tpl->assign('page',			$this->_templatePath('bms.admin.msgqueue.headers.tpl'));
 		}
 
@@ -3211,7 +3667,6 @@ class B1GMailServerAdmin extends BMPlugin
 			// assign
 			$tpl->assign('rules',		$rules);
 			$tpl->assign('nextPos',		$lastPos+10);
-			$tpl->assign('pageURL', 	$this->_adminLink());
 			$tpl->assign('page', 		$this->_templatePath('bms.admin.deliveryrules.tpl'));
 		}
 
@@ -3266,20 +3721,22 @@ class B1GMailServerAdmin extends BMPlugin
 			if(isset($_REQUEST['delByAttr']) && isset($_POST['item_attribute']))
 			{
 				$deletedCount = 0;
+				$allowedAttr = array('from', 'to', 'b1gmail_user', 'smtp_user');
+				$itemAttr = (string)$_POST['item_attribute'];
 
 				$res = $db->Query('SELECT * FROM {pre}bms_queue WHERE `id`=?',
 					$_REQUEST['delByAttr']);
-				if($res->RowCount() == 1)
+				if($res->RowCount() == 1 && in_array($itemAttr, $allowedAttr, true))
 				{
 					$itemRow = $res->FetchArray(MYSQLI_ASSOC);
 					$res->Free();
 
-					if(isset($itemRow[$_POST['item_attribute']]))
+					if(isset($itemRow[$itemAttr]))
 					{
 						if($fp = $this->_openControlChannel())
 						{
-							$res = $db->Query('SELECT `id` FROM {pre}bms_queue WHERE `'.$_POST['item_attribute'].'`=?',
-								$itemRow[$_POST['item_attribute']]);
+							$res = $db->Query('SELECT `id` FROM {pre}bms_queue WHERE `'.$itemAttr.'`=?',
+								$itemRow[$itemAttr]);
 							while($row = $res->FetchArray(MYSQLI_ASSOC))
 							{
 								$this->_queueControlCommand($fp, sprintf('DELETE_QUEUEITEM %d', $row['id']));
@@ -3291,50 +3748,66 @@ class B1GMailServerAdmin extends BMPlugin
 						}
 						else
 						{
-							$db->Query('UPDATE {pre}bms_queue SET `deleted`=1 WHERE `'.$_POST['item_attribute'].'`=?',
-								$itemRow[$_POST['item_attribute']]);
+							$db->Query('UPDATE {pre}bms_queue SET `deleted`=1 WHERE `'.$itemAttr.'`=?',
+								$itemRow[$itemAttr]);
 							$deletedCount = $db->AffectedRows();
 						}
 					}
 				}
+				else
+					$res->Free();
 
 				$tpl->assign('msg', sprintf($lang_admin['bms_deletedmsg'], $deletedCount));
 			}
 
 			// sort options
-			$sortBy = isset($_REQUEST['sortBy'])
-						? $_REQUEST['sortBy']
-						: 'last_attempt';
-			$sortOrder = isset($_REQUEST['sortOrder'])
-							? strtolower($_REQUEST['sortOrder'])
-							: 'desc';
+			$sortBy = AdminSanitizeSortColumn(
+						isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'last_attempt',
+						array('id', 'date', 'type', 'from', 'to', 'size', 'last_attempt', 'attempts', 'active'),
+						'last_attempt');
+			$sortOrder = AdminSanitizeSortOrder(
+						isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'desc',
+						'desc');
 			$perPage = max(1, isset($_REQUEST['perPage'])
 							? (int)$_REQUEST['perPage']
 							: 50);
 
 			// filter stuff
 			$queryAdd = '';
+			$queryParams = array();
 			$query = '';
 			$start = $end = 0;
 			if(isset($_REQUEST['filter']))
 			{
-				$typeIDs = array_keys($_REQUEST['types']);
-				$queryTypes = count($typeIDs) > 0 ? implode(',', $typeIDs) : '0';
-				$queryAdd = ' AND type IN(' . $queryTypes . ') ';
+				$typeIDs = array();
+				if(isset($_REQUEST['types']) && is_array($_REQUEST['types']))
+					$typeIDs = array_values(array_unique(array_map('intval', array_keys($_REQUEST['types']))));
+				if(count($typeIDs) === 0)
+					$typeIDs = array(0);
+				$queryAdd = ' AND type IN ? ';
+				$queryParams[] = $typeIDs;
 				$types = is_array($_REQUEST['types']) ? $_REQUEST['types'] : array();
 
 				if(isset($_REQUEST['query']) && trim($_REQUEST['query']) != '')
 				{
 					$query = trim($_REQUEST['query']);
-					$escQuery = $db->Escape($query);
+					$like = '%' . $query . '%';
 
-					$queryAdd .= ' AND (`from` LIKE \'%'.$escQuery.'%\' OR `to` LIKE \'%'.$escQuery.'%\'';
+					$queryAdd .= ' AND (`from` LIKE ? OR `to` LIKE ?';
+					$queryParams[] = $like;
+					$queryParams[] = $like;
 
 					if(is_numeric($query))
-						$queryAdd .= ' OR `id`=\'' . $escQuery . '\'';
+					{
+						$queryAdd .= ' OR `id`=?';
+						$queryParams[] = $query;
+					}
 
 					if(strlen($query) == 8 && preg_match('/^[abcdefABCDEF0-9]+$/', $query))
-						$queryAdd .= ' OR `id`=\'' . hexdec($query) . '\'';
+					{
+						$queryAdd .= ' OR `id`=?';
+						$queryParams[] = hexdec($query);
+					}
 
 					$queryAdd .= ') ';
 				}
@@ -3343,21 +3816,24 @@ class B1GMailServerAdmin extends BMPlugin
 					&& isset($_REQUEST['startDay']))
 				{
 					$start = SmartyDateTime('start');
-					$queryAdd .= ' AND `date`>=' . (int)$start . ' ';
+					$queryAdd .= ' AND `date`>=? ';
+					$queryParams[] = (int)$start;
 				}
 
 				if(isset($_REQUEST['use_end']) && $_REQUEST['use_end'] == 'yes'
 					&& isset($_REQUEST['endDay']))
 				{
 					$end = SmartyDateTime('end');
-					$queryAdd .= ' AND `date`<=' . (int)$end . ' ';
+					$queryAdd .= ' AND `date`<=? ';
+					$queryParams[] = (int)$end;
 				}
 			}
 			else
 				$types = array(0 => true, 1 => true);
 
 			// page calculation
-			$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_queue WHERE `deleted`=0' . $queryAdd);
+			$res = $db->Query('SELECT COUNT(*) FROM {pre}bms_queue WHERE `deleted`=0' . $queryAdd,
+				...$queryParams);
 			list($queueCount) = $res->FetchArray(MYSQLI_NUM);
 			$res->Free();
 			$pageCount = ceil($queueCount / $perPage);
@@ -3371,7 +3847,8 @@ class B1GMailServerAdmin extends BMPlugin
 			$res = $db->Query('SELECT id,`date`,`type`,`from`,`to`,`size`,last_attempt,attempts,`active` FROM {pre}bms_queue WHERE `deleted`=0 ' . $queryAdd
 						. 'ORDER BY `' . $sortBy . '` '
 						. $sortOrder . ' '
-						. 'LIMIT ' . $startPos . ',' . $perPage);
+						. 'LIMIT ' . (int)$startPos . ',' . (int)$perPage,
+				...$queryParams);
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
 				$queue[$row['id']] = array(
@@ -3402,7 +3879,6 @@ class B1GMailServerAdmin extends BMPlugin
 			$tpl->assign('start',			$start);
 			$tpl->assign('end',				$end);
 			$tpl->assign('queue',			$queue);
-			$tpl->assign('pageURL', 		$this->_adminLink());
 			$tpl->assign('page', 			$this->_templatePath('bms.admin.queue.tpl'));
 		}
 
@@ -3430,21 +3906,18 @@ class B1GMailServerAdmin extends BMPlugin
 			$item['hexID']		= sprintf('%08X', $item['id']);
 			if($item['smtp_user'] > 0)
 			{
-				$user = _new('BMUser', array($item['smtp_user']));
-				$userRow = $user->Fetch();
-				$item['smtp_user_mail'] = $userRow['email'];
+				$userRow = BMUser::staticFetch((int)$item['smtp_user']);
+				$item['smtp_user_mail'] = is_array($userRow) ? $userRow['email'] : '';
 			}
 			if($item['b1gmail_user'] > 0)
 			{
-				$user = _new('BMUser', array($item['b1gmail_user']));
-				$userRow = $user->Fetch();
-				$item['b1gmail_user_mail'] = $userRow['email'];
+				$userRow = BMUser::staticFetch((int)$item['b1gmail_user']);
+				$item['b1gmail_user_mail'] = is_array($userRow) ? $userRow['email'] : '';
 			}
 
 			// assign
 			$tpl->assign('queueRunning',	$this->_isQueueRunning());
 			$tpl->assign('item',			$item);
-			$tpl->assign('pageURL', 		$this->_adminLink());
 			$tpl->assign('page', 			$this->_templatePath('bms.admin.queue.item.tpl'));
 		}
 
@@ -3582,7 +4055,7 @@ class B1GMailServerAdmin extends BMPlugin
 			$lang_user['bms_userarea'] = implode('/', $protocols);
 			$GLOBALS['prefsItems']['bms_userarea'] = true;
 			$GLOBALS['prefsImages']['bms_userarea'] = 'plugins/templates/images/bms_userarea48.png';
-			$GLOBALS['prefsIcons']['bms_userarea'] = 'plugins/templates/images/bms_userarea16.png';
+			$GLOBALS['prefsfaIcons']['bms_userarea'] = 'fa-exchange';
 		}
 	}
 
@@ -3734,7 +4207,7 @@ class B1GMailServerAdmin extends BMPlugin
 
 				$tpl->assign('title', $lang_user['bms_folderstofetch']);
 				$tpl->assign('msg', $lang_user['bms_folderssaved']);
-				$tpl->assign('backLink', 'prefs.php?action=bms_userarea&sid=' . session_id());
+				$tpl->assign('backLink', SessionUrl('prefs.php?action=bms_userarea'));
 				$tpl->assign('pageContent', 'li/msg.tpl');
 				$tpl->display('li/index.tpl');
 
@@ -3761,7 +4234,7 @@ class B1GMailServerAdmin extends BMPlugin
 
 				$tpl->assign('title', $lang_user['bms_imaplimit']);
 				$tpl->assign('msg', $lang_user['bms_imaplimitsaved']);
-				$tpl->assign('backLink', 'prefs.php?action=bms_userarea&sid=' . session_id());
+				$tpl->assign('backLink', SessionUrl('prefs.php?action=bms_userarea'));
 				$tpl->assign('pageContent', 'li/msg.tpl');
 				$tpl->display('li/index.tpl');
 
@@ -3785,6 +4258,7 @@ class B1GMailServerAdmin extends BMPlugin
 
 		return(true);
 	}
+
 }
 
 /**

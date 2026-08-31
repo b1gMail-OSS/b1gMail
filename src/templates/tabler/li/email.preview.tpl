@@ -131,11 +131,11 @@
 		<i class="ti ti-arrows-double-ne-sw icon" aria-hidden="true"></i>
 		{lng p="replyall"}
 	</button>
-	<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.compose.php?sid={$sid}&forward={$mailID}';">
+	<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="document.location.href='email.compose.php?forward={$mailID}{$sessionUrlSuffix}';">
 		<i class="ti ti-arrow-forward-up icon" aria-hidden="true"></i>
 		{lng p="forward"}
 	</button>
-	<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="printMail({$mailID},'{$sid}');">
+	<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="printMail({$mailID});">
 		<i class="ti ti-printer icon" aria-hidden="true"></i>
 		{lng p="print"}
 	</button>
@@ -164,6 +164,7 @@
 </div>
 {/if}
 
-<form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
+<form id="quoteForm" action="email.compose.php?reply={$mailID}{$sessionUrlSuffix}" method="post">
+	{csrffield}
 	<input type="hidden" name="text" id="quoteText" value="" />
 </form>

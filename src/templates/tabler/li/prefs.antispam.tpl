@@ -8,7 +8,8 @@
 
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
 
-<form name="f1" method="post" action="prefs.php?action=antispam&do=save&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=antispam&do=save'}">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="antispam"}</th>
@@ -88,7 +89,8 @@
 
 {if $localMode}
 <br />
-<form name="f1" method="post" action="prefs.php?action=antispam&do=resetDB&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=antispam&do=resetDB'}">
+	{csrffield}
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="spamindex"}</th>

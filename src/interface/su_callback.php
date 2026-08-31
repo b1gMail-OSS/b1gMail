@@ -20,7 +20,8 @@
  */
 
 define('INTERFACE_MODE', true);
-require '../serverlib/init.inc.php';
+if(!defined('B1GMAIL_INIT'))
+	require '../serverlib/init.inc.php';
 include('../serverlib/payment.class.php');
 
 PutLog('SU-Callback: Called',

@@ -6,6 +6,7 @@
 </div>
 
 <form name="f1" method="post" action="prefs.php?action=filters&do=action&sid={$sid}">
+	{csrffield}
 
 <div class="scrollContainer withBottomBar">
 <table class="bigTable">

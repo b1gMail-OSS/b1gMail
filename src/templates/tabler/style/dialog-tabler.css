@@ -28,6 +28,89 @@ BODY.bm-dialog-body {
 	max-height: 100%;
 }
 
+.bm-dialog-body.bm-dialog-webdisk .bm-dialog-webdisk-page {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+BODY.bm-dialog-body.bm-dialog-webdisk.bm-dialog-modal-sections {
+	overflow: hidden;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+}
+
+.bm-webdisk-picker-dialog {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+	height: 100%;
+	max-height: 100%;
+	box-sizing: border-box;
+}
+
+.bm-webdisk-picker-dialog > .modal-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	padding: 0.75rem 1rem 0.5rem;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.bm-webdisk-picker-dialog .modal-footer {
+	flex-shrink: 0;
+	padding: 0.75rem 1.25rem;
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-webdisk-picker-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.bm-webdisk-picker-footer-left {
+	margin-right: auto;
+}
+
+.bm-webdisk-picker-footer-right {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.bm-dialog-body.bm-dialog-webdisk .bm-webdisk-file-list.fileList {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.bm-webdisk-file-list.bm-webdisk-loaded {
+	min-height: 10rem;
+}
+
+.bm-webdisk-file-list.bm-webdisk-loaded > .bm-webdisk-breadcrumb {
+	flex: 0 0 auto;
+}
+
+.bm-webdisk-file-list.bm-webdisk-loaded > .bm-webdisk-picker-split {
+	flex: 1 1 auto;
+	min-height: 0;
+	height: auto;
+}
+
 .bm-dialog-title {
 	margin: 0 0 0.5rem;
 	font-size: 1.125rem;
@@ -64,6 +147,51 @@ BODY.bm-dialog-body {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem;
+}
+
+/* Anlage hinzufügen – modal-body + modal-footer */
+BODY.bm-dialog-body.bm-dialog-openfile.bm-dialog-modal-sections {
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.bm-openfile-dialog {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	height: auto;
+}
+
+.bm-openfile-dialog .bm-dialog-form {
+	display: flex;
+	flex-direction: column;
+	flex: 0 0 auto;
+	min-height: 0;
+}
+
+.bm-openfile-dialog .modal-body {
+	flex: 0 0 auto;
+	padding: 1rem 1.25rem 0.75rem;
+}
+
+.bm-openfile-dialog .modal-footer {
+	flex: 0 0 auto;
+	padding: 0.75rem 1.25rem;
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-openfile-dialog-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+}
+
+.bm-dialog-body.bm-dialog-openfile .bm-dialog-intro {
+	margin-bottom: 0.75rem;
 }
 
 /* Dateiauswahl (lokal / Webdisk) */
@@ -122,34 +250,67 @@ BODY.bm-dialog-body {
 	font-size: 0.8125rem;
 }
 
-/* Webdisk-Browser */
+/* Webdisk-Browser (Ordner links, Dateien rechts) */
 .bm-webdisk-file-list.fileList {
-	flex: 1 1 auto;
-	min-height: 12rem;
-	height: auto !important;
 	width: 100% !important;
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
 	border-radius: var(--tblr-border-radius, 6px);
 	background: var(--tblr-bg-surface-secondary, #f6f8fb);
-	overflow: hidden;
 }
 
-.bm-webdisk-columns-table {
-	border-collapse: collapse;
-	height: 100% !important;
+.bm-webdisk-picker-split {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	min-height: 0;
+	height: auto;
+	background: var(--tblr-bg-surface, #fff);
 }
 
-.bm-webdisk-column {
-	width: 11.5rem;
-	vertical-align: top;
+.bm-webdisk-picker-pane {
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
 	border-right: 1px solid var(--tblr-border-color, #e6e7e9);
 	background: var(--tblr-bg-surface, #fff);
 }
 
-.bm-webdisk-column-scroll {
-	width: 11.5rem !important;
+.bm-webdisk-picker-pane:last-child {
+	border-right: none;
+}
+
+.bm-webdisk-picker-folders {
+	flex: 0 0 42%;
+	max-width: 16rem;
+}
+
+.bm-webdisk-picker-pane-head {
+	flex-shrink: 0;
+	padding: 0.375rem 0.625rem;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--tblr-secondary, #6c7a91);
+	border-bottom: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+}
+
+.bm-webdisk-picker-pane-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
+}
+
+.bm-webdisk-picker-empty {
+	padding: 0.5rem 0.625rem;
+	font-size: 0.8125rem;
+}
+
+.bm-webdisk-parent-item {
+	font-weight: 500;
 }
 
 .bm-webdisk-item,
@@ -195,11 +356,70 @@ BODY.bm-dialog-body {
 	opacity: 0.9;
 }
 
-.bm-webdisk-column-spacer {
-	width: 0.25rem;
+.bm-webdisk-breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.125rem 0.25rem;
+	padding: 0.375rem 0.5rem;
+	margin-bottom: 0.375rem;
+	font-size: 0.75rem;
+	line-height: 1.4;
+	border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-webdisk-breadcrumb-link {
+	color: var(--tblr-primary, #206bc4);
+	text-decoration: none;
+}
+
+.bm-webdisk-breadcrumb-link:hover {
+	text-decoration: underline;
+}
+
+.bm-webdisk-breadcrumb-sep {
+	color: var(--tblr-secondary, #6c7a91);
+	opacity: 0.7;
+}
+
+.bm-webdisk-breadcrumb-current {
+	color: var(--tblr-body-color);
+	font-weight: 600;
 }
 
 /* Adressbuch-Dialog */
+BODY.bm-dialog-body.bm-dialog-addressbook {
+	overflow: hidden;
+	height: 100%;
+}
+
+.bm-addressbook-dialog.bm-dialog-page-fill {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	max-height: 100%;
+	padding: 1rem 1.125rem;
+	box-sizing: border-box;
+}
+
+.bm-addressbook-scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-gutter: stable;
+}
+
+.bm-addressbook-dialog .bm-dialog-actions {
+	flex-shrink: 0;
+	margin-top: 0;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--tblr-border-color-translucent, #eef0f2);
+}
+
 .bm-dialog-body.bm-dialog-addressbook .addressDiv.bm-addressbook-list,
 .bm-addressbook-dialog .addressDiv.bm-addressbook-list {
 	width: 100% !important;
@@ -211,8 +431,12 @@ BODY.bm-dialog-body {
 }
 
 .bm-addressbook-list {
-	height: 10rem;
+	min-height: 7rem;
+	max-height: min(14rem, 32vh);
+	height: auto;
 	padding: 0.125rem 0;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 .bm-dialog-body.bm-dialog-addressbook .input-group,
@@ -236,12 +460,20 @@ BODY.bm-dialog-body {
 	padding: 0.25rem 0.375rem;
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
 	border-radius: var(--tblr-border-radius, 6px);
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
 	background: var(--tblr-bg-surface, #fff);
 	box-shadow: none;
 	overflow: auto;
 	box-sizing: border-box;
+}
+
+.bm-dialog-body.bm-dialog-addressbook .input-group > .btn.bm-addressbook-add-btn,
+.bm-addressbook-dialog .input-group > .btn.bm-addressbook-add-btn {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	padding-left: 0.625rem;
+	padding-right: 0.625rem;
 }
 
 .bm-addressbook-dialog .input-group > .addressDiv.bm-addressbook-target.form-control {
@@ -325,6 +557,39 @@ BODY.bm-dialog-body {
 	border-top: 1px solid var(--tblr-border-color-translucent, #eef0f2);
 }
 
+.bm-addressbook-dialog .bm-addressbook-target .addressItem > div,
+.bm-addressbook-dialog .bm-addressbook-target .addressItemActive > div {
+	flex-wrap: wrap;
+	row-gap: 0.125rem;
+}
+
+.bm-addressbook-dialog .bm-addressbook-target .addressItem img[id^="delAddress"],
+.bm-addressbook-dialog .bm-addressbook-target .addressItemActive img[id^="delAddress"] {
+	flex-shrink: 0 !important;
+	width: 1rem !important;
+	height: 1rem !important;
+	min-width: 1rem !important;
+	max-width: 1rem !important;
+	margin-left: auto !important;
+	padding: 0 !important;
+	cursor: pointer;
+	opacity: 0.65;
+	object-fit: contain;
+}
+
+.bm-addressbook-dialog .bm-addressbook-target .addressItem:hover img[id^="delAddress"],
+.bm-addressbook-dialog .bm-addressbook-target .addressItemActive:hover img[id^="delAddress"] {
+	opacity: 0.9;
+}
+
+.bm-addressbook-dialog .bm-addressbook-target .addressItem small {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .bm-spin {
 	animation: bm-dialog-spin 0.8s linear infinite;
 }
@@ -355,6 +620,24 @@ BODY.bm-dialog-body.bm-dialog-calendar-date {
 BODY.bm-dialog-body.bm-dialog-modal-sections {
 	padding: 0;
 	overflow-y: auto;
+}
+
+/* Premium Account – Paket-Details im Overlay */
+BODY.bm-dialog-body.bm-dialog-pacc-package {
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.bm-dialog-body.bm-dialog-pacc-package .bm-dialog-pacc-package-page {
+	height: auto;
+	min-height: 0;
+	padding: 1rem 1.125rem;
+}
+
+.bm-dialog-body.bm-dialog-pacc-package .bm-dialog-actions {
+	margin-top: 1rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
 }
 
 .bm-dialog-modal-sections .bm-calendar-showdate {
@@ -732,9 +1015,17 @@ BODY.bm-dialog-body.bm-dialog-attendees {
 }
 
 [data-bs-theme="dark"] .bm-webdisk-file-list.fileList,
-[data-bs-theme="dark"] .bm-webdisk-column {
+[data-bs-theme="dark"] .bm-webdisk-picker-pane,
+[data-bs-theme="dark"] .bm-webdisk-picker-split,
+[data-bs-theme="dark"] .bm-openfile-dialog .modal-footer,
+[data-bs-theme="dark"] .bm-webdisk-picker-dialog .modal-footer {
 	background: var(--tblr-bg-surface, #1f2937);
 	border-color: var(--tblr-border-color-translucent, rgba(255, 255, 255, 0.1));
+}
+
+[data-bs-theme="dark"] .bm-webdisk-picker-pane-head,
+[data-bs-theme="dark"] .bm-webdisk-breadcrumb {
+	background: rgba(255, 255, 255, 0.04);
 }
 
 [data-bs-theme="dark"] .bm-webdisk-item,
@@ -833,4 +1124,199 @@ BODY.bm-dialog-body.bm-dialog-attendees {
 
 .bm-calendar-attendee-item .icon {
 	vertical-align: -0.15em;
+}
+
+/* E-Mail verschieben – Ordnerliste */
+BODY.bm-dialog-body.bm-dialog-move-mail {
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: auto !important;
+	min-height: 0 !important;
+}
+
+BODY.bm-dialog-body.bm-dialog-move-mail .bm-dialog-page.bm-move-mail-dialog {
+	height: auto;
+	min-height: 0;
+}
+
+.bm-move-mail-dialog {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 0.875rem 1rem 1rem;
+	box-sizing: border-box;
+	min-height: 0;
+}
+
+.bm-move-mail-list-wrap {
+	flex: 0 1 auto;
+	min-height: 0;
+	max-height: min(24rem, 55vh);
+	overflow-x: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 6px);
+	background: var(--tblr-bg-surface, #fff);
+}
+
+.bm-move-mail-list .list-group-item {
+	border-left: 0;
+	border-right: 0;
+	padding-top: 0.625rem;
+	padding-bottom: 0.625rem;
+	padding-right: 1rem;
+	padding-left: calc(1rem + var(--bm-depth, 0) * 1.125rem);
+	min-height: 2.75rem;
+	color: var(--tblr-body-color);
+}
+
+.bm-move-mail-list .list-group-item:first-child {
+	border-top: 0;
+}
+
+.bm-move-mail-list .list-group-item:last-child {
+	border-bottom: 0;
+}
+
+.bm-move-mail-list .list-group-item .icon {
+	width: 1.125rem;
+	height: 1.125rem;
+	font-size: 1.125rem;
+}
+
+.bm-move-mail-label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.bm-move-mail-dialog .bm-dialog-actions {
+	flex-shrink: 0;
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+	justify-content: stretch;
+}
+
+.bm-move-mail-dialog .bm-move-mail-cancel {
+	width: 100%;
+}
+
+@media (min-width: 576px) {
+	.bm-move-mail-dialog .bm-dialog-actions {
+		justify-content: flex-end;
+	}
+
+	.bm-move-mail-dialog .bm-move-mail-cancel {
+		width: auto;
+	}
+}
+
+@media (max-width: 575.98px) {
+	BODY.bm-dialog-body.bm-dialog-move-mail {
+		overflow-y: hidden;
+		height: 100% !important;
+		min-height: 100% !important;
+	}
+
+	BODY.bm-dialog-body.bm-dialog-move-mail .bm-dialog-page.bm-move-mail-dialog {
+		height: 100%;
+		min-height: 100%;
+	}
+
+	.bm-move-mail-dialog {
+		padding: 0.75rem 0.875rem 0.875rem;
+	}
+
+	.bm-move-mail-list-wrap {
+		flex: 1 1 auto;
+		max-height: none;
+	}
+
+	.bm-move-mail-list .list-group-item {
+		min-height: 3rem;
+		padding-top: 0.75rem;
+		padding-bottom: 0.75rem;
+	}
+}
+
+[data-bs-theme="dark"] .bm-move-mail-list-wrap {
+	background: var(--tblr-bg-surface, #1f2937);
+	border-color: var(--tblr-border-color-translucent, rgba(255, 255, 255, 0.1));
+}
+
+[data-bs-theme="dark"] .bm-move-mail-list .list-group-item {
+	background: transparent;
+	border-color: rgba(255, 255, 255, 0.08);
+	color: var(--tblr-body-color, #e5e7eb);
+}
+
+BODY.bm-dialog-body.bm-dialog-statement {
+	overflow: hidden;
+}
+
+.bm-statement-dialog {
+	height: 100vh;
+}
+
+.bm-statement-dialog .bm-dialog-form {
+	min-height: 0;
+}
+
+.bm-statement-card {
+	margin-bottom: 0;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.bm-statement-table-wrap {
+	max-height: min(58vh, 34rem);
+}
+
+.bm-statement-table {
+	margin-bottom: 0;
+}
+
+.bm-statement-table .bm-statement-balance > td {
+	background: var(--tblr-bg-surface-secondary, #f6f8fb);
+	font-weight: 600;
+}
+
+.bm-statement-table .bm-statement-cancelled > td {
+	text-decoration: line-through;
+	color: var(--tblr-secondary, #667382);
+}
+
+.bm-statement-actions {
+	margin-top: 0.75rem;
+}
+
+.bm-statement-filter {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.bm-statement-filter select {
+	min-width: 6.5rem;
+	height: calc(2rem + 2px);
+	padding: 0.375rem 2rem 0.375rem 0.75rem;
+	border: 1px solid var(--tblr-border-color, #dce1e7);
+	border-radius: var(--tblr-border-radius, 4px);
+	background-color: var(--tblr-bg-forms, #fff);
+	color: inherit;
+	line-height: 1.5;
+}
+
+.bm-statement-filter .btn {
+	height: calc(2rem + 2px);
+	display: inline-flex;
+	align-items: center;
+}
+
+@media (min-width: 576px) {
+	.bm-statement-filter {
+		flex-wrap: nowrap;
+	}
 }

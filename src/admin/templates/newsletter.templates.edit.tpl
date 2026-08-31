@@ -1,7 +1,8 @@
 <fieldset>
 	<legend>{lng p="edittemplate"}</legend>
 
-	<form name="f1" action="newsletter.php?action=templates&do=edit&templateID={$tpl.templateid}&save=true&sid={$sid}" method="post" onsubmit="editor.submit();spin(this);">
+	<form name="f1" action="{sessionurl file='newsletter.php' params="action=templates&do=edit&templateID={$tpl.templateid}&save=true"}" method="post" onsubmit="editor.submit();spin(this);">
+		{csrffield}
 
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="title"}</label>
