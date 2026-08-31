@@ -472,18 +472,18 @@ function CharsetDecode($text, $charset = false, $destCharset = false)
 	if($charset == $myCharset)
 		return($text);
 
-	if(function_exists('mb_convert_encoding'))
-	{
-		if($newText = @mb_convert_encoding($text, $_myCharset, $_charset))
-			$text = $newText;
-		else if($newText = @mb_convert_encoding($text, $myCharset, $charset))
-			$text = $newText;
-	}
-	else if(function_exists('iconv'))
+	if(function_exists('iconv'))
 	{
 		if($newText = @iconv($_charset, $_myCharset, $text))
 			$text = $newText;
 		else if($newText = @iconv($charset, $myCharset, $text))
+			$text = $newText;
+	}
+	else if(function_exists('mb_convert_encoding'))
+	{
+		if($newText = @mb_convert_encoding($text, $_myCharset, $_charset))
+			$text = $newText;
+		else if($newText = @mb_convert_encoding($text, $myCharset, $charset))
 			$text = $newText;
 	}
 	else if(function_exists('utf8_encode'))

@@ -642,8 +642,13 @@ if($_REQUEST['action'] == 'users')
 				$historyCount = count($contactHistory);
 		}
 
-		$user['saliase'] = implode("\n", array_map('DecodeDomain', array_filter(explode(':', $user['saliase']), 'strlen')));
-
+		if (trim($user['saliase']) !== '') {
+            $user['saliase'] = implode(
+                "\n",
+                array_map('DecodeDomain', explode(':', $user['saliase'])),
+            );
+        }
+		
 		// payments
 		$payMethods = BMPayment::GetCustomPaymentMethods();
 		$payments = array();
