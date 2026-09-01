@@ -58,7 +58,7 @@
 		//-->
 	</script>
 
-	<script src="{if $adminAbsoluteUrls}{$adminClientLangUrl|escape:'html'}{else}{sessionurl file='../clientlang.php'}{/if}" type="text/javascript"></script>
+	<script src="{if $adminClientLangUrl}{$adminClientLangUrl|escape:'html'}{else}{sessionurl file='../clientlang.php'}{/if}" type="text/javascript"></script>
 	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}"></script>
 	<script src="{$tpldir}js/tabler-custom.js?{fileDateSig file="js/tabler-custom.js"}"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>

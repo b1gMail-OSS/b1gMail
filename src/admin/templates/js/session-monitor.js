@@ -293,14 +293,14 @@
 	if(typeof MakeXMLRequest === 'function')
 	{
 		var origMakeXMLRequest = MakeXMLRequest;
-		MakeXMLRequest = function(url, callback, param) {
+		MakeXMLRequest = function(url, callback, param, postBody) {
 			url = appendSid(url);
 			return origMakeXMLRequest(url, function(http, p) {
 				if(http.readyState === 4 && bmSessionHandleResponse(http))
 					return;
 				if(callback)
 					callback(http, p);
-			}, param);
+			}, param, postBody);
 		};
 	}
 

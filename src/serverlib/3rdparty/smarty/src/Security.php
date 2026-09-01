@@ -52,7 +52,7 @@ class Security {
 	/**
 	 * This is an array of trusted static classes.
 	 * If empty access to all static classes is allowed.
-	 * To disable access to all static classes set $static_classes = null.
+	 * If set to 'none' none is allowed.
 	 *
 	 * @var array
 	 */
@@ -206,11 +206,7 @@ class Security {
 	 * @return boolean                 true if class is trusted
 	 */
 	public function isTrustedStaticClass($class_name, $compiler) {
-		// Only an array enables access: an empty array allows all classes, a
-		// populated array is an allowlist. Any other value (null, or the
-		// documented "none") denies all. Using is_array() rather than isset()
-		// also avoids a PHP 8 TypeError from passing a non-array to in_array().
-		if (is_array($this->static_classes)
+		if (isset($this->static_classes)
 			&& (empty($this->static_classes) || in_array($class_name, $this->static_classes))
 		) {
 			return true;
@@ -478,34 +474,12 @@ class Security {
 	 * @throws \Smarty\Exception
 	 */
 	private function _checkDir($filepath, $dirs) {
-		// Resolve the canonical, symlink-free path of the requested file so that
-		// a symlink located inside a trusted directory cannot be abused to read
-		// a file outside of it (CWE-22 path traversal). Smarty::_realpath() only
-		// normalizes the path as a string and does not follow symlinks, so we
-		// fall back to it only when the file does not yet exist on disk (e.g.
-		// config/cache paths that are validated before being written).
-		$realpath = @realpath($filepath);
-		$resolved = $realpath !== false ? $realpath : $this->smarty->_realpath($filepath, true);
-		$directory = dirname($resolved) . DIRECTORY_SEPARATOR;
-
-		// Canonicalize the trusted directories the same way. This keeps
-		// legitimate symlinked deployment paths working (e.g. a Capistrano-style
-		// "current" release symlink, or macOS' /var -> /private/var): both the
-		// file and the trusted directories are compared after symlinks have been
-		// resolved.
-		$trusted = [];
-		foreach ($dirs as $dir => $unused) {
-			$trusted[$dir] = true;
-			if (($dirRealpath = @realpath($dir)) !== false) {
-				$trusted[rtrim($dirRealpath, '\\/') . DIRECTORY_SEPARATOR] = true;
-			}
-		}
-
+		$directory = dirname($this->smarty->_realpath($filepath, true)) . DIRECTORY_SEPARATOR;
 		$_directory = [];
 		if (!preg_match('#[\\\\/][.][.][\\\\/]#', $directory)) {
 			while (true) {
 				// test if the directory is trusted
-				if (isset($trusted[$directory])) {
+				if (isset($dirs[$directory])) {
 					return $_directory;
 				}
 				// abort if we've reached root

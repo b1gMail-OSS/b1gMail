@@ -143,7 +143,7 @@ class File extends Base
      *
      * @param Template $_template template object
      *
-     * @return string|false content
+     * @return string  content
      */
     public function retrieveCachedContent(Template $_template)
     {

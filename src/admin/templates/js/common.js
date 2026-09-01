@@ -153,10 +153,9 @@ function deleteUsersStep()
     }
 
     var userID = _usersToDelete.pop();
+    var body = 'singleAction=delete&singleID=' + encodeURIComponent(userID);
 
-    MakeXMLRequest('users.php?sid=' + currentSID
-        + '&singleAction=delete'
-        + '&singleID=' + encodeURIComponent(userID),
+    MakeXMLRequest('users.php?sid=' + currentSID,
         function(http)
         {
             if(http.readyState == 4)
@@ -164,7 +163,9 @@ function deleteUsersStep()
                 rc_statusdiv.innerHTML = (_usersStep++) + ' / ' + _usersMax + ' ...';
                 deleteUsersStep();
             }
-        });
+        },
+        null,
+        body);
 }
 
 function addEvent(elem, event, handler)
@@ -313,7 +314,7 @@ function spin(frm)
     frm.parentNode.insertBefore(center, frm);
 }
 
-function MakeXMLRequest(url, callback, param)
+function MakeXMLRequest(url, callback, param, postBody)
 {
     var xmlHTTP = false;
 
@@ -345,7 +346,28 @@ function MakeXMLRequest(url, callback, param)
     }
     else
     {
-        xmlHTTP.open("GET", url, true);
+        var usePost = (typeof postBody !== 'undefined' && postBody !== null && postBody !== false);
+        var sendBody = null;
+
+        if(usePost)
+        {
+            var token = (typeof adminCsrfToken === 'function') ? adminCsrfToken() : '';
+            sendBody = (typeof postBody === 'string') ? postBody : '';
+            if(token && sendBody.indexOf('csrf_token=') === -1)
+                sendBody += (sendBody ? '&' : '') + 'csrf_token=' + encodeURIComponent(token);
+        }
+
+        xmlHTTP.open(usePost ? 'POST' : 'GET', url, true);
+        if(usePost)
+        {
+            xmlHTTP.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            if(typeof adminCsrfToken === 'function')
+            {
+                var csrf = adminCsrfToken();
+                if(csrf)
+                    xmlHTTP.setRequestHeader('X-CSRF-Token', csrf);
+            }
+        }
         if(typeof(callback) == "string")
         {
             xmlHTTP.onreadystatechange = function xh_readyChange()
@@ -360,7 +382,7 @@ function MakeXMLRequest(url, callback, param)
                 callback(xmlHTTP, param);
             }
         }
-        xmlHTTP.send(null);
+        xmlHTTP.send(sendBody);
         return(true);
     }
 }

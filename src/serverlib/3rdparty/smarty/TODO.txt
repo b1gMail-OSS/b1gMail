@@ -11,10 +11,10 @@
 ## include inline
 - Re-introduce merge_compiled_includes and the {include inline} attribute?
 
-## Output buffering (major)
-- Fix ob_ output buffering commands being scattered around the codebase: Smarty's output model is fundamentally "echo everything, wrap in a buffer to capture". An alternative that would be where rendering returns a string rather than echoing — but that touches the entire compiled template format (the unifunc functions all echo) and is a large change.
+## Output buffering
+- Fix ob_ output buffering commands being scattered around the codebase
 
-## Review public static vars (major)
+## Review public static vars
 - such as _CHARSET and _IS_WINDOWS
 
 ## Block / inheritance
@@ -24,8 +24,9 @@
 ## Plugin system
 - fix template security checks in one place in compiler
 
-## Beatify output (major)
+## Beatify output
 - compiled templates could be proper classes, possibly using [nette/php-generator](https://packagist.org/packages/nette/php-generator)
 
 ## Unrelated / other
 - review (and avoid) use of 'clone' keyword
+- what is 'user literal support', why are unit tests skipped?

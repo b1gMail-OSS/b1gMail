@@ -260,11 +260,7 @@ class Template extends TemplateBase {
 
 		$tpl = $this->smarty->doCreateTemplate($template_name, $cache_id, $compile_id, $this, $caching, $cache_lifetime);
 
-		// Re-use the same Inheritance object only inside an active inheritance tree, i.e. when this
-		// (including) template already has one. A template outside any inheritance tree has no
-		// Inheritance object (null); sub-templates it {include}s must then start with their own, so an
-		// {include}d template that uses {block}/{extends} creates a fresh root via getInheritance().
-		$tpl->inheritance = $this->inheritance;
+		$tpl->inheritance = $this->getInheritance(); // re-use the same Inheritance object inside the inheritance tree
 
 		if ($scope) {
 			$tpl->defaultScope = $scope;

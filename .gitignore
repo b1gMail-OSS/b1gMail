@@ -3,6 +3,7 @@ src/data/
 src/serverlib/config.inc.php
 src/serverlib/version.inc.php
 src/temp/*.tmp
+src/temp/route-admin-map.cache.php
 src/temp/cache/
 src/temp/session/
 src/templates/modern/cache/
