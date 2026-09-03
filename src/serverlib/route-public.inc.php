@@ -224,7 +224,7 @@ function RouteParsePublicPathFromRequest()
 		return '';
 
 	$path = rawurldecode($path);
-	$prefix = RouteAdminUrlPrefix();
+	$prefix = RouteInstallUrlPrefix();
 	if($prefix !== '' && strpos($path, $prefix) === 0)
 		$path = substr($path, strlen($prefix));
 	$path = trim($path, '/');
@@ -245,7 +245,7 @@ function RouteParsePublicRawSegmentsFromRequest()
 		return array();
 
 	$path = rawurldecode($path);
-	$prefix = RouteAdminUrlPrefix();
+	$prefix = RouteInstallUrlPrefix();
 	if($prefix !== '' && strpos($path, $prefix) === 0)
 		$path = substr($path, strlen($prefix));
 	$path = trim($path, '/');
@@ -1071,7 +1071,7 @@ function AssignTemplatePublicNavUrls($tpl)
 	$tpl->assign('nliUrlHome', PublicNavUrl('index.php'));
 	$loginUrl = PublicNavUrl('index.php?action=login', 'ssl_login_enable');
 	if($loginUrl === '' || stripos($loginUrl, '.php') !== false)
-		$loginUrl = '/login';
+		$loginUrl = PublicNavRelativePath(PublicPublicUrl('login'));
 	$tpl->assign('nliUrlLogin', $loginUrl);
 	$tpl->assign('nliUrlSignup', PublicNavUrl('index.php?action=signup'));
 	$tpl->assign('nliUrlSignupSsl', PublicNavUrl('index.php?action=signup', 'ssl_signup_enable'));

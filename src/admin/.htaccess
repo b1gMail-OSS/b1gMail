@@ -1,5 +1,6 @@
 RewriteEngine On
-RewriteBase /admin/
+# No RewriteBase: keep admin pretty URLs inside the install (e.g. /b1gmail/admin/).
+# RewriteBase /b1gmail/admin/
 Options -MultiViews
 
 # Keep direct access to existing files/directories
