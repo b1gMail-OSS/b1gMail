@@ -1047,12 +1047,36 @@ function GeneratePW($length = 16)
 
 
 /**
+ * MySQL 8 dropped integer display widths (`int(11)` → `int`).
+ *
+ * @param string $type
+ * @return string
+ */
+function BMDbNormalizeFieldType($type)
+{
+	$type = strtolower(trim((string)$type));
+	$type = preg_replace('/\binteger\b/', 'int', $type);
+	$type = preg_replace('/\b(tinyint|smallint|mediumint|int|bigint|year)\(\d+\)/', '$1', $type);
+	return $type;
+}
+
+/**
+ * @param string $actual
+ * @param string $expected
+ * @return bool
+ */
+function BMDbFieldTypeMatches($actual, $expected)
+{
+	return BMDbNormalizeFieldType($actual) === BMDbNormalizeFieldType($expected);
+}
+
+/**
  * synchronize DB structure against an DB structure array
  *
  * @param resource $connection
  * @param array $databaseStructure (New/correct) DB structure
  * @param bool $return Return queries?
- * @param bool $return Return queries?
+ * @param bool $utf8Mode
  * @return array
  */
 function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode = false)
@@ -1110,7 +1134,7 @@ function SyncDBStruct($connection, $databaseStructure, $return = true, $utf8Mode
 				else
 				{
 					$myField = $myFields[$field[0]];
-					if($myField[1] != $field[1]
+					if(!BMDbFieldTypeMatches($myField[1], $field[1])
 						|| $myField[2] != $field[2]
 						|| ($myField[4] != $field[4] && !(($myField[4]==0 && $field[4]=='') || ($myField[4]=='' && $field[4]==0)))
 						|| $myField[5] != $field[5])

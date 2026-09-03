@@ -2,6 +2,7 @@
 	{csrffield}
 <input type="hidden" name="do" value="login" />
 <input type="hidden" name="email_full" value="{if isset($email)}{text value=$email}{/if}" />
+{if $savelogin}<input type="hidden" name="savelogin" value="true" />{/if}
 
 	<div class="container">
 		<div class="page-header"><h1>{lng p="smsvalidation"}</h1></div>

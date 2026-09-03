@@ -41,6 +41,12 @@
 							<input type="password" name="password" id="password" class="form-control" placeholder="{lng p="password"}" required="true" />
 						</div>
 					</div>
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="savelogin" id="savelogin"{if $savelogin} checked="checked"{/if} />
+							{lng p="savelogin"}
+						</label>
+					</div>
 					{if $ssl_login_option}<div class="checkbox">
 						<label>
 							<input type="checkbox" id="ssl"{if $ssl_login_enable} checked="checked"{/if} onchange="updateFormSSL(this)" onclick="updateFormSSL(this)" />

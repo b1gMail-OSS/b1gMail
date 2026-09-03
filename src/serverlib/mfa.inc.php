@@ -939,6 +939,7 @@ class BMMfa
 				time(),
 				(int)$mfaAccountID);
 		}
+		self::InvalidateRememberMeForMfaAccount($mfaAccountID);
 	}
 
 	/**
@@ -1109,6 +1110,49 @@ class BMMfa
 			BMUser::InvalidateRememberMeForUser($accountID);
 
 		return true;
+	}
+
+	/**
+	 * Remember-me cookie may skip login MFA when it was issued after MFA
+	 * was enabled on this account (trusted device).
+	 *
+	 * @param int $userID
+	 * @param int $tokenExpires
+	 * @return bool
+	 */
+	public static function RememberMeMaySkipVerify($userID, $tokenExpires)
+	{
+		$account = self::GetAccount('user', (int)$userID);
+		if(!self::RequiresMfaVerifyAtLogin($account))
+			return true;
+
+		$enabledAt = self::GetEnabledAtTimestamp($account);
+		if($enabledAt <= 0)
+			return true;
+
+		$issuedAt = (int)$tokenExpires - TIME_ONE_YEAR;
+		return $issuedAt + 300 >= $enabledAt;
+	}
+
+	/**
+	 * @param int $mfaAccountID
+	 */
+	public static function InvalidateRememberMeForMfaAccount($mfaAccountID)
+	{
+		global $db;
+
+		$res = $db->Query('SELECT account_type,account_id FROM {pre}mfa_accounts WHERE id=?',
+			(int)$mfaAccountID);
+		if($res->RowCount() != 1)
+		{
+			$res->Free();
+			return;
+		}
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		if($row['account_type'] === 'user')
+			BMUser::InvalidateRememberMeForUser((int)$row['account_id']);
 	}
 
 	/**
@@ -1437,6 +1481,8 @@ class BMMfa
 			'group_id'       => $groupID,
 			'password_plain' => $passwordPlain,
 			'recovery'       => $account['recovery_mode'] === 'altmail',
+			'savelogin'      => isset($_POST['savelogin']),
+			'ssl'            => isset($_POST['ssl']) || (!empty($_COOKIE['bm_savedSSL']) && $_COOKIE['bm_savedSSL'] === '1'),
 		);
 
 		self::BeginPending('user', $userID, $meta);
@@ -1527,6 +1573,22 @@ class BMMfa
 
 		self::ClearPending();
 		unset($pending['meta']['password_plain']);
+
+		if(!empty($pending['meta']['savelogin']))
+		{
+			if(isset($_COOKIE['bm_savedToken']))
+				BMUser::DeleteSavedLogin($_COOKIE['bm_savedToken']);
+
+			$cookieToken = BMUser::SaveLogin($userID);
+			BMSecureSetCookie('bm_savedUser', $row['email'], time() + TIME_ONE_YEAR);
+			if(isset($_COOKIE['savedPassword']))
+				BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);
+			if($cookieToken !== false)
+				BMSecureSetCookie('bm_savedToken', $cookieToken, time() + TIME_ONE_YEAR);
+			BMSecureSetCookie('bm_savedSSL',
+				!empty($pending['meta']['ssl']) ? '1' : '0',
+				time() + TIME_ONE_YEAR);
+		}
 
 		$groupID = (int)$row['gruppe'];
 		self::ClearStaleSetupRequired('user', $userID);
@@ -1736,6 +1798,7 @@ class BMMfa
 			'yes',
 			time(),
 			(int)$mfaAccountID);
+		self::InvalidateRememberMeForMfaAccount($mfaAccountID);
 		self::SetSetupRequiredSession(false);
 	}
 

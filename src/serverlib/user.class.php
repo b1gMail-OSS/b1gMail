@@ -1641,9 +1641,11 @@ class BMUser
 	 * @param int  $userID
 	 * @param bool $createSession
 	 * @param bool $successLog
+	 * @param bool $adminImpersonate
+	 * @param bool $rememberMeTrusted Skip login MFA (trusted device cookie)
 	 * @return array
 	 */
-	public static function LoginByUserID($userID, $createSession = true, $successLog = true, $adminImpersonate = false)
+	public static function LoginByUserID($userID, $createSession = true, $successLog = true, $adminImpersonate = false, $rememberMeTrusted = false)
 	{
 		global $db, $currentCharset, $currentLanguage, $bm_prefs;
 
@@ -1684,7 +1686,7 @@ class BMUser
 		$mfaDeferred = false;
 		if($createSession)
 		{
-			if(!$adminImpersonate && BMMfa::DeferUserLoginForMfa($userID, $row, ''))
+			if(!$adminImpersonate && !$rememberMeTrusted && BMMfa::DeferUserLoginForMfa($userID, $row, ''))
 				$mfaDeferred = true;
 			else
 			{
@@ -4130,7 +4132,10 @@ class BMUser
 		if($userID <= 0 || !password_verify($secret, $hash))
 			return(false);
 
-		return(array('userID' => $userID));
+		return(array(
+			'userID'  => $userID,
+			'expires' => (int)$row['expires'],
+		));
 	}
 
 	/**

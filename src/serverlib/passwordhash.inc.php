@@ -178,15 +178,96 @@ function PasswordHashNeedsUpgrade($hash, $context = 'li')
 }
 
 /**
- * @param int    $userID
- * @param string $passwordPlain
- * @param array  $row
- * @return void
+ * Maximum characters the password column can store (0 = unknown).
+ *
+ * @param string $table
+ * @param string $column
+ * @return int
  */
-function PasswordHashUpgradeUser($userID, $passwordPlain, $row)
+function PasswordHashColumnMaxLength($table, $column)
 {
 	global $db;
 
+	static $cache = array();
+	$key = $table . '.' . $column;
+	if(isset($cache[$key]))
+		return $cache[$key];
+
+	$res = $db->Query('SHOW COLUMNS FROM {pre}' . $table . ' LIKE ?', $column);
+	$col = $res->FetchArray(MYSQLI_ASSOC);
+	$res->Free();
+	if(!is_array($col) || empty($col['Type']))
+		return $cache[$key] = 0;
+
+	$type = strtolower((string)$col['Type']);
+	if(preg_match('/^(?:var)?char\((\d+)\)/', $type, $m))
+		return $cache[$key] = (int)$m[1];
+	if(strpos($type, 'text') !== false || strpos($type, 'blob') !== false)
+		return $cache[$key] = PHP_INT_MAX;
+
+	return $cache[$key] = 0;
+}
+
+/**
+ * @param string $table
+ * @param string $column
+ * @param string $hash
+ * @return bool
+ */
+function PasswordHashCanStoreInColumn($table, $column, $hash)
+{
+	$max = PasswordHashColumnMaxLength($table, $column);
+	if($max <= 0)
+		return true;
+
+	return strlen((string)$hash) <= $max;
+}
+
+/**
+ * @param string      $table
+ * @param string      $idColumn
+ * @param int         $id
+ * @param string      $hashColumn
+ * @param string      $saltColumn
+ * @param string      $newHash
+ * @param string      $oldHash
+ * @param string|null $oldSalt
+ * @return bool
+ */
+function PasswordHashWriteAndVerify($table, $idColumn, $id, $hashColumn, $saltColumn, $newHash, $oldHash, $oldSalt)
+{
+	global $db;
+
+	$id = (int)$id;
+	if($id <= 0 || !is_string($newHash) || $newHash === '')
+		return false;
+
+	if(!PasswordHashCanStoreInColumn($table, $hashColumn, $newHash))
+		return false;
+
+	$db->Query('UPDATE {pre}'.$table.' SET `'.$hashColumn.'`=?,`'.$saltColumn.'`=? WHERE `'.$idColumn.'`=?',
+		$newHash,
+		'',
+		$id);
+
+	$res = $db->Query('SELECT `'.$hashColumn.'` FROM {pre}'.$table.' WHERE `'.$idColumn.'`=?', $id);
+	$row = $res->FetchArray(MYSQLI_ASSOC);
+	$res->Free();
+
+	if(!is_array($row) || !hash_equals($newHash, (string)$row[$hashColumn]))
+	{
+		$db->Query('UPDATE {pre}'.$table.' SET `'.$hashColumn.'`=?,`'.$saltColumn.'`=? WHERE `'.$idColumn.'`=?',
+			$oldHash,
+			$oldSalt,
+			$id);
+		return false;
+	}
+
+	return true;
+}
+
+function PasswordHashUpgradeUser($userID, $passwordPlain, $row)
+{
 	if(!is_array($row) || !isset($row['passwort']))
 		return;
 
@@ -195,11 +276,11 @@ function PasswordHashUpgradeUser($userID, $passwordPlain, $row)
 
 	$passwordPlain = CharsetDecode($passwordPlain, false, 'ISO-8859-15');
 	$newHash = PasswordHashCreate($passwordPlain, 'li');
+	$oldSalt = isset($row['passwort_salt']) ? $row['passwort_salt'] : '';
 
-	$db->Query('UPDATE {pre}users SET passwort=?, passwort_salt=? WHERE id=?',
-		$newHash,
-		'',
-		(int)$userID);
+	if(!PasswordHashWriteAndVerify('users', 'id', $userID, 'passwort', 'passwort_salt', $newHash, $row['passwort'], $oldSalt))
+		return;
+
 	if(function_exists('ClientApiRememberPassword'))
 		ClientApiRememberPassword((int)$userID, $passwordPlain);
 }
@@ -208,20 +289,17 @@ function PasswordHashUpgradeUser($userID, $passwordPlain, $row)
  * @param int    $adminID
  * @param string $passwordPlain
  * @param string $currentHash
- * @return string|false New hash or false if unchanged
+ * @param string $currentSalt
+ * @return string|false New hash or false if unchanged / not stored
  */
-function PasswordHashUpgradeAdmin($adminID, $passwordPlain, $currentHash)
+function PasswordHashUpgradeAdmin($adminID, $passwordPlain, $currentHash, $currentSalt = '')
 {
-	global $db;
-
 	if(!PasswordHashNeedsUpgrade($currentHash, 'admin'))
 		return false;
 
 	$newHash = PasswordHashCreate($passwordPlain, 'admin');
-	$db->Query('UPDATE {pre}admins SET `password`=?,`password_salt`=? WHERE `adminid`=?',
-		$newHash,
-		'',
-		(int)$adminID);
+	if(!PasswordHashWriteAndVerify('admins', 'adminid', $adminID, 'password', 'password_salt', $newHash, $currentHash, $currentSalt))
+		return false;
 
 	return $newHash;
 }
@@ -237,11 +315,21 @@ function PasswordHashSetUserPassword($userID, $passwordPlain)
 
 	$passwordPlain = CharsetDecode($passwordPlain, false, 'ISO-8859-15');
 	$newHash = PasswordHashCreate($passwordPlain, 'li');
+	$oldHash = '';
+	$oldSalt = '';
 
-	$db->Query('UPDATE {pre}users SET passwort=?, passwort_salt=? WHERE id=?',
-		$newHash,
-		'',
-		(int)$userID);
+	$res = $db->Query('SELECT passwort,passwort_salt FROM {pre}users WHERE id=?', (int)$userID);
+	if($res->RowCount() == 1)
+	{
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$oldHash = $row['passwort'];
+		$oldSalt = $row['passwort_salt'];
+	}
+	$res->Free();
+
+	if(!PasswordHashWriteAndVerify('users', 'id', $userID, 'passwort', 'passwort_salt', $newHash, $oldHash, $oldSalt))
+		return;
+
 	if(function_exists('ClientApiRememberPassword'))
 		ClientApiRememberPassword((int)$userID, $passwordPlain);
 }
@@ -249,17 +337,27 @@ function PasswordHashSetUserPassword($userID, $passwordPlain)
 /**
  * @param int    $adminID
  * @param string $passwordPlain
- * @return string
+ * @return string|false
  */
 function PasswordHashSetAdminPassword($adminID, $passwordPlain)
 {
 	global $db;
 
 	$newHash = PasswordHashCreate($passwordPlain, 'admin');
-	$db->Query('UPDATE {pre}admins SET `password`=?,`password_salt`=? WHERE `adminid`=?',
-		$newHash,
-		'',
-		(int)$adminID);
+	$oldHash = '';
+	$oldSalt = '';
+
+	$res = $db->Query('SELECT `password`,`password_salt` FROM {pre}admins WHERE `adminid`=?', (int)$adminID);
+	if($res->RowCount() == 1)
+	{
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$oldHash = $row['password'];
+		$oldSalt = $row['password_salt'];
+	}
+	$res->Free();
+
+	if(!PasswordHashWriteAndVerify('admins', 'adminid', $adminID, 'password', 'password_salt', $newHash, $oldHash, $oldSalt))
+		return false;
 
 	return $newHash;
 }

@@ -1498,8 +1498,12 @@ else
 			$remember = BMUser::ValidateRememberMe($_COOKIE['bm_savedToken']);
 			if($remember !== false)
 			{
+				$trusted = BMMfa::RememberMeMaySkipVerify(
+					(int)$remember['userID'],
+					isset($remember['expires']) ? (int)$remember['expires'] : 0
+				);
 				ob_start();
-				list($result, $param) = BMUser::LoginByUserID($remember['userID'], true, true);
+				list($result, $param) = BMUser::LoginByUserID($remember['userID'], true, true, false, $trusted);
 				ob_end_clean();
 			}
 			else
@@ -1839,5 +1843,7 @@ if(!SessionAssignLoginPageActive('user'))
 		$tpl->assign('welcomeBack', FALSE);
 	}
 }
+
+$tpl->assign('savelogin', isset($_POST['savelogin']));
 
 $tpl->display('nli/index.tpl');

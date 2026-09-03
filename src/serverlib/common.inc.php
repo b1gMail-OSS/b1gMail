@@ -1264,6 +1264,31 @@ function GenerateRandomSalt($length = 8)
 }
 
 /**
+ * MySQL 8 dropped integer display widths (`int(11)` → `int`). Treat them as equal
+ * so structure sync does not loop on ALTER TABLE MODIFY.
+ *
+ * @param string $type
+ * @return string
+ */
+function BMDbNormalizeFieldType($type)
+{
+	$type = strtolower(trim((string)$type));
+	$type = preg_replace('/\binteger\b/', 'int', $type);
+	$type = preg_replace('/\b(tinyint|smallint|mediumint|int|bigint|year)\(\d+\)/', '$1', $type);
+	return $type;
+}
+
+/**
+ * @param string $actual
+ * @param string $expected
+ * @return bool
+ */
+function BMDbFieldTypeMatches($actual, $expected)
+{
+	return BMDbNormalizeFieldType($actual) === BMDbNormalizeFieldType($expected);
+}
+
+/**
  * synchronize DB structure against an DB structure array
  *
  * @param array $databaseStructure (New/correct) DB structure
@@ -1277,7 +1302,7 @@ function SyncDBStruct($databaseStructure)
 	$syncQueries = array();
 
 	// get tables
-	$defaultTables = array();
+	$myTables = array();
 	$res = $db->Query('SHOW TABLES');
 	while($row = $res->FetchArray(MYSQLI_NUM))
 		$myTables[] = $row[0];
@@ -1326,7 +1351,7 @@ function SyncDBStruct($databaseStructure)
 				else
 				{
 					$myField = $myFields[$field[0]];
-					if($myField[1] != $field[1]
+					if(!BMDbFieldTypeMatches($myField[1], $field[1])
 						|| $myField[2] != $field[2]
 						|| ($myField[4] != $field[4] && !(($myField[4]==0 && $field[4]=='') || ($myField[4]=='' && $field[4]==0)))
 						|| (isset($field[5]) && $myField[5] != $field[5]))
@@ -3507,18 +3532,33 @@ function GetAvailableTemplates()
 	if(is_object($dir))
 	{
 		while($file = $dir->read())
-			if($file != '.'
-				&& $file != '..'
-				&& is_dir(B1GMAIL_DIR . 'templates/' . $file)
-				&& file_exists(B1GMAIL_DIR . 'templates/' . $file . '/cache/')
-				&& file_exists(B1GMAIL_DIR . 'templates/' . $file . '/info.php'))
 		{
+			if($file == '.' || $file == '..')
+				continue;
+
+			$tplDir = B1GMAIL_DIR . 'templates/' . $file;
+			if(!is_dir($tplDir) || !file_exists($tplDir . '/info.php'))
+				continue;
+
+			$cacheDir = $tplDir . '/cache';
+			if(!is_dir($cacheDir))
+			{
+				@mkdir($cacheDir, 0777);
+				@chmod($cacheDir, 0777);
+			}
+			if(!is_dir($cacheDir))
+				continue;
+
 			$info = GetTemplateInfo($file);
+			if(!is_array($info) || !isset($info['title']))
+				continue;
+
 			$result[$file] = $info;
 		}
 		$dir->close();
 	}
 
+	ksort($result, SORT_STRING);
 	return($result);
 }
 
