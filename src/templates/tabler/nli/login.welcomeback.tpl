@@ -11,6 +11,7 @@
 	{csrffield}
 	<input type="hidden" name="email_full" value="{$smarty.cookies.bm_savedUser}" />
 	<input type="hidden" name="password" value="" />
+	<input type="hidden" name="savelogin" value="1" />
 	{if $smarty.cookies.bm_savedSSL}<input type="hidden" name="ssl" value="true" />{/if}
 	<div class="form-footer">
 		<button type="submit" class="btn btn-primary w-100">

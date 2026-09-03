@@ -36,7 +36,7 @@
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="template"}</label>
 			<div class="col-sm-10">
-				<select name="template" class="form-select"
+				<select name="template" class="form-select">
 				{foreach from=$templates item=templateInfo key=template}
 					<option value="{$template}"{if $defaultTemplate==$template} selected="selected"{/if}>{text value=$templateInfo.title}</option>
 				{/foreach}

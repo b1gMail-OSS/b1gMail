@@ -103,7 +103,8 @@ if($_REQUEST['action'] == 'account')
 		else
 		{
 			$newPW = PasswordHashSetAdminPassword((int)$adminRow['adminid'], $_POST['newpw1']);
-			$_SESSION['bm_adminAuth'] = AdminSessionAuthBind($newPW, (int)$adminRow['adminid']);
+			if($newPW !== false)
+				$_SESSION['bm_adminAuth'] = AdminSessionAuthBind($newPW, (int)$adminRow['adminid']);
 		}
 	}
 
@@ -179,7 +180,13 @@ if($_REQUEST['action'] == 'account')
 				if($_POST['newpw1'] != '')
 				{
 					$pw = PasswordHashSetAdminPassword((int)$admin['adminid'], $_POST['newpw1']);
-					$salt = '';
+					if($pw === false)
+					{
+						$pw = $admin['password'];
+						$salt = $admin['password_salt'];
+					}
+					else
+						$salt = '';
 				}
 				else
 				{

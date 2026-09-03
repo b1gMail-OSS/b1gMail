@@ -2,6 +2,7 @@
 	{csrffield}
 <input type="hidden" name="do" value="login" />
 <input type="hidden" name="email_full" value="{if isset($email)}{text value=$email}{/if}" />
+{if $savelogin}<input type="hidden" name="savelogin" value="1" />{/if}
 
 {include file="nli/page.open.tpl"}
 <h1 class="mb-3">{lng p="smsvalidation"}</h1>

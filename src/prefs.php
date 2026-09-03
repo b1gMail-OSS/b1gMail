@@ -1628,10 +1628,8 @@ else if($_REQUEST['action'] == 'membership')
 				$thisUser->UpdateContactData($userRow, false, true, 0, $suPass1);
 				$db->Query('UPDATE {pre}users SET passwort_salt=? WHERE id=?', '', (int)$userRow['id']);
 				BMUser::InvalidateOtherSessionsForUser((int)$userRow['id']);
+				BMUser::InvalidateRememberMeForUser((int)$userRow['id']);
 
-				// delete cookies
-				if(isset($_COOKIE['bm_savedToken']))
-					BMUser::DeleteSavedLogin($_COOKIE['bm_savedToken']);
 				BMSecureSetCookie('bm_savedUser', '', time() - TIME_ONE_HOUR);
 				BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
 				BMSecureSetCookie('bm_savedPassword', '', time() - TIME_ONE_HOUR);

@@ -45,6 +45,12 @@
 		</div>
 	</div>
 
+	<div class="mb-3">
+		<label class="form-check">
+			<input type="checkbox" class="form-check-input" name="savelogin" id="savelogin" value="1"{if $savelogin} checked="checked"{/if} />
+			<span class="form-check-label">{lng p="savelogin"}</span>
+		</label>
+	</div>
 	{if $ssl_login_option}
 	<div class="mb-3">
 		<label class="form-check">

@@ -76,6 +76,7 @@
 							{if $welcomeBack}
 							<input type="hidden" name="email_full" value="{$smarty.cookies.bm_savedUser}" />
 							<input type="hidden" name="password" value="" />
+							<input type="hidden" name="savelogin" value="true" />
 							{if $smarty.cookies.bm_savedSSL}<input type="hidden" name="ssl" value="true" />{/if}
 
 							<div class="btn-group">
@@ -177,6 +178,12 @@
 				<label class="sr-only" for="password_p">{lng p="password"}</label>
 				<input type="password" name="password" id="password_p" class="form-control" placeholder="{lng p="password"}" required="true" />
 			</div>
+		</div>
+		<div class="checkbox">
+			<label>
+				<input type="checkbox" name="savelogin" id="savelogin_p"{if $savelogin} checked="checked"{/if} />
+				{lng p="savelogin"}
+			</label>
 		</div>
 		{if $ssl_login_option}<div class="checkbox">
 			<label>
