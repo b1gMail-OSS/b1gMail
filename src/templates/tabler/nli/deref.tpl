@@ -1,6 +1,8 @@
-<!doctype html>
-<html lang="{lng p="langCode_editor"|default:'de'}">
-
+{if $pref_exturl_warning=='no'}
+<meta http-equiv="refresh" content="0;URL={$url}" />
+<a href="{$url}" rel="noreferrer">{$url}</a>
+{else}
+<html>
 <head>
 	<meta charset="{$charset}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -131,6 +133,7 @@
 			&copy; {$service_title}
 		</div>
 	</div>
-</div>
 
-{include file="nli/standalone.close.tpl"}
+</body>
+</html>
+{/if}

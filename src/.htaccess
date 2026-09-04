@@ -1,12 +1,15 @@
 RewriteEngine On
-RewriteBase /
+# No RewriteBase: Apache uses this directory's URL path so subdirectory
+# installs (e.g. /b1gmail/) keep rewrites inside the install. Set explicitly
+# only when the URL path differs from the filesystem path (Alias).
+# RewriteBase /b1gmail/
 RewriteOptions inherit
 Options -MultiViews
 
-# Well-known service discovery (DAV)
-RewriteRule ^\.well-known/carddav/?$ /interface/carddav.php [R=301,L]
-RewriteRule ^\.well-known/caldav/?$ /interface/caldav.php [R=301,L]
-RewriteRule ^\.well-known/webdav/?$ /interface/webdav.php [R=301,L]
+# Well-known service discovery (DAV) — relative so subdirectory installs work
+RewriteRule ^\.well-known/carddav/?$ interface/carddav.php [R=301,L]
+RewriteRule ^\.well-known/caldav/?$ interface/caldav.php [R=301,L]
+RewriteRule ^\.well-known/webdav/?$ interface/webdav.php [R=301,L]
 
 # Legacy NLI entry → front controller (GET/POST must share bootstrap with /login)
 RewriteRule ^index\.php$ app.php [QSA,L]
