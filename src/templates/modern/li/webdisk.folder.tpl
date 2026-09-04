@@ -13,14 +13,14 @@
 	{hook id="webdisk.folder.tpl:head"}
 	
 	{if $isShared}
-	<form action="email.compose.php?sid={$sid}" method="post" name="mailForm">
+	<form action="{sessionurl file='email.compose.php'}" method="post" name="mailForm">
 		{csrffield}
 		<input type="hidden" name="subject" value="{if isset($shareMailSubject)}{text value=$shareMailSubject allowEmpty=true}{/if}" />
 		<textarea name="text" style="display:none">{if isset($shareMail)}{text value=$shareMail allowEmpty=true}{/if}</textarea>
 	</form>
 	{/if}
 	
-	<form enctype="multipart/form-data" action="webdisk.php?folder={$folderID}&sid={$sid}" method="post" name="f1" onsubmit="transferSelectedWebdiskItems();">
+	<form enctype="multipart/form-data" action="{sessionurl file='webdisk.php' params="folder={$folderID}"}" method="post" name="f1" onsubmit="transferSelectedWebdiskItems();">
 		{csrffield}
 	<input type="hidden" name="" value="" id="wdAction" />
 	<input type="hidden" name="massAction" value="" id="wdMassAction" />
@@ -137,7 +137,7 @@
 	{include file="li/webdisk.preview.tpl"}
 	
 	{if !isset($smarty.post.inline)}
-	<script src="./clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
 	<script type="application/json" id="webdiskPreviewManifest">{$webdiskPreviewFilesJSON}</script>
 	<script type="application/json" id="webdiskPreviewItems">{$webdiskPreviewItemsJSON}</script>
 	
@@ -145,7 +145,7 @@
 	{if $hotkeys}
 		registerLoadAction('registerWebdiskFolderHotkeyHandler()');
 	{/if}
-		initDnDUpload(EBID('mainContent'), 'webdisk.php?sid='+currentSID+'&folder={$folderID}&action=dndUpload', function() {literal}{{/literal} document.location.href='webdisk.php?sid='+currentSID+'&folder={$folderID}'; {literal}}{/literal});
+		initDnDUpload(EBID('mainContent'), bmAppendSession('webdisk.php?folder={$folderID}&action=dndUpload'), function() {literal}{{/literal} document.location.href=bmAppendSession('webdisk.php?folder={$folderID}'); {literal}}{/literal});
 		currentWebdiskFolderID = {$folderID};
 		var treeID = webdiskGetTreeIDbyFolderID({$folderID});
 		if(treeID > 0) {

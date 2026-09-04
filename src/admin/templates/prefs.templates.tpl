@@ -31,8 +31,21 @@
 <fieldset>
 	<legend>{lng p="defaultemplate"}</legend>
 
-	<form action="{sessionurl file='prefs.templates.php' params="save=true"}" method="post" onsubmit="spin(this)">
+	{if $templateSaved}
+	<div class="alert alert-success" role="alert">{lng p="saveok"} — <code>templates/{text value=$templateSaved}/</code></div>
+	{/if}
+	{if $themeMismatch}
+	<div class="alert alert-warning" role="alert">
+		Der Ordner <code>templates/{text value=$defaultTemplate}/</code> enthält noch die Modern-Vorlagen (Bootstrap 3).
+		Tabler muss als eigener Theme-Ordner mit <code>tabler.min.css</code> liegen, nicht als Kopie von <code>templates/modern/</code>.
+	</div>
+	{/if}
+
+	<form action="{sessionurl file='prefs.templates.php'}" method="post" onsubmit="spin(this)">
 		{csrffield}
+		<input type="hidden" name="action" value="templates" />
+		<input type="hidden" name="do" value="list" />
+		<input type="hidden" name="save" value="1" />
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="template"}</label>
 			<div class="col-sm-10">

@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="{lng p="langCode"}">
+<!-- bm-theme: {$_tplname|default:'unknown'} -->
+<html lang="{lng p="langCode"}" data-bm-theme="{$_tplname|default:'unknown'}">
 {if $templatePrefs.enableDarkMode|default:false}
 <script>
 (function(){
@@ -99,7 +100,7 @@
 	{hook id="li:index.tpl:head"}
 </head>
 
-<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
+<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" data-bm-theme="{$_tplname|default:'unknown'}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
 
 	{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}

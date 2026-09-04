@@ -25,7 +25,7 @@
 				<i class="fa fa-file-o {$fa_additionalparamclass}" aria-hidden="true" {$wdicons_additionalparam}></i>
 				{/if}
 			{else}
-				<img src="webdisk.php?action=displayExtension&ext={$item.ext}&sid={$sid}" border="0" alt="" {$wdicons_imgattr} {$wdicons_additionalparam}>
+				<img src="{sessionurl file='webdisk.php' params="action=displayExtension&ext={$item.ext}"}" border="0" alt="" {$wdicons_imgattr} {$wdicons_additionalparam}>
 			{/if}
 			{if isset($item.share) && $item.share}
 				<i class="fa fa-share-square-o" aria-hidden="true" style="font-size:11px;vertical-align:top;margin-left:2px;color:#4a78c2;"></i>

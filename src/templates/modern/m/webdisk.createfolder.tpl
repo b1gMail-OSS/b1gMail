@@ -3,13 +3,13 @@
 </div>
 
 <div data-role="content">
-	<form action="webdisk.php?do=createFolder&folder={$folderID}&sid={$sid}" method="post">
+	<form action="{sessionurl file='webdisk.php' params="do=createFolder&folder={$folderID}"}" method="post">
 		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="title">{lng p="title"}:</label>
 			<input type="text" name="title" id="title" value=""  />
 		</div>
 		<button type="submit" data-icon="check" data-theme="b">{lng p="ok"}</button>
-		<a data-role="button" href="webdisk.php?folder={$folderID}&sid={$sid}" data-rel="back">{lng p="cancel"}</a>
+		<a data-role="button" href="{sessionurl file='webdisk.php' params="folder={$folderID}"}" data-rel="back">{lng p="cancel"}</a>
 	</form>
 </div>

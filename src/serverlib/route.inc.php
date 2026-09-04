@@ -7,9 +7,10 @@
  *   /admin/{script}                            → users.php, groups.php, …
  *   /admin/{bereich}/{modul}                   → prefs.common.php (default action)
  *   /admin/{bereich}/{modul}/{action}          → prefs.common.php?action=…
- *   /admin/plugin/{pluginname}                 → plugin.page.php?plugin=… (name case-insensitive)
- *   /admin/plugin/{pluginname}/{do}            → plugin.page.php?plugin=…&do=…
- *   /admin/plugin/{pluginname}/{do}/{id}       → plugin.page.php?plugin=…&do=…&id=… (numeric id only)
+ *   /admin/plugin/{pluginname}                          → plugin.page.php?plugin=… (name case-insensitive)
+ *   /admin/plugin/{pluginname}/{do}                   → plugin.page.php?plugin=…&do=…
+ *   /admin/plugin/{pluginname}/{do}/{id}               → plugin.page.php?plugin=…&do=…&id=… (numeric id)
+ *   /admin/plugin/{pluginname}/{do}/{id}/{action}      → plugin.page.php?plugin=…&do=…&id=…&action=…
  *   All path segments are lowercase in URLs and on incoming requests.
  *   Query string: ?save=true&do1=mail (extra params, not path segments)
  *
@@ -216,6 +217,8 @@ function RouteRestoreLegacyAction($action)
 		'initiatesession'           => 'initiateSession',
 		'switchlanguage'            => 'switchLanguage',
 		'generatevapid'             => 'generateVapid',
+		'faxplugin'                 => 'faxPlugin',
+		'fax'                       => 'faxPlugin',
 	);
 
 	$lower = strtolower($action);
@@ -588,8 +591,12 @@ function RouteMatchAdminPath($adminPath)
 			foreach($rest as $i => $part)
 				$rest[$i] = RouteNormalizePathSegment($part);
 
-			if(count($rest) === 1 && preg_match('/^\d+$/', $rest[0]))
+			if(isset($rest[0]) && preg_match('/^\d+$/', $rest[0]))
+			{
 				$params['id'] = $rest[0];
+				if(count($rest) > 1)
+					$params['action'] = implode('/', array_slice($rest, 1));
+			}
 			else
 				$params['action'] = implode('/', $rest);
 		}

@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f1" method="post" action="prefs.php?action=filters&do=createFilter&sid={$sid}" onsubmit="return(checkFilterForm(this));">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=filters&do=createFilter'}" onsubmit="return(checkFilterForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>

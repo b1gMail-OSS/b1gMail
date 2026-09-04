@@ -13,7 +13,7 @@
 	<link rel="stylesheet" type="text/css" href="{$selfurl}{$_tpldir}style/share.css" />
 
 	<!-- client scripts -->
-	<script type="text/javascript" src="{$selfurl}clientlang.php"></script>
+	<script type="text/javascript" src="{sessionurl file='clientlang.php'}"></script>
 	<script type="text/javascript" src="{$selfurl}{$_tpldir}js/common.js"></script>
 	<script type="text/javascript" src="{$selfurl}clientlib/overlay.js"></script>
 	<script type="text/javascript" src="{$selfurl}clientlib/share.js"></script>

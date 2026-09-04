@@ -1,4 +1,4 @@
-<form name="f1" action="email.php?do=action&{$folderString}&sid={$sid}" onsubmit="transferSelectedMailIDs()" method="post">
+<form name="f1" action="{sessionurl file='email.php' params="do=action&{$folderString}"}" onsubmit="transferSelectedMailIDs()" method="post">
 	{csrffield}
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
@@ -38,22 +38,22 @@
 		<th width="50"><i class="fa fa-envelope"></i></th>
 		<th width="20%">
 		{if $folderID!=-2}
-			<a href="email.php?folder={$folderID}&sid={$sid}&sort=von&order={$sortOrderInv}">{lng p="from"}</a>
+			<a href="{sessionurl file='email.php' params="folder={$folderID}&sort=von&order={$sortOrderInv}"}">{lng p="from"}</a>
 			{if $sortColumn=='von'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		{else}
-			<a href="email.php?folder={$folderID}&sid={$sid}&sort=an&order={$sortOrderInv}">{lng p="to"}</a>
+			<a href="{sessionurl file='email.php' params="folder={$folderID}&sort=an&order={$sortOrderInv}"}">{lng p="to"}</a>
 			{if $sortColumn=='an'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		{/if}</th>
 		<th>
-			<a href="email.php?folder={$folderID}&sid={$sid}&sort=betreff&order={$sortOrderInv}">{lng p="subject"}</a>
+			<a href="{sessionurl file='email.php' params="folder={$folderID}&sort=betreff&order={$sortOrderInv}"}">{lng p="subject"}</a>
 			{if $sortColumn=='betreff'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="130">
-			<a href="email.php?folder={$folderID}&sid={$sid}&sort=fetched&order={$sortOrderInv}">{lng p="date"}</a>
+			<a href="{sessionurl file='email.php' params="folder={$folderID}&sort=fetched&order={$sortOrderInv}"}">{lng p="date"}</a>
 			{if $sortColumn=='fetched'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="65">
-			<a href="email.php?folder={$folderID}&sid={$sid}&sort=size&order={$sortOrderInv}">{lng p="size"}</a>
+			<a href="{sessionurl file='email.php' params="folder={$folderID}&sort=size&order={$sortOrderInv}"}">{lng p="size"}</a>
 			{if $sortColumn=='size'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="70">&nbsp;</th>
@@ -84,7 +84,7 @@
 	<tbody id="group_{$mailID}" style="display:{if isset($smarty.cookies.toggleGroup.$mailGroupID) && $smarty.cookies.toggleGroup.$mailGroupID=='closed'}none{/if};">
 	{assign var=first value=false}
 	{else}
-	<tr _draggable="true" _ondragstart="mailDragStart(event,{$mailID})" class="{$class}" id="mail_{$mailID}_ntr" _onmousedown="return mailMouseDown(event,{$mailID});" _onmouseup="mailMouseUp(event,{$mailID});" {if $folderID==-3}_ondblclick="document.location.href='email.compose.php?redirect={$mailID}&sid={$sid}';"{else}_ondblclick="document.location.href='{sessionurl file='email.read.php' params="id={$mailID}"|escape:'javascript'}';"{/if} _oncontextmenu="return(false);">
+	<tr _draggable="true" _ondragstart="mailDragStart(event,{$mailID})" class="{$class}" id="mail_{$mailID}_ntr" _onmousedown="return mailMouseDown(event,{$mailID});" _onmouseup="mailMouseUp(event,{$mailID});" {if $folderID==-3}_ondblclick="document.location.href='{sessionurl file='email.compose.php' params="redirect={$mailID}"}';"{else}_ondblclick="document.location.href='{sessionurl file='email.read.php' params="id={$mailID}"|escape:'javascript'}';"{/if} _oncontextmenu="return(false);">
 		{if $templatePrefs.showCheckboxes}
 		<td style="text-align:center;width:24px;">
 			<input type="checkbox" id="selecTable_{$mailID}" />
@@ -117,7 +117,7 @@
 		<td nowrap="nowrap">
 			<a href="{sessionurl file='email.read.php' params="id={$mailID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 			<a href="javascript:void(0);" onclick="currentSID='{$sid}';currentID={$mailID};currentSortColumn='{$sortColumn}';showMailMenu(event);"><i class="fa fa-bars" aria-hidden="true"></i></a>
-			<a href="email.php?do=deleteMail&id={$mailID}&{$folderString}&sid={$sid}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='email.php' params="do=deleteMail&id={$mailID}&{$folderString}"}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/if}

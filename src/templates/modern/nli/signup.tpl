@@ -4,6 +4,7 @@
 	<p>{if $signupText}{$signupText}{else}{lng p="signuptxt"}{/if} {if $code}{lng p="signuptxt_code"}{/if}</p>
 
 	<div class="row"><div class="col-md-8"><form action="{if $ssl_signup_enable}{$ssl_url}{/if}index.php?action=signup" method="post" id="signupForm">
+		{csrffield}
 		<input type="hidden" name="do" value="createAccount" />
 		<input type="hidden" name="transPostVars" value="true" />
 		<input type="hidden" name="codeID" value="{$codeID}" />

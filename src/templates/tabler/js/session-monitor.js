@@ -48,6 +48,8 @@
 			var base = cfg.apiBase || '';
 			if(base !== '')
 				url = base.replace(/\/?$/, '/') + url.replace(/^\.\//, '');
+			else
+				url = '/' + String(url).replace(/^\.\//, '');
 		}
 		/* Match PHP SessionUrlSidEnabled(): only with urlCompat and without cookie mode */
 		if(!cfg.urlCompat || cfg.cookieMode)

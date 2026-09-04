@@ -20,7 +20,7 @@
 		var tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>

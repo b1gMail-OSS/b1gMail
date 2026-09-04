@@ -70,7 +70,7 @@ function initAddrSel()
 	}
 	sel.cbItemDoubleClick = function(element)
 	{
-		document.location.href = 'organizer.addressbook.php?action=editContact&id='+this.getItemID(element)+'&sid='+currentSID;
+		document.location.href = bmAppendSession('organizer.addressbook.php?action=editContact&id='+this.getItemID(element));
 	}
 	sel.init();
 	_addrSel = sel;
@@ -133,7 +133,7 @@ function abGroups()
 }
 function updateCurrentGroup(id, sid)
 {
-	document.location.href = 'organizer.addressbook.php?sid=' + sid + '&group=' + id;
+	document.location.href = bmAppendSession('organizer.addressbook.php?group=' + id);
 }
 function checkContactForm(form)
 {
@@ -229,7 +229,7 @@ function initTasksSel()
 	}
 	sel.cbItemDoubleClick = function(element)
 	{
-		document.location.href = 'organizer.todo.php?action=editTask&id='+this.getItemID(element)+'&sid='+currentSID;
+		document.location.href = bmAppendSession('organizer.todo.php?action=editTask&id='+this.getItemID(element));
 	}
 	sel.init();
 	_tasksSel = sel;
@@ -693,11 +693,11 @@ function checkCalendarGroupForm(form)
 }
 function updateCalendarViewMode(c, date, sid)
 {
-	document.location.href = 'organizer.calendar.php?sid=' + sid + '&view=' + c.value + '&date=' + date;
+	document.location.href = bmAppendSession('organizer.calendar.php?view=' + c.value + '&date=' + date);
 }
 function updateCalendarGroup(c, date, sid)
 {
-	document.location.href = 'organizer.calendar.php?sid=' + sid + '&switchGroup=' + c.value + '&date=' + date;
+	document.location.href = bmAppendSession('organizer.calendar.php?switchGroup=' + c.value + '&date=' + date);
 }
 function calendarDateClick(id)
 {

@@ -1,9 +1,9 @@
 <div data-role="header" data-position="fixed">
-	<a href="email.php?folder={$folderID}&sid={$sid}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{$folderName}</a>
+	<a href="{sessionurl file='email.php' params="folder={$folderID}"}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{$folderName}</a>
 	<h1>{$pageTitle}</h1>
 	<div data-role="controlgroup" data-type="horizontal" class="ui-btn-right">
-		<a{if !$nextID} class="ui-disabled"{/if} href="email.php?action=read&id={$nextID}&sid={$sid}" data-role="button" data-icon="arrow-u" data-iconpos="notext">&nbsp;</a>
-		<a{if !$prevID} class="ui-disabled"{/if} href="email.php?action=read&id={$prevID}&sid={$sid}" data-role="button" data-icon="arrow-d" data-iconpos="notext">&nbsp;</a>
+		<a{if !$nextID} class="ui-disabled"{/if} href="{sessionurl file='email.php' params="action=read&id={$nextID}"}" data-role="button" data-icon="arrow-u" data-iconpos="notext">&nbsp;</a>
+		<a{if !$prevID} class="ui-disabled"{/if} href="{sessionurl file='email.php' params="action=read&id={$prevID}"}" data-role="button" data-icon="arrow-d" data-iconpos="notext">&nbsp;</a>
 	</div>
 </div>
 
@@ -26,15 +26,15 @@
 			<p>{text value=$subject}</p>
 			<p class="ui-li-aside">
 				{date timestamp=$date nice=true}<br />
-				<a href="email.php?action=read{if !$isUnread}&unread=true{/if}&id={$mailID}&sid={$sid}" class="unreadLink"><i class="fa fa-circle"></i>{if $isUnread}{lng p="unread"}{else}{lng p="read"}{/if}</a>
+				<a href="{sessionurl file='email.php' params="action=read{if !$isUnread}&unread=true{/if}&id={$mailID}"}" class="unreadLink"><i class="fa fa-circle"></i>{if $isUnread}{lng p="unread"}{else}{lng p="read"}{/if}</a>
 			</p>
 		</li>
 	</ul>
 	
 	<div data-role="controlgroup" data-type="horizontal" style="text-align:center;">
-		<a href="email.php?action=deleteMail&id={$mailID}&sid={$sid}" data-role="button" data-icon="delete">{lng p="delete"}</a>
-		<a href="email.php?action=compose&reply={$mailID}&sid={$sid}" data-role="button" data-icon="edit">{lng p="reply"}</a>
-		<a href="email.php?action=compose&forward={$mailID}&sid={$sid}" data-role="button" data-icon="forward">{lng p="forward"}</a>
+		<a href="{sessionurl file='email.php' params="action=deleteMail&id={$mailID}"}" data-role="button" data-icon="delete">{lng p="delete"}</a>
+		<a href="{sessionurl file='email.php' params="action=compose&reply={$mailID}"}" data-role="button" data-icon="edit">{lng p="reply"}</a>
+		<a href="{sessionurl file='email.php' params="action=compose&forward={$mailID}"}" data-role="button" data-icon="forward">{lng p="forward"}</a>
 	</div>
 	
 	<p>
@@ -48,7 +48,7 @@
 		<ul data-role="listview" data-inset="true">
 			{foreach from=$attachments item=att key=attID}
 			<li>
-				<a href="email.php?action=attachment{if $att.viewable}&view=true{/if}&id={$mailID}&attachment={$attID}&sid={$sid}" rel="external" target="_blank">
+				<a href="{sessionurl file='email.php' params="action=attachment{if $att.viewable}&view=true{/if}&id={$mailID}&attachment={$attID}"}" rel="external" target="_blank">
 					{text value=$att.filename}
 					<p class="ui-li-aside">{size bytes=$att.size}</p>
 				</a>

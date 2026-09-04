@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f2" method="post" action="organizer.calendar.php?action=groups&do={if $group}save&id={$group.id}{else}add{/if}&sid={$sid}" onsubmit="return(checkCalendarGroupForm(this));">
+<form name="f2" method="post" action="{sessionurl file='organizer.calendar.php' params="action=groups&do={if $group}save&id={$group.id}{else}add{/if}"}" onsubmit="return(checkCalendarGroupForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>

@@ -46,9 +46,9 @@
 							&nbsp;
 							&nbsp;
 							
-							<a title="{lng p="sendmail"}" target="_top" href="email.compose.php?sid={$sid}&toGroup={$groupID}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
-							<a title="{lng p="export"}" target="_top" href="organizer.addressbook.php?sid={$sid}&action=groups&do=export&id={$groupID}"><i class="fa fa-address-card-o" aria-hidden="true"></i></a>
-							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="organizer.addressbook.php?sid={$sid}&action=groups&do=delete&id={$groupID}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+							<a title="{lng p="sendmail"}" target="_top" href="{sessionurl file='email.compose.php' params="toGroup={$groupID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
+							<a title="{lng p="export"}" target="_top" href="{sessionurl file='organizer.addressbook.php' params="action=groups&do=export&id={$groupID}"}"><i class="fa fa-address-card-o" aria-hidden="true"></i></a>
+							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="{sessionurl file='organizer.addressbook.php' params="action=groups&do=delete&id={$groupID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 						</div>
 					</div>
 				{/foreach}
@@ -59,7 +59,7 @@
 	<table width="100%">
 		<tr>
 			<td align="left">
-				<form action="organizer.addressbook.php?action=groups&do=add&sid={$sid}" method="post">
+				<form action="{sessionurl file='organizer.addressbook.php' params='action=groups&do=add'}" method="post">
 					{csrffield}
 					<input type="text" name="title" value="" style="width:180px;" />
 					<input type="submit" value=" {lng p="add"} " />

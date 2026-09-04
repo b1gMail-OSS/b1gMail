@@ -55,7 +55,7 @@
 		<div><i class="ti ti-code alert-icon icon" aria-hidden="true"></i></div>
 		<div class="bm-mail-alert-body">
 			{lng p="htmlavailable"}
-			<a class="alert-link" href="email.read.php?id={$mailID}&htmlView=true{$sessionUrlSuffix}">{lng p="view"} &raquo;</a>
+			<a class="alert-link" href="{$selfurl}email.read.php?id={$mailID}&amp;htmlView=true{$sessionUrlSuffix}">{lng p="view"} &raquo;</a>
 		</div>
 	</div>
 </div>
@@ -66,7 +66,7 @@
 		<div><i class="ti ti-photo-off alert-icon icon" aria-hidden="true"></i></div>
 		<div class="bm-mail-alert-body">
 			{lng p="noexternal"}
-			<a class="alert-link" href="email.read.php?action=inlineHTML&mode={$textMode}&id={$mailID}&enableExternal=true{$sessionUrlSuffix}" target="{if isset($preview)}textArea{else}mailFrame{/if}" onclick="document.getElementById('noExternalDiv').style.display='none';">{lng p="showexternal"} &raquo;</a>
+			<a class="alert-link" href="#" onclick="return bmEnableExternalContent({$mailID}, '{$textMode|escape:'javascript'}');">{lng p="showexternal"} &raquo;</a>
 		</div>
 	</div>
 </div>

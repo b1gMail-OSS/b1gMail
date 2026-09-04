@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f1" method="post" action="prefs.php?action=aliases&do=create&sid={$sid}" onsubmit="return(checkAliasForm(this));">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=create'}" onsubmit="return(checkAliasForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>

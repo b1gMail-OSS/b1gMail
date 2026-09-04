@@ -385,12 +385,12 @@ function transferSelectedWebdiskItems()
 }
 function webdiskShowUploadForm()
 {
-	MakeXMLRequest('webdisk.php?inline=true&do=uploadFilesForm&fileCount='+escape(EBID('fileCount').value)+'&folder='+currentWebdiskFolderID+'&sid='+currentSID, function(e)
+	MakeXMLRequest(bmAppendSession('webdisk.php?inline=true&do=uploadFilesForm&fileCount='+escape(EBID('fileCount').value)+'&folder='+currentWebdiskFolderID), function(e)
 			{
 				if(e.readyState == 4)
 				{
 					EBID('mainContent').innerHTML = e.responseText;
-					initDnDUpload(EBID('wdDnDArea'), 'webdisk.php?sid='+currentSID+'&folder='+currentWebdiskFolderID+'&action=dndUpload', function()
+					initDnDUpload(EBID('wdDnDArea'), bmAppendSession('webdisk.php?folder='+currentWebdiskFolderID+'&action=dndUpload'), function()
 							{
 								switchWebdiskFolder(currentWebdiskFolderID);
 							});
@@ -424,7 +424,7 @@ function switchWebdiskFolder(folderID)
 {
 	if(EBID('folderLoading')) EBID('folderLoading').style.display = '';
 
-	MakeXMLRequest('webdisk.php?inline=true&folder='+folderID+'&sid='+currentSID, function(e)
+	MakeXMLRequest(bmAppendSession('webdisk.php?inline=true&folder='+folderID), function(e)
 			{
 				if(e.readyState == 4)
 				{
@@ -432,7 +432,7 @@ function switchWebdiskFolder(folderID)
 					currentWebdiskFolderID = folderID;
 					EBID('mainContent').innerHTML = e.responseText;
 					initWDSel();
-					initDnDUpload(EBID('wdDnDArea'), 'webdisk.php?sid='+currentSID+'&folder='+folderID+'&action=dndUpload', function()
+					initDnDUpload(EBID('wdDnDArea'), bmAppendSession('webdisk.php?folder='+folderID+'&action=dndUpload'), function()
 							{
 								switchWebdiskFolder(currentWebdiskFolderID);
 							});

@@ -44,22 +44,32 @@ if($_REQUEST['action'] == 'templates')
 		$_REQUEST['do'] = 'list';
 
 	$templates = GetAvailableTemplates();
+	$tpl->assign('templateSaved', false);
+	$tpl->assign('themeMismatch', false);
 
 	//
 	// list
 	//
 	if($_REQUEST['do'] == 'list')
 	{
-		if(isset($_REQUEST['save']) && isset($_POST['template'])
+		if((isset($_REQUEST['save']) || isset($_POST['save'])) && isset($_POST['template'])
 			&& isset($templates[$_POST['template']]))
 		{
 			$db->Query('UPDATE {pre}prefs SET `template`=?',
 				$_POST['template']);
 			ReadConfig();
+			if(function_exists('TemplateClearCompileCaches'))
+				TemplateClearCompileCaches();
+			$tpl->assign('templateSaved', $bm_prefs['template']);
 		}
+
+		$themeMismatch = false;
+		if(function_exists('TemplateFolderLooksLikeModern'))
+			$themeMismatch = TemplateFolderLooksLikeModern($bm_prefs['template']);
 
 		// assign
 		$tpl->assign('defaultTemplate', $bm_prefs['template']);
+		$tpl->assign('themeMismatch', $themeMismatch);
 		$tpl->assign('templates', $templates);
 		$tpl->assign('page', 'prefs.templates.tpl');
 	}

@@ -1,5 +1,5 @@
 <div class="bm-organizer-page bm-organizer-form-page bm-organizer-date-form">
-	<form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}{$sessionUrlSuffix}" class="bm-organizer-form" onsubmit="return(checkCalendarDateForm(this));">
+	<form name="f2" method="post" action="{if !empty($eDate)}{sessionurl file='organizer.calendar.php' params="action=saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={$smarty.get.jumpbackDate}{/if}"}{else}{sessionurl file='organizer.calendar.php' params='action=createDate'}{/if}" class="bm-organizer-form" onsubmit="return(checkCalendarDateForm(this));">
 		{csrffield}
 		<div id="contentHeader" class="bm-compose-header">
 			<div class="left">

@@ -7,7 +7,7 @@
 		{date timestamp=$weekEndDate dayonly=true}
 	</div>
 	<div class="right">
-		<button type="button" onclick="document.location.href='organizer.calendar.php?action=groups&sid={$sid}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 			<i class="fa fa-calendar-o" aria-hidden="true"></i>
 			{lng p="editgroups"}
 		</button>

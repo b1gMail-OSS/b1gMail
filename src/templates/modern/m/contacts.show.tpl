@@ -1,5 +1,5 @@
 <div data-role="header" data-position="fixed">
-	<a href="contacts.php?sid={$sid}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{lng p="contacts"}</a>
+	<a href="{sessionurl file='contacts.php'}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{lng p="contacts"}</a>
 	<h1>{$pageTitle}</h1>
 </div>
 
@@ -7,7 +7,7 @@
 	<table id="contactHeading">
 		<tr>
 			<th class="picture">
-				<div style="background-image: url({if !$contact || $contact.picture==''}{$selfurl}{$_tpldir}images/li/no_picture.png{else}contacts.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if});"></div>
+				<div style="background-image: url({if !$contact || $contact.picture==''}{$selfurl}{$_tpldir}images/li/no_picture.png{else}contacts.php?action=addressbookPicture&id={$contact.id}{/if});"></div>
 			</th>
 			<td>
 				<h2>
@@ -22,7 +22,7 @@
 	</table>
 
 	<ul data-role="listview" data-inset="true">
-		{if $contact.email}<li><a href="email.php?action=compose&to={$privEmailTo}&sid={$sid}">{text value=$contact.email}</a></li>{/if}
+		{if $contact.email}<li><a href="{sessionurl file='email.php' params="action=compose&to={$privEmailTo}"}">{text value=$contact.email}</a></li>{/if}
 		{if $contact.tel}<li><a href="tel:{text value=$contact.tel}">{lng p="phone"}: {text value=$contact.tel}</a></li>{/if}
 		{if $contact.handy}<li><a href="tel:{text value=$contact.handy}">{lng p="mobile"}: {text value=$contact.handy}</a></li>{/if}
 		{if $contact.fax}<li>{lng p="fax"}: {text value=$contact.fax}</li>{/if}
@@ -36,7 +36,7 @@
 
 		{if ($contact.email||$contact.tel||$contact.fax||$contact.handy||$contact.strassenr||$contact.ort||$contact.plz||$contact.land)&&($contact.work_email||$contact.work_tel||$contact.work_fax||$contact.work_handy||$contact.work_strassenr||$contact.work_ort||$contact.work_plz||$contact.work_land)}</ul><ul data-role="listview" data-inset="true">{/if}
 
-		{if $contact.work_email}<li><a href="email.php?action=compose&to={$workEmailTo}&sid={$sid}">{text value=$contact.work_email}</a></li>{/if}
+		{if $contact.work_email}<li><a href="{sessionurl file='email.php' params="action=compose&to={$workEmailTo}"}">{text value=$contact.work_email}</a></li>{/if}
 		{if $contact.work_tel}<li><a href="tel:{text value=$contact.work_tel}">{lng p="phone"}: {text value=$contact.work_tel}</a></li>{/if}
 		{if $contact.work_handy}<li><a href="tel:{text value=$contact.work_handy}">{lng p="mobile"}: {text value=$contact.work_handy}</a></li>{/if}
 		{if $contact.work_fax}<li>{lng p="fax"}: {text value=$contact.work_fax}</li>{/if}

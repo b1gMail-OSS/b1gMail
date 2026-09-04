@@ -4,7 +4,7 @@
 		{lng p="calendar"}: {$weekDay}, {date timestamp=$date dayonly=true} ({lng p="cw"} {$calWeek})
 	</div>
 	<div class="right">
-		<button type="button" onclick="document.location.href='organizer.calendar.php?action=groups&sid={$sid}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 			<i class="fa fa-calendar-o" aria-hidden="true"></i>
 			{lng p="editgroups"}
 		</button>
@@ -30,7 +30,7 @@
 		</tr>
 		</table>
 	</div>
-	<iframe class="calendarDayBody" id="calendarDayBody" src="organizer.calendar.php?action=dayView&date={$theDate}&sid={$sid}" frameborder="0" border="0"></iframe>
+	<iframe class="calendarDayBody" id="calendarDayBody" src="{sessionurl file='organizer.calendar.php' params="action=dayView&date={$theDate}"}" frameborder="0" border="0"></iframe>
 </div>
 
 <script>

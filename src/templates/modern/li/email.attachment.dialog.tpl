@@ -122,7 +122,7 @@
 					<input type="button" onclick="if(typeof parent.hideOverlay==='function')parent.hideOverlay();" value="{lng p="cancel"}" />
 				</td>
 				<td align="right">
-					<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attachment|escape:'url'}&sid={$sid}" target="_blank" rel="noopener">
+					<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attachment|escape:'url'}" target="_blank" rel="noopener">
 						<i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}
 					</a>
 					{if $openKind == 'vcf'}

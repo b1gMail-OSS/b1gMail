@@ -78,11 +78,24 @@ function bmForceHideDnDOverlay()
 	}
 }
 
+function bmDnDCsrfToken()
+{
+	if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+		return bmCsrfToken;
+	if(typeof bmSessionConfig !== 'undefined' && bmSessionConfig && bmSessionConfig.csrfToken)
+		return bmSessionConfig.csrfToken;
+	var inp = document.querySelector('input[name="csrf_token"]');
+	return inp ? inp.value : '';
+}
+
 function initDnDUpload(elem, url, doneAction, fileDoneAction, urlAddFunc, options)
 {
 	options = options || {};
 	var useOverlay = (options.useOverlay !== false);
 	var files, i, pbText, pbValue, currentXH, ol, progressWrap;
+
+	if(typeof bmAppendSession === 'function')
+		url = bmAppendSession(url);
 
 	var _dragEnter = function(event)
 	{
@@ -168,11 +181,18 @@ function initDnDUpload(elem, url, doneAction, fileDoneAction, urlAddFunc, option
 									+ '&type=' + encodeURIComponent(file.type)
 									+ (urlAddFunc ? urlAddFunc() : ''), true);
 				xh.setRequestHeader('Content-Type', 'application/octet-stream');
+				xh.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+				var csrfToken = bmDnDCsrfToken();
+				if(csrfToken)
+					xh.setRequestHeader('X-CSRF-TOKEN', csrfToken);
 
 				xh.onreadystatechange = function()
 				{
 					if(xh.readyState == 4)
 					{
+						if(typeof bmSessionHandleResponse === 'function' && bmSessionHandleResponse(xh))
+							return;
+
 						var response = (xh.responseText || '').replace(/^\s+|\s+$/g, ''),
 							isWebdiskUpload = (typeof window.webdiskMaxUploadBytes !== 'undefined');
 

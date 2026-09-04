@@ -21,6 +21,8 @@
 var _mailSel;
 var draftAutoSaveStarted = false;
 var _currentPreviewMailID = 0;
+var _previewEnableExternal = false;
+var _previewForceEnableExternal = false;
 
 function loadDraft(id)
 {
@@ -530,6 +532,90 @@ function bmMailIframeDoc(iframe)
 	}
 }
 
+function bmLoadPreviewMailBody(mailID, enableExternal, textMode)
+{
+	mailID = parseInt(mailID, 10);
+	if(!mailID)
+		return;
+
+	textMode = textMode || 'html';
+
+	var url = bmLegacyApiUrl('email.read.php?action=inlineHTML&mode=' + encodeURIComponent(textMode)
+		+ '&id=' + mailID + (enableExternal ? '&enableExternal=true' : ''));
+
+	MakeXMLRequest(url, function(http)
+	{
+		if(http.readyState != 4)
+			return;
+
+		if(EBID('previewLoading')) EBID('previewLoading').style.display = 'none';
+
+		if(http.status && http.status >= 400)
+			return;
+
+		var html = http.responseText || '';
+		if(html.indexOf('__bmMailText') === -1)
+			return;
+
+		if(enableExternal)
+		{
+			var note = EBID('noExternalDiv');
+			if(note)
+				note.style.display = 'none';
+		}
+
+		initEMailTextArea(html);
+	});
+}
+
+function bmEnableExternalPreviewFallback(mailID)
+{
+	_previewEnableExternal = true;
+	_previewForceEnableExternal = true;
+	_lastSelectedMailID = 0;
+	_currentPreviewMailID = mailID;
+	if(EBID('previewLoading')) EBID('previewLoading').style.display = '';
+	togglePreviewPane(mailID, typeof tplDir != 'undefined' ? tplDir : '', typeof currentSID != 'undefined' ? currentSID : '');
+}
+
+function bmEnableExternalContent(mailID, textMode)
+{
+	mailID = parseInt(mailID, 10);
+	if(!mailID)
+		return false;
+
+	textMode = textMode || 'html';
+
+	var inFolderPreview = EBID('folderMailArea') && EBID('previewArea')
+		&& (typeof bmIsTablerMobile == 'undefined' || !bmIsTablerMobile());
+	if(inFolderPreview)
+	{
+		bmEnableExternalPreviewFallback(mailID);
+		return false;
+	}
+
+	var note = EBID('noExternalDiv');
+	if(note)
+		note.style.display = 'none';
+
+	document.location.href = bmAppendSession('email.read.php?id=' + mailID + '&enableExternal=true');
+	return false;
+}
+
+function bmLoadMailIframe(url, iframeName)
+{
+	var mailID = 0;
+	if(url)
+	{
+		var m = String(url).match(/(?:[?&]id=)(\d+)/);
+		if(m)
+			mailID = parseInt(m[1], 10);
+	}
+	if(!mailID && typeof _currentPreviewMailID != 'undefined')
+		mailID = _currentPreviewMailID;
+	return bmEnableExternalContent(mailID);
+}
+
 function bmMailIframeLoaded(iframe)
 {
 	var iframeDoc = bmMailIframeDoc(iframe);
@@ -567,10 +653,30 @@ function bmApplyMailIframeTheme(iframeDoc)
 	iframeDoc.documentElement.style.colorScheme = 'light';
 }
 
-function initEMailTextArea(code)
+function bmMailIframeDocumentHtml(code)
 {
-	var iframe = EBID('textArea'), lastSize = 0;
+	var html = String(code || '');
+	var head = '<meta charset="utf-8">';
+	var baseMatch = html.match(/<base\b[^>]*>/i);
+	if(baseMatch)
+	{
+		head += baseMatch[0];
+		html = html.replace(baseMatch[0], '');
+	}
+	html = html.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, function(block)
+	{
+		head += block;
+		return '';
+	});
+	return '<!DOCTYPE html><html><head>' + head + '</head><body>' + html + '</body></html>';
+}
 
+function bmBindMailIframeDoc(iframe)
+{
+	if(!iframe)
+		return;
+
+	var lastSize = 0;
 	var resCB = function()
 	{
 		var iframeDoc = bmMailIframeDoc(iframe);
@@ -595,119 +701,144 @@ function initEMailTextArea(code)
 		}
 
 		window.setTimeout(resCB, 500);
-	}
-
-	var cb = function()
-	{
-		var iframeDoc = bmMailIframeDoc(iframe);
-		if(!iframeDoc)
-			return;
-
-		if(!iframeDoc.getElementById('__bmMailText'))
-		{
-			if(bmIsBlankIframeUrl(iframeDoc))
-			{
-				removeEvent(iframe, 'load', cb);
-
-				var html = iframeDoc.getElementsByTagName('html');
-				html.item(0).innerHTML = code;
-				bmApplyMailIframeTheme(iframeDoc);
-			}
-			else if(iframeDoc.location.href == document.location.href)
-			{
-				removeEvent(iframe, 'load', cb);
-
-				var doc = iframe.contentWindow.document;
-				doc.open();
-				doc.write(code);
-				doc.close();
-				bmApplyMailIframeTheme(doc);
-				iframeDoc = doc;
-			}
-		}
-		else
-		{
-			bmApplyMailIframeTheme(iframeDoc);
-		}
-
-		var mm = function(event)
-		{
-			if(typeof(parent._hSepDragging) == 'undefined')
-				return;
-
-			if(!parent._hSepDragging && !parent._vSepDragging)
-				return;
-
-			if(parent.document.createEvent)
-			{
-				var ev = parent.document.createEvent('MouseEvents');
-				ev.initMouseEvent('mousemove', true, true, window, 0,
-					event.screenX,
-					event.screenY,
-					event.screenX - parent.diffScreenClientX,
-					event.screenY - parent.diffScreenClientX,
-					false, false, false, false, 0, null);
-				parent.document.dispatchEvent(ev);
-			}
-		}
-
-		var mc = function(event)
-		{
-			if(parent.document.createEvent)
-			{
-				var ev = parent.document.createEvent('MouseEvents');
-				ev.initMouseEvent('mouseup', true, true, window, 0,
-					event.screenX,
-					event.screenY,
-					event.screenX - parent.diffScreenClientX,
-					event.screenY - parent.diffScreenClientX,
-					false, false, false, false, 0, null);
-				parent.document.dispatchEvent(ev);
-			}
-		}
-
-		addEvent(iframeDoc, 'mousemove', mm);
-		addEvent(iframeDoc, 'click', mc);
-		resCB();
 	};
 
-	// WebKit/Opera: load-Event unzuverlaessig; Firefox: about:blank oft schon geladen
-	// bevor der Listener gesetzt wird (z. B. nach AJAX-Preview).
-	if(/WebKit/i.test(navigator.userAgent) || /Opera/i.test(navigator.userAgent))
+	var iframeDoc = bmMailIframeDoc(iframe);
+	if(!iframeDoc)
+		return;
+
+	bmApplyMailIframeTheme(iframeDoc);
+
+	var mm = function(event)
 	{
-		var _isLoaded = false;
-		setInterval(function()
+		if(typeof(parent._hSepDragging) == 'undefined')
+			return;
+
+		if(!parent._hSepDragging && !parent._vSepDragging)
+			return;
+
+		if(parent.document.createEvent)
 		{
-			if (/loaded|complete/.test(document.readyState))
-			{
-				if(!_isLoaded) cb();
-				_isLoaded = true;
-			}
-			else
-				_isLoaded = false;
-		}, 50);
-	}
-	else
+			var ev = parent.document.createEvent('MouseEvents');
+			ev.initMouseEvent('mousemove', true, true, window, 0,
+				event.screenX,
+				event.screenY,
+				event.screenX - parent.diffScreenClientX,
+				event.screenY - parent.diffScreenClientX,
+				false, false, false, false, 0, null);
+			parent.document.dispatchEvent(ev);
+		}
+	};
+
+	var mc = function(event)
 	{
-		addEvent(iframe, 'load', cb);
-		if(bmMailIframeLoaded(iframe))
-			cb();
+		if(parent.document.createEvent)
+		{
+			var ev = parent.document.createEvent('MouseEvents');
+			ev.initMouseEvent('mouseup', true, true, window, 0,
+				event.screenX,
+				event.screenY,
+				event.screenX - parent.diffScreenClientX,
+				event.screenY - parent.diffScreenClientX,
+				false, false, false, false, 0, null);
+			parent.document.dispatchEvent(ev);
+		}
+	};
+
+	addEvent(iframeDoc, 'mousemove', mm);
+	addEvent(iframeDoc, 'click', mc);
+	resCB();
+}
+
+function bmSetMailIframeContent(code)
+{
+	var iframe = EBID('textArea');
+	if(!iframe)
+		return;
+
+	var bindIframeDoc = function()
+	{
+		bmBindMailIframeDoc(iframe);
+	};
+
+	var docHtml = bmMailIframeDocumentHtml(code);
+	var bound = false;
+	var onSrcdocLoad = function()
+	{
+		if(bound)
+			return;
+		bound = true;
+		removeEvent(iframe, 'load', onSrcdocLoad);
+		bindIframeDoc();
+	};
+
+	if('srcdoc' in iframe)
+	{
+		addEvent(iframe, 'load', onSrcdocLoad);
+		iframe.removeAttribute('src');
+		iframe.srcdoc = docHtml;
+		window.setTimeout(onSrcdocLoad, 100);
+		return;
 	}
+
+	try
+	{
+		var iframeDoc = bmMailIframeDoc(iframe);
+		if(iframeDoc)
+		{
+			iframeDoc.open('text/html', 'replace');
+			iframeDoc.write(docHtml);
+			iframeDoc.close();
+			bindIframeDoc();
+			return;
+		}
+	}
+	catch(e) {}
+
+	iframe.srcdoc = docHtml;
+	window.setTimeout(onSrcdocLoad, 100);
+}
+
+function initEMailTextArea(code)
+{
+	bmSetMailIframeContent(code);
 }
 
 function _togglePreviewPane(e)
 {
 	if(e.readyState == 4)
 	{
+		if(e.status && e.status >= 400)
+		{
+			if(EBID('previewLoading')) EBID('previewLoading').style.display = 'none';
+			return;
+		}
+
 		EBID('previewArea').innerHTML = e.responseText;
 
 		EBID('previewArea').style.display = '';
 		EBID('multiSelPreview').style.display = 'none';
 
-		if(EBID('textArea') && EBID('textArea_raw'))
+		var previewMailID = _currentPreviewMailID;
+		var previewTextMode = 'html';
+		var previewEnableExternal = false;
+
+		if(EBID('previewMailID'))
+			previewMailID = parseInt(EBID('previewMailID').value, 10) || previewMailID;
+		if(EBID('previewTextMode'))
+			previewTextMode = EBID('previewTextMode').value || previewTextMode;
+		if(EBID('previewEnableExternal'))
+			previewEnableExternal = EBID('previewEnableExternal').value === '1';
+		if(_previewForceEnableExternal)
 		{
-			initEMailTextArea(EBID('textArea_raw').value);
+			previewEnableExternal = true;
+			_previewForceEnableExternal = false;
 		}
+
+		if(EBID('textArea'))
+			bmLoadPreviewMailBody(previewMailID, previewEnableExternal, previewTextMode);
+		else if(EBID('previewLoading'))
+			EBID('previewLoading').style.display = 'none';
 
 		if(typeof bmMailCalendarInviteInit === 'function')
 			bmMailCalendarInviteInit(EBID('previewArea'));
@@ -727,7 +858,14 @@ function togglePreviewPane(mailID, tpldir, sid)
 
 		if(EBID('previewLoading')) EBID('previewLoading').style.display = '';
 
-		MakeXMLRequest('email.read.php?preview=true&id=' + mailID + (typeof(previewCompactHeader)!='undefined'?(previewCompactHeader?'&narrow=true':''):(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')) , _togglePreviewPane);
+		var extra = '';
+		if(_previewEnableExternal)
+		{
+			extra = '&enableExternal=true';
+			_previewEnableExternal = false;
+		}
+
+		MakeXMLRequest('email.read.php?preview=true&id=' + mailID + extra + (typeof(previewCompactHeader)!='undefined'?(previewCompactHeader?'&narrow=true':''):(typeof(folderNarrowView)!='undefined'&&folderNarrowView?'&narrow=true':'')) , _togglePreviewPane);
 
 		if((EBID('mail_'+mailID+'_nspan1') && EBID('mail_'+mailID+'_nspan1').className.indexOf('unread') >= 0)
 			|| (EBID('mail_'+mailID+'_span1') && EBID('mail_'+mailID+'_span1').className.indexOf('unread') >= 0))

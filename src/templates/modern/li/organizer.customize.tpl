@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-	<form name="f1" method="post" action="organizer.php?action=saveCustomize&sid={$sid}">
+	<form name="f1" method="post" action="{sessionurl file='organizer.php' params='action=saveCustomize'}">
 		{csrffield}
 		<table class="listTable">
 			<tr>

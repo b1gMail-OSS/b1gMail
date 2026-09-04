@@ -2,7 +2,7 @@
 	<table>
 		<tr>
 			<th class="picture">
-				<div style="background-image: url({if !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if});"></div>
+				<div style="background-image: url({if !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}{sessionurl file='organizer.addressbook.php' params="action=addressbookPicture&id={$contact.id}"}{/if});"></div>
 			</th>
 			<td>
 				<h1>
@@ -23,7 +23,7 @@
 		<!-- priv -->
 		{if $contact.email}<tr>
 			<th>{lng p="email"}</th>
-			<td><a href="email.compose.php?to={$privEmailTo}&sid={$sid}">{text value=$contact.email}</a></td>
+			<td><a href="{sessionurl file='email.compose.php' params="to={$privEmailTo}"}">{text value=$contact.email}</a></td>
 		</tr>
 		<tr><td class="spacer" colspan="2"></td></tr>{/if}
 		{if $contact.tel}<tr>
@@ -54,7 +54,7 @@
 		<!-- work -->
 		{if $contact.work_email}<tr>
 			<th>{lng p="email"}</th>
-			<td><a href="email.compose.php?to={$workEmailTo}&sid={$sid}">{text value=$contact.work_email}</a></td>
+			<td><a href="{sessionurl file='email.compose.php' params="to={$workEmailTo}"}">{text value=$contact.work_email}</a></td>
 		</tr>
 		<tr><td class="spacer" colspan="2"></td></tr>{/if}
 		{if $contact.work_tel}<tr>

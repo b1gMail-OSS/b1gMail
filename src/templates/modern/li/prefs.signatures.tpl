@@ -5,7 +5,7 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=signatures&do=action&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=signatures&do=action'}">
 	{csrffield}
 
 <div class="scrollContainer withBottomBar">
@@ -25,10 +25,10 @@
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="signature_{$signatureID}" name="signature_{$signatureID}" /></td>
-		<td class="listTableTDActive" nowrap="nowrap">&nbsp;<a href="prefs.php?action=signatures&do=edit&id={$signatureID}&sid={$sid}"><i class="fa fa-quote-right" aria-hidden="true"></i> {text value=$signature.titel}</a></td>
+		<td class="listTableTDActive" nowrap="nowrap">&nbsp;<a href="{sessionurl file='prefs.php' params="action=signatures&do=edit&id={$signatureID}"}"><i class="fa fa-quote-right" aria-hidden="true"></i> {text value=$signature.titel}</a></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="prefs.php?action=signatures&do=edit&id={$signatureID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=signatures&do=delete&id={$signatureID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='prefs.php' params="action=signatures&do=edit&id={$signatureID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=signatures&do=delete&id={$signatureID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}
@@ -46,7 +46,7 @@
 		<input class="smallInput" type="submit" value="{lng p="ok"}" />
 	</div>
 	<div class="right">
-		<button type="button" onclick="document.location.href='prefs.php?action=signatures&do=add&sid={$sid}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='prefs.php' params='action=signatures&do=add'}';">
 			<i class="fa fa-plus" aria-hidden="true"></i>
 			{lng p="addsignature"}
 		</button>

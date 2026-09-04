@@ -13,7 +13,7 @@
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
@@ -22,7 +22,7 @@
 
 <body>
 
-		<form action="email.php?folder={$folderID}&do=setViewOptions&overlay=true&sid={$sid}" method="post">
+		<form action="{sessionurl file='email.php' params="folder={$folderID}&do=setViewOptions&overlay=true"}" method="post">
 			{csrffield}
 			<fieldset>
 				<legend>{lng p="viewoptions"}</legend>

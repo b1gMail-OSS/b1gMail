@@ -8,22 +8,22 @@
 			</div>
 		</div>
 	
-		<form name="f1" method="post" action="organizer.notes.php?action=action&sid={$sid}">
+		<form name="f1" method="post" action="{sessionurl file='organizer.notes.php' params='action=action'}">
 			{csrffield}
 		<div class="scrollContainer withBottomBar">
 			<table class="bigTable">
 				<tr>
 					<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1);" /></th>
 					<th width="80">
-						<a href="organizer.notes.php?sid={$sid}&sort=priority&order={$sortOrderInv}">{lng p="priority"}</a>
+						<a href="{sessionurl file='organizer.notes.php' params="sort=priority&order={$sortOrderInv}"}">{lng p="priority"}</a>
 						{if $sortColumn=='priority'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 					</th>
 					<th width="150">
-						<a href="organizer.notes.php?sid={$sid}&sort=date&order={$sortOrderInv}">{lng p="date"}</a>
+						<a href="{sessionurl file='organizer.notes.php' params="sort=date&order={$sortOrderInv}"}">{lng p="date"}</a>
 						{if $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 					</th>
 					<th>
-						<a href="organizer.notes.php?sid={$sid}&sort=text&order={$sortOrderInv}">{lng p="text"}</a>
+						<a href="{sessionurl file='organizer.notes.php' params="sort=text&order={$sortOrderInv}"}">{lng p="text"}</a>
 						{if $sortColumn=='text'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}					
 					</th>
 					<th width="55">&nbsp;</th>
@@ -41,7 +41,7 @@
 					<td class="{if $sortColumn=='text'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="javascript:previewNote('{$sid}', '{$noteID}');">{text value=$note.text}</a>&nbsp;</td>
 					<td class="{$class}" nowrap="nowrap">
 						<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-						<a onclick="return confirm('{lng p="realdel"}');" href="organizer.notes.php?action=deleteNote&id={$noteID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.notes.php' params="action=deleteNote&id={$noteID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 					</td>
 				</tr>
 				{/foreach}

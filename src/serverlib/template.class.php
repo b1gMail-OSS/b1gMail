@@ -59,20 +59,15 @@ class Template extends Smarty\Smarty {
             if(function_exists('AssignTemplateAdminRouteVars'))
                 AssignTemplateAdminRouteVars($this);
         } else {
-            $this->setTemplateDir(
-                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/',
-            );
-            $this->setCompileDir(
-                B1GMAIL_DIR . 'templates/' . $bm_prefs['template'] . '/cache/',
-            );
-            $this->tplDir =
-                B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/';
+            TemplateApplyFrontendTheme($this, $bm_prefs['template']);
         }
 
         // variables
         $this->assign('service_title', HTMLFormat($bm_prefs['titel']));
         $this->assign('charset', $lang_info['charset']);
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
+        if (function_exists('PublicFqdnSelfUrl')) {
+            $this->assign('selfurl', PublicFqdnSelfUrl());
+        } else if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') {
             $this->assign(
                 'selfurl',
                 str_replace('http://', 'https://', $bm_prefs['selfurl']),
@@ -80,17 +75,10 @@ class Template extends Smarty\Smarty {
         } else {
             $this->assign('selfurl', $bm_prefs['selfurl']);
         }
-        if (!ADMIN_MODE) {
-            $this->assign(
-                'tpldir',
-                $this->getTemplateVars('selfurl') .
-                    'templates/' .
-                    $bm_prefs['template'] .
-                    '/',
-            );
+        if (ADMIN_MODE) {
+            $this->assign('_tpldir', 'templates/' . $bm_prefs['template'] . '/');
+            $this->assign('_tplname', $bm_prefs['template']);
         }
-        $this->assign('_tpldir', 'templates/' . $bm_prefs['template'] . '/');
-        $this->assign('_tplname', $bm_prefs['template']);
         $this->assign('_regEnabled', $bm_prefs['regenabled'] == 'yes');
         $this->assign('serverTZ', date('Z'));
 
@@ -186,13 +174,18 @@ class Template extends Smarty\Smarty {
             return $file;
         }
 
+        $theme = $this->getTemplateVars('_tplname');
+        if (!is_string($theme) || $theme === '') {
+            $theme = $bm_prefs['template'];
+        }
+
         if (strpos($path, B1GMAIL_DIR) === 0) {
             return $selfUrl . substr($path, strlen(B1GMAIL_DIR)) . $query;
         }
         if (strpos($path, $this->tplDir) === 0) {
             return $selfUrl .
                 'templates/' .
-                $bm_prefs['template'] .
+                $theme .
                 '/' .
                 substr($path, strlen($this->tplDir)) .
                 $query;
@@ -304,7 +297,11 @@ class Template extends Smarty\Smarty {
             $adminRow,
             $currentLanguage;
 
-        $this->assign('templatePrefs', GetTemplatePrefs($bm_prefs['template']));
+        $activeTheme = $this->getTemplateVars('_tplname');
+        if (!is_string($activeTheme) || $activeTheme === '') {
+            $activeTheme = $bm_prefs['template'];
+        }
+        $this->assign('templatePrefs', GetTemplatePrefs($activeTheme));
 
         // admin mode?
         if (ADMIN_MODE && isset($adminRow)) {
@@ -606,6 +603,20 @@ class Template extends Smarty\Smarty {
 
         ModuleFunction('BeforeDisplayTemplate', [$template_name, &$this]);
 
+        if (!ADMIN_MODE && function_exists('TemplateApplyFrontendTheme')) {
+            $activeTheme = $this->getTemplateVars('_tplname');
+            if (!is_string($activeTheme) || $activeTheme === '') {
+                $activeTheme = $bm_prefs['template'];
+            }
+            TemplateApplyFrontendTheme($this, $activeTheme);
+            if (function_exists('AssignTemplatePublicRouteVars')) {
+                AssignTemplatePublicRouteVars($this);
+            }
+            if ($compile_id === null) {
+                $compile_id = $activeTheme;
+            }
+        }
+
         $this->assign('_cssFiles', $this->_cssFiles);
         $this->assign('_jsFiles', $this->_jsFiles);
         $GLOBALS['getTemplateDir'] = parent::getTemplateDir();
@@ -623,6 +634,110 @@ class Template extends Smarty\Smarty {
 /**
  * helper functions
  */
+/**
+ * Apply a user-frontend theme (template folder) to a Smarty instance.
+ *
+ * @param Template $tpl
+ * @param string   $template Folder name under templates/
+ * @return bool
+ */
+function TemplateApplyFrontendTheme($tpl, $template)
+{
+    global $bm_prefs;
+
+    $template = preg_replace('/[^a-zA-Z0-9_.-]/', '', (string)$template);
+    $dir = B1GMAIL_DIR . 'templates/' . $template . '/';
+    if ($template === '' || !is_dir($dir) || !is_file($dir . 'info.php')) {
+        return false;
+    }
+
+    $tpl->setTemplateDir($dir);
+    $tpl->setCompileDir($dir . 'cache/');
+    if (method_exists($tpl, 'setCompileId')) {
+        $tpl->setCompileId($template);
+    }
+
+    $tpl->tplDir = (defined('B1GMAIL_REL') ? B1GMAIL_REL : './') . 'templates/' . $template . '/';
+
+    $base = function_exists('PublicFqdnSelfUrl')
+        ? PublicFqdnSelfUrl()
+        : (rtrim((string) (isset($bm_prefs['selfurl']) ? $bm_prefs['selfurl'] : ''), '/') . '/');
+    $tpl->assign('tpldir', $base . 'templates/' . $template . '/');
+    $tpl->assign('_tpldir', 'templates/' . $template . '/');
+    $tpl->assign('_tplname', $template);
+    $tpl->assign('templatePrefs', GetTemplatePrefs($template));
+    $tpl->assign('bmThemeName', $template);
+
+    if (method_exists($tpl, 'getTemplateDir')) {
+        $GLOBALS['getTemplateDir'] = $tpl->getTemplateDir();
+    }
+
+    return true;
+}
+
+/**
+ * True if a theme folder is named like Tabler (or similar) but still contains the modern NLI shell.
+ *
+ * @param string $template
+ * @return bool
+ */
+function TemplateFolderLooksLikeModern($template)
+{
+    $template = preg_replace('/[^a-zA-Z0-9_.-]/', '', (string)$template);
+    if ($template === '' || $template === 'modern' || $template === 'default') {
+        return false;
+    }
+
+    $index = B1GMAIL_DIR . 'templates/' . $template . '/nli/index.tpl';
+    if (!is_file($index)) {
+        return false;
+    }
+
+    $src = (string)@file_get_contents($index);
+    if ($src === '') {
+        return false;
+    }
+
+    return strpos($src, 'bootstrap.min.css') !== false
+        && strpos($src, 'tabler.min.css') === false;
+}
+
+/**
+ * Delete compiled Smarty files for one or all frontend themes.
+ *
+ * @param string|null $theme
+ */
+function TemplateClearCompileCaches($theme = null)
+{
+    $names = array();
+    if (is_string($theme) && $theme !== '') {
+        $names[] = $theme;
+    } else {
+        $dir = @dir(B1GMAIL_DIR . 'templates/');
+        if (is_object($dir)) {
+            while ($file = $dir->read()) {
+                if ($file === '.' || $file === '..') {
+                    continue;
+                }
+                if (is_dir(B1GMAIL_DIR . 'templates/' . $file . '/cache')) {
+                    $names[] = $file;
+                }
+            }
+            $dir->close();
+        }
+    }
+
+    foreach ($names as $name) {
+        if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $name)) {
+            continue;
+        }
+        $cacheDir = B1GMAIL_DIR . 'templates/' . $name . '/cache/';
+        foreach (glob($cacheDir . '*.php') ?: array() as $file) {
+            @unlink($file);
+        }
+    }
+}
+
 function TemplateTabSort($a, $b) {
     $aOrder = isset($a['order']) ? $a['order'] : 599;
     $bOrder = isset($b['order']) ? $b['order'] : 599;
@@ -714,7 +829,7 @@ function TemplateHalfHourToTime($params, $smarty) {
             $value % 2 == 0 ? 0 : 30,
             0,
             date('m', $params['dateStart']),
-            date('d', $parmas['dateStart']),
+            date('d', $params['dateStart']),
             date('Y', $params['dateStart']),
         );
     }

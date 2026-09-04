@@ -9,7 +9,7 @@
 {if isset($shareError) && $shareError != ''}
 <div class="mailWarning" style="margin-bottom:10px;">{$shareError}</div>
 {/if}
-<form action="webdisk.php?action=saveFileShareSettings&id={$id}&sid={$sid}" method="post">
+<form action="{sessionurl file='webdisk.php' params="action=saveFileShareSettings&id={$id}"}" method="post">
 	{csrffield}
 	<table class="listTable">
 		<tr>

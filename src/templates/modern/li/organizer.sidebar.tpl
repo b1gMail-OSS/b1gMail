@@ -1,10 +1,10 @@
 <div class="sidebarHeading">{lng p="organizer"}</div>
 <div class="contentMenuIcons">
-	<a href="organizer.php?sid={$sid}"><i class="fa fa-tachometer" aria-hidden="true"></i> {lng p="overview"}</a><br />
-	<a href="organizer.calendar.php?sid={$sid}"><i class="fa fa-calendar" aria-hidden="true"></i> {lng p="calendar"}</a><br />
-	<a href="organizer.todo.php?sid={$sid}"><i class="fa fa-tasks" aria-hidden="true"></i> {lng p="todolist"}</a><br />
-	<a href="organizer.addressbook.php?sid={$sid}"><i class="fa fa-address-book-o" aria-hidden="true"></i> {lng p="addressbook"}</a><br />
-	<a href="organizer.notes.php?sid={$sid}"><i class="fa fa-sticky-note-o" aria-hidden="true"></i> {lng p="notes"}</a><br />
+	<a href="{sessionurl file='organizer.php'}"><i class="fa fa-tachometer" aria-hidden="true"></i> {lng p="overview"}</a><br />
+	<a href="{sessionurl file='organizer.calendar.php'}"><i class="fa fa-calendar" aria-hidden="true"></i> {lng p="calendar"}</a><br />
+	<a href="{sessionurl file='organizer.todo.php'}"><i class="fa fa-tasks" aria-hidden="true"></i> {lng p="todolist"}</a><br />
+	<a href="{sessionurl file='organizer.addressbook.php'}"><i class="fa fa-address-book-o" aria-hidden="true"></i> {lng p="addressbook"}</a><br />
+	<a href="{sessionurl file='organizer.notes.php'}"><i class="fa fa-sticky-note-o" aria-hidden="true"></i> {lng p="notes"}</a><br />
 </div>
 
 <div class="sidebarHeading">{lng p="tasks"}</div>
@@ -14,7 +14,7 @@
 	<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}">{text value=$task.titel cut=20}</a><br />
 {/foreach}
 {if $tasks_haveMore}
-	<small><a href="organizer.todo.php?sid={$sid}">{lng p="more"}...</a></small><br />
+	<small><a href="{sessionurl file='organizer.todo.php'}">{lng p="more"}...</a></small><br />
 {/if}
 </div>
 

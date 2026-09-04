@@ -7,7 +7,7 @@
 		{if $templatePrefs.showUserEmail}
 		<em>{$_userEmail}</em>
 		{/if}
-		<button onclick="document.location.href='start.php?action=customize&sid={$sid}';" type="button">
+		<button onclick="document.location.href='{sessionurl file='start.php' params='action=customize'}';" type="button">
 			<i class="fa fa-puzzle-piece" aria-hidden="true"></i>
 			{lng p="customize"}
 		</button>

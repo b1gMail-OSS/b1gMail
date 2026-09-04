@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/loggedin.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/dtree.css" rel="stylesheet" type="text/css" />
 	
@@ -17,15 +17,16 @@
 	<script>
 	<!--
 		var currentSID = '{$sid}', tplDir = '{$tpldir}', serverTZ = {$serverTZ};
+		var bmSessionConfig = (typeof parent !== 'undefined' && parent.bmSessionConfig) ? parent.bmSessionConfig : undefined;
 	//-->
 	</script>
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/organizer.js" type="text/javascript"></script>
-	<script src="clientlib/dtree.js" type="text/javascript"></script>
-	<script src="clientlib/overlay.js" type="text/javascript"></script>
-	<script src="clientlib/autocomplete.js" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/dtree.js" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/overlay.js" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/autocomplete.js" type="text/javascript"></script>
 </head>
 
 <body onload="initCalendar()" style="background-color:#FFF;background-image:none;">

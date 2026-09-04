@@ -1706,6 +1706,7 @@ class BMUser
 
 				$_SESSION['bm_userLoggedIn']	= true;
 				$_SESSION['bm_userID']			= $userID;
+				$_SESSION['bm_adminImpersonate']	= $adminImpersonate ? true : false;
 				$_SESSION['bm_sessionToken']	= SessionToken();
 				BMUser::SyncSessionEpochToSession($userID);
 				SessionInitLoginTimestamps(false);

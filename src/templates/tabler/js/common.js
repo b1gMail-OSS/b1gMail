@@ -46,6 +46,8 @@ function bmPublicPathFromLegacy(script, params)
 
 	if(script === 'email.read.php')
 	{
+		if(params.action && params.action !== 'read')
+			return null;
 		if(params.id !== undefined && params.id !== '')
 			return { path: 'email/read/' + encodeURIComponent(params.id), extra: bmPublicFilterParams(params, ['id']) };
 	}
@@ -92,6 +94,21 @@ function bmPublicPathFromLegacy(script, params)
 	return null;
 }
 
+function bmJoinApiBase(url)
+{
+	if(!url || /^(https?:)?\/\//i.test(url) || url.indexOf('/') === 0)
+		return url;
+
+	var cfg = (typeof parent !== 'undefined' && parent !== window && parent.bmSessionConfig)
+		? parent.bmSessionConfig
+		: ((typeof bmSessionConfig !== 'undefined') ? bmSessionConfig : null);
+	var base = (cfg && cfg.apiBase) ? String(cfg.apiBase) : '';
+	if(base)
+		return base.replace(/\/?$/, '/') + String(url).replace(/^\.\//, '');
+
+	return '/' + String(url).replace(/^\.\//, '');
+}
+
 function bmPublicUrl(url)
 {
 	if(!url || /^(https?:)?\/\//i.test(url))
@@ -102,7 +119,7 @@ function bmPublicUrl(url)
 		: ((typeof bmSessionConfig !== 'undefined') ? bmSessionConfig : null);
 
 	if(!cfg || !cfg.publicRouting)
-		return url;
+		return bmJoinApiBase(url);
 
 	var script = url, query = '';
 	var qPos = url.indexOf('?');
@@ -127,7 +144,7 @@ function bmPublicUrl(url)
 
 	var built = bmPublicPathFromLegacy(script, params);
 	if(built === null)
-		return url;
+		return bmJoinApiBase(url);
 
 	var out = built.path;
 	var extraKeys = Object.keys(built.extra || {});
@@ -138,13 +155,26 @@ function bmPublicUrl(url)
 		}).join('&');
 	}
 
-	var base = cfg.apiBase || '';
-	if(base !== '' && out.indexOf('/') !== 0)
-		out = base.replace(/\/?$/, '/') + out.replace(/^\.\//, '');
-
-	return out;
+	return bmJoinApiBase(out);
 }
 window.bmPublicUrl = bmPublicUrl;
+
+function bmLegacyApiUrl(url)
+{
+	if(!url)
+		return url;
+
+	url = bmJoinApiBase(String(url).replace(/^\.\//, ''));
+
+	if(typeof parent !== 'undefined' && parent !== window && typeof parent.bmSessionAppendUrl === 'function')
+		return parent.bmSessionAppendUrl(url);
+
+	if(typeof bmSessionAppendUrl === 'function')
+		return bmSessionAppendUrl(url);
+
+	return url;
+}
+window.bmLegacyApiUrl = bmLegacyApiUrl;
 
 function bmAppendSession(url)
 {
@@ -484,7 +514,26 @@ function bmSyncLegacyAddonLayout()
 	document.body.classList.toggle('bm-legacy-addon-page', isLegacy);
 }
 
+var bmSyncTablerLayoutBusy = false;
+
 function bmSyncTablerLayout()
+{
+	/* Schutz gegen Rekursion, falls ein Aufruf indirekt ein resize-Event ausloest */
+	if(bmSyncTablerLayoutBusy)
+		return;
+	bmSyncTablerLayoutBusy = true;
+
+	try
+	{
+		bmSyncTablerLayoutInner();
+	}
+	finally
+	{
+		bmSyncTablerLayoutBusy = false;
+	}
+}
+
+function bmSyncTablerLayoutInner()
 {
 	document.body.classList.toggle('bm-li-email-mobile', bmIsTablerMobile() && document.body.classList.contains('bm-li-email'));
 	bmSyncLegacyAddonLayout();
@@ -502,8 +551,6 @@ function bmSyncTablerLayout()
 		{
 			if(hSep2) hSep2.style.display = '';
 			if(hSepSep) hSepSep.style.display = '';
-			if(typeof(window.dispatchEvent) != 'undefined')
-				window.dispatchEvent(new Event('resize'));
 		}
 	}
 
@@ -520,8 +567,6 @@ function bmSyncTablerLayout()
 		{
 			if(vSep2) vSep2.style.display = '';
 			if(vSepSep) vSepSep.style.display = '';
-			if(typeof(window.dispatchEvent) != 'undefined')
-				window.dispatchEvent(new Event('resize'));
 		}
 	}
 }

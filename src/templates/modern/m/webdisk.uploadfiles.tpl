@@ -3,7 +3,7 @@
 </div>
 
 <div data-role="content">
-	<form action="webdisk.php?do=uploadFiles&folder={$folderID}&sid={$sid}" data-ajax="false" enctype="multipart/form-data" method="post">
+	<form action="{sessionurl file='webdisk.php' params="do=uploadFiles&folder={$folderID}"}" data-ajax="false" enctype="multipart/form-data" method="post">
 		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="file1">{lng p="file"} 1:</label>
@@ -18,6 +18,6 @@
 			<input type="file" name="file3" id="file3" />
 		</div>
 		<button type="submit" data-icon="check" data-theme="b">{lng p="ok"}</button>
-		<a data-role="button" href="webdisk.php?folder={$folderID}&sid={$sid}" data-rel="back">{lng p="cancel"}</a>
+		<a data-role="button" href="{sessionurl file='webdisk.php' params="folder={$folderID}"}" data-rel="back">{lng p="cancel"}</a>
 	</form>
 </div>

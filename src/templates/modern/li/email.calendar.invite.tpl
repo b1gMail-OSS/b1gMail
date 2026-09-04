@@ -68,7 +68,7 @@
 			<div class="bm-mail-calendar-card-heading">
 				<p>{text value=$calendarInviteCard.message}</p>
 				{if $calendarInviteCard.dateID > 0}
-				<a class="bm-mail-open-calendar-date" href="organizer.calendar.php?action=showDate&amp;id={$calendarInviteCard.dateID}&amp;sid={$sid}">
+				<a class="bm-mail-open-calendar-date" href="organizer.calendar.php?action=showDate&amp;id={$calendarInviteCard.dateID}">
 					<i class="fa fa-calendar" aria-hidden="true"></i> {lng p="mail_att_reply_open_event"}
 				</a>
 				{/if}

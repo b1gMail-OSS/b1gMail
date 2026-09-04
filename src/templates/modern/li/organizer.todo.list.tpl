@@ -112,7 +112,7 @@
 
 <div class="contentFooter">
 <div class="left">
-	<form name="f1" method="post" action="organizer.todo.php?action=action&sid={$sid}" onsubmit="transferSelectedTasks()">
+	<form name="f1" method="post" action="{sessionurl file='organizer.todo.php' params='action=action'}" onsubmit="transferSelectedTasks()">
 		{csrffield}
 	<input type="hidden" name="taskListID" value="{$taskListID}" />
 	<input type="hidden" name="taskIDs" id="taskIDs" value="" />

@@ -1606,9 +1606,13 @@ class BMPluginInterface
         if (isset($this->_plugins[$module])) {
             if ($this->_plugins[$module]['instance']->tplFromModDir) {
                 return B1GMAIL_DIR.'plugins/'.($type == 'template' ? 'templates' : $type).'/'.$template;
-            } else {
-                return $tpl->template_dir.$template;
             }
+
+            $dirs = (isset($tpl) && is_object($tpl) && method_exists($tpl, 'getTemplateDir'))
+                ? $tpl->getTemplateDir()
+                : array();
+            $base = (is_array($dirs) && isset($dirs[0])) ? $dirs[0] : '';
+            return rtrim((string)$base, '/').'/'.$template;
         }
 
         return false;

@@ -5,7 +5,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-<form name="f1" method="post" action="email.folders.php?action=saveFolder&id={$folderID}&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='email.folders.php' params="action=saveFolder&id={$folderID}"}">
 	{csrffield}
 	<table class="listTable">
 		<tr>

@@ -12,7 +12,7 @@
 	{foreach from=$prefsItems item=null key=item}
 	<tr>
 		<td width="55" height="62" valign="top">
-			<a href="prefs.php?action={$item}&sid={$sid}">
+			<a href="{sessionurl file='prefs.php' params="action={$item}"}">
 				{if isset($prefsfaIcons[$item])}
 					<i class="fa {$prefsfaIcons[$item]} fa-4x" aria-hidden="true"></i>
 				{else if isset($prefsIcons[$item])}
@@ -23,7 +23,7 @@
 			</a>
 		</td>
 		<td class="prefsBox">
-			<h2><a href="prefs.php?action={$item}&sid={$sid}">{lng p="$item"}</a></h2>
+			<h2><a href="{sessionurl file='prefs.php' params="action={$item}"}">{lng p="$item"}</a></h2>
 			{lng p="prefs_d_$item"}
 		</td>
 	</tr>
@@ -44,7 +44,7 @@
 		<td width="50%">
 			<table width="100%" class="listTable">
 				<tr>
-					<th colspan="3" class="listTableHead"><a href="prefs.php?action={$item}&sid={$sid}"><b>{lng p="$item"}</b></a></th>
+					<th colspan="3" class="listTableHead"><a href="{sessionurl file='prefs.php' params="action={$item}"}"><b>{lng p="$item"}</b></a></th>
 				</tr>
 				<tr>
 					<td class="listTableIconSide">
@@ -57,7 +57,7 @@
 						{/if}
 					</td>
 					<td valign="top" style="padding:6px;">{lng p="prefs_d_$item"}</td>
-					<td class="listTableSide"><a href="prefs.php?action={$item}&sid={$sid}">&raquo;</a></td>
+					<td class="listTableSide"><a href="{sessionurl file='prefs.php' params="action={$item}"}">&raquo;</a></td>
 				</tr>
 			</table>
 		</td>

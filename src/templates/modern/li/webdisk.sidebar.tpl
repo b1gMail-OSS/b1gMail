@@ -26,22 +26,22 @@
 	<div id="webdiskDetailFolderActions" style="display:none;">
 		&nbsp;<a href="javascript:void(0);" onclick="switchWebdiskFolder(currentID);"><i class="fa fa-eye" aria-hidden="true"></i> {lng p="view"}</a><br />
 		&nbsp;<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
-		{if $allowShare}&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="sharing"}</a><br />{/if}
+		{if $allowShare}&nbsp;<a href="javascript:void(0);" onclick="document.location.href=bmAppendSession('webdisk.php?action=shareFolder&folder='+currentWebdiskFolderID+'&id=' + currentID);"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="sharing"}</a><br />{/if}
 	</div>
 	<div id="webdiskDetailFileActionsView" style="display:none;">
-		&nbsp;<a href="javascript:void(0);" onclick="window.open('webdisk.php?action=downloadFile&id='+currentID+'&view=true&sid={$sid}');"><i class="fa fa-eye" aria-hidden="true"></i> {lng p="view"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="window.open(bmAppendSession('webdisk.php?action=downloadFile&id='+currentID+'&view=true'));"><i class="fa fa-eye" aria-hidden="true"></i> {lng p="view"}</a><br />
 	</div>
 	<div id="webdiskDetailFileActions" style="display:none;">
 		&nbsp;<a href="javascript:void(0);" onclick="webdiskDownloadCurrent();"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a><br />
-		{if $allowShare}&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=shareFile&id=' + currentID + '&sid={$sid}';"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="sharing"}</a><br />{/if}
+		{if $allowShare}&nbsp;<a href="javascript:void(0);" onclick="document.location.href=bmAppendSession('webdisk.php?action=shareFile&id=' + currentID);"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="sharing"}</a><br />{/if}
 		{if $allowShare}&nbsp;<a href="javascript:void(0);" id="wdStopFileShareLink" style="display:none;" onclick="webdiskStopFileShare();"><i class="fa fa-share-square-o" aria-hidden="true"></i> {lng p="stopsharing"}</a><br />{/if}
 	</div>
 	<div id="webdiskDetailZIPActions" style="display:none;">
-		&nbsp;<a href="javascript:void(0);" onclick="document.location.href='webdisk.php?action=extractFile&id='+currentID+'&folder='+currentWebdiskFolderID+'&sid={$sid}';"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {lng p="extract"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="document.location.href=bmAppendSession('webdisk.php?action=extractFile&id='+currentID+'&folder='+currentWebdiskFolderID);"><i class="fa fa-file-archive-o" aria-hidden="true"></i> {lng p="extract"}</a><br />
 	</div>
 	<div id="webdiskDetailActions" style="display:none;">
 		&nbsp;<a href="javascript:webdiskRename(currentWebdiskFolderID, currentID, currentType, currentTitle);"><i class="fa fa-i-cursor" aria-hidden="true"></i> {lng p="rename"}</a><br />
-		&nbsp;<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) document.location.href='webdisk.php?action=deleteItem&type=' + currentType + '&folder='+currentWebdiskFolderID+'&id=' + currentID + '&sid={$sid}';"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="delete"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) document.location.href=bmAppendSession('webdisk.php?action=deleteItem&type=' + currentType + '&folder='+currentWebdiskFolderID+'&id=' + currentID);"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="delete"}</a><br />
 		&nbsp;<a href="javascript:webdiskClipboardAction('copy');" id="wdCopyLink"><i class="fa fa-clipboard" aria-hidden="true"></i> {lng p="copy"}</a><br />
 		&nbsp;<a href="javascript:webdiskClipboardAction('cut');" id="wdCutLink"><i class="fa fa-scissors" aria-hidden="true"></i> {lng p="cut"}</a><br />
 		{hook id="webdisk.sidebar.tpl:actions.details"}
@@ -54,14 +54,14 @@
 		{hook id="webdisk.sidebar.tpl:actions.details"}
 	</div>
 	{if $clipboard}
-		&nbsp;<a id="pasteLink" href="webdisk.php?action=pasteHere&folder={$folderID}&sid={$sid}"><i class="fa fa-clipboard" aria-hidden="true"></i> {lng p="paste"}</a><br />
+		&nbsp;<a id="pasteLink" href="{sessionurl file='webdisk.php' params="action=pasteHere&folder={$folderID}"}"><i class="fa fa-clipboard" aria-hidden="true"></i> {lng p="paste"}</a><br />
 	{/if}
 	{hook id="webdisk.sidebar.tpl:actions"}
 </div>
 
 <div class="sidebarHeading">{lng p="uploadfiles"}</div>
 <div class="contentMenuIcons">
-	<form action="webdisk.php?do=uploadFilesForm&folder={$folderID}&sid={$sid}" method="post" id="fileCountForm" onsubmit="return webdiskShowUploadForm();">
+	<form action="{sessionurl file='webdisk.php' params="do=uploadFilesForm&folder={$folderID}"}" method="post" id="fileCountForm" onsubmit="return webdiskShowUploadForm();">
 		{csrffield}
 	{lng p="count"}: <input type="text" size="4" value="5" name="fileCount" id="fileCount" />
 	<input type="submit" value="{lng p="ok"}" />

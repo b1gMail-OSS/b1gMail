@@ -2,12 +2,26 @@
 'use strict';
 
 var bmPush = (function () {
-	var swPath = './sw.js';
-	var apiPath = 'push-api.php';
+	function installRoot() {
+		var cfg = (typeof bmSessionConfig !== 'undefined') ? bmSessionConfig : null;
+		var base = (cfg && cfg.apiBase) ? String(cfg.apiBase) : '';
+		if (!base)
+			return '';
+		return base.replace(/\/?$/, '/');
+	}
 
 	function apiUrl(action) {
-		var url = apiPath + '?action=' + encodeURIComponent(action);
-		if (typeof currentSID !== 'undefined' && currentSID) {
+		var url = 'push-api.php?action=' + encodeURIComponent(action);
+		if (typeof bmAppendSession === 'function') {
+			return bmAppendSession(url);
+		}
+		if (typeof bmSessionAppendUrl === 'function') {
+			return bmSessionAppendUrl(url);
+		}
+		var base = installRoot();
+		if (base)
+			url = base + url;
+		if (typeof currentSID !== 'undefined' && currentSID && url.indexOf('sid=') === -1) {
 			url += '&sid=' + encodeURIComponent(currentSID);
 		}
 		return url;
@@ -53,11 +67,46 @@ var bmPush = (function () {
 		return arr;
 	}
 
+	function expectedSwUrl() {
+		var base = installRoot();
+		if (base) {
+			try {
+				return new URL('sw.js', base).href;
+			} catch (e) {
+				return base + 'sw.js';
+			}
+		}
+		try {
+			return new URL('./sw.js', window.location.href).href;
+		} catch (e) {
+			return '';
+		}
+	}
+
 	function registerServiceWorker() {
 		if (!('serviceWorker' in navigator)) {
 			return Promise.reject(new Error('no_sw'));
 		}
-		return navigator.serviceWorker.register(swPath, { scope: './' });
+		var base = installRoot();
+		var path = base ? (base + 'sw.js') : './sw.js';
+		var expected = expectedSwUrl();
+
+		var ready = Promise.resolve();
+		if (navigator.serviceWorker.getRegistrations) {
+			ready = navigator.serviceWorker.getRegistrations().then(function (regs) {
+				return Promise.all(regs.map(function (reg) {
+					var worker = reg.active || reg.waiting || reg.installing;
+					var url = worker && worker.scriptURL ? worker.scriptURL : '';
+					if (expected && url && url !== expected)
+						return reg.unregister();
+					return Promise.resolve();
+				}));
+			});
+		}
+
+		return ready.then(function () {
+			return navigator.serviceWorker.register(path, { scope: base || './' });
+		});
 	}
 
 	function getVapidKey() {

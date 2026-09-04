@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form action="prefs.php?action=membership&do=changePW&sid={$sid}" method="post">
+<form action="{sessionurl file='prefs.php' params='action=membership&do=changePW'}" method="post">
 	{csrffield}
 <h2>{lng p="changepw"}</h2>
 {if isset($errorStep)}
@@ -56,7 +56,7 @@
 	<tr>
 		<td class="listTableLeft">&nbsp;</td>
 		<td class="listTableRight">
-			{if $allowCharge}<input type="button" class="primary" value=" {lng p="charge"} " onclick="document.location.href='prefs.php?action=membership&do=chargeAccount&sid={$sid}';" />{/if}
+			{if $allowCharge}<input type="button" class="primary" value=" {lng p="charge"} " onclick="document.location.href='{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}';" />{/if}
 			<input type="button" value="{lng p="statement"}" onclick="showStatement()" />
 		</td>
 	</tr>
@@ -77,7 +77,7 @@
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
 		<td class="listTableTDActive">&nbsp;<a href="javascript:toggleGroup({$workgroup.id});"><img id="groupImage_{$workgroup.id}" src="{$tpldir}images/expand.png" width="11" height="11" border="0" alt="" align="absmiddle" /></a>&nbsp;<i class="fa fa-users" aria-hidden="true"></i> {text value=$workgroup.title} ({$workgroup.memberCount})</td>
-		<td class="{$class}">&nbsp;<a href="email.compose.php?to={$workgroup.email}&sid={$sid}">{text value=$workgroup.email}</a></td>
+		<td class="{$class}">&nbsp;<a href="{sessionurl file='email.compose.php' params="to={$workgroup.email}"}">{text value=$workgroup.email}</a></td>
 	</tr>
 	
 	<!-- members -->
@@ -85,7 +85,7 @@
 	{foreach from=$workgroup.members item=member}
 		<tr>
 			<td class="wgTableMemberTD"><i class="fa fa-user-o" aria-hidden="true"></i> {text value=$member.nachname}, {text value=$member.vorname}</td>
-			<td class="wgTableTD">&nbsp;<a href="email.compose.php?to={$member.email}&sid={$sid}">{$member.email}</a></td>
+			<td class="wgTableTD">&nbsp;<a href="{sessionurl file='email.compose.php' params="to={$member.email}"}">{$member.email}</a></td>
 		</tr>
 	{/foreach}
 	</tbody>
@@ -111,7 +111,7 @@
 	<tr>
 		<td class="listTableLeft">&nbsp;</td>
 		<td class="listTableRight">
-			<input type="button" value=" {lng p="cancelmembership"} " onclick="document.location.href='prefs.php?action=membership&do=cancelAccount&sid={$sid}';" />
+			<input type="button" value=" {lng p="cancelmembership"} " onclick="document.location.href='{sessionurl file='prefs.php' params='action=membership&do=cancelAccount'}';" />
 		</td>
 	</tr>
 	{/if}

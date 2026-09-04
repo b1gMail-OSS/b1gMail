@@ -1,4 +1,4 @@
-{if empty($smarty.get.tableOnly)}<form name="f1" action="email.php?do=action&{$folderString}&sid={$sid}" onsubmit="transferSelectedMailIDs()" method="post">
+{if empty($smarty.get.tableOnly)}<form name="f1" action="{sessionurl file='email.php' params="do=action&{$folderString}"}" onsubmit="transferSelectedMailIDs()" method="post">
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
 <div id="contentHeader">

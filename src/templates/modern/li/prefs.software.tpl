@@ -27,7 +27,7 @@
 							<p>
 								{lng p="software_win"}
 							</p>
-							<button onclick="document.location.href='prefs.php?action=software&do=download&os=win&sid={$sid}';">
+							<button onclick="document.location.href='{sessionurl file='prefs.php' params='action=software&do=download&os=win'}';">
 								<i class="fa fa-download" aria-hidden="true"></i>
 								{lng p="download"}
 								<small>&nbsp;({size bytes=$fileSizes.win})</small>
@@ -47,7 +47,7 @@
 							<p>
 								{lng p="software_mac"}
 							</p>
-							<button onclick="document.location.href='prefs.php?action=software&do=download&os=mac&sid={$sid}';">
+							<button onclick="document.location.href='{sessionurl file='prefs.php' params='action=software&do=download&os=mac'}';">
 								<i class="fa fa-download" aria-hidden="true"></i>
 								{lng p="download"}
 								<small>&nbsp;({size bytes=$fileSizes.mac})</small>

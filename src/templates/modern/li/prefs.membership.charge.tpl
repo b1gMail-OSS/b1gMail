@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form action="prefs.php?action=membership&do=chargeAccount&sid={$sid}" method="post">
+<form action="{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}" method="post">
 	{csrffield}
 <table class="listTable">
 	<tr>
@@ -39,7 +39,7 @@
 
 {if $credits}
 <br />
-<form action="prefs.php?action=membership&do=chargeAccount&sid={$sid}" method="post">
+<form action="{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}" method="post">
 	{csrffield}
 <input type="hidden" name="credits" value="{$credits}" />
 <input type="hidden" name="submitOrder" value="true" />

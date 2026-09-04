@@ -2,14 +2,14 @@
 
 <div class="sidebarHeading">{lng p="start"}</div>
 <div class="contentMenuIcons">
-	<a href="start.php?sid={$sid}"><i class="fa fa-home" aria-hidden="true"></i> {lng p="start"}</a><br />
-	<a href="start.php?action=customize&sid={$sid}"><i class="fa fa-puzzle-piece" aria-hidden="true"></i> {lng p="customize"}</a><br />
+	<a href="{sessionurl file='start.php'}"><i class="fa fa-home" aria-hidden="true"></i> {lng p="start"}</a><br />
+	<a href="{sessionurl file='start.php' params='action=customize'}"><i class="fa fa-puzzle-piece" aria-hidden="true"></i> {lng p="customize"}</a><br />
 	{hook id="start.sidebar.tpl:start"}
 </div>
 
 <div class="sidebarHeading">{lng p="misc"}</div>
 <div class="contentMenuIcons">
-	<a href="start.php?sid={$sid}&action=logout" onclick="return(confirm('{lng p="logoutquestion"}'));"><i class="fa fa-sign-out" aria-hidden="true"></i> {lng p="logout"}</a><br />
+	<a href="{sessionurl file='start.php' params='action=logout'}" onclick="return(confirm('{lng p="logoutquestion"}'));"><i class="fa fa-sign-out" aria-hidden="true"></i> {lng p="logout"}</a><br />
 	{hook id="start.sidebar.tpl:misc"}
 </div>
 
