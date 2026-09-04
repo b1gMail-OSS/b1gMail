@@ -14,7 +14,7 @@
 	{foreach from=$_cssFiles.li item=_file}	<link rel="stylesheet" type="text/css" href="{$_file}" /> {/foreach}
 
 	<!-- client scripts -->
-	<script src="{$selfurl}clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$selfurl}clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>

@@ -1,11 +1,11 @@
 <div data-role="header" data-position="fixed">
-	<a href="tasks.php?list={$taskListID}&sid={$sid}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{text value=$taskListTitle}</a>
+	<a href="{sessionurl file='tasks.php' params="list={$taskListID}"}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{text value=$taskListTitle}</a>
 	<h1>{$pageTitle}</h1>
 	<button type="button" onclick="$('#taskForm').submit()" data-icon="check" data-theme="b">{lng p="save"}</button>
 </div>
 
 <div data-role="content">
-	<form id="taskForm" action="tasks.php?do=save&id={$task.id}&list={$task.tasklistid}&sid={$sid}" method="post">
+	<form id="taskForm" action="{sessionurl file='tasks.php' params="do=save&id={$task.id}&list={$task.tasklistid}"}" method="post">
 		{csrffield}
 		<div data-role="fieldcontain">
 			<label for="title">{lng p="title"}:</label>

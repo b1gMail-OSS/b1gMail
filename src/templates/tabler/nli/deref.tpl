@@ -6,14 +6,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<meta name="robots" content="noindex" />
-	<title>{$service_title} - {lng p="dsDerefTitle"}</title>
+	<title>{$service_title} - {lng p="deref_title"}</title>
 
 	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/tabler-custom.css?{fileDateSig file="style/tabler-custom.css"}" />
-	<link rel="stylesheet" href="{$selfurl}plugins/css/datenschutz.css?ver={$dsPluginVersion|default:'1.5.0'}" />
 </head>
 
 <body class="border-top-wide border-primary nli-standalone d-flex flex-column">
@@ -30,14 +29,14 @@
 						<i class="ti ti-alert-triangle icon alert-icon icon-2" aria-hidden="true"></i>
 					</div>
 					<div>
-						<h4 class="alert-heading">{lng p="dsDerefUnsafeTitle"}</h4>
-						<div class="alert-description">{lng p="dsDerefUnsafeText"}</div>
+						<h4 class="alert-heading">{lng p="deref_unsafe_title"}</h4>
+						<div class="alert-description">{lng p="deref_unsafe_text"}</div>
 						{if $deref_url_threat == 'MALWARE'}
-						<div class="text-secondary small mt-2">{lng p="dsDerefThreatLabel"}: {lng p="dsDerefThreatMalware"}</div>
+						<div class="text-secondary small mt-2">{lng p="deref_threat_label"}: {lng p="deref_threat_malware"}</div>
 						{elseif $deref_url_threat == 'SOCIAL_ENGINEERING'}
-						<div class="text-secondary small mt-2">{lng p="dsDerefThreatLabel"}: {lng p="dsDerefThreatPhishing"}</div>
+						<div class="text-secondary small mt-2">{lng p="deref_threat_label"}: {lng p="deref_threat_phishing"}</div>
 						{elseif $deref_url_threat == 'UNWANTED_SOFTWARE'}
-						<div class="text-secondary small mt-2">{lng p="dsDerefThreatLabel"}: {lng p="dsDerefThreatUnwanted"}</div>
+						<div class="text-secondary small mt-2">{lng p="deref_threat_label"}: {lng p="deref_threat_unwanted"}</div>
 						{/if}
 					</div>
 				</div>
@@ -47,8 +46,8 @@
 						<i class="ti ti-circle-check icon alert-icon icon-2" aria-hidden="true"></i>
 					</div>
 					<div>
-						<h4 class="alert-heading">{lng p="dsDerefSafeTitle"}</h4>
-						<div class="alert-description">{lng p="dsDerefSafeText"}</div>
+						<h4 class="alert-heading">{lng p="deref_safe_title"}</h4>
+						<div class="alert-description">{lng p="deref_safe_text"}</div>
 					</div>
 				</div>
 				{elseif $deref_url_status == 'invalid'}
@@ -57,8 +56,8 @@
 						<i class="ti ti-alert-circle icon alert-icon icon-2" aria-hidden="true"></i>
 					</div>
 					<div>
-						<h4 class="alert-heading">{lng p="dsDerefInvalidTitle"}</h4>
-						<div class="alert-description">{lng p="dsDerefInvalidText"}</div>
+						<h4 class="alert-heading">{lng p="deref_invalid_title"}</h4>
+						<div class="alert-description">{lng p="deref_invalid_text"}</div>
 					</div>
 				</div>
 				{elseif $deref_url_status == 'unavailable'}
@@ -67,8 +66,8 @@
 						<i class="ti ti-shield-off icon alert-icon icon-2" aria-hidden="true"></i>
 					</div>
 					<div>
-						<h4 class="alert-heading">{lng p="dsDerefUnavailableTitle"}</h4>
-						<div class="alert-description">{lng p="dsDerefUnavailableText"}</div>
+						<h4 class="alert-heading">{lng p="deref_unavailable_title"}</h4>
+						<div class="alert-description">{lng p="deref_unavailable_text"}</div>
 					</div>
 				</div>
 				{else}
@@ -81,14 +80,14 @@
 						</svg>
 					</div>
 					<div>
-						<h4 class="alert-heading">{lng p="dsDerefTitle"}</h4>
-						<div class="alert-description">{lng p="dsDerefRedirect"}</div>
+						<h4 class="alert-heading">{lng p="deref_title"}</h4>
+						<div class="alert-description">{lng p="deref_redirect"}</div>
 					</div>
 				</div>
 				{/if}
 
 				<div class="mb-4">
-					<label class="form-label text-secondary">{lng p="dsDerefLinkLabel"}</label>
+					<label class="form-label text-secondary">{lng p="deref_linklabel"}</label>
 					<div class="bm-deref-url-display{if $deref_url_status == 'unsafe'} bm-deref-url-display-danger{/if}">
 						{if $deref_host}
 						<div class="bm-deref-url-host">
@@ -110,21 +109,21 @@
 					{if $deref_url_status == 'unsafe'}
 					<a href="{$url}" class="btn btn-outline-danger" rel="noreferrer nofollow">
 						<i class="ti ti-external-link icon icon-2" aria-hidden="true"></i>
-						{lng p="dsDerefContinueAnyway"}
+						{lng p="deref_continueanyway"}
 					</a>
 					{else}
 					<a href="{$url}" class="btn btn-primary" rel="noreferrer nofollow">
 						<i class="ti ti-external-link icon icon-2" aria-hidden="true"></i>
-						{lng p="dsDerefContinue"}
+						{lng p="deref_continue"}
 					</a>
 					{/if}
 					<button type="button" class="btn btn-outline-secondary" onclick="window.close()">
 						<i class="ti ti-x icon icon-2" aria-hidden="true"></i>
-						{lng p="dsDerefClose"}
+						{lng p="deref_close"}
 					</button>
 				</div>
 
-				<p class="text-secondary small mt-4 mb-0">{lng p="dsDerefBack"}</p>
+				<p class="text-secondary small mt-4 mb-0">{lng p="deref_back"}</p>
 			</div>
 		</div>
 

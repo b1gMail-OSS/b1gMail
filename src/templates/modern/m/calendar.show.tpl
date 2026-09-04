@@ -1,5 +1,5 @@
 <div data-role="header" data-position="fixed">
-	<a href="calendar.php?sid={$sid}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{lng p="calendar"}</a>
+	<a href="{sessionurl file='calendar.php'}" data-icon="arrow-l" data-direction="reverse" data-transition="slide">{lng p="calendar"}</a>
 	<h1>{$pageTitle}</h1>
 </div>
 
@@ -38,7 +38,7 @@
 		</li>
 	{/foreach}	
 	</ul>
-	<a href="email.php?action=compose&to={$mailTo}&subject={$mailSubject}&sid={$sid}" data-role="button">{lng p="mailattendees"}</a>
+	<a href="{sessionurl file='email.php' params="action=compose&to={$mailTo}&subject={$mailSubject}"}" data-role="button">{lng p="mailattendees"}</a>
 	{/if}
 
 	{if $notes}

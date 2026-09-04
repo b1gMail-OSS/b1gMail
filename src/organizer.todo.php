@@ -280,4 +280,5 @@ else if($_REQUEST['action'] == 'saveTask'
 				$taskListID);
 	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
 }
-?>
+
+SessionRedirect('organizer.todo.php');

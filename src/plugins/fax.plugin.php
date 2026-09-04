@@ -19,9 +19,6 @@
  *
  */
 
-use setasign\Fpdi\Fpdi;
-use setasign\Fpdi\PdfReader;
-
 define('MODFAX_PROTOCOL_EMAIL',			1);
 define('MODFAX_PROTOCOL_HTTP',			2);
 
@@ -84,7 +81,7 @@ class BMHTTP_POST extends BMHTTP
 	 */
 	function __construct($url)
 	{
-		BMHTTP::BMHTTP($url);
+		parent::__construct($url);
 	}
 
 	/**
@@ -223,7 +220,18 @@ class FaxPlugin extends BMPlugin
 	 */
 	function OnLoad()
 	{
-		$this->prefs = $this->_getPrefs();
+		try
+		{
+			$this->prefs = $this->_getPrefs();
+		}
+		catch(\Throwable $e)
+		{
+			PutLog(sprintf('Fax plugin: OnLoad failed (%s)', $e->getMessage()),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__);
+			$this->prefs = $this->_defaultPrefs();
+		}
 	}
 
 	/**
@@ -879,11 +887,9 @@ class FaxPlugin extends BMPlugin
 
 		return(array(
 			'fax'	=> array(
-					'icon'				=> 'modfax_fax',
 					'faIcon'			=> 'fa-fax',
 					'link'				=> SessionUrl('start.php?action=faxPlugin'),
 					'text'				=> $lang_user['modfax_fax'],
-					'iconDir'			=> './plugins/templates/images/',
 					'order'				=> 201
 				)
 		));
@@ -919,11 +925,9 @@ class FaxPlugin extends BMPlugin
 		}
 
 		$result[] = array(
-			'icon'		=> 'modfax_fax',
 			'faIcon'	=> 'fa-fax',
 			'link'		=> SessionUrl('start.php?action=faxPlugin'),
 			'text'		=> $lang_user['modfax_fax'],
-			'iconDir'	=> './plugins/templates/images/',
 			'order'		=> 901
 		);
 
@@ -1054,6 +1058,8 @@ class FaxPlugin extends BMPlugin
 		if(!isset($_REQUEST['do']))
 			$_REQUEST['do'] = 'compose';
 
+		$tpl->assign('faxDo', $_REQUEST['do']);
+
 		if($_REQUEST['do'] == 'compose')
 			$this->_composeUserPage();
 		else if($_REQUEST['do'] == 'addressBook')
@@ -1119,22 +1125,34 @@ class FaxPlugin extends BMPlugin
 			include(B1GMAIL_DIR . 'serverlib/addressbook.class.php');
 		$book = _new('BMAddressbook', array($userRow['id']));
 
-		// load addresses
+		// load addresses (fax fields; fall back to phone numbers)
 		$addresses = array();
 		$addressBook = $book->GetAddressBook('*', -1, 'nachname', 'asc');
 		foreach($addressBook as $id=>$entry)
 		{
-			if(trim($entry['fax']) != '' || trim($entry['work_fax']) != '')
-				$addresses[] = array('firstname' 		=> $entry['vorname'],
-										'lastname'		=> $entry['nachname'],
-										'fax'			=> $entry['fax'],
-										'work_fax'		=> $entry['work_fax'],
-										'id'			=> $entry['id']);
+			$num1 = trim($entry['fax']);
+			$num2 = trim($entry['work_fax']);
+			if($num1 === '')
+				$num1 = trim($entry['tel']);
+			if($num2 === '')
+				$num2 = trim($entry['work_tel']);
+			if($num1 === '')
+				$num1 = trim($entry['handy']);
+			if($num2 === '')
+				$num2 = trim($entry['work_handy']);
+			if($num1 === '' && $num2 === '')
+				continue;
+
+			$addresses[] = array('firstname' 		=> $entry['vorname'],
+									'lastname'		=> $entry['nachname'],
+									'handy'			=> $num1 !== '' ? $num1 : ' - ',
+									'work_handy'	=> $num2 !== '' ? $num2 : ' - ',
+									'id'			=> $entry['id']);
 		}
 
-		// display page
+		// display page (core template: correct asset URLs for pretty-URL iframes)
 		$tpl->assign('addresses', $addresses);
-		$tpl->display($this->_templatePath('modfax.user.addressbook.tpl'));
+		$tpl->display('li/organizer.addressbook.popup.numbers.tpl');
 	}
 
 	/**
@@ -1478,7 +1496,7 @@ class FaxPlugin extends BMPlugin
 					$this->_ensureFPDFisLoaded();
 
 					// get page count
-					$fpdi = new Fpdi();
+					$fpdi = new FPDI();
 					$pageCount = @$fpdi->setSourceFile($tempFileName);
 					unset($fpdi);
 
@@ -2527,15 +2545,55 @@ class FaxPlugin extends BMPlugin
 	 *
 	 * @return array
 	 */
+	function _defaultPrefs()
+	{
+		return array(
+			'allow_ownname'			=> 1,
+			'allow_ownno'			=> 1,
+			'allow_pdf'				=> 1,
+			'default_name'			=> '',
+			'default_no'			=> '',
+			'send_safecode'			=> 0,
+			'default_country_prefix'=> '49',
+			'default_faxgateid'		=> 0,
+			'refund_on_error'		=> 1,
+			'default_template'		=> serialize(array(0 => MODFAX_BLOCK_TEXT)),
+		);
+	}
+
 	function _getPrefs()
 	{
 		global $db;
 
+		if(!$this->_modfaxTableExists('modfax_prefs'))
+			return $this->_defaultPrefs();
+
 		$res = $db->Query('SELECT * FROM {pre}modfax_prefs LIMIT 1');
+		if(!is_object($res))
+			return $this->_defaultPrefs();
+
 		$prefs = $res->FetchArray(MYSQLI_ASSOC);
 		$res->Free();
 
+		if(!is_array($prefs))
+			return $this->_defaultPrefs();
+
 		return($prefs);
+	}
+
+	function _modfaxTableExists($table)
+	{
+		global $db, $mysql;
+
+		$tableName = $mysql['prefix'] . $table;
+		$res = $db->Query('SHOW TABLES LIKE ?', $tableName);
+		if(!is_object($res))
+			return false;
+
+		$exists = $res->RowCount() > 0;
+		$res->Free();
+
+		return $exists;
 	}
 
 	/**
@@ -3493,7 +3551,7 @@ class FaxPlugin extends BMPlugin
 			}
 		}
 
-		if(!class_exists('Fpdi'))
+		if(!class_exists('setasign\\Fpdi\\Fpdi', false))
         {
             if(!@include($this->_fpdfDir . 'fpdi/src/autoload.php'))
             {
@@ -3512,7 +3570,10 @@ class FaxPlugin extends BMPlugin
             }
         }
 
-        if(!class_exists('FPDI_FaxPlugin'))
+		if(!class_exists('FPDI', false))
+			class_alias('setasign\\Fpdi\\Fpdi', 'FPDI');
+
+        if(!class_exists('FPDI_FaxPlugin', false))
             _FaxPluginCreateFPDISubclass();
     }
 
@@ -3543,7 +3604,7 @@ function _FaxPluginCreateFPDISubclass()
 	 * FPDI subclass with signature support
 	 *
 	 */
-	class FPDI_FaxPlugin extends FPDI
+	class FPDI_FaxPlugin extends \FPDI
 	{
 		var $signatureArray = false;
 

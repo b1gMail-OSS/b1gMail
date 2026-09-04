@@ -108,7 +108,7 @@
 						{elseif ($attachment.openKind|default:'')=='viewable'||($attachment.openKind|default:'')=='vcf'||($attachment.openKind|default:'')=='ics'}
 						<a href="javascript:mailOpenAttachment({$mailID}, '{$attID}', '{$attachment.openKind}', '{text value=$attachment.filename cut=45 escape=true}', '{text value=$attachment.filename escape=true}', '{text value=$attachment.mimetype escape=true}');">
 						{else}
-						<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$attID}&sid={$sid}" target="_blank">
+						<a href="{sessionurl file='email.read.php' params="id={$mailID}&action=downloadAttachment&attachment={$attID}"}" target="_blank">
 						{/if}
 							{text value=$attachment.filename cut=45}
 							({size bytes=$attachment.size})</a>
@@ -161,7 +161,7 @@
 		{lng p="replyall"}
 	</button>
 	
-	<button type="button" onclick="document.location.href='email.compose.php?sid={$sid}&forward={$mailID}';">
+	<button type="button" onclick="document.location.href='{sessionurl file='email.compose.php' params="forward={$mailID}"}';">
 		<i class="fa fa-mail-forward"></i>
 		{lng p="forward"}
 	</button>
@@ -185,7 +185,7 @@
 	&nbsp;
 	<i class="fa fa-envelope" aria-hidden="true"></i>
 	{lng p="thisisadraft"}
-	<a href="email.compose.php?redirect={$mailID}&sid={$sid}">{lng p="editsend"}</a>
+	<a href="{sessionurl file='email.compose.php' params="redirect={$mailID}"}">{lng p="editsend"}</a>
 </div>
 {/if}
 {if $flags&128}
@@ -230,7 +230,7 @@
 	&nbsp;
 	<i class="fa fa-comment-o" aria-hidden="true"></i>
 	{lng p="htmlavailable"}
-	<a href="email.read.php?sid={$sid}&id={$mailID}&htmlView=true">{lng p="view"} &raquo;</a>
+	<a href="{sessionurl file='email.read.php' params="id={$mailID}&htmlView=true"}">{lng p="view"} &raquo;</a>
 </div>
 {/if}
 {if $noExternal}
@@ -238,7 +238,7 @@
 	&nbsp;
 	<i class="fa fa-comment-o" aria-hidden="true"></i>
 	{lng p="noexternal"}
-	<a href="email.read.php?action=inlineHTML&mode={$textMode}&id={$mailID}&sid={$sid}&enableExternal=true" target="textArea" onclick="document.getElementById('noExternalDiv').style.display='none';">{lng p="showexternal"} &raquo;</a>
+	<a href="#" onclick="return typeof bmEnableExternalContent==='function'?bmEnableExternalContent({$mailID}, '{$textMode|escape:'javascript'}'):false;">{lng p="showexternal"} &raquo;</a>
 </div>
 {/if}
 {if $confirmationTo}
@@ -271,7 +271,7 @@
 </div>
 {/if}
 
-<form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
+<form id="quoteForm" action="{sessionurl file='email.compose.php' params="reply={$mailID}"}" method="post">
 	{csrffield}
 	<input type="hidden" name="text" id="quoteText" value="" />
 </form>

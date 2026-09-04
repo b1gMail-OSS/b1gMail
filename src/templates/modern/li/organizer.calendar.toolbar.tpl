@@ -1,4 +1,4 @@
-<form action="organizer.calendar.php?sid={$sid}" method="post">
+<form action="{sessionurl file='organizer.calendar.php'}" method="post">
 	{csrffield}
 <table cellspacing="0" cellpadding="0">
 	<tr>
@@ -33,14 +33,14 @@
 		<td><small>&nbsp; {lng p="date"}: &nbsp;</small></td>
 		
 		{if $viewMode=='day'}
-		<td>&nbsp;<a href="organizer.calendar.php?sid={$sid}&date={$date-86400}"><i class="fa fa-backward"></i></a>&nbsp;</td>
+		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$date-86400}"}"><i class="fa fa-backward"></i></a>&nbsp;</td>
 		<td>{html_select_date prefix="date_" time=$date start_year="-5" end_year="+5" field_order="DMY"}</td>
 		<td><input type="submit" class="smallInput" value=" {lng p="today"} " name="jumpToday" /></td>
 		<td><input type="submit" class="smallInput" value=" {lng p="ok"} " /></td>
-		<td>&nbsp;<a href="organizer.calendar.php?sid={$sid}&date={$date+86400}"><i class="fa fa-forward"></i></a>&nbsp;</td>
+		<td>&nbsp;<a href="organizer.calendar.php?date={$date+86400}"><i class="fa fa-forward"></i></a>&nbsp;</td>
 		
 		{elseif $viewMode=='week'}
-		<td>&nbsp;<a href="organizer.calendar.php?sid={$sid}&date={$prevWeek}"><i class="fa fa-backward"></i></a>&nbsp;</td>
+		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$prevWeek}"}"><i class="fa fa-backward"></i></a>&nbsp;</td>
 		<td>
 			<select name="date_Week">
 				{section name=w start=1 loop=53 step=1}
@@ -51,14 +51,14 @@
 		</td>
 		<td><input type="submit" class="smallInput" value=" {lng p="today"} " name="jumpToday" /></td>
 		<td><input type="submit" class="smallInput" value=" {lng p="ok"} " /></td>
-		<td>&nbsp;<a href="organizer.calendar.php?sid={$sid}&date={$nextWeek}"><i class="fa fa-forward"></i></a>&nbsp;</td>
+		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$nextWeek}"}"><i class="fa fa-forward"></i></a>&nbsp;</td>
 		
 		{elseif $viewMode=='month'}
-		<td>&nbsp;<a href="organizer.calendar.php?sid={$sid}&date={$prevMonth}"><i class="fa fa-backward"></i></a>&nbsp;</td>
+		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$prevMonth}"}"><i class="fa fa-backward"></i></a>&nbsp;</td>
 		<td>{html_select_date prefix="date_" time=$date display_days=false start_year="-5" end_year="+5" field_order="MY"}</td>
 		<td><input type="submit" class="smallInput" value=" {lng p="today"} " name="jumpToday" /></td>
 		<td><input type="submit" class="smallInput" value=" {lng p="ok"} " /></td>
-		<td>&nbsp;<a href="organizer.calendar.php?sid={$sid}&date={$nextMonth}"><i class="fa fa-forward"></i></a>&nbsp;</td>
+		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$nextMonth}"}"><i class="fa fa-forward"></i></a>&nbsp;</td>
 
 		{/if}
 		

@@ -2107,6 +2107,34 @@ function DerefAssignTplVars($targetURL)
 }
 
 /**
+ * Install root with trailing slash (absolute), for mail iframe resource URLs.
+ *
+ * @return string
+ */
+function BMMailInstallRootUrl()
+{
+	if(function_exists('PublicFqdnSelfUrl'))
+		return PublicFqdnSelfUrl();
+
+	global $bm_prefs;
+	if(!empty($bm_prefs['selfurl']))
+		return rtrim((string)$bm_prefs['selfurl'], '/') . '/';
+
+	return '';
+}
+
+/**
+ * Links in the mail iframe open in a new tab; do not set href here —
+ * that would load remote/relative images before the user confirms.
+ *
+ * @return string
+ */
+function BMMailIframeBaseTag()
+{
+	return '<base target="_blank" />';
+}
+
+/**
  * format html e-mail text
  *
  * @param string $in Input
@@ -2129,15 +2157,16 @@ function formatEMailHTMLText($in, $showExternal = false, $attachments = array(),
 	$formatter->setAttachments($attachments);
 	$formatter->setReplyMode($replyMode);
 
+	$root = BMMailInstallRootUrl();
 	if($mobile)
 	{
-		$formatter->setComposeBaseURL('email.php?action=compose&to=');
-		$formatter->setAttachmentBaseURL('email.php?action=attachment&view=true&id=' . $mailID . '&attachment=');
+		$formatter->setComposeBaseURL($root . 'email.php?action=compose&to=');
+		$formatter->setAttachmentBaseURL($root . 'email.php?action=attachment&view=true&id=' . (int)$mailID . '&attachment=');
 	}
 	else
 	{
-		$formatter->setComposeBaseURL('email.compose.php?to=');
-		$formatter->setAttachmentBaseURL('email.read.php?action=downloadAttachment&view=true&id=' . $mailID . '&attachment=');
+		$formatter->setComposeBaseURL($root . 'email.compose.php?to=');
+		$formatter->setAttachmentBaseURL($root . 'email.read.php?action=downloadAttachment&view=true&id=' . (int)$mailID . '&attachment=');
 	}
 
 	$result = $formatter->format();
@@ -3483,11 +3512,14 @@ function GetTemplateInfo($template)
 {
 	global $lang_admin, $lang_user;
 
-	if(!file_exists(B1GMAIL_DIR . 'templates/' . $template . '/info.php'))
+	$template = preg_replace('/[^a-zA-Z0-9_.-]/', '', (string)$template);
+	$infoFile = B1GMAIL_DIR . 'templates/' . $template . '/info.php';
+	if($template === '' || !is_file($infoFile))
 		return(false);
 
-	include(B1GMAIL_DIR . 'templates/' . $template . '/info.php');
-	return($templateInfo);
+	$templateInfo = false;
+	include $infoFile;
+	return (isset($templateInfo) && is_array($templateInfo)) ? $templateInfo : false;
 }
 
 /**
@@ -4620,6 +4652,9 @@ function ReadConfig()
 	if($res->RowCount() == 1)
 		$bm_prefs = $res->FetchArray(MYSQLI_ASSOC);
 	$res->Free();
+
+	if(isset($bm_prefs['template']))
+		$bm_prefs['template'] = trim((string)$bm_prefs['template']);
 
 	EnsureSessionPrefColumns();
 	SessionApplyPrefDefaults();

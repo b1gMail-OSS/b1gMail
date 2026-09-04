@@ -5,7 +5,7 @@
 {foreach from=$resultCat.results item=result}
 	<tr>
 		<td class="resultLeft" height="20" width="90">{if $first}{assign var=first value=false}{text value=$resultCat.title}{else}&nbsp;{/if}</td>
-		<td class="resultRight" onclick="{if !empty($result.extLink)}window.open('{$result.extLink}');{else}document.location.href='{$result.link}sid={$sid}';{/if}parent.hideSearchPopup(true);" title="{if isset($result.excerpt)}{text value=$result.excerpt allowEmpty=true stripTags=true}{/if}">
+		<td class="resultRight" onclick="{if !empty($result.extLink)}window.open('{$result.extLink}');{else}document.location.href='{$result.link}';{/if}parent.hideSearchPopup(true);" title="{if isset($result.excerpt)}{text value=$result.excerpt allowEmpty=true stripTags=true}{/if}">
 			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
 			{text value=$result.title cut=25}
 		</td>
@@ -14,7 +14,7 @@
 {/foreach}
 	<tr>
 		<td class="resultLeft" height="20" width="90" style="border-top:3px double #DDD;">&nbsp;</td>
-		<td class="resultRight" style="border-top:3px double #DDD;padding:2px;" onclick="document.location.href='search.php?q={$q}&sid={$sid}';parent.hideSearchPopup(true);">
+		<td class="resultRight" style="border-top:3px double #DDD;padding:2px;" onclick="document.location.href='{sessionurl file='search.php' params="q={$q}"}';parent.hideSearchPopup(true);">
 			<i class="fa fa-search" aria-hidden="true"></i>
 			{lng p="details"}...
 		</td>

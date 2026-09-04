@@ -6,7 +6,7 @@
 			<b>{lng p="sendmail"}</b>
 			<br /><br />{lng p="mailsent"}
 			<br /><br />
-			<input type="button" value="&laquo; {lng p="back"}" class="primary" onclick="document.location.href='email.php?sid={$sid}';" />
+			<input type="button" value="&laquo; {lng p="back"}" class="primary" onclick="document.location.href='{sessionurl file='email.php'}';" />
 			<br /><br /><br />
 		</td>
 	</tr>
@@ -19,7 +19,7 @@
 			<br /><br />
 			{lng p="addraddtext"}
 			<br /><br />
-			<form action="organizer.addressbook.php?action=quickAdd&sid={$sid}" method="post" onsubmit="return ajaxFormSubmit(this);">
+			<form action="{sessionurl file='organizer.addressbook.php' params='action=quickAdd'}" method="post" onsubmit="return ajaxFormSubmit(this);">
 				{csrffield}
 				{*<table class="listTable">
 					<tr>

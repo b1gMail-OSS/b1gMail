@@ -4,7 +4,7 @@
 	</div>
 	
 	<div class="right">
-		<button onclick="document.location.href='organizer.php?action=customize&sid={$sid}';" type="button">
+		<button onclick="document.location.href='{sessionurl file='organizer.php' params='action=customize'}';" type="button">
 			<i class="fa fa-puzzle-piece" aria-hidden="true"></i>
 			{lng p="customize"}
 		</button>

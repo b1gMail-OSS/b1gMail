@@ -67,12 +67,12 @@
 
 <!-- mail menu -->
 <div id="mailMenu" class="mailMenu" style="display:none;position:absolute;left:0px;top:0px;z-index:1000;" oncontextmenu="return(false);" onmousedown="if(event.button==2) return(false);">
-	<a class="mailMenuItem" href="javascript:document.location.href='email.read.php?id='+currentID+'&sid='+currentSID;"><i class="fa fa-envelope-open-o" aria-hidden="true"></i> {lng p="mail_read"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.read.php?id='+currentID);"><i class="fa fa-envelope-open-o" aria-hidden="true"></i> {lng p="mail_read"}</a>
 	<a class="mailMenuItem" href="javascript:printMail(currentID, currentSID);"><i class="fa fa-print" aria-hidden="true"></i> {lng p="print"}</a>
 	<div class="mailMenuSep"></div>
-	<a class="mailMenuItem" href="javascript:document.location.href='email.compose.php?reply='+currentID+'&sid='+currentSID;"><i class="fa fa-reply" aria-hidden="true"></i> {lng p="reply"}</a>
-	<a class="mailMenuItem" href="javascript:document.location.href='email.compose.php?forward='+currentID+'&sid='+currentSID;"><i class="fa fa-share" aria-hidden="true"></i> {lng p="forward"}</a>
-	<a class="mailMenuItem" href="javascript:document.location.href='email.compose.php?redirect='+currentID+'&sid='+currentSID;"><i class="fa fa-level-up" aria-hidden="true"></i> {lng p="redirect"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.compose.php?reply='+currentID);"><i class="fa fa-reply" aria-hidden="true"></i> {lng p="reply"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.compose.php?forward='+currentID);"><i class="fa fa-share" aria-hidden="true"></i> {lng p="forward"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.compose.php?redirect='+currentID);"><i class="fa fa-level-up" aria-hidden="true"></i> {lng p="redirect"}</a>
 	<div class="mailMenuSep"></div>
 	<a class="mailMenuItem" href="javascript:folderFlagMail(currentID, 1, false);"><i class="fa fa-envelope-open-o" aria-hidden="true"></i> {lng p="markread"}</a>
 	<a class="mailMenuItem" href="javascript:folderFlagMail(currentID, 1, true);"><i class="fa fa-envelope-o" aria-hidden="true"></i> {lng p="markunread"}</a>
@@ -117,12 +117,12 @@
 
 <!-- folder menu -->
 <div id="folderMenu" class="mailMenu" style="display:none;position:absolute;left:0px;top:0px;">
-	<a class="mailMenuItem" href="javascript:document.location.href='email.php?do=markAllAsRead&folder='+currentFolderID+'&sid={$sid}';"><i class="fa fa-envelope-open-o" aria-hidden="true"></i> {lng p="markallasread"}</a>
-	<a class="mailMenuItem" href="javascript:document.location.href='email.php?do=markAllAsRead&unread=true&folder='+currentFolderID+'&sid={$sid}';"><i class="fa fa-envelope-o" aria-hidden="true"></i> {lng p="markallasunread"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.php?do=markAllAsRead&folder='+currentFolderID);"><i class="fa fa-envelope-open-o" aria-hidden="true"></i> {lng p="markallasread"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.php?do=markAllAsRead&unread=true&folder='+currentFolderID);"><i class="fa fa-envelope-o" aria-hidden="true"></i> {lng p="markallasunread"}</a>
 	<div class="mailMenuSep"></div>
-	<a class="mailMenuItem" href="javascript:document.location.href='email.php?do=downloadAll&folder='+currentFolderID+'&sid={$sid}';"><i class="fa fa-download" aria-hidden="true"></i> {lng p="downloadall"}</a>
+	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.php?do=downloadAll&folder='+currentFolderID);"><i class="fa fa-download" aria-hidden="true"></i> {lng p="downloadall"}</a>
 	<div class="mailMenuSep"></div>
-	<a class="mailMenuItem" href="javascript:void(0);" onclick="if(confirm('{lng p="realempty"}')) document.location.href='email.php?do=emptyFolder&folder='+currentFolderID+'&sid={$sid}';"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="emptyfolder"}</a>
+	<a class="mailMenuItem" href="javascript:void(0);" onclick="if(confirm('{lng p="realempty"}')) document.location.href=bmAppendSession('email.php?do=emptyFolder&folder='+currentFolderID);"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="emptyfolder"}</a>
 </div>
 
 {hook id="email.folder.tpl:foot"}

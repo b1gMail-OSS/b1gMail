@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-<form action="webdisk.php?action=doExtractFile&folder={$folder}&id={$id}&sid={$sid}" method="post">
+<form action="{sessionurl file='webdisk.php' params="action=doExtractFile&folder={$folder}&id={$id}"}" method="post">
 	{csrffield}
 	<table class="listTable">
 		<tr>
@@ -20,7 +20,7 @@
 		<tr>
 			<td class="listTableLeft">{lng p="targetfolder"}:</td>
 			<td class="listTableRight">&nbsp;<i class="fa fa-folder-open-o" aria-hidden="true"></i>
-										&nbsp;<a href="webdisk.php?folder={$folder}&sid={$sid}">{text value=$folderName}</a></td>
+										&nbsp;<a href="{sessionurl file='webdisk.php' params="folder={$folder}"}">{text value=$folderName}</a></td>
 		</tr>
 		<tr>
 			<td class="listTableLeft">{lng p="existingfiles"}:</td>

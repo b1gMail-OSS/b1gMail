@@ -22,7 +22,7 @@
 
 <body style="margin: 0px; background-color: #FFFFFF; background-image: none;">
 
-<form action="email.folders.php?action=editConditions&do=save&id={$id}&sid={$sid}" method="post" id="saveForm">
+<form action="{sessionurl file='email.folders.php' params="action=editConditions&do=save&id={$id}"}" method="post" id="saveForm">
 	{csrffield}
 <input type="hidden" name="submitParent" value="0" />
 <table width="100%" cellspacing="0" cellpadding="0" id="table">

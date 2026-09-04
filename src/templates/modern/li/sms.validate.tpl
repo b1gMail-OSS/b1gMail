@@ -12,7 +12,7 @@
 <div class="note">{lng p="invalidsmscode"}</div><br />
 {/if}
 
-<form name="f1" method="post" action="sms.php?do=validate&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='sms.php' params='do=validate'}">
 	{csrffield}
 	<table class="listTable">
 		<tr>
@@ -50,7 +50,7 @@
 			<b>{lng p="smsvalidation2"}</b>
 			<br />{lng p="pleasevalidate"}
 			<br /><br />
-			<input type="button" value="{lng p="ok"} &raquo;" class="primary" onclick="document.location.href='prefs.php?action=contact&sid={$sid}';" />
+			<input type="button" value="{lng p="ok"} &raquo;" class="primary" onclick="document.location.href='{sessionurl file='prefs.php' params='action=contact'}';" />
 		</td>
 	</tr>
 </table>

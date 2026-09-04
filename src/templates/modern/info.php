@@ -20,7 +20,7 @@
  */
 
 $templateInfo = array(
-	'title'			=> 'b1gMail ' . $lang_admin['default'],
+	'title'			=> 'Modern (Classic)',
 	'author'		=> 'b1gMail Project',
 	'website'		=> 'https://www.b1gmail.org/',
 	'for_b1gmail'	=> B1GMAIL_VERSION,

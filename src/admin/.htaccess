@@ -7,5 +7,8 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# Nested pretty URLs must not serve HTML for the Service Worker
+RewriteRule (^|/)sw\.js$ sw.js [L]
+
 # Admin pretty URLs -> admin front controller
 RewriteRule ^ app.php [QSA,L]

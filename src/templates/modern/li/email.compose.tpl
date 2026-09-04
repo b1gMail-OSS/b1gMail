@@ -1,4 +1,4 @@
-<form name="f1" method="post" action="email.compose.php?action=sendMail&sid={$sid}" autocomplete="off" onreset="if(!askReset()) return(false);editor.reset();">
+<form name="f1" method="post" action="{sessionurl file='email.compose.php' params='action=sendMail'}" autocomplete="off" onreset="if(!askReset()) return(false);editor.reset();">
 	{csrffield}
 
 <div id="contentHeader">
@@ -213,13 +213,13 @@
 
 <div id="composeLoading" style="display:none"><i class="fa fa-spinner fa-pulse fa-fw fa-3x"></i></div>
 
-<script src="./clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/dndupload.js?{fileDateSig file="../../clientlib/dndupload.js"}" type="text/javascript"></script>
 
 <script>
 <!--
 	registerLoadAction(initComposeAutoComplete);
 	registerLoadAction(generateAttachmentList);
 	registerLoadAction(composeSizer);
-	initDnDUpload(EBID('mainContent'), 'email.compose.php?action=uploadDnDAttachment&sid=' + currentSID, false, dndAttachmentUploaded, dndAttachmentURLAddition);
+	initDnDUpload(EBID('mainContent'), bmAppendSession('email.compose.php?action=uploadDnDAttachment'), false, dndAttachmentUploaded, dndAttachmentURLAddition);
 //-->
 </script>

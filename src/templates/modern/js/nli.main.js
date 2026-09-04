@@ -22,6 +22,22 @@ var clientTZ = (new Date()).getTimezoneOffset() * (-60);
 
 $(document).ready(function()
 {
+	if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+	{
+		document.querySelectorAll('form').forEach(function(form)
+		{
+			if((form.getAttribute('method') || '').toLowerCase() !== 'post')
+				return;
+			if(form.querySelector('input[name="csrf_token"]'))
+				return;
+			var inp = document.createElement('input');
+			inp.type = 'hidden';
+			inp.name = 'csrf_token';
+			inp.value = bmCsrfToken;
+			form.appendChild(inp);
+		});
+	}
+
 	$('button[data-toggle=popover]').popover({
 		html : true,
 		content: function() {

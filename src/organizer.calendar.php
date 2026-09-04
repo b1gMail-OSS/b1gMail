@@ -512,4 +512,3 @@ else if($_REQUEST['action'] == 'saveDate'
 	SessionRedirect('organizer.calendar.php?date=' . $jumpbackDate);
 	exit();
 }
-?>

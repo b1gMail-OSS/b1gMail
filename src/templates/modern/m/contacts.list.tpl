@@ -8,7 +8,7 @@
 		<li data-role="list-divider">{$letter}</li>
 		{foreach from=$addresses key=addressID item=address}
 			<li>
-				<a href="contacts.php?action=show&id={$addressID}&sid={$sid}" data-transition="slide">
+				<a href="{sessionurl file='contacts.php' params="action=show&id={$addressID}"}" data-transition="slide">
 					{if !$address.vorname&&!$address.nachname&&$address.firma}
 					<strong>{text value=$address.firma}</strong>
 					{else}

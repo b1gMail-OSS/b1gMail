@@ -6,7 +6,15 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('activate', function (event) {
-	event.waitUntil(self.clients.claim());
+	event.waitUntil(
+		caches.keys().then(function (keys) {
+			return Promise.all(keys.map(function (key) {
+				return caches.delete(key);
+			}));
+		}).then(function () {
+			return self.clients.claim();
+		})
+	);
 });
 
 function parsePushData(pushEvent) {

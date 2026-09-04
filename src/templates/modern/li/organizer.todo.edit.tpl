@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-<form name="f1" method="post" action="organizer.todo.php?action={if isset($task)}saveTask&id={$task.id}{else}createTask{/if}&sid={$sid}" onsubmit="return(checkTodoForm(this));">
+<form name="f1" method="post" action="{sessionurl file='organizer.todo.php' params="action={if isset($task)}saveTask&id={$task.id}{else}createTask{/if}"}" onsubmit="return(checkTodoForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>

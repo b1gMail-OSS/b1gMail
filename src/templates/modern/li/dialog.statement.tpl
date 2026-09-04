@@ -19,7 +19,7 @@
 		var tplDir = '{$tpldir}';
 	//-->
 	</script>
-	<script src="{$selfurl}clientlang.php" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js" type="text/javascript"></script>
@@ -27,7 +27,7 @@
 
 <body onload="documentLoader()">
 
-	<form action="{$selfurl}prefs.php?action=membership&do=statement&sid={$sid}" method="post">
+	<form action="{sessionurl file='prefs.php' params='action=membership&do=statement'}" method="post">
 		{csrffield}
 	<table width="100%">
 		<tr>

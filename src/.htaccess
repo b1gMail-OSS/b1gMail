@@ -16,6 +16,10 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
+# Service Worker: pretty URLs like /mail/sw.js must not become HTML (app.php)
+RewriteRule ^admin/.+/sw\.js$ admin/sw.js [L]
+RewriteRule (^|/)sw\.js$ sw.js [L]
+
 # Admin pretty URLs → front controller (b1gMail core)
 RewriteRule ^admin(?:/.*)?$ admin/app.php [QSA,L]
 

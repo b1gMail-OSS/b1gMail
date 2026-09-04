@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-<form name="f1" method="post" action="email.folders.php?action={if isset($folder)}saveFolder&id={$folder.id}{else}createFolder{/if}&sid={$sid}" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
+<form name="f1" method="post" action="{sessionurl file='email.folders.php' params="action={if isset($folder)}saveFolder&id={$folder.id}{else}createFolder{/if}"}" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>
@@ -61,7 +61,7 @@
 		<tr>
 			<td class="listTableLeft">* {lng p="conditions"}:</td>
 			<td class="listTableRight">
-				<iframe id="condition_frame" name="condition_frame" class="conditionIFrame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="email.folders.php?action=editConditions&id={$folder.id}&sid={$sid}"></iframe>
+				<iframe id="condition_frame" name="condition_frame" class="conditionIFrame" width="100%" height="30" scrolling="no" frameborder="0" border="0" src="{sessionurl file='email.folders.php' params="action=editConditions&id={$folder.id}"}"></iframe>
 				<div class="linkBox">
 					{lng p="requiredis"}
 					<select name="intelligent_link">

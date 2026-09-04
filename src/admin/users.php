@@ -929,10 +929,26 @@ if($_REQUEST['action'] == 'users')
 			__FILE__,
 			__LINE__);
 
-		BMUser::CreateAdminImpersonationGrant((int)$userRow['id'], (int)$adminRow['adminid']);
+		list($loginResult,) = BMUser::LoginByUserID((int)$userRow['id'], true, true, true);
+		if($loginResult !== USER_OK)
+		{
+			header('Location: users.php?');
+			exit();
+		}
 
-		SessionRedirect(sprintf('../index.php?do=login&email_full=%s&impersonate=1',
-			urlencode($userRow['email'])));
+		$_SESSION['bm_adminImpersonate'] = true;
+
+		$target = '../start.php';
+		if(function_exists('PublicConvertLegacyUrl'))
+		{
+			$converted = PublicConvertLegacyUrl('start.php');
+			if(is_string($converted) && $converted !== '')
+				$target = $converted;
+		}
+
+		$sep = (strpos($target, '?') !== false) ? '&' : '?';
+		$target .= $sep . '_nocache=' . time();
+		SessionRedirect($target);
 	}
 }
 

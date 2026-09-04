@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f1" method="post" action="prefs.php?action=signatures&do={if isset($signature)}saveSignature&id={$signature.id}{else}createSignature{/if}&sid={$sid}" onsubmit="{literal}if(checkSignatureForm(this)) { editor.submit(); return(true); } else return(false);{/literal}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params="action=signatures&do={if isset($signature)}saveSignature&id={$signature.id}{else}createSignature{/if}"}" onsubmit="{literal}if(checkSignatureForm(this)) { editor.submit(); return(true); } else return(false);{/literal}">
 	{csrffield}
 	<table class="listTable">
 		<tr>

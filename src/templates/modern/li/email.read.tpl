@@ -4,7 +4,7 @@
 		{lng p="mail_read"}: {text value=$subject cut=45}
 	</div>
 	<div class="right">
-		<button type="button" onclick="document.location.href='email.php?folder={$folderID}&sid={$sid}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='email.php' params="folder={$folderID}"}';">
 			<i class="fa {if $folderInfo.type == 'inbox'}fa-inbox{elseif $folderInfo.type == 'outbox'}fa-inbox{elseif $folderInfo.type == 'drafts'}fa-envelope{elseif $folderInfo.type == 'spam'}fa-ban{elseif $folderInfo.type == 'trash'}fa-trash-o{elseif $folderInfo.type == 'intellifolder'}fa-folder{else}fa-folder-o{/if}" aria-hidden="true"></i>
 			{$folderInfo.title}
 		</button>
@@ -106,7 +106,7 @@
 
 	<div id="bigFormToolbar">
 
-		{if $prevID}<button type="button" onclick="document.location.href='email.read.php?id={$prevID}&sid={$sid}';">
+		{if $prevID}<button type="button" onclick="document.location.href='{sessionurl file='email.read.php' params="id={$prevID}"}';">
 			&laquo;
 		</button>{/if}
 
@@ -120,17 +120,17 @@
 			{lng p="replyall"}
 		</button>
 
-		<button type="button" onclick="document.location.href='email.compose.php?sid={$sid}&forward={$mailID}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='email.compose.php' params="forward={$mailID}"}';">
 			<i class="fa fa-mail-forward"></i>
 			{lng p="forward"}
 		</button>
 
-		<button type="button" onclick="document.location.href='email.compose.php?sid={$sid}&redirect={$mailID}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='email.compose.php' params="redirect={$mailID}"}';">
 			<i class="fa fa-envelope-o"></i>
 			{lng p="redirect"}
 		</button>
 
-		<button type="button" onclick="document.location.href='email.read.php?sid={$sid}&action=download&id={$mailID}';">
+		<button type="button" onclick="document.location.href='{sessionurl file='email.read.php' params="action=download&id={$mailID}"}';">
 			<i class="fa fa-download"></i>
 			{lng p="download"}
 		</button>
@@ -140,14 +140,14 @@
 			{lng p="print"}
 		</button>
 
-		{if empty($folderInfo.readonly)}<button type="button" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} document.location.href='email.php?sid={$sid}&do=deleteMail&id={$mailID}&folder={$folderID}';">
+		{if empty($folderInfo.readonly)}<button type="button" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} document.location.href='{sessionurl file='email.php' params="do=deleteMail&id={$mailID}&folder={$folderID}"}';">
 			<i class="fa fa-remove"></i>
 			{lng p="delete"}
 		</button>{/if}
 
 		{hook id="email.read.tpl:afterButtons"}
 
-		{if $nextID}<button type="button" onclick="document.location.href='email.read.php?id={$nextID}&sid={$sid}';">
+		{if $nextID}<button type="button" onclick="document.location.href='{sessionurl file='email.read.php' params="id={$nextID}"}';">
 			&raquo;
 		</button>{/if}
 
@@ -199,7 +199,7 @@
 			&nbsp;
 			<i class="fa fa-comment-o" aria-hidden="true"></i>
 			{lng p="htmlavailable"}
-			<a href="email.read.php?sid={$sid}&id={$mailID}&htmlView=true">{lng p="view"} &raquo;</a>
+			<a href="{sessionurl file='email.read.php' params="id={$mailID}&htmlView=true"}">{lng p="view"} &raquo;</a>
 		</div>
 		{/if}
 		{if $noExternal}
@@ -207,7 +207,7 @@
 			&nbsp;
 			<i class="fa fa-comment-o" aria-hidden="true"></i>
 			{lng p="noexternal"}
-			<a href="email.read.php?action=inlineHTML&mode={$textMode}&id={$mailID}&sid={$sid}&enableExternal=true" target="mailFrame" onclick="document.getElementById('noExternalDiv').style.display='none';">{lng p="showexternal"} &raquo;</a>
+			<a href="#" onclick="return typeof bmEnableExternalContent==='function'?bmEnableExternalContent({$mailID}, '{$textMode|escape:'javascript'}'):false;">{lng p="showexternal"} &raquo;</a>
 		</div>
 		{/if}
 		{if $confirmationTo}
@@ -255,8 +255,8 @@
 				<td width="100"><b>{lng p="firstname"}:</td>
 				<td>{text value=$card.vorname}</td>
 				<td rowspan="4" width="140" background="{$tpldir}images/li/box_bg.gif">
-					<a href="email.read.php?id={$mailID}&action=importVCF&attachment={$key}&sid={$sid}"><i class="fa fa-upload" aria-hidden="true"></i> {lng p="importvcf"}</a><br />
-					<a href="email.read.php?id={$mailID}&action=downloadAttachment&attachment={$key}&sid={$sid}"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a>
+					<a href="{sessionurl file='email.read.php' params="id={$mailID}&action=importVCF&attachment={$key}"}"><i class="fa fa-upload" aria-hidden="true"></i> {lng p="importvcf"}</a><br />
+					<a href="{sessionurl file='email.read.php' params="id={$mailID}&action=downloadAttachment&attachment={$key}"}"><i class="fa fa-download" aria-hidden="true"></i> {lng p="download"}</a>
 				</td>
 			</tr>
 			<tr>
@@ -278,7 +278,7 @@
 
 {hook id="email.read.tpl:foot"}
 
-<form id="quoteForm" action="email.compose.php?sid={$sid}&reply={$mailID}" method="post">
+<form id="quoteForm" action="{sessionurl file='email.compose.php' params="reply={$mailID}"}" method="post">
 	{csrffield}
 	<input type="hidden" name="text" id="quoteText" value="" />
 </form>
@@ -337,7 +337,7 @@
 	</div>
 
 	<div class="bigForm">
-		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="email.read.php?action=showThread&id={$mailID}&sid={$sid}" border="0" frameborder="0"></iframe>
+		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="{sessionurl file='email.read.php' params="action=showThread&id={$mailID}"}" border="0" frameborder="0"></iframe>
 	</div>
 </div>
 {/if}
@@ -355,7 +355,7 @@
 		</div>
 	</div>
 
-	<form method="post" action="email.read.php?id={$mailID}&sid={$sid}">
+	<form method="post" action="{sessionurl file='email.read.php' params="id={$mailID}"}">
 		{csrffield}
 	<input type="hidden" name="do" value="saveMeta" />
 

@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f1" method="post" action="organizer.addressbook.php?action={if isset($contact) && $contact}saveContact&id={$contact.id}{else}createContact{/if}&sid={$sid}" onsubmit="return(checkContactForm(this));">
+<form name="f1" method="post" action="{if isset($contact) && $contact}{sessionurl file='organizer.addressbook.php' params="action=saveContact&id={$contact.id}"}{else}{sessionurl file='organizer.addressbook.php' params='action=createContact'}{/if}" onsubmit="return(checkContactForm(this));">
 	{csrffield}
 	<input type="hidden" id="submitAction" name="submitAction" value="" />
 	<table class="listTable">
@@ -23,7 +23,7 @@
 					<legend>{lng p="userpicture"}</legend>
 					<input type="hidden" name="pictureFile" id="pictureFile" value="" />
 					<input type="hidden" name="pictureMime" id="pictureMime" value="" />
-					<br /><center><div id="pictureDiv" style="background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url({if !isset($contact) || !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}&sid={$sid}{/if}); width: 80px; height: 80px;"><a href="javascript:addrUserPicture({if isset($contact) && $contact}{$contact.id}{else}-1{/if});"><img src="{$tpldir}images/li/pic_frame.gif" width="80" height="80" border="0" alt="" /></a></div></center>
+					<br /><center><div id="pictureDiv" style="background-size: cover; background-position: center center; background-repeat: no-repeat; background-image: url({if !isset($contact) || !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}{sessionurl file='organizer.addressbook.php' params="action=addressbookPicture&id={$contact.id}"}{/if}); width: 80px; height: 80px;"><a href="javascript:addrUserPicture({if isset($contact) && $contact}{$contact.id}{else}-1{/if});"><img src="{$tpldir}images/li/pic_frame.gif" width="80" height="80" border="0" alt="" /></a></div></center>
 					<br /><small>{lng p="changepicbyclick"}</small>
 				</fieldset>
 				<small><br /></small>				

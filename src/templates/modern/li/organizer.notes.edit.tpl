@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-	<form name="f1" method="post" action="organizer.notes.php?action={if isset($note)}saveNote&id={$note.id}{else}createNote{/if}&sid={$sid}" onsubmit="return(checkNoteForm(this));">
+	<form name="f1" method="post" action="{sessionurl file='organizer.notes.php' params="action={if isset($note)}saveNote&id={$note.id}{else}createNote{/if}"}" onsubmit="return(checkNoteForm(this));">
 		{csrffield}
 		<table class="listTable">
 			<tr>

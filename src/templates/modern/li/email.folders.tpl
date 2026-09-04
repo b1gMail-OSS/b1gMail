@@ -4,7 +4,7 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="email.folders.php?action=action&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='email.folders.php' params='action=action'}">
 	{csrffield}
 
 <div class="scrollContainer withBottomBar">
@@ -13,11 +13,11 @@
 	<tr>
 		<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'folder');" /></th>
 		<th class="listTableHead">
-			<a href="email.folders.php?sid={$sid}&sort=titel&order={$sortOrderInv}">{lng p="title"}</a>
+			<a href="{sessionurl file='email.folders.php' params="sort=titel&order={$sortOrderInv}"}">{lng p="title"}</a>
 			{if $sortColumn=='titel'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="160">
-			<a href="email.folders.php?sid={$sid}&sort=parent&order={$sortOrderInv}">{lng p="parentfolder"}</a>
+			<a href="{sessionurl file='email.folders.php' params="sort=parent&order={$sortOrderInv}"}">{lng p="parentfolder"}</a>
 			{if $sortColumn=='parent'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="70">
@@ -27,7 +27,7 @@
 			{lng p="status"}
 		</th>
 		<th width="70">
-			<a href="email.folders.php?sid={$sid}&sort=subscribed&order={$sortOrderInv}">{lng p="subscribed"}</a>
+			<a href="{sessionurl file='email.folders.php' params="sort=subscribed&order={$sortOrderInv}"}">{lng p="subscribed"}</a>
 			{if $sortColumn=='subscribed'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="55">&nbsp;</th>
@@ -46,7 +46,7 @@
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" disabled="disabled" /></td>
-		<td class="{$class}" nowrap="nowrap">&nbsp;<a href="email.php?sid={$sid}&folder={$folderID}"><i class="fa {if $folder.type == 'inbox'}fa-inbox{elseif $folder.type == 'outbox'}fa-inbox{elseif $folder.type == 'drafts'}fa-envelope{elseif $folder.type == 'spam'}fa-ban{elseif $folder.type == 'trash'}fa-trash-o{elseif $folder.type == 'intellifolder'}fa-folder{else}fa-folder-o{/if}" aria-hidden="true"></i> {text value=$folder.titel cut=25}</a></td>
+		<td class="{$class}" nowrap="nowrap">&nbsp;<a href="{sessionurl file='email.php' params="folder={$folderID}"}"><i class="fa {if $folder.type == 'inbox'}fa-inbox{elseif $folder.type == 'outbox'}fa-inbox{elseif $folder.type == 'drafts'}fa-envelope{elseif $folder.type == 'spam'}fa-ban{elseif $folder.type == 'trash'}fa-trash-o{elseif $folder.type == 'intellifolder'}fa-folder{else}fa-folder-o{/if}" aria-hidden="true"></i> {text value=$folder.titel cut=25}</a></td>
 		<td class="{$class}" nowrap="nowrap">&nbsp;{if isset($folder.parent)}{text value=$folder.parent cut=15}{/if}</td>
 		<td class="{$class}" nowrap="nowrap" style="text-align:center;">
 			{size bytes=$folder.size}
@@ -65,7 +65,7 @@
 		</td>
 		<td class="{$class}" nowrap="nowrap"><center><input type="checkbox" checked="checked" disabled="disabled" /></center></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="email.folders.php?action=editFolder&id={$folderID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}
@@ -84,7 +84,7 @@
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="folder_{$folderID}" name="folder_{$folderID}" /></td>
-		<td class="{if $sortColumn=='titel'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="email.php?sid={$sid}&folder={$folderID}">{if $folder.intelligent==1}<i class="fa fa-folder" aria-hidden="true"></i>{else}<i class="fa fa-folder-o" aria-hidden="true"></i>{/if} {text value=$folder.titel cut=25}</a></td>
+		<td class="{if $sortColumn=='titel'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="{sessionurl file='email.php' params="folder={$folderID}"}">{if $folder.intelligent==1}<i class="fa fa-folder" aria-hidden="true"></i>{else}<i class="fa fa-folder-o" aria-hidden="true"></i>{/if} {text value=$folder.titel cut=25}</a></td>
 		<td class="{if $sortColumn=='parent'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{if isset($folder.parent)}{text value=$folder.parent cut=15}{/if}</td>
 		<td class="{$class}" nowrap="nowrap" style="text-align:center;">
 			{if $folder.intelligent}-{else}{size bytes=$folder.size}{/if}
@@ -103,8 +103,8 @@
 		</td>
 		<td class="{if $sortColumn=='subscribed'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap"><center><input type="checkbox" {if $folder.subscribed==1}checked="checked" {/if} onchange="updateFolderSubscription('{$folderID}', this, '{$sid}')" /></center></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="email.folders.php?action=editFolder&id={$folderID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="email.folders.php?action=deleteFolder&id={$folderID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='email.folders.php' params="action=deleteFolder&id={$folderID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}
@@ -123,7 +123,7 @@
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="folder_{$folderID}" name="folder_{$folderID}" /></td>
-		<td class="{if $sortColumn=='titel'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="email.php?sid={$sid}&folder={$folderID}"><i class="fa fa-share-square-o" aria-hidden="true"></i> {text value=$folder.titel cut=25}</a>
+		<td class="{if $sortColumn=='titel'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="{sessionurl file='email.php' params="folder={$folderID}"}"><i class="fa fa-share-square-o" aria-hidden="true"></i> {text value=$folder.titel cut=25}</a>
 			{if $folder.readonly}<small>({lng p="readonly"})</small>{/if}</td>
 		<td class="{if $sortColumn=='parent'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{text value=$folder.parent cut=15}</td>
 		<td class="{$class}" nowrap="nowrap" style="text-align:center;">
@@ -163,7 +163,7 @@
 	</div>
 	
 	<div class="right">
-		<button class="primary" onclick="document.location.href='email.folders.php?action=addFolder&sid={$sid}';" type="button">
+		<button class="primary" onclick="document.location.href='{sessionurl file='email.folders.php' params='action=addFolder'}';" type="button">
 			<i class="fa fa-plus-circle"></i>
 			{lng p="addfolder"}
 		</button>

@@ -1491,9 +1491,20 @@ else
 		if($password === '')
 			$password = SessionPendingLoginPassword($email);
 
+		$requiresValidation	 = BMUser::RequiresValidation($email);
+		$ValidationCode	 	= $requiresValidation && isset($_REQUEST['sms_validation_code'])
+								? $_REQUEST['sms_validation_code']
+								: '';
+
 		// saved login?
 		$result = null;
-		if($password == '' && isset($_COOKIE['bm_savedToken']))
+		if(!empty($_REQUEST['impersonate']))
+		{
+			ob_start();
+			list($result, $param) = BMUser::Login($email, $password, true, true, $ValidationCode);
+			ob_end_clean();
+		}
+		else if($password == '' && isset($_COOKIE['bm_savedToken']))
 		{
 			$remember = BMUser::ValidateRememberMe($_COOKIE['bm_savedToken']);
 			if($remember !== false)
@@ -1512,12 +1523,6 @@ else
 				BMSecureSetCookie('bm_savedToken', '', time() - TIME_ONE_HOUR);
 			}
 		}
-
-		// validation
-		$requiresValidation	 = BMUser::RequiresValidation($email);
-		$ValidationCode	 	= $requiresValidation && isset($_REQUEST['sms_validation_code'])
-								? $_REQUEST['sms_validation_code']
-								: '';
 
 		// login
 		if($result === null)

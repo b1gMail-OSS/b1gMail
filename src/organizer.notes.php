@@ -188,4 +188,5 @@ else if($_REQUEST['action'] == 'saveNote'
 	$notes->Change((int)$_REQUEST['id'], (int)$_REQUEST['priority'], $_REQUEST['text']);
 	SessionRedirect('organizer.notes.php');
 }
-?>
+
+SessionRedirect('organizer.notes.php');

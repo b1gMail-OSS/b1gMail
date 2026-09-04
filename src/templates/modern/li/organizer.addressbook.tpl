@@ -5,7 +5,7 @@
 	</div>
 	<div class="right">
 		<small>{lng p="view"}:</small>
-		<select class="smallInput" onchange="document.location.href='organizer.addressbook.php?sid='+currentSID+'&group={$currentGroup}&letter='+this.value;">
+		<select class="smallInput" onchange="document.location.href=bmAppendSession('organizer.addressbook.php?group={$currentGroup}&letter=')+this.value;">
 			<option value="">{lng p="all"}</option>
 			{foreach from=$alpha key=key item=letter}
 			<option value="{$key}"{if $smarty.request.letter==$key} selected="selected"{/if}>{$letter}</option>
@@ -45,7 +45,7 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="organizer.addressbook.php?action=action&sid={$sid}" onsubmit="transferSelectedAddresses();">
+<form name="f1" method="post" action="{sessionurl file='organizer.addressbook.php' params='action=action'}" onsubmit="transferSelectedAddresses();">
 	{csrffield}
 <input name="addrIDs" id="addrIDs" value="" />
 
@@ -121,7 +121,7 @@
 				</div>
 
 				<div class="right">
-					<button type="button" class="primary" onclick="document.location.href='organizer.addressbook.php?action=addContact&sid={$sid}';">
+					<button type="button" class="primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params='action=addContact'}';">
 						<i class="fa fa-plus-circle"></i>
 						{lng p="add"}
 					</button>

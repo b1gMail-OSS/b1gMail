@@ -60,9 +60,11 @@ if(class_exists('DOMDocument'))
 		protected $attachmentBaseURL = '';
 		protected $composeBaseURL = '';
 		protected $replyMode = false;
+		protected $externalBaseHref = '';
 
 		public function __construct($code, $encoding)
 		{
+			$this->externalBaseHref = $this->extractExternalBaseHref($code);
 			$code = preg_replace('~<meta.*?([/]{0,1})>~i', '<meta$1>', $code);
 			$code = preg_replace('~<[/]{0,1}o:p>~i', '', $code);
 
@@ -115,6 +117,57 @@ if(class_exists('DOMDocument'))
 			}
 		}
 
+		public function getExternalBaseHref()
+		{
+			return $this->externalBaseHref;
+		}
+
+		protected function extractExternalBaseHref($code)
+		{
+			if(!is_string($code) || $code === '')
+				return '';
+
+			if(preg_match('~<base\b[^>]*\bhref\s*=\s*["\'](https?://[^"\'\s>]+)["\']~i', $code, $m)
+				|| preg_match('~<base\b[^>]*\bhref\s*=\s*(https?://[^"\'\s>]+)~i', $code, $m))
+			{
+				$href = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+				if(preg_match('~^https?://~i', $href))
+					return $href;
+			}
+
+			return '';
+		}
+
+		protected function absolutizeUrl($url)
+		{
+			$url = trim((string)$url);
+			if($url === '' || preg_match('~^(https?:|data:|cid:|mailto:|#)~i', $url))
+				return $url;
+			if(strpos($url, '//') === 0)
+				return $url;
+
+			$base = $this->externalBaseHref;
+			if($base === '')
+				return $url;
+
+			$parts = parse_url($base);
+			if(empty($parts['scheme']) || empty($parts['host']))
+				return $url;
+
+			$origin = $parts['scheme'].'://'.$parts['host']
+				.(isset($parts['port']) ? ':'.$parts['port'] : '');
+			if(isset($url[0]) && $url[0] === '/')
+				return $origin.$url;
+
+			$pathDir = isset($parts['path']) ? $parts['path'] : '/';
+			$slash = strrpos($pathDir, '/');
+			$pathDir = ($slash === false) ? '/' : substr($pathDir, 0, $slash + 1);
+			if($pathDir === '' || $pathDir[0] !== '/')
+				$pathDir = '/'.ltrim($pathDir, '/');
+
+			return $origin.$pathDir.$url;
+		}
+
 		public function format()
 		{
 			return(CharsetDecode($this->formatNode($this->root), 'utf8'));
@@ -157,19 +210,28 @@ if(class_exists('DOMDocument'))
 				}
 				else if(($lcName == 'src' && $lcTag == 'img') || $lcName == 'background')
 				{
-					$isExternal = preg_match('~^.+://~', $val);
-					$allow = !$isExternal || $this->allowExternal;
+					$isCid = preg_match('~^cid:~i', $val);
+					$isData = preg_match('~^data:~i', $val);
 
-					if(!$isExternal && preg_match('~^cid:~i', $val) && !$this->replyMode)
+					if($isCid && !$this->replyMode)
 					{
 						$cid = substr($val, 4);
 						if(isset($this->cidMap[$cid]))
-						{
 							$val = $this->attachmentBaseURL . $this->cidMap[$cid];
-						}
 						else
+						{
 							$allow = false;
+							continue;
+						}
 					}
+
+					$isOurAttachment = ($this->attachmentBaseURL !== '' && strpos($val, $this->attachmentBaseURL) === 0);
+					if($this->allowExternal && !$isData && !$isCid && !$isOurAttachment)
+						$val = $this->absolutizeUrl($val);
+					$isOurAttachment = ($this->attachmentBaseURL !== '' && strpos($val, $this->attachmentBaseURL) === 0);
+					$isSafe = $isData || $isOurAttachment;
+					$isExternal = !$isSafe;
+					$allow = !$isExternal || $this->allowExternal;
 
 					if($isExternal && !$this->allowExternal)
 						$this->externalFiltered = true;
@@ -474,6 +536,7 @@ else
 			if(!$this->allowExternal)
 			{
 				$in = preg_replace("/(src|href|background)=([\"']*)([h])/i", "blocked_\\1=\\2\\3", $in);
+				$in = preg_replace("/(src|background)=([\"']*)(\/\/)/i", "blocked_\\1=\\2\\3", $in);
 			}
 			else
 			{

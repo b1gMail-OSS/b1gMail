@@ -1518,13 +1518,16 @@ class PremiumAccountPlugin extends BMPlugin
 			if($activeSubscription['package']['template'] != '')
 			{
 				$template = $activeSubscription['package']['template'];
-				if(file_exists(B1GMAIL_DIR . 'templates/' . $template . '/'))
+				if(function_exists('TemplateApplyFrontendTheme'))
+					TemplateApplyFrontendTheme($tpl, $template);
+				else if(file_exists(B1GMAIL_DIR . 'templates/' . $template . '/'))
 				{
 					$tpl->setTemplateDir(B1GMAIL_DIR . 'templates/' . $template . '/');
             		$tpl->setCompileDir(B1GMAIL_DIR . 'templates/' . $template . '/cache/');
 					$tpl->tplDir = B1GMAIL_REL . 'templates/' . $template . '/';
 					$tpl->assign('tpldir', 	$bm_prefs['selfurl'] . 'templates/' . $template . '/');
 					$tpl->assign('_tpldir',	'templates/' . $template . '/');
+					$tpl->assign('_tplname', $template);
 				}
 			}
 		}

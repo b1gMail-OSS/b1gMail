@@ -2,7 +2,7 @@
 
 <div class="sidebarHeading">{lng p="createfolder"}</div>
 <center>
-	<form action="webdisk.php?action=createFolder&folder={$folderID}&sid={$sid}" method="post" onsubmit="return webdiskCreateFolder();">
+	<form action="{sessionurl file='webdisk.php' params="action=createFolder&folder={$folderID}"}" method="post" onsubmit="return webdiskCreateFolder();">
 		{csrffield}
 	<table>
 		<tr>

@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-<form name="f1" method="post" action="prefs.php?action=common&do=save&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=common&do=save'}">
 	{csrffield}
 {if $allownewsoptout!='yes'&&$newsletter_optin=='yes'}
 <input type="hidden" name="newsletter_optin" value="true" />

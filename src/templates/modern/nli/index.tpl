@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{lng p="langCode"}">
+<!-- bm-theme: {$_tplname|default:'unknown'} -->
+<html lang="{lng p="langCode"}" data-bm-theme="{$_tplname|default:'unknown'}">
 
 <head>
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
@@ -9,30 +10,32 @@
 
 	<title>{$service_title}{if isset($pageTitle)} - {text value=$pageTitle}{/if}</title>
 
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 
 	<link href="{$tpldir}bootstrap/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="{$tpldir}style/notloggedin.css?{fileDateSig file="style/notloggedin.css"}" />
 
 	<!--[if lt IE 9]>
-	<script src="clientlib/html5shiv.min.js"></script>
-	<script src="clientlib/respond.min.js"></script>
+	<script src="{$selfurl}clientlib/html5shiv.min.js"></script>
+	<script src="{$selfurl}clientlib/respond.min.js"></script>
 	<![endif]-->
 
 	<script type="text/javascript">
 	<!--
-		var tplDir = '{$tpldir}', sslURL = '{$ssl_url}', serverTZ = {$serverTZ};
+		var tplDir = '{$tpldir}', sslURL = '{$ssl_url}', serverTZ = {$serverTZ},
+			bmCsrfToken = '{$csrfToken|escape:'javascript'}';
 	//-->
 	</script>
 
-	<script src="clientlang.php" type="text/javascript"></script>
-	<script src="clientlib/jquery/jquery-3.7.1.min.js"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/bm-errors.js?{fileDateSig file="../../clientlib/bm-errors.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/jquery/jquery-3.7.1.min.js"></script>
 	<script src="{$tpldir}bootstrap/js/bootstrap.min.js?{fileDateSig file="bootstrap/js/bootstrap.min.js"}"></script>
 	<script src="{$tpldir}js/nli.main.js?{fileDateSig file="js/nli.main.js"}"></script>
 	{hook id="nli:index.tpl:head"}
 </head>
 
-<body>
+<body data-bm-theme="{$_tplname|default:'unknown'}">
 	{hook id="nli:index.tpl:beforeContent"}
 
 	<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">

@@ -74,6 +74,9 @@ function overlayDocument()
 
 function openOverlay(url, name, w, h, clean, noClickHide)
 {
+	if(typeof bmAppendSession === 'function')
+		url = bmAppendSession(url);
+
 	if(top != window)
 		return top.openOverlay(url, name, w, h, clean);
 

@@ -286,7 +286,7 @@
 	</div>
 
 	<div class="bigForm">
-		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="email.read.php?action=showThread&id={$mailID}{$sessionUrlSuffix}" border="0" frameborder="0"></iframe>
+		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="{$selfurl}email.read.php?action=showThread&amp;id={$mailID}{$sessionUrlSuffix}" border="0" frameborder="0"></iframe>
 	</div>
 </div>
 {/if}

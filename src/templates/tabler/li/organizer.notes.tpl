@@ -17,15 +17,15 @@
 							<tr>
 								<th class="bm-organizer-task-gutter"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1);" aria-label="{lng p="selaction"}" /></label></th>
 								<th style="width:5rem;">
-									<a class="bm-organizer-sort-link" href="organizer.notes.php?sort=priority&order={$sortOrderInv}{$sessionUrlSuffix}">{lng p="priority"}</a>
+									<a class="bm-organizer-sort-link" href="{sessionurl file='organizer.notes.php' params="sort=priority&order={$sortOrderInv}"}">{lng p="priority"}</a>
 									{if $sortColumn=='priority'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
 								</th>
 								<th style="width:9.375rem;">
-									<a class="bm-organizer-sort-link" href="organizer.notes.php?sort=date&order={$sortOrderInv}{$sessionUrlSuffix}">{lng p="date"}</a>
+									<a class="bm-organizer-sort-link" href="{sessionurl file='organizer.notes.php' params="sort=date&order={$sortOrderInv}"}">{lng p="date"}</a>
 									{if $sortColumn=='date'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
 								</th>
 								<th>
-									<a class="bm-organizer-sort-link" href="organizer.notes.php?sort=text&order={$sortOrderInv}{$sessionUrlSuffix}">{lng p="text"}</a>
+									<a class="bm-organizer-sort-link" href="{sessionurl file='organizer.notes.php' params="sort=text&order={$sortOrderInv}"}">{lng p="text"}</a>
 									{if $sortColumn=='text'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
 								</th>
 								<th class="bm-organizer-task-col-actions">&nbsp;</th>
@@ -47,7 +47,7 @@
 								<td nowrap="nowrap" class="text-end bm-organizer-task-col-actions">
 									<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}">
 										<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-										<a onclick="return confirm('{lng p="realdel"}');" href="organizer.notes.php?action=deleteNote&id={$noteID}{$sessionUrlSuffix}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+										<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.notes.php' params="action=deleteNote&id={$noteID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 									</div>
 								</td>
 							</tr>

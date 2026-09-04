@@ -8,7 +8,7 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="prefs.php?action=aliases&do=action&sid={$sid}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=action'}">
 	{csrffield}
 
 <div class="scrollContainer withBottomBar">
@@ -16,11 +16,11 @@
 	<tr>
 		<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'alias');" /></th>
 		<th>
-			<a href="prefs.php?sid={$sid}&action=aliases&sort=email&order={$sortOrderInv}">{lng p="alias"}</a>
+			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=email&order={$sortOrderInv}"}">{lng p="alias"}</a>
 			{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="220">
-			<a href="prefs.php?sid={$sid}&action=aliases&sort=type&order={$sortOrderInv}">{lng p="type"}</a>
+			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=type&order={$sortOrderInv}"}">{lng p="type"}</a>
 			{if $sortColumn=='type'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
 		<th width="55">&nbsp;</th>
@@ -35,8 +35,8 @@
 		<td class="{if $sortColumn=='email'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<i class="fa fa-user-o" aria-hidden="true"></i> {email value=$alias.email}</td>
 		<td class="{if $sortColumn=='type'}listTableTDActive{else}{$class}{/if}">&nbsp;{$alias.typeText}</td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="prefs.php?action=aliases&do=edit&id={$aliasID}&sid={$sid}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=aliases&do=delete&id={$aliasID}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='prefs.php' params="action=aliases&do=edit&id={$aliasID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=aliases&do=delete&id={$aliasID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}
@@ -54,7 +54,7 @@
 		<input class="smallInput" type="submit" value="{lng p="ok"}" />
 	</div>
 	<div class="right">
-		{if $allowAdd}<button class="primary" type="button" onclick="document.location.href='prefs.php?action=aliases&do=add&sid={$sid}';">
+		{if $allowAdd}<button class="primary" type="button" onclick="document.location.href='{sessionurl file='prefs.php' params='action=aliases&do=add'}';">
 			<i class="fa fa-plus-circle"></i>
 			{lng p="addalias"}
 		</button>{/if}

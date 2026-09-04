@@ -1721,6 +1721,18 @@ class B1GMailServerAdmin extends BMPlugin
 		$this->_bmsSplitQueryFromPathParam('do');
 		$this->_bmsSplitQueryFromPathParam('action');
 
+		if(isset($_REQUEST['action']) && is_string($_REQUEST['action'])
+			&& preg_match('#^(\d+)/(.+)$#', $_REQUEST['action'], $m))
+		{
+			if(!isset($_REQUEST['id']) || $_REQUEST['id'] === '')
+			{
+				$_REQUEST['id'] = $m[1];
+				$_GET['id'] = $m[1];
+			}
+			$_REQUEST['action'] = $m[2];
+			$_GET['action'] = $m[2];
+		}
+
 		$mainActions = $this->_bmsMainActions();
 
 		if(!isset($_REQUEST['action']) || $_REQUEST['action'] === '')

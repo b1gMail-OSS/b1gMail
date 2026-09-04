@@ -154,8 +154,10 @@
 {include file="li/email.calendar.invite.tpl"}
 {/if}
 
+<input type="hidden" id="previewMailID" value="{$mailID}" />
+<input type="hidden" id="previewTextMode" value="{$textMode|escape:'html'}" />
+<input type="hidden" id="previewEnableExternal" value="{if $enableExternal}1{else}0{/if}" />
 <iframe width="100%" style="height:200px;" id="textArea" name="textArea" src="about:blank" class="mailHTMLText" frameborder="no"></iframe>
-<textarea id="textArea_raw" style="display:none;">{text allowEmpty=true value=$text allowDoubleEnc=true}</textarea>
 
 {if $attachments}
 <div class="bm-mail-attachments-footer">

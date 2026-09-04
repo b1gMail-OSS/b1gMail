@@ -1,4 +1,4 @@
-<form action="search.php?sid={$sid}" method="post" name="searchSideBarForm">
+<form action="{sessionurl file='search.php'}" method="post" name="searchSideBarForm">
 	{csrffield}
 
 <input type="hidden" name="page" value="1" id="searchSideBarPage" />

@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="{lng p="langCode"}">
+<!-- bm-theme: {$_tplname|default:'unknown'} -->
+<html lang="{lng p="langCode"}" data-bm-theme="{$_tplname|default:'unknown'}">
 
 <head>
 	<meta charset="{$charset}" />
@@ -45,7 +46,7 @@
 </head>
 
 {include file="nli/layout.vars.tpl" scope=parent}
-<body class="nli-body{if $nliCompactLayout && $page!='nli/login.tpl'} nli-msp-layout{/if}{if $page=='nli/login.tpl' && $nliStyle!='msp'} nli-login-layout nli-login-{$nliStyle|default:'cover'}{if $nliStyle=='cover' || $nliStyle=='minimal'} d-flex flex-column bg-white{/if}{/if}">
+<body class="nli-body{if $nliCompactLayout && $page!='nli/login.tpl'} nli-msp-layout{/if}{if $page=='nli/login.tpl' && $nliStyle!='msp'} nli-login-layout nli-login-{$nliStyle|default:'cover'}{if $nliStyle=='cover' || $nliStyle=='minimal'} d-flex flex-column bg-white{/if}{/if}" data-bm-theme="{$_tplname|default:'unknown'}">
 	{hook id="nli:index.tpl:beforeContent"}
 
 	{if !$nliCompactLayout && $page!='nli/login.tpl'}

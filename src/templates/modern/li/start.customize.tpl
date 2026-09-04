@@ -6,7 +6,7 @@
 </div>
 
 <div class="scrollContainer"><div class="pad">
-	<form name="f1" method="post" action="start.php?action=saveCustomize&sid={$sid}">
+	<form name="f1" method="post" action="{sessionurl file='start.php' params='action=saveCustomize'}">
 		{csrffield}
 		<table class="listTable">
 			<tr>

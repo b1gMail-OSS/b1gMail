@@ -1,7 +1,7 @@
 
 <h1><i class="fa fa-address-book-o" aria-hidden="true"></i> {lng p="editgroup"}</h1>
 
-<form name="f1" method="post" action="organizer.addressbook.php?action=saveGroup&id={$group.id}{$sessionUrlSuffix}" onsubmit="return(checkGroupForm(this));">
+<form name="f1" method="post" action="{sessionurl file='organizer.addressbook.php' params="action=saveGroup&id={$group.id}"}" onsubmit="return(checkGroupForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>

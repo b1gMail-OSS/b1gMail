@@ -6,22 +6,22 @@
 		</div>
 	</div>
 	
-	<form name="f1" method="post" action="prefs.php?action=keyring&do=action&sid={$sid}">
+	<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=keyring&do=action'}">
 		{csrffield}
 	<div class="scrollContainer withBottomBar">
 		<table class="bigTable">
 			<tr>
 				<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'cert');" /></th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=cn&order={$sortOrderInv}">{lng p="name"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=cn&order={$sortOrderInv}"}">{lng p="name"}</a>
 					{if $sortColumn=='cn'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=email&order={$sortOrderInv}">{lng p="email"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=email&order={$sortOrderInv}"}">{lng p="email"}</a>
 					{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=validto&order={$sortOrderInv}">{lng p="validto"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=validto&order={$sortOrderInv}"}">{lng p="validto"}</a>
 					{if $sortColumn=='validto'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th width="70">&nbsp;</th>
@@ -40,7 +40,7 @@
 				<td class="{$class}" nowrap="nowrap">
 					<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');"><i class="fa fa-eye" aria-hidden="true"></i></a>
 					{if $pkcs12Support}<a href="javascript:void(0);" onclick="exportPrivateCert('{$cert.hash}');"><i class="fa fa-download" aria-hidden="true"></i></a>{/if}
-					<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=keyring&do=delete&type=2&hash={$cert.hash}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+					<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=2&hash={$cert.hash}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 				</td>
 			</tr>
 			{/foreach}
@@ -79,7 +79,7 @@
 				<i class="fa fa-upload" aria-hidden="true"></i>
 				{lng p="addcert"}
 			</button>{/if} 
-			{if $issueCerts}<button type="button" onclick="document.location.href='prefs.php?action=keyring&do=issuePrivateCertificate&sid={$sid}';">
+			{if $issueCerts}<button type="button" onclick="document.location.href='{sessionurl file='prefs.php' params='action=keyring&do=issuePrivateCertificate'}';">
 				<i class="fa fa-certificate" aria-hidden="true"></i>
 				{lng p="requestcert"}
 			</button>{/if}
@@ -96,22 +96,22 @@
 		</div>
 	</div>
 	
-	<form name="f2" method="post" action="prefs.php?action=keyring&do=action&sid={$sid}">
+	<form name="f2" method="post" action="{sessionurl file='prefs.php' params='action=keyring&do=action'}">
 		{csrffield}
 	<div class="scrollContainer withBottomBar">
 		<table class="bigTable">
 			<tr>
 				<th width="20"><input type="checkbox" id="allChecker" onclick="checkAll(this.checked, document.forms.f2, 'cert');" /></th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=cn&order={$sortOrderInv}">{lng p="name"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=cn&order={$sortOrderInv}"}">{lng p="name"}</a>
 					{if $sortColumn=='cn'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=email&order={$sortOrderInv}">{lng p="email"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=email&order={$sortOrderInv}"}">{lng p="email"}</a>
 					{if $sortColumn=='email'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th>
-					<a href="prefs.php?sid={$sid}&action=keyring&sort=validto&order={$sortOrderInv}">{lng p="validto"}</a>
+					<a href="{sessionurl file='prefs.php' params="action=keyring&sort=validto&order={$sortOrderInv}"}">{lng p="validto"}</a>
 					{if $sortColumn=='validto'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 				</th>
 				<th width="70">&nbsp;</th>
@@ -129,7 +129,7 @@
 				<td class="{if $sortColumn=='validto'}listTableTDActive{else}{$class}{/if}" width="100">&nbsp;{if $cert.validto<$now}<font color="red">{/if}{date timestamp=$cert.validto dayonly=true}{if $cert.validto<$now}</font>{/if}</td>
 				<td class="{$class}" nowrap="nowrap">
 					<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');"><i class="fa fa-eye" aria-hidden="true"></i></a>
-					<a onclick="return confirm('{lng p="realdel"}');" href="prefs.php?action=keyring&do=delete&type=1&hash={$cert.hash}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+					<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=1&hash={$cert.hash}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 				</td>
 			</tr>
 			{/foreach}

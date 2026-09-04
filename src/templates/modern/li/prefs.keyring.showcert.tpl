@@ -142,7 +142,7 @@
 	
 	<div>
 		<div style="float:left">
-			<input type="button" value=" {lng p="download"} " onclick="document.location.href='prefs.php?action=keyring&do=downloadCertificate&hash={$certInfo.hash}&sid={$sid}';" />
+			<input type="button" value=" {lng p="download"} " onclick="document.location.href='{sessionurl file='prefs.php' params="action=keyring&do=downloadCertificate&hash={$certInfo.hash}"}';" />
 		</div>
 		<div style="float:right">
 			<input type="button" value=" {lng p="close"} " onclick="parent.hideOverlay();" />

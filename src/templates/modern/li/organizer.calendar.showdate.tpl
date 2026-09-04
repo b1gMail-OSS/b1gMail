@@ -7,11 +7,11 @@
     
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
-	<link rel="shortcut icon" type="image/png" href="{$tpldir}res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
-	<script src="clientlang.php"></script>
-	<script src="{$tpldir}clientlib/overlay.js"></script>
+	<script src="{sessionurl file='clientlang.php'}"></script>
+	<script src="{$selfurl}clientlib/overlay.js"></script>
 	<script src="{$tpldir}js/common.js"></script>
 	<script src="{$tpldir}js/loggedin.js"></script>
 	<script src="{$tpldir}js/dialog.js"></script>
@@ -68,7 +68,7 @@
 			<br /><center><i>({lng p="none"})</i></center>
 		{else}
 			{foreach from=$attendees item=person}
-			<div class="addressItem" onclick="parent.document.location.href='organizer.addressbook.php?sid={$sid}&action=editContact&id={$person.id}';">
+			<div class="addressItem" onclick="parent.document.location.href='{sessionurl file='organizer.addressbook.php' params="action=editContact&id={$person.id}"}';">
 				{if $person.partstat == 'accepted'}
 					<i class="fa fa-check-circle" style="color:green;" title="{lng p="mail_att_partstat_accepted"}" aria-hidden="true"></i>
 				{elseif $person.partstat == 'declined'}
@@ -96,11 +96,11 @@
 	<div>
 		<div style="float:left">
 		{if $attendees}
-			<input type="submit" value=" {lng p="mailattendees"} " onclick="parent.document.location.href='email.compose.php?to={$mailTo}&subject={$mailSubject}&sid={$sid}';" />
+			<input type="submit" value=" {lng p="mailattendees"} " onclick="parent.document.location.href='{sessionurl file='email.compose.php' params="to={$mailTo}&subject={$mailSubject}"}';" />
 		{/if}
 		</div>
 		<div style="float:right">
-			<input type="submit" value=" {lng p="delete"} " onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='organizer.calendar.php?action=deleteDate&id={$date.id}&sid={$sid}';"/>
+			<input type="submit" value=" {lng p="delete"} " onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=deleteDate&id={$date.id}"}';"/>
 			<input type="submit" value=" {lng p="edit"} " onclick="parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=editDate&id={$date.id}{if $date.repeat_flags!=0}&jumpbackDate={$date.startdate}{/if}"|escape:'javascript'}';" />
 			<input type="submit" value=" {lng p="close"} " onclick="parent.hideOverlay();" />
 		</div>

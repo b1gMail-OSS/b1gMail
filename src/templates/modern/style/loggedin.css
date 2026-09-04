@@ -3602,3 +3602,69 @@ body.bm-wd-preview-body-lock
 {
 	display: none;
 }
+
+/* 7.5 session lock / MFA helpers */
+.d-none
+{
+	display: none !important;
+}
+
+.bm-session-lock-overlay
+{
+	position: fixed;
+	inset: 0;
+	z-index: 10050;
+}
+
+.bm-session-lock-backdrop
+{
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.bm-session-lock-panel
+{
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100%;
+	padding: 24px;
+}
+
+.bm-session-lock-card
+{
+	width: 100%;
+	max-width: 420px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+	padding: 24px;
+}
+
+.bm-session-lock-user
+{
+	margin: 16px 0;
+}
+
+body.bm-session-locked #main
+{
+	filter: blur(2px);
+	pointer-events: none;
+	user-select: none;
+}
+
+body.bm-mfa-setup-active #main
+{
+	pointer-events: none;
+	user-select: none;
+	filter: blur(1px);
+}
+
+body.bm-mfa-setup-active .bm-session-lock-overlay
+{
+	display: none !important;
+}

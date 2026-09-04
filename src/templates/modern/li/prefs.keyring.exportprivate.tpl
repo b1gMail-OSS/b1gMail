@@ -14,7 +14,7 @@
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>
@@ -25,7 +25,7 @@
 
 		{lng p="exportprivcerttext"}
 		
-		<form action="prefs.php?action=keyring&do=downloadPrivateCertificate&hash={text value=$hash}&sid={$sid}" method="post" autocomplete="off">
+		<form action="{sessionurl file='prefs.php' params='action=keyring&do=downloadPrivateCertificate&hash={text value=$hash}'}" method="post" autocomplete="off">
 			{csrffield}
 			<br /><br />
 			<table width="100%" cellspacing="0" cellpadding="2">

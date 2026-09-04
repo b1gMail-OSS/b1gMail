@@ -7,7 +7,7 @@
 
 <div class="scrollContainer"><div class="pad">
 
-<form name="f2" method="post" action="organizer.calendar.php?action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}&sid={$sid}" onsubmit="return(checkCalendarDateForm(this));">
+<form name="f2" method="post" action="{sessionurl file='organizer.calendar.php' params="action={if !empty($eDate)}saveDate&id={$eDate.id}{if !empty($smarty.get.jumpbackDate)}&jumpbackDate={text value=$smarty.get.jumpbackDate allowEmpty=true}{/if}{else}createDate{/if}"}" onsubmit="return(checkCalendarDateForm(this));">
 	{csrffield}
 	<table class="listTable">
 		<tr>

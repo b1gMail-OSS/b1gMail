@@ -13,7 +13,7 @@
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="clientlib/overlay.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js" type="text/javascript"></script>

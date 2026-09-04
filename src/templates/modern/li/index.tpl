@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{lng p="langCode"}">
+<!-- bm-theme: {$_tplname|default:'unknown'} -->
+<html lang="{lng p="langCode"}" data-bm-theme="{$_tplname|default:'unknown'}">
 
 <head>
     <title>{if isset($pageTitle)}{text value=$pageTitle} - {/if}{$service_title}</title>
@@ -8,17 +9,17 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="res/favicon.png" />
+	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
 	{if $bmPushEnabled}
-	<link rel="manifest" href="manifest.php" />
+	<link rel="manifest" href="{$selfurl}manifest.php" />
 	<meta name="theme-color" content="#066fd1" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	{/if}
 	    <link href="{$tpldir}style/loggedin.css?{fileDateSig file="style/loggedin.css"}" rel="stylesheet" type="text/css" />
     	<link href="{$tpldir}style/dtree.css?{fileDateSig file="style/dtree.css"}" rel="stylesheet" type="text/css" />
-	<link href="clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
-	<link href="clientlib/fontawesome/css/font-awesome-animation.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome-animation.min.css"}" rel="stylesheet" type="text/css" />
+	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
+	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome-animation.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome-animation.min.css"}" rel="stylesheet" type="text/css" />
 {foreach from=$_cssFiles.li item=_file}	<link rel="stylesheet" type="text/css" href="{$_file}" />
 {/foreach}
 
@@ -26,23 +27,44 @@
 	<script type="text/javascript">
 	<!--
 		var currentSID = '{$sid}', tplDir = '{$tpldir}', serverTZ = {$serverTZ}, ftsBGIndexing = {if $ftsBGIndexing}true{else}false{/if}{if $bmNotifyInterval},
-			notifyInterval = {$bmNotifyInterval}, notifySound = {if $bmNotifySound}true{else}false{/if}{/if};
+			notifyInterval = {$bmNotifyInterval}, notifySound = {if $bmNotifySound}true{else}false{/if}{/if},
+			bmCsrfToken = '{$csrfToken|escape:'javascript'}';
+		var bmSessionConfig = {
+			sid: '{$sid}',
+			csrfToken: '{$csrfToken|escape:'javascript'}',
+			publicRouting: {if $publicRoutingEnabled|default:false}true{else}false{/if},
+			urlCompat: {if $sessionUrlCompat|default:true}true{else}false{/if},
+			cookieMode: {if $sessionCookieMode|default:false}true{else}false{/if},
+			apiBase: '{$selfurl|escape:'javascript'}',
+			apiUrl: 'start.php',
+			loginUrl: '{$selfurl}index.php?action=login&expired=1',
+			idleTimeout: {$sessionIdleTimeout|default:30},
+			warnBefore: {$sessionWarnBefore|default:2},
+			lifetime: {$sessionLifetime|default:480},
+			unlockError: '{lng p="session_unlock_error" js=true}',
+			csrfErrorTitle: '{lng p="csrf_error_title" js=true}',
+			csrfErrorText: '{lng p="csrf_error_text" js=true}',
+			csrfErrorReload: '{lng p="csrf_error_reload" js=true}',
+			csrfError: '{lng p="csrf_error_text" js=true}'
+		};
 	//-->
 	</script>
-	<script src="clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/bm-errors.js?{fileDateSig file="../../clientlib/bm-errors.js"}" type="text/javascript"></script>
+	<script src="{$tpldir}js/session-monitor.js?{fileDateSig file="js/session-monitor.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/loggedin.js?{fileDateSig file="js/loggedin.js"}" type="text/javascript"></script>
-	<script src="clientlib/dtree.js?{fileDateSig file="../../clientlib/dtree.js"}" type="text/javascript"></script>
-	<script src="clientlib/overlay.js?{fileDateSig file="../../clientlib/overlay.js"}" type="text/javascript"></script>
-	<script src="clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
-	<script src="clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/dtree.js?{fileDateSig file="../../clientlib/dtree.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/overlay.js?{fileDateSig file="../../clientlib/overlay.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/autocomplete.js?{fileDateSig file="../../clientlib/autocomplete.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/favico.min.js?{fileDateSig file="../../clientlib/favico.min.js"}" type="text/javascript"></script>
 	{if $bmPushEnabled}
 	<script type="text/javascript">
 	<!--
 		var bmPushEnabled = true, bmPushAutoSubscribe = {if $bmPushSubscribed}true{else}false{/if}, bmPushPromptDismissed = {if $bmPushPromptDismissed|default:false}true{else}false{/if};
 	//-->
 	</script>
-	<script src="clientlib/push.js?{fileDateSig file="../../clientlib/push.js"}" type="text/javascript"></script>
+	<script src="{$selfurl}clientlib/push.js?{fileDateSig file="../../clientlib/push.js"}" type="text/javascript"></script>
 	{/if}
 	<script type="text/javascript">
 	{literal}
@@ -53,7 +75,7 @@
 	{if $bmUnreadNotifications!=0}favicon.badge({number value=$bmUnreadNotifications min=0 max=99});{/if}
 	</script>
 	<!--[if lt IE 9]>
-	<script defer type="text/javascript" src="clientlib/IE9.js"></script>
+	<script defer type="text/javascript" src="{$selfurl}clientlib/IE9.js"></script>
 	<![endif]-->
 	<!--[if IE]>
 	<meta http-equiv="Page-Enter" content="blendTrans(duration=0)" />
@@ -64,7 +86,7 @@
 	{hook id="li:index.tpl:head"}
 </head>
 
-<body onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
+<body class="{if $mfaSetupMode|default:false}bm-mfa-setup-active{/if}" data-bm-theme="{$_tplname|default:'unknown'}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
 
 	<div id="main">
@@ -85,8 +107,8 @@
 				<a href="#" onclick="showNewMenu(this)" title="{lng p="new"}"><i class="fa fa-plus-square fa-lg"></i> {lng p="new"}
 							| <i class="fa fa-angle-down"></i></a>
 				<a href="#" onclick="showSearchPopup(this)" title="{lng p="search"}"><i class="fa fa-search"></i></a>
-				<a href="prefs.php?action=faq&sid={$sid}" title="{lng p="faq"}"><i class="fa fa-question fa-lg"></i></a>
-				<a href="start.php?sid={$sid}&action=logout" onclick="return confirm('{lng p="logoutquestion"}');" title="{lng p="logout"}"><i class="fa fa-sign-out fa-lg"></i></a>
+				<a href="{sessionurl file='prefs.php' params='action=faq'}" title="{lng p="faq"}"><i class="fa fa-question fa-lg"></i></a>
+				<a href="{sessionurl file='start.php' params='action=logout'}" onclick="return confirm('{lng p="logoutquestion"}');" title="{lng p="logout"}"><i class="fa fa-sign-out fa-lg"></i></a>
 			</div>
 
 			<div class="toolbar">
@@ -104,7 +126,7 @@
 				<div class="arrow"></div>
 				{foreach from=$pageTabs key=tabID item=tab}
 				{comment text="tab $tabID"}
-				<a href="{$tab.link}{$sid}" title="{$tab.text}"{if $activeTab==$tabID} class="active"{/if}>
+				<a href="{$tab.link}" title="{$tab.text}"{if $activeTab==$tabID} class="active"{/if}>
 					<i class="fa {$tab.faIcon}"></i>
 					{$tab.text}
 				</a>
@@ -137,7 +159,7 @@
 	            {foreach from=$pageTabs key=tabID item=tab}
 	            {comment text="tab $tabID"}
 	            <li{if $activeTab==$tabID} class="active"{/if}>
-	            	<a href="{$tab.link}{$sid}">
+	            	<a href="{$tab.link}">
 	            		<i class="fa {$tab.faIcon}"></i>
 	                    {if $tab.text}&nbsp;{$tab.text}{/if}
 	                </a>
@@ -195,7 +217,7 @@
 				{if array_key_exists('sep', $item)}
 				<div class="mailMenuSep"></div>
 				{else}
-				<a class="mailMenuItem" href="{$item.link}{$sid}"><i class="fa {$item.faIcon}" aria-hidden="true"></i> {$item.text}...</a>
+				<a class="mailMenuItem" href="{$item.link}"><i class="fa {$item.faIcon}" aria-hidden="true"></i> {$item.text}...</a>
 				{/if}
 			{/foreach}
 			</div>
@@ -210,6 +232,11 @@
 	</div>
 
 	{hook id="li:index.tpl:afterContent"}
+	{if $mfaSetupMode|default:false}
+	{include file="li/mfa_setup_modal.tpl"}
+	<script src="{$tpldir}js/mfa-setup.js?{fileDateSig file="js/mfa-setup.js"}" type="text/javascript"></script>
+	{/if}
+	{include file="li/session-lock.tpl"}
 </body>
 
 </html>

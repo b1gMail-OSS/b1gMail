@@ -808,14 +808,15 @@ function showCalendarDate(id, start, end, inFrame)
 	//start += getTZOffset();
 	//end += getTZOffset();
 
+	var url = bmAppendSession('organizer.calendar.php?action=showDate&start=' + start + '&end=' + end + '&id=' + id);
 	if(inFrame)
-		parent.openOverlay('organizer.calendar.php?sid=' + currentSID + '&action=showDate&start=' + start + '&end=' + end + '&id=' + id,
+		parent.openOverlay(url,
 			lang['date'],
 			550,
 			465,
 			true);
 	else
-		openOverlay('organizer.calendar.php?sid=' + currentSID + '&action=showDate&start=' + start + '&end=' + end + '&id=' + id,
+		openOverlay(url,
 			lang['date'],
 			550,
 			465,
