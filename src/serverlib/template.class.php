@@ -133,7 +133,6 @@ class Template extends Smarty\Smarty {
         $this->registerPlugin('function', 'derefurl', 'TemplateDerefUrl', false);
         $this->registerPlugin('function', 'fieldDate', 'TemplateFieldDate');
         $this->registerPlugin('modifier', 'array_key_exists', 'array_key_exists');
-        $this->registerPlugin('modifier', 'IsMobileUserAgent', 'IsMobileUserAgent');
 
         // module handler
         ModuleFunction('OnCreateTemplate', [&$this]);

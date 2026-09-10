@@ -135,6 +135,7 @@ $lang_setup['unknownversion']			= 'The version of your b1gMail copy (<b>%s</b>) 
 $lang_setup['update_resetcache']		= 'Reseting cache';
 $lang_setup['update_complete']			= 'Finishing update';
 $lang_setup['updatedonefinal']			= 'The update is finished. Necessarily delete the folder &quot;setup&quot; from your webspace <b>now</b>!';
+$lang_setup['update_clevercron_notice']	= 'The <b>CleverCron</b> plugin has been disabled. Existing jobs were migrated and are now available under <b>Tools &raquo; Maintenance &raquo; Scheduled tasks</b>.';
 $lang_setup['dbnotconverted']           = 'Your database is still in Latin1 format / ISO charset. Please continue with <a href="setup/utf8convert.php">setup/utf8convert.php</a> and delete the folder &quot;setup&quot; after sucessfull <b>convert</b> from your Webspace!';
 
 $lang_setup['utf8convert']				= 'UTF-8 converter';

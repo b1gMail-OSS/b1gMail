@@ -496,12 +496,11 @@ elseif ($step == STEP_INSTALL) {
                 $dataFolder = preg_replace('/\/setup\/index\.php(.*)/', '/data/', str_replace('\\', '/', $_SERVER['SCRIPT_FILENAME']));
                 $selfFolder = preg_replace('/\/setup\/index\.php(.*)/', '/', str_replace('\\', '/', $_SERVER['SCRIPT_FILENAME']));
                 $smtpAuth = SetupInput('smtp_auth') === 'yes' ? 'yes' : 'no';
-                $prefsQuery = sprintf('INSERT INTO '.DB_INSTALL_PREFIX.'prefs(template,language,selfurl,mobile_url,send_method,smtp_host,smtp_port,smtp_auth,smtp_user,smtp_pass,sendmail_path,receive_method,pop3_host,pop3_port,pop3_user,pop3_pass,passmail_abs,titel,datafolder,selffolder,b1gmta_host,dnsbl,signup_dnsbl,smsreply_abs,widget_order_start,widget_order_organizer,structstorage,search_in,db_is_utf8,rgtemplate,pay_emailfrom,pay_emailfromemail,regenabled,contactform_to,ap_autolock_notify_to,blobstorage_provider,blobstorage_provider_webdisk,blobstorage_compress,blobstorage_webdisk_compress) '
-                            .'VALUES(\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,%d,\'%s\',\'%s\')',
+                $prefsQuery = sprintf('INSERT INTO '.DB_INSTALL_PREFIX.'prefs(template,language,selfurl,send_method,smtp_host,smtp_port,smtp_auth,smtp_user,smtp_pass,sendmail_path,receive_method,pop3_host,pop3_port,pop3_user,pop3_pass,passmail_abs,titel,datafolder,selffolder,b1gmta_host,dnsbl,signup_dnsbl,smsreply_abs,widget_order_start,widget_order_organizer,structstorage,search_in,db_is_utf8,rgtemplate,pay_emailfrom,pay_emailfromemail,regenabled,contactform_to,ap_autolock_notify_to,blobstorage_provider,blobstorage_provider_webdisk,blobstorage_compress,blobstorage_webdisk_compress) '
+                            .'VALUES(\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d,%d,\'%s\',\'%s\')',
                             SETUP_DEFAULT_TEMPLATE,
                             SetupInput('lng') == 'deutsch' ? 'deutsch' : 'english',
                             SQLEscape($url, $connection),
-                            SQLEscape($url.'m/', $connection),
                             SQLEscape(SetupInput('send_method', 'php'), $connection),
                             SQLEscape(SetupInput('smtp_host', 'localhost'), $connection),
                             (int) SetupInput('smtp_port', '25'),

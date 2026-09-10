@@ -88,7 +88,6 @@ define('ACCOUNT_LOCK_TIME', 5 * TIME_ONE_MINUTE);
 define('PRIVILEGES_USER', 1);		// privileges
 define('PRIVILEGES_CLIENTAPI', 2);
 define('PRIVILEGES_ADMIN', 4);
-define('PRIVILEGES_MOBILE', 8);
 define('FOLDER_INBOX', 0);		// special folders
 define('FOLDER_OUTBOX', -2);
 define('FOLDER_DRAFTS', -3);
@@ -572,19 +571,6 @@ else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], unserialize($bm_p
         exit();
 }
 
-
-/*
- * mobile redirect override
- */
-if (isset($_GET['noMobileRedirect'])) {
-    if ($_GET['noMobileRedirect'] == 'false') {
-        BMSecureSetCookie('noMobileRedirect', '0', time() - TIME_ONE_HOUR);
-        unset($_COOKIE['noMobileRedirect']);
-    } else {
-        BMSecureSetCookie('noMobileRedirect', '1', time() + TIME_ONE_YEAR);
-        $_COOKIE['noMobileRedirect'] = true;
-    }
-}
 
 /*
  * after init module handler

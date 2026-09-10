@@ -54,7 +54,6 @@ $tpl->assign('domain_combobox',		$bm_prefs['domain_combobox'] == 'yes');
 $tpl->assign('domainList', 			GetDomainList('login'));
 $tpl->assign('timezone',			date('Z'));
 $tpl->assign('year',				date('Y'));
-$tpl->assign('mobileURL',			$bm_prefs['mobile_url']);
 
 /**
  * default action = login
@@ -118,19 +117,6 @@ if($isPost)
 
 if($isPost)
 	AssignTemplateSessionUrlVars($tpl);
-
-/**
- * mobile redirection?
- */
-$nonMobileActions = array('codegen', 'checkAddressAvailability', 'resetPassword', 'forgetCookie', 'confirmAlias', 'readCertMail', 'completeAddressBookEntry', 'activateAccount', 'showAddressSugestions', 'initiateSession', 'mfaVerify', 'lostPassword');
-if($bm_prefs['redirect_mobile'] == 'yes'
-	&& IsMobileUserAgent()
-	&& !isset($_COOKIE['noMobileRedirect'])
-	&& !in_array($_REQUEST['action'], $nonMobileActions))
-{
-	header('Location: ' . $bm_prefs['mobile_url']);
-	exit();
-}
 
 /**
  * terms of service

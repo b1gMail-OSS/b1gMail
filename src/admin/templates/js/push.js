@@ -80,13 +80,20 @@ var bmPush = (function () {
 		}
 	}
 
+	function isOurServiceWorker(scriptURL) {
+		try {
+			return /\/sw\.js$/i.test(new URL(scriptURL, window.location.href).pathname);
+		} catch (e) {
+			return /sw\.js/i.test(String(scriptURL || ''));
+		}
+	}
+
 	function registerServiceWorker() {
 		if (!('serviceWorker' in navigator)) {
 			return Promise.reject(new Error('no_sw'));
 		}
 		var base = installRoot();
 		var path = base ? (base + 'sw.js') : './sw.js';
-		var expected = expectedSwUrl();
 
 		var ready = Promise.resolve();
 		if (navigator.serviceWorker.getRegistrations) {
@@ -94,15 +101,77 @@ var bmPush = (function () {
 				return Promise.all(regs.map(function (reg) {
 					var worker = reg.active || reg.waiting || reg.installing;
 					var url = worker && worker.scriptURL ? worker.scriptURL : '';
-					if (expected && url && url !== expected)
+					if (url && !isOurServiceWorker(url)) {
 						return reg.unregister();
+					}
 					return Promise.resolve();
 				}));
 			});
 		}
 
 		return ready.then(function () {
-			return navigator.serviceWorker.register(path, { scope: base || './' });
+			return navigator.serviceWorker.register(path, {
+				scope: base || './',
+				updateViaCache: 'none',
+			});
+		});
+	}
+
+	function waitForPushReady(reg, timeoutMs) {
+		timeoutMs = timeoutMs || 12000;
+		if (reg && reg.active) {
+			return Promise.resolve(reg);
+		}
+		if (!reg) {
+			return Promise.reject(new Error('no_registration'));
+		}
+		return new Promise(function (resolve, reject) {
+			var done = false;
+			var timer = setTimeout(function () {
+				finishErr(new Error('sw_timeout'));
+			}, timeoutMs);
+			var poll = setInterval(function () {
+				if (reg.active) {
+					finishOk();
+				}
+			}, 200);
+			function cleanup() {
+				clearTimeout(timer);
+				clearInterval(poll);
+			}
+			function finishOk() {
+				if (done || !reg.active) {
+					return;
+				}
+				done = true;
+				cleanup();
+				resolve(reg);
+			}
+			function finishErr(err) {
+				if (done) {
+					return;
+				}
+				done = true;
+				cleanup();
+				reject(err);
+			}
+			function watch(worker) {
+				if (!worker) {
+					return;
+				}
+				worker.addEventListener('statechange', function () {
+					if (worker.state === 'activated') {
+						finishOk();
+					} else if (worker.state === 'redundant') {
+						finishErr(new Error('sw_redundant'));
+					}
+				});
+			}
+			watch(reg.installing);
+			watch(reg.waiting);
+			if (reg.active) {
+				finishOk();
+			}
 		});
 	}
 
@@ -115,47 +184,101 @@ var bmPush = (function () {
 		});
 	}
 
-	function subscribe() {
-		return registerServiceWorker()
-			.then(function () {
-				return getVapidKey();
-			})
-			.then(function (publicKey) {
-				return Notification.requestPermission().then(function (perm) {
-					if (perm !== 'granted') {
-						throw new Error('denied');
+	function subscribeFresh(reg, publicKey) {
+		var keyBytes = urlBase64ToUint8Array(publicKey);
+		return reg.pushManager.getSubscription().then(function (existing) {
+			if (existing && existing.options && existing.options.applicationServerKey) {
+				var prev = new Uint8Array(existing.options.applicationServerKey);
+				var same = prev.length === keyBytes.length;
+				for (var i = 0; same && i < prev.length; i++) {
+					if (prev[i] !== keyBytes[i]) {
+						same = false;
 					}
-					return navigator.serviceWorker.ready.then(function (reg) {
-						return reg.pushManager.subscribe({
-							userVisibleOnly: true,
-							applicationServerKey: urlBase64ToUint8Array(publicKey),
-						});
+				}
+				if (same) {
+					return existing;
+				}
+			}
+			var chain = Promise.resolve();
+			if (existing) {
+				chain = existing.unsubscribe().catch(function () {
+					return false;
+				});
+			}
+			return chain.then(function () {
+				return reg.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: keyBytes,
+				});
+			});
+		});
+	}
+
+	function subscribe() {
+		return Promise.resolve()
+			.then(function () {
+				if (typeof Notification === 'undefined') {
+					throw new Error('no_notification');
+				}
+				return Notification.requestPermission();
+			})
+			.then(function (perm) {
+				if (perm !== 'granted') {
+					throw new Error('denied');
+				}
+				return registerServiceWorker();
+			})
+			.then(function (reg) {
+				return waitForPushReady(reg).then(function (readyReg) {
+					return getVapidKey().then(function (publicKey) {
+						return subscribeFresh(readyReg, publicKey);
 					});
 				});
 			})
 			.then(function (subscription) {
+				if (!subscription) {
+					throw new Error('no_subscription');
+				}
 				return fetchJson(apiUrl('subscribe'), {
 					method: 'POST',
 					body: JSON.stringify({ subscription: subscription.toJSON() }),
+				}).then(function (data) {
+					if (data && data.csrfError) {
+						throw new Error('csrf');
+					}
+					if (!data || !data.ok) {
+						throw new Error((data && data.error) ? data.error : 'subscribe_failed');
+					}
+					return data;
 				});
 			});
 	}
 
 	function unsubscribe() {
-		return navigator.serviceWorker.ready
+		var endpoint = '';
+		var getReg = navigator.serviceWorker.getRegistration
+			? navigator.serviceWorker.getRegistration()
+			: Promise.resolve(null);
+		return getReg
 			.then(function (reg) {
+				if (!reg || !reg.pushManager) {
+					return null;
+				}
 				return reg.pushManager.getSubscription();
 			})
 			.then(function (sub) {
 				if (!sub) {
-					return { ok: true };
+					return null;
 				}
-				var endpoint = sub.endpoint;
-				return sub.unsubscribe().then(function () {
-					return fetchJson(apiUrl('unsubscribe'), {
-						method: 'POST',
-						body: JSON.stringify({ endpoint: endpoint }),
-					});
+				endpoint = sub.endpoint || '';
+				return sub.unsubscribe().catch(function () {
+					return false;
+				});
+			})
+			.then(function () {
+				return fetchJson(apiUrl('unsubscribe'), {
+					method: 'POST',
+					body: JSON.stringify({ endpoint: endpoint }),
 				});
 			});
 	}

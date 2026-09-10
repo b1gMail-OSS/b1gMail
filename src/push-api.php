@@ -28,6 +28,9 @@ $json = $input ? json_decode($input, true) : [];
 
 if ($action == 'subscribe') {
     $sub = is_array($json) && isset($json['subscription']) ? $json['subscription'] : $json;
+    if (!empty($json['replace'])) {
+        BMPush::unsubscribeAll(BMPush::AREA_USER, $thisUser->_id);
+    }
     $ok = BMPush::subscribe(BMPush::AREA_USER, $thisUser->_id, $sub);
     if ($ok && is_array($json) && !empty($json['types']) && is_array($json['types'])) {
         BMPush::setUserPushPrefs($thisUser->_id, [
@@ -52,9 +55,13 @@ if ($action == 'subscribe') {
 
 if ($action == 'unsubscribe') {
     $endpoint = isset($json['endpoint']) ? $json['endpoint'] : '';
-    $ok = BMPush::unsubscribe(BMPush::AREA_USER, $thisUser->_id, $endpoint);
+    if ($endpoint !== '') {
+        BMPush::unsubscribe(BMPush::AREA_USER, $thisUser->_id, $endpoint);
+    }
+    // Full disable: drop every stored endpoint and clear delivery prefs.
+    BMPush::unsubscribeAll(BMPush::AREA_USER, $thisUser->_id);
     BMPush::setUserPushPrefs($thisUser->_id, ['enabled' => false, 'types' => []]);
-    echo json_encode(['ok' => (bool) $ok]);
+    echo json_encode(['ok' => true]);
     exit;
 }
 

@@ -2,6 +2,76 @@
 'use strict';
 
 var bmPush = (function () {
+	var suppressResubscribe = false;
+	var suppressResubscribeTimer = null;
+	var subscribeGate = Promise.resolve();
+	var lastSubscribeAt = 0;
+
+	function beginSuppressResubscribe(ms) {
+		suppressResubscribe = true;
+		if (suppressResubscribeTimer) {
+			clearTimeout(suppressResubscribeTimer);
+		}
+		suppressResubscribeTimer = setTimeout(function () {
+			suppressResubscribe = false;
+			suppressResubscribeTimer = null;
+		}, ms || 2500);
+	}
+
+	function delay(ms) {
+		return new Promise(function (resolve) {
+			setTimeout(resolve, Math.max(0, ms || 0));
+		});
+	}
+
+	function waitForController(timeoutMs) {
+		if (!('serviceWorker' in navigator)) {
+			return Promise.resolve();
+		}
+		if (navigator.serviceWorker.controller) {
+			return Promise.resolve();
+		}
+		return new Promise(function (resolve) {
+			var done = false;
+			var timer = setTimeout(function () {
+				if (!done) {
+					done = true;
+					resolve();
+				}
+			}, timeoutMs || 3000);
+			function onChange() {
+				if (done) {
+					return;
+				}
+				done = true;
+				clearTimeout(timer);
+				navigator.serviceWorker.removeEventListener('controllerchange', onChange);
+				resolve();
+			}
+			navigator.serviceWorker.addEventListener('controllerchange', onChange);
+		});
+	}
+
+	/**
+	 * FCM/Mozilla often reject or drop the first push if sent immediately after subscribe.
+	 */
+	function settleAfterSubscribe(minAgeMs) {
+		minAgeMs = typeof minAgeMs === 'number' ? minAgeMs : 1500;
+		return waitForController(3000).then(function () {
+			if (!lastSubscribeAt) {
+				return delay(400);
+			}
+			var remain = minAgeMs - (Date.now() - lastSubscribeAt);
+			return delay(remain);
+		});
+	}
+
+	function waitUntilReady(minAgeMs) {
+		return subscribeGate.then(function () {
+			return settleAfterSubscribe(minAgeMs);
+		});
+	}
+
 	function installRoot() {
 		var cfg = (typeof bmSessionConfig !== 'undefined') ? bmSessionConfig : null;
 		var base = (cfg && cfg.apiBase) ? String(cfg.apiBase) : '';
@@ -67,19 +137,11 @@ var bmPush = (function () {
 		return arr;
 	}
 
-	function expectedSwUrl() {
-		var base = installRoot();
-		if (base) {
-			try {
-				return new URL('sw.js', base).href;
-			} catch (e) {
-				return base + 'sw.js';
-			}
-		}
+	function isOurServiceWorker(scriptURL) {
 		try {
-			return new URL('./sw.js', window.location.href).href;
+			return /\/sw\.js$/i.test(new URL(scriptURL, window.location.href).pathname);
 		} catch (e) {
-			return '';
+			return /sw\.js/i.test(String(scriptURL || ''));
 		}
 	}
 
@@ -89,7 +151,6 @@ var bmPush = (function () {
 		}
 		var base = installRoot();
 		var path = base ? (base + 'sw.js') : './sw.js';
-		var expected = expectedSwUrl();
 
 		var ready = Promise.resolve();
 		if (navigator.serviceWorker.getRegistrations) {
@@ -97,15 +158,88 @@ var bmPush = (function () {
 				return Promise.all(regs.map(function (reg) {
 					var worker = reg.active || reg.waiting || reg.installing;
 					var url = worker && worker.scriptURL ? worker.scriptURL : '';
-					if (expected && url && url !== expected)
+					// Never unregister our own sw.js – that destroys the PushSubscription (FCM 410).
+					// Only remove clearly foreign workers.
+					if (url && !isOurServiceWorker(url)) {
 						return reg.unregister();
+					}
 					return Promise.resolve();
 				}));
 			});
 		}
 
 		return ready.then(function () {
-			return navigator.serviceWorker.register(path, { scope: base || './' });
+			return navigator.serviceWorker.register(path, {
+				scope: base || './',
+				updateViaCache: 'none',
+			});
+		});
+	}
+
+	/**
+	 * Never wait on navigator.serviceWorker.ready – it can hang forever if install fails.
+	 */
+	function waitForPushReady(reg, timeoutMs) {
+		timeoutMs = timeoutMs || 12000;
+		if (reg && reg.active) {
+			return Promise.resolve(reg);
+		}
+		if (!reg) {
+			return Promise.reject(new Error('no_registration'));
+		}
+
+		return new Promise(function (resolve, reject) {
+			var done = false;
+			var timer = setTimeout(function () {
+				finishErr(new Error('sw_timeout'));
+			}, timeoutMs);
+			var poll = setInterval(function () {
+				if (reg.active) {
+					finishOk();
+				}
+			}, 200);
+
+			function cleanup() {
+				clearTimeout(timer);
+				clearInterval(poll);
+			}
+
+			function finishOk() {
+				if (done || !reg.active) {
+					return;
+				}
+				done = true;
+				cleanup();
+				resolve(reg);
+			}
+
+			function finishErr(err) {
+				if (done) {
+					return;
+				}
+				done = true;
+				cleanup();
+				reject(err);
+			}
+
+			function watch(worker) {
+				if (!worker) {
+					return;
+				}
+				worker.addEventListener('statechange', function () {
+					if (worker.state === 'activated') {
+						finishOk();
+					} else if (worker.state === 'redundant') {
+						finishErr(new Error('sw_redundant'));
+					}
+				});
+			}
+
+			watch(reg.installing);
+			watch(reg.waiting);
+			if (reg.active) {
+				finishOk();
+			}
 		});
 	}
 
@@ -118,50 +252,157 @@ var bmPush = (function () {
 		});
 	}
 
+	/**
+	 * Reuse existing PushSubscription when VAPID key matches.
+	 * Unsubscribing a live subscription makes its endpoint return HTTP 410.
+	 */
+	function applicationServerKeyMatches(subscription, keyBytes) {
+		if (!subscription || !subscription.options || !subscription.options.applicationServerKey) {
+			return false;
+		}
+		var existing = new Uint8Array(subscription.options.applicationServerKey);
+		if (existing.length !== keyBytes.length) {
+			return false;
+		}
+		for (var i = 0; i < existing.length; i++) {
+			if (existing[i] !== keyBytes[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function subscribeFresh(reg, publicKey) {
+		var keyBytes = urlBase64ToUint8Array(publicKey);
+		return reg.pushManager.getSubscription().then(function (existing) {
+			if (existing && applicationServerKeyMatches(existing, keyBytes)) {
+				return existing;
+			}
+			var chain = Promise.resolve();
+			if (existing) {
+				beginSuppressResubscribe(4000);
+				chain = existing.unsubscribe().catch(function () {
+					return false;
+				});
+			}
+			return chain.then(function () {
+				return reg.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: keyBytes,
+				});
+			});
+		});
+	}
+
 	function subscribe(types) {
-		return registerServiceWorker()
+		// Permission first while the click gesture is still "fresh".
+		var op = Promise.resolve()
 			.then(function () {
-				return getVapidKey();
+				if (typeof Notification === 'undefined') {
+					throw new Error('no_notification');
+				}
+				return Notification.requestPermission();
 			})
-			.then(function (publicKey) {
-				return Notification.requestPermission().then(function (perm) {
-					if (perm !== 'granted') {
-						throw new Error('denied');
-					}
-					return navigator.serviceWorker.ready.then(function (reg) {
-						return reg.pushManager.subscribe({
-							userVisibleOnly: true,
-							applicationServerKey: urlBase64ToUint8Array(publicKey),
-						});
+			.then(function (perm) {
+				if (perm !== 'granted') {
+					throw new Error('denied');
+				}
+				return registerServiceWorker();
+			})
+			.then(function (reg) {
+				return waitForPushReady(reg).then(function (readyReg) {
+					return getVapidKey().then(function (publicKey) {
+						return subscribeFresh(readyReg, publicKey);
 					});
 				});
 			})
 			.then(function (subscription) {
+				if (!subscription) {
+					throw new Error('no_subscription');
+				}
 				return fetchJson(apiUrl('subscribe'), {
 					method: 'POST',
 					body: JSON.stringify({
 						subscription: subscription.toJSON(),
 						types: types || null,
+						replace: true,
 					}),
+				}).then(function (data) {
+					if (data && data.csrfError) {
+						throw new Error('csrf');
+					}
+					if (!data || !data.ok) {
+						throw new Error((data && data.error) ? data.error : 'subscribe_failed');
+					}
+					lastSubscribeAt = Date.now();
+					return settleAfterSubscribe(1500).then(function () {
+						return data;
+					});
 				});
 			});
+
+		// Let overlapping Test clicks wait for this activation to finish settling.
+		subscribeGate = op.then(function () {}, function () {});
+		return op;
+	}
+
+	function getPushRegistration() {
+		if (!('serviceWorker' in navigator)) {
+			return Promise.resolve(null);
+		}
+		if (navigator.serviceWorker.getRegistration) {
+			return navigator.serviceWorker.getRegistration().then(function (reg) {
+				if (reg) {
+					return reg;
+				}
+				if (!navigator.serviceWorker.getRegistrations) {
+					return null;
+				}
+				return navigator.serviceWorker.getRegistrations().then(function (regs) {
+					return regs && regs.length ? regs[0] : null;
+				});
+			});
+		}
+		return Promise.resolve(null);
 	}
 
 	function unsubscribe() {
-		return navigator.serviceWorker.ready
+		// Intentional disable – do not auto-resubscribe via pushsubscriptionchange.
+		beginSuppressResubscribe(4000);
+		var endpoint = '';
+
+		return getPushRegistration()
 			.then(function (reg) {
+				if (!reg || !reg.pushManager) {
+					return null;
+				}
 				return reg.pushManager.getSubscription();
 			})
 			.then(function (sub) {
 				if (!sub) {
-					return { ok: true };
+					return null;
 				}
-				var endpoint = sub.endpoint;
-				return sub.unsubscribe().then(function () {
-					return fetchJson(apiUrl('unsubscribe'), {
-						method: 'POST',
-						body: JSON.stringify({ endpoint: endpoint }),
-					});
+				endpoint = sub.endpoint || '';
+				return sub.unsubscribe().catch(function () {
+					return false;
+				});
+			})
+			.then(function () {
+				// Always tell the server – also clears prefs when browser had no sub.
+				return fetchJson(apiUrl('unsubscribe'), {
+					method: 'POST',
+					body: JSON.stringify({ endpoint: endpoint }),
+				});
+			})
+			.catch(function (err) {
+				// Still try to disable server-side prefs if browser path failed.
+				return fetchJson(apiUrl('unsubscribe'), {
+					method: 'POST',
+					body: JSON.stringify({ endpoint: endpoint }),
+				}).then(function (r) {
+					return r;
+				}, function () {
+					throw err;
 				});
 			});
 	}
@@ -186,8 +427,11 @@ var bmPush = (function () {
 		if (!isSupported()) {
 			return Promise.resolve(false);
 		}
-		return navigator.serviceWorker.ready
+		return getPushRegistration()
 			.then(function (reg) {
+				if (!reg || !reg.pushManager) {
+					return null;
+				}
 				return reg.pushManager.getSubscription();
 			})
 			.then(function (sub) {
@@ -196,6 +440,12 @@ var bmPush = (function () {
 			.catch(function () {
 				return false;
 			});
+	}
+
+	function getStatus() {
+		return fetchJson(apiUrl('status')).catch(function () {
+			return { ok: false };
+		});
 	}
 
 	function dismissPromptPermanent() {
@@ -275,12 +525,18 @@ var bmPush = (function () {
 		if (!isSupported() || typeof bmPushEnabled === 'undefined' || !bmPushEnabled) {
 			return Promise.resolve();
 		}
+		if (suppressResubscribe) {
+			return Promise.resolve();
+		}
 		return fetchJson(apiUrl('status'))
 			.then(function (status) {
 				if (!status || !status.ok || !status.prefsEnabled) {
 					return null;
 				}
-				return navigator.serviceWorker.ready.then(function (reg) {
+				return getPushRegistration().then(function (reg) {
+					if (!reg || !reg.pushManager) {
+						return null;
+					}
 					return reg.pushManager.getSubscription();
 				});
 			})
@@ -311,9 +567,21 @@ var bmPush = (function () {
 		});
 
 		navigator.serviceWorker.addEventListener('message', function (event) {
-			if (event.data && event.data.type === 'bmPushResubscribe') {
-				subscribe().catch(function () {});
+			if (!event.data || event.data.type !== 'bmPushResubscribe') {
+				return;
 			}
+			// Only restore after browser key rotation – never after user disable / key refresh.
+			if (suppressResubscribe) {
+				return;
+			}
+			fetchJson(apiUrl('status'))
+				.then(function (status) {
+					if (!status || !status.ok || !status.prefsEnabled) {
+						return null;
+					}
+					return subscribe();
+				})
+				.catch(function () {});
 		});
 	}
 
@@ -331,6 +599,8 @@ var bmPush = (function () {
 		initAutoRegister: initAutoRegister,
 		init: init,
 		hasSubscription: hasSubscription,
+		getStatus: getStatus,
+		waitUntilReady: waitUntilReady,
 		syncServerSubscription: syncServerSubscription,
 	};
 })();

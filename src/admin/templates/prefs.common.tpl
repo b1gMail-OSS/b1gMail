@@ -30,12 +30,6 @@
 					</div>
 				</div>
 				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-label">{lng p="mobile_url"}</label>
-					<div class="col-sm-8">
-						<input type="text" class="form-control" name="mobile_url" value="{text allowEmpty=true value=$bm_prefs.mobile_url}" placeholder="{lng p="mobile_url"}">
-					</div>
-				</div>
-				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="searchengine"}</label>
 					<div class="col-sm-8">
 						<input type="text" class="form-control" name="search_engine" value="{text allowEmpty=true value=$bm_prefs.search_engine}" placeholder="{lng p="searchengine"}">

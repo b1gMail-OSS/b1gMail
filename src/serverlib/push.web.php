@@ -104,9 +104,11 @@ class BMPushWeb
         if ($sharedSecret === false || $sharedSecret === '') {
             return false;
         }
-        // P-256 ECDH secret is 32 bytes; truncate only if a build returns more.
-        if (strlen($sharedSecret) > 32) {
-            $sharedSecret = substr($sharedSecret, 0, 32);
+        // P-256 ECDH secret must be a 32-byte big-endian integer (pad leading zeros).
+        if (strlen($sharedSecret) < 32) {
+            $sharedSecret = str_pad($sharedSecret, 32, "\x00", STR_PAD_LEFT);
+        } elseif (strlen($sharedSecret) > 32) {
+            $sharedSecret = substr($sharedSecret, -32);
         }
 
         $salt = random_bytes(16);
@@ -206,6 +208,8 @@ class BMPushWeb
             'Content-Type: application/octet-stream',
             'Content-Encoding: aes128gcm',
             'TTL: 86400',
+            'Urgency: normal',
+            'Content-Length: '.strlen($body),
             'Authorization: '.$authHeader,
         ];
 
@@ -217,12 +221,17 @@ class BMPushWeb
                 CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 15,
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             ]);
             $responseBody = curl_exec($ch);
+            $curlErr = curl_error($ch);
             $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             $ok = $status >= 200 && $status < 300;
             $error = $ok ? '' : 'http_'.$status;
+            if (!$ok && $responseBody === false && $curlErr !== '') {
+                $error = 'curl_'.preg_replace('/\s+/u', '_', $curlErr);
+            }
             if (!$ok && is_string($responseBody) && $responseBody !== '') {
                 $hint = preg_replace('/\s+/u', ' ', trim($responseBody));
                 if (strlen($hint) > 120) {

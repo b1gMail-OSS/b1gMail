@@ -556,23 +556,6 @@ function ArchiveLogs($date, $saveInArchive = true, &$archivedLogEntryCount = nul
 }
 
 /**
- * check if visitor uses a mobile user agent which is compatible
- * with the b1gMail mobile interface
- *
- * @return bool
- */
-function IsMobileUserAgent()
-{
-	$mobileUserAgents = array('iPhone', 'Android', 'webOS', 'BlackBerry', 'iPod');
-
-	foreach($mobileUserAgents as $ua)
-		if(strpos($_SERVER['HTTP_USER_AGENT'],  $ua) !== false)
-			return(true);
-
-	return(false);
-}
-
-/**
  * sanitize email addresses for sending and expand group addresses
  *
  * @param string $in Input
@@ -2141,10 +2124,10 @@ function BMMailIframeBaseTag()
  * @param bool $showExternal Enable external objects and scripts?
  * @param array $attachments Attachment list (for CID replacement)
  * @param int $mailID Mail ID
- * @param bool $mobile For mobile interface?
+ * @param bool $replyMode Reply/compose mode?
  * @return string
  */
-function formatEMailHTMLText($in, $showExternal = false, $attachments = array(), $mailID = -1, $mobile = false, $replyMode = false)
+function formatEMailHTMLText($in, $showExternal = false, $attachments = array(), $mailID = -1, $replyMode = false)
 {
 	global $currentCharset;
 
@@ -2158,16 +2141,8 @@ function formatEMailHTMLText($in, $showExternal = false, $attachments = array(),
 	$formatter->setReplyMode($replyMode);
 
 	$root = BMMailInstallRootUrl();
-	if($mobile)
-	{
-		$formatter->setComposeBaseURL($root . 'email.php?action=compose&to=');
-		$formatter->setAttachmentBaseURL($root . 'email.php?action=attachment&view=true&id=' . (int)$mailID . '&attachment=');
-	}
-	else
-	{
-		$formatter->setComposeBaseURL($root . 'email.compose.php?to=');
-		$formatter->setAttachmentBaseURL($root . 'email.read.php?action=downloadAttachment&view=true&id=' . (int)$mailID . '&attachment=');
-	}
+	$formatter->setComposeBaseURL($root . 'email.compose.php?to=');
+	$formatter->setAttachmentBaseURL($root . 'email.read.php?action=downloadAttachment&view=true&id=' . (int)$mailID . '&attachment=');
 
 	$result = $formatter->format();
 
@@ -2179,10 +2154,9 @@ function formatEMailHTMLText($in, $showExternal = false, $attachments = array(),
  *
  * @param string $in Input
  * @param bool $html For HTML output?
- * @param bool $mobile For mobile interface?
  * @return string
  */
-function formatEMailText($in, $html = true, $mobile = false)
+function formatEMailText($in, $html = true)
 {
 	global $currentCharset;
 
@@ -2215,12 +2189,10 @@ function formatEMailText($in, $html = true, $mobile = false)
 		// e-mail addresses
 		$links = array();
 		$in = preg_replace_callback("/[a-zA-Z0-9\.\_-]*\@[^ ]*\.[a-zA-Z0-9\.\_-]*/" . $pcreSuffix,
-			function($matches) use($mobile)
+			function($matches)
 			{
 				$match = HTMLEntities($matches[0]);
-				return(!$mobile
-						? '<a target="_top" href="email.compose.php?to='.$match.'">'.$match.'</a>'
-						: '<a target="_top" href="email.php?action=compose&to='.$match.'">'.$match.'</a>');
+				return('<a target="_top" href="email.compose.php?to='.$match.'">'.$match.'</a>');
 			},
 			$in);
 
@@ -3113,10 +3085,6 @@ function RequestPrivileges($privileges, $return = false)
 				SetTimeZoneByOffsetSeconds((int)$_SESSION['bm_timezone']);
 		}
 
-	// mobile privileges?
-	if(($privileges & PRIVILEGES_MOBILE) != 0 && $ok)
-		$ok = $groupRow['wap'] == 'yes';
-
 	// client api access privileges?
 	if(($privileges & PRIVILEGES_CLIENTAPI) != 0 && $ok)
 		$ok = true;
@@ -3169,14 +3137,7 @@ function RequestPrivileges($privileges, $return = false)
 			else
 				$tpl->assign('nliUrlHome', $bm_prefs['selfurl']);
 
-			if(($privileges & PRIVILEGES_MOBILE) != 0)
-			{
-				$tpl->assign('isDialog', true);
-				$tpl->assign('page', 'm/error.tpl');
-				$tpl->display('m/index.tpl');
-			}
-			else
-				$tpl->display('nli/error.tpl');
+			$tpl->display('nli/error.tpl');
 		}
 		exit();
 	}

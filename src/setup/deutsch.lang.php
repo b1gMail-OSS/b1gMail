@@ -135,6 +135,7 @@ $lang_setup['unknownversion']			= 'Ihre b1gMail-Version (<b>%s</b>) ist unbekann
 $lang_setup['update_resetcache']		= 'Cache zur&uuml;cksetzen';
 $lang_setup['update_complete']			= 'Update abschlie&szlig;en';
 $lang_setup['updatedonefinal']			= 'Das Update wurde abgeschlossen. L&ouml;schen Sie nun bitte <b>unbedingt</b> den Ordner &quot;setup&quot; von Ihrem Webspace!';
+$lang_setup['update_clevercron_notice']	= 'Das Plugin <b>CleverCron</b> wurde deaktiviert. Bestehende Aufgaben wurden &uuml;bernommen und sind nun unter <b>Tools &raquo; Wartung &raquo; Geplante Aufgaben</b> zu finden.';
 $lang_setup['dbnotconverted']           = 'Ihre Datenbank liegt noch im Latin1-Format vor. Bitte fahren Sie mit <a href="setup/utf8convert.php">setup/utf8convert.php</a> fort und löschen den  Ordner &quot;setup&quot; erst <b>nach Konvertierung</b> von Ihrem Webspace!';
 
 $lang_setup['utf8convert']				= 'UTF-8-Konverter';

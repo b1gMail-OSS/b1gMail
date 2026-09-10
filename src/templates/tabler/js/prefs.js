@@ -195,18 +195,19 @@ function exportPrivateCert(hash)
 			var pBrowser = bmPush.hasSubscription().then(function (v) {
 				browserSub = !!v;
 			});
-			var pServer = fetch(bmAppendSession('push-api.php?action=status'), { credentials: 'same-origin' })
-				.then(function (r) { return r.json(); })
-				.then(function (data) {
-					if (data && data.ok) {
-						serverSubs = data.subscriptions || 0;
-						prefsEnabled = !!data.prefsEnabled;
-					}
-				})
-				.catch(function () {});
+			var pServer = (typeof bmPush.getStatus === 'function'
+				? bmPush.getStatus()
+				: fetch(bmAppendSession('push-api.php?action=status'), { credentials: 'same-origin' })
+					.then(function (r) { return r.json(); })
+			).then(function (data) {
+				if (data && data.ok) {
+					serverSubs = data.subscriptions || 0;
+					prefsEnabled = !!data.prefsEnabled;
+				}
+			}).catch(function () {});
 
 			return Promise.all([pBrowser, pServer]).then(function () {
-				updatePushButtons(browserSub && (serverSubs > 0 || prefsEnabled));
+				updatePushButtons(browserSub || serverSubs > 0 || prefsEnabled);
 				return { browserSub: browserSub, serverSubs: serverSubs, prefsEnabled: prefsEnabled };
 			});
 		}
@@ -216,23 +217,45 @@ function exportPrivateCert(hash)
 		if (subBtn) {
 			subBtn.addEventListener('click', function () {
 				subBtn.disabled = true;
+				if (testBtn) {
+					testBtn.disabled = true;
+				}
 				if (testResult) {
 					testResult.textContent = '';
 				}
-				bmPush.subscribe(collectPushTypes()).then(function (r) {
+				var safety = setTimeout(function () {
 					subBtn.disabled = false;
+					if (testBtn) {
+						testBtn.disabled = false;
+					}
+					if (testResult && !testResult.textContent) {
+						testResult.textContent = (lang['push_enable_fail'] || 'Failed') + ' (timeout)';
+					}
+				}, 20000);
+				bmPush.subscribe(collectPushTypes()).then(function (r) {
+					clearTimeout(safety);
 					if (r && r.ok) {
-						syncPushUi();
+						updatePushButtons(true);
 						if (testResult) {
 							testResult.textContent = lang['push_enabled_ok'] || lang['push_enable_ok'] || '';
 						}
 					} else if (testResult) {
 						testResult.textContent = lang['push_enable_fail'] || lang['push_enabled_fail'] || '';
 					}
-				}).catch(function () {
-					subBtn.disabled = false;
+					return syncPushUi();
+				}).catch(function (err) {
+					clearTimeout(safety);
 					if (testResult) {
-						testResult.textContent = lang['push_enable_fail'] || lang['push_enabled_fail'] || '';
+						var base = lang['push_enable_fail'] || lang['push_enabled_fail'] || 'Failed';
+						var detail = (err && err.message) ? String(err.message) : '';
+						testResult.textContent = (detail && detail !== 'denied') ? (base + ' (' + detail + ')') : base;
+					}
+					return syncPushUi();
+				}).then(function () {
+					clearTimeout(safety);
+					subBtn.disabled = false;
+					if (testBtn) {
+						testBtn.disabled = false;
 					}
 				});
 			});
@@ -240,10 +263,25 @@ function exportPrivateCert(hash)
 		if (unsubBtn) {
 			unsubBtn.addEventListener('click', function () {
 				unsubBtn.disabled = true;
-				bmPush.unsubscribe().then(function () {
-					unsubBtn.disabled = false;
-					syncPushUi();
+				if (testResult) {
+					testResult.textContent = '';
+				}
+				bmPush.unsubscribe().then(function (r) {
+					updatePushButtons(false);
+					if (testResult) {
+						if (r && r.ok === false) {
+							testResult.textContent = lang['push_disable_fail'] || lang['push_enable_fail'] || 'Failed';
+						} else {
+							testResult.textContent = lang['push_disabled_ok'] || lang['push_disable_ok'] || '';
+						}
+					}
+					return syncPushUi();
 				}).catch(function () {
+					if (testResult) {
+						testResult.textContent = lang['push_disable_fail'] || lang['push_enable_fail'] || 'Failed';
+					}
+					return syncPushUi();
+				}).then(function () {
 					unsubBtn.disabled = false;
 				});
 			});
@@ -252,7 +290,10 @@ function exportPrivateCert(hash)
 			if (!data) {
 				return lang['push_test_fail'] || 'Failed';
 			}
-			if (data.reason === 'no_subscription' || (data.subscriptions !== undefined && data.subscriptions < 1)) {
+			if (data.reason === 'no_active_session') {
+				return lang['push_test_fail'] || 'Failed';
+			}
+			if (data.reason === 'no_subscription' || (data.subscriptions !== undefined && data.subscriptions < 1 && data.reason !== 'delivery_failed')) {
 				return lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
 			}
 			if (data.reason === 'prefs_blocked' || data.prefsEnabled === false) {
@@ -268,6 +309,12 @@ function exportPrivateCert(hash)
 				}
 				return msg;
 			}
+			if (data.lastError) {
+				return (lang['push_test_fail'] || 'Failed') + ' (' + data.lastError + ')';
+			}
+			if (data.reason) {
+				return (lang['push_test_fail'] || 'Failed') + ' (' + data.reason + ')';
+			}
 			return lang['push_test_fail'] || 'Failed';
 		}
 
@@ -275,39 +322,55 @@ function exportPrivateCert(hash)
 			testBtn.addEventListener('click', function () {
 				testBtn.disabled = true;
 				if (testResult) {
-					testResult.textContent = '';
+					testResult.textContent = lang['push_test_wait'] || '…';
 				}
-				syncPushUi().then(function (state) {
-					if (!state.browserSub) {
-						testBtn.disabled = false;
-						if (testResult) {
-							testResult.textContent = lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
-						}
-						return;
+				function testPushUrl() {
+					return bmAppendSession('start.php?action=testPush');
+				}
+				function runTestFetch() {
+					return fetch(testPushUrl(), { credentials: 'same-origin' }).then(function (r) {
+						return r.json();
+					});
+				}
+				function isGoneDelivery(data) {
+					if (!data || data.ok) {
+						return false;
 					}
-					if (state.serverSubs < 1) {
-						return bmPush.subscribe(collectPushTypes()).then(function (r) {
-							if (!r || !r.ok) {
-								testBtn.disabled = false;
-								if (testResult) {
-									testResult.textContent = lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
-								}
-								return;
-							}
-							return fetch(bmAppendSession('start.php?action=testPush'), { credentials: 'same-origin' });
-						});
-					}
-					return fetch(bmAppendSession('start.php?action=testPush'), { credentials: 'same-origin' });
+					var err = String(data.lastError || data.reason || '');
+					return err.indexOf('410') !== -1 || err.indexOf('404') !== -1
+						|| err.indexOf('http_0') !== -1;
+				}
+				var ready = typeof bmPush.waitUntilReady === 'function'
+					? bmPush.waitUntilReady(1500)
+					: Promise.resolve();
+				ready.then(function () {
+					return bmPush.subscribe(collectPushTypes());
 				}).then(function (r) {
-					if (!r || !r.json) {
-						return;
+					if (!r || !r.ok) {
+						throw new Error('nosub');
 					}
-					return r.json();
+					return runTestFetch();
 				}).then(function (data) {
+					if (!isGoneDelivery(data)) {
+						return data;
+					}
+					return new Promise(function (resolve) {
+						setTimeout(resolve, 1200);
+					}).then(function () {
+						return bmPush.subscribe(collectPushTypes());
+					}).then(function (r) {
+						if (!r || !r.ok) {
+							return data;
+						}
+						return typeof bmPush.waitUntilReady === 'function'
+							? bmPush.waitUntilReady(1500).then(runTestFetch)
+							: runTestFetch();
+					});
+				}).then(function (data) {
+					testBtn.disabled = false;
 					if (!data) {
 						return;
 					}
-					testBtn.disabled = false;
 					if (testResult) {
 						if (data.ok) {
 							var okMsg = lang['push_test_ok'] || 'OK';
@@ -316,10 +379,11 @@ function exportPrivateCert(hash)
 							testResult.textContent = pushTestFailMessage(data);
 						}
 					}
+					return syncPushUi();
 				}).catch(function () {
 					testBtn.disabled = false;
 					if (testResult) {
-						testResult.textContent = lang['push_test_fail'] || 'Failed';
+						testResult.textContent = lang['push_test_fail_nosub'] || lang['push_test_fail'] || 'Failed';
 					}
 				});
 			});

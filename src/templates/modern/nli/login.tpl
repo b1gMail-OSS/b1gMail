@@ -69,9 +69,8 @@
 					&copy; {$year} {$service_title}
 				</div>
 				<div class="col-xs-4" style="text-align:center;">
-					<a href="{$mobileURL}">{lng p="mobilepda"}</a>
 				{foreach from=$pluginUserPages item=item}{if empty($item.top)}
-				|	<a href="{$item.link}">{$item.text}</a>
+					<a href="{$item.link}" class="mx-1">{$item.text}</a>
 				{/if}{/foreach}
 				</div>
 				<div class="col-xs-4" style="text-align:right;">

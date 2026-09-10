@@ -1,4 +1,4 @@
-/* b1gMail – Service Worker (customer area, Web Push + PWA) v5 */
+/* b1gMail – Service Worker (customer area, Web Push + PWA) v8 */
 'use strict';
 
 self.addEventListener('install', function (event) {

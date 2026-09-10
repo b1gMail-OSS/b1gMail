@@ -235,6 +235,28 @@ elseif ($step == STEP_UPDATE) {
         $doneText .= '<br /><br />'.$lang_setup['dbnotconverted'];
     }
     echo SetupAlert('success', $doneText, '', array('id' => 'done', 'class' => 'd-none mt-3', 'dismissible' => false));
+
+    // CleverCron still active at start of update → show relocation notice when finished.
+    $showCleverCronNotice = false;
+    $res = mysqli_query($connection,
+        'SELECT installed, paused FROM '.$mysql['prefix'].'mods'
+        .' WHERE modname=\'TCCronPlugin\' OR modname=\'PluginTCCron\''
+        .' OR packageName LIKE \'%tccrn%\' OR packageName LIKE \'%clevercron%\''
+        .' LIMIT 1');
+    if ($res && ($row = mysqli_fetch_array($res, MYSQLI_ASSOC))) {
+        $showCleverCronNotice = ((int) $row['installed'] === 1 && (int) $row['paused'] === 0);
+    }
+    if ($res) {
+        mysqli_free_result($res);
+    }
+    if ($showCleverCronNotice && !empty($lang_setup['update_clevercron_notice'])) {
+        echo SetupAlert(
+            'info',
+            $lang_setup['update_clevercron_notice'],
+            '',
+            array('id' => 'update-clevercron-notice', 'class' => 'd-none mt-3', 'dismissible' => false)
+        );
+    }
 	?>
 	<?php
 }
@@ -366,6 +388,89 @@ elseif ($step == STEP_UPDATE_STEP) {
             } elseif ($res) {
                 mysqli_free_result($res);
             }
+
+            // CleverCron → core scheduled tasks: import jobs first, then deactivate plugin.
+            $cleverCronActive = false;
+            $res = mysqli_query($connection,
+                'SELECT installed, paused FROM '.$p.'mods'
+                .' WHERE modname=\'TCCronPlugin\' OR modname=\'PluginTCCron\''
+                .' OR packageName LIKE \'%tccrn%\' OR packageName LIKE \'%clevercron%\''
+                .' LIMIT 1');
+            if ($res && ($row = mysqli_fetch_array($res, MYSQLI_ASSOC))) {
+                $cleverCronActive = ((int) $row['installed'] === 1 && (int) $row['paused'] === 0);
+            }
+            if ($res) {
+                mysqli_free_result($res);
+            }
+
+            $oldCron = $p.'tccrn_plugin_cron';
+            $oldSettings = $p.'tccrn_plugin_settings';
+            $res = mysqli_query($connection, 'SHOW TABLES LIKE \''.$oldCron.'\'');
+            $hasOldCron = ($res && mysqli_num_rows($res) > 0);
+            if ($res) {
+                mysqli_free_result($res);
+            }
+
+            $res = mysqli_query($connection, 'SHOW TABLES LIKE \''.$p.'scheduled_tasks\'');
+            $hasSched = ($res && mysqli_num_rows($res) > 0);
+            if ($res) {
+                mysqli_free_result($res);
+            }
+
+            if ($hasSched) {
+                $res = mysqli_query($connection, 'SELECT COUNT(*) FROM '.$p.'scheduled_tasks_config');
+                if ($res) {
+                    list($cfgCount) = mysqli_fetch_array($res, MYSQLI_NUM);
+                    mysqli_free_result($res);
+                    if ((int) $cfgCount < 1) {
+                        mysqli_query($connection, 'INSERT INTO '.$p.'scheduled_tasks_config (`id`, `loglevel`) VALUES (1, 6)');
+                    }
+                }
+
+                if ($hasOldCron) {
+                    mysqli_query($connection,
+                        'INSERT INTO '.$p.'scheduled_tasks'
+                        .' (`active`, `task`, `status`, `lastcall`, `nextcall`, `crondata`, `taskdata`, `log`)'
+                        .' SELECT `active`, `task`, `status`, `lastcall`, `nextcall`, `crondata`, `taskdata`, `log`'
+                        .' FROM `'.$oldCron.'`');
+
+                    $res = mysqli_query($connection, 'SHOW TABLES LIKE \''.$oldSettings.'\'');
+                    if ($res && mysqli_num_rows($res) > 0) {
+                        mysqli_free_result($res);
+                        $res2 = mysqli_query($connection, 'SELECT `loglevel` FROM `'.$oldSettings.'` LIMIT 1');
+                        if ($res2 && ($cfg = mysqli_fetch_array($res2, MYSQLI_ASSOC))) {
+                            mysqli_query($connection, sprintf(
+                                'UPDATE '.$p.'scheduled_tasks_config SET `loglevel`=%d WHERE `id`=1',
+                                (int) $cfg['loglevel']
+                            ));
+                        }
+                        if ($res2) {
+                            mysqli_free_result($res2);
+                        }
+                        mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$oldSettings.'`');
+                    } elseif ($res) {
+                        mysqli_free_result($res);
+                    }
+
+                    mysqli_query($connection, 'DROP TABLE IF EXISTS `'.$oldCron.'`');
+                }
+
+                mysqli_query($connection,
+                    'UPDATE '.$p.'scheduled_tasks SET `task`=REPLACE(`task`,\'tccrn.\',\'sched.\')'
+                    .' WHERE `task` LIKE \'tccrn.%\'');
+            }
+
+            mysqli_query($connection,
+                'UPDATE '.$p.'mods SET installed=0, paused=1'
+                .' WHERE modname=\'TCCronPlugin\' OR modname=\'PluginTCCron\''
+                .' OR packageName LIKE \'%tccrn%\' OR packageName LIKE \'%clevercron%\'');
+
+            if ($cleverCronActive) {
+                @file_put_contents(
+                    dirname(__DIR__).'/temp/update_clevercron_notice.flag',
+                    '1'
+                );
+            }
         }
 
         // add new root certificates
@@ -403,6 +508,11 @@ elseif ($step == STEP_UPDATE_STEP) {
             $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP sms_send_code';
             $queries[] = 'ALTER TABLE '.$mysql['prefix'].'mails DROP body';
         }
+
+        // Legacy mobile interface (/m) removed
+        $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP mobile_url';
+        $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP redirect_mobile';
+        $queries[] = 'ALTER TABLE '.$mysql['prefix'].'gruppen DROP wap';
 
         $count = count($queries);
 
@@ -492,6 +602,8 @@ elseif ($step == STEP_UPDATE_STEP) {
         fclose($fp);
 
         SetupWriteLock('lock_update');
+
+        @unlink(dirname(__DIR__).'/temp/update_clevercron_notice.flag');
 
         echo 'OK:DONE';
     }

@@ -88,6 +88,8 @@ if($_REQUEST['action'] == 'folder')
 	{
 		$mails = $mailbox->GetMailIDList($folderID);
 
+		SessionReleaseLock();
+
 		$tempFileID = RequestTempFile($userRow['id'], time()+TIME_ONE_HOUR, true);
 		$tempFileName = TempFileName($tempFileID);
 
@@ -142,6 +144,8 @@ if($_REQUEST['action'] == 'folder')
 		}
 		else if(isset($_REQUEST['ids']))
 		{
+			if(count($_REQUEST['ids']) > 1)
+				SessionReleaseLock();
 			foreach($_REQUEST['ids'] as $id)
 				$mailbox->DeleteMail((int)$id);
 		}
@@ -215,6 +219,8 @@ if($_REQUEST['action'] == 'folder')
 			// delete
 			if($_REQUEST['massAction'] == 'delete')
 			{
+				if(count($mailIDs) > 1)
+					SessionReleaseLock();
 				foreach($mailIDs as $mailID)
 					$mailbox->DeleteMail($mailID);
 			}
@@ -232,6 +238,7 @@ if($_REQUEST['action'] == 'folder')
 			// download
 			else if($_REQUEST['massAction'] == 'download')
 			{
+				SessionReleaseLock();
 				$tempFileID = RequestTempFile($userRow['id'], time()+TIME_ONE_HOUR, true);
 				$tempFileName = TempFileName($tempFileID);
 

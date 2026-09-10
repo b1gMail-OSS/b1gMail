@@ -1,0 +1,67 @@
+.scheduler-toolbar {
+	border-bottom: 1px solid var(--tblr-border-color);
+	padding-bottom: 0.75rem;
+}
+
+.sched-btn-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.sched-btn-grid .btn-check + .btn {
+	min-width: 2.6rem;
+	padding: 0.25rem 0.55rem;
+}
+
+.sched-btn-grid--compact .btn-check + .btn {
+	min-width: 2.15rem;
+	padding: 0.2rem 0.4rem;
+	font-size: 0.8125rem;
+}
+
+.sched-btn-grid--minute .btn-check + .btn {
+	min-width: 2rem;
+	padding: 0.15rem 0.35rem;
+	font-size: 0.75rem;
+}
+
+.sched-group-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1rem;
+}
+
+.sched-table-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: 0.35rem;
+	max-height: 14rem;
+	overflow: auto;
+	padding: 0.25rem;
+	border: 1px solid var(--tblr-border-color);
+	border-radius: var(--tblr-border-radius);
+}
+
+.sched-table-grid .form-check {
+	margin: 0;
+}
+
+.sched-acp-actions .btn-group > .sched-acp-actions__form {
+	display: contents;
+}
+
+.sched-acp-actions .btn-group > .sched-acp-actions__form > .btn {
+	border-radius: 0;
+}
+
+.sched-acp-actions .btn-group > .sched-acp-actions__form:first-child > .btn {
+	border-top-left-radius: var(--tblr-border-radius);
+	border-bottom-left-radius: var(--tblr-border-radius);
+}
+
+.sched-acp-actions .btn-group > .btn:last-child,
+.sched-acp-actions .btn-group > .sched-acp-actions__form:last-child > .btn {
+	border-top-right-radius: var(--tblr-border-radius);
+	border-bottom-right-radius: var(--tblr-border-radius);
+}

@@ -21,8 +21,6 @@
 					<a href="{$nliUrlFaq}" class="text-secondary">{lng p="faq"}</a>
 					<span class="mx-1">·</span>
 					<a href="{$nliUrlImprint}" class="text-secondary">{lng p="contact"}</a>
-					<span class="mx-1">·</span>
-					<a href="{$mobileURL}" class="text-secondary">{lng p="mobilepda"}</a>
 				</div>
 			</div>
 		</div>

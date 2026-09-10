@@ -210,14 +210,6 @@
 					</div>
 				</div>
 				<div class="mb-3 row">
-					<label class="col-sm-4 col-form-check-label">{lng p="redirectmobile"}</label>
-					<div class="col-sm-8">
-						<label class="form-check">
-							<input class="form-check-input" type="checkbox" name="redirect_mobile"{if $bm_prefs.redirect_mobile=='yes'} checked="checked"{/if}>
-						</label>
-					</div>
-				</div>
-				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="logouturl"}</label>
 					<div class="col-sm-8">
 						<input type="text" class="form-control" name="logouturl" value="{text allowEmpty=true value=$bm_prefs.logouturl}" placeholder="{lng p="logouturl"}">

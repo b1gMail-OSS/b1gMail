@@ -58,9 +58,13 @@ class BMPush
 
     public static function getPublicKey()
     {
-        global $bm_prefs;
+        // Must match the key used for VAPID signing (derived from private key).
+        $vapid = self::loadVapidCredentials();
+        if ($vapid === false) {
+            return '';
+        }
 
-        return isset($bm_prefs['push_vapid_public']) ? trim($bm_prefs['push_vapid_public']) : '';
+        return BMPushVapid::base64UrlEncode($vapid['public']);
     }
 
     /**
@@ -104,7 +108,24 @@ class BMPush
 
         $subject = !empty($bm_prefs['push_vapid_subject'])
             ? trim($bm_prefs['push_vapid_subject'])
-            : 'mailto:noreply@localhost';
+            : '';
+        // FCM/Mozilla reject weak localhost subjects → HTTP 403, silent non-delivery.
+        if ($subject === ''
+            || stripos($subject, '@localhost') !== false
+            || !preg_match('#^(mailto:|https://)#i', $subject)) {
+            $host = 'localhost';
+            if (!empty($bm_prefs['selfurl'])) {
+                $parsedHost = parse_url($bm_prefs['selfurl'], PHP_URL_HOST);
+                if (is_string($parsedHost) && $parsedHost !== '') {
+                    $host = $parsedHost;
+                }
+            }
+            if ($host !== '' && strcasecmp($host, 'localhost') !== 0) {
+                $subject = 'mailto:noreply@'.$host;
+            } elseif ($subject === '' || !preg_match('#^(mailto:|https://)#i', $subject)) {
+                $subject = 'mailto:noreply@localhost';
+            }
+        }
 
         return [
             'private' => $privatePem,
@@ -324,6 +345,7 @@ class BMPush
         }
 
         $skipPrefCheck = !empty($message['skipPrefCheck']);
+        $skipSessionCheck = !empty($message['skipSessionCheck']);
 
         if (!$skipPrefCheck && $area == self::AREA_USER && !self::userAllowsType($targetId, $type)) {
             $prefs = self::getUserPushPrefs($targetId);
@@ -344,14 +366,17 @@ class BMPush
             return ['sent' => 0, 'failed' => 0, 'removed' => 0, 'reason' => 'prefs_blocked'];
         }
 
-        $pushSessionState = $area == self::AREA_USER
-            ? SessionUserGetPushSessionState($targetId)
-            : ($area == self::AREA_ADMIN ? SessionAdminGetPushSessionState($targetId) : 'none');
+        $pushSessionState = 'active';
+        if (!$skipSessionCheck) {
+            $pushSessionState = $area == self::AREA_USER
+                ? SessionUserGetPushSessionState($targetId)
+                : ($area == self::AREA_ADMIN ? SessionAdminGetPushSessionState($targetId) : 'none');
 
-        if ($pushSessionState === 'none') {
-            self::logPushResult($targetId, $type, 0, 0, self::countSubscriptions($area, $targetId), 'no_active_session');
+            if ($pushSessionState === 'none') {
+                self::logPushResult($targetId, $type, 0, 0, self::countSubscriptions($area, $targetId), 'no_active_session');
 
-            return ['sent' => 0, 'failed' => 0, 'removed' => 0, 'reason' => 'no_active_session'];
+                return ['sent' => 0, 'failed' => 0, 'removed' => 0, 'reason' => 'no_active_session'];
+            }
         }
 
         $payload = [
@@ -433,7 +458,7 @@ class BMPush
             } else {
                 ++$failed;
                 $lastError = isset($result['error']) ? $result['error'] : 'delivery_failed';
-                if (!empty($result['status'])) {
+                if (!empty($result['status']) && strpos($lastError, (string) $result['status']) === false) {
                     $lastError .= '_'.$result['status'];
                 }
                 if (in_array($result['status'], [401, 403, 404, 410], true)) {
@@ -626,6 +651,7 @@ class BMPush
             'targetId' => (int) $userId,
             'type' => self::TYPE_MAIL,
             'skipPrefCheck' => true,
+            'skipSessionCheck' => true,
             'title' => $title,
             'body' => $body,
             'url' => 'start.php',

@@ -9,9 +9,13 @@ class BMScheduledTasks {
         return B1GMAIL_DIR . 'admin/templates/maintenance.scheduler.' . $name;
     }
 
-    /** Language key for a stored task id (e.g. tccrn.db_optimize → sched.task.db_optimize). */
+    /** Language key for a stored task id (e.g. sched.db_optimize → sched.task.db_optimize). */
     public static function taskLangKey($taskId) {
-        if (is_string($taskId) && strncmp($taskId, 'tccrn.', 6) === 0) {
+        if (!is_string($taskId)) {
+            return $taskId;
+        }
+        // Current prefix + legacy CleverCron plugin IDs (tccrn.*)
+        if (strncmp($taskId, 'sched.', 6) === 0 || strncmp($taskId, 'tccrn.', 6) === 0) {
             return 'sched.task.' . substr($taskId, 6);
         }
 
@@ -32,7 +36,7 @@ class BMScheduledTasks {
         $tasks = array();
         foreach ($lang_admin as $k => $v) {
             if (strncmp($k, 'sched.task.', 11) === 0) {
-                $tasks['tccrn.' . substr($k, 11)] = $v;
+                $tasks['sched.' . substr($k, 11)] = $v;
             }
         }
         asort($tasks);
@@ -82,6 +86,33 @@ class BMScheduledTasks {
         $ensured = true;
     }
 
+    /**
+     * Deactivate CleverCron (TCCronPlugin) if still registered – core scheduler replaces it.
+     */
+    public static function deactivateCleverCronPlugin() {
+        global $db, $cacheManager;
+
+        $db->Query(
+            'UPDATE {pre}mods SET installed=0, paused=1 WHERE modname=? OR modname=? OR packageName LIKE ?',
+            'TCCronPlugin',
+            'PluginTCCron',
+            '%tccrn%'
+        );
+
+        if (isset($cacheManager) && is_object($cacheManager)) {
+            $cacheManager->Delete('dbPlugins_v2');
+        }
+    }
+
+    /** Rewrite legacy task ids tccrn.* → sched.* in core table. */
+    public static function normalizeTaskIds() {
+        global $db;
+
+        $db->Query(
+            "UPDATE {pre}scheduled_tasks SET `task`=REPLACE(`task`,'tccrn.','sched.') WHERE `task` LIKE 'tccrn.%'"
+        );
+    }
+
     public static function migrateLegacyPluginData() {
         global $db, $mysql;
 
@@ -95,50 +126,48 @@ class BMScheduledTasks {
         $hasOld = $res->RowCount() > 0;
         $res->Free();
 
-        $res = $db->Query('SELECT COUNT(*) FROM {pre}scheduled_tasks');
-        list($newCount) = $res->FetchArray(MYSQLI_NUM);
+        $res = $db->Query('SELECT COUNT(*) FROM {pre}scheduled_tasks_config');
+        list($cfgCount) = $res->FetchArray(MYSQLI_NUM);
         $res->Free();
-
-        if (!$hasOld) {
-            $res = $db->Query('SELECT COUNT(*) FROM {pre}scheduled_tasks_config');
-            list($cfgCount) = $res->FetchArray(MYSQLI_NUM);
-            $res->Free();
-            if ($cfgCount < 1) {
-                $db->Query('INSERT INTO {pre}scheduled_tasks_config (`id`, `loglevel`) VALUES (1, 6)');
-            }
-            return;
-        }
-
-        if ($newCount > 0) {
-            $db->Query('DROP TABLE IF EXISTS `' . $oldCron . '`');
-            $db->Query('DROP TABLE IF EXISTS `' . $oldSettings . '`');
-            PutLog('Dropped legacy CleverCron tables', PRIO_NOTE, __FILE__, __LINE__);
-            return;
-        }
-
-        $db->Query(
-            'INSERT INTO {pre}scheduled_tasks (`taskid`, `active`, `task`, `status`, `lastcall`, `nextcall`, `crondata`, `taskdata`, `log`) '
-            . 'SELECT `cronid`, `active`, `task`, `status`, `lastcall`, `nextcall`, `crondata`, `taskdata`, `log` FROM `' . $oldCron . '`'
-        );
-
-        $res = $db->Query('SHOW TABLES LIKE ?', $oldSettings);
-        if ($res->RowCount() > 0) {
-            $res2 = $db->Query('SELECT `loglevel` FROM `' . $oldSettings . '` LIMIT 1');
-            if ($res2->RowCount() > 0) {
-                list($loglevel) = $res2->FetchArray(MYSQLI_NUM);
-                $db->Query('INSERT INTO {pre}scheduled_tasks_config (`id`, `loglevel`) VALUES (1, ?) ON DUPLICATE KEY UPDATE `loglevel`=?', (int) $loglevel, (int) $loglevel);
-            } else {
-                $db->Query('INSERT INTO {pre}scheduled_tasks_config (`id`, `loglevel`) VALUES (1, 6)');
-            }
-            $res2->Free();
-            $db->Query('DROP TABLE IF EXISTS `' . $oldSettings . '`');
-        } else {
+        if ($cfgCount < 1) {
             $db->Query('INSERT INTO {pre}scheduled_tasks_config (`id`, `loglevel`) VALUES (1, 6)');
         }
-        $res->Free();
 
-        $db->Query('DROP TABLE IF EXISTS `' . $oldCron . '`');
-        PutLog('Migrated CleverCron plugin data to core scheduled_tasks tables', PRIO_NOTE, __FILE__, __LINE__);
+        $migrated = 0;
+        if ($hasOld) {
+            // Import without copying primary keys – avoids collisions if core tasks already exist.
+            $db->Query(
+                'INSERT INTO {pre}scheduled_tasks (`active`, `task`, `status`, `lastcall`, `nextcall`, `crondata`, `taskdata`, `log`) '
+                . 'SELECT `active`, `task`, `status`, `lastcall`, `nextcall`, `crondata`, `taskdata`, `log` FROM `' . $oldCron . '`'
+            );
+            $migrated = (int) $db->AffectedRows();
+
+            $res = $db->Query('SHOW TABLES LIKE ?', $oldSettings);
+            if ($res->RowCount() > 0) {
+                $res2 = $db->Query('SELECT `loglevel` FROM `' . $oldSettings . '` LIMIT 1');
+                if ($res2->RowCount() > 0) {
+                    list($loglevel) = $res2->FetchArray(MYSQLI_NUM);
+                    $db->Query(
+                        'UPDATE {pre}scheduled_tasks_config SET `loglevel`=? WHERE `id`=1',
+                        (int) $loglevel
+                    );
+                }
+                $res2->Free();
+                $db->Query('DROP TABLE IF EXISTS `' . $oldSettings . '`');
+            }
+            $res->Free();
+
+            $db->Query('DROP TABLE IF EXISTS `' . $oldCron . '`');
+            PutLog(
+                sprintf('Migrated %d CleverCron job(s) to core scheduled_tasks', $migrated),
+                PRIO_NOTE,
+                __FILE__,
+                __LINE__
+            );
+        }
+
+        self::normalizeTaskIds();
+        self::deactivateCleverCronPlugin();
     }
 
     public static function onCron() {
@@ -172,18 +201,18 @@ class BMScheduledTasks {
 
         self::migrateLegacyPluginData();
 
-        $tpl->addCSSFile('admin', '../plugins/css/scheduledtasks.css?ver=' . B1GMAIL_VERSION);
-        $tpl->addJSFile('admin', '../plugins/js/scheduledtasks.js?ver=' . B1GMAIL_VERSION);
+        $tpl->addCSSFile('admin', B1GMAIL_DIR . 'admin/templates/css/scheduler.css');
+        $tpl->addJSFile('admin', B1GMAIL_DIR . 'admin/templates/js/scheduler.js');
 
         static $countdownRegistered = false;
         if (!$countdownRegistered) {
-            $tpl->registerPlugin('function', 'tccrn_countdown', 'ScheduledTasksTemplateCountdown');
+            $tpl->registerPlugin('function', 'sched_countdown', 'ScheduledTasksTemplateCountdown');
             $countdownRegistered = true;
         }
 
-        $tpl->assign('tccrn_admin_script', 'maintenance.php');
-        $tpl->assign('tccrn_admin_action', 'scheduler');
-        $tpl->assign('tccrn_nav_tpl', $this->template('nav.tpl'));
+        $tpl->assign('sched_admin_script', 'maintenance.php');
+        $tpl->assign('sched_admin_action', 'scheduler');
+        $tpl->assign('sched_nav_tpl', $this->template('nav.tpl'));
 
         $do = $this->_adminResolveDo();
         $tpl->assign('scheduler_do', $do);
@@ -300,7 +329,7 @@ class BMScheduledTasks {
             $this->_config = null;
         }
         $tpl->assign('page', $this->template('settings.tpl'));
-        $tpl->assign('tccrn_prefs', $this->_getConfig());
+        $tpl->assign('sched_prefs', $this->_getConfig());
     }
 
     function _taskDb($op, $tables) {
@@ -573,7 +602,10 @@ class BMScheduledTasks {
                         continue;
                     }
                     $path = $dir . $file;
-                    if (fileatime($path) < $limit && filectime($path) < $limit && filemtime($path) < $limit) {
+                    // Use mtime only. Web Push scans every sess_* (file_get_contents),
+                    // which refreshes atime and would otherwise prevent cleanup forever.
+                    $mtime = @filemtime($path);
+                    if ($mtime !== false && $mtime < $limit) {
                         if (@unlink($path)) {
                             $deleted++;
                         }
@@ -695,7 +727,7 @@ class BMScheduledTasks {
 
         $tpl->assign('page', $this->template('start.tpl'));
         $tpl->assign('groups', BMGroup::GetSimpleGroupList());
-        $tpl->assign('tccrn_tasks', $this->_getTasks());
+        $tpl->assign('sched_tasks', $this->_getTasks());
     }
 
     function _getTasks() {
@@ -738,15 +770,15 @@ class BMScheduledTasks {
                     }
                 }
                 $res->Free();
-                $tpl->assign('tccrn_tables', $myTables);
+                $tpl->assign('sched_tables', $myTables);
             } elseif (substr($task, 0, 2) == 'us') {
                 $tpl->assign('groups', BMGroup::GetSimpleGroupList());
             } elseif (substr($task, 0, 2) == 'tr') {
                 $tpl->assign('groups', BMGroup::GetSimpleGroupList());
             }
-            $tpl->assign('tccrn_task_data', $this->template('taskdata.' . $this->_taskData[$task] . '.tpl'));
+            $tpl->assign('sched_task_data', $this->template('taskdata.' . $this->_taskData[$task] . '.tpl'));
             if ($this->_taskData[$task] === 'userGroup') {
-                $tpl->assign('tccrn_task_data_user', $this->template('taskdata.user.tpl'));
+                $tpl->assign('sched_task_data_user', $this->template('taskdata.user.tpl'));
             }
         }
     }
@@ -833,7 +865,7 @@ class BMScheduledTasks {
                 $taskKey = '';
             }
             if (!empty($_POST['next']) && $taskKey !== '') {
-                $tpl->assign('tccrn_data', $this->_normalizeTaskFormData($_POST));
+                $tpl->assign('sched_data', $this->_normalizeTaskFormData($_POST));
                 $this->_loadTaskData($taskKey);
             } elseif (!empty($_POST['save']) && $taskKey !== '') {
                 if (empty($_POST['taskdata'])) {
@@ -856,17 +888,17 @@ class BMScheduledTasks {
             $row = $res->FetchArray();
             $row['taskdata'] = unserialize($row['taskdata']);
             $row['crondata'] = unserialize($row['crondata']);
-            $tpl->assign('tccrn_data', $this->_normalizeTaskFormData($row));
+            $tpl->assign('sched_data', $this->_normalizeTaskFormData($row));
             $this->_loadTaskData($row['task']);
         }
 
-        $tccrnData = $tpl->getTemplateVars('tccrn_data');
-        $tpl->assign('tccrn_data', $this->_normalizeTaskFormData(
-            ($tccrnData === null || $tccrnData === false) ? array() : $tccrnData
+        $schedData = $tpl->getTemplateVars('sched_data');
+        $tpl->assign('sched_data', $this->_normalizeTaskFormData(
+            ($schedData === null || $schedData === false) ? array() : $schedData
         ));
 
-        $tpl->assign('tccrn_tasks', $tasks);
-        $tpl->assign('tccrn_schedule_tpl', $this->template('schedule.tpl'));
+        $tpl->assign('sched_tasks', $tasks);
+        $tpl->assign('sched_schedule_tpl', $this->template('schedule.tpl'));
         $tpl->assign('sched_weekdays_array', $lang_admin['sched.weekdays_array']);
         $tpl->assign('sched_weekdays_short', $lang_admin['sched.weekdays_short']);
         $tpl->assign('page', $this->template('task.tpl'));

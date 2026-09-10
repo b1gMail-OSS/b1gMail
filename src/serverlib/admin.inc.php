@@ -27,6 +27,12 @@ AdminIpWhitelistEnforce();
 // Resume session cookie from login (legacy sid mode keeps use_cookies=0 in init).
 SessionEnsureActiveWithCookie();
 
+if(SessionIsLogoutRequest())
+{
+	SessionHandleAdminLogout();
+	exit();
+}
+
 $sessionApiActions = array('sessionStatus', 'sessionUnlock', 'sessionKeepAlive', 'sessionLock', 'sessionLockNow');
 if(isset($_REQUEST['action']) && in_array($_REQUEST['action'], $sessionApiActions, true))
 {
@@ -119,7 +125,6 @@ $faqRequirementTable = [
     'pop3' => $lang_admin['pop3'],
     'imap' => $lang_admin['imap'],
     'webdav' => $lang_admin['webdav'],
-    'wap' => $lang_admin['mobileaccess'],
     'checker' => $lang_admin['mailchecker'],
     'webdisk' => $lang_admin['webdisk'],
     'share' => $lang_admin['wdshare'],

@@ -179,6 +179,8 @@ function stepInit(theStep)
 	{
 		if(EBID('done'))
 			EBID('done').style.display = '';
+		if(EBID('update-clevercron-notice'))
+			EBID('update-clevercron-notice').style.display = '';
 		if(EBID('next_button'))
 			EBID('next_button').disabled = false;
 	}

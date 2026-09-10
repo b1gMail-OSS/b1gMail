@@ -5,6 +5,26 @@
 	var cfg = bmSessionConfig;
 	var warnShown = false;
 	var lockedShown = false;
+	var stopped = false;
+	var pollTimer = null;
+
+	function stopSessionMonitor() {
+		stopped = true;
+		if(pollTimer)
+		{
+			clearInterval(pollTimer);
+			pollTimer = null;
+		}
+	}
+
+	function isLogoutUrl(url) {
+		if(!url)
+			return false;
+		url = String(url).toLowerCase();
+		return url.indexOf('action=logout') !== -1
+			|| /\/logout(?:\?|#|$)/.test(url)
+			|| /\/start\/logout(?:\?|#|$)/.test(url);
+	}
 
 	function csrfTokenValue() {
 		if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
@@ -206,6 +226,9 @@
 	};
 
 	function sessionFetch(action, options) {
+		if(stopped)
+			return Promise.resolve({ ok: false, data: null, status: 0 });
+
 		options = options || {};
 		var fetchOpts = {
 			method: options.method || 'GET',
@@ -424,11 +447,19 @@
 			}, { passive: true });
 		});
 
+		document.addEventListener('click', function(e) {
+			var link = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+			if(link && isLogoutUrl(link.getAttribute('href')))
+				stopSessionMonitor();
+		}, true);
+
+		window.addEventListener('pagehide', stopSessionMonitor);
+
 		var pollMs = 30000;
 		if(cfg.idleTimeout > 0)
 			pollMs = Math.max(15000, Math.min(60000, cfg.idleTimeout * 60 * 1000 / 2));
 
-		setInterval(pollStatus, pollMs);
+		pollTimer = setInterval(pollStatus, pollMs);
 		pollStatus();
 
 		if(document.body && document.body.classList.contains('bm-session-locked'))

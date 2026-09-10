@@ -271,16 +271,6 @@
 				<div class="row">
 					<div class="col-md-6">
 						<div class="row">
-							<label class="col-sm-6 col-form-check-label">{lng p="mobileaccess"}</label>
-							<div class="col-sm-6">
-								<label class="form-check">
-									<input class="form-check-input" type="checkbox" name="wap"{if $group.wap=='yes'} checked="checked"{/if}>
-								</label>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="row">
 							<label class="col-sm-6 col-form-check-label">{lng p="sync"}</label>
 							<div class="col-sm-6">
 								<label class="form-check">

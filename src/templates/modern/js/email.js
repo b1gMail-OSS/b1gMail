@@ -367,9 +367,22 @@ function registerFolderHotkeyHandler()
 			case 46: // del
 				if(confirm(lang['realdel']))
 				{
-					EBID('massAction').value = 'delete';
 					transferSelectedMailIDs();
-					document.forms['f1'].submit();
+					var idsField = EBID('selectedMailIDs');
+					var ids = [];
+					if(idsField && idsField.value)
+					{
+						var parts = idsField.value.split(';');
+						for(var i = 0; i < parts.length; i++)
+						{
+							if(parts[i] !== '')
+								ids.push(parseInt(parts[i], 10));
+						}
+					}
+					if(ids.length > 0)
+						deleteMail(ids);
+					else if(typeof currentID !== 'undefined' && currentID)
+						deleteMail(currentID);
 				}
 				return(false);
 			}

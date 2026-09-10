@@ -1804,7 +1804,6 @@ else if($_REQUEST['action'] == 'membership')
 		$tpl->assign('domainList', 			GetDomainList('login'));
 		$tpl->assign('timezone',			date('Z'));
 		$tpl->assign('year',				date('Y'));
-		$tpl->assign('mobileURL',			$bm_prefs['mobile_url']);
 		$tpl->assign('title', 				$lang_user['cancelmembership']);
 		$tpl->assign('msg', 				$lang_user['cancelledtext']);
 		$tpl->assign('languageList', 		GetAvailableLanguages());

@@ -139,7 +139,7 @@ if($_REQUEST['action'] == 'compose')
 			&& ($userRow['soforthtml'] == 'yes' || isset($_REQUEST['htmlView'])))
 		{
 			$textMode = 'html';
-			$text = formatEMailHTMLText($textParts['html'], true, array(), -1, false, true);
+			$text = formatEMailHTMLText($textParts['html'], true, array(), -1, true);
 		}
 		else if(isset($textParts['text']))
 		{

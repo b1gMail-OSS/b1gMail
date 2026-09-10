@@ -775,7 +775,7 @@ class PremiumAccountPlugin extends BMPlugin
 		{
 			// insert prefs row
 			$db->Query('INSERT INTO {pre}mod_premium_prefs(`fields`) VALUES(?)',
-				'a:13:{i:0;s:7:"storage";i:1;s:7:"maxsize";i:2;s:4:"pop3";i:3;s:7:"anlagen";i:4;s:7:"webdisk";i:5;s:8:"mail2sms";i:7;s:3:"wap";i:8;s:6:"aliase";i:9;s:10:"send_limit";i:10;s:3:"ads";i:11;s:4:"imap";i:12;s:6:"webdav";i:13;s:4:"smtp";}');
+				'a:12:{i:0;s:7:"storage";i:1;s:7:"maxsize";i:2;s:4:"pop3";i:3;s:7:"anlagen";i:4;s:7:"webdisk";i:5;s:8:"mail2sms";i:6;s:6:"aliase";i:7;s:10:"send_limit";i:8;s:3:"ads";i:9;s:4:"imap";i:10;s:6:"webdav";i:11;s:4:"smtp";}');
 		}
 		else
 		{
@@ -786,7 +786,7 @@ class PremiumAccountPlugin extends BMPlugin
 				$fields = @unserialize($row['fields']);
 				if(!is_array($fields))
 					continue;
-				$fields = array_diff($fields, array('httpmail'));
+				$fields = array_diff($fields, array('httpmail', 'wap'));
 				$db->Query('UPDATE {pre}mod_premium_prefs SET `fields`=?',
 					serialize($fields));
 			}
@@ -1903,7 +1903,6 @@ class PremiumAccountPlugin extends BMPlugin
 			'responder'				=> 'autoresponder',
 			'titel'					=> 'title',
 			'signatur'				=> 'mailsig',
-			'wap'					=> 'mobileaccess',
 			'aliase'				=> 'aliases',
 			'send_limit'			=> 'sendlimit',
 			'checker'				=> 'mailchecker',

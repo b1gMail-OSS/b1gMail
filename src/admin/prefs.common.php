@@ -142,7 +142,7 @@ function PrefsCommonSaveSessionLoginPrefs()
 		. 'pw_hash_li_algo=?, pw_hash_li_cost=?, pw_hash_admin_algo=?, pw_hash_admin_cost=?, '
 		. 'mfa_admin_enable=?, mfa_admin_user_setup=?, mfa_admin_default=?, mfa_admin_required=?, login_notify_admin=?, '
 		. 'mfa_li_enable=?, mfa_li_user_setup=?, mfa_li_default=?, login_notify_li=?, '
-		. 'ip_lock=?, cookie_lock=?, domain_combobox=?, redirect_mobile=?, logouturl=?, contact_history=?, '
+		. 'ip_lock=?, cookie_lock=?, domain_combobox=?, logouturl=?, contact_history=?, '
 		. 'ssl_url=?, ssl_login_option=?, ssl_login_enable=?',
 		$sessionLifetime,
 		$sessionIdle,
@@ -166,7 +166,6 @@ function PrefsCommonSaveSessionLoginPrefs()
 		isset($_POST['ip_lock']) ? 'yes' : 'no',
 		isset($_POST['cookie_lock']) ? 'yes' : 'no',
 		isset($_POST['domain_combobox']) ? 'yes' : 'no',
-		isset($_POST['redirect_mobile']) ? 'yes' : 'no',
 		isset($_POST['logouturl']) ? $_POST['logouturl'] : '',
 		isset($_POST['contact_history']) ? 'yes' : 'no',
 		isset($_POST['ssl_url']) ? $_POST['ssl_url'] : '',
@@ -196,8 +195,6 @@ if($_REQUEST['action'] == 'common')
 		// trailing slashes
 		if(substr($_POST['selfurl'], -1) != '/')
 			$_POST['selfurl'] .= '/';
-		if(substr($_POST['mobile_url'], -1) != '/')
-			$_POST['mobile_url'] .= '/';
 		if(substr($_POST['selffolder'], -1) != '/')
 			$_POST['selffolder'] .= '/';
 		if(substr($_POST['datafolder'], -1) != '/')
@@ -212,13 +209,12 @@ if($_REQUEST['action'] == 'common')
 		if($searchEngine !== '' && SearchEngineBuildRedirect($searchEngine, 'test') === false)
 			$searchEngine = isset($bm_prefs['search_engine']) ? $bm_prefs['search_engine'] : '';
 
-		$db->Query('UPDATE {pre}prefs SET titel=?, b1gmta_host=?, selffolder=?, selfurl=?, mobile_url=?, search_engine=?, datafolder=?, language=?, std_land=?, datumsformat=?, ordner_proseite=?, gut_regged=?, autocancel=?, wartung=?, wartung_whitelist_ips=?, structstorage=?, cron_interval=?, ssl_signup_enable=?, auto_tz=?, compress_pages=?, calendar_defaultviewmode=?, '
+		$db->Query('UPDATE {pre}prefs SET titel=?, b1gmta_host=?, selffolder=?, selfurl=?, search_engine=?, datafolder=?, language=?, std_land=?, datumsformat=?, ordner_proseite=?, gut_regged=?, autocancel=?, wartung=?, wartung_whitelist_ips=?, structstorage=?, cron_interval=?, ssl_signup_enable=?, auto_tz=?, compress_pages=?, calendar_defaultviewmode=?, '
 			. 'logs_autodelete=?, logs_autodelete_days=?, logs_autodelete_archive=?, hotkeys_default=?, contactform=?, contactform_to=?, contactform_name=?, notify_interval=?, notify_lifetime=?, mail_groupmode=?, push_enabled=?, push_vapid_subject=?, clientapi_enable=?',
 			$_POST['titel'],
 			$_POST['b1gmta_host'],
 			$_POST['selffolder'],
 			$_POST['selfurl'],
-			$_POST['mobile_url'],
 			$searchEngine,
 			$_POST['datafolder'],
 			$_POST['language'],

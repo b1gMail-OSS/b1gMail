@@ -6,6 +6,9 @@ RewriteEngine On
 RewriteOptions inherit
 Options -MultiViews
 
+# Legacy mobile UI (/m) removed → install root (bookmarks / favorites)
+RewriteRule ^m(?:/.*)?$ index.php [R=301,L]
+
 # Well-known service discovery (DAV) — relative so subdirectory installs work
 RewriteRule ^\.well-known/carddav/?$ interface/carddav.php [R=301,L]
 RewriteRule ^\.well-known/caldav/?$ interface/caldav.php [R=301,L]

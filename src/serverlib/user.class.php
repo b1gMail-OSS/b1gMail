@@ -1785,15 +1785,15 @@ class BMUser
 			}
 		}
 
-		$_SESSION['bm_userLoggedIn']	= false;
-		$_SESSION['bm_userID']			= -1;
-
-		if(!isset($_SESSION['bm_adminLoggedIn']))
+		$preserveAdmin = !empty($_SESSION['bm_adminLoggedIn']);
+		if(function_exists('SessionEndBrowserSession'))
+			SessionEndBrowserSession($preserveAdmin);
+		else
 		{
-			$cookieName = 'sessionSecret_'.substr(session_id(), 0, 16);
-			if(isset($_COOKIE[$cookieName]))
-				BMSecureSetCookie($cookieName, '', time() - TIME_ONE_HOUR);
-			session_destroy();
+			$_SESSION['bm_userLoggedIn'] = false;
+			$_SESSION['bm_userID'] = -1;
+			if(!$preserveAdmin)
+				@session_destroy();
 		}
 	}
 

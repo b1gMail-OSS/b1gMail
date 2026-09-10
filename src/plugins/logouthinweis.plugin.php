@@ -116,11 +116,6 @@ class LogoutHinweis extends BMPlugin
         $this->_FileHandlerall($file, $action);
     }
 
-	public function FileHandlerMobile($file, $action)
-    {
-        $this->_FileHandlerall($file, $action);
-    }
-
 	private function _FileHandlerall($file, $action) {
 		global $db, $tpl, $lang_user, $lang_custom, $thisUser;
 		if (!RequestPrivileges(PRIVILEGES_USER, true)) {
@@ -138,11 +133,7 @@ class LogoutHinweis extends BMPlugin
 				$tpl->assign('title', $lang_user['logouthinweis_title']);
 				$tpl->assign('pageTitle', $lang_user['logouthinweis_title']);
 				$tpl->assign('msg', nl2br($lang_custom['loginhinweis_text']));
-				if ($_SERVER['PHP_SELF'] == '/m/index.php') {  // Wenn mobiles Login
-					$tpl->assign('backLink', 'email.php');
-				} else {
-					$tpl->assign('backLink', 'start.php');
-				}
+				$tpl->assign('backLink', 'start.php');
 				$tpl->assign('page', $this->_templatePath('logouthinweis.plugin.tpl'));
 				$tpl->display('nli/index.tpl');
 				exit();

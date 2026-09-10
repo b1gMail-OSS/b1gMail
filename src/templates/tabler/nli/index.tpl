@@ -247,9 +247,8 @@
 			<div class="row text-secondary small py-3">
 				<div class="col-md-4">&copy; {$year} {$service_title}</div>
 				<div class="col-md-4 text-center">
-					<a href="{$mobileURL}">{lng p="mobilepda"}</a>
 					{foreach from=$pluginUserPages item=item}{if !$item.top}
-					| <a href="{$item.link}">{$item.text}</a>
+					<a href="{$item.link}" class="mx-1">{$item.text}</a>
 					{/if}{/foreach}
 				</div>
 				<div class="col-md-4 text-md-end">

@@ -2291,6 +2291,10 @@ class BMMailbox
 	{
 		global $db, $tpl;
 
+		// Long-running: release session lock so other tabs (ACP/LI) stay responsive.
+		if(function_exists('SessionReleaseLock'))
+			SessionReleaseLock();
+
 		$deletedMails = 0;
 		$mails = $this->GetMailIDList($id);
 		foreach($mails as $mailID)

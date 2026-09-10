@@ -221,21 +221,10 @@ if(isset($_REQUEST['action']) && $_REQUEST['action']=='login')
 		}
 	}
 }
-else if(isset($_REQUEST['action']) && $_REQUEST['action']=='logout')
+else if(isset($_REQUEST['action']) && RouteRestoreLegacyAction((string)$_REQUEST['action']) === 'logout')
 {
-	RequestPrivileges(PRIVILEGES_ADMIN);
-	$adminId = isset($_SESSION['bm_adminID']) ? (int) $_SESSION['bm_adminID'] : 0;
-	if ($adminId > 0) {
-		if (!class_exists('BMPush', false)) {
-			@include_once B1GMAIL_DIR.'serverlib/push.class.php';
-		}
-		if (class_exists('BMPush', false) && BMPush::isEnabled()) {
-			BMPush::unsubscribeAll(BMPush::AREA_ADMIN, $adminId);
-		}
-	}
-	$_SESSION = array();
-	session_destroy();
-	SessionRedirect('index.php');
+	SessionHandleAdminLogout();
+	exit();
 }
 
 if(isset($_REQUEST['jump']))

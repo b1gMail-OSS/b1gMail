@@ -186,6 +186,10 @@
 			if (done) {
 				done.classList.remove('d-none');
 			}
+			var cleverCronNotice = byId('update-clevercron-notice');
+			if (cleverCronNotice) {
+				cleverCronNotice.classList.remove('d-none');
+			}
 			var next = byId('next_button');
 			if (next) {
 				next.disabled = false;

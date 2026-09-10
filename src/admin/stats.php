@@ -102,7 +102,7 @@ if($_REQUEST['action'] == 'common'
 
 	// special types
 	$statsSpecial = array(
-		'login'		=> array('login', 'mobile_login'),
+		'login'		=> array('login'),
 		'send'		=> array('send', 'send_intern', 'send_extern'),
 		'wd'		=> array('wd_down', 'wd_up'),
 		'receive'	=> array('receive', 'infected', 'spam')

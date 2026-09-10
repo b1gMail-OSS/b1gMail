@@ -1,4 +1,5 @@
-{if empty($smarty.get.tableOnly)}<form name="f1" action="email.php?do=action&{$folderString}{$sessionUrlSuffix}" onsubmit="transferSelectedMailIDs()" method="post">
+{if empty($smarty.get.tableOnly)}<form name="f1" action="{sessionurl file='email.php' params="do=action&{$folderString}"}" onsubmit="transferSelectedMailIDs()" method="post">
+{csrffield}
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
 <div id="contentHeader">

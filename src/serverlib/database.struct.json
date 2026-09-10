@@ -2522,14 +2522,6 @@
 				""
 			],
 			[
-				"wap",
-				"enum('yes','no')",
-				"NO",
-				"",
-				"yes",
-				""
-			],
-			[
 				"aliase",
 				"int(11)",
 				"NO",
@@ -5360,22 +5352,6 @@
 			[
 				"locked_altmail",
 				"text",
-				"NO",
-				"",
-				null,
-				""
-			],
-			[
-				"redirect_mobile",
-				"enum('yes','no')",
-				"NO",
-				"",
-				"yes",
-				""
-			],
-			[
-				"mobile_url",
-				"varchar(255)",
 				"NO",
 				"",
 				null,
