@@ -137,6 +137,62 @@ class BMMailFilter_DNSBL extends BMMailFilter
 }
 
 /**
+ * Open a ClamAV/clamd connection (TCP or Unix socket).
+ *
+ * Host may be a TCP hostname/IP, a filesystem path (/run/clamav/...),
+ * or unix:///run/clamav/clamd.ctl. Port is ignored for Unix sockets.
+ *
+ * @param string $host
+ * @param int $port
+ * @param int $errNo
+ * @param string $errStr
+ * @return resource|false
+ */
+function BMClamAVConnect($host, $port, &$errNo, &$errStr)
+{
+	$host = trim((string)$host);
+	$errNo = 0;
+	$errStr = '';
+	if($host === '')
+	{
+		$errStr = 'empty host';
+		return(false);
+	}
+
+	$timeout = defined('SOCKET_TIMEOUT') ? SOCKET_TIMEOUT : 10;
+
+	// Unix domain socket (Debian/Ubuntu default: /var/run/clamav/clamd.ctl)
+	if($host[0] === '/'
+		|| stripos($host, 'unix:') === 0)
+	{
+		$path = $host;
+		if(stripos($path, 'unix://') === 0)
+			$path = substr($path, 7);
+		else if(stripos($path, 'unix:') === 0)
+			$path = substr($path, 5);
+
+		return(@stream_socket_client('unix://' . $path, $errNo, $errStr, $timeout));
+	}
+
+	return(@fsockopen($host, (int)$port, $errNo, $errStr, $timeout));
+}
+
+/**
+ * Format ClamAV endpoint for log messages.
+ *
+ * @param string $host
+ * @param int $port
+ * @return string
+ */
+function BMClamAVEndpointLabel($host, $port)
+{
+	$host = trim((string)$host);
+	if($host !== '' && ($host[0] === '/' || stripos($host, 'unix:') === 0))
+		return($host);
+	return(sprintf('%s:%d', $host, (int)$port));
+}
+
+/**
  * clamav filter
  *
  */
@@ -155,13 +211,15 @@ class BMMailFilter_ClamAV extends BMMailFilter
 		if(($this->_mail->flags & FLAG_INFECTED) != 0)
 			return($this->_mail->flags);
 
-		// connect to ClamAV
-		$sock = @fsockopen($bm_prefs['clamd_host'], $bm_prefs['clamd_port'], $errNo, $errStr, SOCKET_TIMEOUT);
+		$host = isset($bm_prefs['clamd_host']) ? $bm_prefs['clamd_host'] : '127.0.0.1';
+		$port = isset($bm_prefs['clamd_port']) ? (int)$bm_prefs['clamd_port'] : 3310;
+		$endpoint = BMClamAVEndpointLabel($host, $port);
+
+		$sock = BMClamAVConnect($host, $port, $errNo, $errStr);
 		if(!is_resource($sock))
 		{
-			PutLog(sprintf('Connection to ClamAV at <%s:%d> failed (%d, %s)',
-				$bm_prefs['clamd_host'],
-				$bm_prefs['clamd_port'],
+			PutLog(sprintf('Connection to ClamAV at <%s> failed (%d, %s)',
+				$endpoint,
 				$errNo,
 				$errStr),
 				PRIO_WARNING,
@@ -169,80 +227,83 @@ class BMMailFilter_ClamAV extends BMMailFilter
 				__LINE__);
 			return(false);
 		}
-		else
+
+		stream_set_timeout($sock, defined('SOCKET_TIMEOUT') ? SOCKET_TIMEOUT : 10);
+
+		// Modern clamd: INSTREAM on the same connection (legacy STREAM was removed).
+		if(@fwrite($sock, "nINSTREAM\n") === false)
 		{
-			// request stream
-			if(fwrite($sock, 'STREAM' . "\r\n")
-				&& ($response = fgets2($sock))
-				&& sscanf($response, 'PORT %d', $streamPort) == 1)
-			{
-				// connect to stream
-				$streamSock = @fsockopen($bm_prefs['clamd_host'], $streamPort, $errNo, $errStr, SOCKET_TIMEOUT);
-
-				if(!is_resource($streamSock))
-				{
-					PutLog(sprintf('Connection to ClamAV stream at <%s:%d> failed (%d, %s)',
-						$bm_prefs['clamd_host'],
-						$streamPort,
-						$errNo,
-						$errStr),
-						PRIO_WARNING,
-						__FILE__,
-						__LINE__);
-					return(false);
-				}
-				else
-				{
-					// read mail data
-					$oldOffset = ftell($this->_mail->_fp);
-					fseek($this->_mail->_fp, 0, SEEK_SET);
-					$mailData = '';
-					while(is_resource($this->_mail->_fp) && !feof($this->_mail->_fp))
-						$mailData .= fread($this->_mail->_fp, 4096);
-					fseek($this->_mail->_fp, $oldOffset, SEEK_SET);
-
-					// send mail to ClamAV
-					@fwrite($streamSock, $mailData);
-
-					// close stream
-					fclose($streamSock);
-
-					// get response
-					$response = fgets2($sock);
-
-					// result?
-					if(trim($response) != 'stream: OK')
-					{
-						// set infection, mark as infected
-						if(sscanf($response, 'stream: %s FOUND', $infectionName) != 1)
-							$infectionName = '(unknown)';
-						$this->_mail->flags |= FLAG_INFECTED;
-						$this->_mail->infection = $infectionName;
-
-						// log
-						PutLog(sprintf('Infection <%s> detected in mail by ClamAV',
-							$infectionName),
-							PRIO_DEBUG,
-							__FILE__,
-							__LINE__);
-					}
-				}
-			}
-			else
-			{
-				PutLog(sprintf('Failed requesting stream from ClamAV at <%s:%d>',
-					$bm_prefs['clamd_host'],
-					$bm_prefs['clamd_port']),
-					PRIO_WARNING,
-					__FILE__,
-					__LINE__);
-				return(false);
-			}
-
+			PutLog(sprintf('Failed sending INSTREAM to ClamAV at <%s>', $endpoint),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__);
 			fclose($sock);
+			return(false);
 		}
 
-		// return
+		$oldOffset = ftell($this->_mail->_fp);
+		fseek($this->_mail->_fp, 0, SEEK_SET);
+		$ok = true;
+		while(is_resource($this->_mail->_fp) && !feof($this->_mail->_fp))
+		{
+			$chunk = fread($this->_mail->_fp, 8192);
+			if($chunk === false || $chunk === '')
+				break;
+			if(@fwrite($sock, pack('N', strlen($chunk)) . $chunk) === false)
+			{
+				$ok = false;
+				break;
+			}
+		}
+		fseek($this->_mail->_fp, $oldOffset, SEEK_SET);
+
+		if($ok)
+			$ok = (@fwrite($sock, pack('N', 0)) !== false);
+
+		if(!$ok)
+		{
+			PutLog(sprintf('Failed streaming mail data to ClamAV at <%s>', $endpoint),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__);
+			fclose($sock);
+			return(false);
+		}
+
+		$response = fgets2($sock);
+		fclose($sock);
+
+		if($response === false || $response === '')
+		{
+			PutLog(sprintf('Empty response from ClamAV at <%s>', $endpoint),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__);
+			return(false);
+		}
+
+		$response = trim($response);
+		if($response === 'stream: OK'
+			|| preg_match('/: OK$/i', $response))
+		{
+			return($this->_mail->flags);
+		}
+
+		// e.g. "stream: Eicar-Test-Signature FOUND" or "INSTREAM size limit exceeded"
+		if(preg_match('/:\s*(.+)\s+FOUND$/i', $response, $m))
+			$infectionName = trim($m[1]);
+		else
+			$infectionName = $response !== '' ? $response : '(unknown)';
+
+		$this->_mail->flags |= FLAG_INFECTED;
+		$this->_mail->infection = $infectionName;
+
+		PutLog(sprintf('Infection <%s> detected in mail by ClamAV',
+			$infectionName),
+			PRIO_DEBUG,
+			__FILE__,
+			__LINE__);
+
 		return($this->_mail->flags);
 	}
 }
