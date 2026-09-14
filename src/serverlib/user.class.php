@@ -210,6 +210,11 @@ class BMUser
 						'notify_datenschutz.png'		=> 'fa-user-shield',
 						'datenschutz.png'				=> 'fa-user-shield',
 						'supportsystem.png'				=> 'fa-ticket',
+						// Freigabe-Benachrichtigungen (organizer.shares.inc.php)
+						'notify_addressbook.png'		=> 'fa-address-book-o',
+						'notify_todo.png'				=> 'fa-tasks',
+						'notify_notes.png'				=> 'fa-sticky-note-o',
+						'notify_share.png'				=> 'fa-share',
 					);
 				}
 				$iconBase = basename($row['icon']);
@@ -256,7 +261,7 @@ class BMUser
 	 * @param bool $uniqueClass Set to true to remove all previous notifications of the same class
 	 * @return int Notification ID
 	 */
-	public function PostNotification($textPhrase, $textParams = array(), $link = '', $icon = '', $date = 0, $expires = 0, $flags = 0, $class = '', $uniqueClass = false)
+	public function PostNotification($textPhrase, $textParams = array(), $link = '', $icon = '', $date = 0, $expires = 0, $flags = 0, $class = '', $uniqueClass = false, $suppressPush = false)
 	{
 		global $db;
 
@@ -292,7 +297,7 @@ class BMUser
 			include B1GMAIL_DIR.'serverlib/push.class.php';
 		}
 		// Mail push is sent from BMMailbox::ReceiveMail (sendNewMailPush) to avoid duplicate delivery
-		if (BMPush::isEnabled() && $class != '' && $class != '::newEMail' && $class != '::notifyEMail') {
+		if (!$suppressPush && BMPush::isEnabled() && $class != '' && $class != '::newEMail' && $class != '::notifyEMail') {
 			$pushResult = BMPush::sendFromNotification($this, $notificationId, $textPhrase, $textParams, $link, $icon, $flags, $class);
 			if (is_array($pushResult) && empty($pushResult['sent']) && !empty($pushResult['reason'])) {
 				PutLog(sprintf(

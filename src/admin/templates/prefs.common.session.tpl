@@ -251,6 +251,78 @@
 					</div>
 				</div>
 			</fieldset>
+
+			<fieldset class="mt-3">
+				<legend>{lng p="apppw_admin_section"}</legend>
+
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-check-label">{lng p="apppw_admin_enable"}</label>
+					<div class="col-sm-8">
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="app_password_enable"{if $bm_prefs.app_password_enable|default:'yes'=='yes'} checked="checked"{/if}>
+						</label>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="apppw_admin_dav_mode"}</label>
+					<div class="col-sm-8">
+						<select class="form-select" name="app_password_dav_mode">
+							<option value="off"{if $bm_prefs.app_password_dav_mode|default:'warn'=='off'} selected="selected"{/if}>{lng p="apppw_mode_off"}</option>
+							<option value="warn"{if $bm_prefs.app_password_dav_mode|default:'warn'=='warn'} selected="selected"{/if}>{lng p="apppw_mode_warn"}</option>
+							<option value="enforce"{if $bm_prefs.app_password_dav_mode|default:'warn'=='enforce'} selected="selected"{/if}>{lng p="apppw_mode_enforce"}</option>
+							<option value="strict"{if $bm_prefs.app_password_dav_mode|default:'warn'=='strict'} selected="selected"{/if}>{lng p="apppw_mode_strict"}</option>
+						</select>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-check-label">{lng p="apppw_admin_require_https"}</label>
+					<div class="col-sm-8">
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="dav_require_https"{if $bm_prefs.dav_require_https|default:'no'=='yes'} checked="checked"{/if}>
+						</label>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="apppw_admin_max_per_user"}</label>
+					<div class="col-sm-8">
+						<input type="number" min="1" max="200" class="form-control" style="max-width: 6rem;" name="app_password_max_per_user" value="{$bm_prefs.app_password_max_per_user|default:20}">
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="apppw_admin_expiry"}</label>
+					<div class="col-sm-8">
+						<div class="input-group" style="max-width: 12rem;">
+							<input type="number" min="0" max="3650" class="form-control" name="app_password_expiry_days" value="{$bm_prefs.app_password_expiry_days|default:0}">
+							<span class="input-group-text">{lng p="days"}</span>
+						</div>
+						<small class="form-hint">{lng p="apppw_admin_expiry_hint"}</small>
+					</div>
+				</div>
+
+				<hr>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-check-label">
+						{lng p="apppw_admin_mail_enable"}
+					</label>
+					<div class="col-sm-8">
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="app_password_mail_enable"{if $bm_prefs.app_password_mail_enable|default:'no'=='yes'} checked="checked"{/if}>
+						</label>
+						<small class="form-hint">{lng p="apppw_admin_mail_enable_hint"}</small>
+					</div>
+				</div>
+				<div class="mb-3 row">
+					<label class="col-sm-4 col-form-label">{lng p="apppw_admin_mail_mode"}</label>
+					<div class="col-sm-8">
+						<select class="form-select" name="app_password_mail_mode">
+							<option value="off"{if $bm_prefs.app_password_mail_mode|default:'off'=='off'} selected="selected"{/if}>{lng p="apppw_mode_off"}</option>
+							<option value="warn"{if $bm_prefs.app_password_mail_mode|default:'off'=='warn'} selected="selected"{/if}>{lng p="apppw_mode_warn"}</option>
+							<option value="enforce"{if $bm_prefs.app_password_mail_mode|default:'off'=='enforce'} selected="selected"{/if}>{lng p="apppw_mode_enforce"}</option>
+							<option value="strict"{if $bm_prefs.app_password_mail_mode|default:'off'=='strict'} selected="selected"{/if}>{lng p="apppw_mode_strict"}</option>
+						</select>
+					</div>
+				</div>
+			</fieldset>
 		</div>
 	</div>
 

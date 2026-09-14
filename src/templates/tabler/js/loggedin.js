@@ -189,6 +189,16 @@ function _previewNote(request)
 }
 function previewNote(sid, id)
 {
+	var table = EBID('notesTable');
+	if(table)
+	{
+		var rows = table.querySelectorAll('tbody tr');
+		for(var i = 0; i < rows.length; i++)
+			rows[i].classList.remove('selected');
+		var row = EBID('note_' + id);
+		if(row)
+			row.classList.add('selected');
+	}
 	MakeXMLRequest(bmAppendSession('organizer.notes.php?action=getNoteText&id=' + id), _previewNote);
 }
 

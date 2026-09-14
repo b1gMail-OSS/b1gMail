@@ -10,7 +10,7 @@
 			<option value="week"{if $viewMode=="week"} selected="selected"{/if}>{lng p="week"}</option>
 			<option value="month"{if $viewMode=="month"} selected="selected"{/if}>{lng p="month"}</option>
 		</select></td>
-		
+
 		{comment text="groups"}
 		<td width="15">&nbsp;</td>
 		<td><img align="absmiddle" src="{$tpldir}images/li/tb_sep.gif" border="0" alt="" /></td>
@@ -18,6 +18,17 @@
 		<td><select class="smallInput" onchange="updateCalendarGroup(this, '{$theDate}', '{$sid}')">
 			<option value="-2"{if $theGroup==-2} selected="selected"{/if}>------------</option>
 			<option value="-1"{if $theGroup==-1} selected="selected"{/if}>{lng p="nocalcat"}</option>
+			{if $calendarCount>1}
+				{foreach from=$calendars key=calID item=cal}
+				{if in_array($calID, $visibleCalendarIDs) && isset($groupsByCalendar[$calID])}
+				<optgroup label="{text value=$cal.title}">
+				{foreach from=$groupsByCalendar[$calID] key=gid item=gTitle}
+					<option value="{$gid}"{if $theGroup==$gid} selected="selected"{/if}>{text value=$gTitle}</option>
+				{/foreach}
+				</optgroup>
+				{/if}
+				{/foreach}
+			{else}
 			<optgroup label="{lng p="groups"}">
 			{foreach from=$groups item=group}
 			{if $group.id>0}
@@ -25,6 +36,7 @@
 			{/if}
 			{/foreach}
 			</optgroup>
+			{/if}
 		</select></td>
 		
 		{comment text="date navigation"}

@@ -36,8 +36,8 @@
 							<tbody>
 							{foreach from=$noteList key=noteID item=note}
 							{assign value=$note.priority var=prio}
-							<tr>
-								<td class="bm-organizer-task-gutter" nowrap="nowrap"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="note_{$noteID}" /></label></td>
+							<tr id="note_{$noteID}" onclick="previewNote('{$sid}', '{$noteID}');">
+								<td class="bm-organizer-task-gutter" nowrap="nowrap" onclick="event.stopPropagation();"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="note_{$noteID}" /></label></td>
 								<td nowrap="nowrap"{if $sortColumn=='priority'} class="text-primary fw-semibold"{/if}>
 									<img src="{$tpldir}images/li/prio_{if $note.priority==-1}low{elseif $note.priority==0}normal{else}high{/if}.gif" border="0" alt="" align="absmiddle" />
 									{lng p="prio_$prio"}
@@ -47,9 +47,24 @@
 									<a href="javascript:previewNote('{$sid}', '{$noteID}');" title="{text value=$note.text}">{text value=$note.text cut=80}</a>
 								</td>
 								<td nowrap="nowrap" class="text-end bm-organizer-task-col-actions">
-									<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}">
-										<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-										<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.notes.php' params="action=deleteNote&id={$noteID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+									<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}" onclick="event.stopPropagation();">
+										{if empty($note.readonly)}
+										<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}" class="btn btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+										{else}
+										<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></span>
+										{/if}
+										{if $canShareNotes}
+										{if empty($note.shared)}
+										<a href="#" class="btn btn-icon" title="{lng p="sharenote"}" aria-label="{lng p="sharenote"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.notes.php' params="action=share&id={$noteID}"}', '{lng p="sharenote"|escape:'javascript'}', 520, 360);"><i class="ti ti-share icon" aria-hidden="true"></i></a>
+										{else}
+										<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="sharenote"}"><i class="ti ti-share icon" aria-hidden="true"></i></span>
+										{/if}
+										{/if}
+										{if empty($note.shared)}
+										<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.notes.php' params="action=deleteNote&id={$noteID}&csrf_token={$csrfToken}"}" class="btn btn-icon" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+										{else}
+										<a href="#" class="btn btn-icon" title="{lng p="shareleave"}" aria-label="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.notes.php' params="action=leaveshare&id={$noteID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+										{/if}
 									</div>
 								</td>
 							</tr>

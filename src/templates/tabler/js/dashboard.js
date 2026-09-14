@@ -55,6 +55,31 @@ function bmConvertWidgetIcons(container)
 	});
 }
 
+function bmStripUrlSid(url)
+{
+	if(!url)
+		return url;
+	return String(url).replace(/([?&])sid=[^&#]*/gi, function(m, sep) {
+		return sep === '?' ? '?' : '';
+	}).replace(/\?&/, '?').replace(/[?&]$/, '');
+}
+
+function bmRewriteCalendarWidgetHrefs(root)
+{
+	if(!root)
+		return;
+
+	root.querySelectorAll('a[href]').forEach(function(a)
+	{
+		var href = a.getAttribute('href');
+		if(!href)
+			return;
+		if(typeof bmPublicUrl === 'function')
+			href = bmPublicUrl(href);
+		a.setAttribute('href', bmStripUrlSid(href));
+	});
+}
+
 function bmEnhanceWidgetCalendar(table)
 {
 	if(!table || table.dataset.bmCalendarEnhanced === '1')
@@ -75,6 +100,9 @@ function bmEnhanceWidgetCalendar(table)
 
 	table.classList.add('bm-widget-calendar-table');
 	table.dataset.bmCalendarEnhanced = '1';
+
+	var widget = table.closest ? table.closest('.innerWidget') : table.parentNode;
+	bmRewriteCalendarWidgetHrefs(widget || table);
 }
 
 function bmEnhanceWidgetWebdiskDnD(area)

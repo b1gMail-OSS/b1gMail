@@ -326,7 +326,7 @@ class BMPlugin_Widget_Calendar extends BMPlugin
 		$nextDatesMax = 5;
 
 		$nextDatesMore = 0;
-		$nextDates = $calendar->GetDatesForTimeframe($nextDatesFrom, $nextDatesTo);
+		$nextDates = $calendar->GetDatesForTimeframe($nextDatesFrom, $nextDatesTo, -2, $calendar->GetVisibleCalendarIDs());
 		if(count($nextDates) > $nextDatesMax+1)
 		{
 			$nextDatesMore = count($nextDates)-$nextDatesMax;

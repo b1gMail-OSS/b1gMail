@@ -28,7 +28,7 @@
 		<td class="listTableTDActive" nowrap="nowrap">&nbsp;<a href="{sessionurl file='prefs.php' params="action=signatures&do=edit&id={$signatureID}"}"><i class="fa fa-quote-right" aria-hidden="true"></i> {text value=$signature.titel}</a></td>
 		<td class="{$class}" nowrap="nowrap">
 			<a href="{sessionurl file='prefs.php' params="action=signatures&do=edit&id={$signatureID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=signatures&do=delete&id={$signatureID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=signatures&do=delete&id={$signatureID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}

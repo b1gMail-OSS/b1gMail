@@ -322,7 +322,15 @@ if($_REQUEST['action'] == 'read'
 			{
 				$inviteCard = bmMailGetCalendarInviteCard($mail, $userRow);
 				if($inviteCard !== false)
+				{
+					include_once './serverlib/calendar.class.php';
+					$calObj = _new('BMCalendar', array($userRow['id']));
+					$inviteCalendars = $calObj->GetCalendars();
 					$tpl->assign('calendarInviteCard', $inviteCard);
+					$tpl->assign('calendars', $inviteCalendars);
+					$tpl->assign('calendarCount', count($inviteCalendars));
+					$tpl->assign('defaultCalendarID', $calObj->GetDefaultCalendarID());
+				}
 			}
 			catch(Throwable $calendarEx)
 			{
@@ -713,9 +721,25 @@ else if($_REQUEST['action'] == 'attachmentDialog'
 				$card = bmMailParseVcfAttachment($mail, $_REQUEST['attachment']);
 				if($card !== false)
 					$tpl->assign('vcard', $card);
+				if($groupRow['organizer'] == 'yes')
+				{
+					include_once './serverlib/addressbook.class.php';
+					$bookObj = _new('BMAddressbook', array($userRow['id']));
+					$vcfBooks = $bookObj->GetAddressbooks();
+					$tpl->assign('addressbooks', $vcfBooks);
+					$tpl->assign('addressbookCount', count($vcfBooks));
+					$tpl->assign('defaultAddressbookID', $bookObj->GetDefaultAddressbookID());
+				}
 			}
 			else if($openKind == 'ics' && $groupRow['organizer'] == 'yes')
 			{
+				include_once './serverlib/calendar.class.php';
+				$calObj = _new('BMCalendar', array($userRow['id']));
+				$icsCalendars = $calObj->GetCalendars();
+				$tpl->assign('calendars', $icsCalendars);
+				$tpl->assign('calendarCount', count($icsCalendars));
+				$tpl->assign('defaultCalendarID', $calObj->GetDefaultCalendarID());
+
 				$event = bmMailParseIcsAttachment($mail, $_REQUEST['attachment']);
 				if($event !== false)
 				{
@@ -748,8 +772,9 @@ else if($_REQUEST['action'] == 'importVCF'
 		if($mail->AttachmentToFP($_REQUEST['attachment'], $cardFP))
 		{
 			fclose($cardFP);
+			$importBook = isset($_REQUEST['addressbook']) ? '&addressbook=' . (int)$_REQUEST['addressbook'] : '';
 			bmMailOverlayParentRedirect('organizer.addressbook.php'
-				. '&action=addContact&importFile=' . $tempID);
+				. '&action=addContact&importFile=' . $tempID . $importBook);
 		}
 		else
 		{
@@ -801,16 +826,14 @@ else if($_REQUEST['action'] == 'calendarRsvp'
 
 				if(!$exists)
 				{
-					$groups = $calendar->GetGroups();
-					$group = (($group = $thisUser->GetPref('calendarGroup')) !== false && isset($groups[$group])
-						? $group
-						: -2);
+					$group = -1;
 
 					$row = array(
 						'title' => $event['title'] != '' ? $event['title'] : $lang_user['calendar'],
 						'location' => $event['location'],
 						'text' => $event['text'],
 						'group' => $group,
+						'calendar_id' => $calendar->ResolveCalendarID(isset($_REQUEST['calendar']) ? $_REQUEST['calendar'] : 0),
 						'startdate' => $event['startdate'],
 						'enddate' => $event['enddate'],
 						'reminder' => 0,
@@ -872,16 +895,14 @@ else if($_REQUEST['action'] == 'importICS'
 			$event = bmMailFillOrganizerFromMail($event, $mail);
 
 			$calendar = _new('BMCalendar', array($userRow['id']));
-			$groups = $calendar->GetGroups();
-			$group = (($group = $thisUser->GetPref('calendarGroup')) !== false && isset($groups[$group])
-				? $group
-				: -2);
+			$group = -1;
 
 			$row = array(
 				'title' => $event['title'] != '' ? $event['title'] : $lang_user['calendar'],
 				'location' => $event['location'],
 				'text' => $event['text'],
 				'group' => $group,
+				'calendar_id' => $calendar->ResolveCalendarID(isset($_REQUEST['calendar']) ? $_REQUEST['calendar'] : 0),
 				'startdate' => $event['startdate'],
 				'enddate' => $event['enddate'],
 				'reminder' => 0,

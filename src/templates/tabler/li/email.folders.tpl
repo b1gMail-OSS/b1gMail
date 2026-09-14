@@ -5,6 +5,15 @@
 			{lng p="folderadmin"}
 		</div>
 		<div class="right">
+			{* F4: only the mailbox owner (`bmOrganizerGroupCanShare('mail')`) may
+			   open the full-mailbox share dialog — mirrors the same gate on the
+			   shareMailbox endpoint in email.folders.php. The dialog itself carries
+			   the prominent warning banner (see organizer.share.dialog.tpl). *}
+			{if !empty($canShareMailbox)}
+			<button class="btn btn-sm btn-outline-secondary me-1" onclick="openOverlay('{sessionurl file='email.folders.php' params='action=shareMailbox'}', '{lng p="sharemailbox"|escape:'javascript'}', 520, 360, true); return false;" type="button">
+				<i class="ti ti-mail-share icon icon-sm me-1" aria-hidden="true"></i>{lng p="sharemailbox"}
+			</button>
+			{/if}
 			<button class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='email.folders.php' params='action=addFolder'}';" type="button">
 				<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>{lng p="addfolder"}
 			</button>
@@ -69,7 +78,7 @@
 					</td>
 					<td class="bm-folder-col-subscribed"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" checked="checked" disabled="disabled" aria-hidden="true" /></label></td>
 					<td class="bm-folder-col-actions">
-						<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}" class="btn btn-sm btn-ghost-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+						{include file="li/email.folders.actions.tpl" folderID=$folderID folder=$folder folderActions="sys"}
 					</td>
 				</tr>
 				{/foreach}
@@ -109,10 +118,7 @@
 					</td>
 					<td class="bm-folder-col-subscribed{if $sortColumn=='subscribed'} bm-folder-col-sorted{/if}"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" {if $folder.subscribed==1}checked="checked" {/if} onchange="updateFolderSubscription('{$folderID}', this, '{$sid}')" aria-label="{lng p="subscribed"}" /></label></td>
 					<td class="bm-folder-col-actions">
-						<div class="btn-list flex-nowrap justify-content-end">
-							<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}" class="btn btn-sm btn-ghost-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-							<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='email.folders.php' params="action=deleteFolder&id={$folderID}"}" class="btn btn-sm btn-ghost-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
-						</div>
+						{include file="li/email.folders.actions.tpl" folderID=$folderID folder=$folder folderActions="own"}
 					</td>
 				</tr>
 				{/foreach}
@@ -129,19 +135,27 @@
 					</td>
 				</tr>
 				<tbody id="group_shared" class="bm-folder-section-body">
-				{foreach from=$sharedFolderList key=folderID item=folder}
+				{foreach from=$sharedFolderGroups key=ownerEmail item=ownerFolders}
+				<tr class="bm-folder-row bm-folder-share-owner-row">
+					<td></td>
+					<td colspan="6" class="bm-folder-share-owner">
+						<i class="ti ti-mail icon icon-sm" aria-hidden="true"></i>
+						{text value=$ownerEmail}
+					</td>
+				</tr>
+				{foreach from=$ownerFolders key=folderID item=folder}
 				<tr class="bm-folder-row">
-					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="folder_{$folderID}" name="folder_{$folderID}" aria-label="{text value=$folder.titel cut=40}" /></label></td>
+					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" disabled="disabled" aria-hidden="true" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
 						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
-							<span class="bm-folder-title-icon"><i class="ti ti-share-3 icon" aria-hidden="true"></i></span>
+							<span class="bm-folder-title-icon"><i class="ti ti-folder-share icon" aria-hidden="true"></i></span>
 							<span class="bm-folder-title-text">
 								<span class="bm-folder-name">{text value=$folder.titel cut=40}{if $folder.readonly} <span class="text-secondary fw-normal">({lng p="readonly"})</span>{/if}</span>
 								{if $folder.parent}<span class="bm-folder-parent d-md-none">{text value=$folder.parent cut=20}</span>{/if}
 							</span>
 						</a>
 					</td>
-					<td class="bm-folder-col-parent d-none d-md-table-cell{if $sortColumn=='parent'} bm-folder-col-sorted{/if}">{text value=$folder.parent cut=20}</td>
+					<td class="bm-folder-col-parent d-none d-md-table-cell{if $sortColumn=='parent'} bm-folder-col-sorted{/if}">{if $folder.parent}{text value=$folder.parent cut=20}{/if}</td>
 					<td class="bm-folder-col-size d-none d-lg-table-cell text-secondary">{size bytes=$folder.size}</td>
 					<td class="bm-folder-col-status">
 						<div class="bm-folder-stats">
@@ -151,8 +165,11 @@
 						</div>
 					</td>
 					<td class="bm-folder-col-subscribed{if $sortColumn=='subscribed'} bm-folder-col-sorted{/if}"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" {if $folder.subscribed==1}checked="checked" {/if} disabled="disabled" aria-hidden="true" /></label></td>
-					<td class="bm-folder-col-actions"></td>
+					<td class="bm-folder-col-actions">
+						{include file="li/email.folders.actions.tpl" folderID=$folderID folder=$folder folderActions="shared"}
+					</td>
 				</tr>
+				{/foreach}
 				{/foreach}
 				</tbody>
 				{/if}

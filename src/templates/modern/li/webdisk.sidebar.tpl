@@ -12,6 +12,8 @@
 					<span id="wdSize">&nbsp;</span><br /><br />
 					<b>{lng p="created"}:</b><br />
 					<span id="wdDate">&nbsp;</span><br />
+					<span id="wdUploaderRow" style="display:none;"><br /><b>{lng p="uploadedby"}:</b><br />
+					<span id="wdUploader">&nbsp;</span><br /></span>
 					<span id="wdShared" style="display:none;"><br /><b>{lng p="shared"}</b></span>
 					{hook id="webdisk.sidebar.tpl:itemInfo"}
 				</small>
@@ -41,7 +43,7 @@
 	</div>
 	<div id="webdiskDetailActions" style="display:none;">
 		&nbsp;<a href="javascript:webdiskRename(currentWebdiskFolderID, currentID, currentType, currentTitle);"><i class="fa fa-i-cursor" aria-hidden="true"></i> {lng p="rename"}</a><br />
-		&nbsp;<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) document.location.href=bmAppendSession('webdisk.php?action=deleteItem&type=' + currentType + '&folder='+currentWebdiskFolderID+'&id=' + currentID);"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="delete"}</a><br />
+		&nbsp;<a href="javascript:void(0);" onclick="if(confirm('{lng p="realdel"}')) document.location.href=bmAppendCsrf(bmAppendSession('webdisk.php?action=deleteItem&type=' + currentType + '&folder='+currentWebdiskFolderID+'&id=' + currentID));"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="delete"}</a><br />
 		&nbsp;<a href="javascript:webdiskClipboardAction('copy');" id="wdCopyLink"><i class="fa fa-clipboard" aria-hidden="true"></i> {lng p="copy"}</a><br />
 		&nbsp;<a href="javascript:webdiskClipboardAction('cut');" id="wdCutLink"><i class="fa fa-scissors" aria-hidden="true"></i> {lng p="cut"}</a><br />
 		{hook id="webdisk.sidebar.tpl:actions.details"}

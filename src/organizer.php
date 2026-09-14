@@ -21,8 +21,6 @@
 
 if(!defined('B1GMAIL_INIT'))
 	require './serverlib/init.inc.php';
-include('./serverlib/todo.class.php');
-include('./serverlib/dashboard.class.php');
 RequestPrivileges(PRIVILEGES_USER);
 
 /**
@@ -40,93 +38,6 @@ if($groupRow['organizer']=='no')
 	SessionRedirect('start.php');
 	exit();
 }
-/**
- * default action = start
- */
-$tpl->addJSFile('li', $tpl->tplDir . 'js/organizer.js');
-if(!isset($_REQUEST['action']))
-	$_REQUEST['action'] = 'start';
-$tpl->assign('activeTab', 'organizer');
 
-/**
- * page menu
- */
-$todo = _new('BMTodo', array($userRow['id']));
-$sideTasks = $todo->GetTodoList('faellig', 'asc', 6, 0, true);
-$tpl->assign('tasks_haveMore', count($sideTasks) > 5);
-if(count($sideTasks) > 5)
-	$sideTasks = array_slice($sideTasks, 0, 5);
-$tpl->assign('tasks', $sideTasks);
-$tpl->assign('pageMenuFile', 'li/organizer.sidebar.tpl');
-
-/**
- * dashboard
- */
-$dashboard = _new('BMDashboard', array(BMWIDGET_ORGANIZER));
-
-/**
- * start page
- */
-if($_REQUEST['action'] == 'start')
-{
-	$widgetOrder = $thisUser->GetPref('widgetOrderOrganizer');
-	if($widgetOrder === false || trim($widgetOrder) == '')
-		$widgetOrder = $bm_prefs['widget_order_organizer'];
-
-	$tpl->assign('pageTitle', $lang_user['organizer']);
-	$tpl->assign('widgetOrder', $widgetOrder);
-	$tpl->assign('widgets', $dashboard->getWidgetArray($widgetOrder));
-	$tpl->assign('pageContent', 'li/organizer.start.tpl');
-	$tpl->display('li/index.tpl');
-}
-
-/**
- * save widget order
- */
-else if($_REQUEST['action'] == 'saveWidgetOrder'
-			&& isset($_REQUEST['order']))
-{
-	$widgetOrder = $_REQUEST['order'];
-
-	if($dashboard->checkWidgetOrder($widgetOrder))
-	{
-		$thisUser->SetPref('widgetOrderOrganizer', $widgetOrder);
-		die('OK');
-	}
-	else
-	{
-		die('Invalid order');
-	}
-}
-
-/**
- * customize widgets
- */
-else if($_REQUEST['action'] == 'customize')
-{
-	$widgetOrder = $thisUser->GetPref('widgetOrderOrganizer');
-	if($widgetOrder === false || trim($widgetOrder) == '')
-		$widgetOrder = $bm_prefs['widget_order_organizer'];
-
-	$tpl->assign('pageTitle', $lang_user['customize']);
-	$tpl->assign('possibleWidgets', $dashboard->getPossibleWidgets($widgetOrder));
-	$tpl->assign('pageContent', 'li/organizer.customize.tpl');
-	$tpl->display('li/index.tpl');
-}
-
-/**
- * save cutomization
- */
-else if($_REQUEST['action'] == 'saveCustomize')
-{
-	$widgetOrder = $thisUser->GetPref('widgetOrderOrganizer');
-	if($widgetOrder === false || trim($widgetOrder) == '')
-		$widgetOrder = $bm_prefs['widget_order_organizer'];
-	$newOrder = $dashboard->generateOrderStringFromPostForm($widgetOrder);
-
-	$thisUser->SetPref('widgetOrderOrganizer', $newOrder);
-
-	SessionRedirect('organizer.php');
-	exit();
-}
-?>
+SessionRedirect('organizer.calendar.php');
+exit();
