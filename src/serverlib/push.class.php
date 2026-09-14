@@ -726,6 +726,7 @@ class BMPush
             'url' => $url,
             'icon' => 'pwa-icon.php?size=192',
             'tag' => self::pushNotificationTag($type),
+            'skipPrefCheck' => ($class === '::calendarShare' || $class === '::organizerShare'),
         ]);
     }
 
@@ -1036,12 +1037,23 @@ class BMPush
     private static function pushUrlForNotification($class, $link, $flags)
     {
         switch ($class) {
+            case '::organizerShare':
+                if ($link !== '') {
+                    return $link.(strpos((string) $link, '?') !== false ? '&' : '?');
+                }
+
+                return 'organizer.calendar.php?';
+
             case '::dateReminder':
+            case '::calendarShare':
                 if (preg_match('/showCalendarDate\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/', $link, $m)) {
                     return sprintf(
                         'organizer.calendar.php?date=%d&',
                         (int) $m[2]
                     );
+                }
+                if (preg_match('/organizer\.calendar\.php\?date=(\d+)/', $link, $m)) {
+                    return sprintf('organizer.calendar.php?date=%d&', (int) $m[1]);
                 }
 
                 return 'organizer.calendar.php?';
@@ -1142,6 +1154,8 @@ class BMPush
             case '::notifyEMail':
                 return self::TYPE_MAIL_FILTER;
             case '::dateReminder':
+            case '::calendarShare':
+            case '::organizerShare':
                 return self::TYPE_CALENDAR;
             case '::notifyBirthday':
                 return self::TYPE_BIRTHDAY;

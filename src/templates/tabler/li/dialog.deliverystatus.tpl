@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 
 	<!-- links -->
-	<link rel="shortcut icon" href="{$selfurl}favicon.ico" type="image/x-icon" />
+	{include file="nli/favicon.tpl"}
 	<link href="{$tpldir}style/dialog.css?{fileDateSig file="style/dialog.css"}" rel="stylesheet" type="text/css" />
 	<link href="{$selfurl}clientlib/fontawesome/css/font-awesome.min.css?{fileDateSig file="../../clientlib/fontawesome/css/font-awesome.min.css"}" rel="stylesheet" type="text/css" />
 	{foreach from=$_cssFiles.li item=_file}	<link rel="stylesheet" type="text/css" href="{$_file}" /> {/foreach}

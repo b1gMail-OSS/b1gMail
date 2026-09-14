@@ -17,12 +17,13 @@
 	<div class="row">
 		<div class="col-md-6">
 			<strong>Template</strong><br />
-			Template <a href="https://tabler.io/" target="_blank" rel="noreferrer">Tabler (1.3.2)</a><br />
-			Bootstrap <a href="https://getbootstrap.com/" target="_blank" rel="noreferrer">Bootstrap</a><br />
+			Template <a href="https://tabler.io/" target="_blank" rel="noreferrer">Tabler (1.5.1)</a><br />
+			Bootstrap <a href="https://getbootstrap.com/" target="_blank" rel="noreferrer">Bootstrap (5.3.8)</a><br />
 		</div>
 		<div class="col-md-6">
 			<strong>Icons</strong><br />
-			Font Awesome <a href="https://fontawesome.com/" target="_blank" rel="noreferrer">Font Awesome</a><br />
+			Tabler Icons <a href="https://tabler.io/icons" target="_blank" rel="noreferrer">Tabler Icons (3.46.0)</a><br />
+			Font Awesome <a href="https://fontawesome.com/" target="_blank" rel="noreferrer">Font Awesome (6.2.1)</a><br />
 			{lng p="acpiconsfrom"} <a href="http://www.fatcow.com/free-icons" target="_blank" rel="noreferrer">FatCow Web Hosting</a><br />
 		</div>
 	</div>

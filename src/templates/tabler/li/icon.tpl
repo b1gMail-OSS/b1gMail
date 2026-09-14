@@ -14,6 +14,8 @@
 {elseif $faIcon == 'fa-search'}<i class="ti ti-search {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-bell'}<i class="ti ti-bell {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-plus-square' || $faIcon == 'fa-plus'}<i class="ti ti-square-plus {$_ic}" aria-hidden="true"></i>
+{elseif $faIcon == 'fa-calendar-plus' || $faIcon == 'fa-calendar-plus-o'}<i class="ti ti-calendar-plus {$_ic}" aria-hidden="true"></i>
+{elseif $faIcon == 'fa-book'}<i class="ti ti-book {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-puzzle-piece'}<i class="ti ti-layout-grid-add {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-folder-open-o' || $faIcon == 'fa-folder-open' || $faIcon == 'fa-folder-o' || $faIcon == 'fa-folder'}<i class="ti ti-folders {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-inbox'}<i class="ti ti-inbox {$_ic}" aria-hidden="true"></i>
@@ -35,6 +37,7 @@
 {elseif $faIcon == 'fa-user-shield'}<i class="ti ti-shield-lock {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-exchange'}<i class="ti ti-arrows-exchange {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-cube' || $faIcon == 'fa-box'}<i class="ti ti-package {$_ic}" aria-hidden="true"></i>
+{elseif $faIcon == 'fa-share' || $faIcon == 'fa-share-alt'}<i class="ti ti-share {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-user'}<i class="ti ti-user {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-users'}<i class="ti ti-users {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-newspaper-o' || $faIcon == 'fa-newspaper'}<i class="ti ti-news {$_ic}" aria-hidden="true"></i>

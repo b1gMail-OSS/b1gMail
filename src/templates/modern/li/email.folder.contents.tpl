@@ -9,6 +9,10 @@
 	</div>
 
 	<div class="right">
+		<button onclick="toggleFolderFavorite({$folderID});" type="button" title="{if !empty($folderIsFavorite)}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}">
+			<i class="fa {if !empty($folderIsFavorite)}fa-star{else}fa-star-o{/if} fa-lg"></i>
+			{lng p="folderfavorites"}
+		</button>
 		{if $folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
 		<button onclick="showFolderMenu(event);" type="button">
 			<i class="fa fa-gears fa-lg"></i>
@@ -117,7 +121,7 @@
 		<td nowrap="nowrap">
 			<a href="{sessionurl file='email.read.php' params="id={$mailID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 			<a href="javascript:void(0);" onclick="currentSID='{$sid}';currentID={$mailID};currentSortColumn='{$sortColumn}';showMailMenu(event);"><i class="fa fa-bars" aria-hidden="true"></i></a>
-			<a href="{sessionurl file='email.php' params="do=deleteMail&id={$mailID}&{$folderString}"}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="{sessionurl file='email.php' params="do=deleteMail&id={$mailID}&{$folderString}&csrf_token={$csrfToken}"}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/if}

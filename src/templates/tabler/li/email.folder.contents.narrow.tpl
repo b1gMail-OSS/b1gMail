@@ -9,6 +9,9 @@
 	</div>
 
 	<div class="right bm-mail-header-actions">
+		<button type="button" class="btn btn-icon btn-ghost-secondary{if !empty($folderIsFavorite)} text-yellow{/if}" onclick="toggleFolderFavorite({$folderID});" title="{if !empty($folderIsFavorite)}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}" aria-label="{if !empty($folderIsFavorite)}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}">
+			<i class="ti {if !empty($folderIsFavorite)}ti-star-filled{else}ti-star{/if} icon" aria-hidden="true"></i>
+		</button>
 		{if isset($folderInfo.type)&&$folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
 		<button type="button" class="btn btn-icon btn-ghost-secondary" onclick="showFolderMenu(event, this);" title="{lng p="folderactions"}" aria-label="{lng p="folderactions"}">
 			<i class="ti ti-settings icon" aria-hidden="true"></i>

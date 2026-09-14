@@ -3589,6 +3589,576 @@ function GetTemplatePrefs($template)
 }
 
 /**
+ * Sanitize template folder name.
+ *
+ * @param string $template
+ * @return string
+ */
+function TemplateAssetSafeName($template)
+{
+	return preg_replace('/[^a-zA-Z0-9_.-]/', '', (string)$template);
+}
+
+/**
+ * Directory for uploaded template branding files (data folder).
+ *
+ * @return string Trailing slash
+ */
+function TemplateAssetDir()
+{
+	$base = defined('B1GMAIL_DATA_DIR') ? B1GMAIL_DATA_DIR : (B1GMAIL_DIR . 'data/');
+	return rtrim(str_replace('\\', '/', $base), '/') . '/';
+}
+
+/**
+ * @param string $template
+ * @param string $relPath
+ * @return string
+ */
+function TemplateThemeFileUrl($template, $relPath)
+{
+	$template = TemplateAssetSafeName($template);
+	$relPath = str_replace('\\', '/', (string)$relPath);
+	$relPath = ltrim($relPath, '/');
+	if(strpos($relPath, '..') !== false)
+		$relPath = basename($relPath);
+
+	$path = 'templates/' . $template . '/' . $relPath;
+	if(function_exists('PublicPublicUrl'))
+		return PublicPublicUrl($path);
+
+	return $path;
+}
+
+/**
+ * Public URL for an uploaded template asset, or false.
+ *
+ * @param string $template
+ * @param string $key
+ * @param string $storedValue
+ * @return string|false
+ */
+function TemplateAssetUrl($template, $key, $storedValue)
+{
+	$path = TemplateAssetFilePath($template, $key, $storedValue);
+	if($path === false)
+		return false;
+
+	$query = 'template=' . rawurlencode(TemplateAssetSafeName($template))
+		. '&key=' . rawurlencode((string)$key)
+		. '&t=' . (int)@filemtime($path);
+
+	if(function_exists('PublicPublicUrl'))
+		return PublicPublicUrl('template-asset.php?' . $query);
+
+	return 'template-asset.php?' . $query;
+}
+
+/**
+ * Filesystem path of a stored template asset.
+ *
+ * @param string $template
+ * @param string $key
+ * @param string $storedValue
+ * @return string|false
+ */
+function TemplateAssetFilePath($template, $key, $storedValue)
+{
+	$template = TemplateAssetSafeName($template);
+	$key = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$key);
+	$storedValue = basename((string)$storedValue);
+	if($template === '' || $key === '' || $storedValue === '')
+		return false;
+
+	$expectedPrefix = 'templateasset_' . $template . '_' . $key . '.';
+	if(strpos($storedValue, $expectedPrefix) !== 0)
+		return false;
+
+	$path = TemplateAssetDir() . $storedValue;
+	if(!is_file($path) || !is_readable($path))
+		return false;
+
+	return $path;
+}
+
+/**
+ * @param string $template
+ * @param array|false $prefs
+ * @param string $variant light|dark
+ * @return string
+ */
+function TemplateLogoUrl($template, $prefs = null, $variant = 'light')
+{
+	$template = TemplateAssetSafeName($template);
+	if(!is_array($prefs))
+		$prefs = GetTemplatePrefs($template);
+	if(!is_array($prefs))
+		$prefs = array();
+
+	$variant = ($variant === 'dark') ? 'dark' : 'light';
+
+	if($variant === 'dark')
+	{
+		if(!empty($prefs['customLogoDark']))
+		{
+			$url = TemplateAssetUrl($template, 'customLogoDark', $prefs['customLogoDark']);
+			if($url)
+				return $url;
+		}
+		if(!empty($prefs['customLogo']))
+		{
+			$url = TemplateAssetUrl($template, 'customLogo', $prefs['customLogo']);
+			if($url)
+				return $url;
+		}
+	}
+	else if(!empty($prefs['customLogo']))
+	{
+		$url = TemplateAssetUrl($template, 'customLogo', $prefs['customLogo']);
+		if($url)
+			return $url;
+	}
+
+	$fallback = 'images/logo.png';
+	$info = GetTemplateInfo($template);
+	if(is_array($info) && isset($info['prefs']['customLogo']['fallback']) && $info['prefs']['customLogo']['fallback'] != '')
+		$fallback = $info['prefs']['customLogo']['fallback'];
+
+	return TemplateThemeFileUrl($template, $fallback);
+}
+
+/**
+ * Browser favicon: custom upload, otherwise res/favicon.png.
+ *
+ * @param string $template
+ * @param array|false $prefs
+ * @return string
+ */
+function TemplateFaviconUrl($template, $prefs = null)
+{
+	$template = TemplateAssetSafeName($template);
+	if(!is_array($prefs))
+		$prefs = GetTemplatePrefs($template);
+	if(!is_array($prefs))
+		$prefs = array();
+
+	if(!empty($prefs['customFavicon']))
+	{
+		$url = TemplateAssetUrl($template, 'customFavicon', $prefs['customFavicon']);
+		if($url)
+			return $url;
+	}
+
+	if(function_exists('PublicPublicUrl'))
+		return PublicPublicUrl('res/favicon.png');
+
+	return 'res/favicon.png';
+}
+
+/**
+ * Cover/splash image URL (custom upload overrides the built-in dropdown).
+ *
+ * @param string $template
+ * @param array|false $prefs
+ * @return string
+ */
+function TemplateSplashUrl($template, $prefs = null)
+{
+	$template = TemplateAssetSafeName($template);
+	if(!is_array($prefs))
+		$prefs = GetTemplatePrefs($template);
+	if(!is_array($prefs))
+		$prefs = array();
+
+	if(!empty($prefs['customSplash']))
+	{
+		$url = TemplateAssetUrl($template, 'customSplash', $prefs['customSplash']);
+		if($url)
+			return $url;
+	}
+
+	$info = GetTemplateInfo($template);
+	$options = (is_array($info) && isset($info['prefs']['splashImage']['options']) && is_array($info['prefs']['splashImage']['options']))
+		? $info['prefs']['splashImage']['options']
+		: array();
+	$default = (is_array($info) && isset($info['prefs']['splashImage']['default']))
+		? $info['prefs']['splashImage']['default']
+		: 'login_bg_3.png';
+	$file = isset($prefs['splashImage']) ? basename((string)$prefs['splashImage']) : '';
+	if($file === '' || ($options && !isset($options[$file])))
+		$file = $default;
+
+	$prefix = 'images/nli/';
+	if(is_array($info) && isset($info['prefs']['customSplash']['fallbackPrefix']) && $info['prefs']['customSplash']['fallbackPrefix'] != '')
+		$prefix = $info['prefs']['customSplash']['fallbackPrefix'];
+
+	return TemplateThemeFileUrl($template, rtrim($prefix, '/') . '/' . $file);
+}
+
+/**
+ * @param Template $tpl
+ * @param string $template
+ */
+function TemplateAssignAssetUrls($tpl, $template, $prefs = null)
+{
+	if(!is_object($tpl))
+		return;
+
+	if(!is_array($prefs))
+		$prefs = GetTemplatePrefs($template);
+
+	$tpl->assign('templateLogoUrl', TemplateLogoUrl($template, $prefs, 'light'));
+	$tpl->assign('templateLogoDarkUrl', TemplateLogoUrl($template, $prefs, 'dark'));
+	$tpl->assign('templateLogoIsCustom', is_array($prefs) && !empty($prefs['customLogo']));
+	$tpl->assign('templateLogoDarkIsCustom', is_array($prefs) && (!empty($prefs['customLogoDark']) || !empty($prefs['customLogo'])));
+	$tpl->assign('templateFaviconUrl', TemplateFaviconUrl($template, $prefs));
+	$tpl->assign('templateSplashUrl', TemplateSplashUrl($template, $prefs));
+	$tpl->assign('templateCopyright', TemplateCopyrightText($prefs));
+	$primary = TemplatePrimaryColor($prefs);
+	$tpl->assign('templatePrimaryColor', $primary);
+	$tpl->assign('templateThemeColor', $primary !== '' ? $primary : '#066fd1');
+	$tpl->assign('templateBrandCss', TemplateBrandCss($prefs));
+}
+
+/**
+ * @param string $value
+ * @param string $fallback
+ * @return string
+ */
+function TemplateNormalizeHexColor($value, $fallback = '')
+{
+	$value = trim((string)$value);
+	if(preg_match('/^#?([0-9a-fA-F]{6})$/', $value, $m))
+		return '#' . strtolower($m[1]);
+	if(preg_match('/^#?([0-9a-fA-F]{3})$/', $value, $m))
+	{
+		$h = $m[1];
+		return '#' . strtolower($h[0] . $h[0] . $h[1] . $h[1] . $h[2] . $h[2]);
+	}
+	return $fallback;
+}
+
+/**
+ * @param string $hex
+ * @return array{0:int,1:int,2:int}
+ */
+function TemplateHexToRgb($hex)
+{
+	$hex = ltrim(TemplateNormalizeHexColor($hex, '#000000'), '#');
+	return array(
+		hexdec(substr($hex, 0, 2)),
+		hexdec(substr($hex, 2, 2)),
+		hexdec(substr($hex, 4, 2)),
+	);
+}
+
+/**
+ * Mix two #rrggbb colors. $amount 0 = $from, 1 = $to.
+ *
+ * @param string $from
+ * @param string $to
+ * @param float $amount
+ * @return string
+ */
+function TemplateMixHex($from, $to, $amount)
+{
+	$amount = max(0, min(1, (float)$amount));
+	$a = TemplateHexToRgb($from);
+	$b = TemplateHexToRgb($to);
+	return sprintf('#%02x%02x%02x',
+		(int)round($a[0] + ($b[0] - $a[0]) * $amount),
+		(int)round($a[1] + ($b[1] - $a[1]) * $amount),
+		(int)round($a[2] + ($b[2] - $a[2]) * $amount));
+}
+
+/**
+ * @param array|false $prefs
+ * @return string
+ */
+function TemplatePrimaryColor($prefs)
+{
+	$raw = is_array($prefs) && isset($prefs['primaryColor']) ? $prefs['primaryColor'] : '';
+	$hex = TemplateNormalizeHexColor($raw, '');
+	if($hex === '' || $hex === '#066fd1')
+		return '';
+	return $hex;
+}
+
+/**
+ * Footer copyright (already HTML-escaped). Empty pref = © year + service title.
+ *
+ * @param array|false $prefs
+ * @return string
+ */
+function TemplateCopyrightText($prefs)
+{
+	global $bm_prefs;
+
+	$year = date('Y');
+	$title = (isset($bm_prefs['titel']) && is_string($bm_prefs['titel'])) ? $bm_prefs['titel'] : '';
+	$custom = is_array($prefs) && isset($prefs['copyright']) ? trim((string)$prefs['copyright']) : '';
+	if($custom === '')
+		return HTMLFormat('© ' . $year . ' ' . $title);
+
+	$text = str_replace(array('{year}', '{title}'), array($year, $title), $custom);
+	return HTMLFormat($text);
+}
+
+/**
+ * CSS variables for a custom primary/highlight color.
+ *
+ * @param array|false $prefs
+ * @return string
+ */
+function TemplateBrandCss($prefs)
+{
+	$hex = TemplatePrimaryColor($prefs);
+	if($hex === '')
+		return '';
+
+	$rgb = TemplateHexToRgb($hex);
+	$luma = (0.2126 * $rgb[0] + 0.7152 * $rgb[1] + 0.0722 * $rgb[2]) / 255;
+	$fg = $luma > 0.55 ? '#1d273b' : '#ffffff';
+	$emphasis = TemplateMixHex($hex, '#000000', 0.45);
+	$subtle = TemplateMixHex($hex, '#ffffff', 0.86);
+	$border = TemplateMixHex($hex, '#ffffff', 0.55);
+	$darkLink = TemplateMixHex($hex, '#ffffff', 0.42);
+	$darkLinkRgb = TemplateHexToRgb($darkLink);
+	$darkEmphasis = TemplateMixHex($hex, '#ffffff', 0.28);
+
+	return sprintf(
+		':root,[data-bs-theme=light]{--bm-primary:%1$s;--tblr-primary:%1$s;--tblr-primary-rgb:%2$d, %3$d, %4$d;--tblr-primary-fg:%5$s;--tblr-primary-text-emphasis:%6$s;--tblr-primary-bg-subtle:%7$s;--tblr-primary-border-subtle:%8$s;--tblr-link-color:%1$s;--tblr-link-color-rgb:%2$d, %3$d, %4$d;}'
+		. '[data-bs-theme=dark]{--bm-primary:%1$s;--tblr-primary:%1$s;--tblr-primary-rgb:%2$d, %3$d, %4$d;--tblr-primary-fg:%5$s;--tblr-primary-text-emphasis:%9$s;--tblr-link-color:%10$s;--tblr-link-color-rgb:%11$d, %12$d, %13$d;}',
+		$hex,
+		$rgb[0], $rgb[1], $rgb[2],
+		$fg,
+		$emphasis,
+		$subtle,
+		$border,
+		$darkEmphasis,
+		$darkLink,
+		$darkLinkRgb[0], $darkLinkRgb[1], $darkLinkRgb[2]
+	);
+}
+
+/**
+ * @param string $key
+ * @return array|null
+ */
+function TemplateAssetUploadedFile($key)
+{
+	if(!isset($_FILES['prefs']['error'][$key]['file']))
+		return null;
+
+	return array(
+		'name'		=> $_FILES['prefs']['name'][$key]['file'],
+		'type'		=> $_FILES['prefs']['type'][$key]['file'],
+		'tmp_name'	=> $_FILES['prefs']['tmp_name'][$key]['file'],
+		'error'		=> $_FILES['prefs']['error'][$key]['file'],
+		'size'		=> $_FILES['prefs']['size'][$key]['file'],
+	);
+}
+
+/**
+ * @param string $path
+ * @return string|false png|jpg|gif|webp
+ */
+function TemplateAssetDetectExt($path)
+{
+	$info = @getimagesize($path);
+	if(!is_array($info) || empty($info[2]))
+		return false;
+
+	switch((int)$info[2])
+	{
+	case IMAGETYPE_PNG:
+		return 'png';
+	case IMAGETYPE_JPEG:
+		return 'jpg';
+	case IMAGETYPE_GIF:
+		return 'gif';
+	case IMAGETYPE_WEBP:
+		return 'webp';
+	default:
+		return false;
+	}
+}
+
+/**
+ * Delete previously stored files for a template asset key.
+ *
+ * @param string $template
+ * @param string $key
+ */
+function TemplateAssetDeleteFiles($template, $key)
+{
+	$template = TemplateAssetSafeName($template);
+	$key = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$key);
+	if($template === '' || $key === '')
+		return;
+
+	$prefix = 'templateasset_' . $template . '_' . $key . '.';
+	$dir = TemplateAssetDir();
+	$files = @glob($dir . $prefix . '*');
+	if(!is_array($files))
+		return;
+
+	foreach($files as $file)
+	{
+		if(is_file($file))
+			@unlink($file);
+	}
+}
+
+/**
+ * @param string $template
+ * @param string $key
+ * @param array $file $_FILES-style
+ * @param string &$error
+ * @return string|false stored basename
+ */
+function TemplateAssetSaveUpload($template, $key, $file, &$error)
+{
+	$error = '';
+	$template = TemplateAssetSafeName($template);
+	$key = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$key);
+	if($template === '' || $key === '' || !is_array($file))
+	{
+		$error = 'nofile';
+		return false;
+	}
+
+	$uploadError = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+	if($uploadError !== UPLOAD_ERR_OK)
+	{
+		$error = 'nofile';
+		return false;
+	}
+
+	$maxBytes = 5 * 1024 * 1024;
+	if(($file['size'] ?? 0) > $maxBytes)
+	{
+		$error = 'toolarge';
+		return false;
+	}
+
+	$tmp = $file['tmp_name'] ?? '';
+	if($tmp === '' || !is_uploaded_file($tmp) || !is_readable($tmp))
+	{
+		$error = 'nofile';
+		return false;
+	}
+
+	$ext = TemplateAssetDetectExt($tmp);
+	if($ext === false)
+	{
+		$error = 'invalid';
+		return false;
+	}
+
+	$info = @getimagesize($tmp);
+	if(!is_array($info) || (int)$info[0] < 1 || (int)$info[1] < 1 || (int)$info[0] > 8192 || (int)$info[1] > 8192)
+	{
+		$error = 'invalid';
+		return false;
+	}
+
+	$basename = 'templateasset_' . $template . '_' . $key . '.' . $ext;
+	$dest = TemplateAssetDir() . $basename;
+	TemplateAssetDeleteFiles($template, $key);
+
+	if(!@move_uploaded_file($tmp, $dest))
+	{
+		$error = 'nowrite';
+		return false;
+	}
+
+	@chmod($dest, 0666);
+	return $basename;
+}
+
+/**
+ * Save or keep a FIELD_IMAGE template pref.
+ *
+ * @param string $template
+ * @param string $key
+ * @param string $oldValue
+ * @param string &$error
+ * @return string
+ */
+function TemplateAssetHandleSave($template, $key, $oldValue, &$error)
+{
+	$error = '';
+	$mode = 'keep';
+	if(isset($_POST['prefs'][$key]['mode']))
+		$mode = (string)$_POST['prefs'][$key]['mode'];
+
+	if($mode === 'default')
+	{
+		TemplateAssetDeleteFiles($template, $key);
+		return '';
+	}
+
+	if($mode === 'upload')
+	{
+		$file = TemplateAssetUploadedFile($key);
+		$saved = TemplateAssetSaveUpload($template, $key, $file, $error);
+		if($saved)
+			return $saved;
+		if($error === '')
+			$error = 'nofile';
+		return (string)$oldValue;
+	}
+
+	return (string)$oldValue;
+}
+
+/**
+ * Stream a stored template branding image.
+ *
+ * @param string $template
+ * @param string $key
+ */
+function TemplateAssetOutput($template, $key)
+{
+	$template = TemplateAssetSafeName($template);
+	$key = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$key);
+	$info = GetTemplateInfo($template);
+	if(!is_array($info) || !isset($info['prefs'][$key]) || (int)$info['prefs'][$key]['type'] !== FIELD_IMAGE)
+	{
+		header('HTTP/1.1 404 Not Found');
+		exit();
+	}
+
+	$prefs = GetTemplatePrefs($template);
+	$stored = (is_array($prefs) && isset($prefs[$key])) ? $prefs[$key] : '';
+	$path = TemplateAssetFilePath($template, $key, $stored);
+	if($path === false)
+	{
+		header('HTTP/1.1 404 Not Found');
+		exit();
+	}
+
+	$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+	$types = array(
+		'png'	=> 'image/png',
+		'jpg'	=> 'image/jpeg',
+		'jpeg'	=> 'image/jpeg',
+		'gif'	=> 'image/gif',
+		'webp'	=> 'image/webp',
+	);
+	$mime = isset($types[$ext]) ? $types[$ext] : 'application/octet-stream';
+
+	header('Content-Type: ' . $mime);
+	header('Cache-Control: public, max-age=86400');
+	header('X-Content-Type-Options: nosniff');
+	if(!headers_sent())
+		header('Content-Length: ' . filesize($path));
+	readfile($path);
+	exit();
+}
+
+/**
  * get available templates
  *
  * @return array
@@ -4518,6 +5088,226 @@ function ClientApiRateLimitFail()
 }
 
 /**
+ * Small, file-backed rate limiter for public-share endpoints (folder /
+ * file password submission and download). The bucket key is derived from
+ * the caller (typically token + client-IP or user + IP), the window is a
+ * sliding-time window and only failures are counted so a legitimate user
+ * with the correct password is never blocked.
+ *
+ * This is the same pattern as ClientApiRateLimit*() above; keeping it
+ * separate lets share endpoints tune their own limits without affecting
+ * the client API's own budget.
+ *
+ * @param string $bucket   Opaque bucket key (any identifier that groups
+ *                         failed attempts of one attacker).
+ * @param int    $max      Max allowed failures inside the window.
+ * @param int    $window   Sliding window length in seconds.
+ * @return bool True when a new attempt is allowed, false when blocked.
+ */
+function ShareRateLimitAllow($bucket, $max = 5, $window = 300)
+{
+	$dir = B1GMAIL_DIR . 'temp/';
+	if(!is_dir($dir) || !is_writable($dir))
+		return true;
+
+	$file = $dir . 'share_rl_' . hash('sha256', (string)$bucket) . '.tmp';
+	$now = time();
+	$window = max(30, (int)$window);
+	$max = max(1, (int)$max);
+
+	$times = array();
+	if(is_file($file))
+	{
+		$decoded = json_decode((string)@file_get_contents($file), true);
+		if(is_array($decoded))
+			$times = $decoded;
+	}
+
+	$fresh = array();
+	foreach($times as $stamp)
+	{
+		if((int)$stamp > $now - $window)
+			$fresh[] = (int)$stamp;
+	}
+
+	return count($fresh) < $max;
+}
+
+/**
+ * Record a failed attempt for a share-rate-limit bucket. Call this every
+ * time a password-check fails or a download attempt would otherwise leak
+ * information about the share.
+ *
+ * @param string $bucket Bucket key. Must match the one passed to
+ *                       ShareRateLimitAllow().
+ * @param int    $window Sliding window length in seconds.
+ */
+function ShareRateLimitFail($bucket, $window = 300)
+{
+	$dir = B1GMAIL_DIR . 'temp/';
+	if(!is_dir($dir) || !is_writable($dir))
+		return;
+
+	$file = $dir . 'share_rl_' . hash('sha256', (string)$bucket) . '.tmp';
+	$now = time();
+	$window = max(30, (int)$window);
+
+	$times = array();
+	if(is_file($file))
+	{
+		$decoded = json_decode((string)@file_get_contents($file), true);
+		if(is_array($decoded))
+			$times = $decoded;
+	}
+
+	$fresh = array();
+	foreach($times as $stamp)
+	{
+		if((int)$stamp > $now - $window)
+			$fresh[] = (int)$stamp;
+	}
+	$fresh[] = $now;
+	@file_put_contents($file, json_encode($fresh), LOCK_EX);
+}
+
+/**
+ * Clear a rate-limit bucket after a successful authentication. Prevents
+ * "one legitimate user causes a shared bucket to accumulate credit toward
+ * blocking" scenarios when bucket is IP-only, and gives immediate relief
+ * after a legitimate password entry.
+ *
+ * @param string $bucket Bucket key.
+ */
+function ShareRateLimitClear($bucket)
+{
+	$dir = B1GMAIL_DIR . 'temp/';
+	if(!is_dir($dir))
+		return;
+
+	$file = $dir . 'share_rl_' . hash('sha256', (string)$bucket) . '.tmp';
+	if(is_file($file))
+		@unlink($file);
+}
+
+/**
+ * Consume-style bucket counter that ticks on every call, not just on
+ * failures. Use this for anti-DoS budgets where every access — right or
+ * wrong — should count against the caller's quota (typical for a public
+ * download endpoint where the attacker already has valid credentials).
+ *
+ * Returns true when the tick is within budget (allow the operation);
+ * returns false when the caller would exceed $max within $window (block
+ * the operation). No separate "Fail" call is needed — the tick happens
+ * on every allowed call.
+ *
+ * @param string $bucket Bucket key.
+ * @param int    $max    Max ticks per window.
+ * @param int    $window Sliding window length in seconds.
+ * @return bool
+ */
+function ShareRateLimitConsume($bucket, $max, $window)
+{
+	$dir = B1GMAIL_DIR . 'temp/';
+	if(!is_dir($dir) || !is_writable($dir))
+		return true;
+
+	$file = $dir . 'share_rl_' . hash('sha256', (string)$bucket) . '.tmp';
+	$now = time();
+	$window = max(30, (int)$window);
+	$max = max(1, (int)$max);
+
+	$times = array();
+	if(is_file($file))
+	{
+		$decoded = json_decode((string)@file_get_contents($file), true);
+		if(is_array($decoded))
+			$times = $decoded;
+	}
+
+	$fresh = array();
+	foreach($times as $stamp)
+	{
+		if((int)$stamp > $now - $window)
+			$fresh[] = (int)$stamp;
+	}
+
+	if(count($fresh) >= $max)
+		return false;
+
+	$fresh[] = $now;
+	@file_put_contents($file, json_encode($fresh), LOCK_EX);
+	return true;
+}
+
+/**
+ * Constant-time comparison for public-share passwords. Passwords are
+ * hashed to a fixed-length digest before comparison so hash_equals()
+ * never leaks the stored password length via early-return-on-differing-
+ * length. Empty stored password is treated as "no password required" —
+ * matched by every input (the caller is responsible for gating the
+ * "empty stored" case first when that is not desirable).
+ *
+ * Kept as a plain function because BMWebdisk and share/index.php both
+ * need it and neither is a natural home for a static helper class.
+ *
+ * @param string $stored   Password stored on the share.
+ * @param string $provided Password supplied by the visitor.
+ * @return bool
+ */
+function ShareComparePassword($stored, $provided)
+{
+	$stored = (string)$stored;
+	$provided = (string)$provided;
+
+	// SHA-256 both sides: the hash_equals() comparison then operates on
+	// two 64-char hex strings, so there is no length-dependent early
+	// return that could leak the stored password length.
+	return hash_equals(hash('sha256', $stored), hash('sha256', $provided));
+}
+
+/**
+ * F9: Audit log for cross-owner destructive actions.
+ *
+ * When a user consumes a shared calendar / addressbook / task list /
+ * note stack / webdisk folder / mailbox share with write access, they
+ * may delete data owned by a different user. The delete itself is
+ * legitimate (the owner granted the write permission), but there is
+ * no persistent, human-readable trace of who dropped what — the owner
+ * only sees "gone" the next time they look, and the operator has no
+ * way to reconstruct the incident.
+ *
+ * This helper is called at every destructive path where actor != owner
+ * and emits a structured NOTICE-level entry via PutLog(). Ops teams can
+ * grep for the fixed prefix "share-audit:" to build a timeline. The
+ * function is intentionally a no-op when actor and owner match, so it
+ * is safe to sprinkle liberally inside the low-level *.class.php files.
+ *
+ * @param int    $actorID   User ID performing the action.
+ * @param int    $ownerID   User ID that owns the item.
+ * @param string $context   Short machine tag, e.g. "calendar_delete",
+ *                          "contact_delete", "webdisk_delete",
+ *                          "mail_delete", "folder_delete".
+ * @param int    $itemID    ID of the deleted item.
+ * @param string $extra     Optional free-form context (item title etc.).
+ * @return void
+ */
+function bmShareAuditLog($actorID, $ownerID, $context, $itemID, $extra = '')
+{
+	$actorID = (int)$actorID;
+	$ownerID = (int)$ownerID;
+	if($actorID <= 0 || $ownerID <= 0 || $actorID === $ownerID)
+		return;
+
+	$ip = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '?';
+	$msg = sprintf('share-audit: actor=%d owner=%d ctx=%s item=%d ip=%s',
+		$actorID, $ownerID, (string)$context, (int)$itemID, $ip);
+	if($extra !== '')
+		$msg .= ' extra=' . $extra;
+
+	PutLog($msg, PRIO_NOTE, __FILE__, __LINE__);
+}
+
+/**
  * @return string
  */
 function CronSecret()
@@ -4656,6 +5446,7 @@ function ReadConfig()
 	PasswordHashApplyPrefDefaults();
 	EnsureCronSecretFilled();
 	MfaApplyPrefDefaults();
+	AppPasswordApplyPrefDefaults();
 
 	// for backward compatibility
 	$bm_prefs['domains'] = GetDomainList();

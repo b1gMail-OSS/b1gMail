@@ -33,33 +33,50 @@
 				<h4 class="bm-organizer-form-section-title">
 					<i class="ti ti-calendar-time icon icon-sm me-1" aria-hidden="true"></i>{lng p="date"}
 				</h4>
-				<div class="row g-3">
-					<div class="col-md-6">
-						<label class="form-label required">{lng p="begin"}</label>
-						<div class="bm-organizer-datetime">
-							{html_select_date prefix="startdate" time=$startDate field_order="DMY" start_year="-5" end_year="+5" field_separator="."},
-							{html_select_time prefix="startdate" time=$startTime minute_interval=5 display_seconds=false}
+
+				{* Segmented control for "with time" / "whole day" *}
+				<div class="mb-3">
+					<div class="btn-group" role="group" aria-label="{lng p="wholeday"}">
+						<input type="radio" class="btn-check" name="wholeDay" id="wholeDay0" value="0" autocomplete="off"{if !((isset($eDate.flags) && $eDate.flags&1) || (empty($eDate) && !empty($preWholeDay)))} checked="checked"{/if} onchange="toggleWholeDay(this);" />
+						<label class="btn btn-outline-primary" for="wholeDay0">
+							<i class="ti ti-clock icon icon-sm me-1" aria-hidden="true"></i>{lng p="duration"}
+						</label>
+
+						<input type="radio" class="btn-check" name="wholeDay" id="wholeDay1" value="1" autocomplete="off"{if (isset($eDate.flags) && $eDate.flags&1) || (empty($eDate) && !empty($preWholeDay))} checked="checked"{/if} onchange="toggleWholeDay(this);" />
+						<label class="btn btn-outline-primary" for="wholeDay1">
+							<i class="ti ti-calendar icon icon-sm me-1" aria-hidden="true"></i>{lng p="wholeday"}
+						</label>
+					</div>
+				</div>
+
+				<div class="d-flex flex-wrap gap-3 align-items-end bm-organizer-datetime-row">
+					<div>
+						<label class="form-label required" for="startdate_date">{lng p="begin"}</label>
+						<div class="d-flex gap-2 bm-organizer-datetime" id="startdateWrap">
+							<input type="date" class="form-control bm-organizer-datetime-date" id="startdate_date" value="{$startDateISO}" onchange="syncSmartyDate('startdate');" required />
+							<input type="time" class="form-control bm-organizer-datetime-time" id="startdate_time" value="{$startTimeISO}" onchange="syncSmartyDate('startdate');" />
 						</div>
 					</div>
-					<div class="col-md-6">
-						<label class="form-label required">{lng p="duration"}</label>
-						<div class="bm-organizer-form-options">
-							<label class="form-check mb-2">
-								<input type="radio" class="form-check-input" id="wholeDay_0" name="wholeDay" value="0"{if empty($eDate) || !($eDate.flags&1)} checked="checked"{/if} />
-								<span class="form-check-label d-inline-flex flex-wrap align-items-center gap-2">
-									<input type="text" class="form-control form-control-sm bm-organizer-input-xs" onfocus="EBID('wholeDay_0').checked=true;" name="durationHours" id="durationHours" value="{if isset($durationHours)}{$durationHours}{/if}" />
-									<span>{lng p="hours"},</span>
-									<input type="text" class="form-control form-control-sm bm-organizer-input-xs" onfocus="EBID('wholeDay_0').checked=true;" name="durationMinutes" id="durationMinutes" value="{if isset($durationMinutes)}{$durationMinutes}{/if}" />
-									<span>{lng p="minutes"}</span>
-								</span>
-							</label>
-							<label class="form-check mb-0">
-								<input type="radio" class="form-check-input" id="wholeDay_1" name="wholeDay" value="1"{if (isset($eDate.flags) && $eDate.flags&1)} checked="checked"{/if} />
-								<span class="form-check-label">{lng p="wholeday"}</span>
-							</label>
+					<div>
+						<label class="form-label required" for="enddate_date">{lng p="end"}</label>
+						<div class="d-flex gap-2 bm-organizer-datetime" id="enddateWrap">
+							<input type="date" class="form-control bm-organizer-datetime-date" id="enddate_date" value="{$endDateISO}" onchange="syncSmartyDate('enddate');" required />
+							<input type="time" class="form-control bm-organizer-datetime-time" id="enddate_time" value="{$endTimeISO}" onchange="syncSmartyDate('enddate');" />
 						</div>
 					</div>
 				</div>
+
+				{* Hidden fields that back the SmartyDateTime() server-side parser *}
+				<input type="hidden" name="startdateDay"    id="startdateDay"    value="{$startTime|date_format:"%d"}" />
+				<input type="hidden" name="startdateMonth"  id="startdateMonth"  value="{$startTime|date_format:"%m"}" />
+				<input type="hidden" name="startdateYear"   id="startdateYear"   value="{$startTime|date_format:"%Y"}" />
+				<input type="hidden" name="startdateHour"   id="startdateHour"   value="{$startTime|date_format:"%H"}" />
+				<input type="hidden" name="startdateMinute" id="startdateMinute" value="{$startTime|date_format:"%M"}" />
+				<input type="hidden" name="enddateDay"      id="enddateDay"      value="{$endTime|date_format:"%d"}" />
+				<input type="hidden" name="enddateMonth"    id="enddateMonth"    value="{$endTime|date_format:"%m"}" />
+				<input type="hidden" name="enddateYear"     id="enddateYear"     value="{$endTime|date_format:"%Y"}" />
+				<input type="hidden" name="enddateHour"     id="enddateHour"     value="{$endTime|date_format:"%H"}" />
+				<input type="hidden" name="enddateMinute"   id="enddateMinute"   value="{$endTime|date_format:"%M"}" />
 			</div>
 
 			<div class="bm-organizer-form-section mb-4">
@@ -178,10 +195,18 @@
 				</h4>
 				<div class="row g-3">
 					<div class="col-md-4">
+						<label class="form-label" for="calendar">{lng p="calendar"}</label>
+						<select class="form-select" name="calendar" id="calendar" onchange="filterCalendarGroups();">
+						{foreach from=$writableCalendars key=calID item=cal}
+							<option value="{$calID}"{if (!$eDate && $calID==$eventCalendarID) || (isset($eDate.calendar_id) && $eDate.calendar_id==$calID)} selected="selected"{/if}>{text value=$cal.title}</option>
+						{/foreach}
+						</select>
+					</div>
+					<div class="col-md-4">
 						<label class="form-label" for="group">{lng p="group"}</label>
 						<select class="form-select" name="group" id="group">
 						{foreach from=$groups item=group key=groupID}
-							<option value="{$groupID}"{if (!$eDate&&$groupID==-1) || ($eDate.group==$groupID)} selected="selected"{/if}>{text value=$group.title}</option>
+							<option value="{$groupID}"{if (!$eDate&&$groupID==-1) || ($eDate.group==$groupID)} selected="selected"{/if} data-calendar="{if $groupID>0}{$group.calendar_id}{else}0{/if}">{text value=$group.title}</option>
 						{/foreach}
 						</select>
 					</div>
@@ -194,6 +219,12 @@
 									<input type="checkbox" class="form-check-input" name="reminder_notify" id="reminderNotify"{if !$eDate||($eDate.flags&8)} checked="checked"{/if} />
 									<span class="form-check-label">{lng p="bynotify"}</span>
 								</label>
+								{if $pushEnabled}
+								<label class="form-check mb-1">
+									<input type="checkbox" class="form-check-input" name="reminder_push" id="reminderPush"{if isset($eDate) && $eDate.flags&16} checked="checked"{/if} />
+									<span class="form-check-label">{lng p="bypush"}</span>
+								</label>
+								{/if}
 								<label class="form-check mb-1">
 									<input type="checkbox" class="form-check-input" name="reminder_email" id="reminderEMail"{if isset($eDate)&& $eDate.flags&2} checked="checked"{/if} />
 									<span class="form-check-label">{lng p="byemail"}</span>
@@ -278,5 +309,11 @@
 	var bmOrganizerActionUrls = {
 		attendeePopup: '{sessionurl file='organizer.addressbook.php' params='action=attendeePopup'|escape:'javascript'}'
 	};
+	if(typeof filterCalendarGroups === 'function')
+		filterCalendarGroups();
+	// IDs heißen wholeDay0 / wholeDay1 (Dauer / Ganztägig). toggleWholeDay()
+	// wertet intern EBID('wholeDay1').checked aus, das Argument ist irrelevant.
+	if(typeof toggleWholeDay === 'function' && document.getElementById('wholeDay1'))
+		toggleWholeDay(document.getElementById('wholeDay1'));
 //-->
 </script>

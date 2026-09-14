@@ -7,7 +7,7 @@
 		<th>{lng p="title"}</th>
 		<th style="width:8.75rem;">{lng p="due"}</th>
 		<th style="width:6.25rem;">{lng p="done"}</th>
-		<th class="bm-organizer-task-col-actions" style="width:5.5rem;">&nbsp;</th>
+		<th class="bm-organizer-task-col-actions">&nbsp;</th>
 	</tr>
 	</thead>
 
@@ -32,7 +32,7 @@
 	{foreach from=$todoList key=taskID item=task}{if $task.akt_status!=64}
 	<tr id="task_{$taskID}">
 		<td class="taskCheckBox bm-organizer-task-gutter" nowrap="nowrap">
-			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="task_{$taskID}" onchange="setTaskDone('', {$taskID}, this.checked);" /></label>
+			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="task_{$taskID}"{if !empty($task.readonly)} disabled="disabled"{/if} onchange="setTaskDone('', {$taskID}, this.checked);" /></label>
 		</td>
 		<td nowrap="nowrap" class="bm-organizer-task-priority">
 			{if $task.priority==1}<i class="ti ti-alert-triangle icon icon-sm text-danger" aria-hidden="true"></i>{/if}
@@ -42,13 +42,31 @@
 		<td nowrap="nowrap" class="text-center">{progressBar width=80 value=$task.erledigt max=100}</td>
 		<td nowrap="nowrap" class="text-end bm-organizer-task-col-actions">
 			<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				{if empty($task.readonly)}
+				<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}" class="btn btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+				{else}
+				<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></span>
+				{/if}
+				{if $canShareTodo}
+				{if empty($task.shared)}
+				<a href="#" class="btn btn-icon" title="{lng p="sharetask"}" aria-label="{lng p="sharetask"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=share&kind=task&id={$taskID}"}', '{lng p="sharetask"|escape:'javascript'}', 520, 360);"><i class="ti ti-share icon" aria-hidden="true"></i></a>
+				{else}
+				<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="sharetask"}"><i class="ti ti-share icon" aria-hidden="true"></i></span>
+				{/if}
+				{/if}
+				{if !empty($task.can_leave)}
+				<a href="#" class="btn btn-icon" title="{lng p="shareleave"}" aria-label="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=leaveshare&kind=task&id={$taskID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				{elseif empty($task.readonly)}
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}&csrf_token={$csrfToken}"}" class="btn btn-icon" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				{else}
+				<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></span>
+				{/if}
 			</div>
 		</td>
 	</tr>
 	{else}{assign value=true var=haveDoneTasks}{/if}{/foreach}
 
+	{if $taskListWritable|default:false}
 	<tr id="newTask" class="bm-organizer-new-row">
 		<td class="taskCheckBox bm-organizer-task-gutter">
 			<i class="ti ti-plus icon icon-sm text-secondary" aria-hidden="true"></i>
@@ -61,6 +79,7 @@
 			<button type="button" class="btn btn-sm btn-primary" onclick="addTask();">{lng p="ok"}</button>
 		</td>
 	</tr>
+	{/if}
 
 	</tbody>
 
@@ -87,7 +106,7 @@
 	{if $task.akt_status==64}
 	<tr id="task_{$taskID}" class="done">
 		<td class="taskCheckBox bm-organizer-task-gutter" nowrap="nowrap">
-			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="task_{$taskID}" checked="checked" onchange="setTaskDone('', {$taskID}, this.checked);" /></label>
+			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="task_{$taskID}" checked="checked"{if !empty($task.readonly)} disabled="disabled"{/if} onchange="setTaskDone('', {$taskID}, this.checked);" /></label>
 		</td>
 		<td nowrap="nowrap" class="bm-organizer-task-priority">
 			{if $task.priority==1}<i class="ti ti-alert-triangle icon icon-sm text-danger" aria-hidden="true"></i>{/if}
@@ -97,8 +116,25 @@
 		<td nowrap="nowrap" class="text-center">{progressBar width=80 value=$task.erledigt max=100}</td>
 		<td nowrap="nowrap" class="text-end bm-organizer-task-col-actions">
 			<div class="btn-group btn-group-sm bm-organizer-task-actions" role="group" aria-label="{lng p="actions"}">
-				<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				{if empty($task.readonly)}
+				<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}" class="btn btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+				{else}
+				<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></span>
+				{/if}
+				{if $canShareTodo}
+				{if empty($task.shared)}
+				<a href="#" class="btn btn-icon" title="{lng p="sharetask"}" aria-label="{lng p="sharetask"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=share&kind=task&id={$taskID}"}', '{lng p="sharetask"|escape:'javascript'}', 520, 360);"><i class="ti ti-share icon" aria-hidden="true"></i></a>
+				{else}
+				<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="sharetask"}"><i class="ti ti-share icon" aria-hidden="true"></i></span>
+				{/if}
+				{/if}
+				{if !empty($task.can_leave)}
+				<a href="#" class="btn btn-icon" title="{lng p="shareleave"}" aria-label="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=leaveshare&kind=task&id={$taskID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				{elseif empty($task.readonly)}
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}&csrf_token={$csrfToken}"}" class="btn btn-icon" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				{else}
+				<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></span>
+				{/if}
 			</div>
 		</td>
 	</tr>
@@ -112,6 +148,7 @@
 </div>
 
 <div id="contentFooter" class="contentFooter bm-organizer-footer">
+	{if $taskListWritable|default:false}
 	<div class="left bm-organizer-footer-actions">
 		<form name="f1" method="post" action="{sessionurl file='organizer.todo.php' params='action=action'}" onsubmit="transferSelectedTasks()">
 			{csrffield}
@@ -134,6 +171,7 @@
 			{lng p="addtask"}
 		</button>
 	</div>
+	{/if}
 </div>
 
 <script>
@@ -141,6 +179,6 @@
 	currentTaskListID = {$taskListID};
 	initTasksSel();
 	enableTodoDragTargets();
-	EBID('newTaskText').focus();
+	if(EBID('newTaskText')) EBID('newTaskText').focus();
 //-->
 </script>

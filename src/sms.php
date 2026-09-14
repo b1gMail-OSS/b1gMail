@@ -205,17 +205,19 @@ else if($_REQUEST['action'] == 'sendSMS'
  */
 else if($_REQUEST['action'] == 'outbox')
 {
-	// delete?
+	// delete? — F2: CSRF-token required.
 	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 		&& isset($_REQUEST['id']))
 	{
+		CsrfEnforceOnStateChange();
 		$sms->DeleteOutboxEntry((int)$_REQUEST['id']);
 	}
 
-	// mass delete?
+	// mass delete? — F2: CSRF-token required.
 	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'action'
 			&& isset($_REQUEST['do2']) && $_REQUEST['do2'] == 'delete')
 	{
+		CsrfEnforceOnStateChange();
 		foreach($_POST as $key=>$val)
 			if(substr($key, 0, 4) == 'sms_')
 			{

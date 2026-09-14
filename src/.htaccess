@@ -6,13 +6,29 @@ RewriteEngine On
 RewriteOptions inherit
 Options -MultiViews
 
-# Legacy mobile UI (/m) removed → install root (bookmarks / favorites)
-RewriteRule ^m(?:/.*)?$ index.php [R=301,L]
+# HTTP Basic Auth passthrough for PHP 
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase ^Authorization$ "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
 
-# Well-known service discovery (DAV) — relative so subdirectory installs work
-RewriteRule ^\.well-known/carddav/?$ interface/carddav.php [R=301,L]
-RewriteRule ^\.well-known/caldav/?$ interface/caldav.php [R=301,L]
-RewriteRule ^\.well-known/webdav/?$ interface/webdav.php [R=301,L]
+# Legacy mobile UI (/m) removed → install root (bookmarks / favorites).
+RewriteCond %{REQUEST_URI} ^(.*/)m(?:/.*)?$
+RewriteRule ^m(?:/.*)?$ %1 [R=301,L]
+
+# Convenience short-URLs for DAV clients that do not do well-known discovery
+RewriteRule ^webdav(/.*)?$ interface/webdav.php$1 [L,QSA]
+RewriteRule ^caldav(/.*)?$ interface/caldav.php$1 [L,QSA]
+RewriteRule ^carddav(/.*)?$ interface/carddav.php$1 [L,QSA]
+
+# Well-known service discovery (DAV, RFC 6764) — must use absolute URL path.
+RewriteCond %{REQUEST_URI} ^(.*/)\.well-known/carddav/?$
+RewriteRule ^\.well-known/carddav/?$ %1interface/carddav.php [R=301,L]
+RewriteCond %{REQUEST_URI} ^(.*/)\.well-known/caldav/?$
+RewriteRule ^\.well-known/caldav/?$ %1interface/caldav.php [R=301,L]
+RewriteCond %{REQUEST_URI} ^(.*/)\.well-known/webdav/?$
+RewriteRule ^\.well-known/webdav/?$ %1interface/webdav.php [R=301,L]
 
 # Legacy NLI entry → front controller (GET/POST must share bootstrap with /login)
 RewriteRule ^index\.php$ app.php [QSA,L]
@@ -31,6 +47,12 @@ RewriteRule ^admin(?:/.*)?$ admin/app.php [QSA,L]
 
 # Static / internal paths (no front controller)
 RewriteRule ^(?:interface|clientlib|plugins|templates|languages|temp|serverlib|plz|mobile)(?:/|$) - [L]
+
+# Public share pretty URL: /share/<email> → share/index.php?user=<email>
+# The legacy /share/?user=<email> (query string) form is preserved by
+# share/index.php reading $_REQUEST['user'] and by REQUEST_URI/PATH_INFO
+# parsing as fallback for setups without mod_rewrite.
+RewriteRule ^share/([^/?]+)/?$ share/index.php?user=$1 [L,QSA]
 
 # NLI / LI pretty URLs → public front controller
 RewriteRule ^ app.php [QSA,L]

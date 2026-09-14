@@ -45,7 +45,7 @@ $tpl->addJSFile('li', 'clientlib/selectable.js');
 $tpl->addJSFile('li', $tpl->tplDir . 'js/organizer.js');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'start';
-$tpl->assign('activeTab', 'organizer');
+$tpl->assign('activeTab', 'todo');
 $tpl->assign('pageTitle', $lang_user['todolist']);
 
 /**
@@ -75,24 +75,28 @@ if($_REQUEST['action'] == 'start')
 
 	/**
 	 * set task status RPC
+	 *
+	 * F2: RPC endpoint reachable via GET → CSRF-token required.
 	 */
 	if(isset($_REQUEST['do'])
 			&& $_REQUEST['do'] == 'setTaskDone'
 			&& isset($_REQUEST['id'])
 			&& isset($_REQUEST['done']))
 	{
+		CsrfEnforceOnStateChange();
 		$result = $todo->SetStatus((int)$_REQUEST['id'], $_REQUEST['done'] == 'true' ? TASKS_DONE : TASKS_PROCESSING);
 		if(!isset($_REQUEST['listOnly']))
 			die($result);
 	}
 
 	/**
-	 * add task RPC
+	 * add task RPC — F2: CSRF-token required.
 	 */
 	if(isset($_REQUEST['do'])
 			&& $_REQUEST['do'] == 'addTask'
 			&& isset($_REQUEST['title']))
 	{
+		CsrfEnforceOnStateChange();
 		$result = $todo->Add(time(),
 					time()+TIME_ONE_DAY,
 					TASKS_NOTBEGUN,
@@ -106,13 +110,14 @@ if($_REQUEST['action'] == 'start')
 	}
 
 	/**
-	 * move tasks RPC
+	 * move tasks RPC — F2: CSRF-token required.
 	 */
 	if(isset($_REQUEST['do'])
 			&& $_REQUEST['do'] == 'moveTasks'
 			&& isset($_REQUEST['tasks'])
 			&& isset($_REQUEST['destID']))
 	{
+		CsrfEnforceOnStateChange();
 		$tasks = explode(',', $_REQUEST['tasks']);
 		$result = $todo->MoveTasks($tasks, (int)$_REQUEST['destID']);
 		if(!isset($_REQUEST['listOnly']))
@@ -121,11 +126,15 @@ if($_REQUEST['action'] == 'start')
 
 	// note list
 	$todoList = $todo->GetTodoList('(akt_status=64) ASC,priority DESC,faellig', 'ASC', -1, $taskListID);
+	$resolvedList = $todo->ResolveTaskList($taskListID);
 
 	// page output
 	$tpl->assign('taskListID', $taskListID);
 	$tpl->assign('taskLists', $todo->GetTaskLists());
 	$tpl->assign('todoList', $todoList);
+	$tpl->assign('taskListWritable', $resolvedList && !empty($resolvedList['write']) && empty($resolvedList['virtual_tasks']));
+	$tpl->assign('taskListShared', $resolvedList && !empty($resolvedList['shared']));
+	$tpl->assign('canShareTodo', bmOrganizerGroupCanShare('todo'));
 
 	if(isset($_REQUEST['listOnly']))
 	{
@@ -140,22 +149,65 @@ if($_REQUEST['action'] == 'start')
 }
 
 /**
- * add task list RPC
+ * add task list RPC — F2: CSRF-token required.
  */
 else if($_REQUEST['action'] == 'addList'
 		&& !empty($_REQUEST['title']))
 {
+	CsrfEnforceOnStateChange();
 	$todo->AddTaskList($_REQUEST['title']);
 	NormalArray2XML($todo->GetTaskLists(), 'taskLists');
 	exit();
 }
 
 /**
- * delete task list RPC
+ * edit task list
+ */
+else if($_REQUEST['action'] == 'editList' && isset($_REQUEST['id']))
+{
+	$listId = (int)$_REQUEST['id'];
+	$resolved = $todo->ResolveTaskList($listId);
+	if($resolved === false || !empty($resolved['shared']) || !empty($resolved['virtual_tasks']) || $listId <= 0)
+	{
+		SessionRedirect('organizer.todo.php');
+		exit();
+	}
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'save' && isset($_REQUEST['title']) && IsPOSTRequest())
+	{
+		$todo->ChangeTaskList($listId, $_REQUEST['title']);
+		SessionRedirect('organizer.todo.php?taskListID='.$listId);
+		exit();
+	}
+
+	$lists = $todo->GetTaskLists();
+	if(!isset($lists[$listId]))
+	{
+		SessionRedirect('organizer.todo.php');
+		exit();
+	}
+	$tpl->assign('taskListItem', $lists[$listId]);
+	$tpl->display('li/organizer.todo.list.dialog.tpl');
+	exit();
+}
+
+/**
+ * task list XML
+ */
+else if($_REQUEST['action'] == 'getLists')
+{
+	NormalArray2XML($todo->GetTaskLists(), 'taskLists');
+	exit();
+}
+
+/**
+ * delete task list RPC — F2: CSRF-token required. Deleting a list drops
+ * all tasks inside, so the CSRF surface was significant.
  */
 else if($_REQUEST['action'] == 'deleteList'
 		&& !empty($_REQUEST['tasklistid']))
 {
+	CsrfEnforceOnStateChange();
 	$todo->DeleteTaskList($_REQUEST['tasklistid']);
 	NormalArray2XML($todo->GetTaskLists(), 'taskLists');
 	exit();
@@ -192,11 +244,12 @@ else if($_REQUEST['action'] == 'action'
 }
 
 /**
- * delete task
+ * delete task — F2: CSRF-token required.
  */
 else if($_REQUEST['action'] == 'deleteTask'
 		&& isset($_REQUEST['id']))
 {
+	CsrfEnforceOnStateChange();
 	$taskListID = isset($_REQUEST['taskListID']) ? (int)$_REQUEST['taskListID'] : 0;
 	$todo->Delete((int)$_REQUEST['id']);
 	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
@@ -208,6 +261,11 @@ else if($_REQUEST['action'] == 'deleteTask'
 else if($_REQUEST['action'] == 'addTask')
 {
 	$taskListID = isset($_REQUEST['taskListID']) ? (int)$_REQUEST['taskListID'] : 0;
+	if($todo->GetTaskListWriteAccess($taskListID) === false)
+	{
+		SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
+		exit();
+	}
 	$tpl->assign('taskLists', $todo->GetTaskLists());
 	$tpl->assign('taskListID', $taskListID);
 	$tpl->assign('pageTitle', $lang_user['addtask']);
@@ -229,6 +287,11 @@ else if($_REQUEST['action'] == 'createTask'
 		&& IsPOSTRequest())
 {
 	$taskListID = isset($_REQUEST['taskListID']) ? (int)$_REQUEST['taskListID'] : 0;
+	if($todo->GetTaskListWriteAccess($taskListID) === false)
+	{
+		SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
+		exit();
+	}
 	$todo->Add(SmartyDateTime('beginn'),
 				SmartyDateTime('faellig'),
 				(int)$_REQUEST['akt_status'],
@@ -282,6 +345,133 @@ else if($_REQUEST['action'] == 'saveTask'
 				$_REQUEST['comments'],
 				$taskListID);
 	SessionRedirect('organizer.todo.php?taskListID='.$taskListID);
+}
+
+/**
+ * share task list or task
+ */
+else if($_REQUEST['action'] == 'share' && isset($_REQUEST['id']))
+{
+	if(!bmOrganizerGroupCanShare('todo'))
+	{
+		SessionRedirect('organizer.todo.php');
+		exit();
+	}
+
+	$kind = isset($_REQUEST['kind']) ? $_REQUEST['kind'] : 'list';
+	if($kind === 'task')
+	{
+		$task = $todo->GetTask((int)$_REQUEST['id']);
+		if($task === false)
+		{
+			SessionRedirect('organizer.todo.php');
+			exit();
+		}
+		$accessCheck = $todo->GetTaskAccess((int)$task['id']);
+		if($accessCheck === false || !empty($accessCheck['shared']))
+		{
+			SessionRedirect('organizer.todo.php');
+			exit();
+		}
+		$shareType = BM_ORGANIZER_SHARE_TASK;
+		$collectionId = (int)$task['id'];
+		$shareItem = array('id' => (int)$task['id'], 'title' => $task['titel']);
+		$dialogType = 'task';
+	}
+	else
+	{
+		$listId = (int)$_REQUEST['id'];
+		$resolved = $todo->ResolveTaskList($listId);
+		if($resolved === false || !empty($resolved['shared']) || !empty($resolved['virtual_tasks']))
+		{
+			SessionRedirect('organizer.todo.php');
+			exit();
+		}
+		$lists = $todo->GetTaskLists();
+		$title = isset($lists[$listId]['title']) ? $lists[$listId]['title'] : $lang_user['tasks'];
+		$shareType = $resolved['type'];
+		$collectionId = (int)$resolved['collectionId'];
+		$shareItem = array('id' => $listId, 'title' => $title);
+		$dialogType = 'tasklist';
+	}
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add' && isset($_REQUEST['email']) && IsPOSTRequest())
+	{
+		$targetId = bmOrganizerShareTargetUserId($_REQUEST['email']);
+		$access = isset($_REQUEST['access']) ? $_REQUEST['access'] : BM_ORGANIZER_ACCESS_READ;
+		$result = bmOrganizerAddShare($shareType, $collectionId, $userRow['id'], $targetId, $access);
+		if(is_string($result) && isset($lang_user[$result]))
+			$tpl->assign('shareError', $lang_user[$result]);
+		else if((int)$result > 0)
+		{
+			bmOrganizerNotifyShareInvite($shareType, array('id' => $collectionId, 'title' => $shareItem['title']), $userRow['id'], $targetId, $access);
+			$tpl->assign('shareSuccess', $lang_user['shareinvited']);
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'remove'
+		&& isset($_REQUEST['share'])
+		&& IsPOSTRequest())
+	{
+		// F2: revoking a task-list / task share was GET-reachable.
+		bmOrganizerRemoveShare($shareType, (int)$_REQUEST['share'], $userRow['id']);
+	}
+
+	$tpl->assign('shareItem', $shareItem);
+	$tpl->assign('shareList', bmOrganizerListShares($shareType, $collectionId, $userRow['id']));
+	$tpl->assign('shareType', $dialogType);
+	$tpl->assign('shareAction', 'organizer.todo.php');
+	$tpl->assign('shareKind', $kind === 'task' ? 'task' : '');
+	$tpl->display('li/organizer.share.dialog.tpl');
+	exit();
+}
+
+/**
+ * leave shared list or task
+ */
+else if($_REQUEST['action'] == 'leaveshare' && isset($_REQUEST['id']))
+{
+	$kind = isset($_REQUEST['kind']) ? $_REQUEST['kind'] : 'list';
+	if($kind === 'task')
+	{
+		$access = $todo->GetTaskAccess((int)$_REQUEST['id']);
+		if($access === false || empty($access['shared']))
+		{
+			SessionRedirect('organizer.todo.php');
+			exit();
+		}
+		$task = $todo->GetTask((int)$_REQUEST['id']);
+		$leaveItem = array('id' => (int)$_REQUEST['id'], 'title' => $task ? $task['titel'] : '', 'titel' => $task ? $task['titel'] : '');
+		$shareType = BM_ORGANIZER_SHARE_TASK;
+		$collectionId = (int)$_REQUEST['id'];
+	}
+	else
+	{
+		$resolved = $todo->ResolveTaskList((int)$_REQUEST['id']);
+		if($resolved === false || empty($resolved['shared']) || !empty($resolved['virtual_tasks']))
+		{
+			SessionRedirect('organizer.todo.php');
+			exit();
+		}
+		$lists = $todo->GetTaskLists();
+		$title = isset($lists[(int)$_REQUEST['id']]['title']) ? $lists[(int)$_REQUEST['id']]['title'] : $lang_user['tasks'];
+		$leaveItem = array('id' => (int)$_REQUEST['id'], 'title' => $title, 'titel' => $title);
+		$shareType = $resolved['type'];
+		$collectionId = (int)$resolved['collectionId'];
+	}
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'leave' && IsPOSTRequest())
+	{
+		bmOrganizerLeaveShare($shareType, $collectionId, $userRow['id']);
+		SessionRedirect('organizer.todo.php');
+		exit();
+	}
+
+	$tpl->assign('leaveItem', $leaveItem);
+	$tpl->assign('leaveAction', 'organizer.todo.php');
+	if($kind === 'task')
+		$tpl->assign('leaveKind', 'task');
+	$tpl->display('li/organizer.share.leave.tpl');
+	exit();
 }
 
 SessionRedirect('organizer.todo.php');

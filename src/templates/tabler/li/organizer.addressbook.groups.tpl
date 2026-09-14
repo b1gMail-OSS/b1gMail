@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
@@ -48,7 +48,7 @@
 							
 							<a title="{lng p="sendmail"}" target="_top" href="email.compose.php?toGroup={$groupID}{$sessionUrlSuffix}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 							<a title="{lng p="export"}" target="_top" href="organizer.addressbook.php?action=groups&do=export&id={$groupID}{$sessionUrlSuffix}"><i class="fa fa-address-card-o" aria-hidden="true"></i></a>
-							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="organizer.addressbook.php?action=groups&do=delete&id={$groupID}{$sessionUrlSuffix}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="organizer.addressbook.php?action=groups&do=delete&id={$groupID}{$sessionUrlSuffix}&csrf_token={$csrfToken}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 						</div>
 					</div>
 				{/foreach}

@@ -21,7 +21,6 @@
 
 if(!defined('B1GMAIL_INIT'))
 	require './serverlib/init.inc.php';
-include('./serverlib/todo.class.php');
 include('./serverlib/calendar.class.php');
 include('./serverlib/addressbook.class.php');
 include('./serverlib/email.attachment.inc.php');
@@ -48,7 +47,7 @@ if($groupRow['organizer']=='no')
 $tpl->addJSFile('li', $tpl->tplDir . 'js/organizer.js');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'start';
-$tpl->assign('activeTab', 'organizer');
+$tpl->assign('activeTab', 'calendar');
 $tpl->assign('pageTitle', $lang_user['calendar']);
 
 /**
@@ -69,9 +68,42 @@ if(isset($_REQUEST['switchGroup']))
 }
 
 /**
+ * visible calendars?
+ */
+if(isset($_REQUEST['visibleCal']))
+{
+	$visiblePref = trim($_REQUEST['visibleCal']);
+	$thisUser->SetPref('visibleCalendars', $visiblePref);
+}
+
+/**
  * calendar interface
  */
 $calendar = _new('BMCalendar', array($userRow['id']));
+$calendars = $calendar->GetCalendars();
+$sharedCalendars = $calendar->GetSharedCalendars();
+$defaultCalendarID = $calendar->GetDefaultCalendarID();
+
+$visibleCalendarIDs = $calendar->GetVisibleCalendarIDs($calendars + $sharedCalendars);
+
+$currentCalendarID = $defaultCalendarID;
+if(isset($_REQUEST['calendar']))
+{
+	$currentCalendarID = $calendar->ResolveCalendarID($_REQUEST['calendar']);
+	$thisUser->SetPref('currentCalendar', $currentCalendarID);
+}
+else if(($prefCal = $thisUser->GetPref('currentCalendar')) !== false)
+{
+	$currentCalendarID = $calendar->ResolveCalendarID($prefCal);
+}
+
+$writableCalendars = $calendars;
+foreach($sharedCalendars as $sid => $sharedCal)
+{
+	if($sharedCal['share_access'] === BM_ORGANIZER_ACCESS_WRITE)
+		$writableCalendars[$sid] = $sharedCal;
+}
+$eventCalendarID = $calendar->CanWriteCalendar($currentCalendarID) ? $currentCalendarID : $defaultCalendarID;
 
 /**
  * date & view mode
@@ -111,10 +143,31 @@ else if($viewMode == 'week')
 	$dateStart = $calendar->GetWeekStartDay($date);
 	$dateEnd = $calendar->GetWeekEndDay($date) + 86400 - 1;
 }
-$groups = $calendar->GetGroups();
+$groups = $calendar->GetGroups('title', 'asc');
 $group = (($group = $thisUser->GetPref('calendarGroup')) !== false && isset($groups[$group]) ? $group : -2);
+if($group > 0 && isset($groups[$group]) && !in_array((int)$groups[$group]['calendar_id'], $visibleCalendarIDs, true))
+	$group = -2;
+$tpl->assign('calendars',		$calendars);
+$tpl->assign('sharedCalendars',	$sharedCalendars);
+$tpl->assign('writableCalendars', $writableCalendars);
+$tpl->assign('calendarCount',	count($calendars) + count($sharedCalendars));
+$tpl->assign('visibleCalendarIDs', $visibleCalendarIDs);
+$tpl->assign('currentCalendarID', $currentCalendarID);
+$tpl->assign('eventCalendarID', $eventCalendarID);
+$tpl->assign('defaultCalendarID', $defaultCalendarID);
 $tpl->assign('groups', 			$groups);
 $tpl->assign('theGroup',		$group);
+$groupsByCalendar = array();
+foreach($groups as $gid => $gRow)
+{
+	if($gid <= 0)
+		continue;
+	$cid = (int)$gRow['calendar_id'];
+	if(!isset($groupsByCalendar[$cid]))
+		$groupsByCalendar[$cid] = array();
+	$groupsByCalendar[$cid][$gid] = $gRow['title'];
+}
+$tpl->assign('groupsByCalendar', $groupsByCalendar);
 $tpl->assign('theDate', 		$date);
 $tpl->assign('pageToolbarFile', 'li/organizer.calendar.toolbar.tpl');
 $tpl->assign('viewMode', 		$viewMode);
@@ -129,16 +182,14 @@ $tpl->assign('calWeekNo',		(int)date('W', $date));
 $tpl->assign('weekYear',		date('o') == 'o' ? date('Y', $date) : date('o', $date));
 $tpl->assign('thisMonthText',	_strftime('%B %Y', mktime(0, 0, 0, date('m', $date), 15, date('Y', $date))));
 $tpl->assign('smsEnabled',		$thisUser->SMSEnabled());
+if (!class_exists('BMPush', false)) {
+	include B1GMAIL_DIR.'serverlib/push.class.php';
+}
+$tpl->assign('pushEnabled',		BMPush::isEnabled());
 
 /**
  * page menu
  */
-$todo = _new('BMTodo', array($userRow['id']));
-$sideTasks = $todo->GetTodoList('faellig', 'asc', 6, 0, true);
-$tpl->assign('tasks_haveMore', count($sideTasks) > 5);
-if(count($sideTasks) > 5)
-	$sideTasks = array_slice($sideTasks, 0, 5);
-$tpl->assign('tasks', $sideTasks);
 $tpl->assign('pageMenuFile', 'li/organizer.sidebar.tpl');
 
 /**
@@ -148,7 +199,7 @@ if($_REQUEST['action'] == 'start')
 {
 	if($viewMode == 'day')
 	{
-		$dates = $calendar->GetDatesForTimeframe($dateStart, $dateEnd, $group);
+		$dates = $calendar->GetDatesForTimeframe($dateStart, $dateEnd, $group, $visibleCalendarIDs);
 		$tpl->assign('weekDay', date('l', $dateStart));
 		$tpl->assign('calWeek', date(date('o') == 'o' ? 'W/Y' : 'W/o', $dateStart));
 		$tpl->assign('dates', $dates);
@@ -157,12 +208,14 @@ if($_REQUEST['action'] == 'start')
 	else if($viewMode == 'week')
 	{
 		$dates = array();
+		$weekDayTimestamps = array();
 		for($d=0; $d<7; $d++)
 		{
 			$ts = $dateStart+$d*TIME_ONE_DAY;
 			$dDateStart = mktime(0, 0, 0, date('m', $ts), date('d', $ts), date('Y', $ts));
 			$dDateEnd = mktime(23, 59, 59, date('m', $ts), date('d', $ts), date('Y', $ts));
-			$dates[ _strftime('%A, %d.', $ts) ] = $calendar->GetDatesForTimeframe($dDateStart, $dDateEnd, $group);
+			$dates[ _strftime('%A, %d.', $ts) ] = $calendar->GetDatesForTimeframe($dDateStart, $dDateEnd, $group, $visibleCalendarIDs);
+			$weekDayTimestamps[$d] = $dDateStart;
 		}
 
 		$tpl->assign('curYear', (int)date('Y'));
@@ -171,11 +224,12 @@ if($_REQUEST['action'] == 'start')
 		$tpl->assign('calWeekNo', date('W', $dateStart));
 		$tpl->assign('calWeek', date(date('o') == 'o' ? 'W/Y' : 'W/o', $dateStart));
 		$tpl->assign('dates', $dates);
+		$tpl->assign('weekDayTimestamps', $weekDayTimestamps);
 		$tpl->assign('pageContent', 'li/organizer.calendar.weekview.tpl');
 	}
 	else if($viewMode == 'month')
 	{
-		list($columns, $days) = $calendar->GenerateCalendar((int)date('m', $dateStart), (int)date('Y', $dateStart), -1, $group);
+		list($columns, $days) = $calendar->GenerateCalendar((int)date('m', $dateStart), (int)date('Y', $dateStart), -1, $group, $visibleCalendarIDs);
 		$tpl->assign('lastDayKey', count($days)-1);
 		$tpl->assign('wdays', $lang_user['full_weekdays']);
 		$tpl->assign('columns', $columns);
@@ -191,7 +245,7 @@ if($_REQUEST['action'] == 'start')
  */
 else if($_REQUEST['action'] == 'dayView')
 {
-	$dates = $calendar->GetDatesForTimeframe($dateStart, $dateEnd, $group);
+	$dates = $calendar->GetDatesForTimeframe($dateStart, $dateEnd, $group, $visibleCalendarIDs);
 	$tpl->assign('dateStart', $dateStart);
 	$tpl->assign('dates', $dates);
 	$tpl->display('li/organizer.calendar.dayview.view.tpl');
@@ -233,11 +287,180 @@ else if($_REQUEST['action'] == 'showDate'
 
 		// page output
 		$tpl->assign('date', $date);
+		$tpl->assign('dateWritable', $calendar->CanWriteCalendar((int)$date['calendar_id']));
 		$tpl->assign('attendees', $attendees);
 		$tpl->assign('mailTo', $mailTo);
 		$tpl->assign('mailSubject', $mailSubject);
 		$tpl->display('li/organizer.calendar.showdate.tpl');
 	}
+}
+
+/**
+ * calendars
+ */
+else if($_REQUEST['action'] == 'calendars')
+{
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'edit'
+		&& isset($_REQUEST['id']))
+	{
+		$cal = $calendar->GetCalendar((int)$_REQUEST['id']);
+		if($cal !== false)
+		{
+			$tpl->assign('calendarItem', $cal);
+			$tpl->display('li/organizer.calendar.calendars.dialog.tpl');
+			exit();
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'addForm')
+	{
+		$tpl->display('li/organizer.calendar.calendars.dialog.tpl');
+		exit();
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'deleteForm'
+		&& isset($_REQUEST['id']))
+	{
+		$cal = $calendar->GetCalendar((int)$_REQUEST['id']);
+		if($cal !== false && empty($cal['is_default']))
+		{
+			$tpl->assign('calendarItem', $cal);
+			$tpl->display('li/organizer.calendar.calendars.delete.tpl');
+			exit();
+		}
+	}
+	else
+	{
+		// F2: state-changing endpoints must carry a valid CSRF token.
+		// CsrfEnforceOnStateChange() accepts POST (with hidden field or
+		// header) and GET (with ?csrf_token=...) so classic <a href> UI
+		// keeps working after templates are updated.
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'save'
+			&& isset($_REQUEST['id']))
+		{
+			CsrfEnforceOnStateChange();
+			$calendar->UpdateCalendar((int)$_REQUEST['id'],
+				$_REQUEST['title'],
+				isset($_REQUEST['color']) ? (int)$_REQUEST['color'] : 0);
+			SessionRedirect('organizer.calendar.php');
+		}
+
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
+			&& isset($_REQUEST['id']))
+		{
+			CsrfEnforceOnStateChange();
+			$calendar->DeleteCalendar((int)$_REQUEST['id']);
+			SessionRedirect('organizer.calendar.php');
+		}
+		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add'
+				&& isset($_REQUEST['title']))
+		{
+			CsrfEnforceOnStateChange();
+			$calendar->AddCalendar($_REQUEST['title'], isset($_REQUEST['color']) ? (int)$_REQUEST['color'] : 0);
+			SessionRedirect('organizer.calendar.php');
+		}
+
+		$calendars = $calendar->GetCalendars();
+		$tpl->assign('calendars', $calendars);
+		$tpl->assign('pageContent', 'li/organizer.calendar.calendars.tpl');
+		$tpl->display('li/index.tpl');
+	}
+}
+
+/**
+ * share calendar
+ */
+else if($_REQUEST['action'] == 'share' && isset($_REQUEST['id']))
+{
+	if(!bmOrganizerGroupCanShare('calendar'))
+	{
+		SessionRedirect('organizer.calendar.php');
+		exit();
+	}
+	$cal = $calendar->GetCalendar((int)$_REQUEST['id']);
+	if($cal === false)
+	{
+		SessionRedirect('organizer.calendar.php');
+		exit();
+	}
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add' && isset($_REQUEST['email']) && IsPOSTRequest())
+	{
+		$targetId = bmOrganizerShareTargetUserId($_REQUEST['email']);
+		$access = isset($_REQUEST['access']) ? $_REQUEST['access'] : BM_ORGANIZER_ACCESS_READ;
+		$result = bmOrganizerAddShare(BM_ORGANIZER_SHARE_CAL, (int)$cal['id'], $userRow['id'], $targetId,
+			$access,
+			bmOrganizerNotifyFlag(isset($_REQUEST['notify_email']) ? $_REQUEST['notify_email'] : 0),
+			bmOrganizerNotifyFlag(isset($_REQUEST['notify_push']) ? $_REQUEST['notify_push'] : 0));
+		if(is_string($result) && isset($lang_user[$result]))
+			$tpl->assign('shareError', $lang_user[$result]);
+		else if((int)$result > 0)
+		{
+			bmOrganizerNotifyShareInvite(BM_ORGANIZER_SHARE_CAL, $cal, $userRow['id'], $targetId, $access);
+			$tpl->assign('shareSuccess', $lang_user['shareinvited']);
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'saveNotify' && IsPOSTRequest())
+	{
+		bmOrganizerSetOwnerNotify((int)$cal['id'], $userRow['id'],
+			bmOrganizerNotifyFlag(isset($_REQUEST['owner_notify_email']) ? $_REQUEST['owner_notify_email'] : 0),
+			bmOrganizerNotifyFlag(isset($_REQUEST['owner_notify_push']) ? $_REQUEST['owner_notify_push'] : 0));
+		$shareNotifyEmail = isset($_REQUEST['share_notify_email']) && is_array($_REQUEST['share_notify_email'])
+			? $_REQUEST['share_notify_email']
+			: array();
+		$shareNotifyPush = isset($_REQUEST['share_notify_push']) && is_array($_REQUEST['share_notify_push'])
+			? $_REQUEST['share_notify_push']
+			: array();
+		foreach(bmOrganizerListShares(BM_ORGANIZER_SHARE_CAL, (int)$cal['id'], $userRow['id']) as $shareID => $shareRow)
+		{
+			bmOrganizerSetShareNotify(BM_ORGANIZER_SHARE_CAL, (int)$shareID, $userRow['id'],
+				bmOrganizerNotifyFlag(isset($shareNotifyEmail[$shareID]) ? $shareNotifyEmail[$shareID] : 0),
+				bmOrganizerNotifyFlag(isset($shareNotifyPush[$shareID]) ? $shareNotifyPush[$shareID] : 0));
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'remove'
+		&& isset($_REQUEST['share'])
+		&& IsPOSTRequest())
+	{
+		// F2: share revocation was reachable via a plain GET — an
+		// attacker could trick the owner into visiting a link that
+		// silently unshares a calendar with a specific recipient.
+		bmOrganizerRemoveShare(BM_ORGANIZER_SHARE_CAL, (int)$_REQUEST['share'], $userRow['id']);
+	}
+
+	$ownerNotify = bmOrganizerGetOwnerNotify((int)$cal['id'], $userRow['id']);
+	$tpl->assign('shareItem', $cal);
+	$tpl->assign('shareList', bmOrganizerListShares(BM_ORGANIZER_SHARE_CAL, (int)$cal['id'], $userRow['id']));
+	$tpl->assign('shareType', 'calendar');
+	$tpl->assign('shareAction', 'organizer.calendar.php');
+	$tpl->assign('ownerNotifyEmail', $ownerNotify['notify_email']);
+	$tpl->assign('ownerNotifyPush', $ownerNotify['notify_push']);
+	$tpl->display('li/organizer.share.dialog.tpl');
+	exit();
+}
+
+/**
+ * leave a calendar shared with this user
+ */
+else if($_REQUEST['action'] == 'leaveshare' && isset($_REQUEST['id']))
+{
+	$cal = $calendar->GetAccessibleCalendar((int)$_REQUEST['id']);
+	if($cal === false || empty($cal['shared']))
+	{
+		SessionRedirect('organizer.calendar.php');
+		exit();
+	}
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'leave' && IsPOSTRequest())
+	{
+		bmOrganizerLeaveShare(BM_ORGANIZER_SHARE_CAL, (int)$cal['id'], $userRow['id']);
+		$thisUser->SetPref('currentCalendar', $defaultCalendarID);
+		SessionRedirect('organizer.calendar.php');
+		exit();
+	}
+
+	$tpl->assign('leaveItem', $cal);
+	$tpl->assign('leaveAction', 'organizer.calendar.php');
+	$tpl->display('li/organizer.share.leave.tpl');
+	exit();
 }
 
 /**
@@ -277,26 +500,29 @@ else if($_REQUEST['action'] == 'groups')
 	//
 	else
 	{
-		// save
+		// save — F2: CSRF-safe on any method with a valid token.
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'save'
 			&& isset($_REQUEST['id']))
 		{
+			CsrfEnforceOnStateChange();
 			$calendar->UpdateGroup((int)$_REQUEST['id'],
 				$_REQUEST['title'],
 				(int)$_REQUEST['color']);
 		}
 
-		// delete
+		// delete — F2: CSRF-token required.
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['id']))
 		{
+			CsrfEnforceOnStateChange();
 			$calendar->DeleteGroup((int)$_REQUEST['id']);
 		}
 
-		// mass delete?
+		// mass delete — F2: CSRF-token required.
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'action'
 				&& isset($_REQUEST['do2']) && $_REQUEST['do2'] == 'delete')
 		{
+			CsrfEnforceOnStateChange();
 			foreach($_POST as $key=>$val)
 				if(substr($key, 0, 6) == 'group_')
 				{
@@ -305,11 +531,13 @@ else if($_REQUEST['action'] == 'groups')
 				}
 		}
 
-		// add?
+		// add — F2: CSRF-token required.
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add'
 				&& isset($_REQUEST['title']) && isset($_REQUEST['color']))
 		{
-			$calendar->AddGroup($_REQUEST['title'], (int)$_REQUEST['color']);
+			CsrfEnforceOnStateChange();
+			$calendar->AddGroup($_REQUEST['title'], (int)$_REQUEST['color'], '', '',
+				isset($_REQUEST['calendar']) ? (int)$_REQUEST['calendar'] : $currentCalendarID);
 		}
 
 
@@ -324,8 +552,8 @@ else if($_REQUEST['action'] == 'groups')
 						: 'asc';
 		$sortOrderFA = ($sortOrder=="desc")?'fa-arrow-down': 'fa-arrow-up';
 
-		// group list
-		$groups = $calendar->GetGroups($sortColumn, $sortOrder);
+		// group list (colour filters belong to the current calendar)
+		$groups = $calendar->GetGroups($sortColumn, $sortOrder, $currentCalendarID);
 
 		// page output
 		$tpl->assign('haveGroups', count($groups) > 1);
@@ -350,6 +578,35 @@ else if($_REQUEST['action'] == 'addDate')
 		? (int)$_REQUEST['time']
 		: time();
 
+	// determine pre-filled end date/time
+	$isWholeDay = (isset($_REQUEST['wholeDay']) && (int)$_REQUEST['wholeDay'] === 1);
+	if(isset($_REQUEST['endTime']))
+	{
+		$endTime = (int)$_REQUEST['endTime'];
+	}
+	else if(isset($_REQUEST['durationHours']) || isset($_REQUEST['durationMinutes']))
+	{
+		$dh = isset($_REQUEST['durationHours']) ? max(0, (int)$_REQUEST['durationHours']) : 0;
+		$dm = isset($_REQUEST['durationMinutes']) ? max(0, (int)$_REQUEST['durationMinutes']) : 0;
+		// clamp to something reasonable
+		$dh = min($dh, 24 * 366);
+		$dm = min($dm, 59);
+		$endTime = $startTime + $dh * TIME_ONE_HOUR + $dm * TIME_ONE_MINUTE;
+	}
+	else
+	{
+		// sensible default: 1 hour appointment
+		$endTime = $startTime + TIME_ONE_HOUR;
+	}
+
+	// For whole-day pre-selection, snap the visible fields to day boundaries
+	if($isWholeDay)
+	{
+		$startTime = mktime(0, 0, 0, date('m', $startTime), date('d', $startTime), date('Y', $startTime));
+		$endTime = mktime(0, 0, 0, date('m', $endTime), date('d', $endTime), date('Y', $endTime));
+		$tpl->assign('preWholeDay', true);
+	}
+
 	// assign
 	$tpl->assign('date', $startDate);
 	$tpl->assign('theDate', $startDate);
@@ -363,6 +620,12 @@ else if($_REQUEST['action'] == 'addDate')
 	$tpl->assign('weekDays', $lang_user['full_weekdays']);
 	$tpl->assign('startDate', $startDate);
 	$tpl->assign('startTime', $startTime);
+	$tpl->assign('endTime', $endTime);
+	// ISO strings for HTML5 <input type="date"> / <input type="time">
+	$tpl->assign('startDateISO', date('Y-m-d', $startTime));
+	$tpl->assign('startTimeISO', date('H:i', $startTime));
+	$tpl->assign('endDateISO', date('Y-m-d', $endTime));
+	$tpl->assign('endTimeISO', date('H:i', $endTime));
 	$tpl->assign('pageContent', 'li/organizer.calendar.edit.tpl');
 	$tpl->display('li/index.tpl');
 }
@@ -405,6 +668,8 @@ else if($_REQUEST['action'] == 'createDate'
 else if($_REQUEST['action'] == 'deleteDate'
 		&& isset($_REQUEST['id']))
 {
+	// F2: dates were deletable via GET (click-trick / <img>-based CSRF).
+	CsrfEnforceOnStateChange();
 	$calendar->DeleteDate((int)$_REQUEST['id']);
 	SessionRedirect('organizer.calendar.php');
 	exit();
@@ -417,6 +682,11 @@ else if($_REQUEST['action'] == 'editDate'
 		&& isset($_REQUEST['id']))
 {
 	$date = $calendar->GetDate((int)$_REQUEST['id']);
+	if($date && !$calendar->CanWriteCalendar((int)$date['calendar_id']))
+	{
+		SessionRedirect('organizer.calendar.php');
+		exit();
+	}
 	if($date)
 	{
 		$date['repeating'] = ($date['repeat_flags']&CLNDR_REPEATING_DAILY)
@@ -425,14 +695,17 @@ else if($_REQUEST['action'] == 'editDate'
 							|| ($date['repeat_flags']&CLNDR_REPEATING_WEEKLY)
 							|| ($date['repeat_flags']&CLNDR_REPEATING_YEARLY);
 
-		if(($date['flags']&CLNDR_WHOLE_DAY) == 0)
+		// end date/time for the form (replaces the legacy duration input)
+		if(($date['flags']&CLNDR_WHOLE_DAY) != 0)
 		{
-			$duration = $date['enddate']-$date['startdate'];
-			$durationHours = floor($duration / TIME_ONE_HOUR);
-			$durationMinutes = ceil(($duration-$durationHours*TIME_ONE_HOUR) / TIME_ONE_MINUTE);
-			$tpl->assign('durationHours', $durationHours);
-			$tpl->assign('durationMinutes', $durationMinutes);
+			// whole-day event: normalize end to the day the event ends on
+			$endTimeForForm = mktime(0, 0, 0, date('m', $date['enddate']), date('d', $date['enddate']), date('Y', $date['enddate']));
 		}
+		else
+		{
+			$endTimeForForm = $date['enddate'];
+		}
+		$tpl->assign('endTime', $endTimeForForm);
 
 		// attendees
 		$attendees = $calendar->GetDateAttendees((int)$_REQUEST['id']);
@@ -468,6 +741,11 @@ else if($_REQUEST['action'] == 'editDate'
 		$tpl->assign('startTime', $date['startdate']);
 		$tpl->assign('eDate', $date);
 		$tpl->assign('weekDays', $lang_user['full_weekdays']);
+		// ISO strings for HTML5 <input type="date"> / <input type="time">
+		$tpl->assign('startDateISO', date('Y-m-d', $date['startdate']));
+		$tpl->assign('startTimeISO', date('H:i', $date['startdate']));
+		$tpl->assign('endDateISO', date('Y-m-d', $endTimeForForm));
+		$tpl->assign('endTimeISO', date('H:i', $endTimeForForm));
 		$tpl->assign('pageContent', 'li/organizer.calendar.edit.tpl');
 		$tpl->display('li/index.tpl');
 	}

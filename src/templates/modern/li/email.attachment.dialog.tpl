@@ -46,6 +46,18 @@
 			<tr><th>{lng p="surname"}</th><td>{if $vcard.nachname}{text value=$vcard.nachname}{else}—{/if}</td></tr>
 			<tr><th>{lng p="company"}</th><td>{if $vcard.firma}{text value=$vcard.firma}{else}—{/if}</td></tr>
 			<tr><th>{lng p="email"}</th><td>{if $vcard.email}{email value=$vcard.email}{else}—{/if}</td></tr>
+			{if $addressbookCount>1}
+			<tr>
+				<th><label for="mailAttAddressbook">{lng p="addressbook"}</label></th>
+				<td>
+					<select id="mailAttAddressbook">
+					{foreach from=$addressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if $bookID==$defaultAddressbookID} selected="selected"{/if}>{text value=$abook.title}</option>
+					{/foreach}
+					</select>
+				</td>
+			</tr>
+			{/if}
 		</table>
 	</div>
 	{elseif $openKind == 'ics' && isset($calendarEvent)}
@@ -99,6 +111,18 @@
 			{if $calendarEvent.text}
 			<tr><th>{lng p="text"}</th><td>{text value=$calendarEvent.text|truncate:400}</td></tr>
 			{/if}
+			{if $calendarCount>1}
+			<tr>
+				<th><label for="mailAttCalendar">{lng p="calendar"}</label></th>
+				<td>
+					<select id="mailAttCalendar">
+					{foreach from=$calendars key=calID item=cal}
+						<option value="{$calID}"{if $calID==$defaultCalendarID} selected="selected"{/if}>{text value=$cal.title}</option>
+					{/foreach}
+					</select>
+				</td>
+			</tr>
+			{/if}
 		</table>
 	</div>
 	{else}
@@ -146,6 +170,9 @@ function mailAttachmentImportContact(mailId, attachment, sid)
 		+ '&action=importVCF&attachment=' + encodeURIComponent(attachment)
 		+ '&sid=' + encodeURIComponent(sid);
 
+	if(EBID('mailAttAddressbook'))
+		url += '&addressbook=' + encodeURIComponent(EBID('mailAttAddressbook').value);
+
 	if(window.parent && window.parent !== window)
 		window.parent.document.location.href = url;
 	else
@@ -167,6 +194,9 @@ function mailAttachmentImportCalendar(mailId, attachment, sid)
 	url = 'email.read.php?id=' + encodeURIComponent(mailId)
 		+ '&action=importICS&attachment=' + encodeURIComponent(attachment)
 		+ '&ajax=1&sid=' + encodeURIComponent(sid);
+
+	if(EBID('mailAttCalendar'))
+		url += '&calendar=' + encodeURIComponent(EBID('mailAttCalendar').value);
 
 	if(EBID('mailAttSendCalendarReply') && EBID('mailAttSendCalendarReply').checked)
 		url += '&sendReply=1';

@@ -1,3 +1,10 @@
+{if !empty($moveBlockedNotice)}
+<p class="warning">
+	<strong>{lng p="addrmove_blocked_title"}:</strong>
+	{lng p="addrmove_blocked_desc"}
+</p>
+{/if}
+
 <div id="contentHeader">
 	<div class="left">
 		<i class="fa fa-address-book-o" aria-hidden="true"></i>
@@ -11,6 +18,13 @@
 			<option value="{$key}"{if $smarty.request.letter==$key} selected="selected"{/if}>{$letter}</option>
 			{/foreach}
 		</select>
+		
+		&nbsp;
+		
+		<button type="button" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params='action=books'}';">
+			<i class="fa fa-book" aria-hidden="true"></i>
+			{lng p="addressbooks"}
+		</button>
 		
 		&nbsp;
 		
@@ -121,10 +135,12 @@
 				</div>
 
 				<div class="right">
+					{if $currentBookWritable}
 					<button type="button" class="primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params='action=addContact'}';">
 						<i class="fa fa-plus-circle"></i>
 						{lng p="add"}
 					</button>
+					{/if}
 				</div>
 			</div>
 		</div>

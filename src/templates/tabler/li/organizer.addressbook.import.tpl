@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->
@@ -55,6 +55,18 @@
 					</select>
 				</td>
 			</tr>
+			{if $addressbookCount>1}
+			<tr>
+				<td><label for="importAddressbook">{lng p="addressbook"}:</label></td>
+				<td>
+					<select name="importAddressbook" id="importAddressbook">
+					{foreach from=$addressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if $bookID==$currentAddressbookID} selected="selected"{/if}>{text value=$abook.title}</option>
+					{/foreach}
+					</select>
+				</td>
+			</tr>
+			{/if}
 		</table>
 	</fieldset>
 

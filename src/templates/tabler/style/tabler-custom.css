@@ -1,7 +1,7 @@
 /* b1gMail frontend – Tabler theme overrides */
 
 :root {
-	--bm-primary: #066fd1;
+	--bm-primary: var(--tblr-primary, #066fd1);
 	--bm-navbar-bg: #1f2937;
 	--nli-overlay: rgba(15, 23, 42, 0.72);
 }
@@ -25,6 +25,71 @@ BODY.layout-fluid.bm-loggedin textarea {
 	box-shadow: none;
 	-moz-box-shadow: none;
 	-webkit-box-shadow: none;
+}
+
+/*
+ * loggedin.css contains a legacy rule
+ *   INPUT[type=text], INPUT[type=password], INPUT[type=email],
+ *   INPUT[type=search], INPUT[type=tel], INPUT[type=url] { border:1px solid #CCC;
+ *     min-height:20px; padding:4px; box-sizing:border-box; }
+ * that has higher specificity (0,1,1) than Bootstrap's ".form-control" (0,1,0)
+ * and therefore overrides padding/border/min-height on every Tabler input.
+ * Result: text fields render 30 px tall with a pale #CCC border while
+ * <select class="form-select"> keeps the correct 40 px Tabler look – exactly
+ * the mismatch reported for the address book contact form.
+ *
+ * Re-establish the Tabler defaults for anything that opted in via .form-control
+ * / .form-select / .form-control-plaintext. Using a tag+class selector matches
+ * the legacy specificity (0,1,1), and the BODY prefix pushes it to (0,1,2) so
+ * it wins reliably regardless of stylesheet load order.
+ */
+BODY.layout-fluid.bm-loggedin input.form-control,
+BODY.layout-fluid.bm-loggedin input.form-select {
+	min-height: 0;
+	padding: 0.5625rem 1rem;
+	border: var(--tblr-border-width, 1px) solid var(--tblr-border-color, #e6e7e9);
+	border-radius: var(--tblr-border-radius, 4px);
+	line-height: 1.25rem;
+	font-size: 0.875rem;
+	background-color: var(--tblr-bg-forms, #fff);
+}
+
+BODY.layout-fluid.bm-loggedin input.form-select {
+	padding-right: 3rem;
+}
+
+/* form-control-sm / form-select-sm should stay compact */
+BODY.layout-fluid.bm-loggedin input.form-control.form-control-sm,
+BODY.layout-fluid.bm-loggedin input.form-select.form-select-sm {
+	padding: 0.25rem 0.75rem;
+	font-size: 0.75rem;
+	line-height: 1.4;
+}
+
+/* form-control-lg / form-select-lg keep Tabler's large defaults */
+BODY.layout-fluid.bm-loggedin input.form-control.form-control-lg,
+BODY.layout-fluid.bm-loggedin input.form-select.form-select-lg {
+	padding: 0.5rem 1rem;
+	font-size: 1.0625rem;
+	line-height: 1.4705882353;
+}
+
+/*
+ * Tabler 1.5+ Combo-Layout-Kompatibilität.
+ * In 1.5 wurden Layout-Presets via data-bs-navbar-position eingeführt. Ohne dieses Attribut
+ * blendet Tabler die vertikale Sidebar aus, sobald neben ihr noch horizontale .navbar-expand-*
+ * Elemente im .page-Container liegen – genau unsere Combo-Struktur (linke Sidebar + Top-Tabs).
+ * Wir stellen die Sidebar wieder her und geben --tblr-sidebar-width ab lg wieder frei,
+ * damit .page-wrapper den passenden margin-inline-start bekommt.
+ */
+html:not([data-bs-navbar-position=vertical]) .page:has(> [class*="navbar-expand"]:not(.navbar-vertical)) > .navbar-vertical {
+	display: flex;
+}
+@media (min-width: 992px) {
+	html:not([data-bs-navbar-position=vertical]) .page:has(> [class*="navbar-expand"]:not(.navbar-vertical)) > .navbar,
+	html:not([data-bs-navbar-position=vertical]) .page:has(> [class*="navbar-expand"]:not(.navbar-vertical)) > .page-wrapper {
+		--tblr-sidebar-width: 15rem;
+	}
 }
 
 /* Logged-in shell – Tabler combo layout (fixed vertical nav + top navbar) */
@@ -235,13 +300,71 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo #mainMenuContainer {
 		overflow-y: auto;
 		overscroll-behavior: contain;
 		-webkit-overflow-scrolling: touch;
-		scrollbar-gutter: stable;
+		/* scrollbar-gutter absichtlich nicht "stable": reservierter Platz erzeugte
+		 * einen sichtbaren Rand rechts. Wir nutzen die dünne 6px-Webkit-Scrollbar
+		 * (siehe ::-webkit-scrollbar unten) analog zur Kalender-Sidebar. */
+		scrollbar-gutter: auto;
+		scrollbar-width: thin;   /* Firefox: dünne Scrollbar statt breite Standard */
 	}
 }
 
 /* Fixed dark vertical sidebar */
 BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav {
 	flex-shrink: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-brand {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: 1 1 auto;
+	width: auto;
+	min-width: 0;
+	max-width: 100%;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	box-sizing: border-box;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-brand a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	max-width: 100%;
+	margin-inline: auto;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-brand-image,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-li-brand-image {
+	max-width: 12rem;
+	max-height: 2rem;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+	object-position: center;
+}
+
+@media (max-width: 991.98px) {
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-toggler,
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-nav.d-lg-none {
+		flex-shrink: 0;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-brand-image,
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-li-brand-image {
+		max-width: 8rem;
+		max-height: 1.5rem;
+	}
+}
+
+@media (min-width: 992px) {
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .navbar-brand {
+		width: 100%;
+		flex: none;
+		padding-left: 1rem;
+		padding-right: 1rem;
+	}
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .container-fluid {
@@ -341,11 +464,27 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .sidebarHeadin
 	margin-top: 0;
 }
 
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .sidebarHeading.bm-mailbox-heading,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .sidebarHeading.bm-mailbox-heading {
+	text-transform: none;
+	letter-spacing: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .sidebarHeading.bm-mailbox-heading,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .sidebarHeading.bm-mailbox-heading {
+	margin-top: 0.85rem;
+	padding-left: 0.25rem;
+	padding-right: 0.25rem;
+}
+
 BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons {
 	padding: 0 0.25rem 0.5rem;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons a {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons a:not(.btn) {
 	display: flex;
 	align-items: center;
 	gap: 0.375rem;
@@ -358,8 +497,8 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIc
 	border-radius: var(--tblr-border-radius);
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons a:hover,
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons a.active {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons a:not(.btn):hover,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .contentMenuIcons a:not(.btn).active {
 	color: #fff;
 	background: rgba(255, 255, 255, 0.06);
 	font-weight: 600;
@@ -524,7 +663,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-header-popup.headerBox {
 	background: var(--tblr-bg-surface, #fff);
 	border: 1px solid var(--tblr-border-color);
 	border-radius: var(--tblr-border-radius);
-	box-shadow: var(--tblr-box-shadow-dropdown);
+	box-shadow: var(--tblr-shadow-dropdown, var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.15)));
 	z-index: 1050;
 }
 
@@ -540,7 +679,7 @@ BODY.layout-fluid.bm-loggedin .bm-li-header-popup.dropdown-menu-card {
 BODY.layout-fluid.bm-loggedin .bm-li-header-popup.dropdown-menu-card > .card {
 	margin: 0;
 	border: 0;
-	box-shadow: var(--tblr-box-shadow-dropdown);
+	box-shadow: var(--tblr-shadow-dropdown, var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.15)));
 }
 
 BODY.layout-fluid.bm-loggedin .bm-li-header-popup.dropdown-menu-arrow:before {
@@ -586,7 +725,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo #searchPopup.bm-li-search-popup {
 	background: var(--tblr-bg-surface, #fff);
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
 	border-radius: var(--tblr-border-radius, 4px);
-	box-shadow: var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.15));
+	box-shadow: var(--tblr-shadow-dropdown, var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.15)));
 	overflow: visible;
 }
 
@@ -820,7 +959,7 @@ BODY.layout-fluid.bm-loggedin #dropdownNavMenu.menu {
 	background: var(--tblr-bg-surface, #fff);
 	border: 1px solid var(--tblr-border-color);
 	border-radius: var(--tblr-border-radius);
-	box-shadow: var(--tblr-box-shadow-dropdown);
+	box-shadow: var(--tblr-shadow-dropdown, var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.15)));
 }
 
 BODY.layout-fluid.bm-loggedin .page-body {
@@ -1965,15 +2104,39 @@ BODY.nli-standalone .empty-action .btn .icon {
 	margin-right: 0.25rem;
 }
 
-/* NLI brand on light backgrounds (logo.png is white, for dark top navbar) */
-.nli-brand .nli-brand-image {
+/* Default theme logo is white; darken only that file on light login surfaces */
+.nli-brand .nli-brand-image.bm-logo-default {
 	filter: brightness(0);
 	opacity: 0.9;
 }
 
-[data-bs-theme="dark"] .nli-brand .nli-brand-image {
+[data-bs-theme="dark"] .nli-brand .nli-brand-image.bm-logo-default {
 	filter: none;
 	opacity: 1;
+}
+
+.nli-navbar-logo {
+	height: 24px;
+	width: auto;
+	max-height: 24px;
+}
+
+.bm-logo-pair .bm-logo-dark {
+	display: none;
+}
+
+[data-bs-theme="dark"] .bm-logo-pair .bm-logo-light {
+	display: none;
+}
+
+[data-bs-theme="dark"] .bm-logo-pair .bm-logo-dark {
+	display: inline-block;
+}
+
+/* Tabler autodark flattens logos to white; keep uploaded logos in color */
+.navbar-brand-autodark .navbar-brand-image.bm-logo-custom,
+[data-bs-theme="dark"] .navbar-brand-autodark .navbar-brand-image.bm-logo-custom {
+	filter: none !important;
 }
 
 /* NLI – MSP layout (tabs statt Top-Navbar) */
@@ -2889,7 +3052,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tre
 	font-family: "tabler-icons" !important;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):not(.bm-folder-tree-share),
 BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .dtree-indent-spacer {
 	flex-shrink: 0;
 	display: inline-flex;
@@ -2900,21 +3063,21 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tre
 	line-height: 1;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel) {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):not(.bm-folder-tree-share) {
 	color: rgba(255, 255, 255, 0.5);
 	text-decoration: none;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):hover {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):not(.bm-folder-tree-share):hover {
 	color: #fff;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel) .ti,
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel) .fa {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):not(.bm-folder-tree-share) .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):not(.bm-folder-tree-share) .fa {
 	font-size: 0.875rem;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel) .ti {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a:not(.node):not(.nodeSel):not(.bm-folder-tree-share) .ti {
 	font-family: "tabler-icons" !important;
 }
 
@@ -2950,6 +3113,105 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tre
 	padding: 0;
 	color: rgba(255, 255, 255, 0.75);
 	text-decoration: none;
+}
+
+/* Node-Anchor (Ordner-Link) füllt den restlichen Platz auf, damit das
+ * per JS angehängte Share-Icon (margin-left: auto) rechts am Rand landet
+ * – analog zum Kalender/Adressbuch-Sidebar. */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.node,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.nodeSel,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.node,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.nodeSel {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.35rem;
+	height: 1.35rem;
+	min-width: 1.4rem;
+	margin: 0 0 0 auto;   /* auto = rechts an den Rand wie beim Kalender */
+	padding: 0;
+	color: rgba(255, 255, 255, 0.45);
+	border-radius: var(--tblr-border-radius);
+	text-decoration: none;
+	opacity: 0.7;
+}
+
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share:hover,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share:hover {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+	opacity: 1;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share .fa,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > a.bm-folder-tree-share .fa {
+	width: 0.95rem;
+	min-width: 0.95rem;
+	font-size: 0.9rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Webdisk-Ordnerbaum: Aktion-Button-Gruppe (Edit/Share/Delete)       */
+/* Analog zur Kalender-Sidebar (.bm-organizer-sidebar-cal-actions)    */
+/* ------------------------------------------------------------------ */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions {
+	display: inline-flex;
+	align-items: stretch;
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions > .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4rem;
+	height: 1.4rem;
+	padding: 0;
+	color: rgba(255, 255, 255, 0.55);
+	background: transparent;
+	border-color: rgba(255, 255, 255, 0.2);
+	box-shadow: none;
+	font-weight: 400;
+	text-decoration: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions > .btn + .btn {
+	margin-left: calc(-1 * var(--tblr-border-width, 1px));
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode:hover > .bm-folder-tree-actions > .btn:not(.disabled),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions > .btn:hover:not(.disabled) {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.32);
+	font-weight: 400;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions > .btn.disabled {
+	opacity: 0.4;
+	pointer-events: none;
+	color: rgba(255, 255, 255, 0.28);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions > .btn .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-folder-tree .dTreeNode > .bm-folder-tree-actions > .btn .fa {
+	width: 0.85rem;
+	min-width: 0.85rem;
+	font-size: 0.85rem;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode .bm-folder-label {
@@ -3008,6 +3270,43 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tre
 BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode b {
 	font-weight: 600;
 	color: var(--tblr-primary, #066fd1);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-favorites a.bm-folder-fav {
+	justify-content: flex-start;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-favorites a.bm-folder-fav.current {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.06);
+	font-weight: 600;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-favorites .bm-folder-fav-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-favorites .bm-folder-count {
+	flex-shrink: 0;
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.25rem;
+	padding: 0 0.3rem;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.12);
+	font-size: 0.6875rem;
+	font-weight: 600;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > i.ti-mail,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo .bm-li-vertical-nav .bm-folder-tree .dTreeNode > i.ti-folder-share {
+	opacity: 0.9;
 }
 
 /* ------------------------------------------------------------------ */
@@ -3493,8 +3792,8 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"].selected {
-	background: #066fd1 !important;
-	border-color: #0559b0 !important;
+	background: var(--tblr-primary, #066fd1) !important;
+	border-color: color-mix(in srgb, var(--tblr-primary, #066fd1) 80%, #000) !important;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 	color: #fff;
 }
@@ -4771,7 +5070,7 @@ BODY.layout-fluid.bm-loggedin #multiMailMenu {
 	background: var(--tblr-bg-surface, #fff);
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
 	border-radius: var(--tblr-border-radius);
-	box-shadow: var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.12));
+	box-shadow: var(--tblr-shadow-dropdown, var(--tblr-box-shadow-dropdown, 0 0.5rem 1rem rgba(0, 0, 0, 0.12)));
 	min-width: 13rem;
 	padding: 0.35rem 0;
 	overflow: visible;
@@ -4972,6 +5271,15 @@ BODY.layout-fluid.bm-loggedin .bm-app-modal-dialog {
 	margin-right: auto;
 }
 
+BODY.layout-fluid.bm-loggedin .bm-app-modal-dialog.modal-dialog-scrollable {
+	height: auto;
+	max-height: calc(100% - var(--tblr-modal-margin, 1.75rem) * 2);
+}
+
+BODY.layout-fluid.bm-loggedin .bm-app-modal.bm-app-modal--compact .modal-body {
+	flex: 0 0 auto;
+}
+
 @media (max-width: 575.98px) {
 	BODY.layout-fluid.bm-loggedin .bm-app-modal-dialog.modal-fullscreen-sm-down {
 		margin: 0.5rem;
@@ -5005,6 +5313,10 @@ BODY.layout-fluid.bm-loggedin .bm-app-modal-dialog {
 html.bm-dialog-root,
 html:has(.bm-dialog-body) {
 	height: 100%;
+}
+
+html:has(BODY.bm-dialog-organizer-collection) {
+	height: auto;
 }
 
 .bm-dialog-body {
@@ -5072,6 +5384,17 @@ html:has(.bm-dialog-body) {
 
 .bm-dialog-body .btn-primary {
 	--tblr-btn-color: #fff;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection {
+	height: auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share {
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 /* ------------------------------------------------------------------ */
@@ -6069,6 +6392,18 @@ BODY.layout-fluid.bm-loggedin #folderAdminTable tr.bm-folder-section-row td {
 	background: transparent !important;
 }
 
+BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-share-owner-row td {
+	padding: 0.5rem 0.75rem 0.25rem;
+	background: transparent !important;
+	border-bottom: 0;
+}
+
+BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-share-owner {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--tblr-secondary, #626976);
+}
+
 BODY.layout-fluid.bm-loggedin #folderAdminTable tr.bm-folder-section-row + tbody.bm-folder-section-body tr:first-child td {
 	border-top: 0;
 }
@@ -6174,14 +6509,28 @@ BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-col-subscribed {
 }
 
 BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-col-actions {
-	width: 5.5rem;
+	width: 9.75rem;
 	text-align: right;
+}
+
+BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-col-actions .btn-group {
+	display: inline-flex;
+	flex-wrap: nowrap;
+	vertical-align: middle;
 }
 
 BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-col-actions .btn-icon {
 	width: 1.75rem;
 	height: 1.75rem;
 	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-col-actions .btn-group .btn.disabled {
+	opacity: 0.4;
+	pointer-events: none;
 }
 
 BODY.layout-fluid.bm-loggedin #folderAdminTable .bm-folder-stats {
@@ -6463,6 +6812,25 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer:has(.bm-organizer-
 	min-height: 100vh;
 	min-height: 100dvh;
 	overflow: visible;
+}
+
+/*
+ * Tabler ships with `:root { margin-left: calc(100vw - 100%); }` (from
+ * @media(min-width:992px)) which offsets the entire document by the
+ * scrollbar width whenever a vertical scrollbar appears. On our organizer
+ * form pages we intentionally allow the page to grow past the viewport
+ * (overflow: visible; height: auto), which triggers exactly that offset
+ * and creates a visible ~15 px gap between the left navigation and the
+ * form content. Fix this by cancelling the offset for form pages and
+ * instead reserving a stable scrollbar gutter, so the layout does not
+ * shift horizontally when switching between list and form views.
+ */
+@media (min-width: 992px) {
+	html:has(.bm-organizer-form-page) {
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+		scrollbar-gutter: stable;
+	}
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .page-body:has(.bm-organizer-form-page) {
@@ -6862,6 +7230,7 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskLi
 	background: transparent;
 	color: inherit;
 	text-decoration: none;
+	cursor: pointer;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList:hover {
@@ -7022,7 +7391,13 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-cale
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-calendar-week #calendarWholeDayBody {
 	flex: 0 0 auto;
 	max-height: 35%;
-	overflow: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	/* Immer Platz für Scrollbar reservieren, damit Header-Spalten (Ganztages-Zeile)
+	 * exakt über den Zeit-Grid-Spalten stehen – sonst verschiebt sich der Header,
+	 * weil das Grid darunter (fast immer) scrollt und der Header meist nicht. */
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-calendar-week #calendarDayBody.bm-organizer-week-grid,
@@ -7038,6 +7413,8 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-cale
 	height: auto !important;
 	overflow-x: hidden;
 	overflow-y: auto;
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-calendar-week #calendarDayBody .calendarDayBody {
@@ -7213,6 +7590,10 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-addr
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-address-avatar {
 	flex-shrink: 0;
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+	overflow: hidden;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-address-notes {
@@ -7437,6 +7818,94 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo
 	max-width: 100%;
 }
 
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-title {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: inherit;
+	text-decoration: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions {
+	display: inline-flex;
+	align-items: stretch;
+	flex-wrap: nowrap;
+	flex-shrink: 0;
+	gap: 0;
+	margin-left: auto;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions > .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 1.4rem;
+	height: 1.4rem;
+	min-width: 1.4rem;
+	padding: 0;
+	margin: 0;
+	box-shadow: none;
+	font-weight: 400;
+	color: var(--tblr-body-color, #182433);
+	background: var(--tblr-bg-surface, #fff);
+	border-color: var(--tblr-border-color, #d1d5db);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions > .btn + .btn {
+	margin-left: calc(-1 * var(--tblr-border-width, 1px));
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions > .btn:not(:last-child) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions > .btn:not(:first-child) {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions .btn.disabled {
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList .bm-organizer-tasklist-actions .ti {
+	width: 0.85rem;
+	min-width: 0.85rem;
+	font-size: 0.85rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-title {
+	color: #fff;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-actions .btn,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-actions .btn.disabled {
+	color: #182433;
+	background: #fff;
+	border-color: rgba(0, 0, 0, 0.16);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-actions .btn .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-actions .btn .ti {
+	color: inherit;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-actions .btn.disabled {
+	opacity: 0.45;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .taskLists .taskList.selected .bm-organizer-tasklist-actions .btn:hover:not(.disabled) {
+	color: #182433;
+	background: #f1f5f9;
+	border-color: rgba(0, 0, 0, 0.22);
+}
+
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo .bm-organizer-tasklists-items .taskList {
 	display: flex;
 }
@@ -7546,6 +8015,14 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-tabl
 	color: var(--tblr-secondary, #626976);
 	background: var(--tblr-bg-surface-secondary, #f8fafc);
 	border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-action-disabled {
+	display: inline-flex;
+	align-items: center;
+	opacity: 0.35;
+	cursor: not-allowed;
+	color: var(--tblr-secondary, #626976);
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-sort-link {
@@ -7688,6 +8165,8 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-act
 	flex-shrink: 0;
 }
 
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-row-actions,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-actions {
 	display: inline-flex !important;
@@ -7715,30 +8194,112 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-act
 	justify-content: center;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .btn-outline-secondary,
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .btn-outline-secondary,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .btn.disabled,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .btn.disabled {
+	opacity: 0.4;
+	pointer-events: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions {
+	align-items: stretch;
+	gap: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions > .btn,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions > .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 1.4rem;
+	height: 1.4rem;
+	min-width: 1.4rem;
+	padding: 0;
+	box-shadow: none;
+	font-weight: 400;
+	color: var(--tblr-body-color, #182433);
+	background: var(--tblr-bg-surface, #fff);
+	border-color: var(--tblr-border-color, #d1d5db);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions > .btn + .btn,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions > .btn + .btn {
+	margin-left: calc(-1 * var(--tblr-border-width, 1px)) !important;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions > .btn:not(:last-child),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions > .btn:not(:last-child) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions > .btn:not(:first-child),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions > .btn:not(:first-child) {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .ti {
+	width: 0.85rem;
+	min-width: 0.85rem;
+	font-size: 0.85rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected td,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected td {
+	background: var(--tblr-primary-lt, #e7f1fc);
+	color: inherit;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected span:not(.btn),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected span:not(.btn) {
+	background: transparent;
+	color: inherit;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected a,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected a:hover,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected a,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected a:hover {
+	color: inherit;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected .bm-organizer-task-actions .btn,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected .bm-organizer-task-actions .btn {
+	color: var(--tblr-body-color, #182433);
+	background: var(--tblr-bg-surface, #fff);
+	border-color: var(--tblr-border-color, #d1d5db);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected .bm-organizer-task-actions .btn .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable tr.selected .bm-organizer-task-actions .btn .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected .bm-organizer-task-actions .btn .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable tr.selected .bm-organizer-task-actions .btn .ti {
+	color: inherit;
+}
+
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-row-actions .btn-outline-secondary,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-actions .btn-outline-secondary {
 	background: var(--tblr-bg-surface, #fff);
 	box-shadow: none;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .btn-outline-secondary:hover,
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .btn-outline-secondary:hover,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-row-actions .btn-outline-secondary:hover,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-actions .btn-outline-secondary:hover {
 	background: var(--tblr-bg-surface-secondary, #f8fafc);
 }
 
-[data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .btn-outline-secondary,
-[data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .btn-outline-secondary,
 [data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-row-actions .btn-outline-secondary,
 [data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-actions .btn-outline-secondary {
 	background: var(--tblr-bg-surface, #1f2937);
 }
 
-[data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-todo #tasksTable .bm-organizer-task-actions .btn-outline-secondary:hover,
-[data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-notes #notesTable .bm-organizer-task-actions .btn-outline-secondary:hover,
 [data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-row-actions .btn-outline-secondary:hover,
 [data-bs-theme="dark"] BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-orderpos-actions .btn-outline-secondary:hover {
 	background: var(--tblr-bg-surface-secondary, #334155);
@@ -7772,6 +8333,99 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-form
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
 	border-radius: var(--tblr-border-radius, 0.375rem);
 	box-shadow: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-new-group > .input-group-text {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.5rem 0.75rem;
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+	color: var(--tblr-secondary, #626976);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-new-group > .input-group-text .ti {
+	font-size: 1rem;
+	line-height: 1;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-new-group .form-check-input {
+	float: none;
+	margin: 0;
+}
+
+/* --- Gruppen-Chips (Multiselect als Pills) ------------------------------- */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chips {
+	line-height: 1;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chip-wrap {
+	display: inline-flex;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chip {
+	--tblr-btn-padding-y: 0.25rem;
+	--tblr-btn-padding-x: 0.625rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.3125rem 0.75rem;
+	border-radius: 999px;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	line-height: 1.2;
+	color: var(--tblr-body-color, #1f2937);
+	background-color: #fff;
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+	cursor: pointer;
+	user-select: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chip .ti {
+	font-size: 0.9375rem;
+	line-height: 1;
+	color: var(--tblr-secondary, #626976);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chip .bm-group-chip-check {
+	display: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chip:hover {
+	background-color: var(--tblr-bg-surface-secondary, #f8fafc);
+	border-color: var(--tblr-primary, #066fd1);
+	color: var(--tblr-primary, #066fd1);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-group-chip:hover .ti {
+	color: var(--tblr-primary, #066fd1);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .btn-check:focus-visible + .bm-group-chip {
+	box-shadow: 0 0 0 0.25rem rgba(6, 111, 209, 0.25);
+	outline: 0;
+}
+
+/* aktive Gruppe: gefüllt mit primary, Check sichtbar */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .btn-check:checked + .bm-group-chip {
+	background-color: var(--tblr-primary, #066fd1);
+	border-color: var(--tblr-primary, #066fd1);
+	color: #fff;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .btn-check:checked + .bm-group-chip .ti {
+	color: #fff;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .btn-check:checked + .bm-group-chip .bm-group-chip-check {
+	display: inline-block;
+	opacity: 0.9;
+}
+
+/* Der große primary-Users-Icon links verschwindet auf aktiv, damit nur ein Symbol sichtbar bleibt */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .btn-check:checked + .bm-group-chip > .ti-users {
+	display: none;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-form-section-title {
@@ -7873,18 +8527,39 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-date
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-contact-form .bm-organizer-contact-avatar {
+	width: 5rem;
+	height: 5rem;
+	flex: 0 0 5rem;
 	background-size: cover;
 	background-position: center center;
 	background-repeat: no-repeat;
+	overflow: hidden;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-contact-avatar--empty,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-address-avatar.bm-organizer-contact-avatar--empty {
+	background-image: none;
+	background-color: var(--tblr-bg-surface-secondary, #f1f5f9);
+	color: var(--tblr-secondary, #6b7280);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-contact-form .bm-organizer-contact-avatar--empty .ti {
+	width: 4.25rem;
+	min-width: 4.25rem;
+	height: 4.25rem;
+	font-size: 4.25rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-address-avatar.bm-organizer-contact-avatar--empty .ti {
+	width: 2.35rem;
+	min-width: 2.35rem;
+	height: 2.35rem;
+	font-size: 2.35rem;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-contact-form .bm-organizer-contact-features .list-group-item {
 	display: flex;
 	align-items: center;
-	padding-left: 0;
-	padding-right: 0;
-	border-left: 0;
-	border-right: 0;
 	font-size: 0.875rem;
 }
 
@@ -7917,6 +8592,27 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-date
 	background-color: var(--tblr-bg-surface, #fff);
 	border: 1px solid var(--tblr-border-color, #e6e7e9);
 	border-radius: var(--tblr-border-radius, 0.375rem);
+}
+
+/* HTML5 date/time inputs in the calendar date form */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-datetime {
+	flex-wrap: wrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-datetime input[type="date"].bm-organizer-datetime-date,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-datetime input[type="time"].bm-organizer-datetime-time {
+	flex: 0 0 auto;
+	width: auto;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-datetime input[type="date"].bm-organizer-datetime-date {
+	min-width: 9rem;
+	max-width: 11rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-datetime input[type="time"].bm-organizer-datetime-time {
+	min-width: 6rem;
+	max-width: 7.5rem;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-task {
@@ -7964,17 +8660,22 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-na
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-minical {
-	padding: 0.25rem 0.5rem 0.75rem;
+	padding: 0 0.25rem 0.5rem;
 }
 
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-minical.bm-organizer-minical-plain {
+	padding: 0 0.15rem 0.65rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical.bm-organizer-minical-plain .miniCalendarTable {
 	width: 100%;
 	border-collapse: separate;
 	border-spacing: 0;
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-radius: var(--tblr-border-radius, 0.375rem);
-	overflow: hidden;
-	background: rgba(255, 255, 255, 0.04);
+	border: none;
+	border-radius: 0;
+	overflow: visible;
+	background: transparent;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable th {
@@ -7989,17 +8690,17 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-na
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable th.Caption {
-	background: var(--bm-primary);
-	color: #fff;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.9);
 	font-weight: 600;
 	font-size: 0.75rem;
-	padding: 0.45rem 0.5rem;
+	padding: 0.35rem 0.25rem 0.45rem;
 	text-align: center;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+	border: none;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable th.Caption a {
-	color: #fff;
+	color: rgba(255, 255, 255, 0.92);
 	text-decoration: none;
 }
 
@@ -8009,10 +8710,10 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-na
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable td {
 	text-align: center;
-	border: 1px solid rgba(255, 255, 255, 0.06);
+	border: none;
 	padding: 0;
 	font-size: 0.6875rem;
-	background: rgba(255, 255, 255, 0.02);
+	background: transparent;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable td.Empty {
@@ -8049,6 +8750,237 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-na
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-minical .miniCalendarTable td a:hover {
 	background: rgba(255, 255, 255, 0.12);
 	color: #fff;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.3rem 0.5rem;
+	margin: 0 -0.5rem;
+	border-radius: var(--tblr-border-radius);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal.current {
+	background: rgba(255, 255, 255, 0.06);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal .form-check {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	min-height: 0;
+	padding-left: 0;
+	margin: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal .form-check-input {
+	float: none;
+	width: 1.125rem;
+	height: 1.125rem;
+	min-height: 1.125rem;
+	margin: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-swatch {
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 0.15rem;
+	flex-shrink: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-0 .bm-organizer-cal-swatch { background: #3D81EB; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-1 .bm-organizer-cal-swatch { background: #5DB747; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-2 .bm-organizer-cal-swatch { background: #FA514A; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-3 .bm-organizer-cal-swatch { background: #FD9530; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-4 .bm-organizer-cal-swatch { background: #C358BF; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-5 .bm-organizer-cal-swatch { background: #8A74D3; }
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-0 .form-check-input { accent-color: #3D81EB; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-1 .form-check-input { accent-color: #5DB747; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-2 .form-check-input { accent-color: #FA514A; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-3 .form-check-input { accent-color: #FD9530; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-4 .form-check-input { accent-color: #C358BF; }
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-cal-5 .form-check-input { accent-color: #8A74D3; }
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal > a {
+	display: flex;
+	align-items: center;
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 0;
+	margin: 0;
+	font-size: 0.8125rem;
+	line-height: 1.35;
+	color: rgba(255, 255, 255, 0.75);
+	text-decoration: none;
+	background: transparent;
+	font-weight: 400;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal > a:hover,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal.current > a {
+	color: #fff;
+	background: transparent;
+	font-weight: 600;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .sidebarHeading.bm-organizer-sidebar-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.35rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-heading-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4rem;
+	height: 1.4rem;
+	padding: 0;
+	margin: 0;
+	color: rgba(255, 255, 255, 0.55);
+	border-radius: var(--tblr-border-radius);
+	text-decoration: none;
+	background: transparent;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-heading-action:hover {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-heading-action .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-heading-action .ti {
+	width: 1rem;
+	min-width: 1rem;
+	font-size: 0.95rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .sidebarHeading.bm-email-sidebar-heading,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .sidebarHeading.bm-webdisk-sidebar-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.35rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .sidebarHeading.bm-webdisk-sidebar-heading > span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-email-sidebar-heading-action,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-webdisk-sidebar-heading-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4rem;
+	height: 1.4rem;
+	padding: 0;
+	margin: 0;
+	flex: 0 0 auto;
+	color: rgba(255, 255, 255, 0.55);
+	border-radius: var(--tblr-border-radius);
+	text-decoration: none;
+	background: transparent;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-email-sidebar-heading-action:hover,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-webdisk-sidebar-heading-action:hover {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-email-sidebar-heading-action .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email .bm-li-vertical-nav .bm-email-sidebar-heading-action .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-webdisk-sidebar-heading-action .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-webdisk .bm-li-vertical-nav .bm-webdisk-sidebar-heading-action .ti {
+	width: 1rem;
+	min-width: 1rem;
+	font-size: 0.95rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions {
+	display: inline-flex;
+	align-items: stretch;
+	margin-left: auto;
+	flex: 0 0 auto;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4rem;
+	height: 1.4rem;
+	padding: 0;
+	color: rgba(255, 255, 255, 0.55);
+	background: transparent;
+	border-color: rgba(255, 255, 255, 0.2);
+	box-shadow: none;
+	font-weight: 400;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions > .btn + .btn {
+	margin-left: calc(-1 * var(--tblr-border-width, 1px));
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal:hover .bm-organizer-sidebar-cal-actions .btn:not(.disabled),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-book:hover .bm-organizer-sidebar-cal-actions .btn:not(.disabled),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions .btn:hover:not(.disabled) {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.32);
+	font-weight: 400;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions .btn.disabled {
+	opacity: 0.4;
+	pointer-events: none;
+	color: rgba(255, 255, 255, 0.28);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions .icon,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions .ti,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-cal-actions .fa {
+	width: 0.85rem;
+	min-width: 0.85rem;
+	font-size: 0.85rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-book {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.15rem 0;
+	margin: 0 -0.5rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	border-radius: var(--tblr-border-radius);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-book.current {
+	background: rgba(255, 255, 255, 0.06);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-book > a {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: 0.2rem 0.15rem;
+	margin: 0;
+	background: transparent;
+	font-weight: 400;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-li-vertical-nav .bm-organizer-sidebar-book.current > a {
+	color: #fff;
+	font-weight: 600;
+	background: transparent;
 }
 
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-calendar-body {
@@ -8114,6 +9046,46 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .calendarDayBody.b
 	flex: 1 1 auto;
 	min-height: 0;
 	height: auto;
+}
+
+/* Kalender (Tag/Woche): Die "Zeit"-Spalte links (.calendarDayTimeCell) muss
+ * im Ganztages-Balken UND im Stunden-Grid darunter (iframe im Tagesview,
+ * inline im Wochenview) dieselbe Breite haben, sonst sind die Tages-Spalten
+ * horizontal verschoben. loggedin.css setzt hier historisch 40px, das reicht
+ * mit den Tabler-Fontmetriken für Uhrzeit-Labels wie "12:30" nicht mehr.
+ * → Angehoben auf 57px, was für alle Uhrzeiten inkl. dark-theme ausreicht. */
+BODY.bm-loggedin .calendarDayTimeCell {
+	width: 57px;
+	vertical-align: top;
+}
+
+/* Tagesansicht: Ganztages-Balken (im äußeren Dokument) MUSS dieselbe reservierte
+ * Scrollbar-Breite rechts haben wie der iframe darunter, sonst hängt der Balken
+ * rechts über das Zeit-Grid hinaus. Wir überschreiben deshalb das inline
+ * overflow-y:scroll durch overflow-y:auto + scrollbar-gutter:stable und schalten
+ * die Scrollbar per scrollbar-width:thin schlank – analog zum Wochenview. */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-organizer .bm-organizer-calendar > #calendarContainer:not(.bm-organizer-calendar-week) > #calendarWholeDayBody {
+	overflow-x: hidden !important;
+	overflow-y: auto !important;
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
+}
+
+/* iframe-Content im Tagesview: interne Scrollbar der Stunden-Tabelle
+ * ebenfalls auf "thin" (Firefox) bzw. via ::-webkit-scrollbar (Chrome/Safari),
+ * damit sie gleich viel Platz frisst wie der Gutter am Balken. */
+BODY.bm-loggedin .calendarDayBody {
+	scrollbar-width: thin;
+}
+BODY.bm-loggedin .calendarDayBody::-webkit-scrollbar {
+	width: 8px;
+}
+BODY.bm-loggedin .calendarDayBody::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+}
+BODY.bm-loggedin .calendarDayBody::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.35);
 }
 
 /* Adressbuch – Links lesbar (loggedin.css setzt A { color:#000 }) */
@@ -10380,6 +11352,59 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-payment
 	max-width: none;
 }
 
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card {
+	border: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: 0.5rem;
+	box-shadow: none;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-header {
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+	padding: 0.875rem 1rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-title {
+	margin: 0;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-body {
+	padding: 1rem;
+}
+
+@media (min-width: 768px) {
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-body > .row > .col-md-3 {
+		flex: 0 0 11rem;
+		width: 11rem;
+		max-width: 11rem;
+	}
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-body .form-control {
+	max-width: 22rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--tblr-bg-surface-secondary, #f8fafc);
+	padding: 0.875rem 1rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-body > .row > .col-form-label,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .card-body > .row > [class*="col-"] > .col-form-label {
+	padding-top: 0.4375rem;
+	padding-bottom: 0.4375rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-membership .bm-prefs-wg-member {
+	padding-left: 2.75rem;
+}
+
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-contact .bm-prefs-body:has(> .bm-prefs-form-pad) .listTableRight:not(.listTableRightDesc) {
 	width: var(--bm-prefs-field-width);
 	max-width: 100%;
@@ -11722,3 +12747,16 @@ body.bm-session-locked .bm-session-lock-overlay {
 	}
 }
 
+
+/* Freigabe-Dialoge: Tabelle geht bis zum Modal-Rand (Border / Zeilentrenner
+ * full-width), aber der Zell-Inhalt der ersten/letzten Spalte wird um
+ * 1rem eingerückt, damit er bündig mit dem umgebenden modal-body-Text
+ * steht. !important schlägt Bootstraps --bs-table-padding-x. */
+.bm-dialog-organizer-share .bm-organizer-share-table > thead > tr > th:first-child,
+.bm-dialog-organizer-share .bm-organizer-share-table > tbody > tr > td:first-child {
+	padding-left: 1rem !important;
+}
+.bm-dialog-organizer-share .bm-organizer-share-table > thead > tr > th:last-child,
+.bm-dialog-organizer-share .bm-organizer-share-table > tbody > tr > td:last-child {
+	padding-right: 1rem !important;
+}

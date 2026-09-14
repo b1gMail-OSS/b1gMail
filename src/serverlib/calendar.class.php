@@ -23,6 +23,8 @@ if (!defined('B1GMAIL_INIT')) {
     die('Directly calling this file is not supported');
 }
 
+include_once B1GMAIL_DIR.'serverlib/organizer.collections.inc.php';
+
 /**
  * Ensure dates_attendees.partstat exists (RSVP status).
  */
@@ -68,6 +70,7 @@ function bmCalendarNormalizePartstat($partstat)
 class BMCalendar
 {
     private $_userID;
+    private $_sharedCalendars;
 
     /**
      * constructor.
@@ -79,6 +82,7 @@ class BMCalendar
     public function __construct($userID)
     {
         $this->_userID = $userID;
+        bmOrganizerEnsureCollections();
     }
 
     /**
@@ -376,23 +380,54 @@ class BMCalendar
      *
      * @return array
      */
-    public function GetDatesForTimeframe($start, $end, $group = -2)
+    public function GetDatesForTimeframe($start, $end, $group = -2, $calendarIDs = null)
     {
         global $db;
 
         $result = [];
+        $accessIDs = array_map('intval', array_keys($this->GetCalendars() + $this->GetSharedCalendars()));
+        if (is_array($calendarIDs) && count($calendarIDs) > 0) {
+            $ids = array_values(array_intersect(array_map('intval', $calendarIDs), $accessIDs));
+        } else {
+            $ids = $accessIDs;
+        }
+        if (count($ids) === 0) {
+            return $result;
+        }
+        $calFilter = ' AND `calendar_id` IN('.implode(',', $ids).')';
+
+        $groupColors = [];
+        $res = $db->Query('SELECT `id`,`color` FROM {pre}dates_groups WHERE `calendar_id` IN('.implode(',', $ids).')');
+        while ($gRow = $res->FetchArray(MYSQLI_ASSOC)) {
+            $groupColors[(int) $gRow['id']] = (int) $gRow['color'];
+        }
+        $res->Free();
+
+        $calendarColors = [];
+        $res = $db->Query('SELECT `id`,`color` FROM {pre}calendars WHERE `id` IN('.implode(',', $ids).')');
+        while ($cRow = $res->FetchArray(MYSQLI_ASSOC)) {
+            $calendarColors[(int) $cRow['id']] = (int) $cRow['color'];
+        }
+        $res->Free();
 
         // get dates
-        $res = $db->Query('SELECT id,user,title,location,text,`group`,startdate,enddate,reminder,flags,repeat_flags,repeat_times,repeat_value,repeat_extra1,repeat_extra2 '
-                            .'FROM {pre}dates WHERE (((startdate>=? OR enddate<=? OR (startdate<=? AND enddate>=?)) AND repeat_flags=0) OR (repeat_flags>0 AND ((repeat_flags&'.CLNDR_REPEATING_UNTIL_DATE.')=0 OR repeat_value<=?))) AND user=?'
-                            .($group > -2 ? ' AND `group`='.(int) $group : ''),
+        $res = $db->Query('SELECT id,user,title,location,text,`group`,startdate,enddate,reminder,flags,repeat_flags,repeat_times,repeat_value,repeat_extra1,repeat_extra2,`calendar_id` '
+                            .'FROM {pre}dates WHERE (((startdate>=? OR enddate<=? OR (startdate<=? AND enddate>=?)) AND repeat_flags=0) OR (repeat_flags>0 AND ((repeat_flags&'.CLNDR_REPEATING_UNTIL_DATE.')=0 OR repeat_value<=?)))'
+                            .($group > -2 ? ' AND `group`='.(int) $group : '')
+                            .$calFilter,
                             $start,
                             $end,
                             $start,
                             $end,
-                            $start,
-                            $this->_userID);
+                            $start);
         while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+            $gid = (int) $row['group'];
+            $cid = (int) $row['calendar_id'];
+            if ($gid > 0 && isset($groupColors[$gid])) {
+                $row['displayColor'] = $groupColors[$gid];
+            } else {
+                $row['displayColor'] = isset($calendarColors[$cid]) ? $calendarColors[$cid] : 0;
+            }
             $dates = BMCalendar::_getOccurencesInTimeframe($row, $start, $end);
             if (count($dates) > 0) {
                 $result = array_merge($result, $dates);
@@ -420,16 +455,11 @@ class BMCalendar
         $ok = false;
         $user = _new('BMUser', [$date['user']]);
 
-        // post notification
-        if ($date['flags'] & CLNDR_REMIND_NOTIFY) {
-            $user->PostNotification('notify_date',
-                [HTMLFormat($date['title'])],
-                sprintf('showCalendarDate(%d,%d,%d,false)', $date['id'], $date['startdate'], $date['enddate']),
-                '%%tpldir%%images/li/notify_calendar.png',
-                $date['startdate'],
-                0,
-                NOTIFICATION_FLAG_USELANG | NOTIFICATION_FLAG_JSLINK,
-                '::dateReminder');
+        // post notification (in-app + optionally push, if the push flag is set)
+        $wantsNotify = (bool) ($date['flags'] & CLNDR_REMIND_NOTIFY);
+        $wantsPush = (bool) ($date['flags'] & CLNDR_REMIND_PUSH);
+        if ($wantsNotify || $wantsPush) {
+            self::_postDateReminder($user, $date, $wantsNotify, $wantsPush);
             $ok = true;
         }
 
@@ -491,6 +521,11 @@ class BMCalendar
             $ok = true;
         }
 
+        // in-app + push for users the calendar is shared with (read or write)
+        if (self::_notifyDateSharees($date)) {
+            $ok = true;
+        }
+
         // update last_reminder
         if ($ok) {
             $db->Query('UPDATE {pre}dates SET last_reminder=? WHERE id=?',
@@ -500,6 +535,101 @@ class BMCalendar
 
         // return
         return $ok;
+    }
+
+    /**
+     * In-app notification and/or Web Push for a calendar reminder.
+     *
+     * Sending is controlled independently by the two flags:
+     *   - $doInApp  – create a database notification (visible in-app)
+     *   - $doPush   – deliver a Web Push message to the user's devices
+     *
+     * If both are true, we use the standard PostNotification() path (in-app + push).
+     * If only in-app is requested, PostNotification() is called with $suppressPush=true.
+     * If only push is requested, we bypass the in-app notification entirely and send
+     * a stand-alone Web Push via BMPush::send().
+     *
+     * @param BMUser $user
+     * @param array  $date
+     * @param bool   $doInApp
+     * @param bool   $doPush
+     */
+    private static function _postDateReminder($user, $date, $doInApp = true, $doPush = true)
+    {
+        global $lang_custom;
+
+        if ($doInApp) {
+            $user->PostNotification('notify_date',
+                [HTMLFormat($date['title'])],
+                sprintf('showCalendarDate(%d,%d,%d,false)', $date['id'], $date['startdate'], $date['enddate']),
+                '%%tpldir%%images/li/notify_calendar.png',
+                $date['startdate'],
+                0,
+                NOTIFICATION_FLAG_USELANG | NOTIFICATION_FLAG_JSLINK,
+                '::dateReminder',
+                false,
+                !$doPush);
+
+            return;
+        }
+
+        if (!$doPush) {
+            return;
+        }
+
+        // Push-only path: no in-app notification, deliver Web Push directly.
+        if (!class_exists('BMPush', false)) {
+            include B1GMAIL_DIR.'serverlib/push.class.php';
+        }
+        if (!BMPush::isEnabled()) {
+            return;
+        }
+
+        $phrase = isset($lang_custom['notify_date']) ? $lang_custom['notify_date'] : 'notify_date';
+        $body = @sprintf($phrase, HTMLFormat($date['title']));
+        if ($body === false) {
+            $body = HTMLFormat($date['title']);
+        }
+
+        BMPush::send([
+            'area' => BMPush::AREA_USER,
+            'targetId' => (int) $user->_id,
+            'type' => BMPush::TYPE_CALENDAR,
+            'body' => $body,
+            'url' => sprintf('organizer.calendar.php?date=%d&', (int) $date['id']),
+            'icon' => 'pwa-icon.php?size=192',
+        ]);
+    }
+
+    /**
+     * Remind users a calendar is shared with.
+     *
+     * @param array $date
+     *
+     * @return bool
+     */
+    private static function _notifyDateSharees($date)
+    {
+        $calendarId = isset($date['calendar_id']) ? (int) $date['calendar_id'] : 0;
+        $ownerId = (int) $date['user'];
+        if ($calendarId <= 0 || $ownerId <= 0) {
+            return false;
+        }
+
+        $sent = false;
+        foreach (bmOrganizerListShareeIds(BM_ORGANIZER_SHARE_CAL, $calendarId, $ownerId) as $shareeId) {
+            if ($shareeId <= 0 || $shareeId === $ownerId) {
+                continue;
+            }
+            $sharee = _new('BMUser', [$shareeId]);
+            if (!is_array($sharee->_row) || $sharee->_row['gesperrt'] === 'delete') {
+                continue;
+            }
+            self::_postDateReminder($sharee, $date);
+            $sent = true;
+        }
+
+        return $sent;
     }
 
     /**
@@ -519,10 +649,10 @@ class BMCalendar
 
         // get dates
         $remindDates = [];
-        $res = $db->Query('SELECT {pre}dates.id,{pre}dates.last_reminder,{pre}dates.user,{pre}dates.title,{pre}dates.location,{pre}dates.`text`,{pre}dates.`group`,{pre}dates.startdate,{pre}dates.enddate,{pre}dates.reminder,{pre}dates.flags,{pre}dates.repeat_flags,{pre}dates.repeat_times,{pre}dates.repeat_value,{pre}dates.repeat_extra1,{pre}dates.repeat_extra2 '
+        $res = $db->Query('SELECT {pre}dates.id,{pre}dates.last_reminder,{pre}dates.user,{pre}dates.title,{pre}dates.location,{pre}dates.`text`,{pre}dates.`group`,{pre}dates.startdate,{pre}dates.enddate,{pre}dates.reminder,{pre}dates.flags,{pre}dates.repeat_flags,{pre}dates.repeat_times,{pre}dates.repeat_value,{pre}dates.repeat_extra1,{pre}dates.repeat_extra2,{pre}dates.`calendar_id` '
                             .'FROM {pre}dates '
                             .'INNER JOIN {pre}users ON {pre}users.`id`={pre}dates.`user` '
-                            .'WHERE {pre}users.`gesperrt`!=\'delete\' AND ({pre}dates.flags&'.(CLNDR_REMIND_EMAIL | CLNDR_REMIND_NOTIFY | CLNDR_REMIND_SMS).')!=0 AND ((({pre}dates.startdate>=? OR {pre}dates.enddate<=? OR ({pre}dates.startdate<=? AND {pre}dates.enddate>=?)) AND {pre}dates.repeat_flags=0) OR ({pre}dates.repeat_flags>0 AND (({pre}dates.repeat_flags&'.CLNDR_REPEATING_UNTIL_DATE.')=0 OR {pre}dates.repeat_value<=?))) '
+                            .'WHERE {pre}users.`gesperrt`!=\'delete\' AND ({pre}dates.flags&'.(CLNDR_REMIND_EMAIL | CLNDR_REMIND_NOTIFY | CLNDR_REMIND_SMS | CLNDR_REMIND_PUSH).')!=0 AND ((({pre}dates.startdate>=? OR {pre}dates.enddate<=? OR ({pre}dates.startdate<=? AND {pre}dates.enddate>=?)) AND {pre}dates.repeat_flags=0) OR ({pre}dates.repeat_flags>0 AND (({pre}dates.repeat_flags&'.CLNDR_REPEATING_UNTIL_DATE.')=0 OR {pre}dates.repeat_value<=?))) '
                             .'ORDER BY {pre}dates.user ASC',
                             $start,
                             $end,
@@ -557,6 +687,338 @@ class BMCalendar
     }
 
     /**
+     * Get all calendars of the user.
+     *
+     * @return array
+     */
+    public function GetCalendars()
+    {
+        global $db, $lang_user;
+
+        $result = [];
+        $res = $db->Query('SELECT `id`,`user`,`title`,`color`,`is_default`,`dav_uri`,`dav_uid` FROM {pre}calendars WHERE `user`=? ORDER BY `is_default` DESC, `title` ASC',
+            $this->_userID);
+        while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+            if (empty($row['is_default'])) {
+                $row['dav_uri'] = bmOrganizerUpgradeGeneratedDavUri($this->_userID, (int) $row['id'], $row['title'], $row['dav_uri'], 'cal', '{pre}calendars');
+            }
+            bmOrganizerHydrateCollectionTitle($row, $lang_user['calendar']);
+            $result[(int) $row['id']] = $row;
+        }
+        $res->Free();
+
+        if (count($result) === 0) {
+            $this->EnsureDefaultCalendar();
+            $res = $db->Query('SELECT `id`,`user`,`title`,`color`,`is_default`,`dav_uri`,`dav_uid` FROM {pre}calendars WHERE `user`=? ORDER BY `is_default` DESC, `title` ASC',
+                $this->_userID);
+            while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+                if (empty($row['is_default'])) {
+                    $row['dav_uri'] = bmOrganizerUpgradeGeneratedDavUri($this->_userID, (int) $row['id'], $row['title'], $row['dav_uri'], 'cal', '{pre}calendars');
+                }
+                bmOrganizerHydrateCollectionTitle($row, $lang_user['calendar']);
+                $result[(int) $row['id']] = $row;
+            }
+            $res->Free();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Calendars shared with this user.
+     *
+     * @return array
+     */
+    public function GetSharedCalendars()
+    {
+        if ($this->_sharedCalendars === null) {
+            $this->_sharedCalendars = bmOrganizerListSharedWith(BM_ORGANIZER_SHARE_CAL, $this->_userID);
+        }
+
+        return $this->_sharedCalendars;
+    }
+
+    /**
+     * Own or shared calendar.
+     *
+     * @param int $id
+     *
+     * @return array|false
+     */
+    public function GetAccessibleCalendar($id)
+    {
+        $own = $this->GetCalendar($id);
+        if ($own !== false) {
+            $own['shared'] = false;
+            $own['share_access'] = 'owner';
+
+            return $own;
+        }
+        $shared = $this->GetSharedCalendars();
+        $id = (int) $id;
+
+        return isset($shared[$id]) ? $shared[$id] : false;
+    }
+
+    /**
+     * @param int $id
+     *
+     * @return bool
+     */
+    public function CanWriteCalendar($id)
+    {
+        $cal = $this->GetAccessibleCalendar($id);
+        if ($cal === false) {
+            return false;
+        }
+
+        return empty($cal['shared']) || $cal['share_access'] === BM_ORGANIZER_ACCESS_WRITE;
+    }
+
+    /**
+     * Get a calendar.
+     *
+     * @param int $id
+     *
+     * @return array|false
+     */
+    public function GetCalendar($id)
+    {
+        global $db, $lang_user;
+
+        $res = $db->Query('SELECT `id`,`user`,`title`,`color`,`is_default`,`dav_uri`,`dav_uid` FROM {pre}calendars WHERE `user`=? AND `id`=?',
+            $this->_userID,
+            (int) $id);
+        if ($res->RowCount() !== 1) {
+            $res->Free();
+
+            return false;
+        }
+        $row = $res->FetchArray(MYSQLI_ASSOC);
+        $res->Free();
+        bmOrganizerHydrateCollectionTitle($row, $lang_user['calendar']);
+
+        return $row;
+    }
+
+    /**
+     * Calendar IDs currently shown in the overlay (all, if none stored).
+     *
+     * @param array|null $calendars
+     *
+     * @return int[]
+     */
+    public function GetVisibleCalendarIDs($calendars = null)
+    {
+        global $thisUser;
+
+        if ($calendars === null) {
+            $calendars = $this->GetCalendars() + $this->GetSharedCalendars();
+        }
+        $all = array_map('intval', array_keys($calendars));
+        if (!is_object($thisUser) || !method_exists($thisUser, 'GetPref')) {
+            return $all;
+        }
+        $pref = $thisUser->GetPref('visibleCalendars');
+        if ($pref === false || $pref === '') {
+            return $all;
+        }
+        $wanted = array_filter(array_map('intval', explode(',', $pref)));
+        $filtered = array_values(array_intersect($wanted, $all));
+
+        return count($filtered) > 0 ? $filtered : $all;
+    }
+
+    /**
+     * ID of the default calendar.
+     *
+     * @return int
+     */
+    public function GetDefaultCalendarID()
+    {
+        global $db;
+
+        $res = $db->Query('SELECT `id` FROM {pre}calendars WHERE `user`=? AND `is_default`=1 LIMIT 1',
+            $this->_userID);
+        if ($res->RowCount() === 1) {
+            list($id) = $res->FetchArray(MYSQLI_NUM);
+            $res->Free();
+
+            return (int) $id;
+        }
+        $res->Free();
+
+        return $this->EnsureDefaultCalendar();
+    }
+
+    /**
+     * Resolve a calendar ID, falling back to the default.
+     *
+     * @param int $calendarID
+     *
+     * @return int
+     */
+    public function ResolveCalendarID($calendarID)
+    {
+        $calendarID = (int) $calendarID;
+        if ($calendarID > 0 && $this->GetAccessibleCalendar($calendarID) !== false) {
+            return $calendarID;
+        }
+
+        return $this->GetDefaultCalendarID();
+    }
+
+    /**
+     * Create the default calendar if missing.
+     *
+     * @return int
+     */
+    public function EnsureDefaultCalendar()
+    {
+        global $db;
+
+        $res = $db->Query('SELECT `id` FROM {pre}calendars WHERE `user`=? AND `is_default`=1 LIMIT 1',
+            $this->_userID);
+        if ($res->RowCount() === 1) {
+            list($id) = $res->FetchArray(MYSQLI_NUM);
+            $res->Free();
+
+            return (int) $id;
+        }
+        $res->Free();
+
+        $db->Query('INSERT INTO {pre}calendars(`user`,`title`,`color`,`is_default`,`dav_uri`,`dav_uid`) VALUES(?,?,?,?,?,?)',
+            $this->_userID,
+            '',
+            0,
+            1,
+            'calendar',
+            '');
+
+        return (int) $db->InsertId();
+    }
+
+    /**
+     * Add a calendar.
+     *
+     * @param string $title
+     * @param int    $color
+     * @param string $davURI
+     * @param string $davUID
+     *
+     * @return int
+     */
+    public function AddCalendar($title, $color = 0, $davURI = '', $davUID = '')
+    {
+        global $db;
+
+        $this->EnsureDefaultCalendar();
+
+        $db->Query('INSERT INTO {pre}calendars(`user`,`title`,`color`,`is_default`,`dav_uri`,`dav_uid`) VALUES(?,?,?,?,?,?)',
+            $this->_userID,
+            $title,
+            (int) $color,
+            0,
+            $davURI,
+            $davUID);
+        $id = (int) $db->InsertId();
+        if ($id > 0 && $davURI === '') {
+            $db->Query('UPDATE {pre}calendars SET `dav_uri`=? WHERE `id`=? AND `user`=?',
+                bmOrganizerUniqueCollectionDavUri($this->_userID, $title, 'cal', $id),
+                $id,
+                $this->_userID);
+        }
+
+        return $id;
+    }
+
+    /**
+     * Update a calendar.
+     *
+     * @param int    $id
+     * @param string $title
+     * @param int    $color
+     *
+     * @return bool
+     */
+    public function UpdateCalendar($id, $title, $color = 0)
+    {
+        global $db, $lang_user;
+
+        $existing = $this->GetCalendar($id);
+        if ($existing === false) {
+            return false;
+        }
+        $title = bmOrganizerCollectionTitleForStorage($title, $existing['is_default'], $lang_user['calendar']);
+
+        $db->Query('UPDATE {pre}calendars SET `title`=?,`color`=? WHERE `id`=? AND `user`=?',
+            $title,
+            (int) $color,
+            (int) $id,
+            $this->_userID);
+
+        return $db->AffectedRows() == 1;
+    }
+
+    /**
+     * Delete a calendar (not the default). Dates and groups move to the default calendar.
+     *
+     * @param int $id
+     *
+     * @return bool
+     */
+    public function DeleteCalendar($id, $deleteDates = false)
+    {
+        global $db;
+
+        $calendar = $this->GetCalendar($id);
+        if ($calendar === false || !empty($calendar['is_default'])) {
+            return false;
+        }
+
+        $id = (int) $id;
+        if ($deleteDates) {
+            $res = $db->Query('SELECT `id` FROM {pre}dates WHERE `user`=? AND `calendar_id`=?',
+                $this->_userID,
+                $id);
+            while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
+                ChangelogDeleted(BMCL_TYPE_CALENDAR, $row['id'], time());
+                $db->Query('DELETE FROM {pre}dates_attendees WHERE `date`=?',
+                    $row['id']);
+            }
+            $res->Free();
+            $db->Query('DELETE FROM {pre}dates WHERE `user`=? AND `calendar_id`=?',
+                $this->_userID,
+                $id);
+            $db->Query('DELETE FROM {pre}dates_groups WHERE `user`=? AND `calendar_id`=?',
+                $this->_userID,
+                $id);
+        } else {
+            $defaultID = $this->GetDefaultCalendarID();
+            $db->Query('UPDATE {pre}dates SET `calendar_id`=?, `group`=-1 WHERE `user`=? AND `calendar_id`=?',
+                $defaultID,
+                $this->_userID,
+                $id);
+            $db->Query('UPDATE {pre}dates_groups SET `calendar_id`=? WHERE `user`=? AND `calendar_id`=?',
+                $defaultID,
+                $this->_userID,
+                $id);
+        }
+
+        $db->Query('DELETE FROM {pre}calendars WHERE `id`=? AND `user`=? AND `is_default`=0',
+            $id,
+            $this->_userID);
+
+        if ($db->AffectedRows() == 1) {
+            bmOrganizerDeleteCollectionShares(BM_ORGANIZER_SHARE_CAL, $id);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * get groups.
      *
      * @param string $sortColumn
@@ -564,7 +1026,7 @@ class BMCalendar
      *
      * @return array
      */
-    public function GetGroups($sortColumn = 'title', $sortOrder = 'asc')
+    public function GetGroups($sortColumn = 'title', $sortOrder = 'asc', $calendarID = 0)
     {
         global $db, $lang_user;
 
@@ -574,12 +1036,38 @@ class BMCalendar
                     'user' => $this->_userID,
                     'title' => $lang_user['nocalcat'],
                     'color' => 0,
+                    'calendar_id' => 0,
                 ],
         ];
 
-        $res = $db->Query('SELECT id,user,title,color,dav_uri,dav_uid FROM {pre}dates_groups WHERE user=? '
-            .'ORDER BY '.$sortColumn.' '.$sortOrder,
-            $this->_userID);
+        $ownerIds = [$this->_userID];
+        $sharedIds = [];
+        foreach ($this->GetSharedCalendars() as $sid => $sharedCal) {
+            $ownerIds[] = (int) $sharedCal['user'];
+            $sharedIds[] = (int) $sid;
+        }
+        $ownerIds = array_unique(array_map('intval', $ownerIds));
+
+        $sql = 'SELECT id,user,title,color,dav_uri,dav_uid,`calendar_id` FROM {pre}dates_groups WHERE user IN('.implode(',', $ownerIds).')';
+        $params = [];
+        if ((int) $calendarID > 0) {
+            $cal = $this->GetAccessibleCalendar($calendarID);
+            if ($cal === false) {
+                return $result;
+            }
+            $sql .= ' AND `user`=? AND `calendar_id`=?';
+            $params[] = (int) $cal['user'];
+            $params[] = (int) $calendarID;
+        } elseif (count($sharedIds) > 0) {
+            $sql .= ' AND (`user`=? OR `calendar_id` IN('.implode(',', $sharedIds).'))';
+            $params[] = $this->_userID;
+        } else {
+            $sql .= ' AND `user`=?';
+            $params[] = $this->_userID;
+        }
+        $sql .= ' ORDER BY '.$sortColumn.' '.$sortOrder;
+
+        $res = $db->Query($sql, ...$params);
         while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
             $result[$row['id']] = $row;
         }
@@ -599,7 +1087,7 @@ class BMCalendar
     {
         global $db;
 
-        $res = $db->Query('SELECT id,user,title,color,dav_uri,dav_uid FROM {pre}dates_groups WHERE user=? AND id=?',
+        $res = $db->Query('SELECT id,user,title,color,dav_uri,dav_uid,`calendar_id` FROM {pre}dates_groups WHERE user=? AND id=?',
             $this->_userID,
             (int) $id);
         if ($res->RowCount() == 1) {
@@ -620,16 +1108,19 @@ class BMCalendar
      *
      * @return int
      */
-    public function AddGroup($title, $color = 0, $davURI = '', $davUID = '')
+    public function AddGroup($title, $color = 0, $davURI = '', $davUID = '', $calendarID = 0)
     {
         global $db;
 
-        $db->Query('INSERT INTO {pre}dates_groups(user,title,color,dav_uri,dav_uid) VALUES(?,?,?,?,?)',
+        $calendarID = $this->ResolveCalendarID($calendarID);
+
+        $db->Query('INSERT INTO {pre}dates_groups(user,title,color,dav_uri,dav_uid,`calendar_id`) VALUES(?,?,?,?,?,?)',
             $this->_userID,
             $title,
             (int) $color,
             $davURI,
-            $davUID);
+            $davUID,
+            $calendarID);
 
         return $db->InsertId();
     }
@@ -715,12 +1206,15 @@ class BMCalendar
      *
      * @return array
      */
-    public function GetDatesForDay($day, $month, $year)
+    public function GetDatesForDay($day, $month, $year, $calendarIDs = null)
     {
         $start = mktime(0, 0, 0, $month, $day, $year);
         $end = mktime(23, 59, 59, $month, $day, $year);
+        if ($calendarIDs === null) {
+            $calendarIDs = $this->GetVisibleCalendarIDs();
+        }
 
-        return $this->GetDatesForTimeframe($start, $end);
+        return $this->GetDatesForTimeframe($start, $end, -2, $calendarIDs);
     }
 
     /**
@@ -734,14 +1228,16 @@ class BMCalendar
     {
         global $db;
 
-        $res = $db->Query('SELECT * FROM {pre}dates WHERE id=? AND user=?',
-            (int) $id,
-            $this->_userID);
+        $res = $db->Query('SELECT * FROM {pre}dates WHERE id=?',
+            (int) $id);
         if ($res->RowCount() == 1) {
             $row = $res->FetchArray(MYSQLI_ASSOC);
             $res->Free();
-
-            return $row;
+            if ($this->GetAccessibleCalendar((int) $row['calendar_id']) !== false) {
+                return $row;
+            }
+        } else {
+            $res->Free();
         }
 
         return false;
@@ -760,10 +1256,15 @@ class BMCalendar
 
         bmCalendarEnsureAttendeePartstat();
 
+        $date = $this->GetDate($id);
+        if ($date === false) {
+            return [];
+        }
+
         $result = [];
         $res = $db->Query('SELECT {pre}adressen.vorname AS vorname,{pre}adressen.nachname AS nachname,{pre}adressen.id AS id,{pre}adressen.email AS email,{pre}adressen.work_email AS work_email,{pre}adressen.default_address AS default_address,{pre}dates_attendees.partstat AS partstat FROM {pre}adressen,{pre}dates_attendees WHERE {pre}adressen.id={pre}dates_attendees.address AND {pre}dates_attendees.date=? AND {pre}adressen.user=?',
             $id,
-            $this->_userID);
+            $date['user']);
         while ($row = $res->FetchArray(MYSQLI_ASSOC)) {
             $row['partstat'] = bmCalendarNormalizePartstat($row['partstat'] ?? 'needs-action');
             $result[$row['id']] = $row;
@@ -898,17 +1399,17 @@ class BMCalendar
             $year = (int) date('Y');
         }
         $thisMonth = (int) date('m') == $month && (int) date('Y') == $year;
-        list($columns, $days) = $this->GenerateCalendar($month, $year, $userID);
+        list($columns, $days) = $this->GenerateCalendar($month, $year, $userID, -2, $this->GetVisibleCalendarIDs());
 
         // start
         $html = '<table class="'.$className.'">'."\n";
 
         // month name
+        $monthStart = mktime(0, 0, 0, $month, 1, $year);
         $html .= '	<tr>'."\n";
-        $html .= sprintf('		<th class="Caption" colspan="7"><a href="organizer.calendar.php?view=month&date=%d&sid=%s">%s</a></th>'."\n",
-            mktime(0, 0, 0, $month, 1, $year),
-            session_id(),
-            date('F Y', mktime(0, 0, 0, $month, 1, $year)));
+        $html .= sprintf('		<th class="Caption" colspan="7"><a href="%s">%s</a></th>'."\n",
+            htmlspecialchars(SessionUrl('organizer.calendar.php?view=month&date='.$monthStart), ENT_QUOTES, 'UTF-8'),
+            date('F Y', $monthStart));
         $html .= '	</tr>'."\n";
 
         // column headings
@@ -926,7 +1427,8 @@ class BMCalendar
             if ($dayItem === false) {
                 $html .= '		<td class="Empty"></td>'."\n";
             } else {
-                $html .= sprintf('		<td%s><a title="%d %s" href="organizer.calendar.php?date=%d&sid=%s">%d</a></td>'."\n",
+                $dayStamp = mktime(0, 0, 0, $month, $dayItem['day'], $year);
+                $html .= sprintf('		<td%s><a title="%d %s" href="%s">%d</a></td>'."\n",
                     ($thisMonth && $dayItem['day'] == (int) date('d')
                                 ? ' class="Today"'
                                 : (count($dayItem['dates']) > 0
@@ -934,8 +1436,7 @@ class BMCalendar
                                     : '')),
                     count($dayItem['dates']),
                     $lang_user['dates'],
-                    mktime(0, 0, 0, $month, $dayItem['day'], $year),
-                    session_id(),
+                    htmlspecialchars(SessionUrl('organizer.calendar.php?date='.$dayStamp), ENT_QUOTES, 'UTF-8'),
                     $dayItem['day']);
             }
 
@@ -973,7 +1474,7 @@ class BMCalendar
      *
      * @return array Columns, Days
      */
-    public function GenerateCalendar($month = -1, $year = -1, $userID = -1, $group = -2)
+    public function GenerateCalendar($month = -1, $year = -1, $userID = -1, $group = -2, $calendarIDs = null)
     {
         global $userRow;
 
@@ -994,7 +1495,7 @@ class BMCalendar
             $firstDay = $userRow['c_firstday'];
             $datesStart = mktime(0, 0, 0, $month, 1, $year);
             $datesEnd = mktime(23, 59, 59, $month, $daysInMonth, $year);
-            $dates = $this->GetDatesForTimeframe($datesStart, $datesEnd, $group);
+            $dates = $this->GetDatesForTimeframe($datesStart, $datesEnd, $group, $calendarIDs);
         }
 
         // called statically
@@ -1006,7 +1507,7 @@ class BMCalendar
             $userCalendar = _new('BMCalendar', [$userID]);
             $datesStart = mktime(0, 0, 0, $month, 1, $year);
             $datesEnd = mktime(23, 59, 59, $month, $daysInMonth, $year);
-            $dates = $userCalendar->GetDatesForTimeframe($datesStart, $datesEnd, $group);
+            $dates = $userCalendar->GetDatesForTimeframe($datesStart, $datesEnd, $group, $calendarIDs);
         }
 
         // columns
@@ -1069,8 +1570,41 @@ class BMCalendar
     {
         global $db;
 
-        $db->Query('INSERT INTO {pre}dates(user,title,location,text,`group`,startdate,enddate,reminder,flags,repeat_flags,repeat_times,repeat_value,repeat_extra1,repeat_extra2,dav_uri,dav_uid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-            $this->_userID,
+        // F10: The old implementation silently rewrote the target
+        // calendar to the caller's default whenever the requested one
+        // wasn't writable — so an ICS/CalDAV client that pushed an
+        // event to a read-only shared calendar would see the response
+        // succeed, but the event would silently land somewhere else.
+        // The owner never got the entry, the sender saw a green
+        // "saved" and the two mailboxes drifted apart.
+        //
+        // New semantics:
+        //   - calendar_id == 0     → default calendar (unchanged).
+        //   - calendar_id explicit → hard-fail (return false) when not
+        //                            writable; caller must handle it.
+        $requestedRaw = isset($row['calendar_id']) ? (int) $row['calendar_id'] : 0;
+        $calendarID = $this->ResolveCalendarID($requestedRaw);
+        if (!$this->CanWriteCalendar($calendarID)) {
+            if ($requestedRaw > 0) {
+                PutLog(sprintf('AddDate refused: calendar_id=%d not writable for user %d',
+                    $requestedRaw, (int) $this->_userID),
+                    PRIO_WARNING, __FILE__, __LINE__);
+                return false;
+            }
+            // calendar_id was 0 → try the default. If even that fails
+            // something is very wrong (no owned default) → also fail.
+            $calendarID = $this->GetDefaultCalendarID();
+            if (!$this->CanWriteCalendar($calendarID)) {
+                PutLog(sprintf('AddDate refused: no writable default calendar for user %d',
+                    (int) $this->_userID), PRIO_WARNING, __FILE__, __LINE__);
+                return false;
+            }
+        }
+        $cal = $this->GetAccessibleCalendar($calendarID);
+        $ownerId = $cal !== false ? (int) $cal['user'] : $this->_userID;
+
+        $db->Query('INSERT INTO {pre}dates(user,title,location,text,`group`,startdate,enddate,reminder,flags,repeat_flags,repeat_times,repeat_value,repeat_extra1,repeat_extra2,dav_uri,dav_uid,`calendar_id`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            $ownerId,
             $row['title'],
             $row['location'],
             $row['text'],
@@ -1085,7 +1619,8 @@ class BMCalendar
             $row['repeat_extra1'],
             $row['repeat_extra2'],
             (isset($row['dav_uri']) ? $row['dav_uri'] : ''),
-            (isset($row['dav_uid']) ? $row['dav_uid'] : ''));
+            (isset($row['dav_uid']) ? $row['dav_uid'] : ''),
+            $calendarID);
 
         // attendees
         if ($dateID = $db->InsertId()) {
@@ -1098,6 +1633,11 @@ class BMCalendar
                     $contactID,
                     'needs-action');
             }
+
+            $row['id'] = $dateID;
+            $row['user'] = $ownerId;
+            $row['calendar_id'] = $calendarID;
+            bmOrganizerNotifyCalendarActivity($calendarID, $this->_userID, $row, 'add');
         }
 
         return $dateID;
@@ -1114,13 +1654,26 @@ class BMCalendar
     {
         global $db;
 
+        $date = $this->GetDate($id);
+        if ($date === false || !$this->CanWriteCalendar((int) $date['calendar_id'])) {
+            return false;
+        }
+
+        // F9: If the actor is not the owner of this date (i.e. deleting
+        // via a write-shared calendar) leave an audit trail before we
+        // wipe the row — the owner only sees "gone" afterwards and would
+        // otherwise have no way to reconstruct who did it.
+        bmShareAuditLog($this->_userID, (int) $date['user'],
+            'calendar_delete', (int) $id, isset($date['title']) ? (string) $date['title'] : '');
+
         $db->Query('DELETE FROM {pre}dates WHERE user=? AND id=?',
-            $this->_userID,
+            $date['user'],
             (int) $id);
         if ($db->AffectedRows() == 1) {
             ChangelogDeleted(BMCL_TYPE_CALENDAR, $id, time());
             $db->Query('DELETE FROM {pre}dates_attendees WHERE date=?',
                 (int) $id);
+            bmOrganizerNotifyCalendarActivity((int) $date['calendar_id'], $this->_userID, $date, 'delete');
 
             return true;
         }
@@ -1141,7 +1694,17 @@ class BMCalendar
     {
         global $db;
 
-        $db->Query('UPDATE {pre}dates SET title=?, location=?, text=?, `group`=?, startdate=?, enddate=?, reminder=?, flags=?, repeat_flags=?, repeat_times=?, repeat_value=?, repeat_extra1=?, repeat_extra2=?, `dav_uri`=?, `dav_uid`=? WHERE id=? AND user=?',
+        $existing = $this->GetDate($id);
+        if ($existing === false || !$this->CanWriteCalendar((int) $existing['calendar_id'])) {
+            return false;
+        }
+
+        $calendarID = $this->ResolveCalendarID(isset($row['calendar_id']) ? $row['calendar_id'] : $existing['calendar_id']);
+        if (!$this->CanWriteCalendar($calendarID)) {
+            $calendarID = (int) $existing['calendar_id'];
+        }
+
+        $db->Query('UPDATE {pre}dates SET title=?, location=?, text=?, `group`=?, startdate=?, enddate=?, reminder=?, flags=?, repeat_flags=?, repeat_times=?, repeat_value=?, repeat_extra1=?, repeat_extra2=?, `dav_uri`=?, `dav_uid`=?, `calendar_id`=? WHERE id=? AND user=?',
             $row['title'],
             $row['location'],
             $row['text'],
@@ -1157,8 +1720,9 @@ class BMCalendar
             $row['repeat_extra2'],
             (isset($row['dav_uri']) ? $row['dav_uri'] : ''),
             (isset($row['dav_uid']) ? $row['dav_uid'] : ''),
+            $calendarID,
             (int) $id,
-            $this->_userID);
+            $existing['user']);
 
         ChangelogUpdated(BMCL_TYPE_CALENDAR, $id, time());
 
@@ -1192,7 +1756,32 @@ class BMCalendar
                 (int) $id);
         }
 
+        $notifyRow = $row;
+        $notifyRow['id'] = (int) $id;
+        $notifyRow['user'] = $existing['user'];
+        $notifyRow['calendar_id'] = $calendarID;
+        if (self::_dateActivitySignature($existing) !== self::_dateActivitySignature($notifyRow)) {
+            bmOrganizerNotifyCalendarActivity($calendarID, $this->_userID, $notifyRow, 'change');
+        }
+
         return true;
+    }
+
+    /**
+     * @param array $row
+     *
+     * @return string
+     */
+    private static function _dateActivitySignature($row)
+    {
+        return implode("\0", [
+            isset($row['title']) ? $row['title'] : '',
+            isset($row['location']) ? $row['location'] : '',
+            isset($row['text']) ? $row['text'] : '',
+            isset($row['startdate']) ? (string) (int) $row['startdate'] : '0',
+            isset($row['enddate']) ? (string) (int) $row['enddate'] : '0',
+            isset($row['calendar_id']) ? (string) (int) $row['calendar_id'] : '0',
+        ]);
     }
 
     /**
@@ -1220,19 +1809,67 @@ class BMCalendar
         $row['location'] = $_REQUEST['location'];
         $row['text'] = $_REQUEST['text'];
         $row['startdate'] = SmartyDateTime('startdate');
-        $row['group'] = $_REQUEST['group'];
+        $row['group'] = isset($_REQUEST['group']) ? (int) $_REQUEST['group'] : -1;
+        $row['calendar_id'] = $this->ResolveCalendarID(isset($_REQUEST['calendar']) ? $_REQUEST['calendar'] : 0);
+
+        if ($row['group'] > 0) {
+            $groupRow = $this->GetGroup($row['group']);
+            if ($groupRow === false || (int) $groupRow['calendar_id'] !== (int) $row['calendar_id']) {
+                $row['group'] = -1;
+            }
+        }
 
         //
-        // date duration
+        // date duration – form provides start + end datetime (with an optional
+        // "whole day" checkbox). Legacy durationHours/durationMinutes fields
+        // remain supported as a fallback.
         //
-        if ($_REQUEST['wholeDay'] == 1) {
+        $endDate = SmartyDateTime('enddate');
+        $legacyDurationSec = 0;
+        if (isset($_REQUEST['durationHours']) || isset($_REQUEST['durationMinutes'])) {
+            $dh = isset($_REQUEST['durationHours']) ? max(0, (int) $_REQUEST['durationHours']) : 0;
+            $dm = isset($_REQUEST['durationMinutes']) ? max(0, (int) $_REQUEST['durationMinutes']) : 0;
+            $legacyDurationSec = $dh * TIME_ONE_HOUR + $dm * TIME_ONE_MINUTE;
+        }
+
+        if (isset($_REQUEST['wholeDay']) && $_REQUEST['wholeDay'] == 1) {
             $row['flags'] |= CLNDR_WHOLE_DAY;
-            $row['enddate'] = $row['startdate'] + 59;
+
+            // Snap start to 00:00 of the start day.
+            $row['startdate'] = mktime(0, 0, 0,
+                (int) date('m', $row['startdate']),
+                (int) date('d', $row['startdate']),
+                (int) date('Y', $row['startdate']));
+
+            // Determine end day: prefer the form's end date, then legacy duration,
+            // then default to a single-day event.
+            if ($endDate > 0) {
+                $endDayEnd = mktime(23, 59, 59,
+                    (int) date('m', $endDate),
+                    (int) date('d', $endDate),
+                    (int) date('Y', $endDate));
+            } elseif ($legacyDurationSec > 0) {
+                $endDayEnd = $row['startdate'] + $legacyDurationSec - 1;
+            } else {
+                $endDayEnd = $row['startdate'] + 59;
+            }
+
+            // Multi-day whole-day event → span across days; single-day whole-day
+            // event → keep the historical startdate+59 marker for compatibility.
+            if ($endDayEnd >= $row['startdate'] + TIME_ONE_DAY) {
+                $row['enddate'] = $endDayEnd;
+            } else {
+                $row['enddate'] = $row['startdate'] + 59;
+            }
         } else {
-            $row['enddate'] = max($row['startdate'] + TIME_ONE_MINUTE,
-                                    $row['startdate']
-                                        + $_REQUEST['durationHours'] * TIME_ONE_HOUR
-                                        + $_REQUEST['durationMinutes'] * TIME_ONE_MINUTE);
+            if ($endDate > 0) {
+                $row['enddate'] = max($row['startdate'] + TIME_ONE_MINUTE, $endDate);
+            } elseif ($legacyDurationSec > 0) {
+                $row['enddate'] = max($row['startdate'] + TIME_ONE_MINUTE,
+                                        $row['startdate'] + $legacyDurationSec);
+            } else {
+                $row['enddate'] = $row['startdate'] + TIME_ONE_HOUR;
+            }
         }
 
         //
@@ -1247,6 +1884,9 @@ class BMCalendar
         }
         if (isset($_REQUEST['reminder_notify'])) {
             $row['flags'] |= CLNDR_REMIND_NOTIFY;
+        }
+        if (isset($_REQUEST['reminder_push'])) {
+            $row['flags'] |= CLNDR_REMIND_PUSH;
         }
 
         //
