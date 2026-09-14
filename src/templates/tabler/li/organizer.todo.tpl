@@ -13,12 +13,32 @@
 					<strong class="small text-secondary text-uppercase">{lng p="tasklists"}</strong>
 				</div>
 
-				<div id="taskListsContainer" class="bm-organizer-tasklists-items">
+				<div id="taskListsContainer" class="bm-organizer-tasklists-items" data-can-share="{if $canShareTodo}1{else}0{/if}" data-share-title="{lng p="sharetodolist"|escape:'html'}" data-edit-title="{lng p="edittasklist"|escape:'html'}" data-leave-title="{lng p="shareleave"|escape:'html'}" data-delete-title="{lng p="delete"|escape:'html'}" data-actions-label="{lng p="actions"|escape:'html'}" data-edit-icon="ti ti-pencil icon" data-share-icon="ti ti-share icon" data-trash-icon="ti ti-trash icon">
 					{foreach from=$taskLists item=taskList}
-					<a href="#" class="taskList{if $taskList.tasklistid==$taskListID} selected{/if}" onclick="selectTaskList({$taskList.tasklistid}); return false;" id="taskList_{$taskList.tasklistid}">
-						<span class="bm-organizer-tasklist-title">{text value=$taskList.title}</span>
-						{if $taskList.tasklistid!=0}<img src="{$tpldir}images/li/delcross.png" onclick="deleteTaskList({$taskList.tasklistid}); return false;" alt="" />{/if}
-					</a>
+					<div class="taskList{if $taskList.tasklistid==$taskListID} selected{/if}" id="taskList_{$taskList.tasklistid}" onclick="selectTaskList({$taskList.tasklistid});">
+						<a href="#" class="bm-organizer-tasklist-title" onclick="selectTaskList({$taskList.tasklistid}); return false;">{text value=$taskList.title}</a>
+						<div class="btn-group btn-group-sm bm-organizer-tasklist-actions" role="group" aria-label="{lng p="actions"}" onclick="event.stopPropagation();">
+							{if !empty($taskList.can_edit)}
+							<a href="#" class="btn btn-icon" title="{lng p="edittasklist"}" aria-label="{lng p="edittasklist"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=editList&id={$taskList.tasklistid}"}', '{lng p="edittasklist"|escape:'javascript'}', 440, 220);"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
+							{else}
+							<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></span>
+							{/if}
+							{if $canShareTodo}
+							{if $taskList.can_share}
+							<a href="#" class="btn btn-icon" title="{lng p="sharetodolist"}" aria-label="{lng p="sharetodolist"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=share&id={$taskList.tasklistid}"}', '{lng p="sharetodolist"|escape:'javascript'}', 520, 360);"><i class="ti ti-share icon" aria-hidden="true"></i></a>
+							{else}
+							<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="sharetodolist"}"><i class="ti ti-share icon" aria-hidden="true"></i></span>
+							{/if}
+							{/if}
+							{if $taskList.can_delete}
+							<a href="#" class="btn btn-icon" title="{lng p="delete"}" aria-label="{lng p="delete"}" onclick="deleteTaskList({$taskList.tasklistid}); return false;"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+							{elseif !empty($taskList.can_leave)}
+							<a href="#" class="btn btn-icon" title="{lng p="shareleave"}" aria-label="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=leaveshare&id={$taskList.tasklistid}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+							{else}
+							<span class="btn btn-icon disabled" aria-disabled="true" title="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></span>
+							{/if}
+						</div>
+					</div>
 					{/foreach}
 				</div>
 			</div>

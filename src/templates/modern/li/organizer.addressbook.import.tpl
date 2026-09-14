@@ -55,6 +55,18 @@
 					</select>
 				</td>
 			</tr>
+			{if $addressbookCount>1}
+			<tr>
+				<td><label for="importAddressbook">{lng p="addressbook"}:</label></td>
+				<td>
+					<select name="importAddressbook" id="importAddressbook">
+					{foreach from=$addressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if $bookID==$currentAddressbookID} selected="selected"{/if}>{text value=$abook.title}</option>
+					{/foreach}
+					</select>
+				</td>
+			</tr>
+			{/if}
 		</table>
 	</fieldset>
 

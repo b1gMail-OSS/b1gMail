@@ -6,7 +6,7 @@
 		</div>
 	</div>
 
-	<form name="f1" method="post" action="{sessionurl file='email.folders.php' params="{if isset($folder)}action=saveFolder&id={$folder.id}{else}action=createFolder{/if}"}" class="card bm-folder-admin-card bm-folder-edit-form" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
+	<form name="f1" method="post" action="{sessionurl file='email.folders.php' params="{if isset($folder)}action=saveFolder&id={$folder.id}{else}action=createFolder{/if}&csrf_token={$csrfToken}"}" class="card bm-folder-admin-card bm-folder-edit-form" onsubmit="{if isset($folder) && $folder.intelligent==1}if(!formSubmitOK) {literal}{ parent.frames.condition_frame.document.forms.saveForm.elements.submitParent.value='1';parent.frames.condition_frame.document.forms.saveForm.submit();return(false); }{/literal}{/if}return(checkFolderForm(this));">
 		{csrffield}
 		<div class="card-body bm-folder-edit-body">
 			<div class="bm-folder-edit-fields">

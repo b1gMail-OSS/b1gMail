@@ -24,6 +24,9 @@ var clientTZ = (new Date()).getTimezoneOffset() * (-60);
 function bmPublicFilterParams(params, exclude)
 {
 	var extra = {}, k;
+	exclude = exclude ? exclude.slice() : [];
+	if(exclude.indexOf('sid') < 0)
+		exclude.push('sid');
 	for(k in params)
 	{
 		if(!params.hasOwnProperty(k))
@@ -91,6 +94,60 @@ function bmPublicPathFromLegacy(script, params)
 		return { path: path, extra: bmPublicFilterParams(params, exclude) };
 	}
 
+	var organizerScripts = {
+		'organizer.calendar.php': 'calendar',
+		'organizer.todo.php': 'todo',
+		'organizer.addressbook.php': 'addressbook',
+		'organizer.notes.php': 'notes',
+		'organizer.php': 'calendar'
+	};
+	if(organizerScripts[script])
+	{
+		var orgPath = organizerScripts[script],
+			orgExclude = [],
+			orgAction = params.action || '',
+			orgActionMap = {
+				'calendar': {
+					editDate: 'edit', addDate: 'add', createDate: 'create', saveDate: 'save',
+					deleteDate: 'delete', showDate: 'show', dayView: 'dayview', groups: 'groups'
+				},
+				'todo': {
+					editTask: 'edit', addTask: 'add', createTask: 'create', saveTask: 'save',
+					deleteTask: 'delete', getLists: 'getlists', addList: 'addlist', deleteList: 'deletelist'
+				},
+				'addressbook': {
+					editContact: 'edit', addContact: 'add', createContact: 'create', saveContact: 'save',
+					deleteContact: 'delete', showContact: 'show', groups: 'groups',
+					exportDialog: 'exportdialog', importDialogStart: 'importdialogstart',
+					importDialog: 'importdialog', importDialogSubmit: 'importdialogsubmit',
+					userPictureDialog: 'userpicturedialog', userPictureDialogSubmit: 'userpicturedialogsubmit',
+					vcfImportDialog: 'vcfimportdialog', vcfImportDialogSubmit: 'vcfimportdialogsubmit',
+					addressbookPicture: 'addressbookpicture', attendeePopup: 'attendeepopup',
+					addressPopup: 'addresspopup', numberPopup: 'numberpopup'
+				},
+				'notes': {
+					editNote: 'edit', addNote: 'add', createNote: 'create', saveNote: 'save',
+					deleteNote: 'delete', getNoteText: 'getnotetext'
+				}
+			};
+		if(script === 'organizer.php')
+			return { path: orgPath, extra: {} };
+		if(orgAction && orgAction !== 'start')
+		{
+			var mapped = (orgActionMap[orgPath] && orgActionMap[orgPath][orgAction])
+				? orgActionMap[orgPath][orgAction]
+				: bmPublicNormalizeSegment(orgAction);
+			orgPath += '/' + mapped;
+			orgExclude.push('action');
+		}
+		if(params.id !== undefined && params.id !== '')
+		{
+			orgPath += '/' + encodeURIComponent(params.id);
+			orgExclude.push('id');
+		}
+		return { path: orgPath, extra: bmPublicFilterParams(params, orgExclude) };
+	}
+
 	return null;
 }
 
@@ -106,7 +163,12 @@ function bmJoinApiBase(url)
 	if(base)
 		return base.replace(/\/?$/, '/') + String(url).replace(/^\.\//, '');
 
-	return '/' + String(url).replace(/^\.\//, '');
+	// F3 fix: Without a configured apiBase we MUST keep the URL
+	// relative — the public-share page lives under /share/ and
+	// its XHRs to `index.php?action=getFolder&…` would otherwise
+	// be rewritten to `/index.php?…` (root) and hit the login
+	// page, returning HTML instead of the expected XML.
+	return String(url).replace(/^\.\//, '');
 }
 
 function bmPublicUrl(url)
@@ -175,6 +237,27 @@ function bmLegacyApiUrl(url)
 	return url;
 }
 window.bmLegacyApiUrl = bmLegacyApiUrl;
+
+/**
+ * F2: attach the current CSRF token to a URL so state-changing GET
+ * requests (delete/rename/stopShare/deleteMail/…) survive
+ * CsrfEnforceOnStateChange() on the server. Idempotent — a URL that
+ * already carries csrf_token= is returned unchanged.
+ *
+ * bmCsrfToken is set globally by li/index.tpl (server-rendered from the
+ * user's session token). If it's missing (e.g. very early load) the
+ * URL is returned unchanged and the server-side helper will reject the
+ * request — that's the correct fail-safe behavior.
+ */
+function bmAppendCsrf(url)
+{
+	if(!url) return url;
+	if(typeof bmCsrfToken === 'undefined' || !bmCsrfToken) return url;
+	if(url.indexOf('csrf_token=') !== -1) return url;
+	return url + (url.indexOf('?') >= 0 ? '&' : '?')
+		+ 'csrf_token=' + encodeURIComponent(bmCsrfToken);
+}
+window.bmAppendCsrf = bmAppendCsrf;
 
 function bmAppendSession(url)
 {
@@ -959,6 +1042,13 @@ function GetXMLHTTP()
 function MakeXMLRequest(url, callback, param, cClose)
 {
 	url = bmAppendSession(url);
+	// F2: every XHR must carry the CSRF token so server-side
+	// CsrfEnforceOnStateChange() on delete/rename/stopShare/etc.
+	// endpoints accepts the request. We attach it two ways:
+	//   1. X-CSRF-Token header (preferred, invisible to logs)
+	//   2. csrf_token=... query parameter (fallback, for endpoints
+	//      that only look at $_REQUEST — cheap belt-and-braces).
+	url = bmAppendCsrf(url);
 
 	var xmlHTTP = GetXMLHTTP();
 
@@ -971,6 +1061,8 @@ function MakeXMLRequest(url, callback, param, cClose)
 		xmlHTTP.open("GET", url, true);
 		if(cClose)
 			xmlHTTP.setRequestHeader("Connection", "close");
+		if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+			xmlHTTP.setRequestHeader("X-CSRF-Token", bmCsrfToken);
 		if(typeof(callback) == "string")
 		{
 			xmlHTTP.onreadystatechange = function xh_readyChange()

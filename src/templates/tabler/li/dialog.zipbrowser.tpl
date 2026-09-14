@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" href="{$selfurl}favicon.ico" type="image/x-icon" />
+	{include file="nli/favicon.tpl"}
 	<link href="{$tpldir}style/dialog.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->

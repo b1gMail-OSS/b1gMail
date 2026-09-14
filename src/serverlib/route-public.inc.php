@@ -375,6 +375,7 @@ function RouteGetNliStaticRoutes()
 		'lost-password' => array('script' => 'index.php', 'params' => array('action' => 'lostPassword')),
 		'password'      => array('script' => 'index.php', 'params' => array('action' => 'lostPassword')),
 		'mfa-verify'    => array('script' => 'index.php', 'params' => array('action' => 'mfaVerify')),
+		'forget-cookie' => array('script' => 'index.php', 'params' => array('action' => 'forgetCookie')),
 		'switchlanguage'=> array('script' => 'index.php', 'params' => array('action' => 'switchLanguage')),
 		'checkaddressavailability' => array('script' => 'index.php', 'params' => array('action' => 'checkAddressAvailability')),
 		'showaddresssugestions'    => array('script' => 'index.php', 'params' => array('action' => 'showAddressSugestions')),
@@ -413,7 +414,112 @@ function RouteGetLiScriptMap()
 			$map[strtolower(pathinfo($base, PATHINFO_FILENAME))] = $base;
 	}
 
+	foreach(RouteOrganizerModules() as $module => $script)
+		$map[$module] = $script;
+
 	return $map;
+}
+
+/**
+ * Public organizer modules (pretty URL segment => legacy script).
+ *
+ * @return array<string, string>
+ */
+function RouteOrganizerModules()
+{
+	return array(
+		'calendar'    => 'organizer.calendar.php',
+		'addressbook' => 'organizer.addressbook.php',
+		'todo'        => 'organizer.todo.php',
+		'notes'       => 'organizer.notes.php',
+	);
+}
+
+/**
+ * @param string $key organizer, organizer/calendar, calendar, …
+ * @return string|null calendar|addressbook|todo|notes
+ */
+function RouteOrganizerModuleFromKey($key)
+{
+	$modules = RouteOrganizerModules();
+	if($key === 'organizer')
+		return 'calendar';
+	if(strpos($key, 'organizer/') === 0)
+	{
+		$module = substr($key, strlen('organizer/'));
+		return isset($modules[$module]) ? $module : null;
+	}
+
+	return isset($modules[$key]) ? $key : null;
+}
+
+/**
+ * Main-nav tabs for calendar, address book, tasks and notes.
+ *
+ * @return array<string, array<string, mixed>>
+ */
+function RouteOrganizerNavTabs()
+{
+	global $lang_user;
+
+	return array(
+		'calendar' => array(
+			'icon'   => 'organizer',
+			'faIcon' => 'fa-calendar',
+			'link'   => 'organizer.calendar.php',
+			'text'   => $lang_user['calendar'],
+			'order'  => 400,
+		),
+		'addressbook' => array(
+			'icon'   => 'ico_addressbook',
+			'faIcon' => 'fa-address-book-o',
+			'link'   => 'organizer.addressbook.php',
+			'text'   => $lang_user['addressbook'],
+			'order'  => 410,
+		),
+		'todo' => array(
+			'icon'   => 'ico_todo',
+			'faIcon' => 'fa-tasks',
+			'link'   => 'organizer.todo.php',
+			'text'   => $lang_user['todolist'],
+			'order'  => 420,
+		),
+		'notes' => array(
+			'icon'   => 'ico_notes',
+			'faIcon' => 'fa-sticky-note-o',
+			'link'   => 'organizer.notes.php',
+			'text'   => $lang_user['notes'],
+			'order'  => 430,
+		),
+	);
+}
+
+/**
+ * Map a stored "organizer" tab order onto the four module tabs.
+ *
+ * @param array<string, array<string, mixed>> $pageTabs
+ * @param array<string, mixed> $tabOrder
+ */
+function RouteApplyOrganizerTabOrder(array &$pageTabs, array $tabOrder)
+{
+	if(!isset($tabOrder['organizer']))
+		return;
+
+	$base = $tabOrder['organizer'];
+	$i = 0;
+	foreach(array_keys(RouteOrganizerModules()) as $key)
+	{
+		if(!isset($pageTabs[$key]) || array_key_exists($key, $tabOrder))
+		{
+			$i++;
+			continue;
+		}
+		if((int)$base === -1)
+			unset($pageTabs[$key]);
+		else
+			$pageTabs[$key]['order'] = $base + ($i * 10);
+		$i++;
+	}
 }
 
 /**
@@ -460,8 +566,11 @@ function RouteOrganizerActionAliases($module)
 			'deleteGroup'        => 'deletegroup',
 			'editGroup'          => 'editgroup',
 			'saveGroup'          => 'savegroup',
-			'userPictureDialog'  => 'userpicturedialog',
-			'vcfImportDialog'    => 'vcfimportdialog',
+			'userPictureDialog'        => 'userpicturedialog',
+			'userPictureDialogSubmit'  => 'userpicturedialogsubmit',
+			'vcfImportDialog'          => 'vcfimportdialog',
+			'vcfImportDialogSubmit'    => 'vcfimportdialogsubmit',
+			'importDialogSubmit'      => 'importdialogsubmit',
 			'attendeePopup'      => 'attendeepopup',
 			'addressbookPicture' => 'addressbookpicture',
 			'quickAdd'           => 'quickadd',
@@ -538,14 +647,19 @@ function RouteOrganizerParamsFromRest($module, array $rest)
 }
 
 /**
- * @param string $pathKey e.g. organizer/calendar
+ * @param string $pathKey e.g. organizer/calendar or calendar
  * @param array<string, mixed> $params
  * @return array{path: string, extra: array<string, string>}
  */
 function RoutePublicPathFromOrganizer($pathKey, array $params)
 {
-	$module = substr($pathKey, strlen('organizer/'));
-	$path = $pathKey;
+	if($pathKey === 'organizer')
+		return array('path' => 'calendar', 'extra' => array());
+
+	$module = RouteOrganizerModuleFromKey($pathKey);
+	if($module === null)
+		$module = $pathKey;
+	$path = $module;
 	$exclude = array();
 
 	$action = isset($params['action']) ? (string)$params['action'] : '';
@@ -681,8 +795,8 @@ function RouteMatchLiPath(array $segments)
 			else if(isset($rest[0]) && $rest[0] === 'folder' && isset($rest[1]))
 				$params['folder'] = $rest[1];
 		}
-		else if(strpos($key, 'organizer/') === 0 && !empty($rest))
-			$params = array_merge($params, RouteOrganizerParamsFromRest(substr($key, strlen('organizer/')), $rest));
+		else if(($orgModule = RouteOrganizerModuleFromKey($key)) !== null && !empty($rest))
+			$params = array_merge($params, RouteOrganizerParamsFromRest($orgModule, $rest));
 		else if(!empty($rest) && strpos($map[$key], 'prefs.') === 0)
 			$params['action'] = $rest[0];
 
@@ -847,8 +961,8 @@ function RoutePublicPathFromLegacy($script, array $params)
 {
 	$script = basename($script);
 
-	// Avatar is served as a binary endpoint; keep legacy avatar.php (direct script, single bootstrap).
-	if($script === 'avatar.php')
+	// Avatar / template branding are served as binary endpoints; keep legacy scripts.
+	if($script === 'avatar.php' || $script === 'template-asset.php' || $script === 'pwa-icon.php')
 		return null;
 
 	if($script === 'deref.php')
@@ -944,7 +1058,7 @@ function RoutePublicPathFromLegacy($script, array $params)
 
 	if($key !== null && isset($map[$key]))
 	{
-		if(strpos($key, 'organizer/') === 0)
+		if(RouteOrganizerModuleFromKey($key) !== null)
 			return RoutePublicPathFromOrganizer($key, $params);
 
 		return array('path' => $key, 'extra' => RoutePublicFilterExtraParams($params, array()));

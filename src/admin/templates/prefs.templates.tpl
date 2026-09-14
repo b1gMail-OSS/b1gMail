@@ -32,7 +32,7 @@
 	<legend>{lng p="defaultemplate"}</legend>
 
 	{if $templateSaved}
-	<div class="alert alert-success" role="alert">{lng p="saveok"} — <code>templates/{text value=$templateSaved}/</code></div>
+	<div class="alert alert-success" role="alert">{lng p="saveok"}</div>
 	{/if}
 	{if $themeMismatch}
 	<div class="alert alert-warning" role="alert">

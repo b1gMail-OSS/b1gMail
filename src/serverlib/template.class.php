@@ -300,7 +300,9 @@ class Template extends Smarty\Smarty {
         if (!is_string($activeTheme) || $activeTheme === '') {
             $activeTheme = $bm_prefs['template'];
         }
-        $this->assign('templatePrefs', GetTemplatePrefs($activeTheme));
+        $activeThemePrefs = GetTemplatePrefs($activeTheme);
+        $this->assign('templatePrefs', $activeThemePrefs);
+        TemplateAssignAssetUrls($this, $activeTheme, $activeThemePrefs);
 
         // admin mode?
         if (ADMIN_MODE && isset($adminRow)) {
@@ -350,6 +352,16 @@ class Template extends Smarty\Smarty {
 
         // tabs
         if (isset($userRow) && isset($groupRow)) {
+            if (!function_exists('bmOrganizerGroupCanShare')) {
+                include_once B1GMAIL_DIR.'serverlib/organizer.shares.inc.php';
+            }
+            $this->assign('canShareCalendar', bmOrganizerGroupCanShare('calendar'));
+            $this->assign('canShareAddressbook', bmOrganizerGroupCanShare('addressbook'));
+            $this->assign('canShareMail', bmOrganizerGroupCanShare('mail'));
+            $this->assign('canShareTodo', bmOrganizerGroupCanShare('todo'));
+            $this->assign('canShareNotes', bmOrganizerGroupCanShare('notes'));
+            $this->assign('canShareWebdisk', bmOrganizerGroupCanShare('webdisk'));
+
             $newMenu = [
                 [
                     'icon' => 'send_mail',
@@ -432,17 +444,9 @@ class Template extends Smarty\Smarty {
                 ];
             }
 
-        if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
-            $pageTabs = array_merge($pageTabs, [
-                'organizer' => [
-                    'icon' => 'organizer',
-                    'faIcon' => 'fa-calendar',
-                    'link' => 'organizer.php',
-                    'text' => $lang_user['organizer'],
-                    'order' => 400,
-                ],
-            ]);
-        }
+            if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
+                $pageTabs = array_merge($pageTabs, RouteOrganizerNavTabs());
+            }
 
             if (array_key_exists('webdisk', $groupRow) && $groupRow['webdisk'] + $userRow['diskspace_add'] > 0) {
                 $pageTabs = array_merge($pageTabs, [
@@ -506,6 +510,7 @@ class Template extends Smarty\Smarty {
                         }
                     }
                 }
+                RouteApplyOrganizerTabOrder($pageTabs, $tabOrder);
             }
 
             ModuleFunction('BeforePageTabsAssign', [&$pageTabs]);
@@ -595,6 +600,11 @@ class Template extends Smarty\Smarty {
             if (isset($mailbox) && is_object($mailbox)) {
                 list(, $pageMenu) = $mailbox->GetPageFolderList();
                 $this->assign('folderList', $pageMenu);
+                if (method_exists($mailbox, 'SplitSidebarFolderMenus')) {
+                    list($ownFolderList, $sharedFolderMenus) = $mailbox->SplitSidebarFolderMenus($pageMenu);
+                    $this->assign('ownFolderList', $ownFolderList);
+                    $this->assign('sharedFolderMenus', $sharedFolderMenus);
+                }
             }
         }
 
@@ -662,7 +672,9 @@ function TemplateApplyFrontendTheme($tpl, $template)
     $tpl->assign('tpldir', $base . 'templates/' . $template . '/');
     $tpl->assign('_tpldir', 'templates/' . $template . '/');
     $tpl->assign('_tplname', $template);
-    $tpl->assign('templatePrefs', GetTemplatePrefs($template));
+    $frontendPrefs = GetTemplatePrefs($template);
+    $tpl->assign('templatePrefs', $frontendPrefs);
+    TemplateAssignAssetUrls($tpl, $template, $frontendPrefs);
     $tpl->assign('bmThemeName', $template);
 
     if (method_exists($tpl, 'getTemplateDir')) {

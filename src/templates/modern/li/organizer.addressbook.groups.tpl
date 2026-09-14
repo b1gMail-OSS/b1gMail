@@ -48,7 +48,7 @@
 							
 							<a title="{lng p="sendmail"}" target="_top" href="{sessionurl file='email.compose.php' params="toGroup={$groupID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 							<a title="{lng p="export"}" target="_top" href="{sessionurl file='organizer.addressbook.php' params="action=groups&do=export&id={$groupID}"}"><i class="fa fa-address-card-o" aria-hidden="true"></i></a>
-							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="{sessionurl file='organizer.addressbook.php' params="action=groups&do=delete&id={$groupID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+							<a title="{lng p="delete"}" onclick="return(confirm('{lng p="realdel"}'))" href="{sessionurl file='organizer.addressbook.php' params="action=groups&do=delete&id={$groupID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 						</div>
 					</div>
 				{/foreach}

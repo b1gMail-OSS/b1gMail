@@ -3,7 +3,7 @@
 	<input type="hidden" name="action" value="avatar" />
 	<input type="hidden" name="do" value="upload" />
 </form>
-<form id="bmAvatarDeleteForm" method="post" action="{sessionurl file='prefs.php' params='action=avatar&do=delete'}" class="d-none" aria-hidden="true">
+<form id="bmAvatarDeleteForm" method="post" action="{sessionurl file='prefs.php' params='action=avatar&do=delete&csrf_token={$csrfToken}'}" class="d-none" aria-hidden="true">
 	{csrffield}
 	<input type="hidden" name="action" value="avatar" />
 	<input type="hidden" name="do" value="delete" />

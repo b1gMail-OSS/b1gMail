@@ -4,6 +4,10 @@
 		{lng p="calendar"}: {$thisMonthText}
 	</div>
 	<div class="right">
+		<button type="button" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=calendars'}';">
+			<i class="fa fa-calendar" aria-hidden="true"></i>
+			{lng p="calendars"}
+		</button>
 		<button type="button" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 			<i class="fa fa-calendar-o" aria-hidden="true"></i>
 			{lng p="editgroups"}
@@ -21,10 +25,10 @@
 	
 	<tr>
 		{assign var=i value=0}{foreach from=$days item=day key=dayKey}{if !$day}<td></td>{else}
-		<td valign="top" class="monthCell{if $day.today}Today{/if}">
+		<td valign="top" class="monthCell{if $day.today}Today{/if}" data-day-timestamp="{$day.dayStart}">
 			<div class="monthCellDay" style="{if $day.today}font-weight:bold;{/if}" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params="view=day&date={$day.dayStart}"}';">{$day.day}</div>
 			{foreach from=$day.dates item=date}
-			<div class="monthDate_{$groups[$date.group].color}" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate}, false)">
+			<div class="monthDate_{$date.displayColor}" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate}, false)">
 				&nbsp;
 				{if $date.startdate<$day.dayStart}&lt;{/if}
 				{text value=$date.title cut=18}
@@ -40,6 +44,12 @@
 	</tr>
 </table>
 </div>
+
+<script>
+<!--
+	registerLoadAction('initCalendarRangeSelection()');
+//-->
+</script>
 
 <div id="contentFooter">
 	<div class="right">

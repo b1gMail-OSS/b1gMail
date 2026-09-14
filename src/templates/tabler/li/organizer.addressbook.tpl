@@ -1,3 +1,18 @@
+{if !empty($moveBlockedNotice)}
+<div class="alert alert-warning alert-dismissible" role="alert">
+	<div class="d-flex">
+		<div>
+			<svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v2m0 4v.01"/><path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"/></svg>
+		</div>
+		<div>
+			<h4 class="alert-heading">{lng p="addrmove_blocked_title"}</h4>
+			<div class="alert-description">{lng p="addrmove_blocked_desc"}</div>
+		</div>
+	</div>
+	<a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+</div>
+{/if}
+
 <div class="bm-organizer-page bm-organizer-addressbook">
 	<div id="contentHeader" class="contentHeader bm-organizer-header">
 		<div class="left">
@@ -14,6 +29,11 @@
 					{/foreach}
 				</select>
 
+				<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params='action=books'}';">
+					<i class="ti ti-books icon icon-sm me-1" aria-hidden="true"></i>
+					{lng p="addressbooks"}
+				</button>
+
 				<label class="small text-secondary mb-0" for="abGroupFilter">{lng p="group"}:</label>
 				<select class="form-select form-select-sm" id="abGroupFilter" style="width:auto;min-width:8rem;" onchange="updateCurrentGroup(this.value,'{$sid}')">
 					<option value="-1"{if $currentGroup==-1} selected="selected"{/if}>------------</option>
@@ -24,14 +44,18 @@
 					</optgroup>
 				</select>
 
+				{if $currentBookOwned}
 				<button type="button" class="btn btn-sm btn-outline-primary" onclick="abGroups();">
 					<i class="ti ti-users icon icon-sm me-1" aria-hidden="true"></i>
 					{lng p="editgroups"}
 				</button>
+				{/if}
+				{if $currentBookWritable}
 				<button type="button" class="btn btn-sm btn-outline-primary" onclick="abImport();">
 					<i class="ti ti-upload icon icon-sm me-1" aria-hidden="true"></i>
 					{lng p="import"}
 				</button>
+				{/if}
 				<button type="button" class="btn btn-sm btn-outline-primary" onclick="abExport();">
 					<i class="ti ti-download icon icon-sm me-1" aria-hidden="true"></i>
 					{lng p="export"}
@@ -126,10 +150,12 @@
 				</div>
 
 				<div class="right bm-organizer-footer-tools">
+					{if $currentBookWritable}
 					<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.addressbook.php' params='action=addContact'}';">
 						<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 						{lng p="add"}
 					</button>
+					{/if}
 				</div>
 			</div>
 			</form>

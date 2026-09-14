@@ -39,5 +39,6 @@
 {elseif $item == 'faq'}<i class="ti ti-help icon icon-1" aria-hidden="true"></i>
 {elseif $item == 'orders'}<i class="ti ti-shopping-cart icon icon-1" aria-hidden="true"></i>
 {elseif $item == 'mfa'}<i class="ti ti-shield-lock icon icon-1" aria-hidden="true"></i>
+{elseif $item == 'apppasswords'}<i class="ti ti-key icon icon-1" aria-hidden="true"></i>
 {else}<i class="ti ti-point icon icon-1" aria-hidden="true"></i>
 {/if}

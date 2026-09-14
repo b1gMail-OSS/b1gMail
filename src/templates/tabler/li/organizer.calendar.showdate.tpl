@@ -70,7 +70,8 @@
 			{/if}
 		</div>
 		<div class="bm-calendar-showdate-footer-actions">
-			<button type="button" class="btn btn-ghost-danger" onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=deleteDate&id={$date.id}"|escape:'javascript'}';">
+			{if $dateWritable}
+			<button type="button" class="btn btn-ghost-danger" onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=deleteDate&id={$date.id}&csrf_token={$csrfToken}"|escape:'javascript'}';">
 				<i class="ti ti-trash icon" aria-hidden="true"></i>
 				{lng p="delete"}
 			</button>
@@ -78,6 +79,7 @@
 				<i class="ti ti-pencil icon" aria-hidden="true"></i>
 				{lng p="edit"}
 			</button>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -93,7 +95,7 @@
 
 		parent.setOverlayTitle(
 			"{text noentities=true escape=true value=$date.title}",
-			"{lng p="group"}: {text noentities=true escape=true value=$groups[$date.group].title}"
+			"{if $calendarCount>1 && isset($date.calendar_id) && isset($calendars[$date.calendar_id])}{text noentities=true escape=true value=$calendars[$date.calendar_id].title} · {/if}{lng p="group"}: {text noentities=true escape=true value=$groups[$date.group].title}"
 		);
 	}
 //-->

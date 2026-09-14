@@ -28,12 +28,38 @@
 				</fieldset>
 				<small><br /></small>				
 				<fieldset>
+					<legend>{lng p="addressbook"}</legend>
+					<select name="addressbook" id="contactAddressbook" style="width:100%;" onchange="filterAddressbookGroups();">
+					{if $writableSharedAddressbooksByOwner}
+						<optgroup label="{lng p="myaddressbooks"}">
+						{foreach from=$addressbooks key=bookID item=abook}
+							<option value="{$bookID}"{if (isset($contact.addressbook_id) && $contact.addressbook_id==$bookID) || (!isset($contact) && $bookID==$currentAddressbookID)} selected="selected"{/if}>{text value=$abook.title}</option>
+						{/foreach}
+						</optgroup>
+						{foreach from=$writableSharedAddressbooksByOwner key=ownerLabel item=ownerBooks}
+						<optgroup label="{lng p="sharedaddressbooks"} — {text value=$ownerLabel}">
+							{foreach from=$ownerBooks key=bookID item=abook}
+							<option value="{$bookID}"{if (isset($contact.addressbook_id) && $contact.addressbook_id==$bookID) || (!isset($contact) && $bookID==$currentAddressbookID)} selected="selected"{/if}>{text value=$abook.title}</option>
+							{/foreach}
+						</optgroup>
+						{/foreach}
+					{else}
+						{foreach from=$writableAddressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if (isset($contact.addressbook_id) && $contact.addressbook_id==$bookID) || (!isset($contact) && $bookID==$currentAddressbookID)} selected="selected"{/if}>{text value=$abook.title}</option>
+						{/foreach}
+					{/if}
+					</select>
+				</fieldset>
+				<small><br /></small>
+				<fieldset>
 					<legend>{lng p="groupmember"}</legend>
 					<div align="left">
 						{if !$groups}<small>{lng p="nogroups"}</small>{else}
 						{foreach from=$groups item=group key=groupID}
+							<span class="abGroupRow" data-addressbook="{$group.addressbook_id}">
 							<input type="checkbox" id="group_{$groupID}" name="group_{$groupID}"{if !empty($group.member)} checked="checked"{/if} />
 							<label for="group_{$groupID}">{text value=$group.title cut=18}</label><br />
+							</span>
 						{/foreach}
 						{/if}
 
@@ -212,13 +238,15 @@
 			</td>
 		</tr>
 		<tr>
-			<td class="listTableLeft">{lng p="birthday"}:</td>
+			<td class="listTableLeft"><label for="geburtsdatum_date">{lng p="birthday"}:</label></td>
 			<td class="listTableRight">	
-				{if !empty($contact.geburtsdatum)}
-				{html_select_date time=$contact.geburtsdatum year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="geburtsdatum_" field_order="DMY"}
-				{else}
-				{html_select_date time="---" year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="geburtsdatum_" field_order="DMY"}
-				{/if}
+				<input type="date" id="geburtsdatum_date"
+					value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%Y-%m-%d"}{/if}"
+					max="{$smarty.now|date_format:"%Y-%m-%d"}"
+					onchange="syncSmartyDate('geburtsdatum', 'geburtsdatum_');" />
+				<input type="hidden" id="geburtsdatum_Day"   name="geburtsdatum_Day"   value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%d"}{else}0{/if}" />
+				<input type="hidden" id="geburtsdatum_Month" name="geburtsdatum_Month" value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%m"}{else}0{/if}" />
+				<input type="hidden" id="geburtsdatum_Year"  name="geburtsdatum_Year"  value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%Y"}{else}0{/if}" />
 			</td>
 		</tr>
 		<tr>
@@ -238,5 +266,10 @@
 </form>
 
 {if !empty($jsCode)}{$jsCode}{/if}
+<script>
+<!--
+	filterAddressbookGroups();
+//-->
+</script>
 
 </div></div>
