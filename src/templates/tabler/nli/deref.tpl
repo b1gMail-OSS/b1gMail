@@ -10,11 +10,12 @@
 	<meta name="robots" content="noindex" />
 	<title>{$service_title} - {lng p="deref_title"}</title>
 
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/tabler-custom.css?{fileDateSig file="style/tabler-custom.css"}" />
+	{include file="nli/theme-brand.tpl"}
 </head>
 
 <body class="border-top-wide border-primary nli-standalone d-flex flex-column">
@@ -130,7 +131,7 @@
 		</div>
 
 		<div class="text-center text-secondary mt-4 small">
-			&copy; {$service_title}
+			{include file="nli/copyright.tpl"}
 		</div>
 	</div>
 

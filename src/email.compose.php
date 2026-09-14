@@ -1077,7 +1077,13 @@ else if($_REQUEST['action'] == 'sendMail'
 						}
 
 						if($book)
-							$tpl->assign('groups', $book->GetGroupList());
+						{
+							$sentBooks = $book->GetAddressbooks();
+							$tpl->assign('groups', $book->GetGroupList(0, -1));
+							$tpl->assign('addressbooks', $sentBooks);
+							$tpl->assign('addressbookCount', count($sentBooks));
+							$tpl->assign('currentAddressbookID', $book->GetDefaultAddressbookID());
+						}
 						$tpl->assign('addrMails', $addrMails);
 						$tpl->assign('pageContent', 'li/email.sent.tpl');
 					}

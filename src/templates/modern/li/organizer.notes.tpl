@@ -40,8 +40,9 @@
 					<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{date timestamp=$note.date nice=true}&nbsp;</td>
 					<td class="{if $sortColumn=='text'}listTableTDActive{else}{$class}{/if}"><a href="javascript:previewNote('{$sid}', '{$noteID}');" title="{text value=$note.text}">{text value=$note.text cut=80}</a></td>
 					<td class="{$class}" nowrap="nowrap">
-						<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.notes.php' params="action=deleteNote&id={$noteID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+						{if $canShareNotes && empty($note.shared)}<a href="#" title="{lng p="sharenote"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.notes.php' params="action=share&id={$noteID}"}', '{lng p="sharenote"|escape:'javascript'}', 520, 360);"><i class="fa fa-share" aria-hidden="true"></i></a>{/if}
+						{if empty($note.readonly)}<a href="{sessionurl file='organizer.notes.php' params="action=editNote&id={$noteID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>{/if}
+						{if empty($note.shared)}<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.notes.php' params="action=deleteNote&id={$noteID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{else}<a href="#" title="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.notes.php' params="action=leaveshare&id={$noteID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{/if}
 					</td>
 				</tr>
 				{/foreach}

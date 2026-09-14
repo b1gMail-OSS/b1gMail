@@ -326,7 +326,7 @@ SELECT
 
 .selected TD, .selected SPAN
 {
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 
 	color: #FFF;
 	border-left: 0px;
@@ -935,9 +935,9 @@ BODY
 
 #mainTabs LI.active
 {
-	border-bottom: 1px solid #066fd1;
+	border-bottom: 1px solid var(--tblr-primary, #066fd1);
 	background-image: none;
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 }
 
 #mainTabs LI I
@@ -987,7 +987,7 @@ BODY
 #menuTabItems LI.active
 {
 	font-weight: bold;
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 	color: #FFF;
 }
 
@@ -2071,7 +2071,7 @@ A:hover
 .progressBarValue
 {
 	height: 100%;
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 	float: left;
 }
 
@@ -2089,14 +2089,14 @@ A:hover
 .miniCalendarTable TH
 {
 	text-align: center;
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 	font-size: 10px;
 	color: #FEFEFE;
 	font-weight: normal;
 }
 .miniCalendarTable TH.Caption
 {
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 	font-weight: bold;
 	text-align: left;
 	font-size: 14px;
@@ -2131,7 +2131,7 @@ A:hover
 }
 .miniCalendarTable TD.Today
 {
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 	font-weight: bold;
 }
 .miniCalendarTable TD.Today A
@@ -2807,7 +2807,7 @@ A:hover
 {
 	font-weight: bold;
 	color: #FFF;
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 }
 .taskContents
 {
@@ -3008,8 +3008,8 @@ A:hover
 
 INPUT.primary, BUTTON.primary
 {
-	background-color: #066fd1;
-	border: 1px solid #0559a8;
+	background-color: var(--tblr-primary, #066fd1);
+	border: 1px solid color-mix(in srgb, var(--tblr-primary, #066fd1) 80%, #000);
 	color: #FFF;
 }
 

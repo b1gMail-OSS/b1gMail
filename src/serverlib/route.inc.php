@@ -204,6 +204,12 @@ function RouteRestoreLegacyAction($action)
 		'generatevapid'             => 'generateVapid',
 		'faxplugin'                 => 'faxPlugin',
 		'fax'                       => 'faxPlugin',
+		'userpicturedialog'         => 'userPictureDialog',
+		'userpicturedialogsubmit'   => 'userPictureDialogSubmit',
+		'vcfimportdialog'           => 'vcfImportDialog',
+		'vcfimportdialogsubmit'     => 'vcfImportDialogSubmit',
+		'importdialogsubmit'       => 'importDialogSubmit',
+		'addressbookpicture'       => 'addressbookPicture',
 	);
 
 	$lower = strtolower($action);

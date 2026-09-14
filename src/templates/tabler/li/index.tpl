@@ -20,10 +20,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	{if $bmPushEnabled}
 	<link rel="manifest" href="{$selfurl}manifest.php" />
-	<meta name="theme-color" content="#066fd1" />
+	<meta name="theme-color" content="{$templateThemeColor|default:'#066fd1'}" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -46,7 +46,8 @@
 		var currentSID = '{$sid}', tplDir = '{$tpldir}', serverTZ = {$serverTZ}, ftsBGIndexing = {if $ftsBGIndexing}true{else}false{/if}{if $bmNotifyInterval},
 			notifyInterval = {$bmNotifyInterval}, notifySound = {if $bmNotifySound}true{else}false{/if}{/if},
 			bmEnableDarkMode = {if $templatePrefs.enableDarkMode|default:false}true{else}false{/if},
-			bmCsrfToken = '{$csrfToken|escape:'javascript'}';
+			bmCsrfToken = '{$csrfToken|escape:'javascript'}',
+			bmPrimaryColor = '{$templateThemeColor|default:'#066fd1'|escape:'javascript'}';
 		var bmSessionConfig = {
 			sid: '{$sid}',
 			csrfToken: '{$csrfToken|escape:'javascript'}',
@@ -98,9 +99,10 @@
 {foreach from=$_jsFiles.li item=_file}	<script type="text/javascript" src="{$_file}"></script>
 {/foreach}
 	{hook id="li:index.tpl:head"}
+	{include file="nli/theme-brand.tpl"}
 </head>
 
-<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer'} bm-li-organizer{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" data-bm-theme="{$_tplname|default:'unknown'}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
+<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer' || $activeTab=='calendar' || $activeTab=='addressbook' || $activeTab=='todo' || $activeTab=='notes'} bm-li-organizer{/if}{if $activeTab=='calendar'} bm-li-calendar{/if}{if $activeTab=='addressbook'} bm-li-addressbook{/if}{if $activeTab=='todo'} bm-li-todo{/if}{if $activeTab=='notes'} bm-li-notes{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" data-bm-theme="{$_tplname|default:'unknown'}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
 
 	{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}
@@ -116,7 +118,7 @@
 
 				<div class="navbar-brand navbar-brand-autodark">
 					<a href="{sessionurl file='start.php'}" aria-label="{$service_title|escape}">
-						<img src="{$tpldir}images/logo.png" height="32" alt="{$service_title|escape}" class="navbar-brand-image" />
+						{include file="nli/brand-logo.tpl" logoSurface="dark" logoHeight="32" logoClass="navbar-brand-image bm-li-brand-image"}
 					</a>
 				</div>
 

@@ -114,6 +114,8 @@ $lang_client['taxnote']			= 'incl. %1% TVA';
 $lang_client['decsep']			= ',';
 $lang_client['lastsavedat']		= 'Dernière sauvegarde à %1:%2.';
 $lang_client['statement']		= 'Relevé de compte';
+$lang_client['addtofavorites']	= 'Ajouter aux favoris';
+$lang_client['removefromfavorites'] = 'Retirer des favoris';
 
 /**
  * Customizable phrases
@@ -188,6 +190,21 @@ $lang_custom['clndr_date_msg']	= 'Dear Sir or Madam,' . "\n\n"
 								.	'Notification: %%message%%' . "\n\n" 
 								.	'(This message has been generated automatically)';
 $lang_custom['clndr_sms']		= '%%date%% %%time%% - %%subtitle%%';
+$lang_custom['clndr_share_subject']	= 'Calendrier partagé : %%action%% « %%title%% »';
+$lang_custom['clndr_share_msg']	= 'Cher Monsieur ou Madame,' . "\n\n"
+								.	'Le calendrier partagé « %%calendar%% » a été modifié.' . "\n"
+								.	'Action : %%action%%' . "\n"
+								.	'Rendez-vous : %%title%%' . "\n"
+								.	'Début : %%date%% %%time%%' . "\n"
+								.	'Lieu : %%location%%' . "\n"
+								.	'Par : %%actor%%' . "\n\n"
+								.	'(This message has been generated automatically)';
+$lang_custom['orgshare_invite_subject']	= 'Partage : %%title%%';
+$lang_custom['orgshare_invite_msg']	= 'Bonjour,' . "\n\n"
+								.	'%%owner%% a partagé %%kind%% « %%title%% » avec vous.' . "\n"
+								.	'Accès : %%access%%' . "\n\n"
+								.	'Après connexion, vous trouverez le partage dans la liste correspondante. Vous pouvez le retirer vous-même à tout moment.' . "\n\n"
+								.	'(This message has been generated automatically)';
 $lang_custom['receipt_text']	= 'Cher Monsieur ou Madame,' . "\n\n" 
 								.	'I have just read your message with the subject heading "%%subject%%" (%%date%%).' . "\n\n" 
 								.	'(This message has been generated automatically)';
@@ -274,6 +291,18 @@ $lang_custom['contact_subjects']	= 'Question sur l\'offre' . "\n"
 				
 				. 'Autres questions';
 $lang_custom['notify_date']		= 'Rendez-vous: <strong>%s</strong>';
+$lang_custom['notify_calshare_add']		= 'Nouveau rendez-vous dans <strong>%s</strong> : %s';
+$lang_custom['notify_calshare_change']	= 'Rendez-vous modifié dans <strong>%s</strong> : %s';
+$lang_custom['notify_calshare_delete']	= 'Rendez-vous supprimé dans <strong>%s</strong> : %s';
+$lang_custom['notify_orgshare_cal']		= '<strong>%s</strong> a partagé le calendrier <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_book']	= '<strong>%s</strong> a partagé le carnet d\'adresses <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_mail']	= '<strong>%s</strong> a partagé le dossier <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_mailbox']	= '<strong>%s</strong> a partagé la boîte aux lettres <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_webdisk']	= '<strong>%s</strong> a partagé le disque <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_wdfolder']	= '<strong>%s</strong> a partagé le dossier YooDoc <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_todo']	= '<strong>%s</strong> a partagé la liste de tâches <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_task']	= '<strong>%s</strong> a partagé la tâche <strong>%s</strong> avec vous.';
+$lang_custom['notify_orgshare_note']	= '<strong>%s</strong> a partagé la note <strong>%s</strong> avec vous.';
 $lang_custom['notify_newemail']	= '<strong>%d</strong> nouveau email(s): %s';
 $lang_custom['notify_email']	= 'Email reçu de <strong>%s</strong>: %s';
 $lang_custom['notify_birthday']	= '<strong>%s</strong> a <strong>%d years</strong> aujourd\'hui!';
@@ -714,6 +743,7 @@ $lang_user['droptext']			= 'Pour télécharger des fichiers, faites-les glisser 
 $lang_user['filename']			= 'Nom de fichier';
 $lang_user['size']				= 'Taille';
 $lang_user['created']			= 'Créé';
+$lang_user['uploadedby']			= 'Téléchargé par';
 $lang_user['internalerror']		= 'Erreur interne - Veuillez réessayer plus tard.';
 $lang_user['success']			= 'Réussi';
 $lang_user['fileexists']		= 'Un fichier de ce nom existe déjà ou ce type de fichier n\'est pas valide.';
@@ -1242,6 +1272,61 @@ $lang_user['location']			= 'Emplacement';
 $lang_user['repeating']			= 'Répéter';
 $lang_user['reminder']			= 'Rappel';
 $lang_user['editgroups']		= 'Modifier groupes';
+$lang_user['calendars']			= 'Calendriers';
+$lang_user['addcalendar']		= 'Ajouter un calendrier';
+$lang_user['editcalendar']		= 'Modifier le calendrier';
+$lang_user['mycalendars']		= 'Mes calendriers';
+$lang_user['addressbooks']		= 'Carnets d\'adresses';
+$lang_user['addaddressbook']	= 'Ajouter un carnet d\'adresses';
+$lang_user['editaddressbook']	= 'Modifier le carnet d\'adresses';
+$lang_user['myaddressbooks']	= 'Mes carnets d\'adresses';
+$lang_user['sharedcalendars']	= 'Calendriers partagés';
+$lang_user['sharedaddressbooks']	= 'Carnets d\'adresses partagés';
+$lang_user['sharewith']			= 'Partager avec';
+$lang_user['sharewithhint']		= 'Uniquement les utilisateurs de ce serveur. Le destinataire est notifié.';
+$lang_user['calendarshare']		= 'Partage de calendrier';
+$lang_user['addressbookshare']	= 'Partage du carnet d\'adresses';
+$lang_user['shareinvite']		= 'Inviter';
+$lang_user['shareinvited']		= 'Invité. L\'utilisateur trouvera le partage parmi les éléments partagés.';
+$lang_user['shareaccess']		= 'Accès';
+$lang_user['access_read']		= 'Lecture';
+$lang_user['access_write']		= 'Lecture et écriture';
+$lang_user['nosharees']			= 'Pas encore partagé.';
+$lang_user['sharees']			= 'Utilisateurs invités';
+$lang_user['shareleave']		= 'Retirer le partage';
+$lang_user['shareleaveq']		= 'Retirer cette invitation ? Le partage disparaîtra de votre liste sans notifier le propriétaire.';
+$lang_user['folderfavorites']	= 'Favoris';
+$lang_user['addtofavorites']		= 'Ajouter aux favoris';
+$lang_user['removefromfavorites'] = 'Retirer des favoris';
+$lang_user['mailbox']			= 'Boîte aux lettres';
+$lang_user['sharemailbox']		= 'Partager la boîte';
+$lang_user['sharemailboxwarn_title']	= 'Attention : accès complet à votre boîte aux lettres';
+$lang_user['sharemailboxwarn_desc']	= 'Les destinataires de ce partage auront accès à TOUS les dossiers de votre boîte — y compris la corbeille, les brouillons, les spams, les envois et tout dossier créé ultérieurement. Les contenus sensibles comme les e-mails de réinitialisation de mot de passe, les codes à deux facteurs et les messages privés sont également partagés. Ne partagez votre boîte qu\'avec des personnes de confiance absolue. Pour un accès à des dossiers spécifiques, utilisez le partage de dossier.';
+$lang_user['addrmove_blocked_title']	= 'Déplacement refusé';
+$lang_user['addrmove_blocked_desc']	= 'Les contacts ne peuvent être déplacés qu\'entre carnets d\'adresses appartenant au même propriétaire. Pour transférer un contact à un autre propriétaire, créez-en une copie dans le carnet cible puis supprimez l\'original.';
+$lang_user['sharefolder']		= 'Partager le dossier';
+$lang_user['sharewebdisk']		= 'Partager YooDoc';
+$lang_user['shareinternally']	= 'Partage interne';
+$lang_user['sharepublicly']		= 'Lien public';
+$lang_user['wd_share_enable_public']	= 'Activer le lien public';
+$lang_user['publiclink']		= 'Lien public';
+$lang_user['edittasklist']		= 'Modifier la liste';
+$lang_user['sharetodolist']		= 'Partager la liste';
+$lang_user['sharetask']			= 'Partager la tâche';
+$lang_user['sharenote']			= 'Partager la note';
+$lang_user['sharedtasks']		= 'Tâches partagées';
+$lang_user['sharenotfound']		= 'Aucun utilisateur avec cette adresse e-mail.';
+$lang_user['sharewithself']		= 'Vous ne pouvez pas partager avec vous-même.';
+$lang_user['shareexists']		= 'Ce partage existe déjà.';
+$lang_user['sharenotifyme']		= 'Me notifier';
+$lang_user['sharenotifyhint']	= 'Lorsqu\'un rendez-vous est ajouté, modifié ou supprimé dans ce calendrier.';
+$lang_user['bypush']			= 'par push';
+$lang_user['sharenotify_push']	= 'Push';
+$lang_user['shareowner']		= 'Propriétaire';
+$lang_user['nodeletdefault']	= 'L\'élément par défaut ne peut pas être supprimé.';
+$lang_user['calshare_action_add']		= 'Nouveau rendez-vous';
+$lang_user['calshare_action_change']	= 'Rendez-vous modifié';
+$lang_user['calshare_action_delete']	= 'Rendez-vous supprimé';
 $lang_user['mailattendees']		= 'Courriel aux participants';
 $lang_user['btr']				= 'Concernant';
 $lang_user['wholeday']			= 'toute la journée';
@@ -1409,6 +1494,17 @@ $lang_admin['contactform_name']	= 'Name field in contact form';
 $lang_admin['contactform_subject']	= 'Subject field in contact form';
 $lang_admin['cfs_note']			= 'The subject choices can be customized per language at';
 $lang_admin['captchaprovider']	= 'Captcha provider';
+$lang_admin['altcha_mode']		= 'Mode';
+$lang_admin['altcha_mode_local']	= 'Local (aucun service externe)';
+$lang_admin['altcha_mode_cloud']	= 'ALTCHA Cloud';
+$lang_admin['altcha_hmac']		= 'Secret HMAC (local, vide = automatique)';
+$lang_admin['altcha_complexity']	= 'Difficulté (local)';
+$lang_admin['altcha_complexity_easy']	= 'Facile';
+$lang_admin['altcha_complexity_medium']	= 'Moyen';
+$lang_admin['altcha_complexity_hard']	= 'Difficile';
+$lang_admin['altcha_cloud_region']	= 'Région Cloud';
+$lang_admin['altcha_apikey']		= 'Clé API (Cloud)';
+$lang_admin['altcha_apisecret']	= 'Secret API (Cloud)';
 $lang_admin['privatekey']		= 'Private key';
 $lang_admin['publickey']		= 'Public key';
 $lang_admin['theme']			= 'Theme';
@@ -1482,6 +1578,15 @@ $lang_admin['text_notify_email']	= 'Email notification from filter';
 $lang_admin['text_notify_birthday']	= 'Birthday notification';
 $lang_admin['text_notify_wd_share_expired']	= 'Webdisk share expired';
 $lang_admin['text_notify_wd_share_download']	= 'Webdisk share download';
+$lang_admin['text_notify_orgshare_cal']		= 'Notification de partage de calendrier';
+$lang_admin['text_notify_orgshare_book']	= 'Notification de partage de carnet';
+$lang_admin['text_notify_orgshare_mail']	= 'Notification de partage de dossier';
+$lang_admin['text_notify_orgshare_mailbox']	= 'Notification de partage de boîte';
+$lang_admin['text_notify_orgshare_webdisk']	= 'Notification de partage YooDoc';
+$lang_admin['text_notify_orgshare_wdfolder']	= 'Notification de partage de dossier YooDoc';
+$lang_admin['text_notify_orgshare_todo']	= 'Notification de partage de liste de tâches';
+$lang_admin['text_notify_orgshare_task']	= 'Notification de partage de tâche';
+$lang_admin['text_notify_orgshare_note']	= 'Notification de partage de note';
 $lang_admin['text_contact_subjects']	= 'Contact form subjects';
 $lang_admin['text_ap_autolock_sub']		= 'Abuse protect lock email subject';
 $lang_admin['text_ap_autolock_text']	= 'Abuse protect lock email text';
@@ -1531,6 +1636,22 @@ $lang_admin['releaseversion']	= 'Test and release version';
 $lang_admin['toolboxrelease']	= 'You can now test and release the version. Click &quot;Test (Windows/Mac)&quot; to download a test copy of the version. After testing, you can release the version to your users by clicking &quot;Release&quot;.';
 $lang_admin['toolboxonlinenote']= 'When clicking &quot;Test&quot; or &quot;Release&quot;, the configuration of this release will be transmitted to the b1gMail project server in order to create the release files. Creating the test or release versions may take a few minutes.';
 $lang_admin['keepcurrentimg']	= 'Keep current image';
+$lang_admin['usedefaultimg']	= 'Use default';
+$lang_admin['uploadnewimg']	= 'Upload new image';
+$lang_admin['customsplash']		= 'Custom cover image';
+$lang_admin['customsplashhint']	= 'Overrides the start-page image selection when a custom image is stored. PNG, JPEG, GIF or WebP.';
+$lang_admin['customlogohint']	= 'Affiché en couleurs sur la page de connexion et les fonds clairs. PNG, JPEG, GIF ou WebP.';
+$lang_admin['tpllogolight']		= 'Logo (clair)';
+$lang_admin['tpllogolighthint']	= 'Page de connexion, inscription et autres fonds clairs. PNG, JPEG, GIF ou WebP.';
+$lang_admin['tpllogodark']		= 'Logo (sombre)';
+$lang_admin['tpllogodarkhint']	= 'Navigation sombre (barre gauche) et mode sombre. Sans envoi, le logo clair est utilisé, sinon le logo blanc du thème. PNG, JPEG, GIF ou WebP.';
+$lang_admin['tplfavicon']		= 'Favicon';
+$lang_admin['tplfaviconhint']	= 'Onglet du navigateur et favoris. Reste l\'icône par défaut tant qu\'aucune image n\'est envoyée ici. PNG, JPEG, GIF ou WebP.';
+$lang_admin['tplcopyright']		= 'Copyright';
+$lang_admin['tplcopyrighthint']	= 'Vide = © année en cours et titre du service. Espaces réservés : {year}, {title}';
+$lang_admin['tplprimary']			= 'Couleur d\'accent';
+$lang_admin['tplprimaryhint']	= 'Boutons, liens et sélections. Vide ou #066fd1 = bleu Tabler par défaut.';
+$lang_admin['tplasseterror']		= 'At least one image could not be saved. Please choose a valid PNG, JPEG, GIF or WebP file (max. 5 MB).';
 $lang_admin['toolboxfileerr']	= 'The following images could not be saved. Please ensure that the image matches the required size and is in PNG format.';
 $lang_admin['versions']			= 'Versions';
 $lang_admin['addversion']		= 'Add version';
@@ -2150,6 +2271,10 @@ $lang_admin['text_cs_text']				= 'Cert. mail receipt text';
 $lang_admin['text_clndr_subject']		= 'Date nofiy subject';
 $lang_admin['text_clndr_date_msg']		= 'Date notify text';
 $lang_admin['text_clndr_sms']			= 'Date notify SMS';
+$lang_admin['text_clndr_share_subject']	= 'Sujet du mail de calendrier partagé';
+$lang_admin['text_clndr_share_msg']		= 'Texte du mail de calendrier partagé';
+$lang_admin['text_orgshare_invite_subject']	= 'Sujet du mail d\'invitation organisateur';
+$lang_admin['text_orgshare_invite_msg']	= 'Texte du mail d\'invitation organisateur';
 $lang_admin['text_receipt_text']		= 'Receipt mail text';
 $lang_admin['text_validationsms']		= 'Sign up SMS validation';
 $lang_admin['text_validationsms2']		= 'SMS sender validation';
@@ -2256,11 +2381,12 @@ $lang_admin['groupdeletedesc']	= 'Please select the group(s) to which the member
 $lang_admin['dbwarn']			= 'It is highly recommended to create a backup before running. Use at own risk.';
 $lang_admin['workgroups']		= 'Workgroup';
 $lang_admin['collaboration']	= 'Collaboration';
-$lang_admin['share_addr']		= 'Shared addresses';
-$lang_admin['share_calendar']	= 'Shared calendar';
-$lang_admin['share_todo']		= 'Shared todo';
-$lang_admin['share_notes']		= 'Shared notes';
-$lang_admin['share_webdisk']	= 'Shared webdisc';
+$lang_admin['share_addr']		= 'Adresses';
+$lang_admin['share_calendar']	= 'Calendrier';
+$lang_admin['share_todo']		= 'Tâches';
+$lang_admin['share_notes']		= 'Notes';
+$lang_admin['share_webdisk']	= 'YooDoc';
+$lang_admin['share_mail']		= 'E-mail';
 $lang_admin['bayesdb']			= 'Filter database';
 $lang_admin['reset']			= 'Reset';
 $lang_admin['bayesresetq']		= 'Are you sure you want to reset the filter training database? The filter will not be operational again until re-training.';

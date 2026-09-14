@@ -22,6 +22,8 @@
 if(!defined('B1GMAIL_INIT'))
 	die('Directly calling this file is not supported');
 
+include_once B1GMAIL_DIR . 'serverlib/organizer.shares.inc.php';
+
 /**
  * notes interface class
  */
@@ -58,9 +60,18 @@ class BMNotes
 			$this->_userID);
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
+			$row['shared'] = 0;
+			$row['readonly'] = 0;
 			$result[$row['id']] = $row;
 		}
 		$res->Free();
+
+		foreach(bmOrganizerListSharedNotes($this->_userID) as $noteID=>$row)
+		{
+			$row['shared'] = 1;
+			$row['readonly'] = ($row['share_access'] !== BM_ORGANIZER_ACCESS_WRITE) ? 1 : 0;
+			$result[$noteID] = $row;
+		}
 
 		return($result);
 	}
@@ -75,8 +86,12 @@ class BMNotes
 	{
 		global $db;
 
+		$access = $this->GetNoteAccess($id);
+		if($access === false)
+			return(false);
+
 		$res = $db->Query('SELECT id,priority,date,text FROM {pre}notes WHERE user=? AND id=?',
-			$this->_userID,
+			(int)$access['ownerId'],
 			(int)$id);
 		if($res->RowCount() == 0)
 			return(false);
@@ -96,8 +111,16 @@ class BMNotes
 	{
 		global $db;
 
+		$access = $this->GetNoteWriteAccess($id);
+		if($access === false)
+			return(false);
+
+		// F9: audit cross-owner deletes performed via a write-shared note stack.
+		bmShareAuditLog($this->_userID, (int)$access['ownerId'],
+			'note_delete', (int)$id, '');
+
 		$db->Query('DELETE FROM {pre}notes WHERE user=? AND id=?',
-			$this->_userID,
+			(int)$access['ownerId'],
 			$id);
 		return($db->AffectedRows() == 1);
 	}
@@ -133,11 +156,60 @@ class BMNotes
 	{
 		global $db;
 
+		$access = $this->GetNoteWriteAccess($id);
+		if($access === false)
+			return(false);
+
 		$db->Query('UPDATE {pre}notes SET priority=?,text=? WHERE id=? AND user=?',
 			(int)$priority,
 			$text,
 			(int)$id,
-			$this->_userID);
+			(int)$access['ownerId']);
 		return($db->AffectedRows() == 1);
+	}
+
+	/**
+	 * @param int $id
+	 * @return array|false
+	 */
+	function GetNoteAccess($id)
+	{
+		global $db;
+
+		$id = (int)$id;
+		$res = $db->Query('SELECT `user` FROM {pre}notes WHERE `id`=?',
+			$id);
+		if($res->RowCount() !== 1)
+		{
+			$res->Free();
+			return(false);
+		}
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+		$ownerId = (int)$row['user'];
+		if($ownerId === (int)$this->_userID)
+			return(array('ownerId' => $ownerId, 'write' => true, 'shared' => false));
+
+		$access = bmOrganizerShareAccess(BM_ORGANIZER_SHARE_NOTE, $id, $this->_userID);
+		if($access === false)
+			return(false);
+
+		return(array(
+			'ownerId' => $ownerId,
+			'write' => $access === BM_ORGANIZER_ACCESS_WRITE,
+			'shared' => true
+		));
+	}
+
+	/**
+	 * @param int $id
+	 * @return array|false
+	 */
+	function GetNoteWriteAccess($id)
+	{
+		$access = $this->GetNoteAccess($id);
+		if($access === false || empty($access['write']))
+			return(false);
+		return($access);
 	}
 }

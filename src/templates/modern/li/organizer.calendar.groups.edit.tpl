@@ -20,6 +20,18 @@
 				<input type="text" name="title" id="title" value="{if isset($group.title)}{text value=$group.title allowEmpty=true}{/if}" size="34" style="width:100%;" />
 			</td>
 		</tr>
+		{if $calendarCount>1 && !$group}
+		<tr>
+			<td class="listTableLeft"><label for="calendar">{lng p="calendar"}:</label></td>
+			<td class="listTableRight">
+				<select name="calendar" id="calendar">
+				{foreach from=$calendars key=calID item=cal}
+					<option value="{$calID}"{if $calID==$currentCalendarID} selected="selected"{/if}>{text value=$cal.title}</option>
+				{/foreach}
+				</select>
+			</td>
+		</tr>
+		{/if}
 		<tr>
 			<td class="listTableLeft">* <label for="title">{lng p="color"}:</label></td>
 			<td class="listTableRight">

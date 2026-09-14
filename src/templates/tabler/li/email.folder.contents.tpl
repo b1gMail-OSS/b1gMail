@@ -9,6 +9,9 @@
 	</div>
 
 	<div class="right bm-mail-header-actions">
+		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="toggleFolderFavorite({$folderID});" title="{if !empty($folderIsFavorite)}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}" aria-label="{if !empty($folderIsFavorite)}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}">
+			<i class="ti {if !empty($folderIsFavorite)}ti-star-filled text-yellow{else}ti-star{/if} icon icon-sm me-1" aria-hidden="true"></i>{lng p="folderfavorites"}
+		</button>
 		{if $folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
 		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="showFolderMenu(event, this);" title="{lng p="folderactions"}" aria-label="{lng p="folderactions"}">
 			<i class="ti ti-settings icon icon-sm me-1" aria-hidden="true"></i>{lng p="folderactions"}
@@ -124,7 +127,7 @@
 		<td nowrap="nowrap">
 			<a href="{sessionurl file='email.read.php' params="id={$mailID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 			<a href="javascript:void(0);" onclick="currentSID='{$sid}';currentID={$mailID};currentSortColumn='{$sortColumn}';showMailMenu(event);"><i class="fa fa-bars" aria-hidden="true"></i></a>
-			<a href="email.php?do=deleteMail&id={$mailID}&{$folderString}{$sessionUrlSuffix}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a href="email.php?do=deleteMail&id={$mailID}&{$folderString}{$sessionUrlSuffix}&csrf_token={$csrfToken}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/if}

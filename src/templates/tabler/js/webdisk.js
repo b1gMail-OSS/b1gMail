@@ -26,24 +26,193 @@ var _wdSel;
 
 function initWebdiskFolderTree()
 {
-	webdisk_d.config.useLines = false;
-	webdisk_d.config.useSelection = true;
-	webdisk_d.icon.nlPlus = 'ti ti-chevron-right';
-	webdisk_d.icon.nlMinus = 'ti ti-chevron-down';
-	webdisk_d.icon.plus = 'ti ti-chevron-right';
-	webdisk_d.icon.minus = 'ti ti-chevron-down';
-	webdisk_d.icon.plusBottom = 'ti ti-chevron-right';
-	webdisk_d.icon.minusBottom = 'ti ti-chevron-down';
-
 	if(!EBID('folderList'))
 		return;
 
-	EBID('folderList').innerHTML = webdisk_d;
+	EBID('folderList').innerHTML = (typeof bmWebdiskFolderTreesHtml == 'function') ? bmWebdiskFolderTreesHtml() : webdisk_d;
 	enableWebdiskDragTargets();
+	if(typeof webdiskFolderRowActions !== 'undefined' && webdiskFolderRowActions)
+		attachWebdiskFolderRowActions(webdiskFolderRowActions);
+	else
+		attachWebdiskFolderShareActions(typeof webdiskFolderShareActions !== 'undefined' ? webdiskFolderShareActions : {});
 
-	var treeID = webdiskGetTreeIDbyFolderID(currentWebdiskFolderID);
-	if(treeID > 0)
-		webdisk_d.openTo(treeID, true);
+	webdiskOpenTreeToFolder(currentWebdiskFolderID);
+}
+
+var webdiskShareTitleWebdisk = '';
+var webdiskShareTitleFolder = '';
+
+function attachWebdiskFolderShareActions(map, iconClass, webdiskTitle, folderTitle)
+{
+	if(webdiskTitle)
+		webdiskShareTitleWebdisk = webdiskTitle;
+	if(folderTitle)
+		webdiskShareTitleFolder = folderTitle;
+	if(!map)
+		return;
+	var root = EBID('folderList');
+	if(!root)
+		return;
+	var links = root.querySelectorAll('a.node, a.nodeSel');
+	for(var i=0; i<links.length; i++)
+	{
+		var href = links[i].getAttribute('href') || '';
+		var m = href.match(/switchWebdiskFolder\((-?\d+)\)/);
+		if(!m)
+			continue;
+		var id = parseInt(m[1], 10);
+		if(!map[id])
+			continue;
+		var kind = map[id];
+		var a = document.createElement('a');
+		a.href = '#';
+		a.className = 'bm-folder-tree-share';
+		a.title = kind == 'webdisk' ? webdiskShareTitleWebdisk : webdiskShareTitleFolder;
+		a.setAttribute('aria-label', a.title);
+		a.innerHTML = '<i class="ti ti-share" aria-hidden="true"></i>';
+		a.onclick = (function(shareKind, shareId)
+		{
+			return function(e)
+			{
+				if(e)
+				{
+					if(e.preventDefault)
+						e.preventDefault();
+					if(e.stopPropagation)
+						e.stopPropagation();
+				}
+				var url = shareKind == 'webdisk'
+					? bmAppendSession('webdisk.php?action=shareWebdisk')
+					: bmAppendSession('webdisk.php?action=share&id=' + shareId);
+				var title = shareKind == 'webdisk' ? webdiskShareTitleWebdisk : webdiskShareTitleFolder;
+				var height = shareKind == 'webdisk'
+					? Math.min(420, Math.max(320, window.innerHeight - 120))
+					: Math.min(820, Math.max(520, window.innerHeight - 80));
+				openOverlay(url, title, 640, height, true);
+				return false;
+			};
+		})(kind, id);
+		links[i].parentNode.appendChild(a);
+	}
+}
+
+var webdiskRenamePromptTitle = 'Rename';
+var webdiskDeleteConfirmMessage = 'Really delete?';
+var webdiskEditTitle = 'Edit';
+var webdiskDeleteTitle = 'Delete';
+
+/**
+ * Rendert eine Button-Group (Edit/Share/Delete) rechts am Ordner-Baum-Eintrag,
+ * analog zur Kalender-Sidebar (.bm-organizer-sidebar-cal-actions).
+ *
+ * map: { <folderId>: { share: bool, rename: bool, del: bool, parent: int, title: string } }
+ */
+function attachWebdiskFolderRowActions(map)
+{
+	if(!map)
+		return;
+	var root = EBID('folderList');
+	if(!root)
+		return;
+	var links = root.querySelectorAll('a.node, a.nodeSel');
+	for(var i=0; i<links.length; i++)
+	{
+		var href = links[i].getAttribute('href') || '';
+		var m = href.match(/switchWebdiskFolder\((-?\d+)\)/);
+		if(!m)
+			continue;
+		var id = parseInt(m[1], 10);
+		var cfg = map[id];
+		if(!cfg)
+			continue;
+		if(!cfg.share && !cfg.rename && !cfg.del)
+			continue;
+
+		// Bestehende Actions-Gruppe entfernen (falls Tree neu gerendert wurde)
+		var parent = links[i].parentNode;
+		var oldGroup = parent.querySelector('.bm-folder-tree-actions');
+		if(oldGroup)
+			parent.removeChild(oldGroup);
+
+		var group = document.createElement('span');
+		group.className = 'btn-group btn-group-sm bm-folder-tree-actions';
+		group.setAttribute('role', 'group');
+		group.setAttribute('aria-label', webdiskEditTitle);
+		// Klick im Wrapper darf nicht den Ordner umschalten
+		group.onclick = function(e) { if(e && e.stopPropagation) e.stopPropagation(); };
+
+		if(cfg.rename)
+			group.appendChild(_wdMakeRowAction('ti-pencil', webdiskEditTitle,
+				(function(fid, title)
+				{
+					return function(e)
+					{
+						if(e){ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); }
+						webdiskRenameFolderNode(fid, title);
+						return false;
+					};
+				})(id, cfg.title || '')));
+
+		if(cfg.share)
+			group.appendChild(_wdMakeRowAction('ti-share', webdiskShareTitleFolder,
+				(function(fid)
+				{
+					return function(e)
+					{
+						if(e){ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); }
+						var url = bmAppendSession('webdisk.php?action=share&id=' + fid);
+						var h = Math.min(820, Math.max(520, window.innerHeight - 80));
+						openOverlay(url, webdiskShareTitleFolder, 640, h, true);
+						return false;
+					};
+				})(id)));
+
+		if(cfg.del)
+			group.appendChild(_wdMakeRowAction('ti-trash', webdiskDeleteTitle,
+				(function(fid, pid)
+				{
+					return function(e)
+					{
+						if(e){ if(e.preventDefault) e.preventDefault(); if(e.stopPropagation) e.stopPropagation(); }
+						if(!confirm(webdiskDeleteConfirmMessage))
+							return false;
+						document.location.href = bmAppendCsrf(bmAppendSession(
+							'webdisk.php?action=deleteItem&type=1&folder=' + pid + '&id=' + fid));
+						return false;
+					};
+				})(id, cfg.parent || 0)));
+
+		parent.appendChild(group);
+	}
+}
+
+function _wdMakeRowAction(iconClass, title, onClick)
+{
+	var a = document.createElement('a');
+	a.href = '#';
+	a.className = 'btn btn-icon';
+	a.title = title;
+	a.setAttribute('aria-label', title);
+	a.innerHTML = '<i class="ti ' + iconClass + '" aria-hidden="true"></i>';
+	a.onclick = onClick;
+	return a;
+}
+
+function webdiskRenameFolderNode(id, oldTitle)
+{
+	var newName = prompt(webdiskRenamePromptTitle, oldTitle || '');
+	if(newName == null)
+		return;
+	newName = ('' + newName).replace(/^\s+|\s+$/g, '');
+	if(newName == '' || newName == oldTitle)
+		return;
+	var url = bmAppendCsrf(bmAppendSession(
+		'webdisk.php?action=renameItem&type=1&id=' + id
+		+ '&name=' + encodeURIComponent(newName)));
+	MakeXMLRequest(url, function(e) {
+		if(e.readyState == 4)
+			document.location.href = bmAppendSession('webdisk.php?folder=' + currentWebdiskFolderID);
+	});
 }
 
 function initWDSel()
@@ -286,6 +455,9 @@ function showWebdiskItemDetails(type, id)
 						var ext = x.getElementsByTagName('ext').item(0).childNodes.item(0).nodeValue;
 						var share = x.getElementsByTagName('share').item(0).childNodes.item(0).nodeValue == '1';
 						var viewable = x.getElementsByTagName('viewable').item(0).childNodes.item(0).nodeValue == '1';
+						var uploaderNode = x.getElementsByTagName('uploader').item(0);
+						var uploader = (uploaderNode && uploaderNode.childNodes.length)
+							? uploaderNode.childNodes.item(0).nodeValue : '';
 
 						webdiskShowInfo(
 							type,
@@ -296,7 +468,8 @@ function showWebdiskItemDetails(type, id)
 							created,
 							id,
 							share,
-							viewable);
+							viewable,
+							uploader);
 					}
 				}
 			});
@@ -329,10 +502,12 @@ function selectedWebdiskCountChanged(no)
 	EBID('wdSize').innerHTML = '…';
 	EBID('wdDate').innerHTML = '-';
 	EBID('wdShared').style.display = 'none';
+	webdiskSetUploader('');
 
 	// actions
 	EBID('webdiskDetailActionsNote').style.display = 'none';
-	EBID('webdiskDetailActions').style.display = 'none';
+	if(EBID('webdiskDetailActions'))
+		EBID('webdiskDetailActions').style.display = 'none';
 
 	// folder
 	EBID('webdiskDetailFolderActions').style.display = 'none';
@@ -346,7 +521,8 @@ function selectedWebdiskCountChanged(no)
 	EBID('webdiskDetailFileActionsView').style.display = 'none';
 
 	// zip
-	EBID('webdiskDetailZIPActions').style.display = 'none';
+	if(EBID('webdiskDetailZIPActions'))
+		EBID('webdiskDetailZIPActions').style.display = 'none';
 
 	// multiple
 	EBID('webdiskMultiActions').style.display = '';
@@ -624,7 +800,7 @@ function webdiskSyncUploadModalTargetFolder()
 	if(!form)
 		return;
 
-	var folderId = (typeof currentWebdiskFolderID !== 'undefined' && currentWebdiskFolderID >= 0)
+	var folderId = (typeof currentWebdiskFolderID !== 'undefined' && currentWebdiskFolderID != -1)
 		? currentWebdiskFolderID
 		: 0;
 
@@ -804,7 +980,7 @@ function webdiskInitUploadModalDnD()
 		webdiskDnDFileDone,
 		function()
 		{
-			var folderId = (typeof currentWebdiskFolderID !== 'undefined' && currentWebdiskFolderID >= 0)
+			var folderId = (typeof currentWebdiskFolderID !== 'undefined' && currentWebdiskFolderID != -1)
 				? currentWebdiskFolderID
 				: 0;
 
@@ -812,27 +988,40 @@ function webdiskInitUploadModalDnD()
 		},
 		{ useOverlay: false });
 }
-function webdiskGetTreeIDbyFolderID(folderID)
+function webdiskFindFolderTreeNode(folderID)
 {
-	var folderList = EBID('folderList');
-	var treeAs = folderList.getElementsByTagName('a');
+	var needle = 'switchWebdiskFolder(' + folderID + ')';
+	var trees = (typeof webdiskFolderTrees != 'undefined' && webdiskFolderTrees.length)
+		? webdiskFolderTrees
+		: (typeof webdisk_d != 'undefined' ? [webdisk_d] : []);
 
-	for(var i=0; i<treeAs.length; i++)
+	for(var t=0; t<trees.length; t++)
 	{
-		var a = treeAs[i];
-
-		if(a.href.indexOf('switchWebdiskFolder') < 0) continue;
-		if(a.href.indexOf('('+folderID+')') > 0)
+		var tree = trees[t];
+		if(!tree || !tree.aNodes)
+			continue;
+		for(var n=0; n<tree.aNodes.length; n++)
 		{
-			var idx = a.id.indexOf('webdisk_d');
-
-			return(parseInt(a.id.substring(idx+9)));
+			var url = tree.aNodes[n].url || '';
+			if(url.indexOf(needle) < 0)
+				continue;
+			return { tree: tree, nodeId: tree.aNodes[n].id };
 		}
-
-		continue;
 	}
 
-	return(0);
+	return null;
+}
+function webdiskGetTreeIDbyFolderID(folderID)
+{
+	var info = webdiskFindFolderTreeNode(folderID);
+	return(info ? info.nodeId : 0);
+}
+function webdiskOpenTreeToFolder(folderID)
+{
+	var info = webdiskFindFolderTreeNode(folderID);
+	if(!info || !info.tree || typeof info.tree.openTo != 'function')
+		return;
+	info.tree.openTo(info.nodeId, true);
 }
 function webdiskReloadThumbnails()
 {
@@ -862,6 +1051,8 @@ function switchWebdiskFolder(folderID)
 					webdiskClearInfo();
 					currentWebdiskFolderID = folderID;
 					EBID('mainContentArea').innerHTML = e.responseText;
+					var wdPage = document.querySelector('.bm-webdisk-page');
+					window.webdiskReadonly = !!(wdPage && wdPage.getAttribute('data-readonly') === '1');
 					webdiskResetUploadModalState();
 					initWDSel();
 					webdiskReloadThumbnails();
@@ -872,12 +1063,7 @@ function switchWebdiskFolder(folderID)
 								switchWebdiskFolder(currentWebdiskFolderID);
 							}, webdiskDnDFileDone);
 
-					var treeID = webdiskGetTreeIDbyFolderID(folderID);
-					if(treeID > 0)
-					{
-						//webdisk_d.closeAll();
-						webdisk_d.openTo(treeID, true);
-					}
+					webdiskOpenTreeToFolder(folderID);
 
 					_lastSelectedWebdiskID = 0;
 					_lastSelectedWebdiskType = 0;
@@ -908,15 +1094,37 @@ function webdiskClearInfo()
 	currentType = -1;
 	currentTile = '';
 }
-function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, viewable)
+function webdiskSetUploader(email)
+{
+	var text = email || '';
+	var show = text.length > 0;
+	var dt = EBID('wdUploaderDt');
+	var dd = EBID('wdUploader');
+	var row = EBID('wdUploaderRow');
+	if(dt)
+		dt.style.display = show ? '' : 'none';
+	if(dd)
+	{
+		dd.style.display = show ? '' : 'none';
+		if(dd.textContent !== undefined)
+			dd.textContent = text;
+		else
+			dd.innerHTML = text;
+	}
+	if(row)
+		row.style.display = show ? '' : 'none';
+}
+function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, viewable, uploader)
 {
 	currentID = id;
 	currentType = type;
 	currentTitle = fullTitle;
 
 	// reset links
-	EBID('wdCutLink').className = '';
-	EBID('wdCopyLink').className = '';
+	if(EBID('wdCutLink'))
+		EBID('wdCutLink').className = '';
+	if(EBID('wdCopyLink'))
+		EBID('wdCopyLink').className = '';
 
 	// details
 	EBID('webdiskDetailInfoNote').style.display = 'none';
@@ -925,11 +1133,13 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 	EBID('wdTitle').innerHTML = title;
 	EBID('wdSize').innerHTML = size;
 	EBID('wdDate').innerHTML = date;
+	webdiskSetUploader(type == 2 ? uploader : '');
 	EBID('wdShared').style.display = shared ? '' : 'none';
 
 	// actions
 	EBID('webdiskDetailActionsNote').style.display = 'none';
-	EBID('webdiskDetailActions').style.display = '';
+	if(EBID('webdiskDetailActions'))
+		EBID('webdiskDetailActions').style.display = (type == 1 || type == 2) && !window.webdiskReadonly ? '' : 'none';
 
 	// folder
 	EBID('webdiskDetailFolderActions').style.display = type == 1 ? '' : 'none';
@@ -943,7 +1153,8 @@ function webdiskShowInfo(type, fullTitle, title, size, ext, date, id, shared, vi
 	EBID('webdiskDetailFileActionsView').style.display = type == 2 && viewable ? '' : 'none';
 
 	// zip
-	EBID('webdiskDetailZIPActions').style.display = type==2 && ext=='zip' ? '' : 'none';
+	if(EBID('webdiskDetailZIPActions'))
+		EBID('webdiskDetailZIPActions').style.display = type==2 && ext=='zip' && !window.webdiskReadonly ? '' : 'none';
 
 	// multiple
 	EBID('webdiskMultiActions').style.display = 'none';
@@ -962,9 +1173,10 @@ function webdiskStopShare()
 	if(!confirm(lang['stopsharing_confirm']))
 		return;
 
-	document.location.href = bmAppendSession('webdisk.php?action=stopShare&id=' + currentID
+	// F2: CSRF-token required by CsrfEnforceOnStateChange()
+	document.location.href = bmAppendCsrf(bmAppendSession('webdisk.php?action=stopShare&id=' + currentID
 		+ '&folder=' + currentWebdiskFolderID
-		);
+		));
 }
 function webdiskStopFileShare()
 {
@@ -974,9 +1186,10 @@ function webdiskStopFileShare()
 	if(!confirm(lang['stopsharing_confirm']))
 		return;
 
-	document.location.href = bmAppendSession('webdisk.php?action=stopFileShare&id=' + currentID
+	// F2: CSRF-token required by CsrfEnforceOnStateChange()
+	document.location.href = bmAppendCsrf(bmAppendSession('webdisk.php?action=stopFileShare&id=' + currentID
 		+ '&folder=' + currentWebdiskFolderID
-		);
+		));
 }
 function webdiskClipboardAction(action)
 {

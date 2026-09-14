@@ -117,6 +117,11 @@
 
 <!-- folder menu -->
 <div id="folderMenu" class="mailMenu" style="display:none;position:absolute;left:0px;top:0px;">
+	<a class="mailMenuItem" href="javascript:toggleFolderFavorite(currentFolderID);"><i class="fa fa-star" aria-hidden="true"></i> <span id="folderFavoriteMenuLabel">{lng p="addtofavorites"}</span></a>
+	{if !empty($folderCanLeave)}
+	<a class="mailMenuItem" href="#" onclick="openOverlay(bmAppendSession('email.folders.php?action=leaveshare&id='+currentFolderID), '{lng p="shareleave"|escape:'javascript'}', 480, 260, true); return false;"><i class="fa fa-trash-o" aria-hidden="true"></i> {lng p="shareleave"}</a>
+	{/if}
+	<div class="mailMenuSep"></div>
 	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.php?do=markAllAsRead&folder='+currentFolderID);"><i class="fa fa-envelope-open-o" aria-hidden="true"></i> {lng p="markallasread"}</a>
 	<a class="mailMenuItem" href="javascript:document.location.href=bmAppendSession('email.php?do=markAllAsRead&unread=true&folder='+currentFolderID);"><i class="fa fa-envelope-o" aria-hidden="true"></i> {lng p="markallasunread"}</a>
 	<div class="mailMenuSep"></div>

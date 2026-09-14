@@ -39,7 +39,7 @@
 		<td class="{if $sortColumn=='to'}listTableTDActive{else}{$class}{/if}">&nbsp;<a href="{sessionurl file='sms.php' params='to={text value=$sms.to}'}">{text value=$sms.to}</a></td>
 		<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}">&nbsp;{date timestamp=$sms.date nice=true}</td>
 		<td class="{$class}">
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='sms.php' params="action=outbox&do=delete&id={$sms.id}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='sms.php' params="action=outbox&do=delete&id={$sms.id}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	<tbody id="group_{$sms.id}" style="display:{if $smarty.request.show!=$sms.id}none{/if}">

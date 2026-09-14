@@ -104,6 +104,8 @@ $lang_client['taxnote']			= 'inkl. %1% MwSt.';
 $lang_client['decsep']			= ',';
 $lang_client['lastsavedat']		= 'Zuletzt gespeichert um %1:%2 Uhr.';
 $lang_client['statement']		= 'Konto-Auszug';
+$lang_client['addtofavorites']	= 'Zu Favoriten hinzufügen';
+$lang_client['removefromfavorites'] = 'Aus Favoriten entfernen';
 
 /**
  * Customizable phrases
@@ -191,6 +193,21 @@ $lang_custom['clndr_date_msg']	= 'Sehr geehrte Damen und Herren,' . "\n\n"
 								.	'Anmerkung: %%message%%' . "\n\n"
 								.	'(Diese E-Mail wurde automatisch erstellt)';
 $lang_custom['clndr_sms']		= '%%date%% %%time%% - %%subtitle%%';
+$lang_custom['clndr_share_subject']	= 'Geteilter Kalender: %%action%% „%%title%%“';
+$lang_custom['clndr_share_msg']	= 'Sehr geehrte Damen und Herren,' . "\n\n"
+								.	'im geteilten Kalender „%%calendar%%“ gibt es eine Änderung.' . "\n"
+								.	'Aktion: %%action%%' . "\n"
+								.	'Termin: %%title%%' . "\n"
+								.	'Beginn: %%date%% %%time%% Uhr' . "\n"
+								.	'Ort: %%location%%' . "\n"
+								.	'Von: %%actor%%' . "\n\n"
+								.	'(Diese E-Mail wurde automatisch erstellt)';
+$lang_custom['orgshare_invite_subject']	= 'Freigabe: %%title%%';
+$lang_custom['orgshare_invite_msg']	= 'Hallo,' . "\n\n"
+								.	'%%owner%% hat %%kind%% „%%title%%“ mit Ihnen geteilt.' . "\n"
+								.	'Zugriff: %%access%%' . "\n\n"
+								.	'Nach dem Login finden Sie die Freigabe in der entsprechenden Liste. Sie können sie jederzeit selbst wieder entfernen.' . "\n\n"
+								.	'(Diese E-Mail wurde automatisch erstellt)';
 $lang_custom['receipt_text']	= 'Sehr geehrte Damen und Herren,' . "\n\n"
 								.	'ich habe Ihre E-Mail mit dem Betreff "%%subject%%" soeben (%%date%%) gelesen.' . "\n\n"
 								.	'(Diese E-Mail wurde automatisch erstellt)';
@@ -249,6 +266,18 @@ $lang_custom['contact_subjects']= "Frage zum Angebot\n"
 									. "Passwort vergessen\n"
 									. "Sonstiges Anliegen";
 $lang_custom['notify_date']		= 'Termin: <strong>%s</strong>';
+$lang_custom['notify_calshare_add']		= 'Neuer Termin in <strong>%s</strong>: %s';
+$lang_custom['notify_calshare_change']	= 'Termin geändert in <strong>%s</strong>: %s';
+$lang_custom['notify_calshare_delete']	= 'Termin gelöscht in <strong>%s</strong>: %s';
+$lang_custom['notify_orgshare_cal']		= '<strong>%s</strong> hat den Kalender <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_book']	= '<strong>%s</strong> hat das Adressbuch <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_mail']	= '<strong>%s</strong> hat den Ordner <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_mailbox']	= '<strong>%s</strong> hat das Postfach <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_webdisk']	= '<strong>%s</strong> hat die Webdisk <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_wdfolder']	= '<strong>%s</strong> hat den Webdisk-Ordner <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_todo']	= '<strong>%s</strong> hat die Aufgabenliste <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_task']	= '<strong>%s</strong> hat die Aufgabe <strong>%s</strong> mit Ihnen geteilt.';
+$lang_custom['notify_orgshare_note']	= '<strong>%s</strong> hat die Notiz <strong>%s</strong> mit Ihnen geteilt.';
 $lang_custom['notify_newemail']	= '<strong>%d</strong> neue E-Mail(s): %s';
 $lang_custom['notify_email']	= 'E-Mail eingetroffen von <strong>%s</strong>: %s';
 $lang_custom['notify_birthday'] = '<strong>%s</strong> wird heute <strong>%d Jahre</strong> alt!';
@@ -503,6 +532,52 @@ $lang_user['mfa_active_since']	= 'Aktiv seit %s';
 $lang_user['mfa_active_since_label']	= 'Aktiv seit:';
 $lang_user['mfa_status_off']	= 'Zwei-Faktor ist nicht eingerichtet.';
 $lang_user['mfa_email_subject']	= 'Ihr Anmeldecode: %%code%%';
+
+// App passwords
+$lang_user['apppasswords']				= 'App-Passwörter';
+$lang_user['apppw_intro']				= 'App-Passwörter sind einmal generierte Zugangsdaten für externe Programme (z.&nbsp;B. iPhone, Thunderbird, Nextcloud), die ohne Zwei-Faktor-Authentifizierung funktionieren. Sie können jederzeit einzeln widerrufen werden, ohne Ihr Kontopasswort zu ändern.';
+$lang_user['apppw_existing']			= 'Vorhandene App-Passwörter';
+$lang_user['apppw_none_yet']			= 'Sie haben noch keine App-Passwörter erstellt.';
+$lang_user['apppw_col_label']			= 'Bezeichnung';
+$lang_user['apppw_col_scope']			= 'Zugriff';
+$lang_user['apppw_col_created']			= 'Erstellt';
+$lang_user['apppw_col_last_used']		= 'Zuletzt verwendet';
+$lang_user['apppw_col_status']			= 'Status';
+$lang_user['apppw_status_active']		= 'aktiv';
+$lang_user['apppw_status_revoked']		= 'widerrufen';
+$lang_user['apppw_status_expired']		= 'abgelaufen';
+$lang_user['apppw_revoke']				= 'Widerrufen';
+$lang_user['apppw_revoke_confirm']		= 'Dieses App-Passwort wird sofort ungültig. Fortfahren?';
+$lang_user['apppw_revoke_all']			= 'Alle App-Passwörter widerrufen';
+$lang_user['apppw_revoke_all_confirm']	= 'Alle App-Passwörter werden sofort ungültig. Sync-Clients müssen anschließend mit neuen App-Passwörtern eingerichtet werden. Fortfahren?';
+$lang_user['apppw_never_used']			= 'noch nicht verwendet';
+$lang_user['apppw_expires_on']			= 'Läuft ab';
+$lang_user['apppw_create_title']		= 'Neues App-Passwort erstellen';
+$lang_user['apppw_create_btn']			= 'App-Passwort erstellen';
+$lang_user['apppw_label_placeholder']	= 'z.&nbsp;B. iPhone Kalender';
+$lang_user['apppw_client_hint']			= 'Gerät / Client';
+$lang_user['apppw_client_hint_desc']	= 'Nur zur Orientierung, ohne funktionale Bedeutung.';
+$lang_user['apppw_expiry']				= 'Ablauf';
+$lang_user['apppw_expiry_never']		= 'Kein Ablauf';
+$lang_user['apppw_expiry_admin_max']	= 'Maximale Gültigkeit (Adminvorgabe)';
+$lang_user['apppw_max_per_user']		= 'Maximal erlaubte Anzahl';
+$lang_user['apppw_new_title']			= 'App-Passwort erfolgreich erstellt';
+$lang_user['apppw_new_hint']			= 'Kopieren Sie dieses Passwort JETZT. Aus Sicherheitsgründen wird es nie wieder angezeigt.';
+$lang_user['apppw_new_label_hint']		= 'Bezeichnung';
+$lang_user['apppw_created']				= 'App-Passwort erstellt. Bitte jetzt kopieren – es wird nicht erneut angezeigt.';
+$lang_user['apppw_revoked']				= 'App-Passwort wurde widerrufen.';
+$lang_user['apppw_revoked_all']			= 'Alle App-Passwörter wurden widerrufen.';
+$lang_user['apppw_renamed']				= 'Bezeichnung aktualisiert.';
+$lang_user['apppw_error_label_missing']	= 'Bitte geben Sie eine Bezeichnung ein.';
+$lang_user['apppw_error_scope_missing']	= 'Bitte wählen Sie mindestens einen Zugriff aus.';
+$lang_user['apppw_error_create']		= 'App-Passwort konnte nicht erstellt werden (Maximum erreicht?).';
+$lang_user['apppw_error_generic']		= 'Aktion konnte nicht ausgeführt werden.';
+$lang_user['apppw_mfa_active']			= 'Zwei-Faktor-Authentifizierung ist aktiv.';
+$lang_user['apppw_mfa_hint_warn']		= 'Ihre Sync-Clients (CalDAV/CardDAV/WebDAV) sollten möglichst auf App-Passwörter umgestellt werden. Ihr Kontokennwort funktioniert derzeit noch, wird aber künftig gesperrt.';
+$lang_user['apppw_mfa_hint_enforce']	= 'Ihre Sync-Clients (CalDAV/CardDAV/WebDAV) benötigen zwingend ein App-Passwort. Ein Login mit Ihrem Kontokennwort ist bei aktiver Zwei-Faktor-Authentifizierung nicht möglich.';
+$lang_user['apppw_mail_pending']		= 'App-Passwörter für Mail-Protokolle (IMAP/POP3/SMTP) sind in Vorbereitung. Sobald der Mail-Server sie unterstützt, erscheinen sie hier auswählbar.';
+$lang_user['apppw_scope_coming_soon']	= 'kommt bald';
+
 $lang_user['start']				= 'Startseite';
 
 // mail th
@@ -562,6 +637,7 @@ $lang_user['droptext']			= 'Ziehen Sie Ihre Dateien zum Hochladen aus Ihrem Date
 $lang_user['filename']			= 'Dateiname';
 $lang_user['size']				= 'Grö&szlig;e';
 $lang_user['created']			= 'Erstellt';
+$lang_user['uploadedby']			= 'Hochgeladen von';
 $lang_user['internalerror']		= 'Interner Fehler - bitte versuchen Sie es später erneut';
 $lang_user['success']			= 'Erfolgreich';
 $lang_user['fileexists']		= 'Eine Datei mit diesem Namen existiert bereits oder der Dateityp ist nicht gestattet';
@@ -968,6 +1044,7 @@ $lang_user['prefs_d_software']	= 'Laden Sie Client-Software für Ihren Computer 
 $lang_user['prefs_d_membership'] = 'Sehen Sie Infos zu Ihrer Mitgliedschaft ein oder beenden Sie diese auf Wunsch.';
 $lang_user['prefs_d_coupons']	= 'Lösen Sie Gutscheine ein, die Sie z.B. aus Aktionen oder Gewinnspielen erhalten haben.';
 $lang_user['prefs_d_mfa']		= 'Zwei-Faktor einrichten, Methode wechseln, neu einrichten oder Backup-Codes verwalten.';
+$lang_user['prefs_d_apppasswords'] = 'Legen Sie App-Passwörter für CalDAV, CardDAV und WebDAV an. Empfohlen für Sync-Clients bei aktiver Zwei-Faktor-Authentifizierung.';
 $lang_user['alias']				= 'Alias';
 $lang_user['addalias']			= 'Alias hinzufügen';
 $lang_user['aliastype_1']		= 'Absender';
@@ -1274,6 +1351,59 @@ $lang_user['location']			= 'Ort';
 $lang_user['repeating']			= 'Wiederholend';
 $lang_user['reminder']			= 'Erinnerung';
 $lang_user['editgroups']		= 'Gruppen bearbeiten';
+$lang_user['calendars']			= 'Kalender';
+$lang_user['addcalendar']		= 'Kalender hinzufügen';
+$lang_user['editcalendar']		= 'Kalender bearbeiten';
+$lang_user['mycalendars']		= 'Meine Kalender';
+$lang_user['addressbooks']		= 'Adressbücher';
+$lang_user['addaddressbook']	= 'Adressbuch hinzufügen';
+$lang_user['editaddressbook']	= 'Adressbuch bearbeiten';
+$lang_user['myaddressbooks']	= 'Meine Adressbücher';
+$lang_user['sharedcalendars']	= 'Geteilte Kalender';
+$lang_user['sharedaddressbooks']	= 'Geteilte Adressbücher';
+$lang_user['sharewith']			= 'Teilen mit';
+$lang_user['sharewithhint']		= 'Nur Benutzer dieses Servers. Empfänger wird benachrichtigt.';
+$lang_user['calendarshare']		= 'Kalenderfreigabe';
+$lang_user['addressbookshare']	= 'Adressbuchfreigabe';
+$lang_user['shareinvite']		= 'Einladen';
+$lang_user['shareinvited']		= 'Eingeladen. Der Benutzer findet die Freigabe unter den geteilten Einträgen.';
+$lang_user['shareaccess']		= 'Zugriff';
+$lang_user['access_read']		= 'Lesen';
+$lang_user['access_write']		= 'Lesen und schreiben';
+$lang_user['nosharees']			= 'Noch nicht geteilt.';
+$lang_user['sharees']			= 'Eingeladene Benutzer';
+$lang_user['shareleave']		= 'Freigabe entfernen';
+$lang_user['shareleaveq']		= 'Möchten Sie diese Einladung entfernen? Die Freigabe verschwindet aus Ihrer Liste, ohne dass der Besitzer benachrichtigt wird.';
+$lang_user['folderfavorites']	= 'Favoriten';
+$lang_user['addtofavorites']		= 'Zu Favoriten hinzufügen';
+$lang_user['removefromfavorites'] = 'Aus Favoriten entfernen';
+$lang_user['mailbox']			= 'Postfach';
+$lang_user['sharemailbox']		= 'Postfach teilen';
+$lang_user['sharemailboxwarn_title']	= 'Achtung: Vollzugriff auf Ihr gesamtes Postfach';
+$lang_user['sharemailboxwarn_desc']	= 'Empfänger dieser Freigabe erhalten Zugriff auf ALLE Ordner Ihres Postfachs — inklusive Papierkorb, Entwürfe, Spam, Gesendet und aller Ordner, die Sie später anlegen. Damit sind auch sensible Inhalte wie Passwort-Reset-Mails, Zwei-Faktor-Codes und private Nachrichten mitfreigegeben. Teilen Sie Ihr Postfach nur mit Personen, denen Sie uneingeschränkt vertrauen. Für gezielten Zugriff auf einzelne Ordner nutzen Sie stattdessen die Ordner-Freigabe.';
+$lang_user['sharefolder']		= 'Ordner teilen';
+$lang_user['sharewebdisk']		= 'Webdisk teilen';
+$lang_user['shareinternally']	= 'Interne Freigabe';
+$lang_user['sharepublicly']		= 'Öffentlicher Link';
+$lang_user['wd_share_enable_public']	= 'Öffentlichen Link aktivieren';
+$lang_user['publiclink']		= 'Öffentlicher Link';
+$lang_user['edittasklist']		= 'Aufgabenliste bearbeiten';
+$lang_user['sharetodolist']		= 'Aufgabenliste teilen';
+$lang_user['sharetask']			= 'Aufgabe teilen';
+$lang_user['sharenote']			= 'Notiz teilen';
+$lang_user['sharedtasks']		= 'Geteilte Aufgaben';
+$lang_user['sharenotfound']		= 'Kein Benutzer mit dieser E-Mail-Adresse gefunden.';
+$lang_user['sharewithself']		= 'Sie können nicht mit sich selbst teilen.';
+$lang_user['shareexists']		= 'Diese Freigabe existiert bereits.';
+$lang_user['sharenotifyme']		= 'Mich benachrichtigen';
+$lang_user['sharenotifyhint']	= 'Bei neuen, geänderten oder gelöschten Terminen in diesem Kalender.';
+$lang_user['bypush']			= 'per Push';
+$lang_user['sharenotify_push']	= 'Push';
+$lang_user['shareowner']		= 'Besitzer';
+$lang_user['nodeletdefault']	= 'Der Standard-Eintrag kann nicht gelöscht werden.';
+$lang_user['calshare_action_add']		= 'Neuer Termin';
+$lang_user['calshare_action_change']	= 'Termin geändert';
+$lang_user['calshare_action_delete']	= 'Termin gelöscht';
 $lang_user['mailattendees']		= 'E-Mail an Teilnehmer';
 $lang_user['btr']				= 'Btr.';
 $lang_user['wholeday']			= 'Ganztägig';
@@ -1456,6 +1586,17 @@ $lang_admin['contactform_name']	= 'Name-Feld im Kontakt-Formular';
 $lang_admin['contactform_subject']	= 'Betreff-Feld im Kontakt-Formular';
 $lang_admin['cfs_note']			= 'Die Betreff-Auswahl ist sprach-abhängig anpassbar unter';
 $lang_admin['captchaprovider']	= 'Captcha-Provider';
+$lang_admin['altcha_mode']		= 'Betriebsart';
+$lang_admin['altcha_mode_local']	= 'Lokal (ohne externe Dienste)';
+$lang_admin['altcha_mode_cloud']	= 'ALTCHA Cloud';
+$lang_admin['altcha_hmac']		= 'HMAC-Geheimnis (lokal, leer = automatisch)';
+$lang_admin['altcha_complexity']	= 'Schwierigkeit (lokal)';
+$lang_admin['altcha_complexity_easy']	= 'Leicht';
+$lang_admin['altcha_complexity_medium']	= 'Mittel';
+$lang_admin['altcha_complexity_hard']	= 'Schwer';
+$lang_admin['altcha_cloud_region']	= 'Cloud-Region';
+$lang_admin['altcha_apikey']		= 'API-Key (Cloud)';
+$lang_admin['altcha_apisecret']	= 'API-Secret (Cloud)';
 $lang_admin['privatekey']		= 'Private Key';
 $lang_admin['publickey']		= 'Public Key';
 $lang_admin['theme']			= 'Theme';
@@ -1693,6 +1834,24 @@ $lang_admin['mfa_admin_user_setup']	= 'MFA selbst einrichten';
 $lang_admin['mfa_admin_default']	= 'Standardmethode';
 $lang_admin['mfa_admin_required']	= 'MFA Pflicht für alle';
 $lang_admin['login_notify_admin']	= 'Login-Hinweis bei neuer IP';
+
+// App-Passwörter (Admin)
+$lang_admin['apppw_admin_section']			= 'App-Passwörter (DAV & Mail)';
+$lang_admin['apppw_admin_enable']			= 'App-Passwörter erlauben';
+$lang_admin['apppw_admin_dav_mode']			= 'DAV-Erzwingung';
+$lang_admin['apppw_admin_mail_enable']		= 'App-Passwörter für IMAP/POP3/SMTP';
+$lang_admin['apppw_admin_mail_enable_hint']	= 'Erst aktivieren, wenn ein b1gMailServer mit App-Passwort-Unterstützung deployed ist.';
+$lang_admin['apppw_admin_mail_mode']		= 'Mail-Erzwingung';
+$lang_admin['apppw_admin_require_https']	= 'HTTPS für DAV';
+$lang_admin['apppw_admin_max_per_user']		= 'Max. je Benutzer';
+$lang_admin['apppw_admin_expiry']			= 'Max. Gültigkeit';
+$lang_admin['apppw_admin_expiry_hint']		= '0 = unbegrenzt';
+$lang_admin['apppw_mode_off']				= 'aus (Kontokennwort)';
+$lang_admin['apppw_mode_warn']				= 'Warnung (beides erlaubt)';
+$lang_admin['apppw_mode_enforce']			= 'MFA: nur App-Passwort';
+$lang_admin['apppw_mode_strict']			= 'Strikt (nur App-Passwort)';
+$lang_admin['apppw_mail_preview']			= 'in Vorbereitung';
+
 $lang_admin['admin_email']			= 'E-Mail';
 $lang_admin['admin_email_hint']		= 'Wird für MFA per E-Mail verwendet (wenn aktiviert).';
 $lang_admin['users']			= 'Benutzer';
@@ -1724,6 +1883,22 @@ $lang_admin['releaseversion']	= 'Version testen und freigeben';
 $lang_admin['toolboxrelease']	= 'Sie können die Toolbox-Version nun testen und freigeben. Klicken Sie auf &quot;Testen (Windows/Mac)&quot;, um eine Testkopie der Version herunterzuladen. Nach dem Test können Sie die Version per Klick auf &quot;Freigeben&quot; für Ihre Benutzer zur Verfügung stellen.';
 $lang_admin['toolboxonlinenote']= 'Beim Klick auf &quot;Testen&quot; bzw. &quot;Freigeben&quot; wird die Konfiguration dieser Toolbox-Version (Titel, Branding, Bilder usw.) zur Erstellung Ihrer individuellen Toolbox-Version an den b1gMail Projekt-Server übertragen. Je nach Internetverbindung kann die Erstellung der Test-/Releasedateien einen Moment dauern.';
 $lang_admin['keepcurrentimg']	= 'Aktuelles Bild beibehalten';
+$lang_admin['usedefaultimg']	= 'Standard verwenden';
+$lang_admin['uploadnewimg']	= 'Neues Bild hochladen';
+$lang_admin['customsplash']		= 'Eigenes Cover-Bild';
+$lang_admin['customsplashhint']	= 'Überschreibt die Startseiten-Bild-Auswahl, wenn ein eigenes Bild hinterlegt ist. PNG, JPEG, GIF oder WebP.';
+$lang_admin['customlogohint']	= 'Wird auf der Login-Seite und hellen Flächen in Originalfarben angezeigt. PNG, JPEG, GIF oder WebP.';
+$lang_admin['tpllogolight']		= 'Logo (hell)';
+$lang_admin['tpllogolighthint']	= 'Login-Seite, Registrierung und andere helle Flächen. PNG, JPEG, GIF oder WebP.';
+$lang_admin['tpllogodark']		= 'Logo (dunkel)';
+$lang_admin['tpllogodarkhint']	= 'Dunkle Navigation (linke Leiste) und Dark Mode. Ohne Upload gilt das helle Logo, sonst das weiße Theme-Logo. PNG, JPEG, GIF oder WebP.';
+$lang_admin['tplfavicon']		= 'Favicon';
+$lang_admin['tplfaviconhint']	= 'Browser-Tab und Lesezeichen. Bleibt das Standard-Icon, bis hier ein eigenes Bild hochgeladen wird. PNG, JPEG, GIF oder WebP.';
+$lang_admin['tplcopyright']		= 'Copyright';
+$lang_admin['tplcopyrighthint']	= 'Leer = © aktuelles Jahr und Servicetitel. Platzhalter: {year}, {title}';
+$lang_admin['tplprimary']			= 'Akzentfarbe';
+$lang_admin['tplprimaryhint']	= 'Buttons, Links und Markierungen. Leer bzw. #066fd1 = Tabler-Standardblau.';
+$lang_admin['tplasseterror']		= 'Mindestens ein Bild konnte nicht gespeichert werden. Bitte ein gültiges PNG-, JPEG-, GIF- oder WebP-Bild (max. 5 MB) wählen.';
 $lang_admin['toolboxfileerr']	= 'Die folgenden Bilder konnte nicht übernommen werden. Bitte stellen Sie sicher, dass die Bildgrö&szlig;e den Vorgaben entspricht und dass es sich um eine Datei im PNG-Format handelt.';
 $lang_admin['versions']			= 'Versionen';
 $lang_admin['addversion']		= 'Version hinzufügen';
@@ -2239,6 +2414,15 @@ $lang_admin['text_notify_email']		= 'E-Mail-Benachrichtigung aus Filter';
 $lang_admin['text_notify_birthday']		= 'Geburtstags-Benachrichtigung';
 $lang_admin['text_notify_wd_share_expired']	= 'Webdisk-Freigabe abgelaufen';
 $lang_admin['text_notify_wd_share_download']	= 'Webdisk-Freigabe Download';
+$lang_admin['text_notify_orgshare_cal']		= 'Kalender-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_book']	= 'Adressbuch-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_mail']	= 'Ordner-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_mailbox']	= 'Postfach-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_webdisk']	= 'Webdisk-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_wdfolder']	= 'Webdisk-Ordner-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_todo']	= 'Aufgabenlisten-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_task']	= 'Aufgaben-Freigabe-Benachrichtigung';
+$lang_admin['text_notify_orgshare_note']	= 'Notiz-Freigabe-Benachrichtigung';
 $lang_admin['text_contact_subjects']	= 'Kontakt-Formular-Betreff-Auswahl';
 $lang_admin['text_ap_autolock_sub']		= 'Missbrauchs-Sperrungs-Benachrichtigung-Betreff';
 $lang_admin['text_ap_autolock_text']	= 'Missbrauchs-Sperrungs-Benachrichtigung-Text';
@@ -2264,6 +2448,10 @@ $lang_admin['text_cs_text']				= 'Einschreiben-Gelesen-Mail-Text';
 $lang_admin['text_clndr_subject']		= 'Kalender-Erinnerungs-Mail-Betreff';
 $lang_admin['text_clndr_date_msg']		= 'Kalender-Erinnerungs-Mail-Text';
 $lang_admin['text_clndr_sms']			= 'Kalender-Erinnerungs-SMS';
+$lang_admin['text_clndr_share_subject']	= 'Geteilter-Kalender-Mail-Betreff';
+$lang_admin['text_clndr_share_msg']		= 'Geteilter-Kalender-Mail-Text';
+$lang_admin['text_orgshare_invite_subject']	= 'Organizer-Einladungs-Mail-Betreff';
+$lang_admin['text_orgshare_invite_msg']	= 'Organizer-Einladungs-Mail-Text';
 $lang_admin['text_receipt_text']		= 'Lesebestätigungs-Mail-Text';
 $lang_admin['text_validationsms']		= 'Anmeldungs-Bestätigungs-SMS';
 $lang_admin['text_validationsms2']		= 'SMS-Abs.-Validierungs-SMS';
@@ -2384,11 +2572,12 @@ $lang_admin['groupdeletedesc']	= 'Bitte wählen Sie die Gruppe(n) aus, in welche
 $lang_admin['dbwarn']			= 'Vor der Ausführung sollte ein Backup erstellt werden. Alle Aktionen auf eigene Gefahr.';
 $lang_admin['workgroups']		= 'Arbeitsgruppen';
 $lang_admin['collaboration']	= 'Zusammenarbeit';
-$lang_admin['share_addr']		= 'Gemeinsame Adressen';
-$lang_admin['share_calendar']	= 'Gemeinsamer Kalender';
-$lang_admin['share_todo']		= 'Gemeinsame Aufgaben';
-$lang_admin['share_notes']		= 'Gemeinsame Notizen';
-$lang_admin['share_webdisk']	= 'Gemeinsame Webdisk';
+$lang_admin['share_addr']		= 'Adressen';
+$lang_admin['share_calendar']	= 'Kalender';
+$lang_admin['share_todo']		= 'Aufgaben';
+$lang_admin['share_notes']		= 'Notizen';
+$lang_admin['share_webdisk']	= 'Webdisk';
+$lang_admin['share_mail']		= 'E-Mail';
 $lang_admin['bayesdb']			= 'Filter-Datenbank';
 $lang_admin['reset']			= 'Zurücksetzen';
 $lang_admin['bayesresetq']		= 'Soll die Filter-Trainings-Datenbank wirklich zurückgesetzt werden? Der Filter ist danach erst nach erneutem Training wieder einsatzbereit.';

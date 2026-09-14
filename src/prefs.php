@@ -95,6 +95,8 @@ if(BMPayment::Available())
 $prefsItems['membership'] = true;
 if(BMMfa::LiUserMayManageMfa((int)$groupRow['id']) && empty($_SESSION['bm_mfaSetupRequired']))
 	$prefsItems['mfa'] = true;
+if(BMAppPassword::LiUserMayManage((int)$groupRow['id']) && empty($_SESSION['bm_mfaSetupRequired']))
+	$prefsItems['apppasswords'] = true;
 
 function PrefsDone()
 {
@@ -915,17 +917,19 @@ else if($_REQUEST['action'] == 'filters'
 	//
 	else
 	{
-		// delete?
+		// delete? — F2: CSRF-token required.
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['id']))
 		{
+			CsrfEnforceOnStateChange();
 			$thisUser->DeleteFilter((int)$_REQUEST['id']);
 		}
 
-		// mass delete?
+		// mass delete? — F2: CSRF-token required.
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'action'
 				&& isset($_REQUEST['do2']) && $_REQUEST['do2'] == 'delete')
 		{
+			CsrfEnforceOnStateChange();
 			foreach($_POST as $key=>$val)
 				if(substr($key, 0, 7) == 'filter_')
 				{
@@ -1120,17 +1124,19 @@ else if($_REQUEST['action'] == 'signatures')
 	//
 	else
 	{
-		// delete?
+		// delete? — F2: CSRF-token required.
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['id']))
 		{
+			CsrfEnforceOnStateChange();
 			$thisUser->DeleteSignature((int)$_REQUEST['id']);
 		}
 
-		// mass delete?
+		// mass delete? — F2: CSRF-token required.
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'action'
 				&& isset($_REQUEST['do2']) && $_REQUEST['do2'] == 'delete')
 		{
+			CsrfEnforceOnStateChange();
 			foreach($_POST as $key=>$val)
 				if(substr($key, 0, 10) == 'signature_')
 				{
@@ -1274,10 +1280,11 @@ else if($_REQUEST['action'] == 'aliases'
 			(int)$_REQUEST['id'],
 			$userRow['id']);
 		}
-		// delete?
+		// delete? — F2: CSRF-token required.
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['id']))
 		{
+			CsrfEnforceOnStateChange();
 			if($userRow['defaultSender'] == 10+$_REQUEST['id']*2
 				|| $userRow['defaultSender'] == 11+$_REQUEST['id']*2)
 				$thisUser->SetDefaultSender(1);
@@ -1475,17 +1482,19 @@ else if($_REQUEST['action'] == 'extpop3')
 	//
 	else
 	{
-		// delete?
+		// delete? — F2: CSRF-token required.
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['id']))
 		{
+			CsrfEnforceOnStateChange();
 			$thisUser->DeletePOP3Account((int)$_REQUEST['id']);
 		}
 
-		// mass delete?
+		// mass delete? — F2: CSRF-token required.
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'action'
 				&& isset($_REQUEST['do2']) && $_REQUEST['do2'] == 'delete')
 		{
+			CsrfEnforceOnStateChange();
 			foreach($_POST as $key=>$val)
 				if(substr($key, 0, 5) == 'pop3_')
 				{
@@ -1853,6 +1862,9 @@ else if($_REQUEST['action'] == 'orders'
 	else if($_REQUEST['do'] == 'deleteOrder'
 			&& isset($_REQUEST['id']))
 	{
+		// F2: order deletion GET-CSRF was limited to unpaid orders
+		// but still enabled spam-cleanup of a legit user's basket.
+		CsrfEnforceOnStateChange();
 		$db->Query('DELETE FROM {pre}orders WHERE `orderid`=? AND `userid`=? AND `status`=?',
 				   $_REQUEST['id'],
 				   $userRow['id'],
@@ -1892,14 +1904,17 @@ else if($_REQUEST['action'] == 'keyring'
 	if(!isset($_REQUEST['do'])
 		|| in_array($_REQUEST['do'], array('action', 'delete')))
 	{
+		// F2: CSRF-token required.
 		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'delete'
 			&& isset($_REQUEST['hash']))
 		{
+			CsrfEnforceOnStateChange();
 			$thisUser->DeleteCertificateByHash($_REQUEST['hash'], (int)$_REQUEST['type']);
 		}
 		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'action'
 			&& isset($_REQUEST['cert']) && is_array($_REQUEST['cert']))
 		{
+			CsrfEnforceOnStateChange();
 			$ownCerts = $thisUser->GetKeyRing('cn', 'asc', CERTIFICATE_TYPE_PRIVATE);
 
 			foreach($_REQUEST['cert'] as $certHash)
@@ -2624,6 +2639,149 @@ else if($_REQUEST['action'] == 'mfa')
 	$tpl->assign('mfaSecret', $setupSecret);
 	$tpl->assign('pageTitle', isset($lang_user['mfa']) ? $lang_user['mfa'] : 'Two-factor authentication');
 	$tpl->assign('pageContent', 'li/prefs.mfa.tpl');
+	$tpl->display('li/index.tpl');
+}
+
+/**
+ * App-specific passwords (DAV now; SMTP/IMAP/POP3 prepared but gated off
+ * until b1gMailServer supports the shared table).
+ */
+else if($_REQUEST['action'] == 'apppasswords')
+{
+	$userID = (int)$userRow['id'];
+	$groupID = (int)$groupRow['id'];
+
+	if(!BMAppPassword::LiUserMayManage($groupID))
+	{
+		$tpl->assign('title', $lang_user['error']);
+		$tpl->assign('msg', $lang_user['errorsaving']);
+		$tpl->assign('pageContent', 'li/msg.tpl');
+		$tpl->display('li/index.tpl');
+		exit();
+	}
+
+	$appPwError = '';
+	$appPwInfo  = '';
+	$newAppPwPlain = '';
+	$newAppPwLabel = '';
+
+	if(isset($_REQUEST['do']) && IsPOSTRequest())
+	{
+		$do = (string)$_REQUEST['do'];
+
+		if($do === 'create')
+		{
+			$label = isset($_POST['label']) ? (string)$_POST['label'] : '';
+			$clientHint = isset($_POST['client_hint']) ? (string)$_POST['client_hint'] : '';
+			$expiresInDays = isset($_POST['expires_days']) ? max(0, (int)$_POST['expires_days']) : 0;
+
+			$scopes = array();
+			if(isset($_POST['scope']) && is_array($_POST['scope']))
+			{
+				foreach($_POST['scope'] as $s)
+				{
+					$s = strtolower(trim((string)$s));
+					if(in_array($s, BMAppPassword::AllScopes(), true))
+						$scopes[] = $s;
+				}
+			}
+
+			// Silently drop scopes the admin has gated off (belt & braces:
+			// BMAppPassword::Create() also filters).
+			$scopes = array_values(array_intersect($scopes, BMAppPassword::SelectableScopesForGroup($groupID)));
+
+			if(trim($label) === '')
+			{
+				$appPwError = isset($lang_user['apppw_error_label_missing'])
+					? $lang_user['apppw_error_label_missing'] : 'Please enter a label.';
+			}
+			else if(empty($scopes))
+			{
+				$appPwError = isset($lang_user['apppw_error_scope_missing'])
+					? $lang_user['apppw_error_scope_missing'] : 'Please choose at least one scope.';
+			}
+			else
+			{
+				$created = BMAppPassword::Create($userID, $label, $scopes, $expiresInDays, $clientHint);
+				if($created === false)
+				{
+					$appPwError = isset($lang_user['apppw_error_create'])
+						? $lang_user['apppw_error_create'] : 'Could not create app password (limit reached?).';
+				}
+				else
+				{
+					$newAppPwPlain = $created['plain'];
+					$newAppPwLabel = $created['label'];
+					$appPwInfo = isset($lang_user['apppw_created'])
+						? $lang_user['apppw_created'] : 'App password created. Copy it now - it will not be shown again.';
+				}
+			}
+		}
+		else if($do === 'revoke')
+		{
+			$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+			if($id > 0 && BMAppPassword::Revoke($userID, $id))
+			{
+				$appPwInfo = isset($lang_user['apppw_revoked'])
+					? $lang_user['apppw_revoked'] : 'App password has been revoked.';
+			}
+			else
+			{
+				$appPwError = isset($lang_user['apppw_error_generic'])
+					? $lang_user['apppw_error_generic'] : 'Operation failed.';
+			}
+		}
+		else if($do === 'rename')
+		{
+			$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+			$label = isset($_POST['label']) ? (string)$_POST['label'] : '';
+			if($id > 0 && trim($label) !== '' && BMAppPassword::Rename($userID, $id, $label))
+			{
+				$appPwInfo = isset($lang_user['apppw_renamed'])
+					? $lang_user['apppw_renamed'] : 'App password renamed.';
+			}
+			else
+			{
+				$appPwError = isset($lang_user['apppw_error_generic'])
+					? $lang_user['apppw_error_generic'] : 'Operation failed.';
+			}
+		}
+		else if($do === 'revokeall')
+		{
+			BMAppPassword::RevokeAllForUser($userID, 'user_selfservice');
+			$appPwInfo = isset($lang_user['apppw_revoked_all'])
+				? $lang_user['apppw_revoked_all'] : 'All app passwords have been revoked.';
+		}
+	}
+
+	$rows = BMAppPassword::ListForUser($userID);
+	$selectable = BMAppPassword::SelectableScopesForGroup($groupID);
+	$selectableMap = array();
+	foreach(BMAppPassword::AllScopes() as $s)
+		$selectableMap[$s] = in_array($s, $selectable, true);
+	$mailPrepared = !BMAppPassword::AreMailScopesEnabled();
+
+	$hasMfa = BMMfa::IsLoginReady('user', $userID);
+	$davEnforceMode = BMAppPassword::EnforcementMode(BMAppPassword::SCOPE_CALDAV);
+
+	$tpl->assign('appPwRows', $rows);
+	$tpl->assign('appPwSelectableScopes', $selectable);
+	$tpl->assign('appPwSelectable', $selectableMap);
+	$tpl->assign('appPwAllScopes', BMAppPassword::AllScopes());
+	$tpl->assign('appPwMailPrepared', $mailPrepared);
+	$tpl->assign('appPwNowTs', time());
+	$tpl->assign('appPwError', $appPwError);
+	$tpl->assign('appPwInfo',  $appPwInfo);
+	$tpl->assign('appPwNewPlain', $newAppPwPlain);
+	$tpl->assign('appPwNewLabel', $newAppPwLabel);
+	$tpl->assign('appPwUserHasMfa', $hasMfa);
+	$tpl->assign('appPwDavEnforceMode', $davEnforceMode);
+	$tpl->assign('appPwAdminMaxExpiryDays', isset($bm_prefs['app_password_expiry_days'])
+		? (int)$bm_prefs['app_password_expiry_days'] : 0);
+	$tpl->assign('appPwMaxPerUser', isset($bm_prefs['app_password_max_per_user'])
+		? (int)$bm_prefs['app_password_max_per_user'] : 20);
+	$tpl->assign('pageTitle', isset($lang_user['apppasswords']) ? $lang_user['apppasswords'] : 'App passwords');
+	$tpl->assign('pageContent', 'li/prefs.apppasswords.tpl');
 	$tpl->display('li/index.tpl');
 }
 

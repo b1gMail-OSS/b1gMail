@@ -152,14 +152,14 @@
 								<input type="url" class="form-control" name="web" id="web" value="{if isset($contact.web)}{text value=$contact.web allowEmpty=true}{/if}" />
 							</div>
 							<div class="col-md-6">
-								<label class="form-label">{lng p="birthday"}</label>
-								<div class="bm-organizer-datetime">
-									{if !empty($contact.geburtsdatum)}
-									{html_select_date time=$contact.geburtsdatum year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="geburtsdatum_" field_order="DMY"}
-									{else}
-									{html_select_date time="---" year_empty="---" day_empty="---" month_empty="---" start_year="-120" end_year="+0" prefix="geburtsdatum_" field_order="DMY"}
-									{/if}
-								</div>
+								<label class="form-label" for="geburtsdatum_date">{lng p="birthday"}</label>
+								<input type="date" class="form-control" id="geburtsdatum_date"
+									value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%Y-%m-%d"}{/if}"
+									max="{$smarty.now|date_format:"%Y-%m-%d"}"
+									onchange="syncSmartyDate('geburtsdatum', 'geburtsdatum_');" />
+								<input type="hidden" id="geburtsdatum_Day"   name="geburtsdatum_Day"   value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%d"}{else}0{/if}" />
+								<input type="hidden" id="geburtsdatum_Month" name="geburtsdatum_Month" value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%m"}{else}0{/if}" />
+								<input type="hidden" id="geburtsdatum_Year"  name="geburtsdatum_Year"  value="{if !empty($contact.geburtsdatum)}{$contact.geburtsdatum|date_format:"%Y"}{else}0{/if}" />
 							</div>
 							<div class="col-12">
 								<label class="form-label" for="kommentar">{lng p="comment"}</label>
@@ -178,12 +178,43 @@
 							<input type="hidden" name="pictureFile" id="pictureFile" value="" />
 							<input type="hidden" name="pictureMime" id="pictureMime" value="" />
 							<a href="javascript:addrUserPicture({if isset($contact) && $contact}{$contact.id}{else}-1{/if});" class="d-inline-block mb-2">
-								<span class="avatar avatar-xl bm-organizer-contact-avatar" id="pictureDiv" style="background-image: url({if !isset($contact) || !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}{$sessionUrlSuffix}{/if});"></span>
+								{if !isset($contact) || !$contact || $contact.picture==''}
+								<span class="avatar avatar-xl bm-organizer-contact-avatar bm-organizer-contact-avatar--empty" id="pictureDiv"><i class="ti ti-user" aria-hidden="true"></i></span>
+								{else}
+								<span class="avatar avatar-xl bm-organizer-contact-avatar" id="pictureDiv" style="background-image: url('{sessionurl file='organizer.addressbook.php' params="action=addressbookPicture&id={$contact.id}"}');"></span>
+								{/if}
 							</a>
 							<div class="text-secondary small">{lng p="changepicbyclick"}</div>
 						</div>
 					</div>
 
+					<div class="card bm-organizer-form-card mb-4">
+						<div class="card-header">
+							<h3 class="card-title">{lng p="addressbook"}</h3>
+						</div>
+						<div class="card-body">
+							<select class="form-select" name="addressbook" id="contactAddressbook" onchange="filterAddressbookGroups();">
+							{if $writableSharedAddressbooksByOwner}
+								<optgroup label="{lng p="myaddressbooks"}">
+								{foreach from=$addressbooks key=bookID item=abook}
+									<option value="{$bookID}"{if (isset($contact.addressbook_id) && $contact.addressbook_id==$bookID) || (!isset($contact) && $bookID==$currentAddressbookID)} selected="selected"{/if}>{text value=$abook.title}</option>
+								{/foreach}
+								</optgroup>
+								{foreach from=$writableSharedAddressbooksByOwner key=ownerLabel item=ownerBooks}
+								<optgroup label="{lng p="sharedaddressbooks"} — {text value=$ownerLabel}">
+									{foreach from=$ownerBooks key=bookID item=abook}
+									<option value="{$bookID}"{if (isset($contact.addressbook_id) && $contact.addressbook_id==$bookID) || (!isset($contact) && $bookID==$currentAddressbookID)} selected="selected"{/if}>{text value=$abook.title}</option>
+									{/foreach}
+								</optgroup>
+								{/foreach}
+							{else}
+								{foreach from=$writableAddressbooks key=bookID item=abook}
+								<option value="{$bookID}"{if (isset($contact.addressbook_id) && $contact.addressbook_id==$bookID) || (!isset($contact) && $bookID==$currentAddressbookID)} selected="selected"{/if}>{text value=$abook.title}</option>
+								{/foreach}
+							{/if}
+							</select>
+						</div>
+					</div>
 					<div class="card bm-organizer-form-card mb-4">
 						<div class="card-header">
 							<h3 class="card-title">{lng p="groupmember"}</h3>
@@ -192,22 +223,25 @@
 							{if !$groups}
 							<div class="text-secondary small">{lng p="nogroups"}</div>
 							{else}
-							<div class="d-flex flex-column gap-2 mb-3">
+							<div class="d-flex flex-wrap gap-2 mb-3 bm-group-chips">
 								{foreach from=$groups item=group key=groupID}
-								<label class="form-check mb-0" for="group_{$groupID}">
-									<input type="checkbox" class="form-check-input" id="group_{$groupID}" name="group_{$groupID}"{if !empty($group.member)} checked="checked"{/if} />
-									<span class="form-check-label">{text value=$group.title cut=32}</span>
-								</label>
+								<div class="abGroupRow bm-group-chip-wrap" data-addressbook="{$group.addressbook_id}">
+									<input type="checkbox" class="btn-check" id="group_{$groupID}" name="group_{$groupID}"{if !empty($group.member)} checked="checked"{/if} autocomplete="off" />
+									<label class="btn btn-sm bm-group-chip" for="group_{$groupID}">
+										<i class="ti ti-users icon icon-sm" aria-hidden="true"></i>
+										<span class="bm-group-chip-label">{text value=$group.title cut=32}</span>
+										<i class="ti ti-check bm-group-chip-check icon icon-sm" aria-hidden="true"></i>
+									</label>
+								</div>
 								{/foreach}
 							</div>
 							{/if}
-							<div class="input-group input-group-sm">
-								<span class="input-group-text py-0">
-									<label class="form-check mb-0">
-										<input type="checkbox" class="form-check-input m-0" id="group_new" name="group_new" aria-label="{lng p="newgroup"}" />
-									</label>
+							<div class="input-group bm-organizer-new-group">
+								<span class="input-group-text">
+									<i class="ti ti-plus" aria-hidden="true"></i>
 								</span>
-								<input type="text" class="form-control" name="group_new_name" placeholder="{lng p="newgroup"}" value="" onchange="this.onkeypress();" onkeypress="EBID('group_new').checked = this.value.length > 0;" />
+								<input type="text" class="form-control" id="group_new_name" name="group_new_name" placeholder="{lng p="newgroup"}" value="" oninput="EBID('group_new').checked = this.value.length > 0;" />
+								<input type="checkbox" id="group_new" name="group_new" class="d-none" aria-hidden="true" tabindex="-1" />
 							</div>
 						</div>
 					</div>
@@ -216,30 +250,28 @@
 						<div class="card-header">
 							<h3 class="card-title">{lng p="features"}</h3>
 						</div>
-						<div class="card-body">
-							<div class="list-group list-group-flush bm-organizer-contact-features">
-								{if isset($contact) && $contact}
-								<a href="javascript:addrFunction('exportVCF');" class="list-group-item list-group-item-action">
-									<i class="ti ti-address-book icon icon-sm me-2" aria-hidden="true"></i>{lng p="exportvcf"}
-								</a>
-								<a href="javascript:addrFunction('selfComplete');" class="list-group-item list-group-item-action">
-									<i class="ti ti-checkbox icon icon-sm me-2" aria-hidden="true"></i>{lng p="complete"}
-								</a>
-								<a href="javascript:addrFunction('intelliFolder');" class="list-group-item list-group-item-action">
-									<i class="ti ti-folder icon icon-sm me-2" aria-hidden="true"></i>{lng p="convfolder"}
-								</a>
-								<a href="javascript:addrFunction('sendMail');" class="list-group-item list-group-item-action">
-									<i class="ti ti-mail icon icon-sm me-2" aria-hidden="true"></i>{lng p="sendmail"}
-								</a>
-								{else}
-								<a href="javascript:addrImportVCF();" class="list-group-item list-group-item-action">
-									<i class="ti ti-upload icon icon-sm me-2" aria-hidden="true"></i>{lng p="importvcf"}
-								</a>
-								<a href="javascript:addrFunction('selfComplete');" class="list-group-item list-group-item-action">
-									<i class="ti ti-checkbox icon icon-sm me-2" aria-hidden="true"></i>{lng p="complete"}
-								</a>
-								{/if}
-							</div>
+						<div class="list-group list-group-flush bm-organizer-contact-features">
+							{if isset($contact) && $contact}
+							<a href="javascript:addrFunction('exportVCF');" class="list-group-item list-group-item-action">
+								<i class="ti ti-address-book icon icon-sm me-2" aria-hidden="true"></i>{lng p="exportvcf"}
+							</a>
+							<a href="javascript:addrFunction('selfComplete');" class="list-group-item list-group-item-action">
+								<i class="ti ti-checkbox icon icon-sm me-2" aria-hidden="true"></i>{lng p="complete"}
+							</a>
+							<a href="javascript:addrFunction('intelliFolder');" class="list-group-item list-group-item-action">
+								<i class="ti ti-folder icon icon-sm me-2" aria-hidden="true"></i>{lng p="convfolder"}
+							</a>
+							<a href="javascript:addrFunction('sendMail');" class="list-group-item list-group-item-action">
+								<i class="ti ti-mail icon icon-sm me-2" aria-hidden="true"></i>{lng p="sendmail"}
+							</a>
+							{else}
+							<a href="javascript:addrImportVCF();" class="list-group-item list-group-item-action">
+								<i class="ti ti-upload icon icon-sm me-2" aria-hidden="true"></i>{lng p="importvcf"}
+							</a>
+							<a href="javascript:addrFunction('selfComplete');" class="list-group-item list-group-item-action">
+								<i class="ti ti-checkbox icon icon-sm me-2" aria-hidden="true"></i>{lng p="complete"}
+							</a>
+							{/if}
 						</div>
 					</div>
 				</div>
@@ -257,3 +289,8 @@
 </div>
 
 {if !empty($jsCode)}{$jsCode}{/if}
+<script>
+<!--
+	filterAddressbookGroups();
+//-->
+</script>

@@ -146,8 +146,8 @@ $backupTables = [
     'stats' => ['stats'],
     'users' => ['users', 'aliase', 'autoresponder', 'filter', 'filter_actions', 'filter_conditions',
                             'folder_conditions', 'folders', 'pop3', 'signaturen', 'smsend', 'userprefs', ],
-    'organizer' => ['adressen', 'adressen_gruppen', 'adressen_gruppen_member', 'dates', 'dates_attendees',
-                            'dates_groups', 'notes', 'tasks', ],
+    'organizer' => ['adressen', 'adressen_gruppen', 'adressen_gruppen_member', 'addressbooks', 'dates', 'dates_attendees',
+                            'dates_groups', 'calendars', 'organizer_shares', 'notes', 'tasks', 'tasklists', ],
     'mails' => ['mails', 'certmails'],
     'webdisk' => ['diskfiles', 'diskfolders', 'diskprops'],
 ];
@@ -434,6 +434,10 @@ function DeleteUser($userID, $qAddAND = '')
     $db->Query('DELETE FROM {pre}adressen WHERE user=?',
         $userID);
 
+    // delete address books
+    $db->Query('DELETE FROM {pre}addressbooks WHERE user=?',
+        $userID);
+
     // delete aliases
     $db->Query('DELETE FROM {pre}aliase WHERE user=?',
         $userID);
@@ -459,6 +463,13 @@ function DeleteUser($userID, $qAddAND = '')
     // delete calendar groups
     $db->Query('DELETE FROM {pre}dates_groups WHERE user=?',
         $userID);
+
+    // delete calendars
+    $db->Query('DELETE FROM {pre}calendars WHERE user=?',
+        $userID);
+
+    include_once B1GMAIL_DIR.'serverlib/organizer.collections.inc.php';
+    bmOrganizerDeleteUserShares($userID);
 
     // delete disk props
     $db->Query('DELETE FROM {pre}diskprops WHERE user=?',

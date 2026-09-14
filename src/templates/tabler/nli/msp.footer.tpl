@@ -1,6 +1,6 @@
 <footer class="text-secondary mt-3 small nli-msp-footer">
 	<div class="d-flex flex-wrap align-items-center justify-content-center gap-1 mb-1 nli-msp-footer-meta">
-		<span>&copy; {$year} {$service_title}</span>
+		<span>{include file="nli/copyright.tpl"}</span>
 		<span class="text-secondary" aria-hidden="true">·</span>
 		<span>powered by <a href="https://www.b1gmail.eu/" target="_blank" rel="noreferrer" class="text-secondary">b1gMail.eu</a></span>
 	</div>
