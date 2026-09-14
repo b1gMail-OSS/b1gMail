@@ -46,36 +46,21 @@ function getWidgetArray($type, $widgetOrder)
 	return($tplWidgets);
 }
 
-if(!isset($_REQUEST['action']))
-	$_REQUEST['action'] = 'start';
+// Only the Start dashboard remains — the Organizer dashboard has been
+// removed. Legacy URLs (?action=organizer) transparently fall back to
+// Start so old admin bookmarks keep working.
+$_REQUEST['action'] = 'start';
+$widgetType = BMWIDGET_START;
+$orderKey   = 'widget_order_start';
 
 $tabs = array(
 	0 => array(
 		'title'		=> $lang_admin['startwidgets'],
 		'relIcon'	=> 'start32.png',
 		'link'		=> 'prefs.widgetlayouts.php?',
-		'active'	=> $_REQUEST['action'] == 'start'
-	),
-	1 => array(
-		'title'		=> $lang_admin['organizerwidgets'],
-		'relIcon'	=> 'organizer32.png',
-		'link'		=> 'prefs.widgetlayouts.php?action=organizer&',
-		'active'	=> $_REQUEST['action'] == 'organizer'
+		'active'	=> true
 	)
 );
-
-if($_REQUEST['action'] == 'start')
-{
-	$widgetType = BMWIDGET_START;
-	$orderKey = 'widget_order_start';
-}
-else if($_REQUEST['action'] == 'organizer')
-{
-	$widgetType = BMWIDGET_ORGANIZER;
-	$orderKey = 'widget_order_organizer';
-}
-else
-	die('Invalid action');
 
 $dashboard = _new('BMDashboard', array($widgetType));
 
@@ -105,7 +90,7 @@ if(!isset($_REQUEST['do']))
 	{
 		$db->Query('UPDATE {pre}userprefs SET `value`=? WHERE `key`=? AND `userid` IN (SELECT `id` FROM {pre}users WHERE `gruppe` IN ?)',
 			$bm_prefs[$orderKey],
-			$orderKey == 'widget_order_start' ? 'widgetOrderStart' : 'widgetOrderOrganizer',
+			'widgetOrderStart',
 			$_REQUEST['groups']);
 	}
 
