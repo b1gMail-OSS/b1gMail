@@ -42,6 +42,16 @@ probably the best idea to fork the b1gMail repository here and start creating yo
 As soon as you feel the commit is mature and you would like to integrate it into the b1gMail code base, 
 create a merge request to the main repository and we will review it.
 
+## Migrating from the commercial to the GPL version
+Its important to make a backup of `serverlib/init.inc.php` first. Then upload the files from src to your b1gMail folder. After call `/setup/update.php`.
+Alternatively delete in serverlib the file `version.inc.php` and rename `version.default.inc.php` to `version.inc.php`, upload `tools/db_sync.php` and 
+call `db_sync.php` (maybe you have to change the require path before). In both cases the setup folder must be deleted afterwards.
+
+Open the `serverlib/init.inc.php`, which you backed up. Copy the this value `define('B1GMAIL_SIGNKEY', ''); //Here add signkey from serverlib/init.inc.php` 
+to your `serverlib/config.inc.php`. 
+
+Upgrade older than b1gMail 7.4.0 is not supported. Please update first to b1gMail 7.4.1, if you don't have access to b1gMail 7.4.0. If you use b1gMail 6.x, first upgrade to b1gMail 7.0-7.2 and then to 7.4.1.
+
 ### Basic guidelines for commits
 * Adhere to the b1gMail coding style
 * If your commit requires database structure changes, include the updated database
