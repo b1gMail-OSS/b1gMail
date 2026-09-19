@@ -180,13 +180,28 @@ fieldset.collapsed .content {
 /**
  * Dashboard
  */
+/*
+ * The layout is built by dragcontainer.js as a stack of <div class="dragTable">
+ * with N <div class="dragTableColumn"> children. Since those are block-level
+ * divs (the legacy <table>/<tr>/<td> markup was replaced), we need an explicit
+ * flex layout here — otherwise all columns collapse into a single vertical
+ * stack (bug seen in ACP → widget-layouts).
+ */
 .dragTable {
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
 }
 .dragTableColumn {
-    vertical-align: top;
+    flex: 1 1 250px;
+    min-width: 0;
     padding: 10px;
     border-left: 1px solid #efefef;
+}
+.dragTableColumn:first-child {
+    border-left: 0;
 }
 .dragItem {
     border-spacing: 0px;
