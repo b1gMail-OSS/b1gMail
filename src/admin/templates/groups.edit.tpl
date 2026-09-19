@@ -460,6 +460,77 @@
 			</fieldset>
 
 			<fieldset>
+				<legend>{lng p="collaboration"}</legend>
+
+				<div class="row">
+					<div class="col-md-6">
+						<div class="row">
+							<label class="col-sm-6 col-form-check-label">{lng p="share_calendar"}</label>
+							<div class="col-sm-6">
+								<label class="form-check">
+									<input class="form-check-input" type="checkbox" name="share_calendar"{if !isset($group.share_calendar) || $group.share_calendar!='no'} checked="checked"{/if}>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="row">
+							<label class="col-sm-6 col-form-check-label">{lng p="share_addr"}</label>
+							<div class="col-sm-6">
+								<label class="form-check">
+									<input class="form-check-input" type="checkbox" name="share_addr"{if !isset($group.share_addr) || $group.share_addr!='no'} checked="checked"{/if}>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="row">
+							<label class="col-sm-6 col-form-check-label">{lng p="share_mail"}</label>
+							<div class="col-sm-6">
+								<label class="form-check">
+									<input class="form-check-input" type="checkbox" name="share_mail"{if !isset($group.share_mail) || $group.share_mail!='no'} checked="checked"{/if}>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="row">
+							<label class="col-sm-6 col-form-check-label">{lng p="share_todo"}</label>
+							<div class="col-sm-6">
+								<label class="form-check">
+									<input class="form-check-input" type="checkbox" name="share_todo"{if !isset($group.share_todo) || $group.share_todo!='no'} checked="checked"{/if}>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="row">
+							<label class="col-sm-6 col-form-check-label">{lng p="share_notes"}</label>
+							<div class="col-sm-6">
+								<label class="form-check">
+									<input class="form-check-input" type="checkbox" name="share_notes"{if !isset($group.share_notes) || $group.share_notes!='no'} checked="checked"{/if}>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="row">
+							<label class="col-sm-6 col-form-check-label">{lng p="share_webdisk"}</label>
+							<div class="col-sm-6">
+								<label class="form-check">
+									<input class="form-check-input" type="checkbox" name="share_webdisk"{if !isset($group.share_webdisk) || $group.share_webdisk!='no'} checked="checked"{/if}>
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset>
 				<legend>{lng p="bmtoolbox"}</legend>
 
 				<div class="row">

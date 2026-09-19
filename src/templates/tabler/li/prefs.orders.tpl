@@ -37,7 +37,7 @@
 			{if $order.status==0}
 			<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 				<a href="{sessionurl file='prefs.php' params="action=orders&do=initiatePayment&id={$order.orderid}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="pay"}" aria-label="{lng p="pay"}"><i class="ti ti-credit-card icon" aria-hidden="true"></i></a>
-				<a href="{sessionurl file='prefs.php' params="action=orders&do=deleteOrder&id={$order.orderid}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}" onclick="return(confirm('{lng p="realdel_order"}'));"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a href="{sessionurl file='prefs.php' params="action=orders&do=deleteOrder&id={$order.orderid}&csrf_token={$csrfToken}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}" onclick="return(confirm('{lng p="realdel_order"}'));"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 			{else}
 			<i class="ti ti-circle-check icon text-success" aria-hidden="true" title="{lng p="completed"}"></i>

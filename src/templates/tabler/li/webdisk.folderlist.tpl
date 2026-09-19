@@ -1,14 +1,47 @@
+{if !isset($ownFolderList)}{assign var="ownFolderList" value=$folderList}{/if}
 var webdisk_d = new dTree('webdisk_d');
-{foreach from=$folderList item=folder}
-{if $folder.parent == -1}
-{assign var=wdIcon value="ti-cloud"}
-{assign var=wdIconOpen value="ti-cloud"}
-{elseif $folder.icon == 'folder_shared'}
-{assign var=wdIcon value="ti-folder-share"}
-{assign var=wdIconOpen value="ti-folder-share"}
-{else}
-{assign var=wdIcon value="ti-folder"}
-{assign var=wdIconOpen value="ti-folder-open"}
-{/if}
-webdisk_d.add({$folder.i}, {$folder.parent}, '<span class="bm-folder-label">{text value=$folder.text escape=true noentities=true}</span>', 'javascript:switchWebdiskFolder({$folder.id});', '{text value=$folder.text escape=true noentities=true}', '', 'ti {$wdIcon}', 'ti {$wdIconOpen}');
+var webdiskFolderShareActions = {};
+var webdiskFolderRowActions = {};
+var webdiskFolderTrees = [];
+{include file="li/webdisk.foldertree.nodes.tpl" treeName="webdisk_d" folders=$ownFolderList}
+webdiskFolderTrees.push(webdisk_d);
+{if isset($sharedFolderMenus)}
+{foreach from=$sharedFolderMenus key=ownerId item=group}
+{capture assign="shareTreeName"}webdisk_dshare{$ownerId}{/capture}
+var {$shareTreeName} = new dTree('{$shareTreeName}');
+{include file="li/webdisk.foldertree.nodes.tpl" treeName=$shareTreeName folders=$group.folders}
+webdiskFolderTrees.push({$shareTreeName});
 {/foreach}
+{/if}
+webdiskRenamePromptTitle = '{lng p="rename"|escape:'javascript'}';
+webdiskDeleteConfirmMessage = '{lng p="realdel"|escape:'javascript'}';
+webdiskEditTitle = '{lng p="edit"|escape:'javascript'}';
+webdiskDeleteTitle = '{lng p="delete"|escape:'javascript'}';
+
+function bmInitWebdiskFolderTree(tree)
+{
+	if(!tree || !tree.config)
+		return;
+	tree.config.useLines = false;
+	tree.config.useSelection = true;
+	tree.icon.nlPlus = 'ti ti-chevron-right';
+	tree.icon.nlMinus = 'ti ti-chevron-down';
+	tree.icon.plus = 'ti ti-chevron-right';
+	tree.icon.minus = 'ti ti-chevron-down';
+	tree.icon.plusBottom = 'ti ti-chevron-right';
+	tree.icon.minusBottom = 'ti ti-chevron-down';
+}
+function bmWebdiskFolderTreesHtml()
+{
+	bmInitWebdiskFolderTree(webdisk_d);
+	var html = '' + webdisk_d;
+{if isset($sharedFolderMenus)}
+{foreach from=$sharedFolderMenus key=ownerId item=group}
+{capture assign="shareTreeName"}webdisk_dshare{$ownerId}{/capture}
+	bmInitWebdiskFolderTree({$shareTreeName});
+	html += '<div class="sidebarHeading bm-mailbox-heading" title="{text value=$group.email escape=true}">{text value=$group.email escape=true}</div>';
+	html += '' + {$shareTreeName};
+{/foreach}
+{/if}
+	return html;
+}

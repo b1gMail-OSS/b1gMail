@@ -3,6 +3,16 @@
 		<i class="fa fa-calendar-o" aria-hidden="true"></i>
 		{lng p="groups"}
 	</div>
+	{if $calendarCount>1}
+	<div class="right">
+		<small>{lng p="calendar"}:</small>
+		<select class="smallInput" onchange="document.location.href=bmAppendSession('organizer.calendar.php?action=groups&calendar='+this.value);">
+		{foreach from=$calendars key=calID item=cal}
+			<option value="{$calID}"{if $currentCalendarID==$calID} selected="selected"{/if}>{text value=$cal.title cut=25}</option>
+		{/foreach}
+		</select>
+	</div>
+	{/if}
 </div>
 
 <form name="f1" method="post" action="{sessionurl file='organizer.calendar.php' params='action=groups&do=action'}">
@@ -34,7 +44,7 @@
 		<td class="{if $sortColumn=='color'}listTableTDActive{else}{$class}{/if}"><div class="calendarDate_{$group.color}" style="padding:0px;margin:0px;margin-left:5px;width:12px;height:12px;"></div></td>
 		<td class="{$class}" nowrap="nowrap">
 			<a href="{sessionurl file='organizer.calendar.php' params="action=groups&do=edit&id={$groupID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.calendar.php' params="action=groups&do=delete&id={$groupID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.calendar.php' params="action=groups&do=delete&id={$groupID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/if}

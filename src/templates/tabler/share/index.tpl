@@ -9,13 +9,13 @@
 	<meta name="robots" content="noindex" />
 	<title>{$standalonePageTitle}</title>
 
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
-	<link rel="icon" href="{$selfurl}favicon.ico" type="image/x-icon" />
+	{include file="nli/favicon.tpl"}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/tabler-custom.css?{fileDateSig file="style/tabler-custom.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/share.css?{fileDateSig file="style/share.css"}" />
+	{include file="nli/theme-brand.tpl"}
 
 	<script src="{$selfurl}clientlang.php"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>
@@ -36,9 +36,13 @@
 
 			<div class="text-center mb-4">
 				<a href="{$selfurl}" class="bm-share-brand text-reset text-decoration-none">
+					{if !empty($avatarImage)}
+					<span class="avatar avatar-lg mb-3 bm-share-user-avatar" style="background-image: url('{$avatarImage}')" role="img" aria-label="{if $userMail}{$userMail|escape}{else}{lng p="sharing"}{/if}"></span>
+					{else}
 					<span class="avatar avatar-lg bg-primary-lt text-primary mb-3">
 						<i class="ti ti-share icon icon-lg" aria-hidden="true"></i>
 					</span>
+					{/if}
 					<div class="h2 mb-1">{$service_title}</div>
 					<div class="fs-4 text-secondary">{lng p="sharing"}{if $userMail} &middot; {$userMail|escape}{/if}</div>
 				</a>
@@ -81,7 +85,7 @@
 		{/if}
 
 			<div class="text-center text-secondary mt-4 small">
-				{if isset($year)}&copy; {$year} {/if}{$service_title}
+				{include file="nli/copyright.tpl"}
 			</div>
 		</div>
 	</div>

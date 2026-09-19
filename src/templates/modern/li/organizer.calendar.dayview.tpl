@@ -4,6 +4,10 @@
 		{lng p="calendar"}: {$weekDay}, {date timestamp=$date dayonly=true} ({lng p="cw"} {$calWeek})
 	</div>
 	<div class="right">
+		<button type="button" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=calendars'}';">
+			<i class="fa fa-calendar" aria-hidden="true"></i>
+			{lng p="calendars"}
+		</button>
 		<button type="button" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 			<i class="fa fa-calendar-o" aria-hidden="true"></i>
 			{lng p="editgroups"}
@@ -21,7 +25,7 @@
 			<td class="calendarWholeDayCell">
 				{foreach from=$dates item=date}
 				{if $date.flags&1}
-					<div class="calendarDate_{$groups[$date.group].color}" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate})">
+					<div class="calendarDate_{$date.displayColor}" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate})">
 						{text value=$date.title}
 					</div>
 				{/if}

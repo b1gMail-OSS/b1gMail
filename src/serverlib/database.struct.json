@@ -339,6 +339,74 @@
 			]
 		}
 	},
+	"bm60_addressbooks": {
+		"fields": [
+			[
+				"id",
+				"int(11)",
+				"NO",
+				"PRI",
+				null,
+				"auto_increment"
+			],
+			[
+				"user",
+				"int(11)",
+				"NO",
+				"MUL",
+				null,
+				""
+			],
+			[
+				"title",
+				"varchar(255)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"color",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"is_default",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"dav_uri",
+				"varchar(128)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"dav_uid",
+				"varchar(128)",
+				"NO",
+				"",
+				null,
+				""
+			]
+		],
+		"indexes": {
+			"PRIMARY": [
+				"id"
+			],
+			"user": [
+				"user"
+			]
+		}
+	},
 	"bm60_adressen": {
 		"fields": [
 			[
@@ -596,6 +664,14 @@
 				"",
 				null,
 				""
+			],
+			[
+				"addressbook_id",
+				"int(11)",
+				"NO",
+				"MUL",
+				"0",
+				""
 			]
 		],
 		"indexes": {
@@ -608,6 +684,9 @@
 			"email_2": [
 				"email",
 				"user"
+			],
+			"addressbook_id": [
+				"addressbook_id"
 			]
 		}
 	},
@@ -652,11 +731,22 @@
 				"",
 				null,
 				""
+			],
+			[
+				"addressbook_id",
+				"int(11)",
+				"NO",
+				"MUL",
+				"0",
+				""
 			]
 		],
 		"indexes": {
 			"PRIMARY": [
 				"id"
+			],
+			"addressbook_id": [
+				"addressbook_id"
 			]
 		}
 	},
@@ -1307,6 +1397,90 @@
 			]
 		}
 	},
+	"bm60_calendars": {
+		"fields": [
+			[
+				"id",
+				"int(11)",
+				"NO",
+				"PRI",
+				null,
+				"auto_increment"
+			],
+			[
+				"user",
+				"int(11)",
+				"NO",
+				"MUL",
+				null,
+				""
+			],
+			[
+				"title",
+				"varchar(255)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"color",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"is_default",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"dav_uri",
+				"varchar(128)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"dav_uid",
+				"varchar(128)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"notify_email",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"notify_push",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			]
+		],
+		"indexes": {
+			"PRIMARY": [
+				"id"
+			],
+			"user": [
+				"user"
+			]
+		}
+	},
 	"bm60_dates": {
 		"fields": [
 			[
@@ -1452,6 +1626,14 @@
 				"",
 				null,
 				""
+			],
+			[
+				"calendar_id",
+				"int(11)",
+				"NO",
+				"MUL",
+				"0",
+				""
 			]
 		],
 		"indexes": {
@@ -1460,6 +1642,9 @@
 			],
 			"user": [
 				"user"
+			],
+			"calendar_id": [
+				"calendar_id"
 			]
 		}
 	},
@@ -1546,11 +1731,22 @@
 				"",
 				null,
 				""
+			],
+			[
+				"calendar_id",
+				"int(11)",
+				"NO",
+				"MUL",
+				"0",
+				""
 			]
 		],
 		"indexes": {
 			"PRIMARY": [
 				"id"
+			],
+			"calendar_id": [
+				"calendar_id"
 			]
 		}
 	},
@@ -3217,6 +3413,114 @@
 			]
 		}
 	},
+	"bm60_app_passwords": {
+		"fields": [
+			[
+				"id",
+				"int(11)",
+				"NO",
+				"PRI",
+				null,
+				"auto_increment"
+			],
+			[
+				"user",
+				"int(11)",
+				"NO",
+				"MUL",
+				null,
+				""
+			],
+			[
+				"label",
+				"varchar(128)",
+				"NO",
+				"",
+				"",
+				""
+			],
+			[
+				"client_hint",
+				"varchar(64)",
+				"NO",
+				"",
+				"",
+				""
+			],
+			[
+				"password_hash",
+				"varchar(255)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"scope",
+				"set('caldav','carddav','webdav','imap','pop3','smtp')",
+				"NO",
+				"",
+				"caldav,carddav,webdav",
+				""
+			],
+			[
+				"created",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"expires",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"last_used",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"last_ip",
+				"varchar(64)",
+				"NO",
+				"",
+				"",
+				""
+			],
+			[
+				"last_scope",
+				"varchar(16)",
+				"NO",
+				"",
+				"",
+				""
+			],
+			[
+				"revoked_at",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			]
+		],
+		"indexes": {
+			"PRIMARY": [
+				"id"
+			],
+			"user": [
+				"user"
+			]
+		}
+	},
 	"bm60_mfa_accounts": {
 		"fields": [
 			[
@@ -3639,6 +3943,98 @@
 		"indexes": {
 			"PRIMARY": [
 				"id"
+			]
+		}
+	},
+	"bm60_organizer_shares": {
+		"fields": [
+			[
+				"id",
+				"int(11)",
+				"NO",
+				"PRI",
+				null,
+				"auto_increment"
+			],
+			[
+				"type",
+				"varchar(16)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"collection_id",
+				"int(11)",
+				"NO",
+				"",
+				null,
+				""
+			],
+			[
+				"owner_id",
+				"int(11)",
+				"NO",
+				"MUL",
+				null,
+				""
+			],
+			[
+				"target_id",
+				"int(11)",
+				"NO",
+				"MUL",
+				null,
+				""
+			],
+			[
+				"access",
+				"varchar(8)",
+				"NO",
+				"",
+				"read",
+				""
+			],
+			[
+				"created",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"notify_email",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"notify_push",
+				"tinyint(4)",
+				"NO",
+				"",
+				"0",
+				""
+			]
+		],
+		"indexes": {
+			"PRIMARY": [
+				"id"
+			],
+			"share_unique": [
+				"type",
+				"collection_id",
+				"target_id"
+			],
+			"target_id": [
+				"target_id"
+			],
+			"owner_id": [
+				"owner_id"
 			]
 		}
 	},
@@ -6007,6 +6403,62 @@
 			],
 			[
 				"clientapi_enable",
+				"enum('yes','no')",
+				"NO",
+				"",
+				"no",
+				""
+			],
+			[
+				"app_password_enable",
+				"enum('yes','no')",
+				"NO",
+				"",
+				"yes",
+				""
+			],
+			[
+				"app_password_dav_mode",
+				"enum('off','warn','enforce','strict')",
+				"NO",
+				"",
+				"warn",
+				""
+			],
+			[
+				"app_password_mail_enable",
+				"enum('yes','no')",
+				"NO",
+				"",
+				"no",
+				""
+			],
+			[
+				"app_password_mail_mode",
+				"enum('off','warn','enforce','strict')",
+				"NO",
+				"",
+				"off",
+				""
+			],
+			[
+				"app_password_expiry_days",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"app_password_max_per_user",
+				"int(11)",
+				"NO",
+				"",
+				"20",
+				""
+			],
+			[
+				"dav_require_https",
 				"enum('yes','no')",
 				"NO",
 				"",

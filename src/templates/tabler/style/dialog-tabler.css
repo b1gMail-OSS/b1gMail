@@ -1320,3 +1320,174 @@ BODY.bm-dialog-body.bm-dialog-statement {
 		flex-wrap: nowrap;
 	}
 }
+
+html:has(BODY.bm-dialog-organizer-collection) {
+	height: auto;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection {
+	height: auto;
+	min-height: 0;
+	overflow: hidden;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection form.bm-organizer-collection-form {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .modal-body {
+	padding: 1.25rem 1.25rem 0.75rem;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .modal-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	padding: 0.75rem 1.25rem;
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface, #fff);
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .bm-organizer-color-picks {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .bm-organizer-color-pick {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	margin: 0;
+	padding: 0;
+	border: 2px solid transparent;
+	border-radius: 0.375rem;
+	cursor: pointer;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .bm-organizer-color-pick:has(input:checked) {
+	border-color: var(--tblr-body-color, #1f2937);
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .bm-organizer-color-pick input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .bm-organizer-color-pick span {
+	display: block;
+	width: 1.15rem;
+	height: 1.15rem;
+	border-radius: 0.2rem;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-collection .bm-organizer-collection-name {
+	font-weight: 600;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .modal-body {
+	padding-bottom: 0.85rem;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-wrap {
+	display: block;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share form.bm-organizer-collection-form + form.bm-organizer-collection-form {
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-table-wrap {
+	overflow: hidden;
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-hint {
+	margin: 0 auto 0 0;
+	padding: 0;
+	flex: 1 1 12rem;
+	font-size: 0.75rem;
+	line-height: 1.35;
+	color: var(--tblr-secondary, #6c7a91);
+	text-align: left;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-table {
+	--tblr-table-bg: transparent;
+	width: 100%;
+	table-layout: fixed;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-table th,
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-table td {
+	padding: 0.4rem 0.35rem;
+	vertical-align: middle;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-col-email {
+	padding-left: 1.25rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-col-access {
+	width: 9.75rem;
+	white-space: nowrap;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-col-flag {
+	width: 3.35rem;
+	padding-left: 0.15rem;
+	padding-right: 0.15rem;
+	text-align: center;
+	white-space: nowrap;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-col-action {
+	width: 2.5rem;
+	padding-right: 0.85rem;
+	text-align: right;
+	white-space: nowrap;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-invite-row .form-control,
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-invite-row .form-select {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-invite-row td {
+	overflow: hidden;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-check {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	min-height: 0;
+}
+
+BODY.bm-dialog-body.bm-dialog-organizer-share .bm-organizer-share-check .form-check-input {
+	float: none;
+	margin: 0;
+	position: static;
+}

@@ -8,6 +8,10 @@
 			{date timestamp=$weekEndDate dayonly=true}
 		</div>
 		<div class="right">
+			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=calendars'}';">
+				<i class="ti ti-calendar icon icon-sm me-1" aria-hidden="true"></i>
+				{lng p="calendars"}
+			</button>
 			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 				<i class="ti ti-users-group icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="editgroups"}
@@ -34,7 +38,7 @@
 				<td class="calendarWholeDayCell bm-organizer-week-allday" style="border-right:1px solid var(--tblr-border-color, #B3B8BD);">
 					{foreach from=$dayDates item=date}
 					{if $date.flags&1}
-						<div style="overflow:hidden;text-overflow:ellipsis;" class="calendarDate_{$groups[$date.group].color} bm-organizer-calendar-event" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate})">
+						<div style="overflow:hidden;text-overflow:ellipsis;" class="calendarDate_{$date.displayColor} bm-organizer-calendar-event" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate})">
 							{text value=$date.title}
 						</div>
 					{/if}
@@ -74,7 +78,8 @@
 		<!--
 			var calendarDayStart = {$dayStart},
 				calendarDayEnd = {$dayEnd},
-				calendarDates = [];
+				calendarDates = [],
+				calendarWeekDays = [{foreach from=$weekDayTimestamps item=ts name=wdt}{$ts}{if !$smarty.foreach.wdt.last},{/if}{/foreach}];
 
 			{assign var=d value=0}
 			{foreach from=$dates item=dayDates}
@@ -85,7 +90,7 @@
 				{$date.startdate},
 				{$date.enddate},
 				"{text escape=true noentities=true value=$date.title}",
-				{$groups[$date.group].color},
+				{$date.displayColor},
 				{$d}
 			]);
 			{/if}
@@ -95,6 +100,7 @@
 
 			registerLoadAction('calendarDaySizer()');
 			registerLoadAction('initCalendar()');
+			registerLoadAction('initCalendarRangeSelection()');
 		//-->
 		</script>
 	</div>

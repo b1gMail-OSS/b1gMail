@@ -927,14 +927,30 @@ function CsrfRehydrateFromCookie()
 }
 
 /**
+ * Extract the CSRF token from the request.
+ *
+ * Sources are tried in order of preference (highest first):
+ *   1. Custom header X-CSRF-Token (typically set by fetch/XHR wrappers).
+ *   2. POST body field `csrf_token` (the classic {csrffield} in forms).
+ *   3. GET / URL query parameter `csrf_token` (needed for classic <a href>
+ *      links to state-changing endpoints such as delete/rename/share-stop
+ *      that cannot be turned into a POST form without deep UI refactor).
+ *
+ * When multiple sources are present the highest-preference one wins.
+ * That means server-side we don't care whether the client attached the
+ * token via a header, a hidden POST field, or a query parameter — all
+ * three pathways funnel through here.
+ *
  * @return string
  */
 function CsrfRequestToken()
 {
-	if(isset($_POST['csrf_token']))
-		return (string)$_POST['csrf_token'];
 	if(isset($_SERVER['HTTP_X_CSRF_TOKEN']))
 		return (string)$_SERVER['HTTP_X_CSRF_TOKEN'];
+	if(isset($_POST['csrf_token']))
+		return (string)$_POST['csrf_token'];
+	if(isset($_GET['csrf_token']))
+		return (string)$_GET['csrf_token'];
 	return '';
 }
 
@@ -1071,6 +1087,68 @@ function CsrfErrorHtmlResponse($admin = null)
 function CsrfEnforceOnPost()
 {
 	if(CsrfValidateRequest())
+		return;
+
+	$lang = CsrfErrorLang();
+
+	if(SessionIsApiRequest())
+	{
+		SessionJsonResponse(array(
+			'ok'        => false,
+			'csrfError' => true,
+			'title'     => $lang['title'],
+			'text'      => $lang['text'],
+			'reload'    => $lang['reload'],
+			'error'     => $lang['error'],
+		), 403);
+	}
+
+	CsrfErrorHtmlResponse();
+}
+
+/**
+ * Enforce CSRF protection on a state-changing request regardless of
+ * HTTP method. Use this at the top of `delete`, `rename`, `stopShare`
+ * etc. endpoints that are historically triggered from classic
+ * <a href="...">/document.location.href/XMLHttpRequest GET calls.
+ *
+ * Contract for callers:
+ *   - Do NOT rely on `IsPOSTRequest()` at the same time; this helper
+ *     is orthogonal to method and accepts POST-body, X-CSRF-Token
+ *     header, or ?csrf_token=... query parameter alike.
+ *   - If the request is exempt (cron.php, clientlang.php etc.), the
+ *     helper is a no-op — the same CsrfIsExemptRequest() logic that
+ *     CsrfEnforceOnPost() uses is applied here.
+ *   - On failure this function terminates with a 403 HTML page or
+ *     JSON body (for API requests) — identical UX to
+ *     CsrfEnforceOnPost().
+ *
+ * The client side must attach the token. Three supported patterns:
+ *   - Forms:  include {csrffield} inside <form method="post">.
+ *   - XHR:    MakeXMLRequest() in the shipped JS auto-appends
+ *             &csrf_token=<current> and sets X-CSRF-Token; direct
+ *             fetch() callers should read window.bmCsrfToken.
+ *   - Links:  add &csrf_token={$csrfToken} to any <a href="..."> that
+ *             leads to a state-changing endpoint.
+ */
+function CsrfEnforceOnStateChange()
+{
+	// Non-POST endpoints (delete/rename/etc. reached via GET) are the
+	// whole reason this helper exists — never rely on the POST-only
+	// exemption inside CsrfIsExemptRequest() here.
+	$script = isset($_SERVER['SCRIPT_NAME']) ? basename($_SERVER['SCRIPT_NAME']) : '';
+	if(in_array($script, array('cron.php', 'clientlang.php'), true))
+		return;
+
+	$token = CsrfRequestToken();
+	if($token !== ''
+		&& session_status() === PHP_SESSION_ACTIVE
+		&& !empty($_SESSION['bm_csrfToken'])
+		&& hash_equals((string)$_SESSION['bm_csrfToken'], $token))
+		return;
+	if($token !== ''
+		&& isset($_COOKIE['bm_csrf'])
+		&& hash_equals((string)$_COOKIE['bm_csrf'], $token))
 		return;
 
 	$lang = CsrfErrorLang();

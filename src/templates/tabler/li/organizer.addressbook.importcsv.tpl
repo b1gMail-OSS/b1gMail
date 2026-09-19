@@ -11,6 +11,7 @@
 	{csrffield}
 <input type="hidden" name="encoding" value="{if isset($encoding)}{text value=$encoding allowEmpty=true}{/if}" />
 <input type="hidden" name="tempID" value="{$tempID}" />
+<input type="hidden" name="importBook" value="{$importBookID}" />
 	<table class="listTable">
 		<tr>
 			<th class="listTableHead" colspan="2"> {lng p="import"}</th>
@@ -38,6 +39,14 @@
 					</tr>
 					{/foreach}
 				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft">{lng p="addressbook"}:</td>
+			<td class="listTableRight">
+				{foreach from=$addressbooks key=bookID item=abook}
+					{if $bookID==$importBookID}{text value=$abook.title}{/if}
+				{/foreach}
 			</td>
 		</tr>
 		<tr>

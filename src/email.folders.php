@@ -64,6 +64,12 @@ if($_REQUEST['action'] == 'folders')
 	$sysFolderList = $mailbox->GetSysFolderList();
 	$theFolderList = $mailbox->GetUserFolderList($sortColumn, $sortOrder, true, true);
 	$sharedFolderList = $mailbox->GetSharedFolderList($sortColumn, $sortOrder, true, true);
+	$sharedFolderGroups = array();
+	foreach($sharedFolderList as $folderID=>$folder)
+	{
+		$ownerEmail = !empty($folder['owner_email']) ? DecodeEMail($folder['owner_email']) : $lang_user['sharedfolders'];
+		$sharedFolderGroups[$ownerEmail][$folderID] = $folder;
+	}
 
 	// page output
 	$tpl->assign('pageTitle', $lang_user['folderadmin']);
@@ -73,6 +79,12 @@ if($_REQUEST['action'] == 'folders')
 	$tpl->assign('sortOrder', $sortOrderFA);
 	$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 	$tpl->assign('sharedFolderList', $sharedFolderList);
+	$tpl->assign('sharedFolderGroups', $sharedFolderGroups);
+	$tpl->assign('folderFavoriteMap', array_flip($mailbox->GetFolderFavoriteIDs()));
+	// F4: expose the sharing capability so the folder-admin template can
+	// render the "share full mailbox" button. Same gate as the shareMailbox
+	// action itself uses (see below).
+	$tpl->assign('canShareMailbox', bmOrganizerGroupCanShare('mail'));
 	$tpl->assign('pageContent', 'li/email.folders.tpl');
 	$tpl->display('li/index.tpl');
 }
@@ -83,6 +95,8 @@ if($_REQUEST['action'] == 'folders')
 else if($_REQUEST['action'] == 'action'
 		&& isset($_REQUEST['do']))
 {
+	// F2: bulk-delete requires CSRF token.
+	CsrfEnforceOnStateChange();
 	foreach($_POST as $key=>$val)
 	{
 		if(substr($key, 0, 7) == 'folder_')
@@ -278,12 +292,184 @@ else if($_REQUEST['action'] == 'createFolder'
 }
 
 /**
- * delete folder
+ * delete folder — F2: CSRF-token required.
  */
 else if($_REQUEST['action'] == 'deleteFolder'
 		&& isset($_REQUEST['id']))
 {
+	CsrfEnforceOnStateChange();
 	$mailbox->DeleteFolder((int)$_REQUEST['id']);
 	SessionRedirect('email.folders.php');
+}
+
+/**
+ * toggle favorite
+ */
+else if($_REQUEST['action'] == 'toggleFavorite'
+		&& isset($_REQUEST['id']))
+{
+	$nowFavorite = $mailbox->ToggleFolderFavorite((int)$_REQUEST['id']);
+	if(isset($_REQUEST['rpc']))
+		die($nowFavorite ? '1' : '0');
+	SessionRedirect('email.folders.php');
+}
+
+/**
+ * share folder
+ */
+else if($_REQUEST['action'] == 'share' && isset($_REQUEST['id']))
+{
+	if(!bmOrganizerGroupCanShare('mail'))
+	{
+		SessionRedirect('email.folders.php');
+		exit();
+	}
+	$folderID = (int)$_REQUEST['id'];
+	$shareType = BM_ORGANIZER_SHARE_MAIL;
+	$collectionId = $folderID;
+
+	if($mailbox->IsSystemFolder($folderID))
+	{
+		$folder = $mailbox->GetSystemFolderShareItem($folderID);
+		if($folder === false)
+		{
+			SessionRedirect('email.folders.php');
+			exit();
+		}
+		$shareType = BM_ORGANIZER_SHARE_MAILSYS;
+		$collectionId = $mailbox->EncodeSharedSysFolder($userRow['id'], $folderID);
+	}
+	else
+	{
+		$folder = $mailbox->GetFolder($folderID);
+		if($folder === false || (int)$folder['userid'] !== (int)$userRow['id'] || !empty($folder['intelligent']))
+		{
+			SessionRedirect('email.folders.php');
+			exit();
+		}
+		$folder['title'] = $folder['titel'];
+	}
+
+	$notifyItem = $folder;
+	$notifyItem['id'] = $collectionId;
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add' && isset($_REQUEST['email']) && IsPOSTRequest())
+	{
+		$targetId = bmOrganizerShareTargetUserId($_REQUEST['email']);
+		$access = isset($_REQUEST['access']) ? $_REQUEST['access'] : BM_ORGANIZER_ACCESS_READ;
+		$result = bmOrganizerAddShare($shareType, $collectionId, $userRow['id'], $targetId, $access);
+		if(is_string($result) && isset($lang_user[$result]))
+			$tpl->assign('shareError', $lang_user[$result]);
+		else if((int)$result > 0)
+		{
+			bmOrganizerNotifyShareInvite($shareType, $notifyItem, $userRow['id'], $targetId, $access);
+			$tpl->assign('shareSuccess', $lang_user['shareinvited']);
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'remove'
+		&& isset($_REQUEST['share'])
+		&& IsPOSTRequest())
+	{
+		// F2: revoking a folder share was GET-reachable.
+		bmOrganizerRemoveShare($shareType, (int)$_REQUEST['share'], $userRow['id']);
+	}
+
+	$tpl->assign('shareItem', $folder);
+	$tpl->assign('shareList', bmOrganizerListShares($shareType, $collectionId, $userRow['id']));
+	$tpl->assign('shareType', 'mailfolder');
+	$tpl->assign('shareAction', 'email.folders.php');
+	$tpl->display('li/organizer.share.dialog.tpl');
+	exit();
+}
+
+/**
+ * share whole mailbox
+ */
+else if($_REQUEST['action'] == 'shareMailbox')
+{
+	if(!bmOrganizerGroupCanShare('mail'))
+	{
+		SessionRedirect('email.folders.php');
+		exit();
+	}
+	$shareItem = array(
+		'id'	=> (int)$userRow['id'],
+		'title'	=> $lang_user['mailbox']
+	);
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add' && isset($_REQUEST['email']) && IsPOSTRequest())
+	{
+		$targetId = bmOrganizerShareTargetUserId($_REQUEST['email']);
+		$access = isset($_REQUEST['access']) ? $_REQUEST['access'] : BM_ORGANIZER_ACCESS_READ;
+		$result = bmOrganizerAddShare(BM_ORGANIZER_SHARE_MAILBOX, (int)$userRow['id'], $userRow['id'], $targetId, $access);
+		if(is_string($result) && isset($lang_user[$result]))
+			$tpl->assign('shareError', $lang_user[$result]);
+		else if((int)$result > 0)
+		{
+			bmOrganizerNotifyShareInvite(BM_ORGANIZER_SHARE_MAILBOX, $shareItem, $userRow['id'], $targetId, $access);
+			$tpl->assign('shareSuccess', $lang_user['shareinvited']);
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'remove'
+		&& isset($_REQUEST['share'])
+		&& IsPOSTRequest())
+	{
+		// F2: revoking a full-mailbox share was GET-reachable.
+		bmOrganizerRemoveShare(BM_ORGANIZER_SHARE_MAILBOX, (int)$_REQUEST['share'], $userRow['id']);
+	}
+
+	$tpl->assign('shareItem', $shareItem);
+	$tpl->assign('shareList', bmOrganizerListShares(BM_ORGANIZER_SHARE_MAILBOX, (int)$userRow['id'], $userRow['id']));
+	$tpl->assign('shareType', 'mailbox');
+	$tpl->assign('shareAction', 'email.folders.php');
+	$tpl->assign('shareRequestAction', 'shareMailbox');
+	$tpl->display('li/organizer.share.dialog.tpl');
+	exit();
+}
+
+/**
+ * leave a folder shared with this user
+ */
+else if($_REQUEST['action'] == 'leaveshare' && isset($_REQUEST['id']))
+{
+	$shared = $mailbox->GetAccessibleSharedFolders();
+	$folderID = (int)$_REQUEST['id'];
+	if(!isset($shared[$folderID]) || empty($shared[$folderID]['can_leave']))
+	{
+		SessionRedirect('email.folders.php');
+		exit();
+	}
+
+	$leaveItem = $shared[$folderID];
+	$leaveItem['title'] = $leaveItem['titel'];
+	if(!empty($leaveItem['owner_email']))
+		$leaveItem['owner_email'] = DecodeEMail($leaveItem['owner_email']);
+	if(!empty($leaveItem['mailbox_share']))
+		$leaveItem['title'] = $lang_user['mailbox'];
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'leave' && IsPOSTRequest())
+	{
+		if(!empty($leaveItem['mailbox_share']))
+			bmOrganizerLeaveShare(BM_ORGANIZER_SHARE_MAILBOX, (int)$leaveItem['userid'], $userRow['id']);
+		if(!empty($leaveItem['mailsys_share']))
+			bmOrganizerLeaveShare(BM_ORGANIZER_SHARE_MAILSYS, $folderID, $userRow['id']);
+		if(empty($leaveItem['mailbox_share']) && empty($leaveItem['mailsys_share']))
+			bmOrganizerLeaveShare(BM_ORGANIZER_SHARE_MAIL, $folderID, $userRow['id']);
+		foreach($shared as $fid=>$folderRow)
+		{
+			if((int)$folderRow['userid'] === (int)$leaveItem['userid']
+				&& (empty($leaveItem['mailbox_share']) ? (int)$fid === $folderID : true))
+				$mailbox->RemoveFolderFavorite($fid);
+		}
+		if(empty($leaveItem['mailbox_share']))
+			$mailbox->RemoveFolderFavorite($folderID);
+		SessionRedirect('email.folders.php');
+		exit();
+	}
+
+	$tpl->assign('leaveItem', $leaveItem);
+	$tpl->assign('leaveAction', 'email.folders.php');
+	$tpl->display('li/organizer.share.leave.tpl');
+	exit();
 }
 ?>

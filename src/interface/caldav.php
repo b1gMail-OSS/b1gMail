@@ -40,40 +40,83 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 	{
 		global $os;
 
+		// Sabre traverses the node tree BEFORE the DAV\Auth\Plugin finishes
+		// authenticating the caller, and BMPrincipalBackend intentionally
+		// returns a placeholder principal for unauthenticated probes (so
+		// DAVACL can raise a proper 401 challenge instead of us leaking a
+		// 404). Consequence: this backend can be invoked without our
+		// BMCalDAVAuthBackend::setupState() having populated $os->calendar
+		// yet. Signal 'auth required' rather than crashing on null.
+		if(!$os->calendar || !$os->todo)
+			throw new Sabre\DAV\Exception\NotAuthenticated('Authentication required');
+
 		$result = array();
 
-		$result[] = array(
-			'id'				=> array(BMCL_TYPE_CALENDAR, 0),
-			'uri'				=> 'calendar',
-			'principaluri'		=> $os->getPrincipalURI(),
-			'{DAV:}displayname'	=> 'Calendar',
-			'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VEVENT'))
-		);
-
-		$groupList = $os->calendar->GetGroups();
-		foreach($groupList as $key=>$group)
+		foreach($os->calendar->GetCalendars() as $calendarRow)
 		{
-			if($key <= 0)
-				continue;
+			$uri = !empty($calendarRow['dav_uri'])
+				? $calendarRow['dav_uri']
+				: (!empty($calendarRow['is_default'])
+					? 'calendar'
+					: bmOrganizerUniqueCollectionDavUri($os->userRow['id'], $calendarRow['title'], 'cal', $calendarRow['id']));
+			$result[] = array(
+				'id'				=> array(BMCL_TYPE_CALENDAR, $calendarRow['id']),
+				'uri'				=> $uri,
+				'principaluri'		=> $os->getPrincipalURI(),
+				'{DAV:}displayname'	=> $calendarRow['title'],
+				'{http://apple.com/ns/ical/}calendar-color' => bmOrganizerCalendarColorHex($calendarRow['color']),
+				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VEVENT')),
+				// getctag = collection-level change signal for Thunderbird /
+				// macOS Calendar / DAVx5 / Evolution: they check this cheap
+				// property first and only fall back to a full PROPFIND
+				// depth=1 + per-item GET when it changed. Without it, clients
+				// happily use stale caches and never notice server-side
+				// additions or deletions.
+				'{http://calendarserver.org/ns/}getctag' => $os->getCollectionCtag($calendarRow['id'], BMCL_TYPE_CALENDAR)
+			);
+		}
+
+		foreach($os->calendar->GetSharedCalendars() as $calendarRow)
+		{
+			// F8: A shared calendar handed to us with share_access=READ
+			// must be advertised to the CalDAV client as read-only.
+			// Sabre's Calendar::getACL() honours the boolean flag
+			// `{http://sabredav.org/ns}read-only` and strips {DAV:}write
+			// from the ACL when set — so Thunderbird / macOS Calendar /
+			// DAVx5 see current-user-privilege-set without write and
+			// disable the "add event" UI for the collection instead of
+			// silently failing with 403 later.
+			$readOnly = (isset($calendarRow['share_access'])
+				&& $calendarRow['share_access'] !== BM_ORGANIZER_ACCESS_WRITE);
 
 			$result[] = array(
-				'id'				=> array(BMCL_TYPE_CALENDAR, $key),
-				'uri'				=> !empty($group['dav_uri']) ? $group['dav_uri'] : 'calendar-' . $key,
+				'id'				=> array(BMCL_TYPE_CALENDAR, $calendarRow['id']),
+				'uri'				=> 'shared-cal-' . $calendarRow['id'],
 				'principaluri'		=> $os->getPrincipalURI(),
-				'{DAV:}displayname'	=> $group['title'],
-				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VEVENT'))
+				'{DAV:}displayname'	=> $calendarRow['title'] . ' (' . $calendarRow['owner_email'] . ')',
+				'{http://apple.com/ns/ical/}calendar-color' => bmOrganizerCalendarColorHex($calendarRow['color']),
+				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VEVENT')),
+				'{http://sabredav.org/ns}read-only' => $readOnly,
+				'{http://calendarserver.org/ns/}getctag' => $os->getCollectionCtag($calendarRow['id'], BMCL_TYPE_CALENDAR)
 			);
 		}
 
 		$taskLists = $os->todo->GetTaskLists();
 		foreach($taskLists as $list)
 		{
+			// F8: Same treatment for shared task lists. The GetTaskLists()
+			// resultset marks shared lists with `shared` + `share_access`.
+			$readOnly = !empty($list['shared'])
+				&& (isset($list['share_access']) ? $list['share_access'] : '') !== BM_ORGANIZER_ACCESS_WRITE;
+
 			$result[] = array(
 				'id'				=> array(BMCL_TYPE_TODO, $list['tasklistid']),
 				'uri'				=> !empty($list['dav_uri']) ? $list['dav_uri'] : 'tasklist-' . $list['tasklistid'],
 				'principaluri'		=> $os->getPrincipalURI(),
 				'{DAV:}displayname'	=> $list['title'],
-				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VTODO'))
+				'{' . Sabre\CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new Sabre\CalDAV\Xml\Property\SupportedCalendarComponentSet(array('VTODO')),
+				'{http://sabredav.org/ns}read-only' => $readOnly,
+				'{http://calendarserver.org/ns/}getctag' => $os->getCollectionCtag($list['tasklistid'], BMCL_TYPE_TODO)
 			);
 		}
 
@@ -98,8 +141,12 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($type == 'VEVENT')
 		{
-			$groupID = $os->calendar->AddGroup($properties['{DAV:}displayname'], 0, $calendarUri);
-			return(array(BMCL_TYPE_CALENDAR, $groupID));
+			$color = 0;
+			$colorKey = '{http://apple.com/ns/ical/}calendar-color';
+			if(isset($properties[$colorKey]))
+				$color = bmOrganizerCalendarColorFromHex($properties[$colorKey]);
+			$calendarID = $os->calendar->AddCalendar($properties['{DAV:}displayname'], $color, $calendarUri);
+			return(array(BMCL_TYPE_CALENDAR, $calendarID));
 		}
 		else
 			throw new Sabre\DAV\Exception('Unsupported component set: ' . $type);
@@ -134,20 +181,26 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
-			if($calendarId[1] == 0)
-				throw new Sabre\DAV\Exception\Forbidden('Main calendar cannot be altered');
+			$cal = $os->calendar->GetAccessibleCalendar($calendarId[1]);
+			if($cal === false)
+				throw new Sabre\DAV\Exception\NotFound();
+			if(!empty($cal['shared']))
+				throw new Sabre\DAV\Exception\Forbidden('Shared calendar cannot be altered');
 
-			$supportedProperties = array('{DAV:}displayname');
+			$supportedProperties = array('{DAV:}displayname', '{http://apple.com/ns/ical/}calendar-color');
 
-			$propPatch->handle($supportedProperties, function($mutations) use($calendarId, $os)
+			$propPatch->handle($supportedProperties, function($mutations) use($calendarId, $os, $cal)
 			{
+				$title = $cal['title_raw'];
+				$color = (int)$cal['color'];
 				foreach($mutations as $key=>$val)
 				{
 					if($key == '{DAV:}displayname')
-					{
-						$os->calendar->UpdateGroup($calendarId[1], $val);
-					}
+						$title = $val;
+					else if($key == '{http://apple.com/ns/ical/}calendar-color')
+						$color = bmOrganizerCalendarColorFromHex($val);
 				}
+				$os->calendar->UpdateCalendar($calendarId[1], $title, $color);
 
 				return(true);
 			});
@@ -169,7 +222,13 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
-			$os->todo->DeleteGroup($calendarId[1], true);
+			$cal = $os->calendar->GetAccessibleCalendar($calendarId[1]);
+			if($cal === false)
+				throw new Sabre\DAV\Exception\NotFound();
+			if(!empty($cal['shared']))
+				throw new Sabre\DAV\Exception\Forbidden('Shared calendar cannot be deleted');
+			if(!$os->calendar->DeleteCalendar($calendarId[1], true))
+				throw new Sabre\DAV\Exception\Forbidden('Default calendar cannot be deleted');
 		}
 		else
 			throw new Sabre\DAV\Exception\NotFound();
@@ -211,28 +270,15 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
-			if($calendarId[1] > 0)
-				$group = $calendarId[1];
-			else
-				$group = -1;
+			$cal = $os->calendar->GetAccessibleCalendar($calendarId[1]);
+			if($cal === false)
+				throw new Sabre\DAV\Exception\NotFound();
 
-			$res = $db->Query('SELECT * FROM {pre}dates WHERE `user`=? AND `group`=?',
-				$os->userRow['id'],
-				$group);
+			$res = $db->Query('SELECT * FROM {pre}dates WHERE `user`=? AND `calendar_id`=?',
+				$cal['user'],
+				$calendarId[1]);
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
-			{
-				$data = $this->rowToVEvent($row)->serialize();
-
-				$result[] = array(
-					'id'			=> array(BMCL_TYPE_CALENDAR, $row['id']),
-					'uri'			=> !empty($row['dav_uri']) ? $row['dav_uri'] : 'item-' . $row['id'],
-					'lastmodified'	=> $os->getLastModified($row['id'], BMCL_TYPE_CALENDAR),
-					'calendardata'	=> $data,
-					'size'			=> strlen($data),
-					'calendarid'	=> $calendarId,
-					'component'		=> 'vevent'
-				);
-			}
+				$result[] = $this->eventRowToCalendarObject($row, $calendarId);
 			$res->Free();
 		}
 		else
@@ -253,12 +299,14 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 			$item = $os->todo->GetTask($this->taskURItoID($objectUri));
 			if(!$item)
 				return(null);
+			// Make DTSTAMP/LAST-MODIFIED deterministic — see rowToVTodo().
+			$item['lastmodified'] = $os->getLastModified($item['id'], BMCL_TYPE_TODO);
 			$data = $this->rowToVTodo($item)->serialize();
 
 			return(array(
 				'id'			=> array(BMCL_TYPE_TODO, $item['id']),
 				'uri'			=> !empty($item['dav_uri']) ? $item['dav_uri'] : 'item-' . $item['id'],
-				'lastmodified'	=> $os->getLastModified($item['id'], BMCL_TYPE_TODO),
+				'lastmodified'	=> $item['lastmodified'],
 				'calendardata'	=> $data,
 				'size'			=> strlen($data),
 				'calendarid'	=> $calendarId,
@@ -267,20 +315,15 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
-			$item = $os->calendar->GetDate($this->eventURItoID($objectUri));
+			$dateID = $this->eventURItoID($objectUri, $calendarId);
+			if($dateID === false)
+				return(null);
+			$item = $os->calendar->GetDate($dateID);
 			if(!$item)
 				return(null);
-			$data = $this->rowToVEvent($item)->serialize();
-
-			return(array(
-				'id'			=> array(BMCL_TYPE_CALENDAR, $item['id']),
-				'uri'			=> !empty($item['dav_uri']) ? $item['dav_uri'] : 'item-' . $item['id'],
-				'lastmodified'	=> $os->getLastModified($item['id'], BMCL_TYPE_CALENDAR),
-				'calendardata'	=> $data,
-				'size'			=> strlen($data),
-				'calendarid'	=> $calendarId,
-				'component'		=> 'vevent'
-			));
+			if((int)$item['calendar_id'] !== (int)$calendarId[1])
+				return(null);
+			return $this->eventRowToCalendarObject($item, $calendarId);
 		}
 		else
 			throw new Sabre\DAV\Exception\NotFound();
@@ -305,9 +348,13 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
+			if(!$os->calendar->CanWriteCalendar($calendarId[1]))
+				throw new Sabre\DAV\Exception\Forbidden();
+
 			$event = $this->vEventToRow(Sabre\VObject\Reader::read($calendarData, Sabre\VObject\Reader::OPTION_FORGIVING));
 
-			$event['group'] 	= $calendarId[1] > 0 ? $calendarId[1] : -1;
+			$event['group'] 	= -1;
+			$event['calendar_id'] = $calendarId[1];
 			$event['dav_uri'] 	= $objectUri;
 
 			$os->calendar->AddDate($event, array());
@@ -339,13 +386,18 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
-			$dateID = $this->eventURItoID($objectUri);
+			if(!$os->calendar->CanWriteCalendar($calendarId[1]))
+				throw new Sabre\DAV\Exception\Forbidden();
+
+			$dateID = $this->eventURItoID($objectUri, $calendarId);
 			if($dateID === false)
 				return(null);
 
+			$existing = $os->calendar->GetDate($dateID);
 			$event = $this->vEventToRow(Sabre\VObject\Reader::read($calendarData, Sabre\VObject\Reader::OPTION_FORGIVING));
 
-			$event['group'] 	= $calendarId[1] > 0 ? $calendarId[1] : -1;
+			$event['group'] 	= ($existing !== false && isset($existing['group'])) ? $existing['group'] : -1;
+			$event['calendar_id'] = $calendarId[1];
 			$event['dav_uri'] 	= $objectUri;
 
 			$os->calendar->ChangeDate($dateID, $event, array());
@@ -375,7 +427,10 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else if($calendarId[0] == BMCL_TYPE_CALENDAR)
 		{
-			$eventID = $this->eventURItoID($objectUri);
+			if(!$os->calendar->CanWriteCalendar($calendarId[1]))
+				throw new Sabre\DAV\Exception\Forbidden();
+
+			$eventID = $this->eventURItoID($objectUri, $calendarId);
 			if($eventID === false)
 				return;
 
@@ -385,6 +440,29 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		}
 		else
 			throw new Sabre\DAV\Exception\NotFound();
+	}
+
+	private function eventRowToCalendarObject($row, $calendarId)
+	{
+		global $os;
+
+		// Ensure DTSTAMP/LAST-MODIFIED are deterministic so ETag is stable
+		// across reads (otherwise Sabre would md5 a payload with a fresh
+		// DTSTAMP=now() every time and clients like Thunderbird would
+		// see phantom "server-modified" conflicts on every sync).
+		if(!isset($row['lastmodified']))
+			$row['lastmodified'] = $os->getLastModified($row['id'], BMCL_TYPE_CALENDAR);
+		$data = $this->rowToVEvent($row)->serialize();
+
+		return array(
+			'id'			=> array(BMCL_TYPE_CALENDAR, $row['id']),
+			'uri'			=> !empty($row['dav_uri']) ? $row['dav_uri'] : 'item-' . $row['id'],
+			'lastmodified'	=> $row['lastmodified'],
+			'calendardata'	=> $data,
+			'size'			=> strlen($data),
+			'calendarid'	=> $calendarId,
+			'component'		=> 'vevent'
+		);
 	}
 
 	private function taskURItoID($taskUri)
@@ -411,16 +489,24 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 		return($taskID);
 	}
 
-	private function eventURItoID($eventUri)
+	private function eventURItoID($eventUri, $calendarId = null)
 	{
 		global $db, $os;
+
+		$ownerId = $os->userRow['id'];
+		if(is_array($calendarId) && $calendarId[0] == BMCL_TYPE_CALENDAR)
+		{
+			$cal = $os->calendar->GetAccessibleCalendar($calendarId[1]);
+			if($cal !== false)
+				$ownerId = $cal['user'];
+		}
 
 		if(substr($eventUri, 0, 5) != 'item-' && !empty($eventUri))
 		{
 			$result = false;
 
 			$res = $db->Query('SELECT `id` FROM {pre}dates WHERE `user`=? AND `dav_uri`=?',
-				$os->userRow['id'],
+				$ownerId,
 				$eventUri);
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
@@ -526,7 +612,13 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 
 		foreach($obj->VEVENT as $vEvent)
 		{
-			$row['flags']			= 0;
+			// CLNDR_REMIND_PUSH has no iCalendar/VALARM equivalent, so preserve
+			// the existing push preference across a CalDAV round-trip.
+			$preservedPush = ($baseRow !== null && !empty($baseRow['flags']))
+				? ((int)$baseRow['flags'] & CLNDR_REMIND_PUSH)
+				: 0;
+
+			$row['flags']			= $preservedPush;
 			$row['repeat_flags']	= 0;
 			$row['repeat_value']	= '';
 			$row['repeat_extra1']	= '';
@@ -698,7 +790,17 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 	{
 		global $os;
 
+		// Deterministic DTSTAMP/LAST-MODIFIED: use the item's last-modified
+		// timestamp when known, otherwise fall back to now (Sabre VObject
+		// would default to now() anyway). Stable timestamps keep the ETag
+		// stable across reads, which is required for hassle-free client
+		// sync (Thunderbird, iOS Calendar, DAVx5, ...).
+		$stamp = !empty($row['lastmodified']) ? (int)$row['lastmodified'] : time();
+		$stampDt = gmdate('Ymd\\THis\\Z', $stamp);
+
 		$event = array(
+			'DTSTAMP'			=> $stampDt,
+			'LAST-MODIFIED'		=> $stampDt,
 			'DTSTART'			=> new DateTime('@'.$os->toUTC($row['startdate'])),
 			'DTEND'				=> new DateTime('@'.$os->toUTC($row['enddate'])),
 			'SUMMARY'			=> $row['title'],
@@ -783,7 +885,7 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 
 		$obj = new Sabre\VObject\Component\VCalendar(array('PRODID' => $os->getProdID()));
 		$vEvent = $obj->add('VEVENT', $event);
-		if($row['flags'] & (CLNDR_REMIND_EMAIL|CLNDR_REMIND_SMS|CLNDR_REMIND_NOTIFY))
+		if($row['flags'] & (CLNDR_REMIND_EMAIL|CLNDR_REMIND_SMS|CLNDR_REMIND_NOTIFY|CLNDR_REMIND_PUSH))
 		{
 			if(($row['reminder'] % TIME_ONE_WEEK) == 0)
 				$trigger = sprintf('-P%dW', $row['reminder']/TIME_ONE_WEEK);
@@ -800,7 +902,9 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 			if($row['flags'] & (CLNDR_REMIND_EMAIL|CLNDR_REMIND_SMS))
 				$vEvent->add('VALARM', array('TRIGGER' => $trigger, 'ACTION' => 'EMAIL'));
 
-			if($row['flags'] & CLNDR_REMIND_NOTIFY)
+			// NOTIFY (in-app) or PUSH map to standard DISPLAY/AUDIO alarms.
+			// CLNDR_REMIND_PUSH is preserved server-side across CalDAV writes.
+			if($row['flags'] & (CLNDR_REMIND_NOTIFY|CLNDR_REMIND_PUSH))
 			{
 				$vEvent->add('VALARM', array('TRIGGER' => $trigger, 'ACTION' => 'AUDIO'));
 				$vEvent->add('VALARM', array('TRIGGER' => $trigger, 'ACTION' => 'DISPLAY'));
@@ -814,7 +918,15 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 	{
 		global $os;
 
+		// Deterministic DTSTAMP/LAST-MODIFIED — see rowToVEvent() for the
+		// rationale. Without this, tasks flap between server and client
+		// with a "modified on server" prompt on every completion toggle.
+		$stamp = !empty($row['lastmodified']) ? (int)$row['lastmodified'] : time();
+		$stampDt = gmdate('Ymd\\THis\\Z', $stamp);
+
 		$todo = array(
+			'DTSTAMP'			=> $stampDt,
+			'LAST-MODIFIED'		=> $stampDt,
 			'DTSTART'			=> new DateTime('@'.$os->toUTC($row['beginn'])),
 			'DUE'				=> new DateTime('@'.$os->toUTC($row['faellig'])),
 			'SUMMARY'			=> $row['titel'],
@@ -868,6 +980,11 @@ class BMCalDAVBackend extends Sabre\CalDAV\Backend\AbstractBackend
 
 class BMCalDAVAuthBackend extends BMAuthBackend
 {
+	protected function davScope()
+	{
+		return BMAppPassword::SCOPE_CALDAV;
+	}
+
 	function checkPermissions()
 	{
 		return($this->groupRow['organizerdav'] == 'yes');
@@ -897,7 +1014,7 @@ $nodes = array(
 );
 
 $server = new DAV\Server($nodes);
-$server->setBaseUri($_SERVER['SCRIPT_NAME']);
+$server->setBaseUri(bmDavDetermineBaseUri('caldav'));
 
 $authBackend = new BMCalDAVAuthBackend;
 $authBackend->setRealm($bm_prefs['titel'] . ' ' . $lang_user['calendar']);
@@ -905,7 +1022,18 @@ $authPlugin = new DAV\Auth\Plugin($authBackend);
 $server->addPlugin($authPlugin);
 
 $server->addPlugin(new \Sabre\CalDAV\Plugin());
-$server->addPlugin(new \Sabre\DAVACL\Plugin());
+
+// DAVACL defaults to allowUnauthenticatedAccess=true, which in turn sets
+// the Auth plugin's autoRequireLogin=false — meaning Sabre would NOT
+// send a WWW-Authenticate: Basic realm=... header on 401 responses.
+// Thunderbird (and every other conforming HTTP client) refuses to retry
+// with credentials when that header is missing, so CalDAV sync would
+// silently break.  We only support authenticated DAV access, so force
+// the Auth plugin to challenge on every 401.
+$aclPlugin = new \Sabre\DAVACL\Plugin();
+$aclPlugin->allowUnauthenticatedAccess = false;
+$server->addPlugin($aclPlugin);
+
 $server->addPlugin(new \Sabre\DAV\Sync\Plugin());
 
 $server->exec();

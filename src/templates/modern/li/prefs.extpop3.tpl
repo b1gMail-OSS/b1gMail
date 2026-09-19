@@ -46,7 +46,7 @@
 			({if $account.last_success==0}{lng p="error"}{elseif $account.last_success==1}{lng p="success"}{else}{lng p="fetching"}{/if}){/if}</td>
 		<td class="{$class}" nowrap="nowrap">
 			<a href="{sessionurl file='prefs.php' params="action=extpop3&do=edit&id={$accountID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=extpop3&do=delete&id={$accountID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=extpop3&do=delete&id={$accountID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}

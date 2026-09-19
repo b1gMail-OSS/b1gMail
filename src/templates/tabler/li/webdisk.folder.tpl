@@ -1,19 +1,21 @@
-<div class="bm-webdisk-page">
+<div class="bm-webdisk-page" data-readonly="{if $webdiskReadonly|default:false}1{else}0{/if}">
 	<div id="contentHeader" class="contentHeader bm-organizer-header bm-webdisk-header">
 		<div class="left">
 			<i class="ti ti-cloud icon icon-sm" aria-hidden="true"></i>
 			{if $currentPath}
-			<a href="#" onclick="switchWebdiskFolder(0); return false;" class="bm-webdisk-breadcrumb-root">{lng p="webdisk"}</a>{foreach from=$currentPath key=pathKey item=folder name=pathLoop} <span class="bm-webdisk-breadcrumb-sep" aria-hidden="true">&raquo;</span> {if $smarty.foreach.pathLoop.last}<span class="bm-webdisk-breadcrumb-current">{text value=$folder.title}</span>{else}<a href="#" onclick="switchWebdiskFolder({$folder.id}); return false;" class="bm-webdisk-breadcrumb-link">{text value=$folder.title}</a>{/if}{/foreach}
+			<a href="#" onclick="switchWebdiskFolder({$webdiskBreadcrumbRootId|default:0}); return false;" class="bm-webdisk-breadcrumb-root">{text value=$webdiskBreadcrumbRootTitle}</a>{foreach from=$currentPath key=pathKey item=folder name=pathLoop} <span class="bm-webdisk-breadcrumb-sep" aria-hidden="true">&raquo;</span> {if $smarty.foreach.pathLoop.last}<span class="bm-webdisk-breadcrumb-current">{text value=$folder.title}</span>{else}<a href="#" onclick="switchWebdiskFolder({$folder.id}); return false;" class="bm-webdisk-breadcrumb-link">{text value=$folder.title}</a>{/if}{/foreach}
 			{else}
-			{lng p="webdisk"}
+			{text value=$webdiskBreadcrumbRootTitle}
 			{/if}
 		</div>
+		{if !$webdiskReadonly|default:false}
 		<div class="right bm-webdisk-header-actions">
 			<button type="button" class="btn btn-primary btn-sm" onclick="webdiskOpenUploadModal(); return false;">
 				<i class="ti ti-upload icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="uploadfiles"}
 			</button>
 		</div>
+		{/if}
 	</div>
 
 	<div class="bm-webdisk-split">
@@ -157,6 +159,7 @@
 			<script>
 				window.webdiskMaxUploadBytes = {$webdiskMaxUploadBytes};
 				window.webdiskUploadRules = {$webdiskUploadRulesJSON};
+				window.webdiskReadonly = {if $webdiskReadonly|default:false}true{else}false{/if};
 			{if isset($uploadErrors) || isset($uploadSuccess)}
 				registerLoadAction(function() {literal}{{/literal}
 					var el = EBID('wdAlerts');
@@ -171,10 +174,7 @@
 				registerLoadAction('webdiskEnsureUploadModalInBody()');
 				initDnDUpload(EBID('mainContent'), bmAppendSession('webdisk.php?folder={$folderID}&action=dndUpload'), function() {literal}{{/literal} document.location.href=bmAppendSession('webdisk.php?folder={$folderID}'); {literal}}{/literal}, webdiskDnDFileDone);
 				currentWebdiskFolderID = {$folderID};
-				var treeID = webdiskGetTreeIDbyFolderID({$folderID});
-				if(treeID > 0) {
-					webdisk_d.openTo(treeID, true);
-				}
+				webdiskOpenTreeToFolder({$folderID});
 				initWDSel();
 			</script>
 			{/if}

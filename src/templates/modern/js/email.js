@@ -401,8 +401,13 @@ function reloadFolderList(data)
 		{
 			EBID('folderList').innerHTML = '';
 			eval(data);
-			EBID('folderList').innerHTML = d;
-			enableFolderDragTargets();
+			if(typeof bmRenderEmailFolderList == 'function')
+				bmRenderEmailFolderList();
+			else
+			{
+				EBID('folderList').innerHTML = (typeof bmEmailFolderTreesHtml == 'function') ? bmEmailFolderTreesHtml() : d;
+				enableFolderDragTargets();
+			}
 		}
 
 		return;
@@ -833,10 +838,83 @@ function hideFolderMenu(e)
 	folderMenu.style.display = 'none';
 }
 
+function isFolderFavorite(folderID)
+{
+	if(typeof folderFavoriteIDs == 'undefined' || !folderFavoriteIDs)
+		return false;
+	folderID = parseInt(folderID, 10);
+	for(var i=0; i<folderFavoriteIDs.length; i++)
+	{
+		if(parseInt(folderFavoriteIDs[i], 10) === folderID)
+			return true;
+	}
+	return false;
+}
+
+function toggleFolderFavorite(folderID)
+{
+	hideFolderMenu();
+	MakeXMLRequest(bmAppendSession('email.folders.php?action=toggleFavorite&rpc=true&id='+folderID), function(http)
+	{
+		if(http.readyState == 4)
+			document.location.reload();
+	});
+}
+
+function attachEmailFolderShareActions(map, iconClass, mailboxTitle, folderTitle)
+{
+	if(!map)
+		return;
+	var root = EBID('folderList');
+	if(!root)
+		return;
+	var links = root.querySelectorAll('a.node, a.nodeSel');
+	for(var i=0; i<links.length; i++)
+	{
+		var href = links[i].getAttribute('href') || '';
+		var m = href.match(/switchFolder\((-?\d+)\)/);
+		if(!m)
+			continue;
+		var id = parseInt(m[1], 10);
+		if(!map[id])
+			continue;
+		var kind = map[id];
+		var a = document.createElement('a');
+		a.href = '#';
+		a.className = 'bm-folder-tree-share';
+		a.title = kind == 'mailbox' ? mailboxTitle : folderTitle;
+		a.setAttribute('aria-label', a.title);
+		a.innerHTML = '<i class="' + iconClass + '" aria-hidden="true"></i>';
+		a.onclick = (function(shareKind, shareId)
+		{
+			return function(e)
+			{
+				if(e)
+				{
+					if(e.preventDefault)
+						e.preventDefault();
+					if(e.stopPropagation)
+						e.stopPropagation();
+				}
+				var url = shareKind == 'mailbox'
+					? bmAppendSession('email.folders.php?action=shareMailbox')
+					: bmAppendSession('email.folders.php?action=share&id=' + shareId);
+				var title = shareKind == 'mailbox' ? mailboxTitle : folderTitle;
+				openOverlay(url, title, 520, 360, true);
+				return false;
+			};
+		})(kind, id);
+		links[i].parentNode.appendChild(a);
+	}
+}
+
 function showFolderMenu(e)
 {
 	document.onmouseup = hideFolderMenu;
 	var folderMenu = EBID('folderMenu');
+	var favLabel = EBID('folderFavoriteMenuLabel');
+	if(favLabel && typeof lang != 'undefined')
+		favLabel.innerHTML = isFolderFavorite(currentFolderID) ? lang['removefromfavorites'] : lang['addtofavorites'];
 	var offsetX = getElementMetrics(folderMenu.parentNode, 'x');
 	var offsetY = getElementMetrics(folderMenu.parentNode, 'y');
 	folderMenu.style.left = (e.clientX + getPageXOffset() - offsetX) + 'px';

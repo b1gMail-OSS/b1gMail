@@ -22,7 +22,6 @@
 if(!defined('B1GMAIL_INIT'))
 	require './serverlib/init.inc.php';
 include('./serverlib/notes.class.php');
-include('./serverlib/todo.class.php');
 RequestPrivileges(PRIVILEGES_USER);
 
 /**
@@ -45,7 +44,7 @@ if($groupRow['organizer']=='no')
 $tpl->addJSFile('li', $tpl->tplDir . 'js/organizer.js');
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'start';
-$tpl->assign('activeTab', 'organizer');
+$tpl->assign('activeTab', 'notes');
 $tpl->assign('pageTitle', $lang_user['notes']);
 
 /**
@@ -56,12 +55,6 @@ $notes = _new('BMNotes', array($userRow['id']));
 /**
  * page menu
  */
-$todo = _new('BMTodo', array($userRow['id']));
-$sideTasks = $todo->GetTodoList('faellig', 'asc', 6, 0, true);
-$tpl->assign('tasks_haveMore', count($sideTasks) > 5);
-if(count($sideTasks) > 5)
-	$sideTasks = array_slice($sideTasks, 0, 5);
-$tpl->assign('tasks', $sideTasks);
 $tpl->assign('pageMenuFile', 'li/organizer.sidebar.tpl');
 
 /**
@@ -97,6 +90,7 @@ if($_REQUEST['action'] == 'start')
 	if(isset($_REQUEST['show']))
 		$tpl->assign('showID', (int)$_REQUEST['show']);
 	$tpl->assign('noteList', $noteList);
+	$tpl->assign('canShareNotes', bmOrganizerGroupCanShare('notes'));
 	$tpl->assign('sortColumn', $sortColumn);
 	$tpl->assign('sortOrder', $sortOrderFA);
 	$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
@@ -127,6 +121,9 @@ else if($_REQUEST['action'] == 'action'
 {
 	if($_REQUEST['do'] == 'delete')
 	{
+		// F2: bulk-delete requires CSRF token so <a href>-based click
+		// tricks can't bulk-wipe notes.
+		CsrfEnforceOnStateChange();
 		foreach($_POST as $key=>$val)
 		{
 			if(substr($key, 0, 5) == 'note_')
@@ -140,11 +137,12 @@ else if($_REQUEST['action'] == 'action'
 }
 
 /**
- * delete note
+ * delete note — F2: CSRF-token required.
  */
 else if($_REQUEST['action'] == 'deleteNote'
 		&& isset($_REQUEST['id']))
 {
+	CsrfEnforceOnStateChange();
 	$notes->Delete((int)$_REQUEST['id']);
 	SessionRedirect('organizer.notes.php');
 }
@@ -200,6 +198,87 @@ else if($_REQUEST['action'] == 'saveNote'
 {
 	$notes->Change((int)$_REQUEST['id'], (int)$_REQUEST['priority'], $_REQUEST['text']);
 	SessionRedirect('organizer.notes.php');
+}
+
+/**
+ * share note
+ */
+else if($_REQUEST['action'] == 'share' && isset($_REQUEST['id']))
+{
+	if(!bmOrganizerGroupCanShare('notes'))
+	{
+		SessionRedirect('organizer.notes.php');
+		exit();
+	}
+	$note = $notes->GetNote((int)$_REQUEST['id']);
+	$access = $notes->GetNoteAccess((int)$_REQUEST['id']);
+	if($note === false || $access === false || !empty($access['shared']))
+	{
+		SessionRedirect('organizer.notes.php');
+		exit();
+	}
+	$shareItem = array(
+		'id' => (int)$note['id'],
+		'title' => trim(preg_split("/\r\n|\n|\r/", (string)$note['text'], 2)[0])
+	);
+	if($shareItem['title'] === '')
+		$shareItem['title'] = $lang_user['note'];
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'add' && isset($_REQUEST['email']) && IsPOSTRequest())
+	{
+		$targetId = bmOrganizerShareTargetUserId($_REQUEST['email']);
+		$accessVal = isset($_REQUEST['access']) ? $_REQUEST['access'] : BM_ORGANIZER_ACCESS_READ;
+		$result = bmOrganizerAddShare(BM_ORGANIZER_SHARE_NOTE, (int)$note['id'], $userRow['id'], $targetId, $accessVal);
+		if(is_string($result) && isset($lang_user[$result]))
+			$tpl->assign('shareError', $lang_user[$result]);
+		else if((int)$result > 0)
+		{
+			bmOrganizerNotifyShareInvite(BM_ORGANIZER_SHARE_NOTE, $shareItem, $userRow['id'], $targetId, $accessVal);
+			$tpl->assign('shareSuccess', $lang_user['shareinvited']);
+		}
+	}
+	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'remove'
+		&& isset($_REQUEST['share'])
+		&& IsPOSTRequest())
+	{
+		// F2: revoking a note share was GET-reachable.
+		bmOrganizerRemoveShare(BM_ORGANIZER_SHARE_NOTE, (int)$_REQUEST['share'], $userRow['id']);
+	}
+
+	$tpl->assign('shareItem', $shareItem);
+	$tpl->assign('shareList', bmOrganizerListShares(BM_ORGANIZER_SHARE_NOTE, (int)$note['id'], $userRow['id']));
+	$tpl->assign('shareType', 'note');
+	$tpl->assign('shareAction', 'organizer.notes.php');
+	$tpl->display('li/organizer.share.dialog.tpl');
+	exit();
+}
+
+/**
+ * leave shared note
+ */
+else if($_REQUEST['action'] == 'leaveshare' && isset($_REQUEST['id']))
+{
+	$access = $notes->GetNoteAccess((int)$_REQUEST['id']);
+	if($access === false || empty($access['shared']))
+	{
+		SessionRedirect('organizer.notes.php');
+		exit();
+	}
+	$note = $notes->GetNote((int)$_REQUEST['id']);
+	$title = $note ? trim(preg_split("/\r\n|\n|\r/", (string)$note['text'], 2)[0]) : $lang_user['note'];
+	$leaveItem = array('id' => (int)$_REQUEST['id'], 'title' => $title);
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'leave' && IsPOSTRequest())
+	{
+		bmOrganizerLeaveShare(BM_ORGANIZER_SHARE_NOTE, (int)$_REQUEST['id'], $userRow['id']);
+		SessionRedirect('organizer.notes.php');
+		exit();
+	}
+
+	$tpl->assign('leaveItem', $leaveItem);
+	$tpl->assign('leaveAction', 'organizer.notes.php');
+	$tpl->display('li/organizer.share.leave.tpl');
+	exit();
 }
 
 SessionRedirect('organizer.notes.php');

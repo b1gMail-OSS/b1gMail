@@ -46,7 +46,7 @@
 		<td class="{if $sortColumn=='to'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="sms.php?to={text value=$sms.to}{$sessionUrlSuffix}">{text value=$sms.to}</a></td>
 		<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{date timestamp=$sms.date nice=true}</td>
 		<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
-			<a onclick="return confirm('{lng p="realdel"}');" href="sms.php?action=outbox&do=delete&id={$sms.id}{$sessionUrlSuffix}" class="btn btn-outline-secondary btn-icon btn-sm text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="sms.php?action=outbox&do=delete&id={$sms.id}{$sessionUrlSuffix}&csrf_token={$csrfToken}" class="btn btn-outline-secondary btn-icon btn-sm text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	<tbody id="group_{$sms.id}" style="display:{if $smarty.request.show!=$sms.id}none{/if}">

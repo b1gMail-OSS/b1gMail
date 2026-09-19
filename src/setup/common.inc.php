@@ -1435,4 +1435,4 @@ function ConfigEnsureSignKeyInFile($configPath)
 }
 
 // target version
-$target_version = '7.5.0-RC3';
+$target_version = '7.5.0-RC4';

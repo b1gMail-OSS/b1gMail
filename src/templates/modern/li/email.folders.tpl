@@ -1,7 +1,7 @@
 <div id="contentHeader">
-	<div class="left">
-		<i class="fa fa-folder-o" aria-hidden="true"></i> {lng p="folderadmin"}
-	</div>
+		<div class="left">
+			<i class="fa fa-folder-o" aria-hidden="true"></i> {lng p="folderadmin"}
+		</div>
 </div>
 
 <form name="f1" method="post" action="{sessionurl file='email.folders.php' params='action=action'}">
@@ -65,7 +65,10 @@
 		</td>
 		<td class="{$class}" nowrap="nowrap"><center><input type="checkbox" checked="checked" disabled="disabled" /></center></td>
 		<td class="{$class}" nowrap="nowrap">
+			<a href="{sessionurl file='email.folders.php' params="action=toggleFavorite&id={$folderID}"}" title="{if isset($folderFavoriteMap[$folderID])}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}"><i class="fa {if isset($folderFavoriteMap[$folderID])}fa-star{else}fa-star-o{/if}" aria-hidden="true"></i></a>
+			{if $canShareMail}<a href="#" onclick="openOverlay('{sessionurl file='email.folders.php' params="action=share&id={$folderID}"}', '{lng p="sharefolder"|escape:'javascript'}', 520, 360, true); return false;" title="{lng p="sharefolder"}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>{/if}
 			<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+			<span class="disabled" title="{lng p="delete"}" style="opacity:0.35;cursor:default;"><i class="fa fa-trash-o" aria-hidden="true"></i></span>
 		</td>
 	</tr>
 	{/foreach}
@@ -103,8 +106,10 @@
 		</td>
 		<td class="{if $sortColumn=='subscribed'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap"><center><input type="checkbox" {if $folder.subscribed==1}checked="checked" {/if} onchange="updateFolderSubscription('{$folderID}', this, '{$sid}')" /></center></td>
 		<td class="{$class}" nowrap="nowrap">
+			<a href="{sessionurl file='email.folders.php' params="action=toggleFavorite&id={$folderID}"}" title="{if isset($folderFavoriteMap[$folderID])}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}"><i class="fa {if isset($folderFavoriteMap[$folderID])}fa-star{else}fa-star-o{/if}" aria-hidden="true"></i></a>
+			{if $canShareMail && $folder.intelligent!=1}<a href="#" onclick="openOverlay('{sessionurl file='email.folders.php' params="action=share&id={$folderID}"}', '{lng p="sharefolder"|escape:'javascript'}', 520, 360, true); return false;" title="{lng p="sharefolder"}"><i class="fa fa-share-alt" aria-hidden="true"></i></a>{/if}
 			<a href="{sessionurl file='email.folders.php' params="action=editFolder&id={$folderID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='email.folders.php' params="action=deleteFolder&id={$folderID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='email.folders.php' params="action=deleteFolder&id={$folderID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}
@@ -119,10 +124,14 @@
 		</td>
 	</tr>
 	<tbody id="group_shared" style="display:;">
-	{foreach from=$sharedFolderList key=folderID item=folder}
+	{foreach from=$sharedFolderGroups key=ownerEmail item=ownerFolders}
+	<tr>
+		<td colspan="7" class="folderGroup">&nbsp;<i class="fa fa-envelope-o" aria-hidden="true"></i> {text value=$ownerEmail}</td>
+	</tr>
+	{foreach from=$ownerFolders key=folderID item=folder}
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr>
-		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="folder_{$folderID}" name="folder_{$folderID}" /></td>
+		<td class="{$class}" nowrap="nowrap">&nbsp;</td>
 		<td class="{if $sortColumn=='titel'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<a href="{sessionurl file='email.php' params="folder={$folderID}"}"><i class="fa fa-share-square-o" aria-hidden="true"></i> {text value=$folder.titel cut=25}</a>
 			{if $folder.readonly}<small>({lng p="readonly"})</small>{/if}</td>
 		<td class="{if $sortColumn=='parent'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;{text value=$folder.parent cut=15}</td>
@@ -136,16 +145,20 @@
 						{$folder.allMails}</td>
 					<td width="45" align="left"><i class="fa fa-envelope"></i>
 						{$folder.unreadMails}</td>
-					<td width="45" align="left"><i class="fa fa-flag-o"></i>
+					<td width="45" align="left"><i class="fa fa-flag-o" aria-hidden="true"></i>
 						{$folder.flaggedMails}</td>
 				</tr>
 			</table>
 		</td>
 		<td class="{if $sortColumn=='subscribed'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap"><center><input type="checkbox" {if $folder.subscribed==1}checked="checked" {/if} disabled="disabled" /></center></td>
 		<td class="{$class}" nowrap="nowrap">
-			&nbsp;
+			<a href="{sessionurl file='email.folders.php' params="action=toggleFavorite&id={$folderID}"}" title="{if isset($folderFavoriteMap[$folderID])}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}"><i class="fa {if isset($folderFavoriteMap[$folderID])}fa-star{else}fa-star-o{/if}" aria-hidden="true"></i></a>
+			{if $canShareMail}<span class="disabled" title="{lng p="sharefolder"}" style="opacity:0.35;cursor:default;"><i class="fa fa-share-alt" aria-hidden="true"></i></span>{/if}
+			<span class="disabled" title="{lng p="edit"}" style="opacity:0.35;cursor:default;"><i class="fa fa-pencil" aria-hidden="true"></i></span>
+			{if $folder.can_leave}<a href="#" onclick="openOverlay('{sessionurl file='email.folders.php' params="action=leaveshare&id={$folderID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260, true); return false;" title="{lng p="shareleave"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{else}<span class="disabled" title="{lng p="delete"}" style="opacity:0.35;cursor:default;"><i class="fa fa-trash-o" aria-hidden="true"></i></span>{/if}
 		</td>
 	</tr>
+	{/foreach}
 	{/foreach}
 	</tbody>
 	{/if}
@@ -163,6 +176,13 @@
 	</div>
 	
 	<div class="right">
+		{* F4: full-mailbox share entry point, gated on the sharing capability. *}
+		{if !empty($canShareMailbox)}
+		<button onclick="openOverlay('{sessionurl file='email.folders.php' params='action=shareMailbox'}', '{lng p="sharemailbox"|escape:'javascript'}', 520, 360, true); return false;" type="button">
+			<i class="fa fa-share"></i>
+			{lng p="sharemailbox"}
+		</button>
+		{/if}
 		<button class="primary" onclick="document.location.href='{sessionurl file='email.folders.php' params='action=addFolder'}';" type="button">
 			<i class="fa fa-plus-circle"></i>
 			{lng p="addfolder"}

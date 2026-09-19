@@ -42,30 +42,44 @@
 			<td class="listTableRightDesc">{lng p="date"}</td>
 		</tr>
 		<tr>
-			<td class="listTableLeft">* {lng p="begin"}:</td>
+			<td class="listTableLeft">&nbsp;</td>
 			<td class="listTableRight">
-				{html_select_date prefix="startdate" time=$startDate field_order="DMY" start_year="-5" end_year="+5" field_separator="."},
-				{html_select_time prefix="startdate" time=$startTime minute_interval=5 display_seconds=false}
+				<label style="margin-right:1em;">
+					<input type="radio" name="wholeDay" id="wholeDay0" value="0"{if !((isset($eDate.flags) && $eDate.flags&1) || (empty($eDate) && !empty($preWholeDay)))} checked="checked"{/if} onchange="toggleWholeDay(this);" />
+					{lng p="duration"}
+				</label>
+				<label>
+					<input type="radio" name="wholeDay" id="wholeDay1" value="1"{if (isset($eDate.flags) && $eDate.flags&1) || (empty($eDate) && !empty($preWholeDay))} checked="checked"{/if} onchange="toggleWholeDay(this);" />
+					{lng p="wholeday"}
+				</label>
 			</td>
 		</tr>
 		<tr>
-			<td class="listTableLeft">* {lng p="duration"}:</td>
-			<td class="listTableRight">
-				<table>
-					<tr>
-						<td><input type="radio" id="wholeDay_0" name="wholeDay" value="0"{if empty($eDate) || !($eDate.flags&1)} checked="checked"{/if} /></td>
-						<td>
-							<input type="text" onfocus="EBID('wholeDay_0').checked=true;" name="durationHours" id="durationHours" value="{if isset($durationHours)}{$durationHours}{/if}" size="3" />
-							{lng p="hours"},
-							<input type="text" onfocus="EBID('wholeDay_0').checked=true;" name="durationMinutes" id="durationMinutes" value="{if isset($durationMinutes)}{$durationMinutes}{/if}" size="3" />
-							{lng p="minutes"}
-						</td>
-					</tr>
-					<tr>
-						<td><input type="radio" id="wholeDay_1" name="wholeDay" value="1"{if (isset($eDate.flags) && $eDate.flags&1)} checked="checked"{/if} /></td>
-						<td><label for="wholeDay_1">{lng p="wholeday"}</label></td>
-					</tr>				
-				</table>
+			<td class="listTableLeft">* {lng p="begin"}:</td>
+			<td class="listTableRight" id="startdateWrap">
+				<input type="date" id="startdate_date" value="{$startDateISO}" onchange="syncSmartyDate('startdate');" required />
+				<input type="time" class="bm-organizer-datetime-time" id="startdate_time" value="{$startTimeISO}" onchange="syncSmartyDate('startdate');" />
+			</td>
+		</tr>
+		<tr>
+			<td class="listTableLeft">* {lng p="end"}:</td>
+			<td class="listTableRight" id="enddateWrap">
+				<input type="date" id="enddate_date" value="{$endDateISO}" onchange="syncSmartyDate('enddate');" required />
+				<input type="time" class="bm-organizer-datetime-time" id="enddate_time" value="{$endTimeISO}" onchange="syncSmartyDate('enddate');" />
+			</td>
+		</tr>
+		<tr style="display:none;">
+			<td colspan="2">
+				<input type="hidden" name="startdateDay"    id="startdateDay"    value="{$startTime|date_format:"%d"}" />
+				<input type="hidden" name="startdateMonth"  id="startdateMonth"  value="{$startTime|date_format:"%m"}" />
+				<input type="hidden" name="startdateYear"   id="startdateYear"   value="{$startTime|date_format:"%Y"}" />
+				<input type="hidden" name="startdateHour"   id="startdateHour"   value="{$startTime|date_format:"%H"}" />
+				<input type="hidden" name="startdateMinute" id="startdateMinute" value="{$startTime|date_format:"%M"}" />
+				<input type="hidden" name="enddateDay"      id="enddateDay"      value="{$endTime|date_format:"%d"}" />
+				<input type="hidden" name="enddateMonth"    id="enddateMonth"    value="{$endTime|date_format:"%m"}" />
+				<input type="hidden" name="enddateYear"     id="enddateYear"     value="{$endTime|date_format:"%Y"}" />
+				<input type="hidden" name="enddateHour"     id="enddateHour"     value="{$endTime|date_format:"%H"}" />
+				<input type="hidden" name="enddateMinute"   id="enddateMinute"   value="{$endTime|date_format:"%M"}" />
 			</td>
 		</tr>
 		
@@ -172,11 +186,21 @@
 			<td class="listTableRightDesc">{lng p="misc"}</td>
 		</tr>
 		<tr>
+			<td class="listTableLeft"><label for="calendar">{lng p="calendar"}:</label></td>
+			<td class="listTableRight">
+				<select name="calendar" id="calendar" onchange="filterCalendarGroups();">
+				{foreach from=$writableCalendars key=calID item=cal}
+					<option value="{$calID}"{if (!$eDate && $calID==$eventCalendarID) || (isset($eDate.calendar_id) && $eDate.calendar_id==$calID)} selected="selected"{/if}>{text value=$cal.title}</option>
+				{/foreach}
+				</select>
+			</td>
+		</tr>
+		<tr>
 			<td class="listTableLeft"><label for="group">{lng p="group"}:</label></td>
 			<td class="listTableRight">
 				<select name="group" id="group">
 				{foreach from=$groups item=group key=groupID}
-					<option value="{$groupID}"{if (!$eDate&&$groupID==-1) || ($eDate.group==$groupID)} selected="selected"{/if}>{text value=$group.title}</option>
+					<option value="{$groupID}"{if (!$eDate&&$groupID==-1) || ($eDate.group==$groupID)} selected="selected"{/if} data-calendar="{if $groupID>0}{$group.calendar_id}{else}0{/if}">{text value=$group.title}</option>
 				{/foreach}
 				</select>
 			</td>
@@ -189,6 +213,10 @@
 						<td>
 							<input type="checkbox" name="reminder_notify" id="reminderNotify"{if !$eDate||($eDate.flags&8)} checked="checked"{/if} /> 
 								<label for="reminderNotify">{lng p="bynotify"}</label><br />
+							{if $pushEnabled}
+							<input type="checkbox" name="reminder_push" id="reminderPush"{if isset($eDate) && $eDate.flags&16} checked="checked"{/if} /> 
+								<label for="reminderPush">{lng p="bypush"}</label><br />
+							{/if}
 							<input type="checkbox" name="reminder_email" id="reminderEMail"{if isset($eDate)&& $eDate.flags&2} checked="checked"{/if} /> 
 								<label for="reminderEMail">{lng p="byemail"}</label><br />
 							{if $smsEnabled}<input type="checkbox" name="reminder_sms" id="reminderSMS"{if isset($eDate)&& $eDate.flags&4} checked="checked"{/if} />
@@ -271,5 +299,14 @@
 		</tr>
 	</table>
 </form>
+
+<script>
+<!--
+	if(typeof filterCalendarGroups === 'function')
+		filterCalendarGroups();
+	if(typeof toggleWholeDay === 'function' && document.getElementById('wholeDay'))
+		toggleWholeDay(document.getElementById('wholeDay'));
+//-->
+</script>
 
 </div></div>
