@@ -61,7 +61,7 @@ if($_REQUEST['action'] == 'db')
 			$databaseStructure = json_decode($databaseStructure, JSON_OBJECT_AS_ARRAY);
 
 			// get tables
-			$defaultTables = array();
+			$myTables = array();
 			$res = $db->Query('SHOW TABLES');
 			while($row = $res->FetchArray(MYSQLI_NUM))
 				$myTables[] = $row[0];
