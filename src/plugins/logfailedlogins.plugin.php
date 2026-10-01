@@ -27,7 +27,7 @@ class BMPlugin_logFailedLogins extends BMPlugin
         $this->author = 'b1gMail.eu Project';
         $this->web = 'http://www.b1gmail.eu';
 
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         $this->designedfor = '7.4.1';
 
         $this->type = BMPLUGIN_DEFAULT;
@@ -60,7 +60,10 @@ class BMPlugin_logFailedLogins extends BMPlugin
         $res->Free();
 
         if (!empty($userId)) {
-            $failedloginlog = '['.date('c').'] - Web Login '.$userMail.' - Browser '.substr($_SERVER['HTTP_USER_AGENT'], 0, 250).' - IP '.$_SERVER['REMOTE_ADDR'].PHP_EOL;
+            if (INTERFACE_MODE == true)
+                $failedloginlog = '['.date('c').'] - Interface Login '.$userMail.' - IP '.$_SERVER['REMOTE_ADDR'].PHP_EOL;
+            else 
+                $failedloginlog = '['.date('c').'] - Web Login '.$userMail.' - Browser '.substr($_SERVER['HTTP_USER_AGENT'], 0, 250).' - IP '.$_SERVER['REMOTE_ADDR'].PHP_EOL;
             file_put_contents(B1GMAIL_DIR.'logs/b1gmail_failedlogins.log', $failedloginlog, FILE_APPEND);
         }
     }
