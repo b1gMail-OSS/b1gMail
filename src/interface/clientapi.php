@@ -32,6 +32,14 @@ $exportedClasses = array(
 
 $response = array();
 
+// Prevent access, if TOOLBOX_SERVER is not set or empty
+if (!defined('TOOLBOX_SERVER') OR empty(TOOLBOX_SERVER)) {
+	http_response_code(403);
+	$response['status'] = 'ACCESS_DENIED';
+	NormalArray2XML($response, 'response');
+	exit();
+}
+
 if(!isset($_REQUEST['class'])
 	|| !isset($exportedClasses[$_REQUEST['class']]))
 {
@@ -44,6 +52,7 @@ else
 	// load class
 	if(!class_exists($_REQUEST['class']))
 		include($classInfo['fileName']);
+	$response['status'] = 'ACCESS_DENIED';
 
 	// check privileges
 	if(!RequestPrivileges($classInfo['requiredPrivileges'] | PRIVILEGES_CLIENTAPI, true))

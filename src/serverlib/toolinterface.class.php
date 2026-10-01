@@ -728,7 +728,7 @@ class BMToolInterface
 		$userID = BMUser::GetID($userName);
 		if($userID != 0)
 		{
-			$res = $db->Query('SELECT passwort,passwort_salt,gesperrt,gruppe,mail2sms_nummer FROM {pre}users WHERE id=?',
+			$res = $db->Query('SELECT passwort,passwort_salt,gesperrt,gruppe,mail2sms_nummer,last_login_attempt FROM {pre}users WHERE id=?',
 				$userID);
 			if($res->RowCount() == 1)
 			{
@@ -737,7 +737,7 @@ class BMToolInterface
 				$user = _new('BMUser', array($userID));
 
 				if(strtolower($row['passwort']) === strtolower(md5($passwordHash.$row['passwort_salt']))
-					&& $row['gesperrt'] == 'no')
+					&& $row['gesperrt'] == 'no' && ($row['last_login_attempt'] < 100 || $row['last_login_attempt']+ACCOUNT_LOCK_TIME < time()))
 				{
 					$group = $user->GetGroup();
 					$groupRow = $group->_row;
@@ -802,6 +802,31 @@ class BMToolInterface
 
 					$this->_user = $user;
 					return($result);
+				}
+				else if(!empty($userID)) {
+					// bruteforce login protection
+					$lastLoginAttempt = $row['last_login_attempt'];
+					if($lastLoginAttempt < 100)
+					{
+						// register new attempt
+						if(++$lastLoginAttempt >= 5)
+							$lastLoginAttempt = time();
+						$db->Query('UPDATE {pre}users SET last_login_attempt=? WHERE id=?',
+							$lastLoginAttempt,
+							$userID);
+					}
+					else
+					{
+						// account still locked
+						$lockedUntil = $lastLoginAttempt + ACCOUNT_LOCK_TIME;
+						if($lockedUntil < time())
+						{
+							// first attempt
+							$db->Query('UPDATE {pre}users SET last_login_attempt=? WHERE id=?',
+								1,
+								$userID);
+						}
+					}
 				}
 			}
 			$res->Free();
