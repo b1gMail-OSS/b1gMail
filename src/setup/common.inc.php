@@ -678,4 +678,4 @@ function GetLanguageInfo($fileName)
 }
 
 // target version
-$target_version = '7.4.2-RC3';
+$target_version = '7.4.2-RC4';
