@@ -310,8 +310,15 @@ if($_REQUEST['action'] == 'read'
 		}
 		else if(isset($_REQUEST['print']))
 		{
-			if($textMode == 'html')
-				$tpl->assign('text', formatEMailHTMLText(isset($textParts['html']) ? $textParts['html'] : '', $enableExternal || $mail->IsTrusted(), $attachments, (int)$_REQUEST['id']));
+			if($textMode == 'html') {
+				// Remove a-tag for security reasons (prevent Session hijacking)
+				$textnolink = formatEMailHTMLText(isset($textParts['html']) ? $textParts['html'] : '', $enableExternal || $mail->IsTrusted(), $attachments, (int)$_REQUEST['id']);							
+			}
+			else {
+				// Remove a-tag for security reasons (prevent Session hijacking)
+				$textnolink = preg_replace('/<a.*>(.*)<\/a>/isU','$1',$text);
+			}
+			$tpl->assign('text', $textnolink);
 			$tpl->assign('plaintextCourier', $textMode!='html' && $userRow['plaintext_courier']=='yes');
 			$tpl->display('li/email.print.tpl');
 		}
