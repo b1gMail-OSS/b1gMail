@@ -313,6 +313,7 @@ if($_REQUEST['action'] == 'read'
 			if($textMode == 'html') {
 				// Remove a-tag for security reasons (prevent Session hijacking)
 				$textnolink = formatEMailHTMLText(isset($textParts['html']) ? $textParts['html'] : '', $enableExternal || $mail->IsTrusted(), $attachments, (int)$_REQUEST['id']);							
+				$textnolink = preg_replace('/<a.*>(.*)<\/a>/isU','$1',$textnolink);
 			}
 			else {
 				// Remove a-tag for security reasons (prevent Session hijacking)
