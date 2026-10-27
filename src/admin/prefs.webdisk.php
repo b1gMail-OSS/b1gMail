@@ -28,7 +28,7 @@ if(!isset($_REQUEST['action']))
 
 function EnsureWebdiskSharePrefColumns()
 {
-	global $db;
+	global $db, $bm_prefs;
 
 	$columnDefaults = array(
 		'wd_share_pw_required'		=> "'no'",
@@ -48,6 +48,9 @@ function EnsureWebdiskSharePrefColumns()
 			$db->Query('ALTER TABLE {pre}prefs ADD COLUMN `' . $column . '` '
 				. ($column == 'wd_share_max_days' ? 'INT(11) NOT NULL DEFAULT ' : 'VARCHAR(10) NOT NULL DEFAULT ')
 				. $defaultValue);
+
+			// $bm_prefs was loaded before the column existed: set the default so that the template finds the key on this first request
+			$bm_prefs[$column] = trim($defaultValue, "'");
 		}
 	}
 }
