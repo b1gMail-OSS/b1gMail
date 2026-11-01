@@ -1138,6 +1138,220 @@ BODY
 {
 }
 
+.contentMenuIcons A.active
+{
+	font-weight: bold;
+}
+
+.bm-organizer-sidebar-cal
+{
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	/* white-space: nowrap NICHT auf Container setzen – sonst schieben lange
+	 * Kalendernamen die Action-Icons rechts raus und der Container scrollt
+	 * horizontal. Wir kürzen den Link-Text stattdessen via Ellipsis. */
+	margin: 2px 0;
+	min-width: 0;
+}
+
+/* Kalender-Titel-Link füllt den Restplatz zwischen Swatch und Actions und
+ * kürzt bei Bedarf mit "…". Ohne min-width:0 wächst der Link auf Textbreite
+ * und würde die Actions abschneiden. */
+.bm-organizer-sidebar-cal > a
+{
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.bm-organizer-sidebar-cal.current > a
+{
+	font-weight: bold;
+}
+
+.bm-organizer-sidebar-heading
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.bm-organizer-sidebar-heading-action
+{
+	color: #858B92;
+	padding: 0 4px;
+}
+
+.bm-email-sidebar-heading
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.bm-email-sidebar-heading-action
+{
+	color: #858B92;
+	padding: 0 4px;
+}
+
+.bm-mailbox-heading
+{
+	text-transform: none;
+}
+
+.bm-webdisk-sidebar-heading
+{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.bm-folder-tree-share
+{
+	padding: 0 3px;
+	color: #858B92;
+}
+
+/* Webdisk-Ordnerbaum: Aktions-Gruppe (Edit / Share / Delete) rechts am
+ * dTree-Node – analog zur Kalender-Sidebar (.bm-organizer-sidebar-cal-actions). */
+.dTreeNode
+{
+	display: flex;
+	align-items: center;
+}
+
+.dTreeNode > a.node,
+.dTreeNode > a.nodeSel
+{
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.bm-folder-tree-actions
+{
+	margin-left: auto;
+	display: inline-flex;
+	flex-shrink: 0;
+	gap: 2px;
+}
+
+.bm-folder-tree-actions .bm-folder-tree-action
+{
+	padding: 0 4px;
+	color: #858B92;
+	text-decoration: none;
+}
+
+.bm-folder-tree-actions .bm-folder-tree-action:hover
+{
+	color: #333;
+}
+
+.bm-organizer-sidebar-cal-actions
+{
+	margin-left: auto;
+	display: inline-flex;
+	flex-shrink: 0;   /* nie durch langen Kalendernamen abschneiden */
+}
+
+.bm-organizer-sidebar-cal-actions .btn
+{
+	padding: 0 4px;
+	color: #858B92;
+}
+
+.bm-organizer-sidebar-cal-actions .btn.disabled
+{
+	color: #c5c9ce;
+	cursor: not-allowed;
+	opacity: 0.45;
+	pointer-events: none;
+}
+
+.bm-organizer-action-disabled
+{
+	display: inline-block;
+	opacity: 0.4;
+	cursor: not-allowed;
+	color: inherit;
+}
+
+.bm-organizer-sidebar-book
+{
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin: 2px 0;
+	min-width: 0;
+}
+
+.bm-organizer-sidebar-book > a
+{
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Mini-Kalender in der Kalender-Sidebar horizontal zentrieren.
+ * .miniCalendarTable ist eine <table> mit shrink-to-fit-Breite,
+ * ohne diese Regel klebt sie am linken Rand. */
+.bm-organizer-minical
+{
+	text-align: center;
+	padding: 0 8px;
+}
+
+.bm-organizer-minical .miniCalendarTable
+{
+	margin: 0 auto;
+}
+
+.bm-organizer-minical-plain .miniCalendarTable
+{
+	border: none;
+}
+
+.bm-organizer-minical-plain .miniCalendarTable TD
+{
+	border: none;
+}
+
+.bm-organizer-minical-plain .miniCalendarTable TH.Caption
+{
+	background: transparent;
+	color: #333;
+}
+
+.bm-organizer-minical-plain .miniCalendarTable TH.Caption A
+{
+	color: #333;
+}
+
+.bm-organizer-cal-swatch
+{
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+	vertical-align: middle;
+}
+
+.bm-organizer-cal-0 .bm-organizer-cal-swatch { background-color: #3D81EB; }
+.bm-organizer-cal-1 .bm-organizer-cal-swatch { background-color: #5DB747; }
+.bm-organizer-cal-2 .bm-organizer-cal-swatch { background-color: #FA514A; }
+.bm-organizer-cal-3 .bm-organizer-cal-swatch { background-color: #FD9530; }
+.bm-organizer-cal-4 .bm-organizer-cal-swatch { background-color: #C358BF; }
+.bm-organizer-cal-5 .bm-organizer-cal-swatch { background-color: #8A74D3; }
+
 .contentMenuIcons SELECT
 {
 	font-size: 10px;

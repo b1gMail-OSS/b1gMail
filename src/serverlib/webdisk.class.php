@@ -22,6 +22,8 @@
 if(!defined('B1GMAIL_INIT'))
 	die('Directly calling this file is not supported');
 
+include_once B1GMAIL_DIR . 'serverlib/organizer.collections.inc.php';
+
 /**
  * constants
  */
@@ -36,8 +38,11 @@ class BMWebdisk
 	var $_userID;
 	var $_shareUntilByFolder = null;
 	var $_fileShareByFile = null;
+	var $_sharedWebdiskFolders = null;
+	var $_ownerDiskFolderMap = array();
 	static $_shareMetaTableReady = false;
 	static $_fileShareTableReady = false;
+	static $_uploaderColumnReady = false;
 
 	/**
 	 * constructor
@@ -65,6 +70,7 @@ class BMWebdisk
 		$this->CleanupExpiredShares();
 		$this->EnsureFileShareTable();
 		$this->CleanupExpiredFileShares();
+		$this->EnsureUploaderColumn();
 	}
 
 	function EnsureShareMetaTable()
@@ -186,6 +192,52 @@ class BMWebdisk
 		)');
 
 		self::$_fileShareTableReady = true;
+	}
+
+	function EnsureUploaderColumn()
+	{
+		global $mysql;
+
+		if(self::$_uploaderColumnReady)
+			return;
+		self::$_uploaderColumnReady = true;
+
+		if(!function_exists('bmOrganizerEnsureColumn'))
+			return;
+
+		$prefix = isset($mysql['prefix']) ? $mysql['prefix'] : '';
+		bmOrganizerEnsureColumn($prefix.'diskfiles', 'uploader_id',
+			'ALTER TABLE `{table}` ADD `uploader_id` int(11) NOT NULL DEFAULT 0');
+	}
+
+	/**
+	 * email of the user who uploaded a file
+	 *
+	 * @param array $fileInfo
+	 * @return string
+	 */
+	function GetFileUploaderEmail($fileInfo)
+	{
+		global $db;
+
+		$uploaderId = isset($fileInfo['uploader_id']) ? (int)$fileInfo['uploader_id'] : 0;
+		if($uploaderId <= 0 && isset($fileInfo['user']))
+			$uploaderId = (int)$fileInfo['user'];
+		if($uploaderId <= 0)
+			$uploaderId = (int)$this->_userID;
+		if($uploaderId <= 0)
+			return('');
+
+		$res = $db->Query('SELECT email FROM {pre}users WHERE id=?',
+			$uploaderId);
+		if($res->RowCount() != 1)
+		{
+			$res->Free();
+			return('');
+		}
+		list($email) = $res->FetchArray(MYSQLI_NUM);
+		$res->Free();
+		return(DecodeEMail($email));
 	}
 
 	function LoadFileShareMeta()
@@ -330,6 +382,45 @@ class BMWebdisk
 		$db->Query('UPDATE {pre}diskfileshares SET used=1,active=CASE WHEN single_use=1 THEN 0 ELSE active END,last_used=? WHERE token=?',
 			$now,
 			$token);
+	}
+
+	/**
+	 * Atomically claim a share token for exactly one use.
+	 *
+	 * The naive flow — check via GetFileShareByToken(), then serve the
+	 * file, then call MarkFileShareUsed() at the end — races with any
+	 * parallel request: two concurrent requests both see used=0, both
+	 * proceed to download, and only the second UPDATE takes effect.
+	 * The single-use guarantee is then meaningless in practice.
+	 *
+	 * This method performs the "reserve first" step atomically:
+	 * a conditional UPDATE that flips used=0 → used=1 in a single SQL
+	 * statement. Only the winning request gets AffectedRows() == 1 and
+	 * may proceed with the download. Every other concurrent request
+	 * sees 0 and must abort.
+	 *
+	 * Non-single-use shares don't have this race (multiple downloads
+	 * are permitted by design) so the caller should only call this for
+	 * single_use=true shares. For non-single-use shares the plain
+	 * MarkFileShareUsed() (which updates last_used and used=1 without
+	 * gating access) is the right choice.
+	 *
+	 * @param string $token Public share token.
+	 * @return bool True when this caller owns the single-use slot; false
+	 *              if another request already claimed it (or the row is
+	 *              gone/inactive/expired).
+	 */
+	function ClaimSingleUseFileShare($token)
+	{
+		global $db;
+
+		$now = time();
+		$db->Query('UPDATE {pre}diskfileshares SET used=1,active=0,last_used=? '
+			.'WHERE token=? AND single_use=1 AND used=0 AND active=1',
+			$now,
+			$token);
+
+		return $db->AffectedRows() === 1;
 
 		$this->LoadFileShareMeta();
 		foreach($this->_fileShareByFile as $fileID => $shareInfo)
@@ -380,12 +471,17 @@ class BMWebdisk
 		$pageMenu = $idTable = array();
 		$i = 0;
 
+		$idTable[0] = $i;
 		$pageMenu[] = array(
 			'i'				=> $i++,
 			'icon'			=> 'folder',
 			'id'			=> 0,
 			'parent'		=> -1,
-			'text'			=> $lang_user['webdisk']
+			'parentFolder'	=> -1,
+			'text'			=> $lang_user['webdisk'],
+			'shareOwner'	=> 0,
+			'owner_email'	=> '',
+			'canShareWebdisk'	=> bmOrganizerGroupCanShare('webdisk')
 		);
 
 		$res = $db->Query('SELECT `id`,`titel`,`parent`,`share` FROM {pre}diskfolders WHERE `user`=? ORDER BY `titel` ASC',
@@ -395,16 +491,38 @@ class BMWebdisk
 			$idTable[$row['id']] = $i;
 
 			$pageMenu[] = array(
-				'id'		=> $row['id'],
-				'icon'		=> $row['share'] == 'yes' ? 'folder_shared' : 'folder',
-				'i'			=> $i,
-				'parent'	=> $row['parent'],
-				'text'		=> $row['titel']
+				'id'			=> $row['id'],
+				'icon'			=> $row['share'] == 'yes' ? 'folder_shared' : 'folder',
+				'i'				=> $i,
+				'parent'		=> $row['parent'],
+				'parentFolder'	=> $row['parent'],
+				'text'			=> $row['titel'],
+				'shareOwner'	=> 0,
+				'owner_email'	=> '',
+				'canShare'		=> bmOrganizerGroupCanShare('webdisk')
 			);
 
 			$i++;
 		}
 		$res->Free();
+
+		foreach($this->GetAccessibleSharedFolders() as $folder)
+		{
+			$viewId = (int)$folder['id'];
+			$idTable[$viewId] = $i;
+			$parent = isset($folder['parent']) ? $folder['parent'] : -1;
+			$pageMenu[] = array(
+				'id'			=> $viewId,
+				'icon'			=> 'folder_shared',
+				'i'				=> $i,
+				'parent'		=> $parent,
+				'parentFolder'	=> $parent,
+				'text'			=> $folder['titel'],
+				'shareOwner'	=> isset($folder['userid']) ? (int)$folder['userid'] : 0,
+				'owner_email'	=> !empty($folder['owner_email']) ? DecodeEMail($folder['owner_email']) : ''
+			);
+			$i++;
+		}
 
 		foreach($pageMenu as $key=>$val)
 		{
@@ -414,6 +532,468 @@ class BMWebdisk
 				$pageMenu[$key]['parent'] = 0;
 		}
 		return($pageMenu);
+	}
+
+	/**
+	 * own folders plus shared webdisks grouped by owner email for the sidebar
+	 *
+	 * @param array $pageMenu
+	 * @return array
+	 */
+	function SplitSidebarFolderMenus($pageMenu)
+	{
+		$own = array();
+		$shared = array();
+		foreach($pageMenu as $item)
+		{
+			if(!empty($item['shareOwner']))
+			{
+				$ownerId = (int)$item['shareOwner'];
+				if(!isset($shared[$ownerId]))
+				{
+					$shared[$ownerId] = array(
+						'email'		=> isset($item['owner_email']) ? $item['owner_email'] : '',
+						'folders'	=> array()
+					);
+				}
+				else if($shared[$ownerId]['email'] == '' && !empty($item['owner_email']))
+					$shared[$ownerId]['email'] = $item['owner_email'];
+				$shared[$ownerId]['folders'][] = $item;
+			}
+			else
+				$own[] = $item;
+		}
+
+		$own = $this->_reindexFolderTreeMenu($own);
+		foreach($shared as $ownerId=>$group)
+			$shared[$ownerId]['folders'] = $this->_reindexFolderTreeMenu($group['folders']);
+
+		if(count($shared) > 1)
+		{
+			uasort($shared, function($a, $b) {
+				return strcasecmp(isset($a['email']) ? $a['email'] : '', isset($b['email']) ? $b['email'] : '');
+			});
+		}
+
+		return(array($own, $shared));
+	}
+
+	/**
+	 * @param array $items
+	 * @return array
+	 */
+	function _reindexFolderTreeMenu($items)
+	{
+		$idTable = array();
+		$result = array();
+		$i = 0;
+		foreach($items as $item)
+		{
+			$idTable[$item['id']] = $i;
+			$item['i'] = $i;
+			$result[] = $item;
+			$i++;
+		}
+		foreach($result as $key=>$val)
+		{
+			$parentFolder = isset($val['parentFolder']) ? (int)$val['parentFolder'] : -1;
+			if($parentFolder == -1 || !isset($idTable[$parentFolder]))
+				$result[$key]['parent'] = -1;
+			else
+				$result[$key]['parent'] = $idTable[$parentFolder];
+		}
+		return($result);
+	}
+
+	/**
+	 * virtual id for another user's webdisk root
+	 *
+	 * @param int $ownerId
+	 * @return int
+	 */
+	static function EncodeSharedWebdiskRoot($ownerId)
+	{
+		return(WEBDISK_SHARE_ROOT_BASE - (int)$ownerId);
+	}
+
+	/**
+	 * @param int $folderID
+	 * @return int|false
+	 */
+	static function DecodeSharedWebdiskRoot($folderID)
+	{
+		$folderID = (int)$folderID;
+		if($folderID >= WEBDISK_SHARE_ROOT_BASE)
+			return(false);
+		$ownerId = WEBDISK_SHARE_ROOT_BASE - $folderID;
+		return($ownerId > 0 ? $ownerId : false);
+	}
+
+	/**
+	 * webdisk folders shared with this user
+	 *
+	 * @return array
+	 */
+	function GetAccessibleSharedFolders()
+	{
+		global $db, $lang_user;
+
+		if(is_array($this->_sharedWebdiskFolders))
+			return($this->_sharedWebdiskFolders);
+
+		$result = array();
+		bmOrganizerEnsureShares();
+
+		$res = $db->Query('SELECT f.id,f.titel,f.parent,f.user,f.share,s.access,u.email AS owner_email '
+			. 'FROM {pre}organizer_shares s '
+			. 'INNER JOIN {pre}diskfolders f ON f.id=s.collection_id AND f.user=s.owner_id '
+			. 'INNER JOIN {pre}users u ON u.id=s.owner_id '
+			. 'WHERE s.type=? AND s.target_id=? AND u.gesperrt!=\'delete\' AND s.owner_id!=?',
+			BM_ORGANIZER_SHARE_WDFOLDER,
+			$this->_userID,
+			$this->_userID);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			if(!bmOrganizerShareActiveForOwner(BM_ORGANIZER_SHARE_WDFOLDER, $row['user']))
+				continue;
+			$this->_mergeSharedWebdiskTree($result, $row, $row['access'] === BM_ORGANIZER_ACCESS_WRITE, true, true);
+		}
+		$res->Free();
+
+		$res = $db->Query('SELECT s.access,s.owner_id,u.email AS owner_email '
+			. 'FROM {pre}organizer_shares s '
+			. 'INNER JOIN {pre}users u ON u.id=s.owner_id '
+			. 'WHERE s.type=? AND s.target_id=? AND u.gesperrt!=\'delete\' AND s.owner_id!=?',
+			BM_ORGANIZER_SHARE_WEBDISK,
+			$this->_userID,
+			$this->_userID);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			if(!bmOrganizerShareActiveForOwner(BM_ORGANIZER_SHARE_WEBDISK, $row['owner_id']))
+				continue;
+			$this->_mergeSharedWebdisk($result, (int)$row['owner_id'], $row['owner_email'], $row['access'] === BM_ORGANIZER_ACCESS_WRITE);
+		}
+		$res->Free();
+
+		$this->_sharedWebdiskFolders = $result;
+		return($result);
+	}
+
+	/**
+	 * @param array  $result
+	 * @param int    $ownerId
+	 * @param string $ownerEmail
+	 * @param bool   $writeAccess
+	 */
+	function _mergeSharedWebdisk(&$result, $ownerId, $ownerEmail, $writeAccess)
+	{
+		global $lang_user;
+
+		$ownerId = (int)$ownerId;
+		$vid = self::EncodeSharedWebdiskRoot($ownerId);
+		if(!isset($result[$vid]))
+		{
+			$result[$vid] = array(
+				'id'			=> $vid,
+				'titel'			=> $lang_user['webdisk'],
+				'parent'		=> -1,
+				'userid'		=> $ownerId,
+				'owner_email'	=> $ownerEmail,
+				'readonly'		=> $writeAccess ? 0 : 1,
+				'share_root'	=> 1,
+				'can_leave'		=> 1,
+				'webdisk_share'	=> 1
+			);
+		}
+		else
+		{
+			if($writeAccess)
+				$result[$vid]['readonly'] = 0;
+			$result[$vid]['can_leave'] = 1;
+			$result[$vid]['webdisk_share'] = 1;
+		}
+
+		$this->_ensureOwnerDiskFolderMap($ownerId);
+		$all = isset($this->_ownerDiskFolderMap[$ownerId]) ? $this->_ownerDiskFolderMap[$ownerId] : array();
+		foreach($all as $fid=>$frow)
+		{
+			$frow['owner_email'] = $ownerEmail;
+			$origParent = (int)$frow['parent'];
+			$this->_mergeSharedWebdiskTree($result, $frow, $writeAccess, false, false);
+			if(isset($result[$fid]))
+			{
+				$result[$fid]['webdisk_share'] = 1;
+				if($origParent === 0)
+					$result[$fid]['parent'] = $vid;
+			}
+		}
+	}
+
+	/**
+	 * @param array $result
+	 * @param array $root
+	 * @param bool  $writeAccess
+	 * @param bool  $shareRoot
+	 * @param bool  $canLeave
+	 */
+	function _mergeSharedWebdiskTree(&$result, $root, $writeAccess, $shareRoot, $canLeave)
+	{
+		$ownerId = (int)$root['user'];
+		$rootId = (int)$root['id'];
+		$ownerEmail = isset($root['owner_email']) ? $root['owner_email'] : '';
+		$this->_ensureOwnerDiskFolderMap($ownerId);
+		$all = isset($this->_ownerDiskFolderMap[$ownerId]) ? $this->_ownerDiskFolderMap[$ownerId] : array();
+		if(!isset($all[$rootId]) && $rootId > 0)
+			$all[$rootId] = $root;
+
+		$stack = array($rootId);
+		$seen = array();
+		while(count($stack) > 0)
+		{
+			$id = (int)array_pop($stack);
+			if(isset($seen[$id]) || $id <= 0)
+				continue;
+			$seen[$id] = true;
+			if(!isset($all[$id]))
+				continue;
+
+			$row = $all[$id];
+			$isRoot = ($id == $rootId);
+			$parent = $isRoot && $shareRoot ? -1 : (isset($row['parent']) ? $row['parent'] : 0);
+			$title = isset($row['titel']) ? $row['titel'] : '';
+
+			if(!isset($result[$id]))
+			{
+				$result[$id] = array(
+					'id'			=> $id,
+					'titel'			=> $title,
+					'parent'		=> $parent,
+					'userid'		=> $ownerId,
+					'owner_email'	=> $ownerEmail,
+					'readonly'		=> $writeAccess ? 0 : 1,
+					'share_root'	=> ($isRoot && $shareRoot) ? 1 : 0,
+					'can_leave'		=> ($isRoot && $canLeave) ? 1 : 0,
+					'webdisk_share'	=> 0
+				);
+			}
+			else
+			{
+				if($writeAccess)
+					$result[$id]['readonly'] = 0;
+				if($isRoot && $canLeave)
+					$result[$id]['can_leave'] = 1;
+				if($isRoot && $shareRoot)
+					$result[$id]['share_root'] = 1;
+			}
+
+			foreach($all as $childId=>$child)
+			{
+				if((int)$child['parent'] === $id)
+					$stack[] = (int)$childId;
+			}
+		}
+	}
+
+	/**
+	 * @param int $ownerId
+	 */
+	function _ensureOwnerDiskFolderMap($ownerId)
+	{
+		global $db;
+
+		$ownerId = (int)$ownerId;
+		if(isset($this->_ownerDiskFolderMap[$ownerId]))
+			return;
+
+		$this->_ownerDiskFolderMap[$ownerId] = array();
+		$res = $db->Query('SELECT id,titel,parent,user,share FROM {pre}diskfolders WHERE user=?',
+			$ownerId);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+			$this->_ownerDiskFolderMap[$ownerId][(int)$row['id']] = $row;
+		$res->Free();
+	}
+
+	/**
+	 * map a folder id to owner disk + real folder
+	 *
+	 * @param int $folderID
+	 * @return array|false
+	 */
+	function ResolveFolderAccess($folderID)
+	{
+		$folderID = (int)$folderID;
+		if($folderID === 0)
+		{
+			return(array(
+				'ownerId'		=> $this->_userID,
+				'realFolder'	=> 0,
+				'readonly'		=> 0,
+				'can_leave'		=> 0,
+				'webdisk_share'	=> 0,
+				'share_root_id'	=> 0
+			));
+		}
+
+		$ownerId = self::DecodeSharedWebdiskRoot($folderID);
+		$shared = $this->GetAccessibleSharedFolders();
+		if($ownerId)
+		{
+			if(!isset($shared[$folderID]))
+				return(false);
+			return(array(
+				'ownerId'		=> $ownerId,
+				'realFolder'	=> 0,
+				'readonly'		=> !empty($shared[$folderID]['readonly']),
+				'can_leave'		=> !empty($shared[$folderID]['can_leave']),
+				'webdisk_share'	=> 1,
+				'share_root_id'	=> $folderID
+			));
+		}
+
+		global $db;
+		$res = $db->Query('SELECT id,user,parent FROM {pre}diskfolders WHERE id=?',
+			$folderID);
+		if($res->RowCount() !== 1)
+		{
+			$res->Free();
+			return(false);
+		}
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		if((int)$row['user'] === (int)$this->_userID)
+		{
+			return(array(
+				'ownerId'		=> $this->_userID,
+				'realFolder'	=> $folderID,
+				'readonly'		=> 0,
+				'can_leave'		=> 0,
+				'webdisk_share'	=> 0,
+				'share_root_id'	=> 0
+			));
+		}
+
+		if(!isset($shared[$folderID]))
+			return(false);
+
+		$shareRootId = $folderID;
+		$guard = 0;
+		$cursor = $folderID;
+		while(isset($shared[$cursor]) && $guard++ < 200)
+		{
+			if(!empty($shared[$cursor]['share_root']) || !empty($shared[$cursor]['webdisk_share']))
+			{
+				$shareRootId = $cursor;
+				break;
+			}
+			$parent = (int)$shared[$cursor]['parent'];
+			if($parent == -1 || $parent == $cursor)
+			{
+				$shareRootId = $cursor;
+				break;
+			}
+			$cursor = $parent;
+		}
+
+		return(array(
+			'ownerId'		=> (int)$shared[$folderID]['userid'],
+			'realFolder'	=> $folderID,
+			'readonly'		=> !empty($shared[$folderID]['readonly']),
+			'can_leave'		=> !empty($shared[$folderID]['can_leave']),
+			'webdisk_share'	=> !empty($shared[$folderID]['webdisk_share']),
+			'share_root_id'	=> $shareRootId
+		));
+	}
+
+	/**
+	 * @param int $fileID
+	 * @return array|false
+	 */
+	function ResolveFileAccess($fileID)
+	{
+		global $db;
+
+		$fileID = (int)$fileID;
+		$res = $db->Query('SELECT id,user,ordner FROM {pre}diskfiles WHERE id=?',
+			$fileID);
+		if($res->RowCount() !== 1)
+		{
+			$res->Free();
+			return(false);
+		}
+		$row = $res->FetchArray(MYSQLI_ASSOC);
+		$res->Free();
+
+		$ownerId = (int)$row['user'];
+		$folderID = (int)$row['ordner'];
+		if($ownerId === (int)$this->_userID)
+		{
+			return(array(
+				'ownerId'		=> $ownerId,
+				'realFolder'	=> $folderID,
+				'readonly'		=> 0,
+				'can_leave'		=> 0,
+				'webdisk_share'	=> 0,
+				'share_root_id'	=> 0
+			));
+		}
+
+		if($folderID === 0)
+		{
+			$vid = self::EncodeSharedWebdiskRoot($ownerId);
+			$shared = $this->GetAccessibleSharedFolders();
+			if(!isset($shared[$vid]))
+				return(false);
+			return(array(
+				'ownerId'		=> $ownerId,
+				'realFolder'	=> 0,
+				'readonly'		=> !empty($shared[$vid]['readonly']),
+				'can_leave'		=> 0,
+				'webdisk_share'	=> 1,
+				'share_root_id'	=> $vid
+			));
+		}
+
+		$access = $this->ResolveFolderAccess($folderID);
+		if($access === false || (int)$access['ownerId'] !== $ownerId)
+			return(false);
+		return($access);
+	}
+
+	/**
+	 * path for the UI folder id (own or shared)
+	 *
+	 * @param int $viewFolderID
+	 * @return array
+	 */
+	function GetViewFolderPath($viewFolderID)
+	{
+		$access = $this->ResolveFolderAccess($viewFolderID);
+		if($access === false)
+			return(array());
+
+		if((int)$access['ownerId'] === (int)$this->_userID)
+			return($this->GetFolderPath($access['realFolder']));
+
+		$ownerDisk = _new('BMWebdisk', array($access['ownerId']));
+		$path = $ownerDisk->GetFolderPath($access['realFolder']);
+		if(!empty($access['webdisk_share']))
+			return($path);
+
+		$shared = $this->GetAccessibleSharedFolders();
+		$trimmed = array();
+		$started = false;
+		foreach($path as $bit)
+		{
+			if(!$started)
+			{
+				if(isset($shared[$bit['id']]) && !empty($shared[$bit['id']]['share_root']))
+					$started = true;
+				continue;
+			}
+			$trimmed[] = $bit;
+		}
+		return($trimmed);
 	}
 
 	/**
@@ -522,11 +1102,17 @@ class BMWebdisk
 	{
 		global $userRow, $groupRow;
 
-		if(isset($userRow) && $userRow['id'] == $this->_userID)
+		if(isset($userRow) && (int)$userRow['id'] === (int)$this->_userID)
 			return($groupRow['webdisk'] + $userRow['diskspace_add']);
 
-		assert(false);
-		return(0);
+		$row = BMUser::staticFetch($this->_userID);
+		if(!$row)
+			return(0);
+		$group = _new('BMGroup', array($row['gruppe']));
+		$gRow = is_object($group) ? $group->_row : false;
+		if(!is_array($gRow))
+			return((int)$row['diskspace_add']);
+		return((int)$gRow['webdisk'] + (int)$row['diskspace_add']);
 	}
 
 	/**
@@ -927,6 +1513,7 @@ class BMWebdisk
 			$folderID,
 			$this->_userID);
 		$this->SetShareUntil($folderID, 0);
+		bmOrganizerDeleteCollectionShares(BM_ORGANIZER_SHARE_WDFOLDER, (int)$folderID);
 		return(true);
 	}
 
@@ -1295,14 +1882,20 @@ class BMWebdisk
 	 */
 	function CreateFile($folderID, $fileName, $mimeType, $fileSize)
 	{
-		global $db;
+		global $db, $userRow;
 
 		if($this->Forbidden($fileName, $mimeType)
 			|| $this->FileExists($folderID, $fileName))
 			return(false);
 
+		$uploaderID = (isset($userRow['id']) && (int)$userRow['id'] > 0)
+			? (int)$userRow['id']
+			: (int)$this->_userID;
+		if($uploaderID <= 0)
+			$uploaderID = (int)$this->_userID;
+
 		$db->Query('BEGIN');
-		$db->Query('INSERT INTO {pre}diskfiles(user,dateiname,ordner,size,contenttype,created,accessed,modified,blobstorage) VALUES(?,?,?,?,?,?,?,?,?)',
+		$db->Query('INSERT INTO {pre}diskfiles(user,dateiname,ordner,size,contenttype,created,accessed,modified,blobstorage,uploader_id) VALUES(?,?,?,?,?,?,?,?,?,?)',
 			$this->_userID,
 			$fileName,
 			$folderID,
@@ -1311,7 +1904,8 @@ class BMWebdisk
 			time(),
 			time(),
 			time(),
-			BMBlobStorage::getDefaultWebdiskProvider());
+			BMBlobStorage::getDefaultWebdiskProvider(),
+			$uploaderID);
 		$id = $db->InsertId();
 		$this->UpdateSpace($fileSize);
 		$db->Query('COMMIT');

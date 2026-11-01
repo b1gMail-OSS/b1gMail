@@ -91,12 +91,13 @@ class BMHTTP
 
 		if($this->_protocol === 'https')
 		{
+			// Omit cafile so PHP/OpenSSL keep the system trust store. Setting
+			// cafile would replace that store and drop every other CA.
 			$streamContext = stream_context_create([
 				'ssl' => [
 					'verify_peer' => true,
 					'verify_peer_name' => true,
-					'allow_self_signed' => false,
-					'cafile' => B1GMAIL_DIR . 'res/ca.pem'
+					'allow_self_signed' => false
 				]
 			]);
 			$this->_fp = @stream_socket_client('ssl://' . $this->_host . ':' . $this->_port,

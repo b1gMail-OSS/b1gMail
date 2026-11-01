@@ -35,32 +35,100 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 	{
 		global $os;
 
+		// See note in caldav.php::getCalendarsForUser — Sabre may resolve
+		// nodes before auth runs; be defensive and force a 401 challenge
+		// instead of a PHP fatal on a null $os->addressbook.
+		if(!$os->addressbook)
+			throw new Sabre\DAV\Exception\NotAuthenticated('Authentication required');
+
 		$result = array();
 
-		$result[] = array(
-			'id'				=> 0,
-			'uri'				=> 'main',
-			'principaluri'		=> $os->getPrincipalURI(),
-			'{DAV:}displayname'	=> 'Addressbook',
-			'{' . Sabre\CardDAV\Plugin::NS_CARDDAV . '}supported-address-data' => new Sabre\CardDAV\Xml\Property\SupportedAddressData()
-		);
+		// Default book keeps URI "main" so existing CardDAV subscriptions stay valid.
+		foreach($os->addressbook->GetAddressbooks() as $book)
+		{
+			$result[] = array(
+				'id'				=> $book['id'],
+				'uri'				=> !empty($book['dav_uri'])
+										? $book['dav_uri']
+										: (!empty($book['is_default'])
+											? 'main'
+											: bmOrganizerUniqueCollectionDavUri($os->userRow['id'], $book['title'], 'book', $book['id'])),
+				'principaluri'		=> $os->getPrincipalURI(),
+				'{DAV:}displayname'	=> $book['title'],
+				'{' . Sabre\CardDAV\Plugin::NS_CARDDAV . '}supported-address-data' => new Sabre\CardDAV\Xml\Property\SupportedAddressData(),
+				// See caldav.php::getCalendarsForUser for rationale on getctag.
+				'{http://calendarserver.org/ns/}getctag' => $os->getCollectionCtag($book['id'], BMCL_TYPE_CONTACT)
+			);
+		}
+
+		foreach($os->addressbook->GetSharedAddressbooks() as $book)
+		{
+			// F8: mirror caldav.php — shared address books with
+			// share_access=READ must be surfaced as read-only. Unlike
+			// CalDAV's Calendar::getACL(), Sabre's stock AddressBook
+			// does not honour {http://sabredav.org/ns}read-only itself,
+			// so we hoist the flag here and let our BMReadOnlyAddressBook
+			// wrapper (below) rewrite the ACL. The Property is also kept
+			// in the returned array so clients that PROPFIND the flag
+			// directly (e.g. Apple Contacts) see the truth.
+			$readOnly = (isset($book['share_access'])
+				&& $book['share_access'] !== BM_ORGANIZER_ACCESS_WRITE);
+
+			$result[] = array(
+				'id'				=> $book['id'],
+				'uri'				=> 'shared-book-' . $book['id'],
+				'principaluri'		=> $os->getPrincipalURI(),
+				'{DAV:}displayname'	=> $book['title'] . ' (' . $book['owner_email'] . ')',
+				'{' . Sabre\CardDAV\Plugin::NS_CARDDAV . '}supported-address-data' => new Sabre\CardDAV\Xml\Property\SupportedAddressData(),
+				'{http://sabredav.org/ns}read-only' => $readOnly,
+				'{http://calendarserver.org/ns/}getctag' => $os->getCollectionCtag($book['id'], BMCL_TYPE_CONTACT)
+			);
+		}
 
 		return($result);
 	}
 
 	public function updateAddressBook($addressBookId, \Sabre\DAV\PropPatch $propPatch)
 	{
-		return false;
+		global $os;
+
+		$book = $os->addressbook->GetAccessibleAddressbook($addressBookId);
+		if($book === false)
+			return false;
+		if(!empty($book['shared']))
+			throw new Sabre\DAV\Exception\Forbidden('Shared address book cannot be altered');
+
+		$supportedProperties = array('{DAV:}displayname');
+		$propPatch->handle($supportedProperties, function($mutations) use($addressBookId, $os)
+		{
+			foreach($mutations as $key=>$val)
+			{
+				if($key == '{DAV:}displayname')
+					$os->addressbook->UpdateAddressbook($addressBookId, $val);
+			}
+			return true;
+		});
 	}
 
 	public function createAddressBook($principalUri, $url, array $properties)
 	{
-		return false;
+		global $os;
+
+		$title = isset($properties['{DAV:}displayname']) ? $properties['{DAV:}displayname'] : $url;
+		return $os->addressbook->AddAddressbook($title, $url);
 	}
 
 	public function deleteAddressBook($addressBookId)
 	{
-		return false;
+		global $os;
+
+		$book = $os->addressbook->GetAccessibleAddressbook($addressBookId);
+		if($book === false)
+			throw new Sabre\DAV\Exception\NotFound();
+		if(!empty($book['shared']))
+			throw new Sabre\DAV\Exception\Forbidden('Shared address book cannot be deleted');
+		if(!$os->addressbook->DeleteAddressbook($addressBookId, true))
+			throw new Sabre\DAV\Exception\Forbidden('Default address book cannot be deleted');
 	}
 
 	public function getCards($addressbookId)
@@ -69,10 +137,12 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 
 		$result = array();
 
-		if($addressbookId == 0)
-			$addressbookId = -1;
+		if($addressbookId <= 0)
+			$addressbookId = $os->addressbook->GetDefaultAddressbookID();
+		if($os->addressbook->GetAccessibleAddressbook($addressbookId) === false)
+			throw new Sabre\DAV\Exception\NotFound();
 
-		$groups = $os->addressbook->GetGroupList();
+		$groups = $os->addressbook->GetGroupList(0, $addressbookId);
 
 		if(count($groups) > 0)
 		{
@@ -93,7 +163,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 			);
 		}
 
-		$book = $os->addressbook->GetAddressbook('*', $addressbookId);
+		$book = $os->addressbook->GetAddressbook('*', -1, 'nachname', 'ASC', false, $addressbookId);
 
 		if(count($book) > 0)
 		{
@@ -121,7 +191,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 	{
 		global $os;
 
-		$contactID = $this->cardURItoID($cardUri);
+		$contactID = $this->cardURItoID($cardUri, $addressBookId);
 		if($contactID === false)
 			return(false);
 
@@ -153,7 +223,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		}
 	}
 
-	private function createGroupCard($cardData, $cardUri)
+	private function createGroupCard($cardData, $cardUri, $addressBookId = 0)
 	{
 		global $os;
 
@@ -167,23 +237,23 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		else if($cardData->N)
 			$title = $cardData->N;
 
-		return ($os->addressbook->GroupAdd($title, $cardUri, $davUID) > 0);
+		return ($os->addressbook->GroupAdd($title, $cardUri, $davUID, $addressBookId) > 0);
 	}
 
 	public function createCard($addressBookId, $cardUri, $cardData)
 	{
 		global $os;
 
-		if($addressBookId > 0)
-			$groups = array($addressBookId);
-		else
-			$groups = array();
+		if(!$os->addressbook->CanWriteAddressbook($addressBookId))
+			throw new Sabre\DAV\Exception\Forbidden();
+
+		$groups = array();
 
 		$parsedCard = Sabre\VObject\Reader::read($cardData, Sabre\VObject\Reader::OPTION_FORGIVING);
 
 		if(isset($parsedCard->{'X-ADDRESSBOOKSERVER-KIND'}) && strtoupper($parsedCard->{'X-ADDRESSBOOKSERVER-KIND'}->getValue()) == 'GROUP')
 		{
-			$this->createGroupCard($parsedCard, $cardUri);
+			$this->createGroupCard($parsedCard, $cardUri, $addressBookId);
 			return(null);
 		}
 
@@ -197,7 +267,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 			$contact['web'], $contact['kommentar'], $contact['geburtsdatum'], ADDRESS_PRIVATE, $groups,
 			isset($contact['pictureFile']) ? $contact['pictureFile'] : false,
 			isset($contact['pictureMIME']) ? $contact['pictureMIME'] : false,
-			$cardUri, $contact['dav_uid']);
+			$cardUri, $contact['dav_uid'], $addressBookId);
 
 		return(null);
 	}
@@ -206,7 +276,10 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 	{
 		global $os;
 
-		$contactID = $this->cardURItoID($cardUri);
+		if(!$os->addressbook->CanWriteAddressbook($addressBookId))
+			throw new Sabre\DAV\Exception\Forbidden();
+
+		$contactID = $this->cardURItoID($cardUri, $addressBookId);
 		if($contactID === false)
 			return(false);
 
@@ -237,21 +310,47 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 				$title = $cardData->N;
 
 			$os->addressbook->ChangeGroup($contactID[1], $title);
-			$this->updateGroupMembers($contactID[1], $cardData);
+			// F6: resolve the owner of this shared book so
+			// updateGroupMembers() can look up members and
+			// (re-)associate contacts under the correct user
+			// context, even when we're merely write-shared.
+			$this->updateGroupMembers($contactID[1], $cardData, $addressBookId);
 		}
 
 		return(null);
 	}
 
-	private function updateGroupMembers($groupID, $cardData)
+	/**
+	 * Reconcile the X-ADDRESSBOOKSERVER-MEMBER set of a CardDAV group
+	 * card with our own many-to-many table.
+	 *
+	 * F6: When editing a group inside a shared book (Bob has write
+	 * access to Alice's book), every operation here must run in the
+	 * *book owner's* context — otherwise:
+	 *   - GetGroupMembers() would return an empty "old" set (own-user
+	 *     filter) and we'd wrongly re-insert every member on every sync.
+	 *   - contactIdByUID() would only match Bob's own contacts and
+	 *     silently drop Alice's contacts from the request.
+	 *   - ContactGroup()/DeContactGroup2() would refuse cross-owner
+	 *     operations altogether.
+	 *
+	 * We resolve the book owner up front, use it for the diff, and pass
+	 * it through into the ownership-aware helpers so ACL is still
+	 * enforced (write access to the group's book is verified inside
+	 * those helpers via CanWriteAddressbook()).
+	 */
+	private function updateGroupMembers($groupID, $cardData, $addressBookId)
 	{
 		global $os;
 
+		$book = $os->addressbook->GetAccessibleAddressbook($addressBookId);
+		$ownerID = ($book !== false) ? (int)$book['user'] : (int)$os->userRow['id'];
+
 		$oldUIDs = array();
-		$oldMembers = $os->addressbook->GetGroupMembers($groupID);
+		$oldMembers = $os->addressbook->GetGroupMembers($groupID, $ownerID);
 		foreach($oldMembers as $member)
 		{
-			$uid = $os->genUID($member['dav_uid'], 'contact-' . $member['id'] . '@' . $os->userRow['id']);
+			$uid = $os->genUID($member['dav_uid'], 'contact-' . $member['id'] . '@' . $ownerID);
 			$oldUIDs[$uid] = $member['id'];
 		}
 
@@ -260,7 +359,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		foreach($members as $member)
 		{
 			$uid = str_replace('urn:uuid:', '', $member->getValue());
-			$id = $this->contactIdByUID($uid);
+			$id = $this->contactIdByUID($uid, $addressBookId);
 
 			if(!$id)
 				continue;
@@ -272,7 +371,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		{
 			if(!isset($oldUIDs[$newUID]))
 			{
-				$os->addressbook->ContactGroup($newID, $groupID);
+				$os->addressbook->ContactGroup($newID, $groupID, $ownerID);
 			}
 		}
 
@@ -280,7 +379,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		{
 			if(!isset($newMembers[$oldUID]))
 			{
-				$os->addressbook->DeContactGroup2($oldID, $groupID);
+				$os->addressbook->DeContactGroup2($oldID, $groupID, $ownerID);
 			}
 		}
 	}
@@ -289,7 +388,10 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 	{
 		global $os;
 
-		$contactID = $this->cardURItoID($cardUri);
+		if(!$os->addressbook->CanWriteAddressbook($addressBookId))
+			throw new Sabre\DAV\Exception\Forbidden();
+
+		$contactID = $this->cardURItoID($cardUri, $addressBookId);
 		if($contactID === false)
 			return(false);
 
@@ -303,27 +405,67 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		}
 	}
 
-	private function contactIdByUID($uid)
+	/**
+	 * F6: Resolve a CardDAV member UID to a b1gMail contact ID.
+	 *
+	 * When the group being edited lives in a shared book, "my" address
+	 * book is the wrong search corpus — the members are the *book
+	 * owner's* contacts. If $addressBookId is passed and points at a
+	 * foreign-owned book, we run the SELECT in the owner's context so
+	 * we can match urn:uuid:... entries pointing at Alice's contacts
+	 * even when Bob is the one submitting the update.
+	 */
+	private function contactIdByUID($uid, $addressBookId = 0)
 	{
-		global $os;
+		global $db, $os;
 
 		if(empty($uid))
 			return 0;
 
-		$contacts = $os->addressbook->GetAddressbook('*');
-		foreach($contacts as $contact)
+		$ownerID = (int)$os->userRow['id'];
+		if($addressBookId > 0)
 		{
-			if(!empty($contact['dav_uid']) && $contact['dav_uid'] == $uid
-				|| (empty($contact['dav_uid']) && $os->genUID('', 'contact-' . $contact['id'] . '@' . $os->userRow['id']) == $uid))
-				return $contact['id'];
+			$book = $os->addressbook->GetAccessibleAddressbook($addressBookId);
+			if($book !== false)
+				$ownerID = (int)$book['user'];
 		}
+
+		// Fast path — exact dav_uid match on the owner's contacts.
+		$res = $db->Query('SELECT `id` FROM {pre}adressen WHERE `user`=? AND `dav_uid`=? LIMIT 1',
+			$ownerID, (string)$uid);
+		$row = $res->FetchArray(MYSQLI_NUM);
+		$res->Free();
+		if(is_array($row))
+			return (int)$row[0];
+
+		// Fallback — synthetic UID (contact-<id>@<user>) for older
+		// contacts that never had a dav_uid stored.
+		$res = $db->Query('SELECT `id`,`dav_uid` FROM {pre}adressen WHERE `user`=? AND (`dav_uid` IS NULL OR `dav_uid`=\'\')',
+			$ownerID);
+		while(($r = $res->FetchArray(MYSQLI_ASSOC)))
+		{
+			if($os->genUID('', 'contact-' . $r['id'] . '@' . $ownerID) == $uid)
+			{
+				$res->Free();
+				return (int)$r['id'];
+			}
+		}
+		$res->Free();
 
 		return 0;
 	}
 
-	private function cardURItoID($cardUri)
+	private function cardURItoID($cardUri, $addressBookId = 0)
 	{
 		global $db, $os;
+
+		$ownerId = $os->userRow['id'];
+		if($addressBookId > 0)
+		{
+			$book = $os->addressbook->GetAccessibleAddressbook($addressBookId);
+			if($book !== false)
+				$ownerId = $book['user'];
+		}
 
 		if(substr($cardUri, 0, 6) == 'group-')
 		{
@@ -340,7 +482,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 			$result = false;
 
 			$res = $db->Query('SELECT `id` FROM {pre}adressen WHERE `user`=? AND `dav_uri`=?',
-				$os->userRow['id'],
+				$ownerId,
 				$cardUri);
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
@@ -353,7 +495,7 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 				return(array(BMCL_TYPE_CONTACT, $result));
 
 			$res = $db->Query('SELECT `id` FROM {pre}adressen_gruppen WHERE `user`=? AND `dav_uri`=?',
-				$os->userRow['id'],
+				$ownerId,
 				$cardUri);
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
@@ -504,6 +646,13 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 
 		$obj = new Sabre\VObject\Component\VCard(array('PRODID' => $os->getProdID()));
 
+		// Sabre\VObject\Component\VCard::getDefaults() injects a random
+		// "sabre-vobject-<uuid>" UID that we would otherwise duplicate with
+		// our own $obj->add('UID', ...) below. A per-serialize random UID
+		// would make ETags flap on every read and trigger spurious
+		// "modified on server" prompts in CardDAV clients.
+		unset($obj->UID);
+
 		$obj->add('FN', $row['title']);
 		$obj->add('N', $row['title']);
 		$obj->add('X-ADDRESSBOOKSERVER-KIND', 'group');
@@ -524,6 +673,10 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 		global $os;
 
 		$obj = new Sabre\VObject\Component\VCard(array('PRODID' => $os->getProdID()));
+
+		// See groupToVObject() for rationale — drop Sabre's random default
+		// UID so it doesn't stack with ours and destabilise the ETag.
+		unset($obj->UID);
 
 		$obj->add('UID', $os->genUID($row['dav_uid'], 'contact-' . $row['id'] . '@' . $os->userRow['id']));
 		$obj->add('N', array($row['nachname'], $row['vorname'], '', '', ''));
@@ -580,6 +733,11 @@ class BMCardDAVBackend extends Sabre\CardDAV\Backend\AbstractBackend
 
 class BMCardDAVAuthBackend extends BMAuthBackend
 {
+	protected function davScope()
+	{
+		return BMAppPassword::SCOPE_CARDDAV;
+	}
+
 	function checkPermissions()
 	{
 		return($this->groupRow['organizerdav'] == 'yes');
@@ -597,6 +755,92 @@ class BMCardDAVAuthBackend extends BMAuthBackend
 	}
 }
 
+/**
+ * F8: Read-only wrapper around Sabre's stock AddressBook.
+ *
+ * Sabre's CalDAV Calendar class honours a boolean
+ * `{http://sabredav.org/ns}read-only` in the calendarInfo array and
+ * strips {DAV:}write from the ACL when it's set — clients then hide
+ * the "add contact" UI. CardDAV has no such built-in support, so we
+ * provide it explicitly:
+ *   - getACL()/getChildACL() drop every {DAV:}write privilege.
+ *   - createFile() throws Forbidden BEFORE any body parsing.
+ * The underlying backend still enforces CanWriteAddressbook() as
+ * defence-in-depth in case a rogue client bypasses the ACL check.
+ */
+class BMReadOnlyAddressBook extends \Sabre\CardDAV\AddressBook
+{
+	public function getACL()
+	{
+		$acl = parent::getACL();
+		$filtered = array();
+		foreach($acl as $entry)
+		{
+			if($entry['privilege'] === '{DAV:}write'
+				|| $entry['privilege'] === '{DAV:}write-content'
+				|| $entry['privilege'] === '{DAV:}write-properties'
+				|| $entry['privilege'] === '{DAV:}bind'
+				|| $entry['privilege'] === '{DAV:}unbind')
+			{
+				continue;
+			}
+			$filtered[] = $entry;
+		}
+		return $filtered;
+	}
+
+	public function getChildACL()
+	{
+		$acl = parent::getChildACL();
+		$filtered = array();
+		foreach($acl as $entry)
+		{
+			if($entry['privilege'] === '{DAV:}write'
+				|| $entry['privilege'] === '{DAV:}write-content'
+				|| $entry['privilege'] === '{DAV:}write-properties')
+			{
+				continue;
+			}
+			$filtered[] = $entry;
+		}
+		return $filtered;
+	}
+
+	public function createFile($name, $vcardData = null)
+	{
+		throw new \Sabre\DAV\Exception\Forbidden('This address book is shared read-only');
+	}
+}
+
+/**
+ * F8: AddressBookHome that upgrades read-only shared books to
+ * BMReadOnlyAddressBook so ACL/current-user-privilege-set expose the
+ * truth. Legacy owned books stay on the stock AddressBook class.
+ */
+class BMCardDAVAddressBookHome extends \Sabre\CardDAV\AddressBookHome
+{
+	public function getChildren()
+	{
+		$books = $this->carddavBackend->getAddressBooksForUser($this->principalUri);
+		$objs = array();
+		foreach($books as $book)
+		{
+			$objs[] = !empty($book['{http://sabredav.org/ns}read-only'])
+				? new BMReadOnlyAddressBook($this->carddavBackend, $book)
+				: new \Sabre\CardDAV\AddressBook($this->carddavBackend, $book);
+		}
+		return $objs;
+	}
+}
+
+class BMCardDAVAddressBookRoot extends \Sabre\CardDAV\AddressBookRoot
+{
+	public function getChildForPrincipal(array $principal)
+	{
+		return new BMCardDAVAddressBookHome($this->carddavBackend, $principal['uri']);
+	}
+}
+
 $os = new BMOrganizerState;
 
 $principalBackend 	= new BMPrincipalBackend;
@@ -604,11 +848,11 @@ $carddavBackend		= new BMCardDAVBackend;
 
 $nodes = array(
 	new \Sabre\CalDAV\Principal\Collection($principalBackend),
-	new \Sabre\CardDAV\AddressBookRoot($principalBackend, $carddavBackend)
+	new BMCardDAVAddressBookRoot($principalBackend, $carddavBackend)
 );
 
 $server = new DAV\Server($nodes);
-$server->setBaseUri($_SERVER['SCRIPT_NAME']);
+$server->setBaseUri(bmDavDetermineBaseUri('carddav'));
 
 $authBackend = new BMCardDAVAuthBackend;
 $authBackend->setRealm($bm_prefs['titel'] . ' ' . $lang_user['addressbook']);
@@ -616,7 +860,13 @@ $authPlugin = new DAV\Auth\Plugin($authBackend);
 $server->addPlugin($authPlugin);
 
 $server->addPlugin(new \Sabre\CardDAV\Plugin());
-$server->addPlugin(new \Sabre\DAVACL\Plugin());
+
+// See caldav.php for rationale — force Auth plugin to challenge on 401
+// so Thunderbird / macOS Contacts / etc. actually resend credentials.
+$aclPlugin = new \Sabre\DAVACL\Plugin();
+$aclPlugin->allowUnauthenticatedAccess = false;
+$server->addPlugin($aclPlugin);
+
 $server->addPlugin(new \Sabre\DAV\Sync\Plugin());
 
 $server->exec();

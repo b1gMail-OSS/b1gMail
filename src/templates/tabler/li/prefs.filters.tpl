@@ -53,7 +53,7 @@
 		<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
 			<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 				<a href="{sessionurl file='prefs.php' params="action=filters&do=edit&id={$filterID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
-				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=filters&do=delete&id={$filterID}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+				<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=filters&do=delete&id={$filterID}&csrf_token={$csrfToken}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 			</div>
 		</td>
 	</tr>

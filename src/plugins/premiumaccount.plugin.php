@@ -99,35 +99,6 @@ class PremiumAccountPlugin extends BMPlugin
 		$res->Free();
 	}
 
-	/**
-	 * @param string $template
-	 * @return string
-	 */
-	public function _templatePath($template)
-	{
-		global $bm_prefs;
-
-		$theme = $this->_activeThemeName();
-		if($theme !== '')
-		{
-			$dir  = '';
-			$file = $template;
-			if(strpos($template, '/') !== false)
-			{
-				$dir  = dirname($template) . '/';
-				$file = basename($template);
-			}
-			$dot  = strrpos($file, '.');
-			$base = $dot !== false ? substr($file, 0, $dot) : $file;
-			$ext  = $dot !== false ? substr($file, $dot + 1) : 'tpl';
-			$variantPath = $bm_prefs['selffolder'] . 'plugins/templates/' . $dir . $base . '.' . $theme . '.' . $ext;
-			if(file_exists($variantPath))
-				return $variantPath;
-		}
-
-		return parent::_templatePath($template);
-	}
-
 	protected function _registerNliPackagesCss()
 	{
 		global $tpl, $bm_prefs;
@@ -282,8 +253,11 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_user['pacc_unlimited']			= 'unbegrenzt';
 			$lang_user['pacc_runtimenote']			= 'Die Laufzeit muss ein ganzzahliges Vielfaches von %d sein (%d, %d, %d, ...).';
 			$lang_user['pacc_taxnote']				= 'inkl. %.02f%% MwSt.';
+			$lang_user['pacc_surchargenote']			= 'Transaktionskosten %1 %2';
+			$lang_user['payment_surcharge_opt']		= 'inkl. Transaktionskosten';
 			$lang_user['pacc_banktransfer']		= 'überweisung (Vorkasse)';
 			$lang_user['pacc_paypal']				= 'PayPal';
+			$lang_user['pacc_stripe']				= 'Kreditkarte / TWINT';
 			$lang_user['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_user['pacc_placeorder']			= 'Bestellung zahlungspflichtig abschicken';
 			$lang_user['pacc_placeorderfree']		= 'Kostenlos bestellen';
@@ -388,6 +362,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_paymentmethods']		= 'Zahlungs-Methoden';
 			$lang_admin['pacc_banktransfer']		= 'überweisung (Vorkasse)';
 			$lang_admin['pacc_paypal']				= 'PayPal';
+			$lang_admin['pacc_stripe']				= 'Kreditkarte / TWINT';
 			$lang_admin['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_admin['pacc_kto_inh']			= 'Konto-Inhaber';
 			$lang_admin['pacc_kto_nr']				= 'Konto-Nummer';
@@ -520,8 +495,11 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_user['pacc_unlimited']			= 'unlimited';
 			$lang_user['pacc_runtimenote']			= 'The runtime must be a multiple of %d (%d, %d, %d, ...).';
 			$lang_user['pacc_taxnote']				= 'incl. %.02f%% VAT';
+			$lang_user['pacc_surchargenote']			= 'Transaction fee %1 %2';
+			$lang_user['payment_surcharge_opt']		= 'incl. transaction fee';
 			$lang_user['pacc_banktransfer']		= 'Bank transfer (prepayment)';
 			$lang_user['pacc_paypal']				= 'PayPal';
+			$lang_user['pacc_stripe']				= 'Credit card / TWINT';
 			$lang_user['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_user['pacc_placeorder']			= 'Submit order';
 			$lang_user['pacc_placeorderfree']		= 'Submit order for free';
@@ -626,6 +604,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_paymentmethods']		= 'Payment methods';
 			$lang_admin['pacc_banktransfer']		= 'Bank transfer (prepayment)';
 			$lang_admin['pacc_paypal']				= 'PayPal';
+			$lang_admin['pacc_stripe']				= 'Credit card / TWINT';
 			$lang_admin['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_admin['pacc_kto_inh']			= 'Account owner';
 			$lang_admin['pacc_kto_nr']				= 'Account no.';
@@ -1321,6 +1300,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$tpl->assign('tabs', $tabs);
 		$tpl->assign('paccPlugin', $this->internal_name);
 		$tpl->assign('pageURL', $this->_paccAdminUrl($action, $this->_paccSubDoForUrl(), array(), true));
+		$tpl->assign('bm_prefs', $bm_prefs);
 		$tpl->assign('pacc_prefs', $this->prefs);
 		$tpl->assign('paccMsg', $this->_paccTakeFlashMsg());
 		$tpl->assign('usertpldir', B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/');
@@ -1943,7 +1923,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 */
 	function _getPrefs()
 	{
-		global $db;
+		global $db, $bm_prefs;
 
 		$res = $db->Query('SELECT * FROM {pre}mod_premium_prefs LIMIT 1');
 		$prefs = $res->FetchArray(MYSQLI_ASSOC);
@@ -1951,6 +1931,9 @@ class PremiumAccountPlugin extends BMPlugin
 
 		if(!isset($prefs['nli_packages_order_buttons']) || $prefs['nli_packages_order_buttons'] === '')
 			$prefs['nli_packages_order_buttons'] = 'yes';
+
+		if(isset($bm_prefs['currency']) && trim($bm_prefs['currency']) != '')
+			$prefs['currency'] = $bm_prefs['currency'];
 
 		return($prefs);
 	}
@@ -2362,6 +2345,16 @@ class PremiumAccountPlugin extends BMPlugin
 		if(!class_exists('BMPayment'))
 			include(B1GMAIL_DIR . 'serverlib/payment.class.php');
 		BMPayment::PreparePaymentForm($tpl, '', 0, $userRow);
+		$pf = $tpl->getTemplateVars('_pf');
+		if(!is_array($pf))
+			$pf = array();
+		$pf['enable_paypal_checkout'] = BMPayment::PayPalCheckoutEnabled() ? 'yes' : 'no';
+		$pf['enable_stripe'] = BMPayment::StripeEnabled() ? 'yes' : 'no';
+		$surchargeTpl = BMPayment::SurchargeTplData();
+		$pf['surchargePaypal'] = $surchargeTpl['paypal'];
+		$pf['surchargeStripe'] = $surchargeTpl['stripe'];
+		$pf['surchargeJs'] = $surchargeTpl['js'];
+		$tpl->assign('_pf', $pf);
 	}
 
 	/**
@@ -2380,6 +2373,16 @@ class PremiumAccountPlugin extends BMPlugin
 		if(!class_exists('BMPayment'))
 			include(B1GMAIL_DIR . 'serverlib/payment.class.php');
 		BMPayment::PreparePaymentForm($tpl, '', 0, $userRow);
+		$pf = $tpl->getTemplateVars('_pf');
+		if(!is_array($pf))
+			$pf = array();
+		$pf['enable_paypal_checkout'] = BMPayment::PayPalCheckoutEnabled() ? 'yes' : 'no';
+		$pf['enable_stripe'] = BMPayment::StripeEnabled() ? 'yes' : 'no';
+		$surchargeTpl = BMPayment::SurchargeTplData();
+		$pf['surchargePaypal'] = $surchargeTpl['paypal'];
+		$pf['surchargeStripe'] = $surchargeTpl['stripe'];
+		$pf['surchargeJs'] = $surchargeTpl['js'];
+		$tpl->assign('_pf', $pf);
 
 		$invalidFields = array();
 		$tpl->assign('pacc_prefs',		$this->prefs);
@@ -3217,9 +3220,15 @@ class PremiumAccountPlugin extends BMPlugin
 		$res->Free();
 
 		// outstanding payments (paypal)
-		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\' AND paymethod=?',
-			PAYMENT_METHOD_PAYPAL);
+		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\' AND paymethod IN ?',
+			array(PAYMENT_METHOD_PAYPAL, PAYMENT_METHOD_PAYPAL_CHECKOUT));
 		[$paypalPaymentsCount, $paypalPaymentsSum] = $res->FetchArray(MYSQLI_NUM);
+		$res->Free();
+
+		// outstanding payments (stripe)
+		$res = $db->Query('SELECT COUNT(*),SUM(amount) FROM {pre}orders WHERE status=0 AND cart LIKE \'%PAcc.order.%\' AND paymethod=?',
+			PAYMENT_METHOD_STRIPE);
+		[$stripePaymentsCount, $stripePaymentsSum] = $res->FetchArray(MYSQLI_NUM);
 		$res->Free();
 
 		// outstanding payments (sofortueberweisung)
@@ -3237,6 +3246,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$tpl->assign('outstandingPayments',	sprintf('%d (%.02f %s)', $outstandingPaymentsCount, $outstandingPaymentsSum/100, $bm_prefs['currency']));
 		$tpl->assign('advancePayments',		sprintf('%d (%.02f %s)', $advancePaymentsCount, $advancePaymentsSum/100, $bm_prefs['currency']));
 		$tpl->assign('paypalPayments',		sprintf('%d (%.02f %s)', $paypalPaymentsCount, $paypalPaymentsSum/100, $bm_prefs['currency']));
+		$tpl->assign('stripePayments',		sprintf('%d (%.02f %s)', $stripePaymentsCount, $stripePaymentsSum/100, $bm_prefs['currency']));
 		$tpl->assign('suPayments',			sprintf('%d (%.02f %s)', $suPaymentsCount, $suPaymentsSum/100, $bm_prefs['currency']));
 		$tpl->assign('lang',				$currentLanguage);
 		$tpl->assign('page', 				$this->_templatePath('pacc.admin.overview.tpl'));
@@ -3261,7 +3271,7 @@ class PremiumAccountPlugin extends BMPlugin
 
 	function _usesTablerUi()
 	{
-		return(in_array($this->_activeThemeName(), array('tabler', 'km_v6', 'mt_v2'), true));
+		return(in_array($this->_activeThemeName(), array('tabler', 'km_v6', 'km_v7', 'mt_v2'), true));
 	}
 
 	function _smartyPaccFormatField($params, &$smarty)
@@ -3321,18 +3331,19 @@ class PremiumAccountPlugin extends BMPlugin
 
 		if($value == 'yes' || $value == 'no')
 		{
+			// NLI shells of km_v6/km_v7 load Font Awesome, not the Tabler icon font.
+			if(!isset($userRow))
+				return sprintf('<span class="fa fa-%s" style="color:%s;" title="%s"></span>',
+					$value == 'yes' ? 'check' : 'times',
+					$value == 'yes' ? '#2f7d32' : '#c04545',
+					$value == 'yes' ? 'ja' : 'nein');
 			if($isTabler)
 				return sprintf('<i class="ti ti-%s icon icon-sm text-%s" aria-hidden="true"></i>',
 					$value == 'yes' ? 'check' : 'x',
 					$value == 'yes' ? 'success' : 'danger');
-			if(!isset($userRow))
-				return sprintf('<span class="glyphicon glyphicon-%s" style="color:%s;"></span>',
-					$value == 'yes' ? 'ok' : 'remove',
-					$value == 'yes' ? 'green' : 'red');
-			else
-				return(sprintf('<span class="fa fa-%s" style="color:%s;" />',
-					$value == 'yes' ? 'check' : 'times',
-					$value == 'yes' ? 'green' : 'red'));
+			return sprintf('<span class="fa fa-%s" style="color:%s;"></span>',
+				$value == 'yes' ? 'check' : 'times',
+				$value == 'yes' ? 'green' : 'red');
 		}
 
 		// default

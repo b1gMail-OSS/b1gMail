@@ -8,6 +8,10 @@
 			{date timestamp=$weekEndDate dayonly=true}
 		</div>
 		<div class="right">
+			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=calendars'}';">
+				<i class="ti ti-calendar icon icon-sm me-1" aria-hidden="true"></i>
+				{lng p="calendars"}
+			</button>
 			<button type="button" class="btn btn-sm btn-outline-primary" onclick="document.location.href='{sessionurl file='organizer.calendar.php' params='action=groups'}';">
 				<i class="ti ti-users-group icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="editgroups"}
@@ -17,24 +21,27 @@
 
 	<div class="scrollContainer withBottomBar bm-organizer-calendar-body bm-organizer-calendar-week" id="calendarContainer">
 		<div class="bm-organizer-week-allday-wrap" id="calendarWholeDayBody">
-			<table class="calendarWholeDayBody bm-organizer-calendar-allday" id="weekWholeDayTable" style="border-bottom:3px double var(--tblr-border-color, #B3B8BD);">
-			<tr style="border-bottom:1px solid var(--tblr-border-color, #B3B8BD);">
+			<table class="calendarWholeDayBody bm-organizer-calendar-allday" id="weekWholeDayTable">
+			<tr>
 				<td class="calendarDayTimeCell"></td>
 				<td class="calendarDaySepCell"></td>
-				<td></td>
-				{foreach from=$dates key=dayName item=dontCare}
-				<td class="calendarWeekDayCaption bm-organizer-week-caption">{text value=$dayName}</td>
+				<td class="calendarDaySepCell2"></td>
+				{foreach from=$weekCaptions item=cap}
+				<td class="calendarWeekDayCaption bm-organizer-week-caption{if $cap.today} is-today{/if}">
+					<span class="bm-organizer-week-dow">{$cap.dow}</span>
+					<span class="bm-organizer-week-dom">{$cap.dom}</span>
+				</td>
 				{/foreach}
 			</tr>
 			<tr>
 				<td class="calendarDayTimeCell">&nbsp;</td>
 				<td class="calendarDaySepCell"></td>
 				<td class="calendarDaySepCell2"></td>
-				{foreach from=$dates key=dayName item=dayDates}
-				<td class="calendarWholeDayCell bm-organizer-week-allday" style="border-right:1px solid var(--tblr-border-color, #B3B8BD);">
+				{foreach from=$dates key=dayIndex item=dayDates}
+				<td class="calendarWholeDayCell bm-organizer-week-allday{if $weekCaptions[$dayIndex].today} is-today{/if}">
 					{foreach from=$dayDates item=date}
 					{if $date.flags&1}
-						<div style="overflow:hidden;text-overflow:ellipsis;" class="calendarDate_{$groups[$date.group].color} bm-organizer-calendar-event" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate})">
+						<div style="overflow:hidden;text-overflow:ellipsis;" class="calendarDate_{$date.displayColor} bm-organizer-calendar-event" onclick="showCalendarDate({$date.id}, {$date.startdate}, {$date.enddate})">
 							{text value=$date.title}
 						</div>
 					{/if}
@@ -59,8 +66,8 @@
 			<td class="calendarDaySepCell2" rowspan="48"></td>
 		{/if}
 		{assign var=d value=0}
-		{foreach from=$dates key=dayName item=dontCare}
-			<td class="calendarDayCell{if $smarty.section.halfHours.index%2}2{/if}{if $smarty.section.halfHours.index>=$dayStart && $smarty.section.halfHours.index<$dayEnd}_day{/if} calendarWeekCell bm-organizer-week-cell" id="timeRow_{$d}_{$smarty.section.halfHours.index}" style="{if $smarty.section.halfHours.index==0}border-top:0;{/if}">
+		{foreach from=$dates key=dayIndex item=dontCare}
+			<td class="calendarDayCell{if $smarty.section.halfHours.index%2}2{/if}{if $smarty.section.halfHours.index>=$dayStart && $smarty.section.halfHours.index<$dayEnd}_day{/if} calendarWeekCell bm-organizer-week-cell{if $weekCaptions[$dayIndex].today} is-today{/if}" id="timeRow_{$d}_{$smarty.section.halfHours.index}">
 				&nbsp;
 			</td>
 		{assign var=d value=$d+1}
@@ -74,7 +81,8 @@
 		<!--
 			var calendarDayStart = {$dayStart},
 				calendarDayEnd = {$dayEnd},
-				calendarDates = [];
+				calendarDates = [],
+				calendarWeekDays = [{foreach from=$weekDayTimestamps item=ts name=wdt}{$ts}{if !$smarty.foreach.wdt.last},{/if}{/foreach}];
 
 			{assign var=d value=0}
 			{foreach from=$dates item=dayDates}
@@ -85,7 +93,7 @@
 				{$date.startdate},
 				{$date.enddate},
 				"{text escape=true noentities=true value=$date.title}",
-				{$groups[$date.group].color},
+				{$date.displayColor},
 				{$d}
 			]);
 			{/if}
@@ -95,6 +103,7 @@
 
 			registerLoadAction('calendarDaySizer()');
 			registerLoadAction('initCalendar()');
+			registerLoadAction('initCalendarRangeSelection()');
 		//-->
 		</script>
 	</div>

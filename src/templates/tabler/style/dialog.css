@@ -176,7 +176,7 @@ H1
 .progressBarValue
 {
 	height: 100%;
-	background-color: #066fd1;
+	background-color: var(--tblr-primary, #066fd1);
 	float: left;
 }
 

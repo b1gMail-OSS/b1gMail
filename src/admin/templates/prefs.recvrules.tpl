@@ -8,7 +8,7 @@
 				<table class="table table-vcenter table-striped">
 					<thead>
 					<tr>
-						<th style="width: 25px;" class="text-center"><a href="javascript:invertSelection(document.forms.f1,'rule_');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th style="width: 25px;" class="text-center"><a href="javascript:invertSelection(document.forms.f1,'rule_');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th>{lng p="field"}</th>
 						<th>{lng p="expression"}</th>
 						<th style="width: 210px;">{lng p="action"}</th>
@@ -39,18 +39,16 @@
 				</table>
 			</div>
 			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="export">{lng p="export"}</option>
 								<option value="delete">{lng p="delete"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 			</div>
 		</div>

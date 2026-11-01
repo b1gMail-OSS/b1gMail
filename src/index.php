@@ -747,7 +747,13 @@ else if($_REQUEST['action'] == 'signup')
 				$tpl->assign('countryList',			CountryList());
 				$tpl->assign('defaultCountry',		$bm_prefs['std_land']);
 				$tpl->assign('tos',					HTMLFormat($lang_custom['tos']));
-				$tpl->assign('tos_html',			nl2br(HTMLFormat($lang_custom['tos'])));
+				// tos_html is rendered as raw HTML in the signup modal so
+				// the admin's custom TOS text (which may legitimately
+				// contain <strong>, <a href>, <br /> and similar markup
+				// from the ACP text editor) is not double-escaped. Kept
+				// consistent with the standalone /?action=tos route in
+				// this same file (see line ~129).
+				$tpl->assign('tos_html',			nl2br($lang_custom['tos']));
 				$tpl->assign('domainListSignup',	GetDomainList('signup'));
 				$tpl->assign('minPassLength',		$bm_prefs['min_pass_length']);
 				$tpl->assign('minPassText',			sprintf($lang_user['minchars'], $bm_prefs['min_pass_length']));

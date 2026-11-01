@@ -24,6 +24,9 @@ var clientTZ = (new Date()).getTimezoneOffset() * (-60);
 function bmPublicFilterParams(params, exclude)
 {
 	var extra = {}, k;
+	exclude = exclude ? exclude.slice() : [];
+	if(exclude.indexOf('sid') < 0)
+		exclude.push('sid');
 	for(k in params)
 	{
 		if(!params.hasOwnProperty(k))
@@ -91,6 +94,64 @@ function bmPublicPathFromLegacy(script, params)
 		return { path: path, extra: bmPublicFilterParams(params, exclude) };
 	}
 
+	var organizerScripts = {
+		'organizer.calendar.php': 'calendar',
+		'organizer.todo.php': 'todo',
+		'organizer.addressbook.php': 'addressbook',
+		'organizer.notes.php': 'notes',
+		'organizer.php': 'calendar'
+	};
+	if(organizerScripts[script])
+	{
+		var orgPath = organizerScripts[script],
+			orgExclude = [],
+			orgAction = params.action || '',
+			orgActionMap = {
+				'calendar': {
+					editDate: 'edit', addDate: 'add', createDate: 'create', saveDate: 'save',
+					deleteDate: 'delete', showDate: 'show', dayView: 'dayview', groups: 'groups'
+				},
+				'todo': {
+					editTask: 'edit', addTask: 'add', createTask: 'create', saveTask: 'save',
+					deleteTask: 'delete', getLists: 'getlists', addList: 'addlist', deleteList: 'deletelist'
+				},
+				'addressbook': {
+					editContact: 'edit', addContact: 'add', createContact: 'create', saveContact: 'save',
+					deleteContact: 'delete', showContact: 'show', groups: 'groups',
+					books: 'books', share: 'share', leaveshare: 'leaveshare',
+					exportDialog: 'exportdialog', exportAddressbook: 'exportaddressbook',
+					importDialogStart: 'importdialogstart', importDialog: 'importdialog',
+					importDialogSubmit: 'importdialogsubmit', importFile: 'importfile',
+					importCSV: 'importcsv',
+					userPictureDialog: 'userpicturedialog', userPictureDialogSubmit: 'userpicturedialogsubmit',
+					vcfImportDialog: 'vcfimportdialog', vcfImportDialogSubmit: 'vcfimportdialogsubmit',
+					addressbookPicture: 'addressbookpicture', attendeePopup: 'attendeepopup',
+					addressPopup: 'addresspopup', numberPopup: 'numberpopup',
+					lookupAddresses: 'lookupaddresses'
+				},
+				'notes': {
+					editNote: 'edit', addNote: 'add', createNote: 'create', saveNote: 'save',
+					deleteNote: 'delete', getNoteText: 'getnotetext'
+				}
+			};
+		if(script === 'organizer.php')
+			return { path: orgPath, extra: {} };
+		if(orgAction && orgAction !== 'start')
+		{
+			var mapped = (orgActionMap[orgPath] && orgActionMap[orgPath][orgAction])
+				? orgActionMap[orgPath][orgAction]
+				: bmPublicNormalizeSegment(orgAction);
+			orgPath += '/' + mapped;
+			orgExclude.push('action');
+		}
+		if(params.id !== undefined && params.id !== '')
+		{
+			orgPath += '/' + encodeURIComponent(params.id);
+			orgExclude.push('id');
+		}
+		return { path: orgPath, extra: bmPublicFilterParams(params, orgExclude) };
+	}
+
 	return null;
 }
 
@@ -106,7 +167,12 @@ function bmJoinApiBase(url)
 	if(base)
 		return base.replace(/\/?$/, '/') + String(url).replace(/^\.\//, '');
 
-	return '/' + String(url).replace(/^\.\//, '');
+	// F3 fix: Without a configured apiBase we MUST keep the URL
+	// relative — the public-share page lives under /share/ and
+	// its XHRs to `index.php?action=getFolder&…` would otherwise
+	// be rewritten to `/index.php?…` (root) and hit the login
+	// page, returning HTML instead of the expected XML.
+	return String(url).replace(/^\.\//, '');
 }
 
 function bmPublicUrl(url)
@@ -176,6 +242,27 @@ function bmLegacyApiUrl(url)
 }
 window.bmLegacyApiUrl = bmLegacyApiUrl;
 
+/**
+ * F2: attach the current CSRF token to a URL so state-changing GET
+ * requests (delete/rename/stopShare/deleteMail/…) survive
+ * CsrfEnforceOnStateChange() on the server. Idempotent — a URL that
+ * already carries csrf_token= is returned unchanged.
+ *
+ * bmCsrfToken is set globally by li/index.tpl (server-rendered from the
+ * user's session token). If it's missing (e.g. very early load) the
+ * URL is returned unchanged and the server-side helper will reject the
+ * request — that's the correct fail-safe behavior.
+ */
+function bmAppendCsrf(url)
+{
+	if(!url) return url;
+	if(typeof bmCsrfToken === 'undefined' || !bmCsrfToken) return url;
+	if(url.indexOf('csrf_token=') !== -1) return url;
+	return url + (url.indexOf('?') >= 0 ? '&' : '?')
+		+ 'csrf_token=' + encodeURIComponent(bmCsrfToken);
+}
+window.bmAppendCsrf = bmAppendCsrf;
+
 function bmAppendSession(url)
 {
 	if(!url)
@@ -221,6 +308,86 @@ function isChildOf(child, parent)
 	return false;
 }
 
+function applyPaymentSurcharge(amount)
+{
+	amount = parseFloat(amount);
+	if(isNaN(amount))
+		amount = 0;
+	var baseCents = Math.round(amount * 100);
+	var methodEl = (typeof EBID == 'function') ? EBID('paymentMethod') : null;
+	if(!methodEl)
+		methodEl = document.getElementById('paymentMethod');
+	if(!methodEl)
+		return baseCents / 100;
+	var cfg = null;
+	if(methodEl.selectedIndex >= 0)
+	{
+		var opt = methodEl.options[methodEl.selectedIndex];
+		if(opt && opt.getAttribute('data-surcharge-percent') != null)
+			cfg = {
+				enabled: true,
+				percent: parseFloat(opt.getAttribute('data-surcharge-percent')) || 0,
+				fixed: parseFloat(opt.getAttribute('data-surcharge-fixed')) || 0,
+				cover: opt.getAttribute('data-surcharge-cover') != '0'
+			};
+	}
+	if(!cfg && typeof bmPayment != 'undefined' && bmPayment.surcharge)
+		cfg = bmPayment.surcharge[methodEl.value] || bmPayment.surcharge[parseInt(methodEl.value, 10)];
+	if(!cfg || !cfg.enabled)
+		return baseCents / 100;
+	var percent = parseFloat(cfg.percent);
+	if(isNaN(percent) || percent < 0)
+		percent = 0;
+	var fixed = parseFloat(cfg.fixed);
+	if(isNaN(fixed) || fixed < 0)
+		fixed = 0;
+	var fixedCents = Math.round(fixed * 100);
+	var grossCents;
+	if(cfg.cover)
+	{
+		var rate = percent / 100;
+		if(rate >= 0.99)
+			rate = 0.99;
+		grossCents = Math.round((baseCents + fixedCents) / (1 - rate));
+	}
+	else
+		grossCents = baseCents + Math.round(baseCents * percent / 100) + fixedCents;
+	return grossCents / 100;
+}
+
+function paymentSurchargeNote(baseAmount, grossAmount)
+{
+	var extra = Math.round((grossAmount - baseAmount) * 100) / 100;
+	if(extra <= 0 || typeof lang == 'undefined' || !lang['paymentsurcharge'] || typeof bmPayment == 'undefined')
+		return '';
+	return lang['paymentsurcharge'].replace('%1', formatNumber(extra, 2)).replace('%2', bmPayment.currency);
+}
+
+function refreshPaymentAmount(baseAmount, taxNote)
+{
+	if(typeof bmPayment == 'undefined')
+		return;
+	var gross = applyPaymentSurcharge(baseAmount);
+	var html = formatNumber(gross, 2) + ' ' + bmPayment.currency;
+	var ids = ['paymentAmount', 'finalAmount'];
+	for(var i = 0; i < ids.length; i++)
+	{
+		var amountEl = document.getElementById(ids[i]);
+		if(amountEl)
+			amountEl.innerHTML = html;
+	}
+	var noteEl = document.getElementById('taxNote');
+	if(noteEl)
+		noteEl.innerHTML = taxNote || '';
+	var surchargeEl = document.getElementById('surchargeNote');
+	if(surchargeEl)
+	{
+		var surcharge = paymentSurchargeNote(baseAmount, gross);
+		surchargeEl.innerHTML = surcharge;
+		surchargeEl.style.display = surcharge ? '' : 'none';
+	}
+}
+
 function updatePaymentMethod(field)
 {
 	var paymentMethodID = field.value;
@@ -237,6 +404,12 @@ function updatePaymentMethod(field)
 				tbodies[i].style.display = 'none';
 		}
 	}
+
+	var land = (typeof EBID == 'function') ? EBID('land') : document.getElementById('land');
+	if(land)
+		updatePaymentCountry(land);
+	else if(typeof bmPayment != 'undefined')
+		refreshPaymentAmount(bmPayment.baseAmount, '');
 }
 
 function formatNumber(num, decimals)
@@ -279,8 +452,7 @@ function updatePaymentCountry(field)
 	if(showTaxNote)
 		taxNote = lang['taxnote'].replace('%1', formatNumber(taxRate, 2));
 
-	EBID('paymentAmount').innerHTML = formatNumber(amount, 2) + ' ' + bmPayment.currency;
-	EBID('taxNote').innerHTML = taxNote;
+	refreshPaymentAmount(amount, taxNote);
 }
 
 function getCookie(name)
@@ -343,6 +515,13 @@ function removeEvent(elem, event, handler)
 
 function documentLoader()
 {
+	if(window.tabler && tabler.OtpInput)
+	{
+		document.querySelectorAll('.bm-mfa-otp[data-bs-toggle="otp"]').forEach(function(el) {
+			tabler.OtpInput.getOrCreateInstance(el);
+		});
+	}
+
 	initBmTheme();
 	initBmNavbarDropdowns();
 	bmSyncTablerLayout();
@@ -959,6 +1138,13 @@ function GetXMLHTTP()
 function MakeXMLRequest(url, callback, param, cClose)
 {
 	url = bmAppendSession(url);
+	// F2: every XHR must carry the CSRF token so server-side
+	// CsrfEnforceOnStateChange() on delete/rename/stopShare/etc.
+	// endpoints accepts the request. We attach it two ways:
+	//   1. X-CSRF-Token header (preferred, invisible to logs)
+	//   2. csrf_token=... query parameter (fallback, for endpoints
+	//      that only look at $_REQUEST — cheap belt-and-braces).
+	url = bmAppendCsrf(url);
 
 	var xmlHTTP = GetXMLHTTP();
 
@@ -971,6 +1157,8 @@ function MakeXMLRequest(url, callback, param, cClose)
 		xmlHTTP.open("GET", url, true);
 		if(cClose)
 			xmlHTTP.setRequestHeader("Connection", "close");
+		if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
+			xmlHTTP.setRequestHeader("X-CSRF-Token", bmCsrfToken);
 		if(typeof(callback) == "string")
 		{
 			xmlHTTP.onreadystatechange = function xh_readyChange()

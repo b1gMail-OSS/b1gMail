@@ -43,12 +43,14 @@
 		</td>
 		<td class="{$class}" nowrap="nowrap" align="center"><center>{progressBar width=80 value=$task.erledigt max=100}</center></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			{if $canShareTodo && empty($task.shared)}<a href="#" title="{lng p="sharetask"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=share&kind=task&id={$taskID}"}', '{lng p="sharetask"|escape:'javascript'}', 520, 360);"><i class="fa fa-share" aria-hidden="true"></i></a>{/if}
+			{if empty($task.readonly)}<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>{/if}
+			{if !empty($task.can_leave)}<a href="#" title="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=leaveshare&kind=task&id={$taskID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{elseif empty($task.readonly)}<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{/if}
 		</td>
 	</tr>
 	{else}{assign value=true var=haveDoneTasks}{/if}{/foreach}
 	
+	{if $taskListWritable|default:false}
 	{cycle values="listTableTD,listTableTD2" assign="class"}
 	<tr id="newTask">
 		<td class="{$class} taskCheckBox">
@@ -64,6 +66,7 @@
 			<input type="button" class="smallInput" value=" {lng p="ok"} " onclick="addTask()" />
 		</td>
 	</tr>
+	{/if}
 	
 	</tbody>
 	
@@ -96,8 +99,9 @@
 		</td>
 		<td class="{$class}" nowrap="nowrap" align="center"><center>{progressBar width=80 value=$task.erledigt max=100}</center></td>
 		<td class="{$class}" nowrap="nowrap">
-			<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			{if $canShareTodo && empty($task.shared)}<a href="#" title="{lng p="sharetask"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=share&kind=task&id={$taskID}"}', '{lng p="sharetask"|escape:'javascript'}', 520, 360);"><i class="fa fa-share" aria-hidden="true"></i></a>{/if}
+			{if empty($task.readonly)}<a href="{sessionurl file='organizer.todo.php' params="action=editTask&id={$taskID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>{/if}
+			{if !empty($task.can_leave)}<a href="#" title="{lng p="shareleave"}" onclick="return organizerOpenOverlay('{sessionurl file='organizer.todo.php' params="action=leaveshare&kind=task&id={$taskID}"}', '{lng p="shareleave"|escape:'javascript'}', 480, 260);"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{elseif empty($task.readonly)}<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='organizer.todo.php' params="action=deleteTask&taskListID={$taskListID}&id={$taskID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>{/if}
 		</td>
 	</tr>
 	{/if}
@@ -111,6 +115,7 @@
 </div>
 
 <div class="contentFooter">
+{if $taskListWritable|default:false}
 <div class="left">
 	<form name="f1" method="post" action="{sessionurl file='organizer.todo.php' params='action=action'}" onsubmit="transferSelectedTasks()">
 		{csrffield}
@@ -132,6 +137,7 @@
 		{lng p="addtask"}
 	</button>
 </div>
+{/if}
 </div>
 
 <script>
@@ -139,6 +145,6 @@
 	currentTaskListID = {$taskListID};
 	initTasksSel();
 	enableTodoDragTargets();
-	EBID('newTaskText').focus();
+	if(EBID('newTaskText')) EBID('newTaskText').focus();
 //-->
 </script>

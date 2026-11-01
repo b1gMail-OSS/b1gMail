@@ -30,7 +30,7 @@
 					{csrffield}
 					<input type="hidden" name="do" value="{if $plugin.active}deactivatePlugin{else}activatePlugin{/if}" />
 					<input type="hidden" name="filename" value="{$plugin.filename|escape}" />
-					<button type="submit" class="btn btn-sm btn-ghost-secondary p-0" title="{lng p="acdeactivate"}"><img src="{$tpldir}images/plugin_switch.png" alt="{lng p="acdeactivate"}" width="16" height="16" /></button>
+					<button type="submit" class="btn btn-sm btn-ghost-secondary p-0" title="{lng p="acdeactivate"}">{acpicon file="plugin_switch.png"}</button>
 				</form>
 			</td>
 			{else}
@@ -52,7 +52,7 @@
 	
 	<table width="100%">
 	<tr>
-		<td align="left" valign="top" width="40"><img src="{$tpldir}images/updates.png" border="0" alt="" width="32" height="32" /></td>
+		<td align="left" valign="top" width="40">{acpicon file="updates.png" size="lg"}</td>
 		<td>
 			{lng p="bms_updatesdesc"}
 	

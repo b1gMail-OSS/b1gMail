@@ -49,6 +49,213 @@
 	<fieldset>
 		<legend>PayPal</legend>
 
+		{if $paypalWebhookMsg}
+		<div class="alert {if $paypalWebhookOk}alert-success{else}alert-warning{/if}">{$paypalWebhookMsg}</div>
+		{/if}
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enablechrgpaypalcheckout"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enable_paypal_checkout"{if isset($bm_prefs.enable_paypal_checkout) && $bm_prefs.enable_paypal_checkout=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="default_paymethod" value="4"{if $bm_prefs.default_paymethod==4} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="paypal_clientid"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="paypal_client_id" value="{if isset($bm_prefs.paypal_client_id)}{text value=$bm_prefs.paypal_client_id allowEmpty=true}{/if}" autocomplete="off">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="paypal_secret"}</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="paypal_client_secret" value="" placeholder="{lng p="paypal_secret_keep"}" autocomplete="new-password">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="paypal_sandbox"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="paypal_sandbox"{if isset($bm_prefs.paypal_sandbox) && $bm_prefs.paypal_sandbox=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="paypal_autoactivate"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="paypal_auto_activate"{if !isset($bm_prefs.paypal_auto_activate) || $bm_prefs.paypal_auto_activate!='no'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="paypal_autoactivate_desc"}</span>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="paypal_webhookurl"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" value="{$paypalWebhookUrl}" readonly="readonly">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="paypal_webhookid"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="paypal_webhook_id" value="{if isset($bm_prefs.paypal_webhook_id)}{text value=$bm_prefs.paypal_webhook_id allowEmpty=true}{/if}" autocomplete="off">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="surcharge"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="paypal_surcharge"{if isset($bm_prefs.paypal_surcharge) && $bm_prefs.paypal_surcharge=='yes'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="surcharge_enable"}</span>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="surcharge_percent"}</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input type="text" class="form-control" name="paypal_surcharge_percent" value="{if isset($bm_prefs.paypal_surcharge_percent)}{text value=$bm_prefs.paypal_surcharge_percent allowEmpty=true}{else}0{/if}">
+					<span class="input-group-text">%</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="surcharge_fixed"}</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input type="text" class="form-control" name="paypal_surcharge_fixed" value="{if isset($bm_prefs.paypal_surcharge_fixed)}{text value=$bm_prefs.paypal_surcharge_fixed allowEmpty=true}{else}0{/if}">
+					<span class="input-group-text">{$bm_prefs.currency}</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="surcharge_cover"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="paypal_surcharge_cover"{if !isset($bm_prefs.paypal_surcharge_cover) || $bm_prefs.paypal_surcharge_cover!='no'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="surcharge_cover_desc"}</span>
+				</label>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset>
+		<legend>Stripe</legend>
+
+		{if $stripeWebhookMsg}
+		<div class="alert {if $stripeWebhookOk}alert-success{else}alert-warning{/if}">{$stripeWebhookMsg}</div>
+		{/if}
+
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="enablechrgstripe"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="enable_stripe"{if isset($bm_prefs.enable_stripe) && $bm_prefs.enable_stripe=='yes'} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="default_paymethod" value="5"{if $bm_prefs.default_paymethod==5} checked="checked"{/if}>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="stripe_secret"}</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="stripe_secret_key" value="" placeholder="{lng p="stripe_secret_keep"}" autocomplete="new-password">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="stripe_enable_twint"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="stripe_enable_twint"{if !isset($bm_prefs.stripe_enable_twint) || $bm_prefs.stripe_enable_twint!='no'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="stripe_enable_twint_desc"}</span>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="stripe_autoactivate"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="stripe_auto_activate"{if !isset($bm_prefs.stripe_auto_activate) || $bm_prefs.stripe_auto_activate!='no'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="stripe_autoactivate_desc"}</span>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="stripe_webhookurl"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" value="{$stripeWebhookUrl}" readonly="readonly">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="stripe_webhooksecret"}</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" name="stripe_webhook_secret" value="" placeholder="{lng p="stripe_secret_keep"}" autocomplete="new-password">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="stripe_webhookid"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="stripe_webhook_id" value="{if isset($bm_prefs.stripe_webhook_id)}{text value=$bm_prefs.stripe_webhook_id allowEmpty=true}{/if}" autocomplete="off">
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="surcharge"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="stripe_surcharge"{if isset($bm_prefs.stripe_surcharge) && $bm_prefs.stripe_surcharge=='yes'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="surcharge_enable"}</span>
+				</label>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="surcharge_percent"}</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input type="text" class="form-control" name="stripe_surcharge_percent" value="{if isset($bm_prefs.stripe_surcharge_percent)}{text value=$bm_prefs.stripe_surcharge_percent allowEmpty=true}{else}0{/if}">
+					<span class="input-group-text">%</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="surcharge_fixed"}</label>
+			<div class="col-sm-10">
+				<div class="input-group">
+					<input type="text" class="form-control" name="stripe_surcharge_fixed" value="{if isset($bm_prefs.stripe_surcharge_fixed)}{text value=$bm_prefs.stripe_surcharge_fixed allowEmpty=true}{else}0{/if}">
+					<span class="input-group-text">{$bm_prefs.currency}</span>
+				</div>
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="surcharge_cover"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="stripe_surcharge_cover"{if !isset($bm_prefs.stripe_surcharge_cover) || $bm_prefs.stripe_surcharge_cover!='no'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="surcharge_cover_desc"}</span>
+				</label>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset>
+		<legend>{lng p="paypal_classic"}</legend>
+
+		<div class="alert alert-warning">{lng p="paypal_classic_notice"}</div>
+
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-check-label">{lng p="enablechrgpaypal"}</label>
 			<div class="col-sm-10">

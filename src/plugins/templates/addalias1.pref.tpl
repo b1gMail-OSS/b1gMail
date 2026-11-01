@@ -10,9 +10,9 @@
 <fieldset>
 	<legend>{lng p="add"}</legend>
 	{if $tpl_email_locked==false}
-		<center><img src="./templates/images/ok.png" border="0" alt="{lng p="ok"}" width="16" height="16" /> {lng p="success"}!</center>
+		<center>{acpicon file="ok.png"} {lng p="success"}!</center>
 	{else}
-		<center><img src="./templates/images/error.png" border="0" alt="{lng p="error"}" width="16" height="16" /> {lng p="error"}! {lng p="addresstaken"}</center>
+		<center>{acpicon file="error.png"} {lng p="error"}! {lng p="addresstaken"}</center>
 	{/if}
 </fieldset>
 {/if}
@@ -28,7 +28,7 @@
 					<option value="{$gruppe.id}"{if $selected_gruppe==$gruppe.id} selected="selected"{/if}>{text value=$gruppe.titel}</option>
 				{/foreach}
 				</select>
-				<input type="hidden" value="{$selected_gruppe}" name="gruppe_hidden"> <a href="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page2'}"><img src="./templates/images/help.png" border="0" alt="Bearbeiten" width="16" height="16" /></a></td>
+				<input type="hidden" value="{$selected_gruppe}" name="gruppe_hidden"> <a href="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page2'}">{acpicon file="help.png"}</a></td>
 			</tr>
 		</table>
 
@@ -51,7 +51,7 @@
 					<option value="{$user.id}"{if $selected_user==$user.id} selected="selected"{/if}>{text value=$user.email}</option>
 				{/foreach}
 				</select>
-				<input type="hidden" value="{$selected_user}" name="user_hidden"> <a href="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page2'}"><img src="./templates/images/help.png" border="0" alt="Bearbeiten" width="16" height="16" /></a></td>
+				<input type="hidden" value="{$selected_user}" name="user_hidden"> <a href="{sessionurl file='plugin.page.php' params='plugin=addalias&do=page2'}">{acpicon file="help.png"}</a></td>
 			</tr>
 		</table>
 

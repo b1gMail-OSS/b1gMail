@@ -1437,16 +1437,20 @@ function togglePluginPackage(id)
     var packItem = EBID('package_' + id);
     var packItemImg = EBID('packageImage_' + id);
 
-    if(packItem.style.display == '')
+    if(!packItem || !packItemImg)
+        return;
+
+    var collapsed = packItem.style.display == '';
+    packItem.style.display = collapsed ? 'none' : '';
+    if(packItemImg.tagName === 'IMG')
     {
-        packItem.style.display = 'none';
-        packItemImg.src = packItemImg.src.replace(/contract/, 'expand');
+        packItemImg.src = collapsed
+            ? packItemImg.src.replace(/contract/, 'expand')
+            : packItemImg.src.replace(/expand/, 'contract');
+        return;
     }
-    else
-    {
-        packItem.style.display = '';
-        packItemImg.src = packItemImg.src.replace(/expand/, 'contract');
-    }
+    packItemImg.classList.toggle('ti-chevron-down', !collapsed);
+    packItemImg.classList.toggle('ti-chevron-right', collapsed);
 }
 
 function _checkPluginSignature(obj)

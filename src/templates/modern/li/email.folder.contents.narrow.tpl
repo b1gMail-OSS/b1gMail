@@ -1,4 +1,4 @@
-{if empty($smarty.get.tableOnly)}<form name="f1" action="{sessionurl file='email.php' params="do=action&{$folderString}"}" onsubmit="transferSelectedMailIDs()" method="post">
+{if empty($smarty.get.tableOnly)}<form name="f1" action="{sessionurl file='email.php' params="do=action&{$folderString}"}" onsubmit="return executeMailMassAction();" method="post">
 {csrffield}
 <input type="hidden" name="selectedMailIDs" id="selectedMailIDs" value="" />
 
@@ -9,6 +9,9 @@
 	</div>
 
 	<div class="right">
+		<button onclick="toggleFolderFavorite({$folderID});" type="button" title="{if !empty($folderIsFavorite)}{lng p="removefromfavorites"}{else}{lng p="addtofavorites"}{/if}">
+			<i class="fa {if !empty($folderIsFavorite)}fa-star{else}fa-star-o{/if} fa-lg"></i>
+		</button>
 		{if isset($folderInfo.type)&&$folderInfo.type!='intellifolder'&&empty($folderInfo.readonly)}
 		<button onclick="showFolderMenu(event);" type="button">
 			<i class="fa fa-gears fa-lg"></i>

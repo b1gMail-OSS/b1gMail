@@ -542,6 +542,15 @@ elseif ($step == STEP_INSTALL) {
                     echo 'Failed to create default config: '.mysqli_error($connection)."\n";
                 }
 
+                // Harden by default on FRESH installations: require app passwords
+                // for all DAV endpoints (CalDAV/CardDAV/WebDAV). Existing
+                // installations upgrading from an earlier version keep the
+                // schema default `warn` (see database.struct.json) so that
+                // configured DAV clients continue to work with the account
+                // password until the admin has issued app passwords and
+                // switches this to `strict` manually.
+                mysqli_query($connection, 'UPDATE '.DB_INSTALL_PREFIX.'prefs SET app_password_dav_mode=\'strict\'');
+
                 $adminPW = SetupHashPassword($adminPlain, 'admin');
                 if (mysqli_query($connection, sprintf('REPLACE INTO '.DB_INSTALL_PREFIX.'admins(`adminid`,`username`,`firstname`,`lastname`,`password`,`password_salt`,`type`,`notes`) VALUES '
                             .'(1,\'%s\',\'%s\',\'%s\',\'%s\',\'\',0,\'\')',

@@ -45,7 +45,7 @@
 		<td class="{if $sortColumn=='active'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<input type="checkbox" disabled="disabled"{if $filter.active} checked="checked"{/if} /></td>
 		<td class="{$class}" nowrap="nowrap">
 			<a href="{sessionurl file='prefs.php' params="action=filters&do=edit&id={$filterID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=filters&do=delete&id={$filterID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=filters&do=delete&id={$filterID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}

@@ -15,7 +15,7 @@
 				<thead>
 					<tr>
 						<th style="width:25px;text-align:center;">
-							<a href="javascript:invertSelection(document.getElementById('amMassForm'),'mirroring_');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a>
+							<a href="javascript:invertSelection(document.getElementById('amMassForm'),'mirroring_');">{acpicon file="dot.png" size="sm"}</a>
 						</th>
 						<th>{lng p="am_source"}</th>
 						<th>{lng p="am_dest"}</th>

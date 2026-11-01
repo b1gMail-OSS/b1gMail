@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+	{include file="theme-boot.tpl"}
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 	<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
@@ -59,6 +60,7 @@
 	</script>
 
 	<script src="{if $adminClientLangUrl}{$adminClientLangUrl|escape:'html'}{else}{sessionurl file='../clientlang.php'}{/if}" type="text/javascript"></script>
+	<script src="{$tpldir}js/vanilla-calendar-pro.js?{fileDateSig file="js/vanilla-calendar-pro.js"}"></script>
 	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}"></script>
 	<script src="{$tpldir}js/tabler-custom.js?{fileDateSig file="js/tabler-custom.js"}"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>
@@ -79,25 +81,30 @@
 			if (typeof bmPush === 'undefined' || !bmPush.isSupported()) {
 				return;
 			}
-			navigator.serviceWorker.ready
-				.then(function (reg) { return reg.pushManager.getSubscription(); })
+			// Always register SW first, then (re)subscribe so the current admin
+			// gets a DB row – permission alone is not a Push subscription.
+			var chain = (typeof bmPush.registerServiceWorker === 'function')
+				? bmPush.registerServiceWorker()
+				: Promise.resolve();
+			chain
+				.then(function () {
+					return navigator.serviceWorker.ready.then(function (reg) {
+						return reg.pushManager.getSubscription();
+					});
+				})
 				.then(function (sub) {
 					if (!sub) {
+						if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+							return null;
+						}
 						return bmPush.subscribe();
 					}
-					var url = '{/literal}{if $adminAbsoluteUrls}{$adminPushSyncUrl|escape:'javascript'}{else}push-api.php?action=sync{/if}{literal}';
-					if(typeof bmSessionAppendUrl === 'function')
-						url = bmSessionAppendUrl(url);
-					else if(typeof currentSID !== 'undefined' && currentSID)
-						url += (url.indexOf('?') !== -1 ? '&' : '?') + 'sid=' + encodeURIComponent(currentSID);
-					return fetch(url, {
-						method: 'POST',
-						credentials: 'same-origin',
-						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-						body: (typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
-							? 'csrf_token=' + encodeURIComponent(bmCsrfToken)
-							: ''
-					});
+					// Existing browser subscription: re-POST for this adminid
+					// (action=sync only enables prefs and left admin 1 without DB rows).
+					if (typeof bmPush.syncServerSubscription === 'function') {
+						return bmPush.syncServerSubscription();
+					}
+					return bmPush.subscribe();
 				})
 				.catch(function () {});
 		}
@@ -132,6 +139,14 @@
 			</div>
 			<!-- END NAVBAR LOGO -->
 			<div class="navbar-nav flex-row order-md-last">
+				<div class="nav-item d-flex">
+					<a href="#" class="nav-link px-2 hide-theme-dark" onclick="bmAcpSetTheme('dark'); return false;" title="Dunkelmodus" aria-label="Dunkelmodus aktivieren">
+						<i class="icon ti ti-moon"></i>
+					</a>
+					<a href="#" class="nav-link px-2 hide-theme-light" onclick="bmAcpSetTheme('light'); return false;" title="Hellmodus" aria-label="Hellmodus aktivieren">
+						<i class="icon ti ti-sun"></i>
+					</a>
+				</div>
 				<div class="nav-item dropdown">
 					<a href="#" class="nav-link dropdown-toggle d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
 						{include file="user-avatar.tpl" avatarSize="sm"}
@@ -142,9 +157,11 @@
 					</a>
 					<div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
 						<a href="{sessionurl file='admins.php'}" class="dropdown-item">{lng p="profile"}</a>
-						<a href="../index.php" class="dropdown-item" target="_blank" rel="noreferrer">{lng p="to_startpage"}</a>
+						<a href="/" class="dropdown-item" target="_blank" rel="noreferrer">{lng p="to_startpage"}</a>
 						<!--<a href="javascript:showHelp();" class="dropdown-item">{lng p="help"}</a>-->
-						{if $adminRow.type==0}<a href="{sessionurl file='welcome.php' params='action=phpinfo'}" class="dropdown-item">{lng p="phpinfo"}</a>{/if}
+						<div class="dropdown-divider"></div>
+						<a href="#bmAboutModal" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bmAboutModal">{lng p="about"}</a>
+						{if $adminRow.type==0}<a href="#bmPhpinfoModal" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#bmPhpinfoModal">{lng p="phpinfo"}</a>{/if}
 						<div class="dropdown-divider"></div>
 						<a href="javascript:void(0)" class="dropdown-item" id="bmSessionLockMenu" role="button">{lng p="session_lock_now"}</a>
 						<a href="{sessionurl file='index.php' params='action=logout'}" class="dropdown-item" onclick="return confirm('{lng p="logoutquestion"}');">{lng p="logout"}</a>
@@ -163,40 +180,40 @@
 							<ul class="navbar-nav">
 								<li class="nav-item dropdown">
 									<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-										<span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_license.png" height="16" /></span>
+										<span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_license.png"}</span>
 										<span class="nav-link-title">{lng p="welcome"}</span>
 									</a>
 									<div class="dropdown-menu">
-										<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/welcome.php'} active{/if}" href="{sessionurl file='welcome.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_license.png" height="16" /></span><span class="nav-link-title"> {lng p="welcome"} </span></a>
-										<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/admins.php' && $smarty.request.action|default:''=='admins'} active{/if}" href="{sessionurl file='admins.php' params='action=admins'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_users.png" height="16" /></span><span class="nav-link-title"> {lng p="admins"} </span></a>
+										<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/welcome.php'} active{/if}" href="{sessionurl file='welcome.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_license.png"}</span><span class="nav-link-title"> {lng p="welcome"} </span></a>
+										<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/admins.php' && $smarty.request.action|default:''=='admins'} active{/if}" href="{sessionurl file='admins.php' params='action=admins'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_users.png"}</span><span class="nav-link-title"> {lng p="admins"} </span></a>
 									</div>
 								</li>
 								<li class="nav-item dropdown">
 									<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-										<span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_prefs_misc.png" height="16" /></span>
+										<span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_prefs_misc.png"}</span>
 										<span class="nav-link-title">{lng p="prefs"}</span>
 									</a>
 									<div class="dropdown-menu">
 										<div class="dropdown-menu-columns">
 											<div class="dropdown-menu-column">
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.common.php'} active{/if}" href="{sessionurl file='prefs.common.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_prefs_common.png" height="16" /></span><span class="nav-link-title"> {lng p="common"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.email.php'} active{/if}" href="{sessionurl file='prefs.email.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_prefs_email.png" height="16" /></span><span class="nav-link-title"> {lng p="email"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.recvrules.php'} active{/if}" href="{sessionurl file='prefs.recvrules.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/rule32.png" height="16" /></span><span class="nav-link-title"> {lng p="recvrules"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.webdisk.php'} active{/if}" href="{sessionurl file='prefs.webdisk.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_disk.png" height="16" /></span><span class="nav-link-title"> {lng p="webdisk"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.sms.php'} active{/if}" href="{sessionurl file='prefs.sms.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/gateway32.png" height="16" /></span><span class="nav-link-title"> {lng p="sms"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.abuse.php'} active{/if}" href="{sessionurl file='prefs.abuse.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/abuse.png" height="16" /></span><span class="nav-link-title"> {lng p="abuseprotect"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.coupons.php'} active{/if}" href="{sessionurl file='prefs.coupons.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/coupon.png" height="16" /></span><span class="nav-link-title"> {lng p="coupons"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.profilefields.php'} active{/if}" href="{sessionurl file='prefs.profilefields.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/field32.png" height="16" /></span><span class="nav-link-title"> {lng p="profilefields"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.common.php'} active{/if}" href="{sessionurl file='prefs.common.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_prefs_common.png"}</span><span class="nav-link-title"> {lng p="common"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.email.php'} active{/if}" href="{sessionurl file='prefs.email.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_prefs_email.png"}</span><span class="nav-link-title"> {lng p="email"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.recvrules.php'} active{/if}" href="{sessionurl file='prefs.recvrules.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="rule32.png"}</span><span class="nav-link-title"> {lng p="recvrules"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.webdisk.php'} active{/if}" href="{sessionurl file='prefs.webdisk.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_disk.png"}</span><span class="nav-link-title"> {lng p="webdisk"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.sms.php'} active{/if}" href="{sessionurl file='prefs.sms.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="gateway32.png"}</span><span class="nav-link-title"> {lng p="sms"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.abuse.php'} active{/if}" href="{sessionurl file='prefs.abuse.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="abuse.png"}</span><span class="nav-link-title"> {lng p="abuseprotect"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.coupons.php'} active{/if}" href="{sessionurl file='prefs.coupons.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="coupon.png"}</span><span class="nav-link-title"> {lng p="coupons"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.profilefields.php'} active{/if}" href="{sessionurl file='prefs.profilefields.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="field32.png"}</span><span class="nav-link-title"> {lng p="profilefields"} </span></a>
 											</div>
 											<div class="dropdown-menu-column">
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.languages.php'} active{/if}" href="{sessionurl file='prefs.languages.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/lang32.png" height="16" /></span><span class="nav-link-title"> {lng p="languages"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.templates.php'} active{/if}" href="{sessionurl file='prefs.templates.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/template.png" height="16" /></span><span class="nav-link-title"> {lng p="templates"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.ads.php'} active{/if}" href="{sessionurl file='prefs.ads.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ad32.png" height="16" /></span><span class="nav-link-title"> {lng p="ads"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.faq.php'} active{/if}" href="{sessionurl file='prefs.faq.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/faq32.png" height="16" /></span><span class="nav-link-title"> {lng p="faq"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.countries.php'} active{/if}" href="{sessionurl file='prefs.countries.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/country.png" height="16" /></span><span class="nav-link-title"> {lng p="countries"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.widgetlayouts.php'} active{/if}" href="{sessionurl file='prefs.widgetlayouts.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/wlayout_add.png" height="16" /></span><span class="nav-link-title"> {lng p="widgetlayouts"} </span></a>
-												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.payments.php'} active{/if}" href="{sessionurl file='prefs.payments.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_prefs_payments.png" height="16" /></span><span class="nav-link-title"> {lng p="payments"} </span></a>
-												{if !empty($smarty.const.TOOLBOX_SERVER)}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/toolbox.php'} active{/if}" href="{sessionurl file='toolbox.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/toolbox.png" height="16" /></span><span class="nav-link-title"> {lng p="toolbox"} </span></a>{/if}
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.languages.php'} active{/if}" href="{sessionurl file='prefs.languages.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="lang32.png"}</span><span class="nav-link-title"> {lng p="languages"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.templates.php'} active{/if}" href="{sessionurl file='prefs.templates.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="template.png"}</span><span class="nav-link-title"> {lng p="templates"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.ads.php'} active{/if}" href="{sessionurl file='prefs.ads.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ad32.png"}</span><span class="nav-link-title"> {lng p="ads"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.faq.php'} active{/if}" href="{sessionurl file='prefs.faq.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="faq32.png"}</span><span class="nav-link-title"> {lng p="faq"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.countries.php'} active{/if}" href="{sessionurl file='prefs.countries.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="country.png"}</span><span class="nav-link-title"> {lng p="countries"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.widgetlayouts.php'} active{/if}" href="{sessionurl file='prefs.widgetlayouts.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="wlayout_add.png"}</span><span class="nav-link-title"> {lng p="widgetlayouts"} </span></a>
+												<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/prefs.payments.php'} active{/if}" href="{sessionurl file='prefs.payments.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_prefs_payments.png"}</span><span class="nav-link-title"> {lng p="payments"} </span></a>
+												{if !empty($smarty.const.TOOLBOX_SERVER)}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/toolbox.php'} active{/if}" href="{sessionurl file='toolbox.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="toolbox.png"}</span><span class="nav-link-title"> {lng p="toolbox"} </span></a>{/if}
 											</div>
 										</div>
 									</div>
@@ -204,31 +221,31 @@
 								{if $adminRow.type==0||$adminRow.privileges.users||$adminRow.privileges.groups||$adminRow.privileges.workgroups||$adminRow.privileges.activity||$adminRow.privileges.newsletter||$adminRow.privileges.payments}
 									<li class="nav-item dropdown">
 										<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-											<span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_users.png" height="16" /></span>
+											<span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_users.png"}</span>
 											<span class="nav-link-title">{lng p="usersgroups"}</span>
 										</a>
 										<div class="dropdown-menu">
-											{if $adminRow.type==0||$adminRow.privileges.users}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/users.php'} active{/if}" href="{sessionurl file='users.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/user_action.png" height="16" /></span><span class="nav-link-title"> {lng p="users"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.groups}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/groups.php'} active{/if}" href="{sessionurl file='groups.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_group.png" height="16" /></span><span class="nav-link-title"> {lng p="groups"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.workgroups}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/workgroups.php'} active{/if}" href="{sessionurl file='workgroups.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_workgroup.png" height="16" /></span><span class="nav-link-title"> {lng p="workgroups"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.activity}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/activity.php'} active{/if}" href="{sessionurl file='activity.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/activity.png" height="16" /></span><span class="nav-link-title"> {lng p="activity"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.abuse}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/abuse.php'} active{/if}" href="{sessionurl file='abuse.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/abuse.png" height="16" /></span><span class="nav-link-title"> {lng p="abuseprotect"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.newsletter}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/newsletter.php'} active{/if}" href="{sessionurl file='newsletter.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/newsletter.png" height="16" /></span><span class="nav-link-title"> {lng p="newsletter"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.payments}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/payments.php'} active{/if}" href="{sessionurl file='payments.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/ico_prefs_payments.png" height="16" /></span><span class="nav-link-title"> {lng p="payments"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.users}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/users.php'} active{/if}" href="{sessionurl file='users.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="user_action.png"}</span><span class="nav-link-title"> {lng p="users"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.groups}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/groups.php'} active{/if}" href="{sessionurl file='groups.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_group.png"}</span><span class="nav-link-title"> {lng p="groups"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.workgroups}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/workgroups.php'} active{/if}" href="{sessionurl file='workgroups.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_workgroup.png"}</span><span class="nav-link-title"> {lng p="workgroups"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.activity}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/activity.php'} active{/if}" href="{sessionurl file='activity.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="activity.png"}</span><span class="nav-link-title"> {lng p="activity"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.abuse}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/abuse.php'} active{/if}" href="{sessionurl file='abuse.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="abuse.png"}</span><span class="nav-link-title"> {lng p="abuseprotect"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.newsletter}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/newsletter.php'} active{/if}" href="{sessionurl file='newsletter.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="newsletter.png"}</span><span class="nav-link-title"> {lng p="newsletter"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.payments}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/payments.php'} active{/if}" href="{sessionurl file='payments.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="ico_prefs_payments.png"}</span><span class="nav-link-title"> {lng p="payments"} </span></a>{/if}
 										</div>
 									</li>
 								{/if}
 								{if $adminRow.type==0||$adminRow.privileges.optimize||$adminRow.privileges.maintenance||$adminRow.privileges.stats||$adminRow.privileges.logs}
 									<li class="nav-item dropdown">
 										<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false" >
-											<span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/toolbox.png" height="16" /></span>
+											<span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="toolbox.png"}</span>
 											<span class="nav-link-title">{lng p="tools"}</span>
 										</a>
 										<div class="dropdown-menu">
-											{if $adminRow.type==0||$adminRow.privileges.optimize}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/optimize.php'} active{/if}" href="{sessionurl file='optimize.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/db_optimize.png" height="16" /></span><span class="nav-link-title"> {lng p="optimize"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.maintenance}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/maintenance.php'} active{/if}" href="{adminurl script='maintenance.php' trailingAmp='false'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/orphans32.png" height="16" /></span><span class="nav-link-title"> {lng p="maintenance"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.stats}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/stats.php'} active{/if}" href="{sessionurl file='stats.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/stats.png" height="16" /></span><span class="nav-link-title"> {lng p="stats"} </span></a>{/if}
-											{if $adminRow.type==0||$adminRow.privileges.logs}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/logs.php'} active{/if}" href="{sessionurl file='logs.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block"><img src="{$tpldir}images/logs.png" height="16" /></span><span class="nav-link-title"> {lng p="logs"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.optimize}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/optimize.php'} active{/if}" href="{sessionurl file='optimize.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="db_optimize.png"}</span><span class="nav-link-title"> {lng p="optimize"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.maintenance}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/maintenance.php'} active{/if}" href="{adminurl script='maintenance.php' trailingAmp='false'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="orphans32.png"}</span><span class="nav-link-title"> {lng p="maintenance"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.stats}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/stats.php'} active{/if}" href="{sessionurl file='stats.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="stats.png"}</span><span class="nav-link-title"> {lng p="stats"} </span></a>{/if}
+											{if $adminRow.type==0||$adminRow.privileges.logs}<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/logs.php'} active{/if}" href="{sessionurl file='logs.php'}"><span class="nav-link-icon d-md-none d-lg-inline-block">{acpicon file="logs.png"}</span><span class="nav-link-title"> {lng p="logs"} </span></a>{/if}
 										</div>
 									</li>
 								{/if}
@@ -236,7 +253,7 @@
 									<li class="nav-item dropdown">
 										<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
     <span class="nav-link-icon d-md-none d-lg-inline-block">
-      <img src="{$tpldir}images/plugin.png" height="16" />
+      {acpicon file="plugin.png"}
     </span>
 											<span class="nav-link-title">{lng p="plugins"}</span>
 										</a>
@@ -251,7 +268,7 @@
 														{if $adminRow.type == 0 || $adminRow.privileges.plugins.$plugin}
 														<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/plugins.php'} active{/if}" href="{sessionurl file='plugins.php'}">
 															<span class="nav-link-icon d-md-none d-lg-inline-block">
-																<img src="{$tpldir}images/plugin.png" height="16" />
+																{acpicon file="plugin.png"}
 															</span>
 																<span class="nav-link-title">{lng p="plugins"}</span>
 															</a>
@@ -268,7 +285,7 @@
 														{if $count == 0 && $adminRow.type == 0}
 															<a class="dropdown-item{if $smarty.server.SCRIPT_NAME=='/admin/plugins.php'} active{/if}" href="{sessionurl file='plugins.php'}">
 															<span class="nav-link-icon d-md-none d-lg-inline-block">
-																<img src="{$tpldir}images/plugin.png" height="16" />
+																{acpicon file="plugin.png"}
 															</span>
 																<span class="nav-link-title">{lng p="plugins"}</span>
 															</a>
@@ -282,7 +299,7 @@
 														{* Plugin-Link selbst *}
 														<a class="dropdown-item{if isset($smarty.get.plugin) && $smarty.get.plugin == $plugin && (!isset($smarty.get.do) || $smarty.get.do != "activatePlugin")} active{/if}" href="{sessionurl file='plugin.page.php' params="plugin={$plugin|escape:url}"}">
 															<span class="nav-link-icon d-md-none d-lg-inline-block">
-																	<img src="{if isset($pluginInfo.icon) && $pluginInfo.icon}{$selfurl|escape:'html'}plugins/templates/images/{$pluginInfo.icon|escape:'url'}{else}{$tpldir}images/wlayout_add.png{/if}" height="16" />
+																	{if isset($pluginInfo.icon) && $pluginInfo.icon}<img src="{$selfurl|escape:'html'}plugins/templates/images/{$pluginInfo.icon|escape:'url'}" height="16" alt="" />{else}{acpicon file="wlayout_add.png"}{/if}
 															</span>
 															<span class="nav-link-title">{text value=$pluginInfo.title cut=20}</span>
 														</a>
@@ -319,6 +336,11 @@
 							{if $title}<div id="breadcrumb">{$title}</div>{/if}
 						</h2>
 					</div>
+					{if $page == 'welcome.tpl'}
+					<div class="col-auto ms-auto">
+						<button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#bmNotesModal">{lng p="notes"}</button>
+					</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -326,6 +348,9 @@
 		<!-- BEGIN PAGE BODY -->
 		<div class="page-body">
 			<div class="container-xl flex-fill d-flex flex-column">
+				{if $page == 'welcome.tpl'}
+					{include file="$page"}
+				{else}
 				<div class="card">
 					<div class="card-header bg-muted-lt">
 						<ul class="nav nav-pills card-header-pills">
@@ -333,7 +358,7 @@
 							<li class="nav-item">
 								<a class="nav-link{if $tab.active} active{/if}" href="{sessionurl file=$tab.link}">
 									<span class="nav-link-icon d-md-none d-lg-inline-block">
-											<img src="{if isset($tab.relIcon) && $tab.relIcon}{$tpldir}images/{$tab.relIcon|escape:'url'}{elseif isset($tab.icon) && $tab.icon}{$tab.icon}{else}{$tpldir}images/ico_prefs_misc.png{/if}" height="16" alt="{$tab.title}" />
+											{if isset($tab.relIcon) && $tab.relIcon}{acpicon file=$tab.relIcon}{elseif isset($tab.icon) && $tab.icon}<img src="{$tab.icon}" height="16" alt="{$tab.title}" />{else}{acpicon file="ico_prefs_misc.png"}{/if}
 										</span>
 									<span class="nav-link-title"> {$tab.title} </span>
 								</a>
@@ -345,6 +370,7 @@
 						{include file="$page"}
 					</div>
 				</div>
+				{/if}
 			</div>
 		</div>
 		<!-- END PAGE BODY -->
@@ -363,7 +389,7 @@
 					<div class="col-12 col-lg-auto mt-3 mt-lg-0">
 						<ul class="list-inline list-inline-dots mb-0">
 							<li class="list-inline-item">Copyright &copy; {$smarty.now|date_format:"%Y"} b1gMail</li>
-							<li class="list-inline-item"><a href="{sessionurl file='welcome.php' params='action=about'}" class="link-secondary" rel="noopener">{$bmver}</a></li>
+							<li class="list-inline-item"><a href="#bmAboutModal" class="link-secondary" data-bs-toggle="modal" data-bs-target="#bmAboutModal">{$bmver}</a></li>
 						</ul>
 					</div>
 				</div>
@@ -373,5 +399,67 @@
 	</div>
 </div>
 {include file="session-lock.tpl"}
+<div class="modal modal-blur fade" id="bmAboutModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">{lng p="about"}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+			</div>
+			<div class="modal-body">
+				{include file="about.tpl"}
+			</div>
+			<div class="modal-footer flex-wrap justify-content-center column-gap-3 row-gap-1 text-secondary small">
+				<span><a href="https://tabler.io/" target="_blank" rel="noreferrer">Tabler</a> 1.7.3</span>
+				<span><a href="https://getbootstrap.com/" target="_blank" rel="noreferrer">Bootstrap</a> 5.3.8</span>
+				<span><a href="https://tabler.io/icons" target="_blank" rel="noreferrer">Tabler Icons</a> 3.50.0</span>
+				<span><a href="https://fontawesome.com/" target="_blank" rel="noreferrer">Font Awesome</a> 6.2.1</span>
+			</div>
+		</div>
+	</div>
+</div>
+{if $adminRow.type==0}
+<div class="modal modal-blur fade" id="bmPhpinfoModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">{lng p="phpinfo"}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+			</div>
+			<div class="modal-body p-0">
+				<iframe id="bmPhpinfoFrame" title="{lng p="phpinfo"}" data-src="{sessionurl file='welcome.php' params='action=phpinfo&do=phpinfo'}" style="width:100%;height:70vh;border:0;background:var(--tblr-bg-surface);"></iframe>
+			</div>
+			<div class="modal-footer">
+				<a href="{sessionurl file='welcome.php' params='action=phpinfo&do=phpinfo&download=true'}" class="btn btn-primary" target="_blank" rel="noopener">{lng p="download"}</a>
+			</div>
+		</div>
+	</div>
+</div>
+{/if}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	var phpinfoModal = document.getElementById('bmPhpinfoModal');
+	if (phpinfoModal) {
+		phpinfoModal.addEventListener('shown.bs.modal', function () {
+			var frame = document.getElementById('bmPhpinfoFrame');
+			if (!frame) {
+				return;
+			}
+			var base = frame.getAttribute('data-src') || '';
+			var theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+			var src = base + (base.indexOf('?') === -1 ? '?' : '&') + 'theme=' + theme;
+			if (frame.getAttribute('src') !== src) {
+				frame.src = src;
+			}
+		});
+	}
+	var open = new URLSearchParams(window.location.search).get('open');
+	var openId = open === 'about' ? 'bmAboutModal' : (open === 'phpinfo' ? 'bmPhpinfoModal' : '');
+	var openEl = openId ? document.getElementById(openId) : null;
+	if (openEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+		bootstrap.Modal.getOrCreateInstance(openEl).show();
+	}
+});
+</script>
 </body>
 </html>

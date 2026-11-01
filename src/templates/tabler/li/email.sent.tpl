@@ -26,6 +26,16 @@
 
 			<form action="{sessionurl file='organizer.addressbook.php' params='action=quickAdd'}" method="post" onsubmit="return ajaxFormSubmit(this);" class="bm-mail-sent-address-form">
 				{csrffield}
+				{if $addressbookCount>1}
+				<div class="mb-3">
+					<label class="form-label" for="sentAddressbook">{lng p="addressbook"}</label>
+					<select class="form-select" name="addressbook" id="sentAddressbook" onchange="filterSentAddressbookGroups();">
+					{foreach from=$addressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if $bookID==$currentAddressbookID} selected="selected"{/if}>{text value=$abook.title}</option>
+					{/foreach}
+					</select>
+				</div>
+				{/if}
 				{foreach from=$addrMails item=item key=i}
 				<div class="card bm-mail-sent-contact mb-3">
 					<div class="card-header py-2">
@@ -53,7 +63,7 @@
 								<span class="form-label d-block mb-2">{lng p="groupmember"}</span>
 								<div class="d-flex flex-wrap gap-3">
 									{foreach from=$groups item=group key=groupID}
-									<label class="form-check mb-0" for="group_{$i}_{$groupID}">
+									<label class="form-check mb-0 abGroupRow" for="group_{$i}_{$groupID}" data-addressbook="{$group.addressbook_id}">
 										<input type="checkbox" class="form-check-input" id="group_{$i}_{$groupID}" name="addr[{$i}][groups][]" value="{$groupID}" />
 										<span class="form-check-label">{text value=$group.title cut=18}</span>
 									</label>
@@ -76,3 +86,26 @@
 	</div>
 	{/if}
 </div>
+<script>
+<!--
+function filterSentAddressbookGroups()
+{
+	var sel = document.getElementById('sentAddressbook'),
+		bid = sel ? String(sel.value) : '{$currentAddressbookID}',
+		rows = document.querySelectorAll('.abGroupRow'), i, inp;
+	for(i=0; i<rows.length; i++)
+	{
+		if(!bid || rows[i].getAttribute('data-addressbook') == bid)
+			rows[i].style.display = '';
+		else
+		{
+			rows[i].style.display = 'none';
+			inp = rows[i].querySelector('input[type=checkbox]');
+			if(inp)
+				inp.checked = false;
+		}
+	}
+}
+filterSentAddressbookGroups();
+//-->
+</script>

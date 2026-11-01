@@ -7,12 +7,12 @@
 			<th width="90">{lng p="bms_component"}</th>
 			<th>{lng p="entry"}</th>
 			<th width="150">{lng p="date"}
-				<img src="{$tpldir}images/sort_desc.png" border="0" alt="" width="7" height="6" align="absmiddle" /></th>
+				{acpicon file="sort_desc.png" size="sm"}</th>
 		</tr>
 		
 		{foreach from=$entries item=entry}
 		<tr>
-			<td><img src="{$tpldir}images/{$entry.prioImg}.png" border="0" alt="" width="16" height="16" /></td>
+			<td>{acpicon file="`$entry.prioImg`.png"}</td>
 			<td>{text value=$entry.componentName}</td>
 			<td><code>{$entry.szEntry}</code></td>
 			<td>{date nice=true timestamp=$entry.iDate}</td>
@@ -39,7 +39,7 @@
 	{csrffield}
 		<table>
 			<tr>
-				<td width="40" valign="top" rowspan="5"><img src="{$tpldir}images/filter.png" border="0" alt="" width="32" height="32" /></td>
+				<td width="40" valign="top" rowspan="5">{acpicon file="filter.png" size="lg"}</td>
 				<td class="td1" width="100">{lng p="from"}:</td>
 				<td class="td2">
 						{html_select_date prefix="start" time=$start start_year="-5" field_order="DMY" field_separator="."}, 
@@ -74,13 +74,13 @@
 			<tr>
 				<td class="td1">{lng p="priority"}:</td>
 				<td class="td2">
-					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8" /><span class="form-check-label" for="prio8"><img src="{$tpldir}images/debug.png" border="0" alt="" width="16" height="16" /></span></label> &nbsp;
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[8])} checked="checked"{/if} name="prio[8]" id="prio8" /><span class="form-check-label" for="prio8">{acpicon file="debug.png"}</span></label> &nbsp;
 
-					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1" /><span class="form-check-label" for="prio1"><img src="{$tpldir}images/info.png" border="0" alt="" width="16" height="16" /></span></label> &nbsp;
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[1])} checked="checked"{/if} name="prio[1]" id="prio1" /><span class="form-check-label" for="prio1">{acpicon file="info.png"}</span></label> &nbsp;
 
-					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2" /><span class="form-check-label" for="prio2"><img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" /></span></label> &nbsp;
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[2])} checked="checked"{/if} name="prio[2]" id="prio2" /><span class="form-check-label" for="prio2">{acpicon file="warning.png"}</span></label> &nbsp;
 
-					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4" /><span class="form-check-label" for="prio4"><img src="{$tpldir}images/error.png" border="0" alt="" width="16" height="16" /></span></label>
+					<label class="form-check mb-0"><input class="form-check-input" type="checkbox"{if !empty($prio[4])} checked="checked"{/if} name="prio[4]" id="prio4" /><span class="form-check-label" for="prio4">{acpicon file="error.png"}</span></label>
 				</td>
 			</tr>
 			<tr>
@@ -108,7 +108,7 @@
 		
 		<table>
 			<tr>
-				<td width="40" valign="top"><img src="{$tpldir}images/archiving.png" border="0" alt="" width="32" height="32" /></td>
+				<td width="40" valign="top">{acpicon file="archiving.png" size="lg"}</td>
 				<td class="td1" width="80">{lng p="date"}:</td>
 				<td class="td2">
 					{html_select_date prefix="date" start_year="-5" field_order="DMY" field_separator="."}, 

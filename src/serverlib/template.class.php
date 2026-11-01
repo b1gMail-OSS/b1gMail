@@ -145,6 +145,11 @@ class Template extends Smarty\Smarty {
      * @param string $tpl File name of template to be included
      */
     function registerHook($id, $tpl) {
+        $variant = PluginThemeTemplateVariant($tpl, true);
+        if ($variant !== '') {
+            $tpl = $variant;
+        }
+
         if (!isset($this->hookTable[$id])) {
             $this->hookTable[$id] = [$tpl];
         } else {
@@ -300,7 +305,9 @@ class Template extends Smarty\Smarty {
         if (!is_string($activeTheme) || $activeTheme === '') {
             $activeTheme = $bm_prefs['template'];
         }
-        $this->assign('templatePrefs', GetTemplatePrefs($activeTheme));
+        $activeThemePrefs = GetTemplatePrefs($activeTheme);
+        $this->assign('templatePrefs', $activeThemePrefs);
+        TemplateAssignAssetUrls($this, $activeTheme, $activeThemePrefs);
 
         // admin mode?
         if (ADMIN_MODE && isset($adminRow)) {
@@ -350,6 +357,16 @@ class Template extends Smarty\Smarty {
 
         // tabs
         if (isset($userRow) && isset($groupRow)) {
+            if (!function_exists('bmOrganizerGroupCanShare')) {
+                include_once B1GMAIL_DIR.'serverlib/organizer.shares.inc.php';
+            }
+            $this->assign('canShareCalendar', bmOrganizerGroupCanShare('calendar'));
+            $this->assign('canShareAddressbook', bmOrganizerGroupCanShare('addressbook'));
+            $this->assign('canShareMail', bmOrganizerGroupCanShare('mail'));
+            $this->assign('canShareTodo', bmOrganizerGroupCanShare('todo'));
+            $this->assign('canShareNotes', bmOrganizerGroupCanShare('notes'));
+            $this->assign('canShareWebdisk', bmOrganizerGroupCanShare('webdisk'));
+
             $newMenu = [
                 [
                     'icon' => 'send_mail',
@@ -432,17 +449,9 @@ class Template extends Smarty\Smarty {
                 ];
             }
 
-        if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
-            $pageTabs = array_merge($pageTabs, [
-                'organizer' => [
-                    'icon' => 'organizer',
-                    'faIcon' => 'fa-calendar',
-                    'link' => 'organizer.php',
-                    'text' => $lang_user['organizer'],
-                    'order' => 400,
-                ],
-            ]);
-        }
+            if(array_key_exists('organizer', $groupRow) && $groupRow['organizer']=='yes') {
+                $pageTabs = array_merge($pageTabs, RouteOrganizerNavTabs());
+            }
 
             if (array_key_exists('webdisk', $groupRow) && $groupRow['webdisk'] + $userRow['diskspace_add'] > 0) {
                 $pageTabs = array_merge($pageTabs, [
@@ -506,6 +515,7 @@ class Template extends Smarty\Smarty {
                         }
                     }
                 }
+                RouteApplyOrganizerTabOrder($pageTabs, $tabOrder);
             }
 
             ModuleFunction('BeforePageTabsAssign', [&$pageTabs]);
@@ -595,6 +605,11 @@ class Template extends Smarty\Smarty {
             if (isset($mailbox) && is_object($mailbox)) {
                 list(, $pageMenu) = $mailbox->GetPageFolderList();
                 $this->assign('folderList', $pageMenu);
+                if (method_exists($mailbox, 'SplitSidebarFolderMenus')) {
+                    list($ownFolderList, $sharedFolderMenus) = $mailbox->SplitSidebarFolderMenus($pageMenu);
+                    $this->assign('ownFolderList', $ownFolderList);
+                    $this->assign('sharedFolderMenus', $sharedFolderMenus);
+                }
             }
         }
 
@@ -662,7 +677,9 @@ function TemplateApplyFrontendTheme($tpl, $template)
     $tpl->assign('tpldir', $base . 'templates/' . $template . '/');
     $tpl->assign('_tpldir', 'templates/' . $template . '/');
     $tpl->assign('_tplname', $template);
-    $tpl->assign('templatePrefs', GetTemplatePrefs($template));
+    $frontendPrefs = GetTemplatePrefs($template);
+    $tpl->assign('templatePrefs', $frontendPrefs);
+    TemplateAssignAssetUrls($tpl, $template, $frontendPrefs);
     $tpl->assign('bmThemeName', $template);
 
     if (method_exists($tpl, 'getTemplateDir')) {
@@ -859,6 +876,10 @@ function TemplateDate($params, $smarty) {
 
     if ($ts == -1) {
         return $lang_user['unknown'];
+    }
+
+    if (isset($params['format'])) {
+        return date($params['format'], $ts);
     }
 
     $diff = time() - $ts;
@@ -1275,6 +1296,87 @@ function TemplateStoreTime($params, $smarty) {
         return '-';
     }
 }
+/**
+ * Theme-specific plugin template, if the file exists.
+ *
+ * plugins/templates/name.tpl is replaced by plugins/templates/name.{theme}.tpl
+ * while that frontend theme is active.
+ *
+ * @param string $template            Template path or file name
+ * @param bool   $pluginTemplatesOnly Only rewrite paths under plugins/templates/
+ *
+ * @return string Absolute path, or empty when no variant exists
+ */
+function PluginThemeTemplateVariant($template, $pluginTemplatesOnly = false)
+{
+    global $tpl, $bm_prefs;
+
+    if (!is_string($template) || $template === '' || strpos($template, '..') !== false) {
+        return '';
+    }
+
+    $theme = '';
+    if (isset($tpl) && is_object($tpl) && method_exists($tpl, 'getTemplateVars')) {
+        $theme = $tpl->getTemplateVars('_tplname');
+    }
+    if (!is_string($theme) || $theme === '') {
+        $theme = isset($bm_prefs['template']) ? $bm_prefs['template'] : '';
+    }
+    $theme = preg_replace('/[^a-zA-Z0-9_.-]/', '', (string) $theme);
+    if (!is_string($theme) || $theme === '') {
+        return '';
+    }
+
+    $normalized = str_replace('\\', '/', $template);
+    if (($queryPos = strpos($normalized, '?')) !== false) {
+        $normalized = substr($normalized, 0, $queryPos);
+    }
+
+    $marker = 'plugins/templates/';
+    $markerPos = strpos($normalized, $marker);
+    if ($markerPos !== false) {
+        $relative = substr($normalized, $markerPos + strlen($marker));
+    } elseif ($pluginTemplatesOnly || (isset($normalized[0]) && $normalized[0] === '/')) {
+        return '';
+    } else {
+        $relative = $normalized;
+    }
+
+    $relative = ltrim($relative, '/');
+    if ($relative === '' || strpos($relative, '..') !== false) {
+        return '';
+    }
+
+    $dir = '';
+    $file = $relative;
+    if (strpos($relative, '/') !== false) {
+        $dir = dirname($relative).'/';
+        $file = basename($relative);
+    }
+
+    $dot = strrpos($file, '.');
+    $base = $dot !== false ? substr($file, 0, $dot) : $file;
+    $ext = $dot !== false ? substr($file, $dot + 1) : 'tpl';
+    if ($base === '' || $ext === '') {
+        return '';
+    }
+
+    $variantPath = B1GMAIL_DIR.'plugins/templates/'.$dir.$base.'.'.$theme.'.'.$ext;
+    if (!is_file($variantPath)) {
+        return '';
+    }
+
+    if ($markerPos !== false) {
+        $originalReal = realpath($normalized);
+        $variantReal = realpath($variantPath);
+        if ($originalReal !== false && $variantReal !== false && $originalReal === $variantReal) {
+            return '';
+        }
+    }
+
+    return $variantPath;
+}
+
 function TemplateHook($params, $template) {
     $result = '';
     $smarty = $template;

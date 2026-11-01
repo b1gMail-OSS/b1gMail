@@ -479,7 +479,7 @@
 											{foreach from=$aliases item=alias}
 												{cycle values="td1,td2" name="class" assign="class"}
 												<tr class="{$class}">
-													<td><img src="{$tpldir}images/alias.png" border="0" alt="" width="16" height="16" /></td>
+													<td>{acpicon file="alias.png"}</td>
 													<td>{email value=$alias.email cut=30}</td>
 													<td>{$alias.type}</td>
 													<td><a href="{sessionurl file='users.php' params="do=edit&id={$user.id}&deleteAlias={$alias.id}"}" onclick="return confirm('{lng p="realdel"}');" class="btn btn-sm"><i class="fa-regular fa-trash-can"></i></a></td>
@@ -524,15 +524,15 @@
 														</div>
 														{if $payment.paymethod<0}
 															<div style="float:right;">
-																<a href="{sessionurl file='payments.php' params="do=details&orderid={$payment.orderid}"}" title="{lng p="details"}"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="{lng p="details"}" width="16" height="16" /></a>
+																<a href="{sessionurl file='payments.php' params="do=details&orderid={$payment.orderid}"}" title="{lng p="details"}">{acpicon file="ico_prefs_payments.png"}</a>
 															</div>
 														{/if}
 													</td>
 													<td>{date timestamp=$payment.created nice=true}</td>
 													<td>
-														{if $payment.hasInvoice}<a href="javascript:void(0);" onclick="openWindow('payments.php?action=showInvoice&orderID={$payment.orderid}{$sessionUrlSuffix}','invoice_{$payment.orderid}',640,480);" title="{lng p="showinvoice"}"><img src="{$tpldir}images/file.png" border="0" alt="{lng p="showinvoice"}" width="16" height="16" /></a>{/if}
-														{if $payment.status==0}<a href="{if $payment.paymethod<0}payments.php?do=details&orderid={$payment.orderid}{$sessionUrlSuffix}{else}users.php?do=edit&id={$user.id}&activatePayment={$payment.orderid}{$sessionUrlSuffix}{/if}" title="{lng p="activatepayment"}"><img src="{$tpldir}images/unlock.png" border="0" alt="{lng p="activatepayment"}" width="16" height="16" /></a>{/if}
-														<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}&deletePayment={$payment.orderid}"}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
+														{if $payment.hasInvoice}<a href="javascript:void(0);" onclick="openWindow('payments.php?action=showInvoice&orderID={$payment.orderid}{$sessionUrlSuffix}','invoice_{$payment.orderid}',640,480);" title="{lng p="showinvoice"}">{acpicon file="file.png"}</a>{/if}
+														{if $payment.status==0}<a href="{if $payment.paymethod<0}payments.php?do=details&orderid={$payment.orderid}{$sessionUrlSuffix}{else}users.php?do=edit&id={$user.id}&activatePayment={$payment.orderid}{$sessionUrlSuffix}{/if}" title="{lng p="activatepayment"}">{acpicon file="unlock.png"}</a>{/if}
+														<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}&deletePayment={$payment.orderid}"}" onclick="return confirm('{lng p="realdel"}');" title="{lng p="delete"}">{acpicon file="delete.png"}</a>
 													</td>
 												</tr>
 											{/foreach}
@@ -549,10 +549,9 @@
 
 	<div class="row">
 		<div class="col-md-6">
-			<div style="float: left;">{lng p="action"}:&nbsp;</div>
-			<div style="float: left;">
-				<div class="btn-group btn-group-sm">
-					<select name="massAction" id="userAction" class="form-select form-select-sm">
+			<div class="input-group input-group-sm bm-mass-action">
+				<span class="input-group-text">{lng p="action"}</span>
+				<select name="massAction" id="userAction" class="form-select form-select-sm">
 						<optgroup label="{lng p="actions"}">
 							{if $user.sms_validation_code!=''&&$user.gesperrt=='locked'}
 								{if $regValidation=='email'&&$user.altmail!=''}
@@ -577,8 +576,7 @@
 							{/foreach}
 						</optgroup>
 					</select>
-					<input type="button" name="executeMassAction" value="{lng p="ok"}" onclick="executeAction('userAction');" class="btn btn-sm btn-dark-lt" />
-				</div>
+				<button type="button" name="executeMassAction" class="btn btn-dark-lt" onclick="executeAction('userAction');">{lng p="ok"}</button>
 			</div>
 		</div>
 		<div class="col-md-6 text-end">

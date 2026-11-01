@@ -140,7 +140,7 @@
 			{lng p="print"}
 		</button>
 
-		{if empty($folderInfo.readonly)}<button type="button" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} document.location.href='{sessionurl file='email.php' params="do=deleteMail&id={$mailID}&folder={$folderID}"}';">
+		{if empty($folderInfo.readonly)}<button type="button" onclick="{if $folderID==-5}if(confirm('{lng p="realdel"}')) {/if} document.location.href='{sessionurl file='email.php' params="do=deleteMail&id={$mailID}&folder={$folderID}&csrf_token={$csrfToken}"}';">
 			<i class="fa fa-remove"></i>
 			{lng p="delete"}
 		</button>{/if}

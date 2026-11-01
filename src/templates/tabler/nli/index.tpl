@@ -10,7 +10,7 @@
 
 	<title>{$service_title}{if isset($pageTitle)} - {text value=$pageTitle}{/if}</title>
 
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
@@ -43,6 +43,7 @@
 	<script src="{$_file}" defer></script>
 	{/foreach}
 	{hook id="nli:index.tpl:head"}
+	{include file="nli/theme-brand.tpl"}
 </head>
 
 {include file="nli/layout.vars.tpl" scope=parent}
@@ -56,7 +57,7 @@
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<a class="navbar-brand" href="{$nliUrlHome}">
-				<img src="{$tpldir}images/logo.png" border="0" alt="" class="navbar-brand-image me-2" style="height:24px;" />
+				{include file="nli/brand-logo.tpl" logoSurface="dark" logoHeight="24" logoClass="navbar-brand-image me-2 nli-navbar-logo"}
 				{$service_title}
 			</a>
 			<div class="collapse navbar-collapse" id="nli-navbar-menu">
@@ -245,7 +246,7 @@
 	<footer class="footer footer-transparent d-print-none border-top">
 		<div class="container-xl">
 			<div class="row text-secondary small py-3">
-				<div class="col-md-4">&copy; {$year} {$service_title}</div>
+				<div class="col-md-4">{include file="nli/copyright.tpl"}</div>
 				<div class="col-md-4 text-center">
 					{foreach from=$pluginUserPages item=item}{if !$item.top}
 					<a href="{$item.link}" class="mx-1">{$item.text}</a>

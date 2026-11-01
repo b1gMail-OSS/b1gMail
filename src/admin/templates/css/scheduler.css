@@ -3,27 +3,52 @@
 	padding-bottom: 0.75rem;
 }
 
-.sched-btn-grid {
+.sched-block {
+	width: max-content;
+	max-width: 100%;
+	margin-bottom: 1.25rem;
+	overflow-x: auto;
+}
+
+.sched-block__head {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 0.35rem;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-bottom: 0.4rem;
 }
 
-.sched-btn-grid .btn-check + .btn {
-	min-width: 2.6rem;
-	padding: 0.25rem 0.55rem;
+.sched-grid {
+	display: grid;
+	gap: 0.3rem;
 }
 
-.sched-btn-grid--compact .btn-check + .btn {
-	min-width: 2.15rem;
-	padding: 0.2rem 0.4rem;
+.sched-grid--week {
+	grid-template-columns: repeat(7, 2.75rem);
+}
+
+.sched-grid--days {
+	grid-template-columns: repeat(7, 2.5rem);
+}
+
+.sched-grid--months {
+	grid-template-columns: repeat(6, 2.75rem);
+}
+
+.sched-grid--hours {
+	grid-template-columns: repeat(12, 2.35rem);
+}
+
+.sched-grid--minutes {
+	grid-template-columns: repeat(10, 2.35rem);
+}
+
+.sched-grid .btn-check + .btn {
+	width: 100%;
+	min-height: 2rem;
+	padding: 0.2rem 0;
 	font-size: 0.8125rem;
-}
-
-.sched-btn-grid--minute .btn-check + .btn {
-	min-width: 2rem;
-	padding: 0.15rem 0.35rem;
-	font-size: 0.75rem;
+	font-variant-numeric: tabular-nums;
 }
 
 .sched-group-grid {
@@ -47,21 +72,37 @@
 	margin: 0;
 }
 
-.sched-acp-actions .btn-group > .sched-acp-actions__form {
-	display: contents;
+.sched-acp-actions {
+	display: inline-flex;
+	vertical-align: middle;
 }
 
-.sched-acp-actions .btn-group > .sched-acp-actions__form > .btn {
+.sched-acp-actions > .sched-acp-actions__form {
+	display: inline-flex;
+}
+
+.sched-acp-actions > * + * {
+	margin-inline-start: -1px;
+}
+
+.sched-acp-actions .btn {
 	border-radius: 0;
+	position: relative;
 }
 
-.sched-acp-actions .btn-group > .sched-acp-actions__form:first-child > .btn {
-	border-top-left-radius: var(--tblr-border-radius);
-	border-bottom-left-radius: var(--tblr-border-radius);
+.sched-acp-actions > :first-child .btn,
+.sched-acp-actions > .btn:first-child {
+	border-start-start-radius: var(--tblr-border-radius);
+	border-end-start-radius: var(--tblr-border-radius);
 }
 
-.sched-acp-actions .btn-group > .btn:last-child,
-.sched-acp-actions .btn-group > .sched-acp-actions__form:last-child > .btn {
-	border-top-right-radius: var(--tblr-border-radius);
-	border-bottom-right-radius: var(--tblr-border-radius);
+.sched-acp-actions > :last-child .btn,
+.sched-acp-actions > .btn:last-child {
+	border-start-end-radius: var(--tblr-border-radius);
+	border-end-end-radius: var(--tblr-border-radius);
+}
+
+.sched-acp-actions .btn:hover,
+.sched-acp-actions .btn:focus {
+	z-index: 1;
 }

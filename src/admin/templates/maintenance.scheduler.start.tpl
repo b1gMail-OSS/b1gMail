@@ -1,19 +1,26 @@
-{include file=$sched_nav_tpl}
+<fieldset>
+	<legend>{lng p="sched.tasks_title"}</legend>
 
-<fieldset class="mb-4">
-	<legend class="h4 mb-3">{lng p="sched.tasks_title"}</legend>
+	<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+		<p class="mb-0">{lng p="sched.toolbar_hint"}</p>
+		<div class="btn-group">
+			<a href="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=settings"}" class="btn">{lng p="prefs"}</a>
+			<a href="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=task"}" class="btn btn-primary">{lng p="sched.new_task"}</a>
+		</div>
+	</div>
 
+	<div class="card">
 	{if !count($sched_tasks)}
-		<div class="text-secondary">{lng p="sched.no_tasks"}</div>
+		<div class="card-body text-secondary">{lng p="sched.no_tasks"}</div>
 	{else}
 		<div class="table-responsive">
-			<table class="table table-vcenter table-hover card-table">
+			<table class="table table-vcenter table-striped">
 				<thead>
 					<tr>
 						<th>{lng p="sched.task_label"}</th>
 						<th>{lng p="sched.next_run"}</th>
 						<th>{lng p="status"}</th>
-						<th class="text-end w-1">{lng p="action"}</th>
+						<th style="width: 11rem;">&nbsp;</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -58,29 +65,29 @@
 								<div class="small text-secondary mt-1">{date timestamp=$task.lastcall nice=1}</div>
 							{/if}
 						</td>
-						<td class="text-end text-nowrap sched-acp-actions">
-							<div class="btn-group btn-group-sm" role="group">
+						<td class="text-end text-nowrap">
+							<div class="sched-acp-actions">
 								<form method="post" action="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=start"}" class="sched-acp-actions__form">
 									{csrffield}
 									<input type="hidden" name="op" value="switch" />
 									<input type="hidden" name="id" value="{$task.taskid}" />
 									<input type="hidden" name="active" value="{$task.active}" />
-									<button type="submit" class="btn btn-sm{if $task.active} btn-success{else} btn-outline-secondary{/if}" title="{if $task.active}{lng p='sched.enabled'}{else}{lng p='sched.disabled'}{/if}">
-										<i class="ti ti-{if $task.active}circle-check{else}circle-x{/if} icon"></i>
+									<button type="submit" class="btn btn-sm" title="{if $task.active}{lng p='sched.enabled'}{else}{lng p='sched.disabled'}{/if}">
+										<i class="fa-regular fa-{if $task.active}circle-check{else}circle-xmark{/if}"></i>
 									</button>
 								</form>
 								<form method="post" action="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=start"}" class="sched-acp-actions__form">
 									{csrffield}
 									<input type="hidden" name="op" value="execute" />
 									<input type="hidden" name="id" value="{$task.taskid}" />
-									<button type="submit" class="btn btn-sm" title="{lng p="execute"}"><i class="ti ti-player-play icon"></i></button>
+									<button type="submit" class="btn btn-sm" title="{lng p="execute"}"><i class="fa-solid fa-play"></i></button>
 								</form>
-								<a href="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=task&id={$task.taskid}"}" class="btn btn-sm" title="{lng p="edit"}"><i class="ti ti-edit icon"></i></a>
+								<a href="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=task&id={$task.taskid}"}" class="btn btn-sm" title="{lng p="edit"}"><i class="fa-regular fa-pen-to-square"></i></a>
 								<form method="post" action="{sessionurl file=$sched_admin_script params="action={$sched_admin_action}&do=start"}" class="sched-acp-actions__form" onsubmit="return confirm('{lng p="realdel"}');">
 									{csrffield}
 									<input type="hidden" name="op" value="delete" />
 									<input type="hidden" name="id" value="{$task.taskid}" />
-									<button type="submit" class="btn btn-sm btn-outline-danger" title="{lng p="delete"}"><i class="ti ti-trash icon"></i></button>
+									<button type="submit" class="btn btn-sm" title="{lng p="delete"}"><i class="fa-regular fa-trash-can"></i></button>
 								</form>
 							</div>
 						</td>
@@ -90,23 +97,21 @@
 			</table>
 		</div>
 	{/if}
-	<p class="text-secondary small mb-0 mt-2">{lng p="sched.server_time"}: {date timestamp=$smarty.now}</p>
+		<div class="card-footer text-end">{lng p="sched.server_time"}: {date timestamp=$smarty.now}</div>
+	</div>
 </fieldset>
 
 {if count($notices)}
-<fieldset class="mb-4">
-	<legend class="h4 mb-3">{lng p="notices"}</legend>
-	<div class="list-group list-group-flush">
+<fieldset>
+	<legend>{lng p="notices"}</legend>
 	{foreach from=$notices item=notice}
-		<div class="list-group-item d-flex align-items-start gap-3 px-0">
-			<i class="ti ti-{if $notice.type == 'error'}alert-circle text-danger{else}info-circle text-info{/if} mt-1"></i>
-			<div class="flex-fill">{$notice.text}</div>
+		<div class="alert alert-{if $notice.type == 'error'}danger{else}info{/if} d-flex align-items-center justify-content-between gap-3 mb-2">
+			<div>{$notice.text}</div>
 			{if $notice.link}
-				<a href="{$notice.link}" class="btn btn-sm btn-ghost-secondary"><i class="ti ti-arrow-right"></i></a>
+				<a href="{$notice.link}" class="btn btn-sm">{lng p="show"}</a>
 			{/if}
 		</div>
 	{/foreach}
-	</div>
 </fieldset>
 {/if}
 

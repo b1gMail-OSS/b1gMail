@@ -81,6 +81,12 @@ if($_REQUEST['action'] == 'templates')
 		&& isset($templates[$_REQUEST['template']]))
 	{
 		$prefsMeta = $templates[$_REQUEST['template']]['prefs'];
+		$prefsValues = GetTemplatePrefs($_REQUEST['template']);
+		if(!is_array($prefsValues))
+			$prefsValues = array();
+
+		$templateAssetErrors = array();
+		$templateSaved = false;
 
 		if(isset($_POST['save']))
 		{
@@ -92,8 +98,27 @@ if($_REQUEST['action'] == 'templates')
 					$value = isset($_POST['prefs'][$key]) ? 1 : 0;
 					break;
 
+				case FIELD_IMAGE:
+					$assetError = '';
+					$oldValue = isset($prefsValues[$key]) ? $prefsValues[$key] : '';
+					$value = TemplateAssetHandleSave($_REQUEST['template'], $key, $oldValue, $assetError);
+					if($assetError != '')
+						$templateAssetErrors[$key] = $assetError;
+					break;
+
 				default:
-					$value = $_POST['prefs'][$key];
+					$value = isset($_POST['prefs'][$key]) ? $_POST['prefs'][$key] : '';
+					if(is_array($value))
+						$value = '';
+					$value = is_string($value) ? trim($value) : '';
+					if(isset($info['input']) && $info['input'] === 'color')
+					{
+						$fallback = isset($info['default']) ? (string)$info['default'] : '';
+						$norm = TemplateNormalizeHexColor($value, $fallback);
+						$value = ($norm === '#066fd1') ? '' : $norm;
+					}
+					if(isset($info['maxlength']) && $info['maxlength'] > 0 && $value !== '')
+						$value = substr($value, 0, (int)$info['maxlength']);
 					break;
 				}
 
@@ -102,16 +127,41 @@ if($_REQUEST['action'] == 'templates')
 					$key,
 					$value);
 			}
+
+			$prefsValues = GetTemplatePrefs($_REQUEST['template']);
+			if(!is_array($prefsValues))
+				$prefsValues = array();
+			$templateSaved = true;
 		}
 
-		$prefsValues = GetTemplatePrefs($_REQUEST['template']);
 		foreach($prefsValues as $key=>$val)
 			if(isset($prefsMeta[$key]))
 				$prefsMeta[$key]['value'] = $val;
 
+		foreach($prefsMeta as $key=>$info)
+		{
+			if($info['type'] != FIELD_IMAGE)
+				continue;
+			$prefsMeta[$key]['hasCustom'] = !empty($info['value']);
+			if($key === 'customLogo')
+				$prefsMeta[$key]['previewUrl'] = TemplateLogoUrl($_REQUEST['template'], $prefsValues, 'light');
+			else if($key === 'customLogoDark')
+				$prefsMeta[$key]['previewUrl'] = TemplateLogoUrl($_REQUEST['template'], $prefsValues, 'dark');
+			else if($key === 'customFavicon')
+				$prefsMeta[$key]['previewUrl'] = TemplateFaviconUrl($_REQUEST['template'], $prefsValues);
+			else if($key === 'customSplash')
+				$prefsMeta[$key]['previewUrl'] = TemplateSplashUrl($_REQUEST['template'], $prefsValues);
+			else
+				$prefsMeta[$key]['previewUrl'] = !empty($info['value'])
+					? TemplateAssetUrl($_REQUEST['template'], $key, $info['value'])
+					: '';
+		}
+
 		$tpl->assign('template', $_REQUEST['template']);
 		$tpl->assign('templateInfo', $templates[$_REQUEST['template']]);
 		$tpl->assign('meta', $prefsMeta);
+		$tpl->assign('templateSaved', $templateSaved);
+		$tpl->assign('templateAssetErrors', $templateAssetErrors);
 		$tpl->assign('page', 'prefs.templates.prefs.tpl');		// yo dawg
 	}
 }

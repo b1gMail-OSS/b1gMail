@@ -36,6 +36,54 @@ $tabs = array(
 );
 
 /**
+ * Parse a VAT rate from form input. Accepts 8.1 and 8,1.
+ *
+ * @param mixed $vat
+ * @return float
+ */
+function ParseCountryVat($vat)
+{
+	$vat = trim(str_replace(' ', '', (string)$vat));
+	if(strpos($vat, ',') !== false && strpos($vat, '.') !== false)
+		$vat = str_replace('.', '', $vat);
+	$vat = str_replace(',', '.', $vat);
+	return min(100, max(0, (float)$vat));
+}
+
+/**
+ * VAT rate for display. One decimal separator, trailing zeros removed.
+ *
+ * @param mixed $vat
+ * @param bool $emptyIfZero
+ * @param string $decimal
+ * @return string
+ */
+function FormatCountryVat($vat, $emptyIfZero = true, $decimal = ',')
+{
+	$value = ParseCountryVat($vat);
+	if($emptyIfZero && $value <= 0)
+		return('');
+	$formatted = number_format($value, 2, '.', '');
+	$formatted = rtrim(rtrim($formatted, '0'), '.');
+	if($formatted === '')
+		$formatted = '0';
+	if($decimal !== '.')
+		$formatted = str_replace('.', $decimal, $formatted);
+	return($formatted);
+}
+
+/**
+ * VAT rate for SQL. Always a dot, independent of the process locale.
+ *
+ * @param float $vat
+ * @return string
+ */
+function CountryVatSql($vat)
+{
+	return number_format((float)$vat, 2, '.', '');
+}
+
+/**
  * fields
  */
 if($_REQUEST['action'] == 'countries')
@@ -96,7 +144,7 @@ if($_REQUEST['action'] == 'countries')
 				'id'		=> $row['id'],
 				'land'		=> $row['land'],
 				'is_eu'		=> $row['is_eu'] == 'yes',
-				'vat'		=> $row['vat'] ? sprintf('%.02f', $row['vat']) : '',
+				'vat'		=> FormatCountryVat($row['vat']),
 				'plzDB'		=> file_exists(B1GMAIL_REL . 'plz/' . $row['id'] . '.plz')
 			);
 		$res->Free();
@@ -114,10 +162,11 @@ if($_REQUEST['action'] == 'countries')
 		// save?
 		if(isset($_REQUEST['save']))
 		{
+			$vatInput = isset($_POST['vat']) ? (string)$_POST['vat'] : '0';
 			$db->Query('UPDATE {pre}staaten SET land=?,is_eu=?,vat=? WHERE id=?',
 				HTMLFormat($_REQUEST['land']),
 				isset($_REQUEST['is_eu']) ? 'yes' : 'no',
-				min(100, max(0, (double)str_replace(',', '.', $_REQUEST['vat']))),
+				CountryVatSql(ParseCountryVat($vatInput)),
 				(int)$_REQUEST['id']);
 			$cacheManager->Delete('countryList');
 			$cacheManager->Delete('countryListWithDetails');
@@ -130,6 +179,7 @@ if($_REQUEST['action'] == 'countries')
 		assert('$res->RowCount() != 0');
 		$country = $res->FetchArray(MYSQLI_ASSOC);
 		$res->Free();
+		$country['vat'] = FormatCountryVat($country['vat'], false);
 
 		// assign
 		$tpl->assign('country', $country);

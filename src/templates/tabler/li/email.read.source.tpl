@@ -5,9 +5,10 @@
 	<title>{lng p="showsource"}</title>
 	<meta charset="{$charset}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/tabler-custom.css?{fileDateSig file="style/tabler-custom.css"}" />
+	{include file="nli/theme-brand.tpl"}
 	<script>
 	<!--
 		var tplDir = '{$tpldir}';

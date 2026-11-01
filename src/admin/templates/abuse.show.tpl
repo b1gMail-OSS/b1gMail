@@ -221,11 +221,11 @@
 				<thead>
 				<tr>
 					<th style="width: 40px;">&nbsp;</th>
-					<th style="width: 25px; text-align: center;"><a href="javascript:invertSelection(document.forms.f1,'entries[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+					<th style="width: 25px; text-align: center;"><a href="javascript:invertSelection(document.forms.f1,'entries[]');">{acpicon file="dot.png" size="sm"}</a></th>
 					<th style="width: 80px;">{lng p="points"}</th>
 					<th>{lng p="type"}</th>
 					<th>{lng p="comment"}</th>
-					<th style="width: 150px;">{lng p="date"}&nbsp; <img src="{$tpldir}images/sort_desc.png" border="0" alt="" width="7" height="6" align="absmiddle" /></th>
+					<th style="width: 150px;">{lng p="date"}&nbsp; {acpicon file="sort_desc.png" size="sm"}</th>
 					<th style="width: 80px;">{lng p="sum"}</th>
 					<th style="width: 32px;">&nbsp;</th>
 				</tr>
@@ -248,18 +248,16 @@
 				{/foreach}
 				</tbody>
 			</table>
-			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+			<div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="delete">{lng p="delete"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 				<div class="text-end">
 					{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"javascript:updatePage(.s);\">.t</a></span> "}&nbsp;

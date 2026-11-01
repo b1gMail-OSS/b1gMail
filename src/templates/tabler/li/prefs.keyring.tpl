@@ -44,7 +44,7 @@
 					<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 						<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');" class="btn btn-outline-secondary btn-icon" title="{lng p="view"}" aria-label="{lng p="view"}"><i class="ti ti-eye icon" aria-hidden="true"></i></a>
 						{if $pkcs12Support}<a href="javascript:void(0);" onclick="exportPrivateCert('{$cert.hash}');" class="btn btn-outline-secondary btn-icon" title="{lng p="download"}" aria-label="{lng p="download"}"><i class="ti ti-download icon" aria-hidden="true"></i></a>{/if}
-						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=2&hash={$cert.hash}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=2&hash={$cert.hash}&csrf_token={$csrfToken}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 					</div>
 				</td>
 			</tr>
@@ -140,7 +140,7 @@
 				<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
 					<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 						<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');" class="btn btn-outline-secondary btn-icon" title="{lng p="view"}" aria-label="{lng p="view"}"><i class="ti ti-eye icon" aria-hidden="true"></i></a>
-						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=1&hash={$cert.hash}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
+						<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=1&hash={$cert.hash}&csrf_token={$csrfToken}"}" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="delete"}" aria-label="{lng p="delete"}"><i class="ti ti-trash icon" aria-hidden="true"></i></a>
 					</div>
 				</td>
 			</tr>

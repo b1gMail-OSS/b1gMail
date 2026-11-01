@@ -47,7 +47,6 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="cronauth"}</label>
 					<div class="col-sm-8">
-						<p class="form-text text-secondary mb-2">{lng p="cronauthdesc"}</p>
 						<label class="form-label">{lng p="croncli"}</label>
 						<input type="text" class="form-control form-control-sm mb-2" readonly="readonly" value="{text allowEmpty=true value=$cronCliCmd}">
 						<label class="form-label">{lng p="cronhttp"}</label>

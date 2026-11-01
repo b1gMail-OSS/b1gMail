@@ -170,7 +170,16 @@ function _switchFolder(e, retainPreviewMail)
 	if(e.readyState == 4)
 	{
 		_lastSelectedMailID = 0;
-		var folderObj = eval('('+e.responseText+')');
+		var folderObj;
+		try
+		{
+			folderObj = JSON.parse(e.responseText);
+		}
+		catch(err)
+		{
+			if(EBID('folderLoading')) EBID('folderLoading').style.display = 'none';
+			return;
+		}
 
 		currentFolderID = folderObj.id;
 		currentSortColumn = folderObj.sortColumn;
@@ -182,6 +191,7 @@ function _switchFolder(e, retainPreviewMail)
 		setWindowTitle(folderObj.windowTitle);
 
 		EBID('folderMailArea').innerHTML = folderObj.html;
+		bmSyncMailFolderCsrf();
 		initMailSel();
 
 		if(EBID('previewArea'))
@@ -457,8 +467,13 @@ function reloadFolderList(data)
 		{
 			EBID('folderList').innerHTML = '';
 			eval(data);
-			EBID('folderList').innerHTML = d;
-			enableFolderDragTargets();
+			if(typeof bmRenderEmailFolderList == 'function')
+				bmRenderEmailFolderList();
+			else
+			{
+				EBID('folderList').innerHTML = (typeof bmEmailFolderTreesHtml == 'function') ? bmEmailFolderTreesHtml() : d;
+				enableFolderDragTargets();
+			}
 		}
 
 		return;
@@ -659,7 +674,7 @@ function bmApplyMailIframeTheme(iframeDoc)
 		style.id = 'bmMailIframeTheme';
 		style.textContent = 'html, body { background: #fff !important; color: #333 !important; color-scheme: light !important; margin: 0; padding: 0; } '
 			+ '#__bmMailText { background: #fff !important; color: #333; padding: 1rem 1.25rem; box-sizing: border-box; } '
-			+ 'a { color: #066fd1; }';
+			+ 'a { color: ' + (typeof bmPrimaryColor === 'string' && bmPrimaryColor ? bmPrimaryColor : '#066fd1') + '; }';
 		(iframeDoc.head || iframeDoc.documentElement).appendChild(style);
 	}
 
@@ -985,9 +1000,33 @@ function enableFolderDragTargets()
 	}
 }
 
+function bmSyncMailFolderCsrf()
+{
+	var token = (typeof bmCsrfToken !== 'undefined' && bmCsrfToken) ? bmCsrfToken : '';
+	if(!token)
+		return;
+
+	var root = EBID('folderMailArea') || document;
+	var nodes = root.querySelectorAll('input[name="csrf_token"]');
+	for(var i = 0; i < nodes.length; i++)
+		nodes[i].value = token;
+
+	var form = document.forms['f1'];
+	if(form && !form.querySelector('input[name="csrf_token"]'))
+	{
+		var inp = document.createElement('input');
+		inp.type = 'hidden';
+		inp.name = 'csrf_token';
+		inp.value = token;
+		form.appendChild(inp);
+	}
+}
+
 function transferSelectedMailIDs()
 {
 	var f = EBID('selectedMailIDs'), i;
+
+	bmSyncMailFolderCsrf();
 
 	if(f)
 	{
@@ -1003,6 +1042,37 @@ function transferSelectedMailIDs()
 		if(f.value.length > 0)
 			f.value = f.value.substr(0, f.value.length-1);
 	}
+}
+
+/**
+ * Bulk footer OK / form submit. Delete uses the same CSRF-safe XHR path as
+ * Entf/context menu; other actions keep the classic POST form.
+ */
+function executeMailMassAction()
+{
+	transferSelectedMailIDs();
+
+	var actionEl = EBID('massAction');
+	var action = actionEl ? actionEl.value : '-';
+	if(action === 'delete')
+	{
+		var idsField = EBID('selectedMailIDs');
+		var ids = [];
+		if(idsField && idsField.value)
+		{
+			var parts = idsField.value.split(';');
+			for(var i = 0; i < parts.length; i++)
+			{
+				if(parts[i] !== '')
+					ids.push(parseInt(parts[i], 10));
+			}
+		}
+		if(ids.length > 0)
+			deleteMail(ids);
+		return false;
+	}
+
+	return true;
 }
 
 function hideMailMenu(e)
@@ -1075,10 +1145,83 @@ function hideFolderMenu(e)
 	folderMenu.style.display = 'none';
 }
 
+function isFolderFavorite(folderID)
+{
+	if(typeof folderFavoriteIDs == 'undefined' || !folderFavoriteIDs)
+		return false;
+	folderID = parseInt(folderID, 10);
+	for(var i=0; i<folderFavoriteIDs.length; i++)
+	{
+		if(parseInt(folderFavoriteIDs[i], 10) === folderID)
+			return true;
+	}
+	return false;
+}
+
+function toggleFolderFavorite(folderID)
+{
+	hideFolderMenu();
+	MakeXMLRequest(bmAppendSession('email.folders.php?action=toggleFavorite&rpc=true&id='+folderID), function(http)
+	{
+		if(http.readyState == 4)
+			document.location.reload();
+	});
+}
+
+function attachEmailFolderShareActions(map, iconClass, mailboxTitle, folderTitle)
+{
+	if(!map)
+		return;
+	var root = EBID('folderList');
+	if(!root)
+		return;
+	var links = root.querySelectorAll('a.node, a.nodeSel');
+	for(var i=0; i<links.length; i++)
+	{
+		var href = links[i].getAttribute('href') || '';
+		var m = href.match(/switchFolder\((-?\d+)\)/);
+		if(!m)
+			continue;
+		var id = parseInt(m[1], 10);
+		if(!map[id])
+			continue;
+		var kind = map[id];
+		var a = document.createElement('a');
+		a.href = '#';
+		a.className = 'bm-folder-tree-share';
+		a.title = kind == 'mailbox' ? mailboxTitle : folderTitle;
+		a.setAttribute('aria-label', a.title);
+		a.innerHTML = '<i class="' + iconClass + '" aria-hidden="true"></i>';
+		a.onclick = (function(shareKind, shareId)
+		{
+			return function(e)
+			{
+				if(e)
+				{
+					if(e.preventDefault)
+						e.preventDefault();
+					if(e.stopPropagation)
+						e.stopPropagation();
+				}
+				var url = shareKind == 'mailbox'
+					? bmAppendSession('email.folders.php?action=shareMailbox')
+					: bmAppendSession('email.folders.php?action=share&id=' + shareId);
+				var title = shareKind == 'mailbox' ? mailboxTitle : folderTitle;
+				openOverlay(url, title, 520, 360, true);
+				return false;
+			};
+		})(kind, id);
+		links[i].parentNode.appendChild(a);
+	}
+}
+
 function showFolderMenu(e, posElem)
 {
 	document.onmouseup = hideFolderMenu;
 	var folderMenu = EBID('folderMenu');
+	var favLabel = EBID('folderFavoriteMenuLabel');
+	if(favLabel && typeof lang != 'undefined')
+		favLabel.innerHTML = isFolderFavorite(currentFolderID) ? lang['removefromfavorites'] : lang['addtofavorites'];
 	var offsetX = getElementMetrics(folderMenu.parentNode, 'x');
 	var offsetY = getElementMetrics(folderMenu.parentNode, 'y');
 
@@ -1681,3 +1824,444 @@ function submitComposeForm()
 		EBID('composeLoading').style.display = '';
 	document.forms.f1.submit();
 }
+
+var bmFavDrag = null;
+
+function bmReadFavOrder(container, selector)
+{
+	var nodes = container.querySelectorAll(selector);
+	var ids = [];
+	for(var i = 0; i < nodes.length; i++)
+		ids.push(nodes[i].getAttribute('data-folder-id'));
+	return ids;
+}
+
+function bmWriteFavOrder(container, selector, ids)
+{
+	var map = {};
+	var nodes = container.querySelectorAll(selector);
+	for(var i = 0; i < nodes.length; i++)
+		map[nodes[i].getAttribute('data-folder-id')] = nodes[i];
+	for(var j = 0; j < ids.length; j++)
+	{
+		if(map[ids[j]])
+			container.appendChild(map[ids[j]]);
+	}
+}
+
+function bmSaveFolderFavoriteOrder(order)
+{
+	var containers = [
+		{ el: document.querySelector('.bm-folder-favorites'), sel: '.bm-folder-fav' },
+		{ el: document.getElementById('group_fav'), sel: 'tr.bm-folder-fav-admin-row' }
+	];
+	MakeXMLRequest('email.folders.php?action=reorderFavorites&rpc=1&ids=' + encodeURIComponent(order), function(http)
+	{
+		if(http.readyState != 4)
+			return;
+		if(http.status != 200 || (http.responseText || '').replace(/^\s+|\s+$/g, '') != 'OK')
+		{
+			document.location.reload();
+			return;
+		}
+		var ids = order.split(',');
+		if(typeof folderFavoriteIDs != 'undefined')
+			folderFavoriteIDs = ids;
+		for(var i = 0; i < containers.length; i++)
+		{
+			if(!containers[i].el)
+				continue;
+			if(bmReadFavOrder(containers[i].el, containers[i].sel).join(',') !== order)
+				bmWriteFavOrder(containers[i].el, containers[i].sel, ids);
+		}
+	});
+}
+
+function bmBindFavDragItem(item, container, itemSelector)
+{
+	var grip = item.querySelector('.bm-folder-fav-grip');
+	if(!grip)
+		return;
+	grip.addEventListener('mousedown', function()
+	{
+		item.setAttribute('draggable', 'true');
+	});
+	grip.addEventListener('mouseup', function()
+	{
+		if(!bmFavDrag)
+			item.setAttribute('draggable', 'false');
+	});
+	item.addEventListener('dragstart', function(e)
+	{
+		bmFavDrag = {
+			item: item,
+			container: container,
+			before: bmReadFavOrder(container, itemSelector).join(',')
+		};
+		item.classList.add('is-dragging');
+		e.dataTransfer.effectAllowed = 'move';
+		try { e.dataTransfer.setData('text/plain', item.getAttribute('data-folder-id') || ''); } catch(err) {}
+	});
+	item.addEventListener('dragend', function()
+	{
+		item.classList.remove('is-dragging');
+		item.setAttribute('draggable', 'false');
+		if(!bmFavDrag || bmFavDrag.item !== item)
+			return;
+		var before = bmFavDrag.before;
+		bmFavDrag = null;
+		var after = bmReadFavOrder(container, itemSelector).join(',');
+		if(after !== before)
+			bmSaveFolderFavoriteOrder(after);
+	});
+	item.addEventListener('dragover', function(e)
+	{
+		if(!bmFavDrag || bmFavDrag.container !== container || bmFavDrag.item === item)
+			return;
+		e.preventDefault();
+		if(e.dataTransfer)
+			e.dataTransfer.dropEffect = 'move';
+		var rect = item.getBoundingClientRect();
+		var placeAfter = (e.clientY - rect.top) > (rect.height / 2);
+		if(placeAfter)
+			container.insertBefore(bmFavDrag.item, item.nextSibling);
+		else
+			container.insertBefore(bmFavDrag.item, item);
+	});
+}
+
+function bmInitFolderFavoriteSort(container, itemSelector)
+{
+	if(!container || container.getAttribute('data-fav-sort') === '1')
+		return;
+	container.setAttribute('data-fav-sort', '1');
+	var items = container.querySelectorAll(itemSelector);
+	for(var i = 0; i < items.length; i++)
+		bmBindFavDragItem(items[i], container, itemSelector);
+	container.addEventListener('dragover', function(e)
+	{
+		if(bmFavDrag && bmFavDrag.container === container)
+			e.preventDefault();
+	});
+}
+
+function bmInitAllFolderFavoriteSort()
+{
+	bmInitFolderFavoriteSort(document.querySelector('.bm-folder-favorites'), '.bm-folder-fav');
+	bmInitFolderFavoriteSort(document.getElementById('group_fav'), 'tr.bm-folder-fav-admin-row');
+	bmInitFolderOrderSort();
+}
+
+var bmFolderDrag = null;
+
+function bmFolderNodeFrom(target, className)
+{
+	var node = target;
+	while(node && node !== document)
+	{
+		if(node.classList && node.classList.contains(className))
+			return node;
+		node = node.parentNode;
+	}
+	return null;
+}
+
+function bmFolderClipAfter(node)
+{
+	var next = node.nextElementSibling;
+	if(next && next.classList && next.classList.contains('clip'))
+		return next;
+	return null;
+}
+
+function bmMoveFolderBlock(node, target, after)
+{
+	var clip = bmFolderClipAfter(node);
+	var ref;
+	if(after)
+	{
+		var targetClip = bmFolderClipAfter(target);
+		ref = targetClip ? targetClip.nextSibling : target.nextSibling;
+	}
+	else
+		ref = target;
+	target.parentNode.insertBefore(node, ref);
+	if(clip)
+		target.parentNode.insertBefore(clip, node.nextSibling);
+}
+
+function bmTreeSiblingIds(node)
+{
+	var parentId = node.getAttribute('data-parent-id');
+	var children = node.parentNode.children;
+	var ids = [];
+	for(var i = 0; i < children.length; i++)
+	{
+		if(!children[i].classList.contains('dTreeNode') || !children[i].classList.contains('bm-folder-sortable'))
+			continue;
+		if(children[i].getAttribute('data-parent-id') !== parentId)
+			continue;
+		ids.push(children[i].getAttribute('data-folder-id'));
+	}
+	return ids;
+}
+
+function bmAdminSubtree(row)
+{
+	var rows = row.parentNode.querySelectorAll('tr[data-folder-id]');
+	var keep = {};
+	keep[row.getAttribute('data-folder-id')] = true;
+	var grew = true;
+	while(grew)
+	{
+		grew = false;
+		for(var i = 0; i < rows.length; i++)
+		{
+			var id = rows[i].getAttribute('data-folder-id');
+			if(keep[rows[i].getAttribute('data-parent-id')] && !keep[id])
+			{
+				keep[id] = true;
+				grew = true;
+			}
+		}
+	}
+	var list = [];
+	for(var j = 0; j < rows.length; j++)
+	{
+		if(keep[rows[j].getAttribute('data-folder-id')])
+			list.push(rows[j]);
+	}
+	return list;
+}
+
+function bmMoveAdminSubtree(row, target, after)
+{
+	var rows = bmAdminSubtree(row);
+	var moving = {};
+	for(var i = 0; i < rows.length; i++)
+	{
+		if(rows[i] === target)
+			return;
+		moving[rows[i].getAttribute('data-folder-id')] = true;
+	}
+	var targetRows = bmAdminSubtree(target);
+	var ref = after ? targetRows[targetRows.length - 1].nextSibling : targetRows[0];
+	while(ref && ref.getAttribute && moving[ref.getAttribute('data-folder-id')])
+		ref = ref.nextSibling;
+	for(var j = 0; j < rows.length; j++)
+		target.parentNode.insertBefore(rows[j], ref);
+}
+
+function bmAdminSiblingIds(tbody, parentId)
+{
+	var rows = tbody.querySelectorAll('tr.bm-folder-order-row');
+	var ids = [];
+	for(var i = 0; i < rows.length; i++)
+	{
+		if(rows[i].getAttribute('data-parent-id') === parentId)
+			ids.push(rows[i].getAttribute('data-folder-id'));
+	}
+	return ids;
+}
+
+function bmSaveFolderSiblingOrder(parentId, order)
+{
+	MakeXMLRequest('email.folders.php?action=reorderFolders&rpc=1&parent=' + encodeURIComponent(parentId) + '&ids=' + encodeURIComponent(order), function(http)
+	{
+		if(http.readyState != 4)
+			return;
+		if(http.status != 200 || (http.responseText || '').replace(/^\s+|\s+$/g, '') != 'OK')
+		{
+			document.location.reload();
+			return;
+		}
+		if(document.getElementById('folderAdminTable'))
+			document.location.reload();
+	});
+}
+
+function bmPrepareFolderSortNodes(root)
+{
+	var marks = root.querySelectorAll('.bm-folder-sort');
+	for(var i = 0; i < marks.length; i++)
+	{
+		var node = marks[i];
+		while(node && (!node.classList || !node.classList.contains('dTreeNode')))
+			node = node.parentNode;
+		if(!node || node.querySelector('.bm-folder-sort-grip'))
+			continue;
+		node.classList.add('bm-folder-sortable');
+		node.setAttribute('data-folder-id', marks[i].getAttribute('data-folder-id'));
+		node.setAttribute('data-parent-id', marks[i].getAttribute('data-parent-id'));
+		var links = node.getElementsByTagName('a');
+		for(var j = 0; j < links.length; j++)
+			links[j].setAttribute('draggable', 'false');
+		var grip = document.createElement('span');
+		grip.className = 'bm-folder-sort-grip';
+		grip.title = marks[i].getAttribute('title') || '';
+		grip.setAttribute('aria-label', grip.title);
+		grip.innerHTML = '<i class="ti ti-grip-vertical" aria-hidden="true"></i>';
+		node.insertBefore(grip, node.firstChild);
+	}
+}
+
+function bmBindTreeFolderSort(container)
+{
+	container.addEventListener('mousedown', function(e)
+	{
+		if(!bmFolderNodeFrom(e.target, 'bm-folder-sort-grip'))
+			return;
+		var node = bmFolderNodeFrom(e.target, 'bm-folder-sortable');
+		if(node)
+			node.setAttribute('draggable', 'true');
+	});
+	container.addEventListener('mouseup', function(e)
+	{
+		if(bmFolderDrag)
+			return;
+		var node = bmFolderNodeFrom(e.target, 'bm-folder-sortable');
+		if(node)
+			node.setAttribute('draggable', 'false');
+	});
+	container.addEventListener('dragstart', function(e)
+	{
+		var node = bmFolderNodeFrom(e.target, 'bm-folder-sortable');
+		if(!node || node.getAttribute('draggable') !== 'true')
+			return;
+		bmFolderDrag = {
+			kind: 'tree',
+			item: node,
+			parentId: node.getAttribute('data-parent-id'),
+			before: bmTreeSiblingIds(node).join(',')
+		};
+		node.classList.add('is-dragging');
+		e.dataTransfer.effectAllowed = 'move';
+		try { e.dataTransfer.setData('text/plain', node.getAttribute('data-folder-id') || ''); } catch(err) {}
+		e.stopPropagation();
+	});
+	container.addEventListener('dragover', function(e)
+	{
+		if(!bmFolderDrag || bmFolderDrag.kind !== 'tree')
+			return;
+		var target = bmFolderNodeFrom(e.target, 'bm-folder-sortable');
+		if(!target || target === bmFolderDrag.item || target.parentNode !== bmFolderDrag.item.parentNode)
+			return;
+		if(target.getAttribute('data-parent-id') !== bmFolderDrag.parentId)
+			return;
+		e.preventDefault();
+		e.stopPropagation();
+		if(e.dataTransfer)
+			e.dataTransfer.dropEffect = 'move';
+		var rect = target.getBoundingClientRect();
+		bmMoveFolderBlock(bmFolderDrag.item, target, (e.clientY - rect.top) > (rect.height / 2));
+	});
+	container.addEventListener('dragend', function(e)
+	{
+		var node = bmFolderNodeFrom(e.target, 'bm-folder-sortable');
+		if(node)
+		{
+			node.classList.remove('is-dragging');
+			node.setAttribute('draggable', 'false');
+		}
+		if(!bmFolderDrag || bmFolderDrag.kind !== 'tree')
+			return;
+		var before = bmFolderDrag.before;
+		var parentId = bmFolderDrag.parentId;
+		var item = bmFolderDrag.item;
+		bmFolderDrag = null;
+		var after = bmTreeSiblingIds(item).join(',');
+		if(after !== before)
+			bmSaveFolderSiblingOrder(parentId, after);
+	});
+}
+
+function bmBindAdminFolderSort(tbody)
+{
+	if(!tbody || tbody.getAttribute('data-folder-order') === '1')
+		return;
+	tbody.setAttribute('data-folder-order', '1');
+	tbody.addEventListener('mousedown', function(e)
+	{
+		var row = bmFolderNodeFrom(e.target, 'bm-folder-order-row');
+		if(!row || !bmFolderNodeFrom(e.target, 'bm-folder-fav-grip'))
+			return;
+		row.setAttribute('draggable', 'true');
+	});
+	tbody.addEventListener('mouseup', function(e)
+	{
+		if(bmFolderDrag)
+			return;
+		var row = bmFolderNodeFrom(e.target, 'bm-folder-order-row');
+		if(row)
+			row.setAttribute('draggable', 'false');
+	});
+	tbody.addEventListener('dragstart', function(e)
+	{
+		var row = bmFolderNodeFrom(e.target, 'bm-folder-order-row');
+		if(!row || row.getAttribute('draggable') !== 'true')
+			return;
+		bmFolderDrag = {
+			kind: 'admin',
+			item: row,
+			parentId: row.getAttribute('data-parent-id'),
+			before: bmAdminSiblingIds(tbody, row.getAttribute('data-parent-id')).join(',')
+		};
+		row.classList.add('is-dragging');
+		e.dataTransfer.effectAllowed = 'move';
+		try { e.dataTransfer.setData('text/plain', row.getAttribute('data-folder-id') || ''); } catch(err) {}
+		e.stopPropagation();
+	});
+	tbody.addEventListener('dragover', function(e)
+	{
+		if(!bmFolderDrag || bmFolderDrag.kind !== 'admin' || bmFolderDrag.item.parentNode !== tbody)
+			return;
+		var target = bmFolderNodeFrom(e.target, 'bm-folder-order-row');
+		if(!target || target === bmFolderDrag.item)
+			return;
+		if(target.getAttribute('data-parent-id') !== bmFolderDrag.parentId)
+			return;
+		e.preventDefault();
+		if(e.dataTransfer)
+			e.dataTransfer.dropEffect = 'move';
+		var rect = target.getBoundingClientRect();
+		bmMoveAdminSubtree(bmFolderDrag.item, target, (e.clientY - rect.top) > (rect.height / 2));
+	});
+	tbody.addEventListener('dragend', function(e)
+	{
+		var row = bmFolderNodeFrom(e.target, 'bm-folder-order-row');
+		if(row)
+		{
+			row.classList.remove('is-dragging');
+			row.setAttribute('draggable', 'false');
+		}
+		if(!bmFolderDrag || bmFolderDrag.kind !== 'admin')
+			return;
+		var before = bmFolderDrag.before;
+		var parentId = bmFolderDrag.parentId;
+		bmFolderDrag = null;
+		var after = bmAdminSiblingIds(tbody, parentId).join(',');
+		if(after !== before)
+			bmSaveFolderSiblingOrder(parentId, after);
+	});
+}
+
+function bmInitFolderOrderSort()
+{
+	var folderList = document.getElementById('folderList');
+	if(folderList)
+	{
+		bmPrepareFolderSortNodes(folderList);
+		if(folderList.getAttribute('data-folder-order') !== '1')
+		{
+			folderList.setAttribute('data-folder-order', '1');
+			bmBindTreeFolderSort(folderList);
+		}
+	}
+	bmBindAdminFolderSort(document.getElementById('group_own'));
+	bmBindAdminFolderSort(document.getElementById('group_shared'));
+}
+
+if(document.readyState === 'loading')
+	document.addEventListener('DOMContentLoaded', bmInitAllFolderFavoriteSort);
+else
+	bmInitAllFolderFavoriteSort();

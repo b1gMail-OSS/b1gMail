@@ -88,12 +88,15 @@ function openCellphoneAddressbook(sid)
 {
 	openOverlay(bmAppendSession('organizer.addressbook.php?action=numberPopup'),
 		lang['addressbook'],
-		450,
-		380,
+		640,
+		520,
 		true);
 }
 function smsComposeSizer(justFire)
 {
+	if(document.body && document.body.classList.contains('bm-layout-combo'))
+		return;
+
 	var resizeHandler = function()
 	{
 		var mainContent = EBID('mainContent'),

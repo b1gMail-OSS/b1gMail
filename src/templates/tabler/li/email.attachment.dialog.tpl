@@ -34,6 +34,16 @@
 				<dd class="col-sm-8">{if $vcard.firma}{text value=$vcard.firma}{else}—{/if}</dd>
 				<dt class="col-sm-4">{lng p="email"}</dt>
 				<dd class="col-sm-8">{if $vcard.email}{email value=$vcard.email}{else}—{/if}</dd>
+				{if $addressbookCount>1}
+				<dt class="col-sm-4"><label class="form-label mb-0" for="mailAttAddressbook">{lng p="addressbook"}</label></dt>
+				<dd class="col-sm-8">
+					<select class="form-select" id="mailAttAddressbook">
+					{foreach from=$addressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if $bookID==$defaultAddressbookID} selected="selected"{/if}>{text value=$abook.title}</option>
+					{/foreach}
+					</select>
+				</dd>
+				{/if}
 			</dl>
 		</div>
 		{elseif $openKind == 'ics' && isset($calendarEvent)}
@@ -85,6 +95,16 @@
 				<dt class="col-sm-4">{lng p="text"}</dt>
 				<dd class="col-sm-8">{text value=$calendarEvent.text|truncate:400}</dd>
 				{/if}
+				{if $calendarCount>1}
+				<dt class="col-sm-4"><label class="form-label mb-0" for="mailAttCalendar">{lng p="calendar"}</label></dt>
+				<dd class="col-sm-8">
+					<select class="form-select" id="mailAttCalendar">
+					{foreach from=$calendars key=calID item=cal}
+						<option value="{$calID}"{if $calID==$defaultCalendarID} selected="selected"{/if}>{text value=$cal.title}</option>
+					{/foreach}
+					</select>
+				</dd>
+				{/if}
 			</dl>
 		</div>
 		{else}
@@ -113,7 +133,7 @@
 			</a>
 			{if $openKind == 'vcf'}
 			<button type="button" class="btn btn-primary" onclick="mailAttachmentImportContact({$mailID}, '{$attachment|escape:'javascript'}', '{$sid|escape:'javascript'}');">
-				<i class="ti ti-address-book-plus icon icon-sm me-1" aria-hidden="true"></i>
+				<i class="ti ti-user-plus icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="mail_att_import_contact"}
 			</button>
 			{elseif $openKind == 'ics' && $organizerEnabled && isset($calendarEvent)}
@@ -133,6 +153,9 @@ function mailAttachmentImportContact(mailId, attachment, sid)
 	var url = 'email.read.php?id=' + encodeURIComponent(mailId)
 		+ '&action=importVCF&attachment=' + encodeURIComponent(attachment)
 		+ '&sid=' + encodeURIComponent(sid);
+
+	if(EBID('mailAttAddressbook'))
+		url += '&addressbook=' + encodeURIComponent(EBID('mailAttAddressbook').value);
 
 	if(window.parent && window.parent !== window)
 		window.parent.document.location.href = url;
@@ -155,6 +178,9 @@ function mailAttachmentImportCalendar(mailId, attachment, sid)
 	url = 'email.read.php?id=' + encodeURIComponent(mailId)
 		+ '&action=importICS&attachment=' + encodeURIComponent(attachment)
 		+ '&ajax=1&sid=' + encodeURIComponent(sid);
+
+	if(EBID('mailAttCalendar'))
+		url += '&calendar=' + encodeURIComponent(EBID('mailAttCalendar').value);
 
 	if(EBID('mailAttSendCalendarReply') && EBID('mailAttSendCalendarReply').checked)
 		url += '&sendReply=1';

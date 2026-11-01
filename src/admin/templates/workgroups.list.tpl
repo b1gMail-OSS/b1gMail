@@ -8,7 +8,7 @@
 				<table class="table table-vcenter table-striped">
 					<thead>
 					<tr>
-						<th style="width: 25px; text-align: center;"><a href="javascript:invertSelection(document.forms.f1,'group_');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th class="text-center" style="width:3rem;"><a href="javascript:invertSelection(document.forms.f1,'group_');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th>{lng p="title"}</th>
 						<th>{lng p="email"}</th>
 						<th style="width: 70px;">&nbsp;</th>
@@ -18,7 +18,7 @@
 					{foreach from=$groups item=group}
 						{cycle name=class values="td1,td2" assign=class}
 						<tr class="{$class}">
-							<td class="text-center"><input type="checkbox" name="group_{$group.id}" /></td>
+							<td class="text-center"><label class="form-check d-inline-block mb-0"><input class="form-check-input" type="checkbox" name="group_{$group.id}" /></label></td>
 							<td><a href="{sessionurl file='workgroups.php' params="do=edit&id={$group.id}"}">{text value=$group.title}</a><br /><small>{$group.members} {lng p="members"}</small></td>
 							<td>{email value=$group.email}</td>
 							<td class="text-nowrap">
@@ -33,17 +33,15 @@
 				</table>
 			</div>
 			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="delete">{lng p="delete"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 			</div>
 		</div>

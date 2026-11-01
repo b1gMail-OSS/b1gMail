@@ -20,7 +20,7 @@
 			</div>
 
 			<div class="text-end">
-				<input class="btn btn-sm btn-warning" type="submit" value=" {lng p="emptycache"} " />
+				<input class="btn btn-primary" type="submit" value=" {lng p="emptycache"} " />
 			</div>
 		</form>
 	</fieldset>
@@ -60,8 +60,12 @@
 			</div>
 		</div>
 
-		<div style="float: right;"><input class="btn btn-sm btn-warning" type="submit" onclick="rebuildCaches()" value="{lng p="execute"}" /></div>
-		<div style="float: right;"><input type="text" class="form-control form-control-sm" name="perpage" id="perpage" value="50" size="5" />&nbsp; </div>
-		<div style="float: right;">{lng p="opsperpage"}&nbsp; </div>
+		<div class="text-end">
+			<div class="input-group input-group-sm bm-ops-action">
+				<span class="input-group-text">{lng p="opsperpage"}</span>
+				<input type="text" class="form-control" id="perpage" value="50">
+				<button type="button" class="btn btn-primary" onclick="rebuildCaches()">{lng p="execute"}</button>
+			</div>
+		</div>
 	</div>
 </fieldset>

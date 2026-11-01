@@ -18,11 +18,12 @@
 	</script>
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	<link href="{$tpldir}css/tabler.min.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/loggedin.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/tabler-custom.css" rel="stylesheet" type="text/css" />
 	<link href="{$tpldir}style/dtree.css" rel="stylesheet" type="text/css" />
+	{include file="nli/theme-brand.tpl"}
 	
 	<!-- client scripts -->
 	<script>
@@ -39,7 +40,7 @@
 	<script src="{$selfurl}clientlib/autocomplete.js" type="text/javascript"></script>
 </head>
 
-<body onload="initCalendar()" style="background-color:var(--tblr-bg-surface, #fff);background-image:none;">
+<body onload="initCalendar();initCalendarRangeSelection();" style="background-color:var(--tblr-bg-surface, #fff);background-image:none;">
 	<div id="calendarDayBody">
 		<table class="calendarDayBody">
 		{section name=halfHours start=0 loop=48}
@@ -53,7 +54,7 @@
 			<td class="calendarDaySepCell" rowspan="48"></td>
 			<td class="calendarDaySepCell2" rowspan="48"></td>
 		{/if}
-			<td class="calendarDayCell{if $smarty.section.halfHours.index%2}2{/if}{if $smarty.section.halfHours.index>=$dayStart && $smarty.section.halfHours.index<$dayEnd}_day{/if}" id="timeRow_{$smarty.section.halfHours.index}" style="{if $smarty.section.halfHours.index==0}border-top:0;{/if}">
+			<td class="calendarDayCell{if $smarty.section.halfHours.index%2}2{/if}{if $smarty.section.halfHours.index>=$dayStart && $smarty.section.halfHours.index<$dayEnd}_day{/if}" id="timeRow_{$smarty.section.halfHours.index}">
 				&nbsp;
 			</td>
 		</tr>
@@ -65,7 +66,8 @@
 	<!--
 		var calendarDayStart = {$dayStart},
 			calendarDayEnd = {$dayEnd},
-			calendarDates = [];
+			calendarDates = [],
+			calendarWeekDays = [{$dateStart}];
 		
 		{foreach from=$dates item=date}
 		{if ($date.flags&1)==0}
@@ -74,7 +76,7 @@
 			{$date.startdate},
 			{$date.enddate},
 			"{text escape=true noentities=true value=$date.title}",
-			{$groups[$date.group].color}
+			{$date.displayColor}
 		]);
 		{/if}
 		{/foreach}

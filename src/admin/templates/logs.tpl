@@ -49,15 +49,19 @@
 				<div class="mb-3 row">
 					<label class="col-sm-2 col-form-label">{lng p="from"}</label>
 					<div class="col-sm-10">
-						{html_select_date prefix="start" time=$start start_year="-5" field_order="DMY" field_separator="."},
-						{html_select_time prefix="start" time=$start display_seconds=false}
+						<div class="input-group">
+							<input type="text" class="form-control" id="log-start" name="start" data-bs-toggle="datepicker" data-bs-position-element="#log-start" data-bm-datetime="1" data-bs-date-format="DD.MM.YYYY" data-bs-locale="de" autocomplete="off" value="{date timestamp=$start format="d.m.Y H:i"}" placeholder="TT.MM.JJJJ HH:MM" aria-label="{lng p="from"}">
+							<label class="input-group-text mb-0" for="log-start"><i class="icon ti ti-calendar-time"></i></label>
+						</div>
 					</div>
 				</div>
 				<div class="mb-3 row">
 					<label class="col-sm-2 col-form-label">{lng p="to"}</label>
 					<div class="col-sm-10">
-						{html_select_date prefix="end" time=$end start_year="-5" field_order="DMY" field_separator="."},
-						{html_select_time prefix="end" time=$end display_seconds=false}
+						<div class="input-group">
+							<input type="text" class="form-control" id="log-end" name="end" data-bs-toggle="datepicker" data-bs-position-element="#log-end" data-bm-datetime="1" data-bs-date-format="DD.MM.YYYY" data-bs-locale="de" autocomplete="off" value="{date timestamp=$end format="d.m.Y H:i"}" placeholder="TT.MM.JJJJ HH:MM" aria-label="{lng p="to"}">
+							<label class="input-group-text mb-0" for="log-end"><i class="icon ti ti-calendar-time"></i></label>
+						</div>
 					</div>
 				</div>
 				<div class="mb-3 row">
