@@ -130,7 +130,7 @@
 			<div id="contentFooter" class="contentFooter bm-organizer-footer">
 				<div class="left bm-organizer-footer-actions">
 					<div class="input-group input-group-sm bm-organizer-action-group">
-						<select class="form-select" name="do" aria-label="{lng p="selaction"}">
+						<select class="form-select form-select-sm" name="do" aria-label="{lng p="selaction"}">
 							<option value="-">{lng p="selaction"}</option>
 
 							<optgroup label="{lng p="actions"}">
@@ -145,7 +145,7 @@
 							{/foreach}
 							</optgroup>{/if}
 						</select>
-						<button class="btn btn-primary" type="submit">{lng p="ok"}</button>
+						<button class="btn btn-sm btn-primary" type="submit">{lng p="ok"}</button>
 					</div>
 				</div>
 

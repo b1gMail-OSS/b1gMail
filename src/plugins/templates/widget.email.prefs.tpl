@@ -1,3 +1,32 @@
+{if $widgetPrefsModernDialog}
+{capture assign="dialogTitleText"}{lng p="prefs"}{/capture}
+{include file="li/dialog.head.tpl" dialogTitle=$dialogTitleText dialogBodyClass="bm-dialog-widget-prefs" dialogOnLoad="documentLoader()"}
+
+<form action="{$widgetPrefsURL}" method="post" class="bm-widget-prefs-form">
+	{csrffield}
+	<input type="hidden" name="save" value="true" />
+	<div class="modal-body">
+		<label class="form-check">
+			<input type="checkbox" class="form-check-input" name="hideSystemFolders" id="hideSystemFolders"{if $hideSystemFolders} checked="checked"{/if} />
+			<span class="form-check-label">{lng p="hidesystemfolders"}</span>
+		</label>
+		<label class="form-check">
+			<input type="checkbox" class="form-check-input" name="hideCustomFolders" id="hideCustomFolders"{if $hideCustomFolders} checked="checked"{/if} />
+			<span class="form-check-label">{lng p="hidecustomfolders"}</span>
+		</label>
+		<label class="form-check mb-0">
+			<input type="checkbox" class="form-check-input" name="hideIntelliFolders" id="hideIntelliFolders"{if $hideIntelliFolders} checked="checked"{/if} />
+			<span class="form-check-label">{lng p="hideintellifolders"}</span>
+		</label>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-sm btn-ghost-secondary" onclick="parent.hideOverlay()">{lng p="cancel"}</button>
+		<button type="submit" class="btn btn-sm btn-primary">{lng p="ok"}</button>
+	</div>
+</form>
+
+{include file="li/dialog.foot.tpl"}
+{else}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -54,3 +83,4 @@
 </body>
 
 </html>
+{/if}

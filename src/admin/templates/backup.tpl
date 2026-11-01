@@ -5,7 +5,7 @@
 		{csrffield}
 	<table>
 		<tr>
-			<td align="left" rowspan="3" valign="top" width="40"><img src="{$tpldir}images/backup32.png" border="0" alt="" width="32" height="32" /></td>
+			<td align="left" rowspan="3" valign="top" width="40">{acpicon file="backup32.png" size="lg"}</td>
 			<td>
 				{lng p="backupitems"}:
 				<blockquote>
@@ -27,7 +27,7 @@
 	</table>
 	<p>
 		<div style="float:left;" class="buttons">
-			<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
+			{acpicon file="warning.png"}
 			{lng p="backupwarn"}
 		</div>
 		<div style="float:right;" class="buttons">

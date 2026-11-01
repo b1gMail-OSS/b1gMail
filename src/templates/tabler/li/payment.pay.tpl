@@ -92,6 +92,30 @@
 			</center></p>
 		{if !$omitTable}</td>
 	</tr>{/if}
+{elseif $_pf.payMethod==4}
+	{if !$omitTable}<tr>
+		<td class="listTableRight">{/if}
+			<p><center>
+				{if $_pf.paypalError}
+					{$_pf.paypalErrorMsg}
+				{else}
+					<p>{lng p="paypal_error"}</p>
+				{/if}
+			</center></p>
+		{if !$omitTable}</td>
+	</tr>{/if}
+{elseif $_pf.payMethod==5}
+	{if !$omitTable}<tr>
+		<td class="listTableRight">{/if}
+			<p><center>
+				{if $_pf.stripeError}
+					{$_pf.stripeErrorMsg}
+				{else}
+					<p>{lng p="stripe_error"}</p>
+				{/if}
+			</center></p>
+		{if !$omitTable}</td>
+	</tr>{/if}
 {elseif $_pf.payMethod==3}
 {if !$omitTable}<tr>
 	<td class="listTableRight">{/if}

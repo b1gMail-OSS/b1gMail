@@ -2517,6 +2517,24 @@ function SmartyCellphoneNo($field)
  */
 function SmartyDateTime($field)
 {
+	if(!isset($_REQUEST[$field.'Day']) && !isset($_REQUEST[$field.'Month']) && !isset($_REQUEST[$field.'Year'])
+		&& isset($_REQUEST[$field]) && is_string($_REQUEST[$field]))
+	{
+		$raw = trim($_REQUEST[$field]);
+		if($raw === '')
+			return 0;
+		if(preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/', $raw, $match))
+		{
+			$day = (int)$match[1];
+			$month = (int)$match[2];
+			$year = (int)$match[3];
+			$hour = isset($match[4]) ? (int)$match[4] : 0;
+			$minute = isset($match[5]) ? (int)$match[5] : 0;
+			if($month >= 1 && $month <= 12 && $day >= 1 && $day <= 31 && $hour >= 0 && $hour <= 23 && $minute >= 0 && $minute <= 59)
+				return mktime($hour, $minute, 0, $month, $day, $year);
+		}
+	}
+
 	$d = $m = $y = 1;
 	$h = $i = $s = 0;
 	$y = (int)date('Y');
@@ -4557,8 +4575,9 @@ function PutLog($entry, $prio = PRIO_NOTE, $at_file = __FILE__, $at_line = __LIN
 	$at_file = explode($sep, $at_file);
 	$at_file = $at_file[ count($at_file)-1 ];
 
-	$db->Query('INSERT INTO {pre}logs(eintrag, zeitstempel, prio) VALUES(?, UNIX_TIMESTAMP(), ?)',
+	$db->Query('INSERT INTO {pre}logs(eintrag, zeitstempel, prio) VALUES(?, ?, ?)',
 		"({$at_file}:{$at_line}) $entry",
+		time(),
 		$prio);
 }
 
@@ -4848,6 +4867,7 @@ function ConnectDB()
 		{
 			@mysqli_query($mysqlHandle, 'SET SESSION sql_mode=\'\'');
 			$db = _new('DB', array($mysqlHandle));
+			SyncMysqlTimeZone();
 			return(true);
 		}
 		else
@@ -5618,9 +5638,32 @@ function ApplyClientTimezoneOffset($offset, $userID = 0)
  */
 function SetTimeZoneByName($name)
 {
-	
-	date_default_timezone_set($name);
+	if(!@date_default_timezone_set($name))
+		return(false);
+
+	SyncMysqlTimeZone();
 	return(true);
+}
+
+/**
+ * Align MySQL session time_zone with PHP's current default timezone.
+ *
+ * UNIX_TIMESTAMP() / FROM_UNIXTIME() follow the MySQL session, not
+ * date.timezone. Named zones need mysql.time_zone_name; the numeric
+ * offset from date('P') works without those tables.
+ */
+function SyncMysqlTimeZone()
+{
+	global $db;
+
+	if(!isset($db) || !is_object($db))
+		return;
+
+	$offset = date('P');
+	if(!preg_match('/^[+-][0-9]{2}:[0-9]{2}$/', $offset))
+		return;
+
+	$db->Query('SET SESSION time_zone=?', $offset);
 }
 
 /**
@@ -5688,7 +5731,10 @@ function SetTimeZoneByOffsetSeconds($offset)
 			continue;
 
 		if((int)date('Z') === $offset)
+		{
+			SyncMysqlTimeZone();
 			return true;
+		}
 	}
 
 	if(class_exists('DateTimeZone'))
@@ -5702,7 +5748,10 @@ function SetTimeZoneByOffsetSeconds($offset)
 				continue;
 
 			if((int)date('Z') === $offset)
+			{
+				SyncMysqlTimeZone();
 				return true;
+			}
 		}
 	}
 

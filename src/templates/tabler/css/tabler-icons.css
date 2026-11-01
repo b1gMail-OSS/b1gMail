@@ -1,12 +1,342 @@
 /*!
- * Tabler Icons 3.46.0 by tabler - https://tabler.io
+ * Tabler Icons 3.50.0 by tabler - https://tabler.io
  * License - https://github.com/tabler/tabler-icons/blob/main/LICENSE
  */
 @font-face {
   font-family: "tabler-icons";
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/tabler-icons.woff2?v3.46.0") format("woff2"), url("../fonts/tabler-icons.woff?") format("woff"), url("../fonts/tabler-icons.ttf?v3.46.0") format("truetype");
+  src: url("../fonts/tabler-icons.core.woff2?h3a24de11") format("woff2");
+  unicode-range: U+EA03, U+EA05-EA06, U+EA0B, U+EA19-EA1D, U+EA1F, U+EA24, U+EA28, U+EA2C, U+EA35, U+EA38-EA3A, U+EA45-EA46, U+EA4E-EA4F, U+EA51-EA55, U+EA59, U+EA5C, U+EA5E-EA62, U+EA67, U+EA69-EA6D, U+EA70, U+EA75-EA77, U+EA79-EA7A, U+EA84, U+EA87-EA8A, U+EA94-EA9A, U+EA9C-EA9D, U+EAA2, U+EAA4-EAA6, U+EAAD, U+EABD-EAC1, U+EAC3, U+EAC5, U+EAC7, U+EADA, U+EADE, U+EAE2, U+EAE4-EAE5, U+EAE7-EAE9, U+EAEC-EAF0, U+EAF2, U+EAF7-EAF8, U+EAFC-EAFD, U+EAFF, U+EB01-EB02, U+EB04-EB05, U+EB09-EB0C, U+EB0E, U+EB10-EB11, U+EB13, U+EB17, U+EB1C-EB1E, U+EB20-EB22, U+EB24-EB25, U+EB28, U+EB2C, U+EB2E, U+EB30, U+EB3C-EB3D, U+EB40-EB41, U+EB43, U+EB45, U+EB47, U+EB49, U+EB4B, U+EB4D, U+EB51-EB52, U+EB54-EB55, U+EB5C-EB5D, U+EB62, U+EB64-EB65, U+EB67-EB68, U+EB6A-EB6C, U+EB6E, U+EB72, U+EB75, U+EB77, U+EB80, U+EB82, U+EB84, U+EB90, U+EB9D, U+EBA1, U+EBA6, U+EBA8, U+EBAA, U+EBB6, U+EBBB-EBBC, U+EBBE, U+EBC2, U+EBC4, U+EBE2-EBE3, U+EBEA, U+EBF2, U+EBF6, U+EC01, U+EC16-EC17, U+EC1A, U+EC1C, U+EC1F-EC20, U+EC26, U+EC2C, U+EC2E, U+EC38-EC39, U+EC42, U+EC45, U+EC4B, U+EC73-EC74, U+EC8C, U+EC90-EC91, U+EC9C-EC9D, U+ECA3, U+ECDE, U+ECEF-ECF0, U+ECF7, U+ED07, U+ED12, U+ED22, U+ED45-ED46, U+ED4A, U+ED4F, U+ED51, U+ED58, U+ED61, U+ED76, U+EDBA, U+EDBE, U+EDEF, U+EDFD, U+EDFF, U+EE21, U+EE25, U+EEA9, U+EEC2, U+EECB, U+EECD, U+EEF7, U+EEFF, U+EF40, U+EF4F, U+EF68, U+EF88-EF89, U+EF8E, U+EF90, U+EFBE, U+EFC5, U+EFE6, U+EFF0, U+EFF2, U+EFF9, U+F004-F005, U+F00B, U+F021, U+F028, U+F02C, U+F074, U+F082, U+F089, U+F0F3, U+F1D2, U+F1E2, U+F1F6, U+F1F8, U+F226, U+F236, U+F265, U+F2B8, U+F2C9, U+F318-F319, U+F358, U+F38A, U+F38C, U+F38F, U+F3AE, U+F51A, U+F59F, U+F5AC, U+F5F8, U+F634-F635, U+F63D, U+F65C-F65D, U+F6D7, U+F7BD, U+F7D0, U+F810, U+F824, U+F91D, U+F9D4, U+FA21, U+FA77, U+FA7E, U+FAF7, U+FAFD, U+FB03, U+FB10, U+FB1B, U+FC0F, U+FCAF, U+FD2E-FD30, U+FD32, U+FDAA, U+FEB8, U+FEF7, U+FEFB, U+FF11, U+FF40, U+FF9B, U+10066, U+10096, U+100B2, U+1014B, U+101A6, U+1025A-1025B, U+10261, U+10289;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.numbers.woff2?h117cfd3d") format("woff2");
+  unicode-range: U+EDF0-EDF9, U+EE0D-EE16, U+EE34-EE3D, U+EEE5-EEEE, U+F015, U+F1FE, U+F459-F462, U+F554, U+F58F-F598, U+F5C8-F5D1, U+FC6B-FC74, U+FC7E-FC87, U+FCE1-FCFE, U+FFBF-FFEF, U+10000-10005, U+1005D-1005E, U+10210-1021F;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.games.woff2?h861962bb") format("woff2");
+  unicode-range: U+EB66, U+EB8E, U+EEBC, U+EEBF, U+EF83, U+EF9F, U+F030, U+F08B-F090, U+F132, U+F17E, U+F186, U+F26F, U+F28A, U+F3F2, U+F434, U+F512, U+F515, U+F57C, U+F587, U+FAD3, U+FAFC, U+FC13, U+FC55, U+1004E-1005C, U+1005F, U+1025E, U+1027F;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.buildings.woff2?h43fdb261") format("woff2");
+  unicode-range: U+EA49-EA4D, U+EBF7, U+ED26, U+ED87-ED8A, U+EE1B-EE1C, U+EF06, U+EF2A, U+EF48, U+EF7A, U+EF80, U+EF9E, U+EFE7, U+F05E, U+F0FF, U+F129, U+F145, U+F1A7, U+F1C9, U+F1D8, U+F2CA-F2CB, U+F336-F347, U+F350-F356, U+F3BD-F3BE, U+F41B, U+F43C, U+F4BE-F4C0, U+F504-F505, U+F5A5-F5A6, U+F641, U+F64A, U+FA57, U+FC77, U+FCA1, U+FEFD, U+FF3A, U+FF50, U+FFA9, U+FFB5, U+10060-10062, U+10160, U+10204, U+10234, U+1023B, U+10251, U+1028A;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.arrows-1.woff2?h8217c577") format("woff2");
+  unicode-range: U+EA0C-EA18, U+EA1E, U+EA20-EA23, U+EA25-EA27, U+EA29, U+EA63-EA66, U+EA7C-EA83, U+EB15-EB16, U+EB31-EB33, U+EB42, U+EB59-EB5B, U+EB5E-EB60, U+EB78, U+EBA7, U+EBB4-EBB5, U+EC15, U+EC88-EC8B, U+EC9E, U+ECE0-ECE1, U+ED09-ED10, U+ED3C-ED3D, U+ED54-ED57, U+ED98, U+ED9A-EDA4, U+EDA6-EDB7, U+EDBF-EDC4, U+EDDA-EDE1, U+EE00-EE03, U+EE48-EE4F, U+EF31-EF39, U+EF45-EF46, U+EF85, U+EFBF, U+EFE5, U+EFE8-EFEF, U+EFFE-F000, U+F044-F046;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.arrows-2.woff2?h0fbc8071") format("woff2");
+  unicode-range: U+F047-F05B, U+F095, U+F11C, U+F18D, U+F1F3-F1F4, U+F22A-F22F, U+F23B-F23D, U+F296, U+F2B2-F2B5, U+F2BA-F2BD, U+F2CC-F2CD, U+F3A4, U+F4A7, U+F4A9-F4AC, U+F4B7-F4BA, U+F516-F519, U+F578, U+F60B-F60E, U+F61D-F620, U+F622-F625, U+F627-F62E, U+F639-F63C, U+F642-F645, U+F64B-F652, U+F6F6, U+F6F8-F6F9, U+F6FB, U+F6FD, U+F700, U+F702-F703, U+F799, U+F9EC-F9EF, U+FADD-FADE, U+FAE4-FAE5, U+FAF0-FAF3, U+FC44, U+FC76, U+FC9F-FCA0, U+FD5E-FD61, U+FD86-FD8D, U+FEA1-FEA2, U+FFAC, U+10063-10065, U+10067-1006A, U+10161-10164, U+101A9-101AA, U+10206-10209, U+10276, U+102CE;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.math.woff2?h482bbe35") format("woff2");
+  unicode-range: U+EB69, U+EB73, U+EB97, U+EBCC-EBCD, U+EBD8, U+EBEB, U+EC46-EC4A, U+ECF4, U+ED5C, U+EE86-EE87, U+EEB2-EEB3, U+EEF0-EEF1, U+EF05, U+EF41-EF44, U+F05C, U+F0BF-F0C0, U+F0F4-F0F6, U+F15E, U+F171, U+F1AB, U+F1BD, U+F1E3-F1E5, U+F225, U+F229, U+F36A-F36B, U+F3B6, U+F3F0, U+F3FE, U+F409, U+F4E1-F4F9, U+F7AD-F7AE, U+FA26, U+FAB9, U+FDA0, U+FF1E-FF1F, U+FF33-FF35, U+10072-10073, U+100BC, U+10233, U+10237;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.vehicles.woff2?hb76eaf8b") format("woff2");
+  unicode-range: U+EA36, U+EB6F, U+EB99-EB9A, U+EBE4, U+EBE8-EBE9, U+EBF0, U+EBF5, U+EC0D, U+EC6C, U+EC7B-EC7D, U+EC83-EC84, U+ECAA-ECAB, U+ECBC, U+ECC1-ECC2, U+ED79, U+ED7C, U+ED86, U+ED8D-ED8E, U+ED93-ED97, U+EDFE, U+EE07, U+EE1D, U+EE26, U+EE7E, U+EEB6, U+EF00, U+EF03, U+EF25, U+EF27, U+EF7E, U+EF98, U+EF9C, U+EFA4, U+F0A2, U+F0B8, U+F0C7, U+F109, U+F120, U+F137, U+F170, U+F17A, U+F1DB, U+F1ED, U+F23E, U+F270, U+F2D4, U+F3CE, U+F3F1, U+F423, U+F425, U+F42A-F42B, U+F431, U+F43E-F43F, U+F4A6, U+F4CC, U+F4FD, U+F5F7, U+FA25, U+FC89, U+FC8B, U+FDB3-FDB8, U+10074, U+10221, U+10229, U+1022F-10230, U+10244, U+1024F-10250;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.e-commerce.woff2?h799cba6a") format("woff2");
+  unicode-range: U+EB34, U+EBBD, U+EBE1, U+EC0A, U+EC4C, U+ED11, U+EE1E, U+EE24, U+EE7C, U+EE9A, U+EEDC, U+EEE1, U+EF2F-EF30, U+EF47, U+EF86, U+EFC0-EFC1, U+EFD2, U+F07E, U+F0B6, U+F0D1, U+F105, U+F13E, U+F16C, U+F1A2, U+F1A4, U+F1C4, U+F1DA, U+F26C, U+F285, U+F2BE-F2C3, U+F3AA, U+F3C2, U+F3D6, U+F3E6-F3E7, U+F3F3, U+F4A0, U+F4DF, U+F506, U+F509, U+F564, U+F661, U+FB43-FB6B, U+FC16-FC1D, U+FC99, U+FD0D, U+FD33, U+FD66, U+FD68-FD6B, U+FD6F-FD73, U+FD82, U+FDA2, U+FEE6, U+FF10, U+FFA2, U+10097, U+10138-10149, U+1022E, U+10283-10286, U+1029E;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.document.woff2?hd7fd756b") format("woff2");
+  unicode-range: U+EA6E-EA6F, U+EA9E-EAA1, U+EAA3, U+EAAA-EAAC, U+EAAE, U+EB6D, U+EB70, U+EB96, U+EBB0, U+EBC0, U+EBD0, U+EC81, U+ECDC, U+ECED, U+ECF1-ECF2, U+ED08, U+ED14, U+ED2A-ED2B, U+ED4D-ED4E, U+ED53, U+ED5D, U+ED7B, U+EDBD, U+EDE6-EDEA, U+EDEC-EDEE, U+EDFA-EDFC, U+EEC3, U+EECC, U+EECE, U+EF54-EF55, U+EF84, U+EFA8, U+EFB2, U+EFE0-EFE1, U+F029, U+F032-F043, U+F070-F071, U+F073, U+F0AD, U+F0BC-F0BE, U+F0CB-F0CC, U+F0CE, U+F133, U+F153, U+F167, U+F169-F16A, U+F183, U+F18F, U+F1B2, U+F299, U+F2A1, U+F2D7-F2DA, U+F34D-F34F, U+F3BF, U+F3D1, U+F415, U+F501-F503, U+F53D-F540, U+F563, U+F5AA-F5AB, U+F90C-F91C, U+FA27, U+FA5A, U+FA5E-FA61, U+FB07-FB0F, U+FB11-FB1A, U+FB1C-FB1D, U+FC8A, U+FD22-FD24, U+FD43, U+FD67, U+FD9A, U+FEAB-FEAC, U+FEF2-FEF3, U+FFA0-FFA1, U+FFB8-FFB9, U+10098, U+100F2, U+1029B-1029C, U+102B0-102B1, U+102BA-102BB, U+102D6, U+102D8;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.brand-1.woff2?h94da8f57") format("woff2");
+  unicode-range: U+EC18-EC19, U+EC1B, U+EC1D-EC1E, U+EC21-EC25, U+EC27, U+EC6E-EC72, U+EC8D-EC8F, U+EC93, U+ECA1, U+ECD8, U+ECE3, U+ECFB-ED06, U+ED24-ED25, U+ED68-ED73, U+EDC5-EDD9, U+EF0C, U+EF24, U+EF3E, U+EF49, U+EF57-EF59, U+EF6A-EF76, U+EF7B, U+EF8D, U+EFA2, U+EFB0, U+F001-F003, U+F072, U+F0DC-F0E0, U+F1CF, U+F1E6-F1E7, U+F205-F21A, U+F230-F232, U+F24E-F255, U+F260-F262, U+F297-F298, U+F2D2-F2D3, U+F324-F335, U+F348-F34C, U+F35A, U+F37F-F380, U+F390-F399;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.brand-2.woff2?h3380221e") format("woff2");
+  unicode-range: U+F39A-F39B, U+F39D-F3A1, U+F3A8, U+F494-F49F, U+F4A8, U+F4CF-F4DE, U+F4FB-F4FC, U+F50C-F50E, U+F562, U+F568-F569, U+F5A0-F5A4, U+F5D5-F5D8, U+F5E8-F5F3, U+F5F9-F60A, U+F60F-F617, U+F653-F658, U+F6D2-F6D3, U+F78B-F790, U+F7A2-F7A5, U+F7AF-F7B0, U+F7E3, U+F7E8, U+FA22-FA24, U+FA4C-FA56, U+FA70-FA76, U+FA78-FA7A, U+FAD0-FAD1, U+FADF-FAE1, U+FAEF, U+FB02, U+FC10, U+FC41-FC42, U+FC6A, U+FCB3, U+FD1B-FD1C, U+FD2D, U+FD75-FD79, U+FDB9, U+FEAE, U+FF12, U+FF23-FF2A, U+FFAA-FFAB, U+10099, U+1018A, U+101AE, U+1020A, U+10231, U+10242-10243, U+10252, U+10275, U+102D4-102D5;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.food.woff2?hb3481bc1") format("woff2");
+  unicode-range: U+EAB7-EAB8, U+EAC2, U+EAFB, U+EB8A, U+ED64, U+EDB8, U+EDBB, U+EE91, U+EE9F, U+EF0B, U+EF0D-EF0E, U+EF10, U+EF12-EF17, U+EF21, U+EF26, U+EF28-EF29, U+EF2E, U+EF81, U+EFA1, U+EFA3, U+EFA9, U+EFCC, U+F00F, U+F02F, U+F0BB, U+F0C5, U+F0D7, U+F101, U+F104, U+F106, U+F10D, U+F11F, U+F148, U+F157, U+F165, U+F16F, U+F175, U+F179, U+F21C-F21D, U+F248, U+F264, U+F2D6, U+F35B-F35C, U+F386, U+F3A5, U+F3C8, U+F3CB, U+F3D0, U+F3D4, U+F3F5, U+F40A, U+F40F, U+F412, U+F42D, U+F4C8, U+F4FA, U+F500, U+F50A, U+F552, U+F57A, U+FAE9-FAEB, U+FC61, U+FC7A, U+FCB4, U+FD2B, U+FD8E, U+FD90-FD91, U+FD9C-FD9E, U+FDB1, U+FEB5, U+FEB9, U+FF51-FF52, U+100A8-100A9, U+100BD, U+101A0, U+10239, U+1024E, U+10253;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.system-1.woff2?hc2e55e19") format("woff2");
+  unicode-range: U+EA04, U+EA2E, U+EA71, U+EA91-EA93, U+EA9B, U+EAB0-EAB1, U+EABA, U+EAC4, U+EAC6, U+EADC-EADD, U+EAE1, U+EAE6, U+EAEB, U+EAFE, U+EB12, U+EB23, U+EB3A-EB3B, U+EB3E-EB3F, U+EB48, U+EB4A, U+EB4C, U+EB53, U+EBB9-EBBA, U+EBC1, U+EBC6-EBC8, U+EBCB, U+EBD1, U+EBD4-EBD5, U+EBD7, U+EBDC, U+EBE7, U+EBEC, U+EBF1, U+EBFA-EBFB, U+EC00, U+EC12, U+EC37, U+EC3E, U+EC77, U+EC9F, U+ECA2, U+ECBF, U+ECC6, U+ECD3-ECD5, U+ECD7, U+ECDA, U+ECE9, U+ECF8-ECF9, U+ED19, U+ED1E, U+ED2C, U+ED38, U+ED62, U+ED65, U+ED84, U+EDE2-EDE5, U+EE1F-EE20, U+EE41, U+EE71, U+EE88, U+EEAA, U+EEAE, U+EEB4, U+EEC4, U+EECA, U+EED6, U+EF4C-EF4E, U+EF51, U+EF53, U+EF56, U+EF93, U+EF9A-EF9B, U+EFA7, U+EFAD, U+EFAF, U+EFB3-EFB4, U+EFB6, U+EFB9-EFBB, U+EFBD, U+EFC9, U+EFCF, U+EFD3, U+EFDA-EFDB, U+EFDF, U+EFE2, U+EFF1, U+EFF7, U+F008, U+F00C, U+F020, U+F023, U+F02A, U+F031, U+F068, U+F076, U+F079, U+F07D, U+F092-F093, U+F099, U+F09C, U+F0A4, U+F0A8-F0A9, U+F0B3, U+F0CF, U+F10A, U+F10F, U+F11B, U+F123-F125, U+F12A, U+F136, U+F138, U+F146-F147, U+F149-F14A, U+F14C, U+F154, U+F156, U+F158, U+F15D, U+F16B, U+F181, U+F185, U+F18B, U+F192, U+F198-F199, U+F19C, U+F19F, U+F1A1, U+F1A9, U+F1AE, U+F1B1, U+F1B4, U+F1BB, U+F1C1, U+F1C5-F1C6, U+F1F1-F1F2, U+F1F7, U+F1FB-F1FC, U+F1FF, U+F21F-F223, U+F227-F228, U+F249-F24B, U+F256, U+F258, U+F26E, U+F286, U+F288, U+F294, U+F2DD, U+F313-F317, U+F31A-F31E, U+F359, U+F368, U+F37E, U+F38E, U+F3A3, U+F3B0, U+F3B3, U+F3B5, U+F3BA, U+F3C1, U+F3E1-F3E2, U+F3E5, U+F3E8, U+F3EA, U+F3F4, U+F3F8, U+F3FB, U+F3FD, U+F401, U+F404, U+F422, U+F42C, U+F42E-F430, U+F436-F437, U+F43A, U+F440, U+F4A5, U+F4CA-F4CB, U+F50B;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.system-2.woff2?h4ffab718") format("woff2");
+  unicode-range: U+F513, U+F51B, U+F526-F52F, U+F546-F54B, U+F551, U+F566, U+F577, U+F581, U+F588-F589, U+F5E6-F5E7, U+F5F5, U+F61B-F61C, U+F621, U+F62F-F632, U+F636, U+F793-F794, U+F79D-F79E, U+F7A8-F7AB, U+F7BE-F7BF, U+F7C1-F7CF, U+F7D1-F7D2, U+F7EC-F7F1, U+F7FB-F80F, U+F811-F823, U+F825-F832, U+F844-F84A, U+F91E-F936, U+F999-F9D3, U+F9D5-F9D8, U+F9F3-F9F7, U+F9FE-FA04, U+FA07-FA0B;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.system-3.woff2?h19d29dbd") format("woff2");
+  unicode-range: U+FA0C-FA0F, U+FA33, U+FAD2, U+FAD4-FADC, U+FAF6, U+FAF8-FAFB, U+FB6D-FB6F, U+FB71-FB89, U+FB8F, U+FBB4, U+FBDA, U+FC11, U+FC15, U+FC1E-FC20, U+FC47, U+FC4E-FC53, U+FC56-FC57, U+FC5A-FC5C, U+FC65-FC69, U+FC78, U+FC7B-FC7D, U+FC9E, U+FCA3, U+FCA7-FCA8, U+FCB0, U+FCB6, U+FCB8, U+FCBE-FCC1, U+FCC3-FCC5, U+FD1D-FD1F, U+FD25-FD2A, U+FD35-FD36, U+FD3B-FD3C, U+FD3E, U+FD44-FD4C, U+FD4F, U+FD57, U+FD5B-FD5C, U+FD6C, U+FD7C-FD7E, U+FD81, U+FD94-FD97, U+FD9B, U+FDA3-FDA9, U+FDAC, U+FEA4, U+FEA6, U+FEA8, U+FEAF, U+FED7-FEE5, U+FEE8-FEED, U+FEF1, U+FEF4, U+FEF8, U+FF0C-FF0E, U+FF30, U+FF37-FF39, U+FF3C, U+FF3E-FF3F, U+FF42-FF43, U+FF49-FF4C, U+FF9F, U+FFA3, U+FFAE, U+FFB4, U+FFBA, U+FFBE, U+100AA-100AD, U+100BA, U+100F0, U+1014A, U+1014C-1015F, U+101A7, U+101F2, U+101FA, U+10220, U+10226, U+10235, U+10257, U+1025D, U+1025F-10260, U+10268, U+10270, U+10273, U+10277-1027A, U+1027D, U+10287, U+10292, U+10294, U+102C0;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.devices-1.woff2?h591f42a6") format("woff2");
+  unicode-range: U+EA2F-EA34, U+EA37, U+EA8B-EA8D, U+EA90, U+EAF9, U+EB06-EB08, U+EB0D, U+EB18, U+EB1F, U+EB63, U+EB86-EB87, U+EBA3-EBA5, U+EBB7, U+EBD6, U+EBD9, U+EBF3-EBF4, U+EBF9, U+EC05-EC07, U+EC43, U+EC7E-EC7F, U+ECC7-ECCB, U+ECDB, U+ECEA-ECEB, U+ECF5, U+ECFA, U+ED17-ED18, U+ED1A-ED1C, U+ED29, U+ED74, U+EE72-EE7A, U+EEA0, U+EEB7, U+EEDF, U+EF3B-EF3C, U+EF7C-EF7D, U+EFD6-EFD8, U+F00A, U+F00D, U+F026, U+F060-F065, U+F067, U+F075, U+F07C, U+F081, U+F083-F088, U+F094, U+F0A0-F0A1, U+F0AA, U+F0C1, U+F0C4, U+F0C8, U+F108, U+F111-F114, U+F118, U+F163, U+F168, U+F180, U+F184, U+F19E, U+F1D3, U+F1D7, U+F1E8-F1E9, U+F1EE-F1F0, U+F1FA, U+F224, U+F233, U+F259, U+F25E, U+F2AD-F2B0, U+F2B6-F2B7, U+F2B9, U+F320-F321, U+F384, U+F3A2, U+F3BB, U+F3E3-F3E4, U+F3EF, U+F41E, U+F424, U+F4AF-F4B2, U+F542, U+F5A9, U+F646-F649, U+F792, U+F79A, U+F7A7, U+F85E-F875;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.devices-2.woff2?h280dae9d") format("woff2");
+  unicode-range: U+F876-F8F8, U+F9F8-F9FD, U+FA59, U+FAE6-FAE7, U+FC58-FC59, U+FCA2, U+FF13-FF1D, U+FFAF, U+FFB1, U+FFBD, U+100AE-100B0, U+100B6, U+1022B-1022D, U+10236, U+10238, U+1023A, U+1023C, U+10274, U+1028B, U+10299-1029A, U+1029F-102A0, U+102B7;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.sport.woff2?h20771d0b") format("woff2");
+  unicode-range: U+EC28-EC2B, U+EC78, U+EC82, U+EC87, U+EC92, U+ECD0, U+ED32, U+ED8C, U+ED8F, U+ED91-ED92, U+EE04-EE06, U+EEBA, U+EED4, U+EEE4, U+EFA0, U+EFC8, U+EFCA-EFCB, U+EFCD, U+EFD1, U+F01F, U+F096, U+F09A, U+F0B2, U+F13A, U+F143, U+F1D6, U+F2DB, U+F382, U+F385, U+F38D, U+F3C3, U+F416, U+F41D, U+F428, U+F438, U+F514, U+F51C, U+F56B-F56F, U+F5AD, U+FA66-FA6F, U+FACA, U+FD4E, U+FEFA, U+FEFC, U+100B1, U+10228, U+10245, U+10247, U+1024A, U+1024C-1024D, U+10254;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.badges.woff2?h750d8dfd") format("woff2");
+  unicode-range: U+EFC2-EFC3, U+F0FA-F0FC, U+F555-F560, U+FD8F, U+100B3-100B5;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.shapes.woff2?h750135e7") format("woff2");
+  unicode-range: U+EA68, U+EB29-EB2B, U+EB44, U+EC02, U+ECBD, U+ECDF, U+ECE4-ECE5, U+ECE8, U+ED27-ED28, U+ED36-ED37, U+ED59-ED5B, U+EE3E-EE40, U+EE9C, U+EEB8, U+EEBD, U+EEC5, U+EEEF, U+EEF2, U+EF02, U+EFB1, U+EFDC-EFDD, U+EFE3, U+EFF3-EFF5, U+EFFA, U+F010-F011, U+F01A-F01D, U+F02D-F02E, U+F09D, U+F0A5, U+F0CD, U+F115, U+F140-F142, U+F176, U+F187, U+F1D4, U+F1F5, U+F387, U+F3D8, U+F3F7, U+F3F9, U+F3FC, U+F3FF, U+F41A, U+F4C3, U+F4C7, U+F54C, U+F599-F59A, U+F633, U+F638, U+F63E-F640, U+FA94-FAB8, U+FAE2-FAE3, U+FAED-FAEE, U+FB9E-FBA2, U+FBA4-FBAE, U+FC43, U+FC45, U+FC49, U+FC75, U+FC88, U+FC8C-FC94, U+FC96-FC98, U+FC9A-FC9D, U+FD20-FD21, U+FD7A-FD7B, U+FD83-FD84, U+FD98, U+FEA3, U+FEB3, U+FEB6-FEB7, U+FFB6, U+FFBB, U+100BB, U+1019E, U+101A5, U+101A8, U+101AB, U+101AD, U+10205, U+10258, U+102B4-102B6, U+102BF;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.computers.woff2?h7286d5cc") format("woff2");
+  unicode-range: U+EE08, U+F027, U+F09F, U+F122, U+F1D0-F1D1, U+F3C5, U+F414, U+F5D3-F5D4, U+F5D9-F5E5, U+FA28-FA30, U+FA5B-FA5C, U+100DE-100E7;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.gestures.woff2?h5487f3d3") format("woff2");
+  unicode-range: U+EC2D, U+ED15, U+EE94-EE99, U+EF50, U+F091, U+F13D, U+FF4D-FF4F, U+100F1;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.media.woff2?h0c80ffb0") format("woff2");
+  unicode-range: U+EA56, U+EAEA, U+EAF1, U+EAFA, U+EB4F-EB50, U+EB71, U+EC3A-EC3C, U+ECEE, U+ECF6, U+ED16, U+ED1D, U+ED1F-ED21, U+ED30, U+ED35, U+ED43-ED44, U+ED47-ED49, U+ED4B-ED4C, U+EEC0, U+EF2C-EF2D, U+EFBC, U+EFE4, U+F009, U+F022, U+F0AF, U+F0C6, U+F0C9, U+F15F, U+F164, U+F166, U+F17F, U+F18E, U+F1C3, U+F35D-F367, U+F38B, U+F3B9, U+F3F6, U+F40D, U+F420, U+F576, U+F582-F585, U+F833-F843, U+F990-F998, U+FA32, U+FABA-FAC9, U+FBD5-FBD9, U+FBDB-FBE8, U+FC62-FC63, U+FEA0, U+FEA5, U+FFA6-FFA8, U+FFB0, U+FFBC, U+1019D, U+101A1-101A4, U+10240-10241, U+10262, U+1028F-10290, U+102BC-102BE, U+102C6;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.symbols.woff2?h6ae5adf0") format("woff2");
+  unicode-range: U+EA78, U+EA7B, U+EB14, U+EB9B, U+EC09, U+EC0E, U+EC35, U+EC3D, U+EC80, U+EC86, U+ECB8, U+ECBE, U+ECC0, U+ED75, U+EF8F, U+F0B9, U+F0CA, U+F0D9-F0DA, U+F10B, U+F189, U+F18C, U+F1CD, U+F266-F26A, U+F3D7, U+F58A-F58E, U+F59B, U+FD5A, U+1019F;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.health.woff2?h4944397c") format("woff2");
+  unicode-range: U+EA8F, U+EB74, U+EB7A, U+EBA9, U+EBAF, U+EBCE, U+EBD2, U+EC44, U+ECB9-ECBA, U+ECC3-ECC4, U+ED23, U+ED66-ED67, U+EE7D, U+EE84, U+EE89-EE8A, U+EEB1, U+EEB9, U+EEBE, U+EF04, U+EF5A-EF67, U+EF69, U+EF92, U+EF99, U+EFB5, U+F025, U+F05D, U+F0A7, U+F0DB, U+F10C, U+F110, U+F117, U+F119-F11A, U+F126-F127, U+F12F-F130, U+F178, U+F1BC, U+F239, U+F292, U+F29B, U+F3C4, U+F3E9, U+F3ED, U+F405, U+F40E, U+F432, U+F439, U+F4B4-F4B5, U+F50F, U+F545, U+F5D2, U+F5F4, U+FB70, U+FBA3, U+FCB5, U+FD58-FD59, U+FEAD, U+FF3B, U+FF3D, U+101AC, U+101AF, U+10232, U+10265;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.text.woff2?h52fb0347") format("woff2");
+  unicode-range: U+EA07-EA0A, U+EA2B, U+EA2D, U+EB26-EB27, U+EB46, U+EB7B, U+EB83, U+EB8B, U+EB91-EB94, U+EB9E-EBA0, U+EBA2, U+EBB1-EBB3, U+EBC5, U+EBC9, U+EBCF, U+EBDA, U+EBDD, U+EBE5, U+EC0C, U+EC41, U+EC79-EC7A, U+EC94-EC99, U+ECA7, U+ED13, U+EE09, U+EE42-EE43, U+EE6D, U+EE8F, U+EE9B, U+EEA2-EEA6, U+EEBB, U+EEE0, U+EEE2-EEE3, U+EEFC-EEFD, U+EF07-EF08, U+EF11, U+EF18-EF1B, U+EF1E, U+EF3F, U+EF77-EF78, U+EFB8, U+EFC4, U+EFD4-EFD5, U+F019, U+F024, U+F06E, U+F0A3, U+F0A6, U+F0B0-F0B1, U+F0BA, U+F0D0, U+F0D4, U+F0D8, U+F121, U+F13F, U+F144, U+F14E, U+F188, U+F1A5, U+F1AA, U+F1BA, U+F1CB-F1CC, U+F1DF-F1E1, U+F202-F204, U+F25F, U+F2A2, U+F2A4-F2A6, U+F2B1, U+F2DC, U+F312, U+F31F, U+F402, U+F407, U+F421, U+F427, U+F43B, U+F4A4, U+F4E0, U+F4FE-F4FF, U+F530-F53B, U+F54D-F550, U+F567, U+F5F6, U+F61A, U+F6D4-F6D6, U+F79F, U+F9F0-F9F2, U+FACB-FACF, U+FB1E, U+FD16-FD17, U+FD6D, U+FD7F-FD80, U+FDAD-FDB0, U+FEB2, U+FF00, U+FF2B-FF2F, U+101B0-101B1, U+10224, U+10248, U+10269-1026F, U+10271, U+1028E, U+102B2, U+102C1-102C5;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.development.woff2?hbf5f82eb") format("woff2");
+  unicode-range: U+EA48, U+EB0F, U+EBEF, U+EC36, U+ECA0, U+ED52, U+EFFC-EFFD, U+F01E, U+F07A-F07B, U+F0AB-F0AC, U+F0C3, U+F0F8, U+F1A6, U+F1C0, U+F1CE, U+F24D, U+F26B, U+F3AF, U+F3C0, U+F43D, U+F4A2, U+F553, U+F662-F666, U+FC54, U+FEA7, U+FEE7, U+101E8, U+101EA-101F1, U+101F3-101F9, U+101FF-10200, U+1020B, U+10225, U+10267, U+10280-10282, U+1028C-1028D, U+102A6, U+102C7, U+102CC;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.map.woff2?ha77cf56a") format("woff2");
+  unicode-range: U+EA8E, U+EAB9, U+EAE0, U+EB03, U+EB35, U+EB4E, U+EB56-EB57, U+EB76, U+EC08, U+EC0F-EC10, U+EC2F, U+EC4D, U+EC6B, U+ECA4-ECA6, U+ECDD, U+ECF3, U+ED2E-ED2F, U+ED39, U+ED5E-ED60, U+ED7A, U+ED7D, U+ED85, U+EDEB, U+EE8C-EE8D, U+EE90, U+EEC1, U+EED3, U+EEFB, U+EF01, U+EF09-EF0A, U+EF3D, U+EF79, U+EF82, U+EF8A-EF8B, U+F014, U+F016-F018, U+F06A-F06D, U+F07F-F080, U+F09B, U+F0B7, U+F0D5, U+F0F7, U+F100, U+F10E, U+F116, U+F12C-F12D, U+F134, U+F139, U+F155, U+F15C, U+F160, U+F172, U+F174, U+F17B, U+F191, U+F193-F194, U+F197, U+F19A, U+F1AD, U+F1B5-F1B6, U+F1B8-F1B9, U+F1C2, U+F1C8, U+F1CA, U+F1DC-F1DE, U+F263, U+F295, U+F2A7, U+F2C4, U+F2C8, U+F3A9, U+F3EC, U+F408, U+F413, U+F41C, U+F41F, U+F435, U+F4B6, U+F57F-F580, U+F5A7, U+F795, U+F79B-F79C, U+F94A-F95B, U+F9D9-F9EB, U+FAE8, U+FAEC, U+FB01, U+FB04-FB06, U+FB8A-FB8E, U+FB90-FB9D, U+FBAF-FBB3, U+FBB5-FBD4, U+FBE9-FBFC, U+FC48, U+FC5D-FC60, U+FC79, U+FCA9-FCAE, U+FCBA-FCBD, U+FEB4, U+FED6, U+FFB7, U+101E9, U+10202-10203, U+10227, U+10298, U+102C8, U+102CD, U+102D7;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.charts.woff2?hbe3a3796") format("woff2");
+  unicode-range: U+EA57-EA58, U+EA5A-EA5B, U+EA5D, U+EC75, U+ED77, U+EE27-EE33, U+F097-F098, U+F381, U+F3D2-F3D3, U+F4C2, U+F618-F619, U+FD92-FD93, U+FEF5-FEF6, U+FFA4-FFA5, U+101FB;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.design-1.woff2?h9b49350d") format("woff2");
+  unicode-range: U+EA02, U+EA2A, U+EA3B-EA44, U+EA47, U+EA50, U+EA85-EA86, U+EAA7-EAA8, U+EAAF, U+EABC, U+EAC8-EAD9, U+EADB, U+EAE3, U+EB00, U+EB1A-EB1B, U+EB2D, U+EB2F, U+EB39, U+EB61, U+EB7C, U+EB88-EB89, U+EB9C, U+EBB8, U+EBCA, U+EBDB, U+EBE6, U+EC13-EC14, U+EC3F-EC40, U+ECA8-ECA9, U+ECC5, U+ECEC, U+EDB9, U+EE0A-EE0C, U+EE17-EE18, U+EE46-EE47, U+EE50, U+EE7B, U+EE81-EE83, U+EE85, U+EE92, U+EE9D-EE9E, U+EEA1, U+EEA7-EEA8, U+EEAF-EEB0, U+EEC6-EEC9, U+EECF, U+EED2, U+EED5, U+EED9-EEDA, U+EEF3-EEF6, U+EF1D, U+EF1F-EF20, U+EF22-EF23, U+EF87, U+EF8C, U+EF91, U+EF94-EF95, U+EF9D, U+EFA5, U+EFAB-EFAC, U+EFC6, U+EFD0, U+EFF8, U+EFFB, U+F006-F007, U+F00E, U+F02B, U+F05F, U+F09E, U+F0AE, U+F0B4-F0B5, U+F0C2, U+F0D2-F0D3, U+F0D6, U+F0FE, U+F102-F103, U+F107, U+F11D-F11E, U+F135, U+F13C, U+F14B, U+F14D, U+F14F-F151, U+F159, U+F16D-F16E, U+F173, U+F182, U+F195-F196, U+F19B, U+F1A0, U+F1A3, U+F1B0, U+F1B7, U+F1BE-F1BF, U+F1D9, U+F1EB-F1EC, U+F234-F235, U+F289, U+F28B-F28E;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.design-2.woff2?h9d6ad679") format("woff2");
+  unicode-range: U+F290-F291, U+F2A3, U+F2A8-F2AB, U+F2CE-F2D1, U+F2D5, U+F369, U+F383, U+F388-F389, U+F3A7, U+F3AB, U+F3B7, U+F3C6-F3C7, U+F3C9-F3CA, U+F3CC, U+F3D9, U+F3FA, U+F4BD, U+F4C6, U+F4C9, U+F4CD-F4CE, U+F507-F508, U+F510, U+F51E-F525, U+F565, U+F56A, U+F570-F575, U+F579, U+F586, U+F59C-F59E, U+F5A8, U+F626, U+F659-F65A, U+F7A0-F7A1, U+F8F9-F90B, U+FA63-FA65, U+FA7D, U+FBFD-FC0E, U+FC14, U+FC64, U+FCA4-FCA6, U+FCB1-FCB2, U+FCB9, U+FD2C, U+FD31, U+FD3A, U+FD3D, U+FD50-FD56, U+FD62-FD65, U+FDA1, U+FDAB, U+FDB2, U+FDBA-FDBE, U+FEA9-FEAA, U+FEB0, U+FEC6, U+FEFE, U+FF0F, U+FF20-FF22, U+FF45-FF48, U+101FC-101FE, U+10201, U+10256, U+10259, U+1025C, U+10263, U+1027C, U+10288, U+10291, U+10293, U+1029D, U+102A1-102A5, U+102CA-102CB, U+102D3;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.letters.woff2?h8def2161") format("woff2");
+  unicode-range: U+EC50-EC69, U+F441-F458, U+F463-F493, U+F4AD-F4AE, U+F4B3, U+F4BB-F4BC, U+F53C, U+F541, U+F543-F544, U+F5AE-F5C7, U+FCC7-FCE0, U+FF66-FF8D, U+FF8F-FF9A, U+10222-10223;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.nature.woff2?hcb91be2d") format("woff2");
+  unicode-range: U+EB79, U+EBDE-EBDF, U+ED50, U+ED78, U+ED7E, U+ED82, U+EE8B, U+EE93, U+EF3A, U+EF97, U+EFD9, U+EFDE, U+EFF6, U+F0F9, U+F0FD, U+F128, U+F12E, U+F131, U+F17C-F17D, U+F190, U+F19D, U+F1EA, U+F1FD, U+F21B, U+F21E, U+F26D, U+F3CF, U+F3D5, U+F400, U+F40C, U+F411, U+F4C1, U+F511, U+F57B, U+FC12, U+FCC2, U+FCC6, U+FF44, U+1022A, U+10249, U+10255, U+1027E, U+10295-10297;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.currencies.woff2?h7caae506") format("woff2");
+  unicode-range: U+EB85, U+EBAB-EBAE, U+EE51, U+EE53-EE6C, U+EF4B, U+EFA6, U+F08A, U+F29A, U+F36C-F37D, U+F3DC-F3E0, U+F4A1, U+F65E-F65F, U+F7A6, U+FA58, U+FAF5, U+FD34, U+FD6E, U+FD85, U+FEEE-FEF0, U+1023D-1023F, U+10246;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.weather.woff2?h32c5db18") format("woff2");
+  unicode-range: U+EA72-EA74, U+EB36-EB38, U+EBED-EBEE, U+EC0B, U+EC30-EC31, U+EC34, U+EC76, U+ECD9, U+ECE2, U+ECE6-ECE7, U+ED3E, U+ED63, U+EDBC, U+EE8E, U+EF1C, U+EFAA, U+F162, U+F18A, U+F1A8, U+F1AF, U+F1C7, U+F237-F238, U+F23A, U+F24C, U+F3B2, U+F410, U+F433, U+F4A3, U+F51D, U+F84B-F85D, U+1024B;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.version-control.woff2?h74b27f4c") format("woff2");
+  unicode-range: U+EAB2-EAB6, U+EB8F, U+EF7F, U+EFB7, U+F57D-F57E, U+10264, U+102AB-102AF, U+102CF-102D2;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.communication.woff2?h9e1249e8") format("woff2");
+  unicode-range: U+EB19, U+EC9A-EC9B, U+ED40-ED42, U+EEAC-EEAD, U+EFAE, U+F012-F013, U+F069, U+F077-F078, U+F15A-F15B, U+F28F, U+F3B8, U+F40B, U+F429, U+F937-F949, U+F95C-F98F, U+FA31, U+FD4D, U+FD5D, U+FEBA-FEBE, U+FEC4-FEC5, U+FF36, U+FF9C-FF9E, U+FFB3, U+10266, U+102A7-102AA;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.animals.woff2?head6cd14") format("woff2");
+  unicode-range: U+EF2B, U+EF52, U+F12B, U+F177, U+F1F9, U+F284, U+F287, U+F293, U+F3EE, U+F419, U+F4C5, U+F65B, U+F660, U+FC46, U+FCB7, U+10272, U+102C9;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.photography.woff2?h86b07f30") format("woff2");
+  unicode-range: U+EADF, U+EB58, U+EB7D-EB7F, U+EB8C-EB8D, U+EBD3, U+EC4E, U+ED33-ED34, U+EE19-EE1A, U+EE22-EE23, U+EEAB, U+EED7-EED8, U+EEFE, U+EFC7, U+F1B3, U+F201, U+F29C-F2A0, U+F3BC, U+F3CD, U+F3DA-F3DB, U+F3EB, U+F403, U+F406, U+F417-F418, U+F796-F798, U+FA62, U+FA7B, U+FC4A-FC4D, U+FC95, U+FD99, U+FD9F, U+FF31, U+102B8-102B9;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.mood.woff2?hfe0cf392") format("woff2");
+  unicode-range: U+EAF3-EAF6, U+EB95, U+EC03-EC04, U+ECBB, U+ED2D, U+ED90, U+EEB5, U+EF96, U+F161, U+F2C5-F2C7, U+F2DE-F2EF, U+F7B3-F7BC, U+FA05-FA06, U+FD37-FD39, U+FF32, U+FFB2;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.zodiac.woff2?h52f52310") format("woff2");
+  unicode-range: U+ECAC-ECB7;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.database.woff2?h562673cb") format("woff2");
+  unicode-range: U+ED7F-ED81, U+EE44-EE45, U+EE6E-EE70, U+EED0-EED1, U+EEF8-EEFA, U+F200, U+F25B-F25D, U+F426, U+FA10-FA20, U+FAF4, U+FAFE-FB00, U+FFAD;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.gender.woff2?h5bd6e3da") format("woff2");
+  unicode-range: U+F0E1-F0F2;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.logic.woff2?h5a235e6d") format("woff2");
+  unicode-range: U+F240-F247;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.extensions.woff2?hbf77dde5") format("woff2");
+  unicode-range: U+F257, U+F25A, U+F3A6, U+F3AC-F3AD, U+F3B1, U+F3B4, U+F791, U+F7AC, U+F7B1-F7B2, U+F7C0, U+FA5D;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.electrical.woff2?h94c520d1") format("woff2");
+  unicode-range: U+F271-F283;
+}
+@font-face {
+  font-family: "tabler-icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("../fonts/tabler-icons.laundry.woff2?ha019522d") format("woff2");
+  unicode-range: U+F2F0-F311, U+F322-F323, U+FA7C, U+FA7F-FA81;
 }
 .ti {
   font-family: "tabler-icons" !important;
@@ -241,6 +571,14 @@
   content: "\fb01";
 }
 
+.ti-airpods-l:before {
+  content: "\102a0";
+}
+
+.ti-airpods-r:before {
+  content: "\1029f";
+}
+
 .ti-alarm:before {
   content: "\ea04";
 }
@@ -422,7 +760,7 @@
 }
 
 .ti-align-right-2:before {
-  content: "\feff";
+  content: "\1028e";
 }
 
 .ti-alpha:before {
@@ -437,8 +775,24 @@
   content: "\ff2e";
 }
 
+.ti-alphabet-chinese:before {
+  content: "\102c5";
+}
+
 .ti-alphabet-cyrillic:before {
   content: "\f1df";
+}
+
+.ti-alphabet-devanagari:before {
+  content: "\102c4";
+}
+
+.ti-alphabet-ethiopic:before {
+  content: "\102c3";
+}
+
+.ti-alphabet-georgian:before {
+  content: "\102c2";
 }
 
 .ti-alphabet-greek:before {
@@ -447,6 +801,10 @@
 
 .ti-alphabet-hebrew:before {
   content: "\ff2d";
+}
+
+.ti-alphabet-japanese:before {
+  content: "\102c1";
 }
 
 .ti-alphabet-korean:before {
@@ -607,6 +965,10 @@
 
 .ti-archive-off:before {
   content: "\f0ad";
+}
+
+.ti-archive-restore:before {
+  content: "\102d8";
 }
 
 .ti-armchair:before {
@@ -1909,6 +2271,10 @@
   content: "\ef3d";
 }
 
+.ti-beach-bag:before {
+  content: "\102d7";
+}
+
 .ti-beach-off:before {
   content: "\f0b7";
 }
@@ -2113,6 +2479,10 @@
   content: "\feaf";
 }
 
+.ti-blob-dashed:before {
+  content: "\102c0";
+}
+
 .ti-blockquote:before {
   content: "\ee09";
 }
@@ -2195,6 +2565,10 @@
 
 .ti-book-2:before {
   content: "\efc5";
+}
+
+.ti-book-clone:before {
+  content: "\102d6";
 }
 
 .ti-book-download:before {
@@ -3341,6 +3715,10 @@
   content: "\f602";
 }
 
+.ti-brand-misskey:before {
+  content: "\102d5";
+}
+
 .ti-brand-mixpanel:before {
   content: "\f397";
 }
@@ -3871,6 +4249,10 @@
 
 .ti-brand-vercel:before {
   content: "\ef24";
+}
+
+.ti-brand-viber:before {
+  content: "\102d4";
 }
 
 .ti-brand-vimeo:before {
@@ -4861,6 +5243,10 @@
   content: "\10144";
 }
 
+.ti-cash-coin:before {
+  content: "\1029e";
+}
+
 .ti-cash-edit:before {
   content: "\10143";
 }
@@ -5697,6 +6083,10 @@
   content: "\ee3e";
 }
 
+.ti-circle-heart:before {
+  content: "\102bf";
+}
+
 .ti-circle-key:before {
   content: "\f633";
 }
@@ -5873,8 +6263,16 @@
   content: "\10206";
 }
 
+.ti-circle-pause:before {
+  content: "\102be";
+}
+
 .ti-circle-percentage:before {
   content: "\fd7b";
+}
+
+.ti-circle-play:before {
+  content: "\102bd";
 }
 
 .ti-circle-plus:before {
@@ -5899,6 +6297,10 @@
 
 .ti-circle-square:before {
   content: "\ece4";
+}
+
+.ti-circle-stop:before {
+  content: "\102bc";
 }
 
 .ti-circle-triangle:before {
@@ -7345,6 +7747,10 @@
   content: "\101ac";
 }
 
+.ti-decagram:before {
+  content: "\102d3";
+}
+
 .ti-decimal:before {
   content: "\fa26";
 }
@@ -8597,6 +9003,10 @@
   content: "\feb5";
 }
 
+.ti-duplicate:before {
+  content: "\102b2";
+}
+
 .ti-e-passport:before {
   content: "\f4df";
 }
@@ -8643,6 +9053,10 @@
 
 .ti-edit:before {
   content: "\ea98";
+}
+
+.ti-edit-bulk:before {
+  content: "\1029d";
 }
 
 .ti-edit-circle:before {
@@ -9139,6 +9553,10 @@
 
 .ti-file-like:before {
   content: "\ed2b";
+}
+
+.ti-file-lock:before {
+  content: "\102bb";
 }
 
 .ti-file-minus:before {
@@ -9845,6 +10263,10 @@
   content: "\eaad";
 }
 
+.ti-folder-ai:before {
+  content: "\102b1";
+}
+
 .ti-folder-bolt:before {
   content: "\f90c";
 }
@@ -9879,6 +10301,10 @@
 
 .ti-folder-heart:before {
   content: "\f914";
+}
+
+.ti-folder-lock:before {
+  content: "\102ba";
 }
 
 .ti-folder-minus:before {
@@ -9921,8 +10347,16 @@
   content: "\f919";
 }
 
+.ti-folder-sparkle:before {
+  content: "\102b0";
+}
+
 .ti-folder-star:before {
   content: "\f91a";
+}
+
+.ti-folder-stats:before {
+  content: "\1029c";
 }
 
 .ti-folder-symlink:before {
@@ -9931,6 +10365,10 @@
 
 .ti-folder-up:before {
   content: "\f91c";
+}
+
+.ti-folder-user:before {
+  content: "\1029b";
 }
 
 .ti-folder-x:before {
@@ -10177,8 +10615,16 @@
   content: "\eab2";
 }
 
+.ti-git-branch-check:before {
+  content: "\102af";
+}
+
 .ti-git-branch-deleted:before {
   content: "\f57d";
+}
+
+.ti-git-branch-x:before {
+  content: "\102ae";
 }
 
 .ti-git-cherry-pick:before {
@@ -10201,6 +10647,14 @@
   content: "\eab5";
 }
 
+.ti-git-merge-ai:before {
+  content: "\102d2";
+}
+
+.ti-git-merge-queue:before {
+  content: "\102ad";
+}
+
 .ti-git-pull-request:before {
   content: "\eab6";
 }
@@ -10209,12 +10663,32 @@
   content: "\ef7f";
 }
 
+.ti-git-pull-request-closed-ai:before {
+  content: "\102d1";
+}
+
 .ti-git-pull-request-conflict:before {
   content: "\10264";
 }
 
 .ti-git-pull-request-draft:before {
   content: "\efb7";
+}
+
+.ti-git-pull-request-draft-ai:before {
+  content: "\102d0";
+}
+
+.ti-git-pull-request-locked:before {
+  content: "\102ac";
+}
+
+.ti-git-pull-request-locked-ai:before {
+  content: "\102cf";
+}
+
+.ti-git-pull-request-unlisted:before {
+  content: "\102ab";
 }
 
 .ti-gizmo:before {
@@ -10267,6 +10741,14 @@
 
 .ti-gps:before {
   content: "\ed7a";
+}
+
+.ti-gpu:before {
+  content: "\10299";
+}
+
+.ti-gpu-2:before {
+  content: "\1029a";
 }
 
 .ti-gradienter:before {
@@ -11853,6 +12335,14 @@
   content: "\ef81";
 }
 
+.ti-lens-concave:before {
+  content: "\102b9";
+}
+
+.ti-lens-convex:before {
+  content: "\102b8";
+}
+
 .ti-letter-a:before {
   content: "\ec50";
 }
@@ -12489,6 +12979,10 @@
   content: "\f157";
 }
 
+.ti-loop:before {
+  content: "\102ce";
+}
+
 .ti-luggage:before {
   content: "\efad";
 }
@@ -12809,8 +13303,16 @@
   content: "\f95b";
 }
 
+.ti-map-pinned:before {
+  content: "\10298";
+}
+
 .ti-map-pins:before {
   content: "\ed5e";
+}
+
+.ti-map-pins-off:before {
+  content: "\102cd";
 }
 
 .ti-map-plus:before {
@@ -13069,6 +13571,10 @@
   content: "\f15f";
 }
 
+.ti-mcp:before {
+  content: "\102cc";
+}
+
 .ti-meat:before {
   content: "\ef12";
 }
@@ -13109,6 +13615,10 @@
   content: "\fc7a";
 }
 
+.ti-memory:before {
+  content: "\102b7";
+}
+
 .ti-menorah:before {
   content: "\f58c";
 }
@@ -13147,6 +13657,10 @@
 
 .ti-message-2:before {
   content: "\eaec";
+}
+
+.ti-message-2-ai:before {
+  content: "\102aa";
 }
 
 .ti-message-2-bolt:before {
@@ -13217,6 +13731,10 @@
   content: "\f077";
 }
 
+.ti-message-2-sparkle:before {
+  content: "\102a9";
+}
+
 .ti-message-2-star:before {
   content: "\f96a";
 }
@@ -13227,6 +13745,10 @@
 
 .ti-message-2-x:before {
   content: "\f96c";
+}
+
+.ti-message-ai:before {
+  content: "\102a8";
 }
 
 .ti-message-bolt:before {
@@ -13409,6 +13931,10 @@
   content: "\f078";
 }
 
+.ti-message-sparkle:before {
+  content: "\102a7";
+}
+
 .ti-message-star:before {
   content: "\f98d";
 }
@@ -13555,6 +14081,10 @@
 
 .ti-mobiledata-off:before {
   content: "\f9f4";
+}
+
+.ti-model-ai:before {
+  content: "\102a6";
 }
 
 .ti-moneybag:before {
@@ -14713,8 +15243,24 @@
   content: "\eb97";
 }
 
+.ti-opacity:before {
+  content: "\102cb";
+}
+
 .ti-option:before {
   content: "\1019f";
+}
+
+.ti-orbit:before {
+  content: "\10296";
+}
+
+.ti-orbit-vertical:before {
+  content: "\10297";
+}
+
+.ti-orbits:before {
+  content: "\10295";
 }
 
 .ti-outbound:before {
@@ -14881,6 +15427,10 @@
   content: "\eb04";
 }
 
+.ti-pencil-ai:before {
+  content: "\102a5";
+}
+
 .ti-pencil-bolt:before {
   content: "\fbfd";
 }
@@ -14943,6 +15493,10 @@
 
 .ti-pencil-question:before {
   content: "\fc09";
+}
+
+.ti-pencil-ruler:before {
+  content: "\102ca";
 }
 
 .ti-pencil-search:before {
@@ -16189,6 +16743,14 @@
   content: "\f18c";
 }
 
+.ti-reduce-motion:before {
+  content: "\10294";
+}
+
+.ti-reference-image:before {
+  content: "\10293";
+}
+
 .ti-refresh:before {
   content: "\eb13";
 }
@@ -16853,6 +17415,10 @@
   content: "\f19c";
 }
 
+.ti-secret-phrases:before {
+  content: "\10292";
+}
+
 .ti-section:before {
   content: "\eed5";
 }
@@ -17497,6 +18063,10 @@
   content: "\ecc3";
 }
 
+.ti-snail:before {
+  content: "\102c9";
+}
+
 .ti-snowboarding:before {
   content: "\fd4f";
 }
@@ -17795,6 +18365,14 @@
 
 .ti-square-dashed:before {
   content: "\100bb";
+}
+
+.ti-square-dashed-top-solid:before {
+  content: "\102b6";
+}
+
+.ti-square-dashed-x:before {
+  content: "\102b5";
 }
 
 .ti-square-dot:before {
@@ -18321,6 +18899,10 @@
   content: "\fd27";
 }
 
+.ti-stack-check:before {
+  content: "\102a4";
+}
+
 .ti-stack-forward:before {
   content: "\fd28";
 }
@@ -18333,12 +18915,24 @@
   content: "\fd2a";
 }
 
+.ti-stack-minus:before {
+  content: "\102a3";
+}
+
+.ti-stack-plus:before {
+  content: "\102a2";
+}
+
 .ti-stack-pop:before {
   content: "\f234";
 }
 
 .ti-stack-push:before {
   content: "\f235";
+}
+
+.ti-stack-x:before {
+  content: "\102a1";
 }
 
 .ti-stairs:before {
@@ -18415,6 +19009,10 @@
 
 .ti-sticker-2:before {
   content: "\fd3d";
+}
+
+.ti-sticker-smile:before {
+  content: "\10291";
 }
 
 .ti-stopwatch:before {
@@ -19409,6 +20007,10 @@
   content: "\eb44";
 }
 
+.ti-triangle-dashed:before {
+  content: "\102b4";
+}
+
 .ti-triangle-inverted:before {
   content: "\f01d";
 }
@@ -19913,6 +20515,14 @@
   content: "\f43b";
 }
 
+.ti-voice:before {
+  content: "\1028f";
+}
+
+.ti-voice-2:before {
+  content: "\10290";
+}
+
 .ti-volcano:before {
   content: "\f79c";
 }
@@ -20113,6 +20723,10 @@
   content: "\ecd5";
 }
 
+.ti-waveform:before {
+  content: "\102c6";
+}
+
 .ti-waves-electricity:before {
   content: "\fcc5";
 }
@@ -20287,6 +20901,10 @@
 
 .ti-world-map:before {
   content: "\101e9";
+}
+
+.ti-world-map-off:before {
+  content: "\102c8";
 }
 
 .ti-world-minus:before {
@@ -20531,6 +21149,10 @@
 
 .ti-zoom-scan:before {
   content: "\fcb0";
+}
+
+.ti-zsh:before {
+  content: "\102c7";
 }
 
 .ti-zzz:before {

@@ -94,7 +94,7 @@
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
 					<input type="text" class="form-control" name="preis" value="{$package.preis}" placeholder="{lng p="pacc_periodprice"}">
-					<span class="input-group-text">{text value=$pacc_prefs.currency}</span>
+					<span class="input-group-text">{text value=$bm_prefs.currency}</span>
 				</div>
 			</div>
 		</div>

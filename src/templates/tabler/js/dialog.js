@@ -226,7 +226,9 @@ function exchangeAddress(a)
 
 function addAddressField(data, field, i, o)
 {
-	var node = document.createElement('div');
+	var primary = (data && data[1] != null) ? String(data[1]) : '',
+		secondary = (data && data[2] != null) ? String(data[2]) : '',
+		node = document.createElement('div');
 	node.className = 'addressItem';
 	node.setAttribute('id', '__addrItem_' + field.id + '_' + i);
 	node.onclick = function() { selectAddressItem(this); return(false); }
@@ -234,7 +236,7 @@ function addAddressField(data, field, i, o)
 	var image = document.createElement('img');
 	image.setAttribute('border', 0);
 	image.setAttribute('align', 'absmiddle');
-	if(data[1].indexOf("@contact.groups") != -1)
+	if(primary.indexOf("@contact.groups") != -1)
 		image.setAttribute('src', tplDir + 'images/li/ico_contact_groups.png');
 	else
 		image.setAttribute('src', tplDir + 'images/li/addr_priv.png');
@@ -246,17 +248,17 @@ function addAddressField(data, field, i, o)
 
 	var link;
 
-	if(o && data[1] != ' - ' && data[2] != ' - ')
+	if(o && primary != ' - ' && secondary != ' - ')
 	{
 		var link = document.createElement('a');
 		link.setAttribute('href', '#');
 		link.setAttribute('id', 'emailAddress_' + i);
 		link.onclick = function() { exchangeAddress(this); return(false); }
-		link.appendChild(document.createTextNode(data[1]));
+		link.appendChild(document.createTextNode(primary));
 	}
 	else
 	{
-		link = document.createTextNode(data[1] == ' - ' ? data[2] : data[1]);
+		link = document.createTextNode(primary == ' - ' ? secondary : primary);
 	}
 
 	small.appendChild(link);

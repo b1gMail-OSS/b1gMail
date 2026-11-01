@@ -208,13 +208,21 @@ if($_REQUEST['action'] == 'start')
 	else if($viewMode == 'week')
 	{
 		$dates = array();
+		$weekCaptions = array();
 		$weekDayTimestamps = array();
+		$todayStart = mktime(0, 0, 0, (int)date('m'), (int)date('d'), (int)date('Y'));
 		for($d=0; $d<7; $d++)
 		{
 			$ts = $dateStart+$d*TIME_ONE_DAY;
 			$dDateStart = mktime(0, 0, 0, date('m', $ts), date('d', $ts), date('Y', $ts));
 			$dDateEnd = mktime(23, 59, 59, date('m', $ts), date('d', $ts), date('Y', $ts));
-			$dates[ _strftime('%A, %d.', $ts) ] = $calendar->GetDatesForTimeframe($dDateStart, $dDateEnd, $group, $visibleCalendarIDs);
+			$wday = (int)date('w', $ts);
+			$dates[$d] = $calendar->GetDatesForTimeframe($dDateStart, $dDateEnd, $group, $visibleCalendarIDs);
+			$weekCaptions[$d] = array(
+				'dow' => isset($lang_user['weekdays_long'][$wday]) ? $lang_user['weekdays_long'][$wday] : _strftime('%a', $ts),
+				'dom' => (int)date('j', $ts),
+				'today' => ($dDateStart == $todayStart)
+			);
 			$weekDayTimestamps[$d] = $dDateStart;
 		}
 
@@ -224,6 +232,7 @@ if($_REQUEST['action'] == 'start')
 		$tpl->assign('calWeekNo', date('W', $dateStart));
 		$tpl->assign('calWeek', date(date('o') == 'o' ? 'W/Y' : 'W/o', $dateStart));
 		$tpl->assign('dates', $dates);
+		$tpl->assign('weekCaptions', $weekCaptions);
 		$tpl->assign('weekDayTimestamps', $weekDayTimestamps);
 		$tpl->assign('pageContent', 'li/organizer.calendar.weekview.tpl');
 	}

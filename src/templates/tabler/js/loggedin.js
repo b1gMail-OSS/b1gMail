@@ -466,6 +466,77 @@ function changeSearchSort(sort, order)
 	EBID('searchSideBarOrder').value = order;
 	document.forms['searchSideBarForm'].submit();
 }
+var bmSearchDateField = null;
+document.addEventListener('focusin', function(event)
+{
+	if(event.target && event.target.classList && event.target.classList.contains('bm-search-date-input'))
+		bmSearchDateField = event.target;
+});
+document.addEventListener('mousedown', function(event)
+{
+	var btn = event.target && event.target.closest ? event.target.closest('[data-vc-date-btn]') : null;
+	if(!btn || !bmSearchDateField)
+		return;
+
+	var cell = btn.closest('[data-vc-date]');
+	var iso = cell ? cell.getAttribute('data-vc-date') : '';
+	var match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+	if(!match)
+		return;
+
+	var text = match[3] + '.' + match[2] + '.' + match[1];
+	var field = bmSearchDateField;
+	field.value = text;
+
+	var Datepicker = window.tabler && window.tabler.Datepicker;
+	var picker = Datepicker && Datepicker.getInstance(field);
+	if(picker && typeof picker.setSelectedDates === 'function')
+	{
+		try { picker.setSelectedDates([iso]); }
+		catch(e) { field.value = text; }
+	}
+	window.setTimeout(function()
+	{
+		if(field.value !== text)
+			field.value = text;
+	}, 0);
+}, true);
+function bmPlaceSearchDatepicker(field)
+{
+	var Datepicker = window.tabler && window.tabler.Datepicker;
+	var picker = Datepicker && Datepicker.getInstance(field);
+	var popup = picker && picker.calendar && picker.calendar.context && picker.calendar.context.mainElement;
+	if(!popup || popup.hasAttribute('data-vc-calendar-hidden'))
+		return;
+
+	popup._bmSearchField = field;
+	popup.classList.add('bm-search-datepicker');
+	var rect = field.getBoundingClientRect();
+	var width = popup.offsetWidth || 280;
+	var height = popup.offsetHeight || 320;
+	var left = rect.left;
+	if(left + width > window.innerWidth - 8)
+		left = Math.max(8, window.innerWidth - width - 8);
+	var top = rect.bottom + 4;
+	if(top + height > window.innerHeight - 8 && rect.top > height + 12)
+		top = rect.top - height - 4;
+
+	popup.style.position = 'fixed';
+	popup.style.left = Math.round(left) + 'px';
+	popup.style.top = Math.round(top) + 'px';
+	popup.style.margin = '0';
+	popup.style.zIndex = '1060';
+}
+document.addEventListener('shown.bs.datepicker', function(event)
+{
+	if(!event.target || !event.target.classList || !event.target.classList.contains('bm-search-date-input'))
+		return;
+	bmPlaceSearchDatepicker(event.target);
+});
+window.addEventListener('scroll', function()
+{
+	document.querySelectorAll('.bm-search-date-input').forEach(bmPlaceSearchDatepicker);
+}, true);
 function _performSearch(e)
 {
 	hideNewMenu();

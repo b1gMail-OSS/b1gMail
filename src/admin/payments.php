@@ -211,7 +211,7 @@ if($_REQUEST['action'] == 'payments')
 		// filter stuff
 		$payMethods = BMPayment::GetCustomPaymentMethods();
 		$statusIDs = array(0 => true, 1 => true);
-		$paymentMethods = array(0 => true, 1 => true, 2 => true, 3 => true);
+		$paymentMethods = array(0 => true, 1 => true, 2 => true, 3 => true, 4 => true, 5 => true);
 		foreach($payMethods as $methodID=>$method)
 			$paymentMethods[-$methodID] = true;
 		$queryAdd = '';
@@ -226,7 +226,7 @@ if($_REQUEST['action'] == 'payments')
 			$queryStatus = count(array_keys(array_filter($statusIDs))) > 0 ? implode(',', array_keys(array_filter($statusIDs))) : '-1';
 			$queryAdd = 'WHERE `status` IN(' . $queryStatus . ') ';
 
-			$paymentMethods = array(0 => false, 1 => false, 2 => false, 3 => false);
+			$paymentMethods = array(0 => false, 1 => false, 2 => false, 3 => false, 4 => false, 5 => false);
 			foreach($payMethods as $methodID=>$method)
 				$paymentMethods[-$methodID] = false;
 			if(isset($_REQUEST['paymentMethod']) && is_array($_REQUEST['paymentMethod']))
@@ -290,7 +290,11 @@ if($_REQUEST['action'] == 'payments')
 			if($row['paymethod'] == PAYMENT_METHOD_BANKTRANSFER)
 				$row['method'] = $lang_admin['banktransfer'];
 			else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL)
+				$row['method'] = $lang_admin['paypal_classic'];
+			else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL_CHECKOUT)
 				$row['method'] = $lang_admin['paypal'];
+			else if($row['paymethod'] == PAYMENT_METHOD_STRIPE)
+				$row['method'] = $lang_admin['stripe'];
 			else if($row['paymethod'] == PAYMENT_METHOD_SOFORTUEBERWEISUNG)
 				$row['method'] = $lang_admin['su'];
 			else if($row['paymethod'] == PAYMENT_METHOD_SKRILL)
@@ -302,6 +306,13 @@ if($_REQUEST['action'] == 'payments')
 				else
 					$row['method'] = $lang_admin['unknown'];
 			}
+
+			$row['paypalPaid'] = ($row['paymethod'] == PAYMENT_METHOD_PAYPAL_CHECKOUT
+				&& $row['status'] == ORDER_STATUS_CREATED
+				&& !empty($row['txnid']));
+			$row['stripePaid'] = ($row['paymethod'] == PAYMENT_METHOD_STRIPE
+				&& $row['status'] == ORDER_STATUS_CREATED
+				&& !empty($row['txnid']));
 
 			$row['user'] = $users[$row['userid']];
 			$row['customerNo'] = BMPayment::CustomerNo($row['userid']);
@@ -361,7 +372,11 @@ if($_REQUEST['action'] == 'payments')
 		if($row['paymethod'] == PAYMENT_METHOD_BANKTRANSFER)
 			$row['method'] = $lang_admin['banktransfer'];
 		else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL)
+			$row['method'] = $lang_admin['paypal_classic'];
+		else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL_CHECKOUT)
 			$row['method'] = $lang_admin['paypal'];
+		else if($row['paymethod'] == PAYMENT_METHOD_STRIPE)
+			$row['method'] = $lang_admin['stripe'];
 		else if($row['paymethod'] == PAYMENT_METHOD_SOFORTUEBERWEISUNG)
 			$row['method'] = $lang_admin['su'];
 		else if($row['paymethod'] == PAYMENT_METHOD_SKRILL)
@@ -399,8 +414,8 @@ else if($_REQUEST['action'] == 'export')
 	}
 
 	else if($_REQUEST['do'] == 'exportAccEntries'
-			&& isset($_REQUEST['startDay'])
-			&& isset($_REQUEST['endDay']))
+			&& ((isset($_REQUEST['startDay']) && isset($_REQUEST['endDay']))
+				|| (isset($_REQUEST['start']) && isset($_REQUEST['end']))))
 	{
 		$from = SmartyDateTime('start');
 		$to   = SmartyDateTime('end') + TIME_ONE_DAY;
@@ -444,8 +459,8 @@ else if($_REQUEST['action'] == 'export')
 	}
 
 	else if($_REQUEST['do'] == 'exportInvoices'
-			&& isset($_REQUEST['startDay'])
-			&& isset($_REQUEST['endDay']))
+			&& ((isset($_REQUEST['startDay']) && isset($_REQUEST['endDay']))
+				|| (isset($_REQUEST['start']) && isset($_REQUEST['end']))))
 	{
 		$from = SmartyDateTime('start');
 		$to   = SmartyDateTime('end') + TIME_ONE_DAY;

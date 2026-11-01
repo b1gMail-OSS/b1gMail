@@ -51,8 +51,9 @@ if($_REQUEST['action'] == 'folders')
 {
 	$sortColumns = array('titel', 'parent', 'subscribed', 'storetime', 'intelligent');
 
-	// get sort info
-	$sortColumn = (isset($_REQUEST['sort']) && in_array($_REQUEST['sort'], $sortColumns))
+	// get sort info; without a column the list follows the saved drag order
+	$folderOrderCustom = !isset($_REQUEST['sort']);
+	$sortColumn = (!$folderOrderCustom && isset($_REQUEST['sort']) && in_array($_REQUEST['sort'], $sortColumns))
 					? $_REQUEST['sort']
 					: 'titel';
 	$sortOrder = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc')))
@@ -70,17 +71,53 @@ if($_REQUEST['action'] == 'folders')
 		$ownerEmail = !empty($folder['owner_email']) ? DecodeEMail($folder['owner_email']) : $lang_user['sharedfolders'];
 		$sharedFolderGroups[$ownerEmail][$folderID] = $folder;
 	}
+	if($folderOrderCustom)
+	{
+		$theFolderList = $mailbox->OrderFolderAdminRows($theFolderList);
+		foreach($sharedFolderGroups as $ownerEmail=>$ownerFolders)
+			$sharedFolderGroups[$ownerEmail] = $mailbox->OrderFolderAdminRows($ownerFolders);
+		$sortColumn = '';
+	}
 
 	// page output
 	$tpl->assign('pageTitle', $lang_user['folderadmin']);
 	$tpl->assign('sysFolderList', $sysFolderList);
 	$tpl->assign('theFolderList', $theFolderList);
 	$tpl->assign('sortColumn', $sortColumn);
+	$tpl->assign('folderOrderCustom', $folderOrderCustom);
 	$tpl->assign('sortOrder', $sortOrderFA);
 	$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 	$tpl->assign('sharedFolderList', $sharedFolderList);
 	$tpl->assign('sharedFolderGroups', $sharedFolderGroups);
 	$tpl->assign('folderFavoriteMap', array_flip($mailbox->GetFolderFavoriteIDs()));
+	$folderFavoriteAdmin = array();
+	foreach($mailbox->GetFavoriteFolderList() as $folderID=>$fav)
+	{
+		$row = null;
+		$actions = '';
+		if(isset($sysFolderList[$folderID]))
+		{
+			$row = $sysFolderList[$folderID];
+			$actions = 'sys';
+		}
+		else if(isset($theFolderList[$folderID]))
+		{
+			$row = $theFolderList[$folderID];
+			$actions = 'own';
+		}
+		else if(isset($sharedFolderList[$folderID]))
+		{
+			$row = $sharedFolderList[$folderID];
+			$actions = 'shared';
+		}
+		if(!$row)
+			continue;
+		$row['folderActions'] = $actions;
+		$row['type'] = !empty($fav['type']) ? $fav['type'] : '';
+		$row['sourceEmail'] = !empty($fav['owner_email']) ? $fav['owner_email'] : DecodeEMail($userRow['email']);
+		$folderFavoriteAdmin[$folderID] = $row;
+	}
+	$tpl->assign('folderFavoriteAdmin', $folderFavoriteAdmin);
 	// F4: expose the sharing capability so the folder-admin template can
 	// render the "share full mailbox" button. Same gate as the shareMailbox
 	// action itself uses (see below).
@@ -311,6 +348,53 @@ else if($_REQUEST['action'] == 'toggleFavorite'
 	$nowFavorite = $mailbox->ToggleFolderFavorite((int)$_REQUEST['id']);
 	if(isset($_REQUEST['rpc']))
 		die($nowFavorite ? '1' : '0');
+	SessionRedirect('email.folders.php');
+}
+
+/**
+ * reorder favorites
+ */
+else if($_REQUEST['action'] == 'reorderFavorites'
+		&& isset($_REQUEST['ids']))
+{
+	CsrfEnforceOnStateChange();
+	$ordered = array();
+	foreach(explode(',', (string)$_REQUEST['ids']) as $id)
+	{
+		$id = trim($id);
+		if($id === '' || !is_numeric($id))
+			continue;
+		$ordered[] = (int)$id;
+		if(count($ordered) >= 200)
+			break;
+	}
+	$mailbox->SetFolderFavoriteOrder($ordered);
+	if(isset($_REQUEST['rpc']))
+		die('OK');
+	SessionRedirect('email.folders.php');
+}
+
+/**
+ * reorder folders within one parent; system folders stay fixed
+ */
+else if($_REQUEST['action'] == 'reorderFolders'
+		&& isset($_REQUEST['parent'])
+		&& isset($_REQUEST['ids']))
+{
+	CsrfEnforceOnStateChange();
+	$ordered = array();
+	foreach(explode(',', (string)$_REQUEST['ids']) as $id)
+	{
+		$id = trim($id);
+		if($id === '' || !is_numeric($id))
+			continue;
+		$ordered[] = (int)$id;
+		if(count($ordered) >= 200)
+			break;
+	}
+	$mailbox->SetFolderSiblingOrder((int)$_REQUEST['parent'], $ordered);
+	if(isset($_REQUEST['rpc']))
+		die('OK');
 	SessionRedirect('email.folders.php');
 }
 

@@ -6,13 +6,13 @@
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-label">{lng p="language"}</label>
 			<div class="col-sm-10">
-				<div class="btn-group">
+				<div class="input-group">
 					<select name="lang" class="form-select">
 						{foreach from=$languages key=langID item=lang}
 							<option value="{$langID}"{if $langID==$selectedLang} selected="selected"{/if}>{text value=$lang.title}</option>
 						{/foreach}
 					</select>
-					<input type="submit" value="{lng p="ok"}" class="btn btn-dark-lt" />
+					<button type="submit" class="btn btn-dark-lt">{lng p="ok"}</button>
 				</div>
 			</div>
 		</div>

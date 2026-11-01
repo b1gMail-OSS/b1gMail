@@ -133,7 +133,7 @@
 			</a>
 			{if $openKind == 'vcf'}
 			<button type="button" class="btn btn-primary" onclick="mailAttachmentImportContact({$mailID}, '{$attachment|escape:'javascript'}', '{$sid|escape:'javascript'}');">
-				<i class="ti ti-address-book-plus icon icon-sm me-1" aria-hidden="true"></i>
+				<i class="ti ti-user-plus icon icon-sm me-1" aria-hidden="true"></i>
 				{lng p="mail_att_import_contact"}
 			</button>
 			{elseif $openKind == 'ics' && $organizerEnabled && isset($calendarEvent)}

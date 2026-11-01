@@ -14,17 +14,17 @@
 	<div class="card mb-3"><div class="table-responsive"><table class="table table-vcenter table-striped card-table">
 		<tr>
 			<th width="20">&nbsp;</th>
-			<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'items[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+			<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'items[]');">{acpicon file="dot.png" size="sm"}</a></th>
 			<th><a href="javascript:updateSort('id');">{lng p="id"}
-				{if $sortBy=='id'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+				{if $sortBy=='id'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 			<th><a href="javascript:updateSort('from');">{lng p="from"}
-				{if $sortBy=='from'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+				{if $sortBy=='from'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 			<th><a href="javascript:updateSort('to');">{lng p="to2"}
-				{if $sortBy=='to'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+				{if $sortBy=='to'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 			<th><a href="javascript:updateSort('size');">{lng p="size"}
-				{if $sortBy=='size'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+				{if $sortBy=='size'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 			<th><a href="javascript:updateSort('last_attempt');">{lng p="bms_last_attempt"}
-				{if $sortBy=='last_attempt'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+				{if $sortBy=='last_attempt'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 			<th width="90">&nbsp;</th>
 		</tr>
 		
@@ -41,7 +41,7 @@
 			<td>
 				<a href="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=showQueueItem&id={$item.id}"}" title="{lng p="show"}"><img src="../plugins/templates/images/bms_show.png" border="0" alt="{lng p="show"}" width="16" height="16" /></a>
 				{if $queueRunning}<a href="{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue&action=downloadQueueItem&id={$item.id}"}" title="{lng p="bms_download"}" target="_blank"><img src="../plugins/templates/images/bms_download.png" border="0" alt="{lng p="bms_download"}" width="16" height="16" /></a>{/if}
-				<a href="javascript:if(confirm('{lng p="realdel"}')) singleAction('delete', '{$item.id}');" title="{lng p="delete"}"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
+				<a href="javascript:if(confirm('{lng p="realdel"}')) singleAction('delete', '{$item.id}');" title="{lng p="delete"}">{acpicon file="delete.png"}</a>
 			</td>
 		</tr>
 		{/foreach}
@@ -73,7 +73,7 @@
 	
 	<table width="100%">
 		<tr>
-			<td width="40" valign="top" rowspan="4"><img src="{$tpldir}images/filter.png" border="0" alt="" width="32" height="32" /></td>
+			<td width="40" valign="top" rowspan="4">{acpicon file="filter.png" size="lg"}</td>
 			<td class="td1" width="80">{lng p="types"}:</td>
 			<td class="td2">
 				<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox" name="types[0]" id="type_0"{if $types[0]} checked="checked"{/if} /><span class="form-check-label" for="type_0"><b>{lng p="bms_inbound"}</b></span></label><br />

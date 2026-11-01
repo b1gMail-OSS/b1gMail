@@ -47,8 +47,8 @@
 				<div class="left bm-organizer-footer-actions">
 					<div class="input-group input-group-sm bm-organizer-action-group">
 						<span class="input-group-text"><i class="ti ti-plus icon icon-sm" aria-hidden="true"></i></span>
-						<input type="text" id="addListTitle" class="form-control" onkeypress="return todoListInputKeyPress(event);" placeholder="{lng p="tasklists"}" aria-label="{lng p="tasklists"}" />
-						<button type="button" class="btn btn-primary" onclick="addTodoList();">{lng p="ok"}</button>
+						<input type="text" id="addListTitle" class="form-control form-control-sm" onkeypress="return todoListInputKeyPress(event);" placeholder="{lng p="tasklists"}" aria-label="{lng p="tasklists"}" />
+						<button type="button" class="btn btn-sm btn-primary" onclick="addTodoList();">{lng p="ok"}</button>
 					</div>
 				</div>
 			</div>

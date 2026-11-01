@@ -190,13 +190,18 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 			<div class="bm-pacc-field-row bm-pacc-field-row-full">
 			<select class="form-select" name="paymentMethod" id="paymentMethod" onclick="updatePaymentMethod(this)" onchange="updatePaymentMethod(this)">
 				{if $_pf.enable_su=='yes'}<option value="2"{if $_pf.paymentMethod==2} selected="selected"{/if}>{lng p="su"}</option>{/if}
-				{if $_pf.enable_paypal=='yes'}<option value="1"{if $_pf.paymentMethod==1} selected="selected"{/if}>{lng p="paypal"}</option>{/if}
+				{if $_pf.enable_paypal_checkout=='yes'}<option value="4"{if $_pf.paymentMethod==4} selected="selected"{/if}{if $_pf.surchargePaypal.enabled} data-surcharge-percent="{$_pf.surchargePaypal.percent}" data-surcharge-fixed="{$_pf.surchargePaypal.fixed}" data-surcharge-cover="{$_pf.surchargePaypal.cover}"{/if}>{lng p="paypal"}{if $_pf.surchargePaypal.enabled} ({lng p="payment_surcharge_opt"}){/if}</option>{/if}
+				{if $_pf.enable_stripe=='yes'}<option value="5"{if $_pf.paymentMethod==5} selected="selected"{/if}{if $_pf.surchargeStripe.enabled} data-surcharge-percent="{$_pf.surchargeStripe.percent}" data-surcharge-fixed="{$_pf.surchargeStripe.fixed}" data-surcharge-cover="{$_pf.surchargeStripe.cover}"{/if}>{lng p="stripe"}{if $_pf.surchargeStripe.enabled} ({lng p="payment_surcharge_opt"}){/if}</option>{/if}
+				{if $_pf.enable_paypal=='yes'}<option value="1"{if $_pf.paymentMethod==1} selected="selected"{/if}{if $_pf.surchargePaypal.enabled} data-surcharge-percent="{$_pf.surchargePaypal.percent}" data-surcharge-fixed="{$_pf.surchargePaypal.fixed}" data-surcharge-cover="{$_pf.surchargePaypal.cover}"{/if}>{lng p="paypal_classic"}{if $_pf.surchargePaypal.enabled} ({lng p="payment_surcharge_opt"}){/if}</option>{/if}
 				{if $_pf.enable_skrill=='yes'}<option value="3"{if $_pf.paymentMethod==3} selected="selected"{/if}>{lng p="skrill"}</option>{/if}
 				{if $_pf.enable_vk=='yes'}<option value="0"{if $_pf.paymentMethod===0} selected="selected"{/if}>{lng p="banktransfer"}</option>{/if}
 				{foreach from=$_pf.customMethods key=methodID item=methodInfo}
 				<option value="-{$methodID}"{if $_pf.paymentMethod==-$methodID} selected="selected"{/if}>{text value=$methodInfo.title}</option>
 				{/foreach}
 			</select>
+			{if $_pf.enable_paypal=='yes' && $_pf.enable_paypal_checkout=='yes'}
+			<small class="text-secondary d-block mt-1">{lng p="paypal_both_notice"}</small>
+			{/if}
 			</div>
 			{/if}
 		</td>
@@ -243,7 +248,10 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		<td class="listTableLeft">{lng p="pacc_finalamount"}:</td>
 		<td class="listTableRight">
 			<strong><span id="finalAmount">-</span></strong>
-			<small class="text-secondary" id="taxNote">{$taxNote}</small>
+			<div class="text-secondary small d-block mt-1">
+				<div id="taxNote">{$taxNote}</div>
+				<div id="surchargeNote"></div>
+			</div>
 		</td>
 	</tr>
 
@@ -262,7 +270,9 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		vatRates: {ldelim}{foreach from=$_pf.countryList item=country key=id}{if $country.vat>0}{$id}: {$country.vat},{/if}{/foreach}{rdelim},
 		vatMode: '{$_pf.mwst}',
 		currency: '{$_pf.currency}',
-		baseAmount: {$package.preis_cent}/100
+		baseAmount: {$package.preis_cent}/100,
+		surcharge: {ldelim}{if isset($_pf.surchargeJs)}{$_pf.surchargeJs}{else}1:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},4:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},5:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim}{/if}{rdelim},
+		surchargeNote: '{lng p="pacc_surchargenote"}'
 	{rdelim};
 
 {if $invalidFields}
@@ -278,6 +288,80 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 {/if}
 
 	{literal}
+	function applyPaymentSurcharge(amount)
+	{
+		amount = parseFloat(amount);
+		if(isNaN(amount))
+			amount = 0;
+		var baseCents = Math.round(amount * 100);
+		var methodEl = document.getElementById('paymentMethod');
+		if(!methodEl)
+			return baseCents / 100;
+		var cfg = null;
+		if(methodEl.selectedIndex >= 0)
+		{
+			var opt = methodEl.options[methodEl.selectedIndex];
+			if(opt && opt.getAttribute('data-surcharge-percent') != null)
+				cfg = {
+					enabled: true,
+					percent: parseFloat(opt.getAttribute('data-surcharge-percent')) || 0,
+					fixed: parseFloat(opt.getAttribute('data-surcharge-fixed')) || 0,
+					cover: opt.getAttribute('data-surcharge-cover') != '0'
+				};
+		}
+		if(!cfg && typeof bmPayment != 'undefined' && bmPayment.surcharge)
+			cfg = bmPayment.surcharge[methodEl.value] || bmPayment.surcharge[parseInt(methodEl.value, 10)];
+		if(!cfg || !cfg.enabled)
+			return baseCents / 100;
+		var percent = parseFloat(cfg.percent);
+		if(isNaN(percent) || percent < 0)
+			percent = 0;
+		var fixed = parseFloat(cfg.fixed);
+		if(isNaN(fixed) || fixed < 0)
+			fixed = 0;
+		var fixedCents = Math.round(fixed * 100);
+		var grossCents;
+		if(cfg.cover)
+		{
+			var rate = percent / 100;
+			if(rate >= 0.99)
+				rate = 0.99;
+			grossCents = Math.round((baseCents + fixedCents) / (1 - rate));
+		}
+		else
+			grossCents = baseCents + Math.round(baseCents * percent / 100) + fixedCents;
+		return grossCents / 100;
+	}
+
+	function paymentSurchargeNote(baseAmount, grossAmount)
+	{
+		var extra = Math.round((grossAmount - baseAmount) * 100) / 100;
+		if(extra <= 0 || typeof bmPayment == 'undefined')
+			return '';
+		var fmt = bmPayment.surchargeNote || '';
+		if(!fmt || fmt.indexOf('UNKNOWN') !== -1 || fmt.indexOf('inkl') === 0 || fmt.indexOf('incl') === 0)
+			fmt = 'Transaktionskosten %1 %2';
+		return fmt.replace('%1', formatNumber(extra, 2)).replace('%2', bmPayment.currency);
+	}
+
+	function refreshPaymentAmount(baseAmount, taxNote)
+	{
+		var gross = applyPaymentSurcharge(baseAmount);
+		var amountEl = document.getElementById('finalAmount');
+		if(amountEl)
+			amountEl.innerHTML = formatNumber(gross, 2) + ' ' + bmPayment.currency;
+		var noteEl = document.getElementById('taxNote');
+		if(noteEl)
+			noteEl.innerHTML = taxNote || '';
+		var surchargeEl = document.getElementById('surchargeNote');
+		if(surchargeEl)
+		{
+			var surcharge = paymentSurchargeNote(baseAmount, gross);
+			surchargeEl.innerHTML = surcharge;
+			surchargeEl.style.display = surcharge ? '' : 'none';
+		}
+	}
+
 	function updatePaymentMethod(field)
 	{
 		var paymentMethodID = field.value;
@@ -291,6 +375,11 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 			else
 				nodes[i].style.display = 'none';
 		}
+
+		if(EBID('land'))
+			updatePaymentCountry(EBID('land'));
+		else if(typeof refreshPaymentAmount == 'function')
+			refreshPaymentAmount(bmPayment.baseAmount, '');
 	}
 
 	function formatNumber(num, decimals)
@@ -333,8 +422,13 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		if(showTaxNote)
 			taxNote = lang['taxnote'].replace('%1', formatNumber(taxRate, 2));
 
-		EBID('finalAmount').innerHTML = formatNumber(amount, 2) + ' ' + bmPayment.currency;
-		EBID('taxNote').innerHTML = taxNote;
+		if(typeof refreshPaymentAmount == 'function')
+			refreshPaymentAmount(amount, taxNote);
+		else
+		{
+			EBID('finalAmount').innerHTML = formatNumber(amount, 2) + ' ' + bmPayment.currency;
+			EBID('taxNote').innerHTML = taxNote;
+		}
 	}
 
 	function paccCalc()
@@ -371,8 +465,13 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		}
 		else
 		{
-			EBID('finalAmount').innerHTML = formatNumber(amount, 2) + ' ' + bmPayment.currency;
-			EBID('taxNote').innerHTML = '';
+			if(typeof refreshPaymentAmount == 'function')
+				refreshPaymentAmount(amount, '');
+			else
+			{
+				EBID('finalAmount').innerHTML = formatNumber(amount, 2) + ' ' + bmPayment.currency;
+				EBID('taxNote').innerHTML = '';
+			}
 		}
 	}
 

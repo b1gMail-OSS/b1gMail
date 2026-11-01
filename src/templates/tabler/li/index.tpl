@@ -69,6 +69,7 @@
 	//-->
 	</script>
 	<script src="{sessionurl file='clientlang.php'}" type="text/javascript"></script>
+	<script src="{$tpldir}js/vanilla-calendar-pro.js?{fileDateSig file="js/vanilla-calendar-pro.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}" type="text/javascript"></script>
 	<script src="{$selfurl}clientlib/bm-errors.js?{fileDateSig file="../../clientlib/bm-errors.js"}" type="text/javascript"></script>
@@ -102,7 +103,7 @@
 	{include file="nli/theme-brand.tpl"}
 </head>
 
-<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer' || $activeTab=='calendar' || $activeTab=='addressbook' || $activeTab=='todo' || $activeTab=='notes'} bm-li-organizer{/if}{if $activeTab=='calendar'} bm-li-calendar{/if}{if $activeTab=='addressbook'} bm-li-addressbook{/if}{if $activeTab=='todo'} bm-li-todo{/if}{if $activeTab=='notes'} bm-li-notes{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" data-bm-theme="{$_tplname|default:'unknown'}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
+<body class="layout-fluid bm-loggedin bm-layout-combo{if $mfaSetupMode|default:false} bm-mfa-setup-active{/if}{if $activeTab=='start'} bm-li-start{/if}{if $activeTab=='email'} bm-li-email bm-mail-preview-lines-{$templatePrefs.mailListPreviewLines|default:2}{/if}{if $activeTab=='organizer' || $activeTab=='calendar' || $activeTab=='addressbook' || $activeTab=='todo' || $activeTab=='notes'} bm-li-organizer{/if}{if $activeTab=='calendar'} bm-li-calendar{/if}{if $activeTab=='addressbook'} bm-li-addressbook{/if}{if $activeTab=='todo'} bm-li-todo{/if}{if $activeTab=='notes'} bm-li-notes{/if}{if $activeTab=='webdisk'} bm-li-webdisk{/if}{if $activeTab=='sms'} bm-li-sms{/if}{if $activeTab=='prefs'} bm-li-prefs{/if}{if $activeTab=='_search'} bm-li-search{/if}{if $activeTab=='supportsystem.tab'} bm-li-prefs{/if}{if $activeTab=='blog.tab'} bm-li-blog{/if}{if $pageContent=='li/email.compose.tpl'||$pageContent=='li/sms.compose.tpl'} bm-li-compose{/if}{if $pageContent=='li/email.folders.tpl'||$pageContent=='li/email.folders.edit.tpl'||$pageContent=='li/email.folders.editsys.tpl'} bm-li-folders{/if}{if $pageContent|substr:0:22 == 'li/organizer.calendar.'} bm-li-organizer-calendar{/if}" data-bm-theme="{$_tplname|default:'unknown'}" onload="documentLoader();if(typeof bmPushInitClient==='function')bmPushInitClient();">
 	{hook id="li:index.tpl:beforeContent"}
 
 	{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}

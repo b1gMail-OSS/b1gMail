@@ -439,6 +439,25 @@ BODY.bm-dialog-body.bm-dialog-addressbook {
 	-webkit-overflow-scrolling: touch;
 }
 
+.bm-sms-numbers-dialog .bm-addressbook-scroll,
+.bm-sms-numbers-dialog .bm-addressbook-picker {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.bm-sms-numbers-dialog .bm-addressbook-picker {
+	margin-bottom: 0;
+}
+
+.bm-sms-numbers-dialog .addressDiv.bm-addressbook-list {
+	flex: 1 1 auto;
+	min-height: 12rem;
+	max-height: none;
+	height: auto;
+}
+
 .bm-dialog-body.bm-dialog-addressbook .input-group,
 .bm-addressbook-dialog .input-group {
 	display: flex !important;
@@ -1323,6 +1342,51 @@ BODY.bm-dialog-body.bm-dialog-statement {
 
 html:has(BODY.bm-dialog-organizer-collection) {
 	height: auto;
+}
+
+BODY.bm-dialog-body.bm-dialog-widget-prefs {
+	height: 100%;
+	min-height: 100%;
+	overflow: hidden;
+}
+
+BODY.bm-dialog-body.bm-dialog-widget-prefs form.bm-widget-prefs-form {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 100%;
+	margin: 0;
+}
+
+BODY.bm-dialog-body.bm-dialog-widget-prefs .modal-body {
+	flex: 1 1 auto;
+	padding: 1.25rem 1.25rem 0.5rem;
+}
+
+BODY.bm-dialog-body.bm-dialog-widget-prefs .form-check {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	margin-bottom: 0.65rem;
+	padding-left: 0;
+	min-height: 0;
+}
+
+BODY.bm-dialog-body.bm-dialog-widget-prefs .form-check-input {
+	float: none;
+	margin: 0.15rem 0 0;
+	flex: 0 0 auto;
+}
+
+BODY.bm-dialog-body.bm-dialog-widget-prefs .modal-footer {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	margin-top: auto;
+	padding: 0.75rem 1.25rem;
+	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
+	background: var(--tblr-bg-surface, #fff);
 }
 
 BODY.bm-dialog-body.bm-dialog-organizer-collection {

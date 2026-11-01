@@ -41,6 +41,9 @@
 {elseif $faIcon == 'fa-user'}<i class="ti ti-user {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-users'}<i class="ti ti-users {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-newspaper-o' || $faIcon == 'fa-newspaper'}<i class="ti ti-news {$_ic}" aria-hidden="true"></i>
+{elseif $faIcon == 'fa-paperclip'}<i class="ti ti-paperclip {$_ic}" aria-hidden="true"></i>
+{elseif $faIcon == 'fa-commenting-o' || $faIcon == 'fa-commenting'}<i class="ti ti-message {$_ic}" aria-hidden="true"></i>
+{elseif $faIcon == 'fa-globe'}<i class="ti ti-world {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon == 'fa-building' || $faIcon == 'fa-building-o' || $faIcon == 'fa-university' || $faIcon == 'fa-bank' || $faIcon == 'fa-building-bank'}<i class="ti ti-building-bank {$_ic}" aria-hidden="true"></i>
 {elseif $faIcon}<i class="fa {$faIcon|escape} {$_ic}" aria-hidden="true"></i>
 {else}<i class="ti ti-point {$_ic}" aria-hidden="true"></i>

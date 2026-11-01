@@ -118,12 +118,16 @@ function bmPublicPathFromLegacy(script, params)
 				'addressbook': {
 					editContact: 'edit', addContact: 'add', createContact: 'create', saveContact: 'save',
 					deleteContact: 'delete', showContact: 'show', groups: 'groups',
-					exportDialog: 'exportdialog', importDialogStart: 'importdialogstart',
-					importDialog: 'importdialog', importDialogSubmit: 'importdialogsubmit',
+					books: 'books', share: 'share', leaveshare: 'leaveshare',
+					exportDialog: 'exportdialog', exportAddressbook: 'exportaddressbook',
+					importDialogStart: 'importdialogstart', importDialog: 'importdialog',
+					importDialogSubmit: 'importdialogsubmit', importFile: 'importfile',
+					importCSV: 'importcsv',
 					userPictureDialog: 'userpicturedialog', userPictureDialogSubmit: 'userpicturedialogsubmit',
 					vcfImportDialog: 'vcfimportdialog', vcfImportDialogSubmit: 'vcfimportdialogsubmit',
 					addressbookPicture: 'addressbookpicture', attendeePopup: 'attendeepopup',
-					addressPopup: 'addresspopup', numberPopup: 'numberpopup'
+					addressPopup: 'addresspopup', numberPopup: 'numberpopup',
+					lookupAddresses: 'lookupaddresses'
 				},
 				'notes': {
 					editNote: 'edit', addNote: 'add', createNote: 'create', saveNote: 'save',
@@ -304,6 +308,86 @@ function isChildOf(child, parent)
 	return false;
 }
 
+function applyPaymentSurcharge(amount)
+{
+	amount = parseFloat(amount);
+	if(isNaN(amount))
+		amount = 0;
+	var baseCents = Math.round(amount * 100);
+	var methodEl = (typeof EBID == 'function') ? EBID('paymentMethod') : null;
+	if(!methodEl)
+		methodEl = document.getElementById('paymentMethod');
+	if(!methodEl)
+		return baseCents / 100;
+	var cfg = null;
+	if(methodEl.selectedIndex >= 0)
+	{
+		var opt = methodEl.options[methodEl.selectedIndex];
+		if(opt && opt.getAttribute('data-surcharge-percent') != null)
+			cfg = {
+				enabled: true,
+				percent: parseFloat(opt.getAttribute('data-surcharge-percent')) || 0,
+				fixed: parseFloat(opt.getAttribute('data-surcharge-fixed')) || 0,
+				cover: opt.getAttribute('data-surcharge-cover') != '0'
+			};
+	}
+	if(!cfg && typeof bmPayment != 'undefined' && bmPayment.surcharge)
+		cfg = bmPayment.surcharge[methodEl.value] || bmPayment.surcharge[parseInt(methodEl.value, 10)];
+	if(!cfg || !cfg.enabled)
+		return baseCents / 100;
+	var percent = parseFloat(cfg.percent);
+	if(isNaN(percent) || percent < 0)
+		percent = 0;
+	var fixed = parseFloat(cfg.fixed);
+	if(isNaN(fixed) || fixed < 0)
+		fixed = 0;
+	var fixedCents = Math.round(fixed * 100);
+	var grossCents;
+	if(cfg.cover)
+	{
+		var rate = percent / 100;
+		if(rate >= 0.99)
+			rate = 0.99;
+		grossCents = Math.round((baseCents + fixedCents) / (1 - rate));
+	}
+	else
+		grossCents = baseCents + Math.round(baseCents * percent / 100) + fixedCents;
+	return grossCents / 100;
+}
+
+function paymentSurchargeNote(baseAmount, grossAmount)
+{
+	var extra = Math.round((grossAmount - baseAmount) * 100) / 100;
+	if(extra <= 0 || typeof lang == 'undefined' || !lang['paymentsurcharge'] || typeof bmPayment == 'undefined')
+		return '';
+	return lang['paymentsurcharge'].replace('%1', formatNumber(extra, 2)).replace('%2', bmPayment.currency);
+}
+
+function refreshPaymentAmount(baseAmount, taxNote)
+{
+	if(typeof bmPayment == 'undefined')
+		return;
+	var gross = applyPaymentSurcharge(baseAmount);
+	var html = formatNumber(gross, 2) + ' ' + bmPayment.currency;
+	var ids = ['paymentAmount', 'finalAmount'];
+	for(var i = 0; i < ids.length; i++)
+	{
+		var amountEl = document.getElementById(ids[i]);
+		if(amountEl)
+			amountEl.innerHTML = html;
+	}
+	var noteEl = document.getElementById('taxNote');
+	if(noteEl)
+		noteEl.innerHTML = taxNote || '';
+	var surchargeEl = document.getElementById('surchargeNote');
+	if(surchargeEl)
+	{
+		var surcharge = paymentSurchargeNote(baseAmount, gross);
+		surchargeEl.innerHTML = surcharge;
+		surchargeEl.style.display = surcharge ? '' : 'none';
+	}
+}
+
 function updatePaymentMethod(field)
 {
 	var paymentMethodID = field.value;
@@ -320,6 +404,12 @@ function updatePaymentMethod(field)
 				tbodies[i].style.display = 'none';
 		}
 	}
+
+	var land = (typeof EBID == 'function') ? EBID('land') : document.getElementById('land');
+	if(land)
+		updatePaymentCountry(land);
+	else if(typeof bmPayment != 'undefined')
+		refreshPaymentAmount(bmPayment.baseAmount, '');
 }
 
 function formatNumber(num, decimals)
@@ -362,8 +452,7 @@ function updatePaymentCountry(field)
 	if(showTaxNote)
 		taxNote = lang['taxnote'].replace('%1', formatNumber(taxRate, 2));
 
-	EBID('paymentAmount').innerHTML = formatNumber(amount, 2) + ' ' + bmPayment.currency;
-	EBID('taxNote').innerHTML = taxNote;
+	refreshPaymentAmount(amount, taxNote);
 }
 
 function getCookie(name)
@@ -426,6 +515,13 @@ function removeEvent(elem, event, handler)
 
 function documentLoader()
 {
+	if(window.tabler && tabler.OtpInput)
+	{
+		document.querySelectorAll('.bm-mfa-otp[data-bs-toggle="otp"]').forEach(function(el) {
+			tabler.OtpInput.getOrCreateInstance(el);
+		});
+	}
+
 	initBmTheme();
 	initBmNavbarDropdowns();
 	bmSyncTablerLayout();

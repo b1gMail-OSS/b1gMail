@@ -156,12 +156,12 @@
 			<input type="hidden" name="taskIDs" id="taskIDs" value="" />
 
 			<div class="input-group input-group-sm bm-organizer-action-group">
-				<select class="form-select" name="do" aria-label="{lng p="selaction"}">
+				<select class="form-select form-select-sm" name="do" aria-label="{lng p="selaction"}">
 					<option value="-">{lng p="selaction"}</option>
 					<option value="markasdone">{lng p="markasdone"}</option>
 					<option value="delete">{lng p="delete"}</option>
 				</select>
-				<button class="btn btn-primary" type="submit">{lng p="ok"}</button>
+				<button class="btn btn-sm btn-primary" type="submit">{lng p="ok"}</button>
 			</div>
 		</form>
 	</div>

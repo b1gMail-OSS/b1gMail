@@ -21,7 +21,7 @@
 			<label class="col-sm-2 col-form-label">{lng p="vatrate"}</label>
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
-					<input type="text" class="form-control" name="cron_interval" value="{$country.vat}" min="0" max="100" step="any" placeholder="{lng p="vatrate"}">
+					<input type="text" class="form-control" name="vat" value="{$country.vat}" inputmode="decimal" placeholder="{lng p="vatrate"}">
 					<span class="input-group-text">%</span>
 				</div>
 			</div>

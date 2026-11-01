@@ -5,7 +5,7 @@
 
 		<table width="100%">
 			<tr>
-				<td align="left" rowspan="4" valign="top" width="40"><img src="{$tpldir}images/ico_users.png" border="0" alt="" width="32" height="32" /></td>
+				<td align="left" rowspan="4" valign="top" width="40">{acpicon file="ico_users.png" size="lg"}</td>
 				<td class="td1" width="200">{lng p="bms_usershowlogin"}?</td>
 				<td class="td2"><label class="form-check mb-0"><input class="form-check-input" type="checkbox" name="user_showlogin"{if $bms_prefs.user_showlogin} checked="checked"{/if} /></label></td>
 			</tr>
@@ -140,7 +140,7 @@
 
 		<table width="100%">
 			<tr>
-				<td align="left" valign="top" width="40" rowspan="4"><img src="{$tpldir}images/ico_prefs_ssl.png" border="0" alt="" width="32" height="32" /></td>
+				<td align="left" valign="top" width="40" rowspan="4">{acpicon file="ico_prefs_ssl.png" size="lg"}</td>
 				<td class="td1" width="200">{lng p="bms_ssl_cipher_list"}:</td>
 				<td class="td2"><input class="form-control" type="text" name="ssl_cipher_list" value="{text value=$bms_prefs.ssl_cipher_list allowEmpty=true}" style="width:95%;" /></td>
 			</tr>

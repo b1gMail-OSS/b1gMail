@@ -302,14 +302,11 @@ var bmPush = (function () {
 		if (!isSupported() || typeof bmPushEnabled === 'undefined' || !bmPushEnabled) {
 			return Promise.resolve();
 		}
-		return fetchJson(apiUrl('status'))
-			.then(function (status) {
-				if (!status || !status.ok || !status.prefsEnabled) {
-					return null;
-				}
-				return navigator.serviceWorker.ready.then(function (reg) {
-					return reg.pushManager.getSubscription();
-				});
+		// Re-POST browser subscription for the logged-in admin even when prefs
+		// were already enabled – otherwise prefs can be on with 0 DB rows.
+		return navigator.serviceWorker.ready
+			.then(function (reg) {
+				return reg.pushManager.getSubscription();
 			})
 			.then(function (sub) {
 				if (!sub) {

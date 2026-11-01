@@ -10,11 +10,11 @@
 <p class="text-secondary small">{lng p="sched.user_filter_hint"}</p>
 
 <div class="mb-3 row">
-	<label class="col-sm-3 col-form-label" for="sched_user_days">
+	<label class="col-sm-2 col-form-label" for="sched_user_days">
 		{if $sched_data.task == 'sched.us_na_delete' || $sched_data.task == 'sched.us_nl_delete'}{lng p="trash_daysonly"}{else}{lng p="notloggedinsince"}{/if}
 	</label>
-	<div class="col-sm-9">
-		<div class="input-group" style="max-width:12rem;">
+	<div class="col-sm-10">
+		<div class="input-group">
 			<input class="form-control" type="number" min="1" id="sched_user_days" name="taskdata[days]" value="{if !isset($sched_data.taskdata.days)}90{else}{$sched_data.taskdata.days}{/if}" />
 			<span class="input-group-text">{lng p="days"}</span>
 		</div>
@@ -32,7 +32,7 @@
 		{/foreach}
 	</div>
 	<div class="btn-list mt-2">
-		<button type="button" class="btn btn-sm btn-ghost-secondary" data-sched-toggle="all" data-sched-target="groups">{lng p="sched.select_all"}</button>
-		<button type="button" class="btn btn-sm btn-ghost-secondary" data-sched-toggle="none" data-sched-target="groups">{lng p="sched.select_none"}</button>
+		<button type="button" class="btn btn-sm" data-sched-toggle="all" data-sched-target="groups">{lng p="sched.select_all"}</button>
+		<button type="button" class="btn btn-sm" data-sched-toggle="none" data-sched-target="groups">{lng p="sched.select_none"}</button>
 	</div>
 </div>

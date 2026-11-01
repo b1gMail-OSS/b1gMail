@@ -81,6 +81,7 @@
 			<fieldset class="mt-3">
 				<legend>{lng p="mfa_global_section"}</legend>
 
+				<div class="card">
 				<div class="table-responsive">
 					<table class="table table-vcenter card-table">
 						<thead>
@@ -193,6 +194,7 @@
 							</tr>
 						</tbody>
 					</table>
+				</div>
 				</div>
 			</fieldset>
 		</div>

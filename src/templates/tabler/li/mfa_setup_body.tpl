@@ -42,8 +42,10 @@
 			<input type="hidden" name="do" value="mfaSetup" />
 			<input type="hidden" name="step" value="2" />
 			<div class="mb-3">
-				<label class="form-label">{lng p="mfa_code"}</label>
-				<input type="text" class="form-control" name="email_code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required="required" autocomplete="one-time-code" />
+				<label class="form-label" for="mfa_email_code">{lng p="mfa_code"}</label>
+				<div class="otp otp-lg bm-mfa-otp" data-bs-toggle="otp" data-bs-length="6" data-bs-groups="[3,3]" data-bs-type="numeric">
+					<input type="text" name="email_code" id="mfa_email_code" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required="required" />
+				</div>
 			</div>
 			<button type="submit" class="btn btn-primary w-100">{lng p="mfa_verify_submit"}</button>
 		</form>
@@ -59,8 +61,10 @@
 			<input type="hidden" name="do" value="mfaSetup" />
 			<input type="hidden" name="step" value="2" />
 			<div class="mb-3">
-				<label class="form-label">{lng p="mfa_code"}</label>
-				<input type="text" class="form-control" name="totp_code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required="required" autocomplete="one-time-code" />
+				<label class="form-label" for="mfa_totp_code">{lng p="mfa_code"}</label>
+				<div class="otp otp-lg bm-mfa-otp" data-bs-toggle="otp" data-bs-length="6" data-bs-groups="[3,3]" data-bs-type="numeric">
+					<input type="text" name="totp_code" id="mfa_totp_code" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required="required" />
+				</div>
 			</div>
 			<button type="submit" class="btn btn-primary w-100">{lng p="mfa_verify_submit"}</button>
 		</form>

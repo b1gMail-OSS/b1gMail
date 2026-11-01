@@ -1750,7 +1750,9 @@ class BMUser
 				$groupID = (int)$row['gruppe'];
 				BMMfa::ClearStaleSetupRequired('user', $userID);
 				BMMfa::SyncSetupRequiredSession($userID, $groupID);
-				if(empty($_SESSION['bm_mfaSetupRequired']) && class_exists('BMLoginNotify'))
+				if(!$adminImpersonate
+					&& empty($_SESSION['bm_mfaSetupRequired'])
+					&& class_exists('BMLoginNotify'))
 					BMLoginNotify::OnSuccessfulLogin('user', $userID, DecodeEMail($email), $groupID);
 			}
 			if($mfaDeferred)

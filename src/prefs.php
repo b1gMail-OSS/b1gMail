@@ -1881,12 +1881,17 @@ else if($_REQUEST['action'] == 'orders'
 /**
  * payment return page
  */
-else if($_REQUEST['action'] == 'paymentReturn')
+else if(strcasecmp((string)$_REQUEST['action'], 'paymentReturn') === 0)
 {
 	$tpl->assign('title', $lang_user['thankyou']);
 	$tpl->assign('msg', $lang_user['paymentreturn_txt']);
+	$tpl->assign('msgTone', 'success');
 	$tpl->assign('backLink', SessionUrl('prefs.php?action=orders'));
-	$tpl->assign('pageContent', 'li/msg.tpl');
+	$payReturnTpl = 'li/prefs.paymentreturn.tpl';
+	$tplName = isset($bm_prefs['template']) ? trim((string)$bm_prefs['template']) : '';
+	if($tplName === '' || !is_file(B1GMAIL_DIR . 'templates/' . $tplName . '/' . $payReturnTpl))
+		$payReturnTpl = 'li/msg.tpl';
+	$tpl->assign('pageContent', $payReturnTpl);
 	$tpl->display('li/index.tpl');
 }
 

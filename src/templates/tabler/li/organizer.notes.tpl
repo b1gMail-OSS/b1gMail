@@ -76,14 +76,16 @@
 				</div>
 
 				<div id="contentFooter" class="contentFooter bm-organizer-footer">
-					<div class="left d-flex flex-wrap align-items-center gap-2">
-						<select class="form-select form-select-sm" name="do" style="width:auto;min-width:10rem;">
-							<option value="-">------ {lng p="selaction"} ------</option>
-							<option value="delete">{lng p="delete"}</option>
-						</select>
-						<button class="btn btn-sm btn-primary" type="submit">{lng p="ok"}</button>
+					<div class="left bm-organizer-footer-actions">
+						<div class="input-group input-group-sm bm-organizer-action-group">
+							<select class="form-select form-select-sm" name="do" aria-label="{lng p="selaction"}">
+								<option value="-">{lng p="selaction"}</option>
+								<option value="delete">{lng p="delete"}</option>
+							</select>
+							<button class="btn btn-sm btn-primary" type="submit">{lng p="ok"}</button>
+						</div>
 					</div>
-					<div class="right">
+					<div class="right bm-organizer-footer-tools">
 						<button type="button" class="btn btn-sm btn-primary" onclick="document.location.href='{sessionurl file='organizer.notes.php' params='action=addNote'}';">
 							<i class="ti ti-plus icon icon-sm me-1" aria-hidden="true"></i>
 							{lng p="addnote"}

@@ -291,74 +291,53 @@ elseif ($_REQUEST['action'] == 'install') {
     }
 
     //
-    // install
+    // install (both steps in one request — avoids fragile redirect between steps)
     //
     elseif (isset($_REQUEST['do']) && $_REQUEST['do'] == 'installPlugin'
         && isset($_REQUEST['id'])) {
         $id = (int) $_REQUEST['id'];
+        $backInstall = AdminUrl('plugins.php', ['action' => 'install'], true);
 
         if (!ValidTempFile(0, $id)) {
             $tpl->assign('msgTitle', $lang_admin['install']);
-            $tpl->assign('msgText', $lang_admin['plugin_insterr']);
+            $tpl->assign('msgText', $lang_admin['plugin_insterr_temp'] ?? $lang_admin['plugin_insterr']);
             $tpl->assign('msgIcon', 'error32');
-            $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
+            $tpl->assign('backLink', $backInstall);
             $tpl->assign('page', 'msg.tpl');
         } else {
-        if (isset($_REQUEST['step'])) {
-            $step = max(1, min(2, (int) $_REQUEST['step']));
-        } else {
-            $step = 1;
-        }
-        $tempFileName = TempFileName($id);
+            $tempFileName = TempFileName($id);
+            $fp = fopen($tempFileName, 'rb');
+            $package = _new('BMPluginPackage', [$fp]);
 
-        // open file
-        $package = _new('BMPluginPackage', [$fp = fopen($tempFileName, 'rb')]);
-        if ($package->ParseFile()) {
-            if ($step == 1) {
-                if ($package->InstallStep1()) {
-                    fclose($fp);
-                    SessionRedirect(AdminUrl('plugins.php', [
-                        'action' => 'install',
-                        'do' => 'installPlugin',
-                        'id' => $id,
-                        'step' => 2,
-                    ], false));
-                } else {
-                    $tpl->assign('msgTitle', $lang_admin['install']);
-                    $tpl->assign('msgText', $lang_admin['plugin_insterr']);
-                    $tpl->assign('msgIcon', 'error32');
-                    $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
-                    $tpl->assign('page', 'msg.tpl');
-                    fclose($fp);
-                    ReleaseTempFile(0, $id);
-                }
-            } elseif ($step == 2) {
-                if ($package->InstallStep2()) {
-                    $tpl->assign('reloadMenu', true);
-                    $tpl->assign('msgTitle', $lang_admin['install']);
-                    $tpl->assign('msgText', $lang_admin['plugin_installed']);
-                    $tpl->assign('msgIcon', 'info32');
-                    $tpl->assign('backLink', AdminUrl('plugins.php', [], true));
-                    $tpl->assign('page', 'msg.tpl');
-                } else {
-                    $tpl->assign('msgTitle', $lang_admin['install']);
-                    $tpl->assign('msgText', $lang_admin['plugin_insterr']);
-                    $tpl->assign('msgIcon', 'error32');
-                    $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
-                    $tpl->assign('page', 'msg.tpl');
-                }
-
-                // close and release file
+            if (!$package->ParseFile()) {
+                $tpl->assign('msgTitle', $lang_admin['install']);
+                $tpl->assign('msgText', $lang_admin['plugin_formaterr']);
+                $tpl->assign('msgIcon', 'error32');
+                $tpl->assign('backLink', $backInstall);
+                $tpl->assign('page', 'msg.tpl');
+                fclose($fp);
+                ReleaseTempFile(0, $id);
+            } elseif (!$package->InstallStep1() || !$package->InstallStep2()) {
+                $tpl->assign('msgTitle', $lang_admin['install']);
+                // InstallStep1 returns false when the same signature is already active.
+                $tpl->assign('msgText', $package->AlreadyInstalled()
+                    ? ($lang_admin['plugin_alreadyinst'] ?? $lang_admin['plugin_insterr'])
+                    : $lang_admin['plugin_insterr']);
+                $tpl->assign('msgIcon', 'error32');
+                $tpl->assign('backLink', $backInstall);
+                $tpl->assign('page', 'msg.tpl');
+                fclose($fp);
+                ReleaseTempFile(0, $id);
+            } else {
+                $tpl->assign('reloadMenu', true);
+                $tpl->assign('msgTitle', $lang_admin['install']);
+                $tpl->assign('msgText', $lang_admin['plugin_installed']);
+                $tpl->assign('msgIcon', 'info32');
+                $tpl->assign('backLink', AdminUrl('plugins.php', [], true));
+                $tpl->assign('page', 'msg.tpl');
                 fclose($fp);
                 ReleaseTempFile(0, $id);
             }
-        } else {
-            $tpl->assign('msgTitle', $lang_admin['install']);
-            $tpl->assign('msgText', $lang_admin['plugin_insterr']);
-            $tpl->assign('msgIcon', 'error32');
-            $tpl->assign('backLink', AdminUrl('plugins.php', ['action' => 'install'], true));
-            $tpl->assign('page', 'msg.tpl');
-        }
         }
     }
 

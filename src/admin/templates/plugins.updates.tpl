@@ -16,7 +16,7 @@
 				{foreach from=$plugins item=pluginPackage key=packageSignature}
 				<tr class="tableSubHead">
 					<td colspan="4">
-						<a href="javascript:togglePluginPackage('{$packageSignature}');"><img src="{$tpldir}images/contract.png" border="0" alt="" align="absmiddle" id="packageImage_{$packageSignature}" heigbt="11" width="11" /></a>
+						<a href="javascript:togglePluginPackage('{$packageSignature}');"><i class="ti ti-chevron-down" id="packageImage_{$packageSignature}" aria-hidden="true"></i></a>
 						{if $pluginPackage.name}<b>{lng p="package"}:</b> {text value=$pluginPackage.name}{else}{lng p="withoutpackage"}{/if}
 					</td>
 				</tr>

@@ -50,13 +50,18 @@
 		<td class="listTableRight">
 			<select name="paymentMethod" id="paymentMethod" onclick="updatePaymentMethod(this)" onchange="updatePaymentMethod(this)">
 				{if $_pf.enable_su=='yes'}<option value="2"{if $_pf.paymentMethod==2} selected="selected"{/if}>{lng p="su"}</option>{/if}
-				{if $_pf.enable_paypal=='yes'}<option value="1"{if $_pf.paymentMethod==1} selected="selected"{/if}>{lng p="paypal"}</option>{/if}
+				{if $_pf.enable_paypal_checkout=='yes'}<option value="4"{if $_pf.paymentMethod==4} selected="selected"{/if}{if $_pf.surchargePaypal.enabled} data-surcharge-percent="{$_pf.surchargePaypal.percent}" data-surcharge-fixed="{$_pf.surchargePaypal.fixed}" data-surcharge-cover="{$_pf.surchargePaypal.cover}"{/if}>{lng p="paypal"}{if $_pf.surchargePaypal.enabled} ({lng p="payment_surcharge_opt"}){/if}</option>{/if}
+				{if $_pf.enable_stripe=='yes'}<option value="5"{if $_pf.paymentMethod==5} selected="selected"{/if}{if $_pf.surchargeStripe.enabled} data-surcharge-percent="{$_pf.surchargeStripe.percent}" data-surcharge-fixed="{$_pf.surchargeStripe.fixed}" data-surcharge-cover="{$_pf.surchargeStripe.cover}"{/if}>{lng p="stripe"}{if $_pf.surchargeStripe.enabled} ({lng p="payment_surcharge_opt"}){/if}</option>{/if}
+				{if $_pf.enable_paypal=='yes'}<option value="1"{if $_pf.paymentMethod==1} selected="selected"{/if}{if $_pf.surchargePaypal.enabled} data-surcharge-percent="{$_pf.surchargePaypal.percent}" data-surcharge-fixed="{$_pf.surchargePaypal.fixed}" data-surcharge-cover="{$_pf.surchargePaypal.cover}"{/if}>{lng p="paypal_classic"}{if $_pf.surchargePaypal.enabled} ({lng p="payment_surcharge_opt"}){/if}</option>{/if}
 				{if $_pf.enable_skrill=='yes'}<option value="3"{if $_pf.paymentMethod==3} selected="selected"{/if}>{lng p="skrill"}</option>{/if}
 				{if $_pf.enable_vk=='yes'}<option value="0"{if $_pf.paymentMethod===0} selected="selected"{/if}>{lng p="banktransfer"}</option>{/if}
 				{foreach from=$_pf.customMethods key=methodID item=methodInfo}
 				<option value="-{$methodID}"{if $_pf.paymentMethod==-$methodID} selected="selected"{/if}>{text value=$methodInfo.title}</option>
 				{/foreach}
 			</select>
+			{if $_pf.enable_paypal=='yes' && $_pf.enable_paypal_checkout=='yes'}
+			<small class="text-secondary d-block mt-1">{lng p="paypal_both_notice"}</small>
+			{/if}
 		</td>
 	</tr>
 
@@ -102,7 +107,10 @@
 		<td class="listTableLeft">{lng p="finalamount"}:</td>
 		<td class="listTableRight">
 			<b id="paymentAmount"></b>
-			<small id="taxNote"></small>
+			<div class="text-secondary small d-block mt-1">
+				<div id="taxNote"></div>
+				<div id="surchargeNote"></div>
+			</div>
 		</td>
 	</tr>
 	
@@ -120,8 +128,44 @@
 		vatRates: {ldelim}{foreach from=$_pf.countryList item=country key=id}{if $country.vat>0}{$id}: {$country.vat},{/if}{/foreach}{rdelim},
 		vatMode: '{$_pf.mwst}',
 		currency: '{$_pf.currency}',
-		baseAmount: {$_pf.amount}
+		baseAmount: {$_pf.amount},
+		surcharge: {ldelim}{if isset($_pf.surchargeJs)}{$_pf.surchargeJs}{else}1:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},4:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},5:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim}{/if}{rdelim},
+		surchargeNote: '{lng p="payment_surcharge"} %1 %2'
 	{rdelim};
+	{literal}
+	function paymentSurchargeNote(baseAmount, grossAmount)
+	{
+		var extra = Math.round((grossAmount - baseAmount) * 100) / 100;
+		if(extra <= 0 || typeof bmPayment == 'undefined')
+			return '';
+		var fmt = bmPayment.surchargeNote || '';
+		if(!fmt || fmt.indexOf('UNKNOWN') !== -1 || fmt.indexOf('inkl') === 0 || fmt.indexOf('incl') === 0)
+			fmt = 'Transaktionskosten %1 %2';
+		return fmt.replace('%1', formatNumber(extra, 2)).replace('%2', bmPayment.currency);
+	}
+	function refreshPaymentAmount(baseAmount, taxNote)
+	{
+		var gross = (typeof applyPaymentSurcharge == 'function') ? applyPaymentSurcharge(baseAmount) : baseAmount;
+		var html = formatNumber(gross, 2) + ' ' + bmPayment.currency;
+		var ids = ['paymentAmount', 'finalAmount'];
+		for(var i = 0; i < ids.length; i++)
+		{
+			var amountEl = document.getElementById(ids[i]);
+			if(amountEl)
+				amountEl.innerHTML = html;
+		}
+		var noteEl = document.getElementById('taxNote');
+		if(noteEl)
+			noteEl.innerHTML = taxNote || '';
+		var surchargeEl = document.getElementById('surchargeNote');
+		if(surchargeEl)
+		{
+			var surcharge = paymentSurchargeNote(baseAmount, gross);
+			surchargeEl.innerHTML = surcharge;
+			surchargeEl.style.display = surcharge ? '' : 'none';
+		}
+	}
+	{/literal}
 	updatePaymentMethod(EBID('paymentMethod'));
 	updatePaymentCountry(EBID('land'));
 {if $_pf.invalidFields}

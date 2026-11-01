@@ -134,13 +134,13 @@
 					<div class="bm-webdisk-footer-row">
 					<div class="left bm-organizer-footer-actions bm-webdisk-footer-actions">
 						<div class="input-group input-group-sm bm-organizer-action-group">
-							<select class="form-select" id="massAction" aria-label="{lng p="selaction"}">
+							<select class="form-select form-select-sm" id="massAction" aria-label="{lng p="selaction"}">
 								<option value="-">------ {lng p="selaction"} ------</option>
 								<option value="download">{lng p="download"}</option>
 								<option value="delete">{lng p="delete"}</option>
 								{hook id="webdisk.folder.tpl:select"}
 							</select>
-							<button type="button" class="btn btn-primary" onclick="EBID('wdMassAction').value=EBID('massAction').value;transferSelectedWebdiskItems();document.forms.f1.submit();">{lng p="ok"}</button>
+							<button type="button" class="btn btn-sm btn-primary" onclick="EBID('wdMassAction').value=EBID('massAction').value;transferSelectedWebdiskItems();document.forms.f1.submit();">{lng p="ok"}</button>
 						</div>
 					</div>
 					</div>

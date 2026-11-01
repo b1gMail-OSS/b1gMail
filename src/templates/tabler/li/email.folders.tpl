@@ -26,6 +26,7 @@
 			<table class="table table-vcenter table-hover card-table bm-folder-admin-table" id="folderAdminTable">
 				<thead>
 				<tr>
+					<th class="bm-folder-col-grip"></th>
 					<th class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="allChecker" onclick="checkAll(this.checked, document.forms.f1, 'folder');" aria-label="{lng p="selaction"}" /></label></th>
 					<th class="bm-folder-col-title">
 						<a class="bm-folder-sort-link" href="{sessionurl file='email.folders.php' params="sort=titel&order={$sortOrderInv}"}">{lng p="title"}</a>
@@ -45,9 +46,50 @@
 				</tr>
 				</thead>
 
+				{if !empty($folderFavoriteAdmin)}
+				<tr class="bm-folder-section-row">
+					<td colspan="8">
+						<button type="button" class="bm-folder-section-toggle" onclick="toggleGroup('fav');">
+							<i class="ti ti-chevron-down icon icon-sm" id="groupImage_fav" aria-hidden="true"></i>
+							{lng p="folderfavorites"}
+						</button>
+					</td>
+				</tr>
+				<tbody id="group_fav" class="bm-folder-section-body bm-folder-favorites-admin">
+				{foreach from=$folderFavoriteAdmin key=folderID item=folder}
+				<tr class="bm-folder-row bm-folder-fav-admin-row" data-folder-id="{$folderID}">
+					<td class="bm-folder-col-grip"><span class="bm-folder-fav-grip" title="{lng p="move"}" aria-label="{lng p="move"}"><i class="ti ti-grip-vertical icon" aria-hidden="true"></i></span></td>
+					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" disabled="disabled" aria-hidden="true" /></label></td>
+					<td class="bm-folder-col-title">
+						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}" draggable="false">
+							<span class="bm-folder-title-icon"><i class="ti {if $folder.type == 'inbox'}ti-inbox{elseif $folder.type == 'outbox'}ti-send{elseif $folder.type == 'drafts'}ti-file-pencil{elseif $folder.type == 'spam'}ti-ban{elseif $folder.type == 'trash'}ti-trash{elseif $folder.type == 'sharedfolder'}ti-folder-share{elseif $folder.type == 'intellifolder'}ti-folder-cog{else}ti-folder{/if} icon" aria-hidden="true"></i></span>
+							<span class="bm-folder-title-text">
+								<span class="bm-folder-name">{text value=$folder.titel cut=40}{if $folder.folderActions=='shared' && $folder.readonly} <span class="text-secondary fw-normal">({lng p="readonly"})</span>{/if}</span>
+								<span class="bm-folder-fav-source">{text value=$folder.sourceEmail cut=40}</span>
+							</span>
+						</a>
+					</td>
+					<td class="bm-folder-col-parent d-none d-md-table-cell">{if isset($folder.parent) && $folder.parent}{text value=$folder.parent cut=20}{/if}</td>
+					<td class="bm-folder-col-size d-none d-lg-table-cell text-secondary">{if $folder.folderActions=='own' && $folder.intelligent==1}-{else}{size bytes=$folder.size}{/if}</td>
+					<td class="bm-folder-col-status">
+						<div class="bm-folder-stats">
+							<span class="badge bg-secondary-lt bm-folder-stat" title="{lng p="all"}"><i class="ti ti-mail icon icon-sm" aria-hidden="true"></i>{$folder.allMails}</span>
+							<span class="badge bg-azure-lt bm-folder-stat" title="{lng p="unread"}"><i class="ti ti-mail-opened icon icon-sm" aria-hidden="true"></i>{$folder.unreadMails}</span>
+							<span class="badge bg-yellow-lt bm-folder-stat" title="{lng p="flagged"}"><i class="ti ti-flag icon icon-sm" aria-hidden="true"></i>{$folder.flaggedMails}</span>
+						</div>
+					</td>
+					<td class="bm-folder-col-subscribed"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" {if $folder.folderActions!='own' || $folder.subscribed==1}checked="checked" {/if}disabled="disabled" aria-hidden="true" /></label></td>
+					<td class="bm-folder-col-actions">
+						{include file="li/email.folders.actions.tpl" folderID=$folderID folder=$folder folderActions=$folder.folderActions}
+					</td>
+				</tr>
+				{/foreach}
+				</tbody>
+				{/if}
+
 				{if !empty($sysFolderList)}
 				<tr class="bm-folder-section-row">
-					<td colspan="7">
+					<td colspan="8">
 						<button type="button" class="bm-folder-section-toggle" onclick="toggleGroup('sys');">
 							<i class="ti ti-chevron-down icon icon-sm" id="groupImage_sys" aria-hidden="true"></i>
 							{lng p="sysfolders"}
@@ -57,6 +99,7 @@
 				<tbody id="group_sys" class="bm-folder-section-body">
 				{foreach from=$sysFolderList key=folderID item=folder}
 				<tr class="bm-folder-row">
+					<td class="bm-folder-col-grip"></td>
 					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" disabled="disabled" aria-hidden="true" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
 						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
@@ -87,7 +130,7 @@
 
 				{if $theFolderList}
 				<tr class="bm-folder-section-row">
-					<td colspan="7">
+					<td colspan="8">
 						<button type="button" class="bm-folder-section-toggle" onclick="toggleGroup('own');">
 							<i class="ti ti-chevron-down icon icon-sm" id="groupImage_own" aria-hidden="true"></i>
 							{lng p="ownfolders"}
@@ -96,10 +139,11 @@
 				</tr>
 				<tbody id="group_own" class="bm-folder-section-body">
 				{foreach from=$theFolderList key=folderID item=folder}
-				<tr class="bm-folder-row">
+				<tr class="bm-folder-row{if $folderOrderCustom} bm-folder-order-row{/if}"{if $folderOrderCustom} data-folder-id="{$folderID}" data-parent-id="{$folder.parent_id}"{/if}>
+					<td class="bm-folder-col-grip">{if $folderOrderCustom}<span class="bm-folder-fav-grip" title="{lng p="move"}" aria-label="{lng p="move"}"><i class="ti ti-grip-vertical icon" aria-hidden="true"></i></span>{/if}</td>
 					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="folder_{$folderID}" name="folder_{$folderID}" aria-label="{text value=$folder.titel cut=40}" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
-						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
+						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}" draggable="false">
 							<span class="bm-folder-title-icon"><i class="ti {if $folder.intelligent==1}ti-folder-cog{else}ti-folder{/if} icon" aria-hidden="true"></i></span>
 							<span class="bm-folder-title-text">
 								<span class="bm-folder-name">{text value=$folder.titel cut=40}</span>
@@ -127,7 +171,7 @@
 
 				{if $sharedFolderList}
 				<tr class="bm-folder-section-row">
-					<td colspan="7">
+					<td colspan="8">
 						<button type="button" class="bm-folder-section-toggle" onclick="toggleGroup('shared');">
 							<i class="ti ti-chevron-down icon icon-sm" id="groupImage_shared" aria-hidden="true"></i>
 							{lng p="sharedfolders"}
@@ -137,17 +181,19 @@
 				<tbody id="group_shared" class="bm-folder-section-body">
 				{foreach from=$sharedFolderGroups key=ownerEmail item=ownerFolders}
 				<tr class="bm-folder-row bm-folder-share-owner-row">
-					<td></td>
+					<td class="bm-folder-col-grip"></td>
+					<td class="bm-folder-col-check"></td>
 					<td colspan="6" class="bm-folder-share-owner">
 						<i class="ti ti-mail icon icon-sm" aria-hidden="true"></i>
 						{text value=$ownerEmail}
 					</td>
 				</tr>
 				{foreach from=$ownerFolders key=folderID item=folder}
-				<tr class="bm-folder-row">
+				<tr class="bm-folder-row{if $folderOrderCustom && $folder.type != 'inbox' && $folder.type != 'outbox' && $folder.type != 'drafts' && $folder.type != 'spam' && $folder.type != 'trash'} bm-folder-order-row{/if}"{if $folderOrderCustom && $folder.type != 'inbox' && $folder.type != 'outbox' && $folder.type != 'drafts' && $folder.type != 'spam' && $folder.type != 'trash'} data-folder-id="{$folderID}" data-parent-id="{$folder.parent_id}"{/if}>
+					<td class="bm-folder-col-grip">{if $folderOrderCustom && $folder.type != 'inbox' && $folder.type != 'outbox' && $folder.type != 'drafts' && $folder.type != 'spam' && $folder.type != 'trash'}<span class="bm-folder-fav-grip" title="{lng p="move"}" aria-label="{lng p="move"}"><i class="ti ti-grip-vertical icon" aria-hidden="true"></i></span>{/if}</td>
 					<td class="bm-folder-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" disabled="disabled" aria-hidden="true" /></label></td>
 					<td class="bm-folder-col-title{if $sortColumn=='titel'} bm-folder-col-sorted{/if}">
-						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}">
+						<a class="bm-folder-title-link" href="{sessionurl file='email.php' params="folder={$folderID}"}" draggable="false">
 							<span class="bm-folder-title-icon"><i class="ti ti-folder-share icon" aria-hidden="true"></i></span>
 							<span class="bm-folder-title-text">
 								<span class="bm-folder-name">{text value=$folder.titel cut=40}{if $folder.readonly} <span class="text-secondary fw-normal">({lng p="readonly"})</span>{/if}</span>

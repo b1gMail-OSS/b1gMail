@@ -55,15 +55,21 @@
 
 	<div class="row row-cards">
 
-		{* ---- Info card ---- *}
 		<div class="col-12">
-			<div class="card">
-				<div class="card-body">
-					<p class="mb-2">{lng p="apppw_intro"}</p>
+			<div class="alert alert-info mb-0" role="alert">
+				<div class="alert-icon">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon alert-icon"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path></svg>
+				</div>
+				<div>
+					<div class="alert-description">{lng p="apppw_intro"}</div>
+				</div>
+			</div>
+		</div>
 
-					{if $appPwUserHasMfa|default:false}
+		{if $appPwUserHasMfa|default:false}
+		<div class="col-12">
 						{if $appPwDavEnforceMode == 'enforce'}
-							<div class="alert alert-warning alert-dismissible mb-0 mt-3" role="alert">
+							<div class="alert alert-warning alert-dismissible mb-0" role="alert">
 								<div class="alert-icon">
 									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon alert-icon"><path d="M12 9v4"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path><path d="M12 16h.01"></path></svg>
 								</div>
@@ -74,7 +80,7 @@
 								<a class="btn-close" data-bs-dismiss="alert" aria-label="{lng p="close"}"></a>
 							</div>
 						{else}
-							<div class="alert alert-info alert-dismissible mb-0 mt-3" role="alert">
+							<div class="alert alert-info alert-dismissible mb-0" role="alert">
 								<div class="alert-icon">
 									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon alert-icon"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path></svg>
 								</div>
@@ -85,10 +91,8 @@
 								<a class="btn-close" data-bs-dismiss="alert" aria-label="{lng p="close"}"></a>
 							</div>
 						{/if}
-					{/if}
-				</div>
-			</div>
 		</div>
+		{/if}
 
 		{* ---- Existing list ---- *}
 		<div class="col-12">
@@ -159,10 +163,11 @@
 													{csrffield}
 													<input type="hidden" name="do" value="revoke" />
 													<input type="hidden" name="id" value="{$row.id}" />
-													<button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('{lng p="apppw_revoke_confirm"}');">
-														<i class="ti ti-trash" aria-hidden="true"></i>
-														{lng p="apppw_revoke"}
-													</button>
+													<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
+														<button type="submit" class="btn btn-outline-secondary btn-icon text-danger" title="{lng p="apppw_revoke"}" aria-label="{lng p="apppw_revoke"}" onclick="return confirm('{lng p="apppw_revoke_confirm"}');">
+															<i class="ti ti-trash icon" aria-hidden="true"></i>
+														</button>
+													</div>
 												</form>
 											{/if}
 										</td>

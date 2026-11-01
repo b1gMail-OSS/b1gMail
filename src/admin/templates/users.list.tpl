@@ -26,18 +26,18 @@
 					<thead>
 					<tr>
 						<th style="width: 30px;">&nbsp;</th>
-						<th style="width: 25px; text-align: center;"><a href="javascript:invertSelection(document.forms.f1,'user_');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th class="text-center" style="width:3rem;"><a href="javascript:invertSelection(document.forms.f1,'user_');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th><a href="javascript:updateSort('id');">{lng p="id"}
-								{if $sortBy=='id'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='id'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th><a href="javascript:updateSort('email');">{lng p="email"}
-								{if $sortBy=='email'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='email'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th><a href="javascript:updateSort('nachname');">{lng p="name"}
-								{if $sortBy=='nachname'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='nachname'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						{foreach from=$fields item=field key=fieldID}{if $field.checked}
 							<th{if $field.typ==2} style="text-align:center;"{/if}>{text value=$field.feld}</th>
 						{/if}{/foreach}
 						<th><a href="javascript:updateSort('gesperrt');">{lng p="status"}
-								{if $sortBy=='gesperrt'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='gesperrt'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						{if $mfaLiEnabled}<th class="text-center" style="width: 2.5rem;" title="{lng p="mfa_col"}">{lng p="mfa_col"}</th>{/if}
 						<th width="95">&nbsp;</th>
 					</tr>
@@ -48,22 +48,24 @@
 						<tr class="{$class}">
 							<td class="text-center">
 								{if $user.statusImg == 'active'}
-									<i class="fa-solid fa-user"></i>
+									<i class="fa-solid fa-user text-green" title="{$user.status|escape}" aria-label="{$user.status|escape}"></i>
 								{elseif $user.statusImg == 'nologin'}
-									<i class="fa-regular fa-user"></i>
+									<i class="fa-regular fa-user text-azure" title="{$user.status|escape}" aria-label="{$user.status|escape}"></i>
+								{elseif $user.statusImg == 'notactivated'}
+									<i class="fa-solid fa-user-clock text-yellow" title="{$user.status|escape}" aria-label="{$user.status|escape}"></i>
 								{elseif $user.statusImg == 'deleted'}
-									<i class="fa-solid fa-user-xmark"></i>
+									<i class="fa-solid fa-user-xmark text-orange" title="{$user.status|escape}" aria-label="{$user.status|escape}"></i>
 								{elseif $user.statusImg == 'locked'}
-									<i class="fa-solid fa-user-lock"></i>
+									<i class="fa-solid fa-user-lock text-red" title="{$user.status|escape}" aria-label="{$user.status|escape}"></i>
 								{/if}
 							</td>
-							<td class="text-center"><input type="checkbox" name="user_{$user.id}" /></td>
+							<td class="text-center"><label class="form-check d-inline-block mb-0"><input class="form-check-input" type="checkbox" name="user_{$user.id}" /></label></td>
 							<td>{$user.id}</td>
 							<td><a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}">{email value=$user.email}</a><br /><small>{text value=$user.aliases cut=45 allowEmpty=true}</small></td>
 							<td>{text value=$user.nachname cut=20}, {text value=$user.vorname cut=20}<br /><small>{text value=$user.strasse cut=20} {text value=$user.hnr cut=5}, {text value=$user.plz cut=8} {text value=$user.ort cut=20}</small></td>
 							{foreach from=$fields item=field key=fieldID}{if $field.checked}
 								<td{if $field.typ==2} style="text-align:center;"{/if}>
-									{if $field.typ==2}<img src="{$tpldir}images/{if $user.profileData.$fieldID}yes{else}no{/if}.png" border="0" alt="" width="16" height="16" />
+									{if $field.typ==2}{if $user.profileData.$fieldID}{acpicon file="yes.png"}{else}{acpicon file="no.png"}{/if}
 									{elseif $field.typ==32}{fieldDate value=$user.profileData.$fieldID}
 									{else}{text value=$user.profileData.$fieldID}{/if}
 								</td>
@@ -99,11 +101,10 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" id="massAction" class="form-select form-select-sm">
+			<div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" id="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="delete">{lng p="delete"}</option>
@@ -117,8 +118,7 @@
 								{/foreach}
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 				<div class="text-end">
 					{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"javascript:updatePage(.s);\">.t</a></span> "}&nbsp;

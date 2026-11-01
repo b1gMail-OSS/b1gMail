@@ -18,7 +18,7 @@
 
 	<div class="scrollContainer withBottomBar bm-organizer-calendar-body" id="calendarContainer">
 		<div style="overflow-y:scroll;" id="calendarWholeDayBody">
-			<table class="calendarWholeDayBody bm-organizer-calendar-allday" style="border-bottom:3px double var(--tblr-border-color, #B3B8BD);">
+			<table class="calendarWholeDayBody bm-organizer-calendar-allday">
 			<tr>
 				<td class="calendarDayTimeCell">&nbsp;</td>
 				<td class="calendarDaySepCell"></td>

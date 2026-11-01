@@ -13,11 +13,11 @@
 		{foreach from=$folders item=folder}
 		{cycle name=class values="td1,td2" assign=class}
 		<tr class="{$class}">
-			<td align="center"><img src="{$tpldir}images/ico_sharedfolder.png" border="0" width="16" height="16" alt="" /></td>
+			<td align="center">{acpicon file="ico_sharedfolder.png"}</td>
 			<td><a href="{sessionurl file='workgroups.php' params="action=folders&do=edit&id={$folder.id}"}">{text value=$folder.titel}</a></td>
 			<td>
-				<a href="{sessionurl file='workgroups.php' params="action=folders&do=edit&id={$folder.id}"}"><img src="{$tpldir}images/edit.png" border="0" alt="{lng p="edit"}" width="16" height="16" /></a>
-				<a href="{sessionurl file='workgroups.php' params="action=folders&delete={$folder.id}"}" onclick="return confirm('{lng p="realdel"}');"><img src="{$tpldir}images/delete.png" border="0" alt="{lng p="delete"}" width="16" height="16" /></a>
+				<a href="{sessionurl file='workgroups.php' params="action=folders&do=edit&id={$folder.id}"}">{acpicon file="edit.png"}</a>
+				<a href="{sessionurl file='workgroups.php' params="action=folders&delete={$folder.id}"}" onclick="return confirm('{lng p="realdel"}');">{acpicon file="delete.png"}</a>
 			</td>
 		</tr>
 		{/foreach}
@@ -32,7 +32,7 @@
 		{csrffield}
 		<table width="100%">
 			<tr>
-				<td width="40" valign="top" rowspan="1"><img src="{$tpldir}images/workgroup_mail32.png" border="0" alt="" width="32" height="32" /></td>
+				<td width="40" valign="top" rowspan="1">{acpicon file="workgroup_mail32.png" size="lg"}</td>
 				<td class="td1" width="130">{lng p="title"}:</td>
 				<td class="td2"><input type="text" name="titel" value="" style="width:85%;" /></td>
 			</tr>

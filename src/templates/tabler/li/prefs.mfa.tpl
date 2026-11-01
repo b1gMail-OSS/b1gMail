@@ -97,7 +97,9 @@
 					<tr>
 						<td class="listTableLeft"><label>{lng p="mfa_code"}:</label></td>
 						<td class="listTableRight">
-							<input type="text" class="form-control" name="email_code" inputmode="numeric" maxlength="6" required="required" autocomplete="one-time-code" style="max-width:12rem;" />
+							<div class="otp otp-lg bm-mfa-otp" data-bs-toggle="otp" data-bs-length="6" data-bs-groups="[3,3]" data-bs-type="numeric">
+								<input type="text" name="email_code" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required="required" />
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -133,7 +135,9 @@
 					<tr>
 						<td class="listTableLeft"><label>{lng p="mfa_code"}:</label></td>
 						<td class="listTableRight">
-							<input type="text" class="form-control" name="totp_code" inputmode="numeric" maxlength="6" required="required" style="max-width:12rem;" />
+							<div class="otp otp-lg bm-mfa-otp" data-bs-toggle="otp" data-bs-length="6" data-bs-groups="[3,3]" data-bs-type="numeric">
+								<input type="text" name="totp_code" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required="required" />
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -179,7 +183,9 @@
 					<tr>
 						<td class="listTableLeft"><label>{lng p="mfa_code"}:</label></td>
 						<td class="listTableRight">
-							<input type="text" class="form-control" name="email_code" inputmode="numeric" maxlength="6" required="required" autocomplete="one-time-code" style="max-width:12rem;" />
+							<div class="otp otp-lg bm-mfa-otp" data-bs-toggle="otp" data-bs-length="6" data-bs-groups="[3,3]" data-bs-type="numeric">
+								<input type="text" name="email_code" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required="required" />
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -215,7 +221,9 @@
 					<tr>
 						<td class="listTableLeft"><label>{lng p="mfa_code"}:</label></td>
 						<td class="listTableRight">
-							<input type="text" class="form-control" name="totp_code" inputmode="numeric" maxlength="6" required="required" style="max-width:12rem;" />
+							<div class="otp otp-lg bm-mfa-otp" data-bs-toggle="otp" data-bs-length="6" data-bs-groups="[3,3]" data-bs-type="numeric">
+								<input type="text" name="totp_code" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required="required" />
+							</div>
 						</td>
 					</tr>
 					<tr>

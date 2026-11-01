@@ -13,11 +13,17 @@
 <div class="sidebarHeading bm-folder-fav-heading">{lng p="folderfavorites"}</div>
 <div class="contentMenuIcons bm-folder-favorites">
 {foreach from=$folderFavorites key=favID item=folder}
-	<a href="{sessionurl file='email.php' params="folder={$favID}"}" class="bm-folder-fav{if isset($currentFolderID) && $currentFolderID==$favID} current{/if}" data-folder-id="{$favID}">
-		<i class="ti {if $folder.type == 'inbox'}ti-inbox{elseif $folder.type == 'outbox'}ti-send{elseif $folder.type == 'drafts'}ti-file-pencil{elseif $folder.type == 'spam'}ti-ban{elseif $folder.type == 'trash'}ti-trash{elseif $folder.type == 'sharedfolder'}ti-folder-share{elseif $folder.type == 'intellifolder'}ti-folder{else}ti-folder{/if} icon icon-1" aria-hidden="true"></i>
-		<span class="bm-folder-fav-label">{text value=$folder.title cut=22 escape=true noentities=true}</span>
-		<span class="bm-folder-count bm-folder-fav-count" data-folder-count-id="{$favID}"{if empty($folder.unread) || $folder.unread<=0} style="display:none;"{/if}>{if !empty($folder.unread)}{$folder.unread}{else}0{/if}</span>
-	</a>
+	<div class="bm-folder-fav{if isset($currentFolderID) && $currentFolderID==$favID} current{/if}" data-folder-id="{$favID}">
+		<span class="bm-folder-fav-grip" title="{lng p="move"}" aria-label="{lng p="move"}"><i class="ti ti-grip-vertical" aria-hidden="true"></i></span>
+		<a href="{sessionurl file='email.php' params="folder={$favID}"}" class="bm-folder-fav-link" draggable="false" title="{text value=$folder.title escape=true}{if !empty($folder.owner_email)} — {text value=$folder.owner_email escape=true}{else} — {text value=$mailboxEmail escape=true}{/if}">
+			<i class="ti {if $folder.type == 'inbox'}ti-inbox{elseif $folder.type == 'outbox'}ti-send{elseif $folder.type == 'drafts'}ti-file-pencil{elseif $folder.type == 'spam'}ti-ban{elseif $folder.type == 'trash'}ti-trash{elseif $folder.type == 'sharedfolder'}ti-folder-share{elseif $folder.type == 'intellifolder'}ti-folder{else}ti-folder{/if} icon icon-1" aria-hidden="true"></i>
+			<span class="bm-folder-fav-text">
+				<span class="bm-folder-fav-label">{text value=$folder.title cut=28 escape=true noentities=true}</span>
+				<span class="bm-folder-fav-source">{if !empty($folder.owner_email)}{text value=$folder.owner_email cut=28 escape=true noentities=true}{else}{text value=$mailboxEmail cut=28 escape=true noentities=true}{/if}</span>
+			</span>
+			<span class="bm-folder-count bm-folder-fav-count" data-folder-count-id="{$favID}"{if empty($folder.unread) || $folder.unread<=0} style="display:none;"{/if}>{if !empty($folder.unread)}{$folder.unread}{else}0{/if}</span>
+		</a>
+	</div>
 {/foreach}
 </div>
 {/if}
@@ -57,6 +63,8 @@
 		EBID('folderList').innerHTML = bmEmailFolderTreesHtml();
 		enableFolderDragTargets();
 		bmUpdateFolderFavoriteCounts();
+		if(typeof bmInitFolderOrderSort == 'function')
+			bmInitFolderOrderSort();
 	}
 	bmRenderEmailFolderList();
 //-->

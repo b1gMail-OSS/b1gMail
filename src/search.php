@@ -24,8 +24,18 @@ if(!defined('B1GMAIL_INIT'))
 RequestPrivileges(PRIVILEGES_USER);
 
 /**
- * search sort callback
+ * date from the search form (datepicker string or legacy day/month/year fields)
  */
+function bmSearchRequestDate($field)
+{
+	$hasParts = isset($_REQUEST[$field.'Day']) || isset($_REQUEST[$field.'Month']) || isset($_REQUEST[$field.'Year']);
+	$hasValue = isset($_REQUEST[$field]) && is_string($_REQUEST[$field]) && trim($_REQUEST[$field]) !== '';
+	if(!$hasParts && !$hasValue)
+		return 0;
+
+	return SmartyDateTime($field);
+}
+
 function _searchSort($a, $b)
 {
 	global $sortColumn, $sortOrder;
@@ -133,12 +143,12 @@ if($_REQUEST['action'] == 'search')
 	}
 
 	// date
-	$dateFrom = isset($_REQUEST['dateFromDay']) ? SmartyDateTime('dateFrom') 	: 0;
-	$dateTo = isset($_REQUEST['dateToDay']) 	? SmartyDateTime('dateTo') 		: 0;
+	$dateFrom = bmSearchRequestDate('dateFrom');
+	$dateTo = bmSearchRequestDate('dateTo');
 	if($dateFrom != 0)
 		$dateFrom = mktime(0, 0, 0, date('m', $dateFrom), date('d', $dateFrom), date('Y', $dateFrom));
 	if($dateTo != 0)
-		$dateTo = mktime(0, 0, 0, date('m', $dateTo), date('d', $dateTo), date('Y', $dateTo));
+		$dateTo = mktime(23, 59, 59, date('m', $dateTo), date('d', $dateTo), date('Y', $dateTo));
 
 	// sort info
 	$sortColumns = array('score', 'date', 'size', 'title');
@@ -207,6 +217,7 @@ if($_REQUEST['action'] == 'search')
 		// show results
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
 		$tpl->assign('sortColumn', $sortColumn);
+		$tpl->assign('sortOrderRaw', $sortOrder);
 		$tpl->assign('sortOrder', $sortOrderFA);
 		$tpl->assign('pageNo', $pageNo);
 		$tpl->assign('pageCount', $pageCount);

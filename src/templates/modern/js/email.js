@@ -134,7 +134,16 @@ function _switchFolder(e, retainPreviewMail)
 	if(e.readyState == 4)
 	{
 		_lastSelectedMailID = 0;
-		var folderObj = eval('('+e.responseText+')');
+		var folderObj;
+		try
+		{
+			folderObj = JSON.parse(e.responseText);
+		}
+		catch(err)
+		{
+			if(EBID('folderLoading')) EBID('folderLoading').style.display = 'none';
+			return;
+		}
 
 		currentFolderID = folderObj.id;
 		currentSortColumn = folderObj.sortColumn;
@@ -146,6 +155,7 @@ function _switchFolder(e, retainPreviewMail)
 		setWindowTitle(folderObj.windowTitle);
 
 		EBID('folderMailArea').innerHTML = folderObj.html;
+		bmSyncMailFolderCsrf();
 		initMailSel();
 
 		if(EBID('previewArea'))
@@ -748,9 +758,33 @@ function enableFolderDragTargets()
 	}
 }
 
+function bmSyncMailFolderCsrf()
+{
+	var token = (typeof bmCsrfToken !== 'undefined' && bmCsrfToken) ? bmCsrfToken : '';
+	if(!token)
+		return;
+
+	var root = EBID('folderMailArea') || document;
+	var nodes = root.querySelectorAll('input[name="csrf_token"]');
+	for(var i = 0; i < nodes.length; i++)
+		nodes[i].value = token;
+
+	var form = document.forms['f1'];
+	if(form && !form.querySelector('input[name="csrf_token"]'))
+	{
+		var inp = document.createElement('input');
+		inp.type = 'hidden';
+		inp.name = 'csrf_token';
+		inp.value = token;
+		form.appendChild(inp);
+	}
+}
+
 function transferSelectedMailIDs()
 {
 	var f = EBID('selectedMailIDs'), i;
+
+	bmSyncMailFolderCsrf();
 
 	if(f)
 	{
@@ -766,6 +800,37 @@ function transferSelectedMailIDs()
 		if(f.value.length > 0)
 			f.value = f.value.substr(0, f.value.length-1);
 	}
+}
+
+/**
+ * Bulk footer OK / form submit. Delete uses the same CSRF-safe XHR path as
+ * Entf/context menu; other actions keep the classic POST form.
+ */
+function executeMailMassAction()
+{
+	transferSelectedMailIDs();
+
+	var actionEl = EBID('massAction');
+	var action = actionEl ? actionEl.value : '-';
+	if(action === 'delete')
+	{
+		var idsField = EBID('selectedMailIDs');
+		var ids = [];
+		if(idsField && idsField.value)
+		{
+			var parts = idsField.value.split(';');
+			for(var i = 0; i < parts.length; i++)
+			{
+				if(parts[i] !== '')
+					ids.push(parseInt(parts[i], 10));
+			}
+		}
+		if(ids.length > 0)
+			deleteMail(ids);
+		return false;
+	}
+
+	return true;
 }
 
 function hideMailMenu(e)

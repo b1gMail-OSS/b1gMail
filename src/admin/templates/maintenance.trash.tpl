@@ -44,8 +44,12 @@
 			</div>
 		</div>
 
-		<div style="float: right;"><input class="btn btn-sm btn-warning" type="button" value="{lng p="execute"}" onclick="trashExec()" /></div>
-		<div style="float: right;"><input type="text" class="form-control form-control-sm" name="perpage" id="perpage" value="50" size="5" />&nbsp; </div>
-		<div style="float: right;">{lng p="opsperpage"}&nbsp; </div>
+		<div class="text-end">
+			<div class="input-group input-group-sm bm-ops-action">
+				<span class="input-group-text">{lng p="opsperpage"}</span>
+				<input type="text" class="form-control" name="perpage" id="perpage" value="50">
+				<button type="button" class="btn btn-primary" onclick="trashExec()">{lng p="execute"}</button>
+			</div>
+		</div>
 	</div>
 </fieldset>

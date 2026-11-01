@@ -210,6 +210,19 @@ function RouteRestoreLegacyAction($action)
 		'vcfimportdialogsubmit'     => 'vcfImportDialogSubmit',
 		'importdialogsubmit'       => 'importDialogSubmit',
 		'addressbookpicture'       => 'addressbookPicture',
+		'addresspopup'             => 'addressPopup',
+		'numberpopup'              => 'numberPopup',
+		'attendeepopup'            => 'attendeePopup',
+		'lookupaddresses'          => 'lookupAddresses',
+		'exportaddressbook'        => 'exportAddressbook',
+		'importfile'               => 'importFile',
+		'importcsv'                => 'importCSV',
+		'paymentreturn'            => 'paymentReturn',
+		'paccpaymentreturn'        => 'paccPaymentReturn',
+		'paccorder'                => 'paccOrder',
+		'paccplaceorder'           => 'paccPlaceOrder',
+		'paccpackagedetails'       => 'paccPackageDetails',
+		'paccpackages'             => 'paccPackages',
 	);
 
 	$lower = strtolower($action);

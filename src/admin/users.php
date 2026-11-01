@@ -663,7 +663,11 @@ if($_REQUEST['action'] == 'users')
 			if($row['paymethod'] == PAYMENT_METHOD_BANKTRANSFER)
 				$row['method'] = $lang_admin['banktransfer'];
 			else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL)
+				$row['method'] = $lang_admin['paypal_classic'];
+			else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL_CHECKOUT)
 				$row['method'] = $lang_admin['paypal'];
+			else if($row['paymethod'] == PAYMENT_METHOD_STRIPE)
+				$row['method'] = $lang_admin['stripe'];
 			else if($row['paymethod'] == PAYMENT_METHOD_SOFORTUEBERWEISUNG)
 				$row['method'] = $lang_admin['su'];
 			else if($row['paymethod'] == PAYMENT_METHOD_SKRILL)

@@ -644,8 +644,9 @@ class BMMailbox
 			$this->_userID);
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
+			$row['parent_id'] = (int)$row['parent'];
 			if($withParentTitle)
-				$row['parent'] = $this->GetFolderTitle($row['parent']);
+				$row['parent'] = $this->GetFolderTitle($row['parent_id']);
 			if($withStats)
 			{
 				$row['allMails'] = $this->GetMailCount($row['id']);
@@ -668,12 +669,19 @@ class BMMailbox
 
 		foreach($result as $folderID=>$row)
 		{
+			$rawParent = (int)$row['parent'];
+			if($rawParent <= 0 || !isset($result[$rawParent]))
+				$result[$folderID]['parent_id'] = FOLDER_ROOT;
+			else
+				$result[$folderID]['parent_id'] = $rawParent;
+			if(empty($row['type']))
+				$result[$folderID]['type'] = 'sharedfolder';
 			if($withParentTitle)
 			{
-				if(!empty($row['owner_email']) && (empty($row['parent']) || (int)$row['parent'] <= 0 || !isset($result[(int)$row['parent']])))
+				if(!empty($row['owner_email']) && ($rawParent <= 0 || !isset($result[$rawParent])))
 					$result[$folderID]['parent'] = DecodeEMail($row['owner_email']);
 				else
-					$result[$folderID]['parent'] = $this->GetFolderTitle($row['parent']);
+					$result[$folderID]['parent'] = $this->GetFolderTitle($rawParent);
 			}
 			if($withStats)
 			{
@@ -1212,6 +1220,263 @@ class BMMailbox
 	}
 
 	/**
+	 * reorder favorites; unknown ids are ignored, missing current favorites stay at the end
+	 *
+	 * @param int[] $orderedIDs
+	 * @return int[]
+	 */
+	function SetFolderFavoriteOrder($orderedIDs)
+	{
+		$current = $this->GetFolderFavoriteIDs();
+		$allowed = array();
+		foreach($current as $id)
+			$allowed[$id] = true;
+
+		$next = array();
+		$seen = array();
+		foreach($orderedIDs as $id)
+		{
+			$id = (int)$id;
+			if(!isset($allowed[$id]) || isset($seen[$id]))
+				continue;
+			$seen[$id] = true;
+			$next[] = $id;
+		}
+		foreach($current as $id)
+		{
+			if(!isset($seen[$id]))
+				$next[] = $id;
+		}
+
+		$this->_userObject->SetPref('emailFolderFavorites', implode(',', $next));
+		return($next);
+	}
+
+	/**
+	 * saved sibling order, parent id => folder ids
+	 *
+	 * @return array
+	 */
+	function GetFolderOrderGroups()
+	{
+		$pref = $this->_userObject->GetPref('emailFolderOrder');
+		$groups = array();
+		if($pref === false || $pref === '')
+			return($groups);
+
+		foreach(explode('|', $pref) as $part)
+		{
+			$colon = strpos($part, ':');
+			if($colon === false)
+				continue;
+			$parent = (int)substr($part, 0, $colon);
+			$ids = array();
+			foreach(explode(',', substr($part, $colon + 1)) as $id)
+			{
+				if($id === '' || !is_numeric($id))
+					continue;
+				$ids[] = (int)$id;
+			}
+			if(count($ids) > 0)
+				$groups[$parent] = $ids;
+		}
+		return($groups);
+	}
+
+	/**
+	 * @return array folder id => position among its siblings
+	 */
+	function GetFolderOrderPositions()
+	{
+		$positions = array();
+		foreach($this->GetFolderOrderGroups() as $ids)
+		{
+			$index = 0;
+			foreach($ids as $id)
+				$positions[$id] = $index++;
+		}
+		return($positions);
+	}
+
+	/**
+	 * @param array $folder
+	 * @return int
+	 */
+	function _folderOrderRank($folder)
+	{
+		static $system = array(
+			'inbox' => 0,
+			'outbox' => 1,
+			'drafts' => 2,
+			'spam' => 3,
+			'trash' => 4
+		);
+		$type = isset($folder['type']) ? $folder['type'] : '';
+		return isset($system[$type]) ? $system[$type] : 100;
+	}
+
+	/**
+	 * @param int $parent
+	 * @param int[] $orderedIDs
+	 */
+	function SetFolderSiblingOrder($parent, $orderedIDs)
+	{
+		$parent = (int)$parent;
+		$all = $this->GetFolderList(false, false, false);
+		foreach($this->GetUserFolderList('titel', 'asc', false, false) as $id=>$row)
+		{
+			if(isset($all[$id]))
+				continue;
+			$all[$id] = array(
+				'parent'	=> (int)$row['parent_id'],
+				'type'		=> !empty($row['intelligent']) ? 'intellifolder' : 'folder',
+				'title'		=> $row['titel']
+			);
+		}
+		$clean = array();
+		$seen = array();
+		foreach($orderedIDs as $id)
+		{
+			$id = (int)$id;
+			if(isset($seen[$id]) || !isset($all[$id]))
+				continue;
+			if($this->_folderOrderRank($all[$id]) < 100)
+				continue;
+			if((int)$all[$id]['parent'] !== $parent)
+				continue;
+			$seen[$id] = true;
+			$clean[] = $id;
+			if(count($clean) >= 200)
+				break;
+		}
+		foreach($all as $id=>$folder)
+		{
+			$id = (int)$id;
+			if((int)$folder['parent'] !== $parent || isset($seen[$id]))
+				continue;
+			if($this->_folderOrderRank($folder) < 100)
+				continue;
+			$seen[$id] = true;
+			$clean[] = $id;
+		}
+		if(count($clean) < 1)
+			return;
+
+		$groups = $this->GetFolderOrderGroups();
+		$groups[$parent] = $clean;
+		$parts = array();
+		foreach($groups as $groupParent=>$ids)
+		{
+			if(count($ids) < 1)
+				continue;
+			$parts[] = (int)$groupParent . ':' . implode(',', array_map('intval', $ids));
+		}
+		$this->_userObject->SetPref('emailFolderOrder', implode('|', $parts));
+	}
+
+	/**
+	 * depth-first admin rows, system folders first, then the saved sibling order
+	 *
+	 * @param array $rows
+	 * @return array
+	 */
+	function OrderFolderAdminRows($rows)
+	{
+		if(!is_array($rows) || count($rows) < 2)
+			return($rows);
+
+		$positions = $this->GetFolderOrderPositions();
+		$byParent = array();
+		foreach($rows as $id=>$row)
+		{
+			$pid = isset($row['parent_id']) ? (int)$row['parent_id'] : 0;
+			$byParent[$pid][$id] = $row;
+		}
+		foreach($byParent as $pid=>$items)
+		{
+			uksort($items, function($a, $b) use ($items, $positions) {
+				$rankA = $this->_folderOrderRank($items[$a]);
+				$rankB = $this->_folderOrderRank($items[$b]);
+				if($rankA !== $rankB)
+					return $rankA < $rankB ? -1 : 1;
+				$posA = isset($positions[$a]) ? $positions[$a] : 1000000;
+				$posB = isset($positions[$b]) ? $positions[$b] : 1000000;
+				if($posA !== $posB)
+					return $posA < $posB ? -1 : 1;
+				$titleA = isset($items[$a]['titel']) ? $items[$a]['titel'] : '';
+				$titleB = isset($items[$b]['titel']) ? $items[$b]['titel'] : '';
+				$cmp = strcasecmp((string)$titleA, (string)$titleB);
+				if($cmp !== 0)
+					return $cmp;
+				return $a < $b ? -1 : ($a > $b ? 1 : 0);
+			});
+			$byParent[$pid] = $items;
+		}
+
+		$ordered = array();
+		$seen = array();
+		$walk = function($parentId) use (&$walk, &$ordered, &$seen, &$byParent) {
+			if(empty($byParent[$parentId]))
+				return;
+			foreach($byParent[$parentId] as $id=>$row)
+			{
+				if(isset($seen[$id]))
+					continue;
+				$seen[$id] = true;
+				$ordered[$id] = $row;
+				$walk((int)$id);
+			}
+		};
+		$rootParents = array();
+		foreach($rows as $id=>$row)
+		{
+			$pid = isset($row['parent_id']) ? (int)$row['parent_id'] : 0;
+			if(!isset($rows[$pid]))
+				$rootParents[$pid] = true;
+		}
+		foreach(array_keys($rootParents) as $pid)
+			$walk($pid);
+		foreach($rows as $id=>$row)
+		{
+			if(!isset($seen[$id]))
+				$ordered[$id] = $row;
+		}
+		return($ordered);
+	}
+
+	/**
+	 * @param array $result
+	 * @return array
+	 */
+	function _sortFolderList($result)
+	{
+		$positions = $this->GetFolderOrderPositions();
+		uksort($result, function($a, $b) use ($result, $positions) {
+			$parentA = isset($result[$a]['parent']) ? (int)$result[$a]['parent'] : 0;
+			$parentB = isset($result[$b]['parent']) ? (int)$result[$b]['parent'] : 0;
+			if($parentA !== $parentB)
+				return $parentA < $parentB ? -1 : 1;
+			$rankA = $this->_folderOrderRank($result[$a]);
+			$rankB = $this->_folderOrderRank($result[$b]);
+			if($rankA !== $rankB)
+				return $rankA < $rankB ? -1 : 1;
+			$posA = isset($positions[$a]) ? $positions[$a] : 1000000;
+			$posB = isset($positions[$b]) ? $positions[$b] : 1000000;
+			if($posA !== $posB)
+				return $posA < $posB ? -1 : 1;
+			$titleA = isset($result[$a]['title']) ? $result[$a]['title'] : '';
+			$titleB = isset($result[$b]['title']) ? $result[$b]['title'] : '';
+			$cmp = strcasecmp((string)$titleA, (string)$titleB);
+			if($cmp !== 0)
+				return $cmp;
+			if($a == $b)
+				return 0;
+			return $a < $b ? -1 : 1;
+		});
+		return($result);
+	}
+
+	/**
 	 * @param int $folderID
 	 */
 	function RemoveFolderFavorite($folderID)
@@ -1532,6 +1797,8 @@ class BMMailbox
 			if($withAllCount)
 				$result[$folderID]['all'] = $this->GetMailCount($folderID, false, false);
 		}
+
+		$result = $this->_sortFolderList($result);
 
 		// encode?
 		if($encode)

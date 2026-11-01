@@ -302,10 +302,11 @@ function SessionUrl($url)
 			$url = $converted;
 		else if(function_exists('PublicRoutingActive') && PublicRoutingActive()
 			&& function_exists('PublicEnsureAbsoluteUrl')
-			&& preg_match('#^[A-Za-z0-9_.-]+\.php([?#]|$)#', $url))
+			&& preg_match('~^[A-Za-z0-9_.-]+\.php([?#]|$)~', $url))
 		{
 			// Nested pretty URLs (e.g. /email/read/123) break relative *.php links;
 			// keep legacy scripts root-absolute when they have no pretty mapping.
+			// Delimiter must not be '#' — the pattern matches '?' and '#'.
 			$url = PublicEnsureAbsoluteUrl($url);
 		}
 	}

@@ -177,3 +177,493 @@ body.bm-session-locked .bm-session-lock-overlay {
     flex: 0 0 auto !important;
     white-space: nowrap;
 }
+
+/*
+ * Tabler 1.7 setzt --tblr-avatar-bg auf --tblr-fill-tertiary (nur wenige Prozent Deckkraft).
+ * Auf der dunklen ACP-Navbar bleibt dann nur ein Schemen; 1.5 nutzte eine deckende Fläche.
+ * .bg-*-lt bleibt über !important davor, Fotos liegen als img darüber.
+ */
+.avatar {
+    --tblr-avatar-bg: var(--tblr-bg-surface-secondary, #f8fafc);
+    background-color: var(--tblr-avatar-bg);
+}
+
+/* Die Leiste bleibt dunkel, der Kreis deshalb in beiden Modi hell. */
+.page > .navbar.bg-dark .avatar {
+    --tblr-avatar-bg: #f3f4f6;
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+/* navbar-light lässt die Linkfarbe dunkel, bg-dark färbt nur den Hintergrund. */
+.page > .navbar.bg-dark .navbar-nav .nav-link,
+.page > .navbar.bg-dark .navbar-nav .nav-link:hover,
+.page > .navbar.bg-dark .navbar-nav .nav-link:focus {
+    color: #fff;
+}
+
+.page > .navbar.bg-dark .navbar-nav .nav-link .text-muted {
+    color: color-mix(in srgb, #fff 72%, transparent) !important;
+}
+
+/*
+ * ACP-Legacy (common.css) setzt feste Hellwerte. Im Dark Mode an die Tabler-Flächen koppeln.
+ */
+[data-bs-theme="dark"] fieldset {
+    border-top-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] fieldset legend {
+    border-color: var(--tblr-border-color);
+    color: var(--tblr-body-color);
+}
+
+[data-bs-theme="dark"] fieldset.uncollapsed legend:before,
+[data-bs-theme="dark"] fieldset.collapsed legend:before {
+    color: var(--tblr-secondary);
+}
+
+[data-bs-theme="dark"] .list,
+[data-bs-theme="dark"] .statsTable {
+    color: var(--tblr-body-color);
+    border-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] .list th,
+[data-bs-theme="dark"] .list .footer,
+[data-bs-theme="dark"] .statsTable th {
+    color: var(--tblr-secondary);
+    background: var(--tblr-bg-surface-tertiary);
+    border-bottom-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] .list th a,
+[data-bs-theme="dark"] .list th a:hover,
+[data-bs-theme="dark"] .list .footer a,
+[data-bs-theme="dark"] .list .footer a:hover {
+    color: var(--tblr-body-color);
+}
+
+[data-bs-theme="dark"] .list td {
+    border-right-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] .list .td2 {
+    background-color: color-mix(in oklab, var(--tblr-body-color) 6%, transparent);
+}
+
+[data-bs-theme="dark"] .list .td1_dl,
+[data-bs-theme="dark"] .list .td2_dl {
+    border-top-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] .list .td1_dl {
+    background-color: var(--tblr-bg-surface);
+}
+
+[data-bs-theme="dark"] .list .td2_dl {
+    background-color: color-mix(in oklab, var(--tblr-body-color) 8%, transparent);
+}
+
+[data-bs-theme="dark"] .tableSubHead td {
+    background-color: var(--tblr-bg-surface-tertiary);
+    box-shadow: none;
+    border-top-color: var(--tblr-border-color);
+    border-bottom-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] .dragTableColumn {
+    border-left-color: var(--tblr-border-color);
+}
+
+[data-bs-theme="dark"] .dragItem,
+[data-bs-theme="dark"] .dragBar {
+    background-color: var(--tblr-bg-surface);
+    border-color: var(--tblr-border-color);
+    color: var(--tblr-body-color);
+}
+
+[data-bs-theme="dark"] .button,
+[data-bs-theme="dark"] .smallInput[type=submit] {
+    color: var(--tblr-body-color);
+    background-color: var(--tblr-bg-surface);
+    border-color: var(--tblr-border-color);
+}
+
+/* Bulk-Aktion: Gruppe nur so breit wie Label, Select und Button.
+   Sonst ist .input-group ein Block mit voller Kartenbreite und der Tabler-Schatten
+   läuft über den Button hinaus. */
+.page .input-group.bm-mass-action {
+    display: inline-flex !important;
+    flex: 0 0 auto;
+    width: fit-content !important;
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+.page .input-group.bm-mass-action > .form-select {
+    flex: 0 1 auto !important;
+    width: auto !important;
+    min-width: 10rem !important;
+}
+
+.page .input-group.bm-mass-action > .btn {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    white-space: nowrap;
+}
+
+/* Wartung: „Operationen pro Seite“ als kompakte Gruppe, rechtsbündig. */
+.page .input-group.bm-ops-action {
+    display: inline-flex !important;
+    width: fit-content !important;
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+.page .input-group.bm-ops-action > .form-control {
+    flex: 0 0 4.5rem !important;
+    width: 4.5rem !important;
+    min-width: 4.5rem !important;
+}
+
+.page .input-group.bm-ops-action > .btn {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    white-space: nowrap;
+}
+
+/* Datum/Monat: Feld bleibt in der Input-Gruppe, auch wenn der Kalender Koordinaten darauf schreibt. */
+.page .input-group > .form-control[data-bm-month="1"],
+.page .input-group > .form-control[data-bm-datetime="1"] {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+    align-self: stretch;
+    transform: none !important;
+}
+
+/* Uhrzeit im Gutschein-Kalender: Stunde und Minute unter dem Datum. */
+[data-vc="calendar"] [data-vc="time"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 1rem;
+    border-top: 1px solid var(--tblr-border-color);
+}
+
+[data-vc="calendar"] [data-vc-time="content"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+[data-vc="calendar"] [data-vc-time-input="hour"]::after {
+    content: ":";
+    font-weight: 600;
+}
+
+[data-vc="calendar"] [data-vc-time-input] input {
+    width: 3rem;
+    padding: 0.25rem 0.35rem;
+    text-align: center;
+    color: var(--tblr-body-color);
+    background: var(--tblr-bg-forms);
+    border: var(--tblr-border-width) solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+}
+
+[data-vc="calendar"] [data-vc-time="ranges"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+[data-vc="calendar"] [data-vc-time-range] input[type="range"] {
+    width: 100%;
+}
+
+.card-gradient {
+    --tblr-card-gradient-direction: 180deg;
+    --tblr-card-gradient-opacity: 86%;
+    --tblr-card-gradient: var(--tblr-primary), var(--tblr-primary);
+    background:
+        radial-gradient(ellipse at center, var(--tblr-card-bg) 0%, color-mix(in oklab, var(--tblr-card-bg) 0%, transparent) 80%) border-box,
+        linear-gradient(var(--tblr-card-gradient-direction), color-mix(in oklab, var(--tblr-card-bg) var(--tblr-card-gradient-opacity), transparent) 0%, var(--tblr-card-bg) 40%) border-box,
+        linear-gradient(calc(270deg + var(--tblr-card-gradient-direction)), var(--tblr-card-gradient)) border-box;
+}
+
+.card-gradient-azure {
+    --tblr-card-gradient: var(--tblr-azure), var(--tblr-azure);
+}
+
+.card-gradient-green {
+    --tblr-card-gradient: var(--tblr-green), var(--tblr-green);
+}
+
+.card-gradient-purple {
+    --tblr-card-gradient: var(--tblr-purple), var(--tblr-purple);
+}
+
+.nav-link-icon > .ti {
+    display: inline-block;
+    width: 1.25rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    vertical-align: -0.2em;
+}
+
+.acp-icon-sm {
+    font-size: 0.8rem;
+    line-height: 1;
+    vertical-align: -0.05em;
+}
+
+.acp-icon-lg {
+    font-size: 2rem;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.bm-welcome-chart {
+    overflow: hidden;
+    line-height: 0;
+    border-bottom-left-radius: var(--tblr-card-border-radius, var(--tblr-border-radius));
+    border-bottom-right-radius: var(--tblr-card-border-radius, var(--tblr-border-radius));
+}
+
+.bm-welcome-area-chart.sparkline {
+    --tblr-sparkline-width: 100%;
+    --tblr-sparkline-height: 2.5rem;
+    --tblr-sparkline-fill: color-mix(in oklab, currentColor 16%, transparent);
+    --tblr-sparkline-stroke-width: 2;
+    display: block;
+    width: 100%;
+    height: 2.5rem;
+}
+
+.bm-welcome-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem 2rem;
+}
+
+.bm-welcome-meta-item {
+    flex: 0 1 auto;
+    min-width: 6.5rem;
+}
+
+.bm-welcome-meta-item-wide {
+    flex: 1 1 16rem;
+    min-width: 14rem;
+}
+
+.bm-welcome-meta-side {
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.bm-welcome-meta-side .bm-welcome-meta-item,
+.bm-welcome-meta-side .bm-welcome-meta-item-wide {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+}
+
+.bm-welcome-meta-value {
+    font-weight: var(--tblr-font-weight-medium);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.bm-welcome-notes {
+    white-space: pre-wrap;
+}
+
+.bm-welcome-activate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.bm-welcome-activate-code {
+    width: 12rem;
+    max-width: 100%;
+}
+
+.bm-welcome-activate-amount {
+    width: 12rem;
+    max-width: 100%;
+}
+
+.bm-welcome-activate .form-label {
+    margin-bottom: 0.25rem;
+}
+
+.bm-welcome-activate-stack {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.bm-welcome-activate-stack .bm-welcome-activate-code,
+.bm-welcome-activate-stack .bm-welcome-activate-amount {
+    width: 100%;
+}
+
+.bm-welcome-activate-result:empty {
+    display: none;
+}
+
+.bm-welcome-activate-result:not(:empty) {
+    margin-top: 1rem;
+}
+
+.bm-welcome-notices .divide-y > * {
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+}
+
+.bm-welcome-notices .divide-y > :first-child {
+    padding-top: 0.15rem;
+}
+
+.bm-welcome-notice-text ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.15rem 1.25rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.bm-welcome-notice-text li {
+    color: var(--tblr-secondary);
+    font-size: 0.8125rem;
+}
+
+#bmNotesModal .bm-notes-field {
+    width: 100%;
+    display: block;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 0.75rem 1.25rem 1rem;
+    resize: vertical;
+}
+
+#bmNotesModal .bm-notes-field:focus {
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
+}
+
+.bm-usage-meter {
+    height: 0.5rem;
+    background-color: var(--tblr-fill-secondary);
+}
+
+.bm-usage-meter > .progress-bar {
+    min-width: 4px;
+}
+
+.table > tbody > tr.bm-usage-sum > td {
+    border-top: 1px solid var(--tblr-border-color);
+    border-bottom: 0;
+    font-weight: 600;
+}
+
+.bm-stat-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 11rem;
+    border-bottom: 1px solid var(--tblr-border-color);
+    padding: 0 0.15rem;
+}
+
+.bm-stat-col {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bm-stat-track {
+    position: relative;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+}
+
+.bm-stat-bar {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 70%;
+    max-width: 0.85rem;
+    transform: translateX(-50%);
+    border-radius: 0.2rem 0.2rem 0 0;
+    background: var(--tblr-primary);
+    min-height: 2px;
+}
+
+.bm-stat-col.is-zero .bm-stat-bar {
+    height: 2px !important;
+    background: var(--tblr-border-color);
+}
+
+.bm-stat-col.is-future .bm-stat-bar {
+    height: 0 !important;
+    min-height: 0;
+    background: transparent;
+}
+
+.bm-stat-col > span {
+    margin-top: 0.35rem;
+    font-size: 0.625rem;
+    line-height: 1;
+    color: var(--tblr-secondary);
+}
+
+.bm-stat-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.35rem;
+}
+
+.bm-stat-day {
+    border: 1px solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    padding: 0.35rem 0.2rem;
+    text-align: center;
+}
+
+.bm-stat-day__n {
+    display: block;
+    font-size: 0.6875rem;
+    color: var(--tblr-secondary);
+}
+
+.bm-stat-day__v {
+    display: block;
+    font-weight: 600;
+}
+
+.bm-stat-day.is-hot {
+    border-color: color-mix(in srgb, var(--tblr-primary) 40%, var(--tblr-border-color));
+    background: color-mix(in srgb, var(--tblr-primary) 8%, transparent);
+}
+
+.bm-stat-day.is-future {
+    opacity: 0.45;
+}

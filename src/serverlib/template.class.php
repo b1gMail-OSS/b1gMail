@@ -145,6 +145,11 @@ class Template extends Smarty\Smarty {
      * @param string $tpl File name of template to be included
      */
     function registerHook($id, $tpl) {
+        $variant = PluginThemeTemplateVariant($tpl, true);
+        if ($variant !== '') {
+            $tpl = $variant;
+        }
+
         if (!isset($this->hookTable[$id])) {
             $this->hookTable[$id] = [$tpl];
         } else {
@@ -873,6 +878,10 @@ function TemplateDate($params, $smarty) {
         return $lang_user['unknown'];
     }
 
+    if (isset($params['format'])) {
+        return date($params['format'], $ts);
+    }
+
     $diff = time() - $ts;
     if (isset($params['elapsed'])) {
         if ($diff >= 0 && $diff < TIME_ONE_MINUTE) {
@@ -1287,6 +1296,87 @@ function TemplateStoreTime($params, $smarty) {
         return '-';
     }
 }
+/**
+ * Theme-specific plugin template, if the file exists.
+ *
+ * plugins/templates/name.tpl is replaced by plugins/templates/name.{theme}.tpl
+ * while that frontend theme is active.
+ *
+ * @param string $template            Template path or file name
+ * @param bool   $pluginTemplatesOnly Only rewrite paths under plugins/templates/
+ *
+ * @return string Absolute path, or empty when no variant exists
+ */
+function PluginThemeTemplateVariant($template, $pluginTemplatesOnly = false)
+{
+    global $tpl, $bm_prefs;
+
+    if (!is_string($template) || $template === '' || strpos($template, '..') !== false) {
+        return '';
+    }
+
+    $theme = '';
+    if (isset($tpl) && is_object($tpl) && method_exists($tpl, 'getTemplateVars')) {
+        $theme = $tpl->getTemplateVars('_tplname');
+    }
+    if (!is_string($theme) || $theme === '') {
+        $theme = isset($bm_prefs['template']) ? $bm_prefs['template'] : '';
+    }
+    $theme = preg_replace('/[^a-zA-Z0-9_.-]/', '', (string) $theme);
+    if (!is_string($theme) || $theme === '') {
+        return '';
+    }
+
+    $normalized = str_replace('\\', '/', $template);
+    if (($queryPos = strpos($normalized, '?')) !== false) {
+        $normalized = substr($normalized, 0, $queryPos);
+    }
+
+    $marker = 'plugins/templates/';
+    $markerPos = strpos($normalized, $marker);
+    if ($markerPos !== false) {
+        $relative = substr($normalized, $markerPos + strlen($marker));
+    } elseif ($pluginTemplatesOnly || (isset($normalized[0]) && $normalized[0] === '/')) {
+        return '';
+    } else {
+        $relative = $normalized;
+    }
+
+    $relative = ltrim($relative, '/');
+    if ($relative === '' || strpos($relative, '..') !== false) {
+        return '';
+    }
+
+    $dir = '';
+    $file = $relative;
+    if (strpos($relative, '/') !== false) {
+        $dir = dirname($relative).'/';
+        $file = basename($relative);
+    }
+
+    $dot = strrpos($file, '.');
+    $base = $dot !== false ? substr($file, 0, $dot) : $file;
+    $ext = $dot !== false ? substr($file, $dot + 1) : 'tpl';
+    if ($base === '' || $ext === '') {
+        return '';
+    }
+
+    $variantPath = B1GMAIL_DIR.'plugins/templates/'.$dir.$base.'.'.$theme.'.'.$ext;
+    if (!is_file($variantPath)) {
+        return '';
+    }
+
+    if ($markerPos !== false) {
+        $originalReal = realpath($normalized);
+        $variantReal = realpath($variantPath);
+        if ($originalReal !== false && $variantReal !== false && $originalReal === $variantReal) {
+            return '';
+        }
+    }
+
+    return $variantPath;
+}
+
 function TemplateHook($params, $template) {
     $result = '';
     $smarty = $template;

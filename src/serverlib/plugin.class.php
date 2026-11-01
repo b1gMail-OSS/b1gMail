@@ -686,10 +686,19 @@ class BMPlugin
     /**
      * get template path.
      *
+     * A file plugins/templates/{name}.{theme}.tpl replaces {name}.tpl
+     * while that frontend theme is active. Plugins keep calling
+     * _templatePath('{name}.tpl').
+     *
      * @param string $template Template
      */
     public function _templatePath($template)
     {
+        $variant = PluginThemeTemplateVariant($template);
+        if ($variant !== '') {
+            return $variant;
+        }
+
         return $this->_resourcePath($template, 'template');
     }
 
@@ -1026,6 +1035,16 @@ class BMPluginPackage
                 $this->metaInfo['name'],
                 $this->signature,
                 serialize($installedFiles));
+            // Keep in-memory DB cache in sync so registerPlugin() treats the
+            // package as not-yet-installed in this request.
+            $plugins->_dbPlugins[$className] = [
+                'installed' => 0,
+                'paused' => 0,
+                'pos' => 0,
+                'modname' => $className,
+                'packageName' => $this->metaInfo['name'],
+                'signature' => $this->signature,
+            ];
         }
 
         // include
@@ -1036,8 +1055,18 @@ class BMPluginPackage
             include_once($pluginFile);
         }
 
-        // Plugin may already be loaded in this request (e.g. dev copy in plugins/).
+        // On updates the class is often already loaded in this request, so
+        // include_once skips the file and never calls registerPlugin().
+        // Re-register / move to inactive so activatePlugin() can run.
         foreach ($this->metaInfo['classes'] as $className) {
+            if (!class_exists($className, false)) {
+                continue;
+            }
+
+            if (!isset($plugins->_plugins[$className]) && !isset($plugins->_inactivePlugins[$className])) {
+                $plugins->registerPlugin($className);
+            }
+
             if (isset($plugins->_plugins[$className]) && !isset($plugins->_inactivePlugins[$className])) {
                 $plugins->_inactivePlugins[$className] = $plugins->_plugins[$className];
                 unset($plugins->_plugins[$className]);
@@ -1132,6 +1161,12 @@ class BMPluginPackage
             }
             if (isset($plugins->_inactivePlugins[$row['modname']])) {
                 unset($plugins->_inactivePlugins[$row['modname']]);
+            }
+            if (isset($plugins->_plugins[$row['modname']])) {
+                unset($plugins->_plugins[$row['modname']]);
+            }
+            if (isset($plugins->_dbPlugins[$row['modname']])) {
+                unset($plugins->_dbPlugins[$row['modname']]);
             }
             $packageFiles = @unserialize($row['files']);
         }

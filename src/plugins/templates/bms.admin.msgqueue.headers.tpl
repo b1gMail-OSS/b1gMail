@@ -24,7 +24,7 @@
 			<button type="button" class="btn btn-outline-secondary btn-sm"  onclick="document.location.href='{sessionurl file='plugin.page.php' params="plugin={$bmsPlugin}&do=msgqueue"}';" >&laquo; {lng p="back"}</button>
 		</div>
 		<div style="float:right" class="buttons">
-			<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
+			{acpicon file="warning.png"}
 			{lng p="bms_headersnote"}
 			&nbsp;
 			<button type="submit" class="btn btn-primary"  >{lng p="save"}</button>

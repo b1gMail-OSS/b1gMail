@@ -8,7 +8,7 @@
 				<table class="table table-vcenter table-striped">
 					<thead>
 					<tr>
-						<th style="width: 20px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'coupon_');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th style="width: 20px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'coupon_');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th>{lng p="code"}</th>
 						<th style="width: 200px;">{lng p="validitytime"}</th>
 						<th style="width: 200px;">{lng p="validity"}</th>
@@ -40,17 +40,15 @@
 				</table>
 			</div>
 			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="delete">{lng p="delete"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 			</div>
 		</div>
@@ -138,8 +136,8 @@
 							<input class="form-check-input m-0" type="checkbox" id="from_unlim" name="von_unlim" checked="checked" />
                         </span>
 					<span class="input-group-text">{lng p="now"} {lng p="or"}</span>
-					{html_select_date prefix="von" start_year="-5" field_order="DMY" field_separator="."},
-					{html_select_time prefix="von" display_seconds=false}
+					<input type="text" class="form-control" id="coupon-von" name="von" data-bs-toggle="datepicker" data-bs-position-element="#coupon-von" data-bm-datetime="1" data-bs-date-format="DD.MM.YYYY" data-bs-locale="de" autocomplete="off" value="{date timestamp=$smarty.now format="d.m.Y H:i"}" placeholder="TT.MM.JJJJ HH:MM">
+					<label class="input-group-text mb-0" for="coupon-von"><i class="icon ti ti-calendar-time"></i></label>
 				</div>
 			</div>
 		</div>
@@ -151,8 +149,8 @@
 							<input class="form-check-input m-0" type="checkbox" id="to_unlim" name="bis_unlim" checked="checked" />
                         </span>
 					<span class="input-group-text">{lng p="now"} {lng p="or"}</span>
-					{html_select_date prefix="bis" end_year="+5" field_order="DMY" field_separator="."},
-					{html_select_time prefix="bis" display_seconds=false}
+					<input type="text" class="form-control" id="coupon-bis" name="bis" data-bs-toggle="datepicker" data-bs-position-element="#coupon-bis" data-bm-datetime="1" data-bs-date-format="DD.MM.YYYY" data-bs-locale="de" autocomplete="off" value="{date timestamp=$smarty.now format="d.m.Y H:i"}" placeholder="TT.MM.JJJJ HH:MM">
+					<label class="input-group-text mb-0" for="coupon-bis"><i class="icon ti ti-calendar-time"></i></label>
 				</div>
 			</div>
 		</div>

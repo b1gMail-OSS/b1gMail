@@ -403,8 +403,8 @@ class BMPlugin_Widget_EMail extends BMPlugin
 		$this->version			= '1.2';
 
 		$this->widgetPrefs 			= true;
-		$this->widgetPrefsWidth		= 320;
-		$this->widgetPrefsHeight	= 140;
+		$this->widgetPrefsWidth		= 440;
+		$this->widgetPrefsHeight	= 280;
 		$this->widgetIcon			= 'widget_email.png';
 	}
 
@@ -459,6 +459,11 @@ class BMPlugin_Widget_EMail extends BMPlugin
 
 		if(!isset($_REQUEST['save']))
 		{
+			$dirs = (isset($tpl) && is_object($tpl) && method_exists($tpl, 'getTemplateDir'))
+				? $tpl->getTemplateDir()
+				: array();
+			$base = (is_array($dirs) && isset($dirs[0])) ? rtrim((string)$dirs[0], '/') : '';
+			$tpl->assign('widgetPrefsModernDialog', $base !== '' && is_file($base.'/li/dialog.head.tpl'));
 			$tpl->assign('hideSystemFolders', $thisUser->getPref('widget_email.hideSystemFolders') == 1);
 			$tpl->assign('hideCustomFolders', $thisUser->getPref('widget_email.hideCustomFolders') == 1);
 			$tpl->assign('hideIntelliFolders', $thisUser->getPref('widget_email.hideIntelliFolders') == 1);

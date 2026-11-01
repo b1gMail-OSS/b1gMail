@@ -473,6 +473,36 @@ elseif ($step == STEP_UPDATE_STEP) {
             }
         }
 
+        // Standard VAT rates as of 2026. Only known outdated defaults are replaced.
+        if ($numVersion < 7505) {
+            $p = $mysql['prefix'];
+            $vatFixes = array(
+                array(29, 24, array(20)),
+                array(31, 25.5, array(24)),
+                array(36, 24, array(23)),
+                array(67, 8.1, array(0)),
+                array(100, 21, array(19, 24)),
+                array(105, 8.1, array(0, 7.6, 7.7, 8, 77)),
+                array(110, 23, array(20)),
+            );
+            foreach ($vatFixes as $fix) {
+                $match = array();
+                foreach ($fix[2] as $rate) {
+                    $match[] = sprintf('ROUND(vat,2)=ROUND(%F,2)', (float)$rate);
+                }
+                mysqli_query($connection, sprintf(
+                    'UPDATE %sstaaten SET vat=%F WHERE id=%d AND (%s)',
+                    $p,
+                    (float)$fix[1],
+                    (int)$fix[0],
+                    implode(' OR ', $match)
+                ));
+            }
+            mysqli_query($connection,
+                'UPDATE '.$p.'staaten SET is_eu=\'no\', vat=20'
+                .' WHERE id=107 AND is_eu=\'yes\' AND ROUND(vat,2)=25');
+        }
+
         // add new root certificates
         if (!isset($rootCertsData)) {
             include './data/rootcerts.data.php';
