@@ -33,6 +33,14 @@ $exportedClasses = array(
 
 $response = array();
 
+// Prevent access, if TOOLBOX_SERVER is not set or empty or not enabled
+if (!defined('TOOLBOX_SERVER') OR empty(TOOLBOX_SERVER) OR !ClientApiEnabled()) {
+	http_response_code(403);
+	$response['status'] = 'ACCESS_DENIED';
+	NormalArray2XML($response, 'response');
+	exit();
+}
+
 if(!isset($_REQUEST['class'])
 	|| !isset($exportedClasses[$_REQUEST['class']]))
 {
@@ -48,11 +56,7 @@ else
 
 	$method = isset($_REQUEST['method']) ? (string)$_REQUEST['method'] : '';
 
-	if(!ClientApiEnabled())
-	{
-		$response['status'] = 'ACCESS_DENIED';
-	}
-	else if(!RequestPrivileges($classInfo['requiredPrivileges'] | PRIVILEGES_CLIENTAPI, true))
+	if(!RequestPrivileges($classInfo['requiredPrivileges'] | PRIVILEGES_CLIENTAPI, true))
 	{
 		$response['status'] = 'ACCESS_DENIED';
 	}
