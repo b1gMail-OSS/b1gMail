@@ -2832,7 +2832,8 @@ class FaxPlugin extends BMPlugin
 		$fp 			= fopen($fileName, 'rb');
 		if(!$fp)
 			return(false);
-		$pdfData		= fread($fp, filesize($fileName));
+		$pdfDataSize    = filesize($fileName);
+		$pdfData		= $pdfDataSize > 0 ? fread($fp, $pdfDataSize) : false;
 		fclose($fp);
 
 		// replace variables

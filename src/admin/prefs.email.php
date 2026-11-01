@@ -320,7 +320,8 @@ else if($_REQUEST['action'] == 'smime')
 					{
 						// read file
 						$fp = fopen($tempFileName, 'rb');
-						$certData = fread($fp, filesize($tempFileName));
+						$certDataSize = filesize($tempFileName);
+						$certData = $certDataSize > 0 ? fread($fp, $certDataSize) : false;
 						fclose($fp);
 
 						// parse
