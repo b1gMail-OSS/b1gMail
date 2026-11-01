@@ -12,8 +12,8 @@
 							<option value="{$type}"{if $statType==$type} selected="selected"{/if}>{lng p="stat_$type"}</option>
 						{/foreach}
 					</select>
-					<span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
-					{html_select_date prefix="time" start_year="-5" time=$time display_days=false}
+					<span class="input-group-text"><i class="icon ti ti-calendar"></i></span>
+					<input type="text" class="form-control" id="statPeriod" name="statPeriod" data-bs-toggle="datepicker" data-bs-position-element="#statPeriod" data-bm-month="1" data-bs-date-format="MM.YYYY" data-bs-locale="de" autocomplete="off" value="{date timestamp=$time format="m.Y"}" placeholder="MM.JJJJ" aria-label="{lng p="date"}">
 
 				</div>
 			</div>
@@ -26,75 +26,38 @@
 	<fieldset>
 		<legend>{$stat.title}</legend>
 
-		<div class="row">
-			<div class="col-md-8">
-				<div class="card">
-					<div class="table-responsive">
-						<table class="statsTable">
-							<thead>
-							<tr>
-								<th colspan="{$stat.count+1}">{text value=$stat.title}</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr>
-								<td style="width: 30px;" class="yScale">{foreach from=$stat.yScale item=val}<div>{$val}&nbsp;</div>{/foreach}</td>
-								{foreach from=$stat.data item=values key=day}
-									<td class="bar">{if $values[$stat.key]!==false}<div title="{$values[$stat.key]}" style="height:{if $stat.heights[$day]==0}1{else}{$stat.heights[$day]}{/if}px;"></div>{/if}</td>
-								{/foreach}
-							</tr>
-							<tr>
-								<td rowspan="2"></td>
-								{foreach from=$stat.data item=values key=day}<td class="xLines"></td>{/foreach}
-							</tr>
-							<tr>
-								{foreach from=$stat.data item=values key=day}<td class="xScale">{$day}</td>{/foreach}
-							</tr>
-							</tbody>
-						</table>
-					</div>
+		<div class="card">
+			<div class="card-body">
+				<div class="d-flex justify-content-end mb-2">
+					<span class="text-secondary">{lng p="sum"}: <span class="fw-semibold text-body">{$stat.sum}</span></span>
+				</div>
+				<div class="bm-stat-chart" role="img" aria-label="{text value=$stat.title}">
+					{foreach from=$stat.data item=values key=day}
+						{if $values[$stat.key]===false}
+							{assign var=barState value="is-future"}
+							{assign var=barPct value=0}
+						{elseif $stat.maxVal>0 && $values[$stat.key]>0}
+							{assign var=barState value=""}
+							{math equation="x/y*100" x=$values[$stat.key] y=$stat.maxVal format="%.2f" assign=barPct}
+						{else}
+							{assign var=barState value="is-zero"}
+							{assign var=barPct value=0}
+						{/if}
+						<div class="bm-stat-col {$barState}" title="{lng p="day"} {$day}: {if $values[$stat.key]===false}–{else}{$values[$stat.key]}{/if}">
+							<div class="bm-stat-track"><div class="bm-stat-bar" style="height: {$barPct}%;"></div></div>
+							<span>{$day}</span>
+						</div>
+					{/foreach}
 				</div>
 			</div>
-			<div class="col-md-4">
-				<div class="card">
-					<div class="table-responsive">
-						<table class="table table-vcenter table-striped">
-							<thead>
-							<tr>
-								<th width="60">{lng p="day"}</th>
-								<th>{lng p="value"}</th>
-								<th width="60">{lng p="day"}</th>
-								<th>{lng p="value"}</th>
-								<th width="60">{lng p="day"}</th>
-								<th>{lng p="value"}</th>
-								<th width="60">{lng p="day"}</th>
-								<th>{lng p="value"}</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr>
-								{assign var="i" value=0}
-								{foreach from=$stat.data item=values key=day}
-								{assign var="i" value=$i+1}
-								<td style="padding: 3px 10px 3px 10px;">{$day}</td>
-								<td style="padding: 3px 10px 3px 10px;{if $i!=4} border-right: 1px solid #BBBBBB;{/if}">{implode pieces=$values glue=" / "}</td>
-								{if $i==4}
-								{assign var="i" value=0}
-							</tr>
-							<tr>
-								{/if}
-								{/foreach}
-								{if $i<4}
-								{math assign="i" equation="(x - y)" x=4 y=$i}
-								{section loop=$i name=rest}
-									<td colspan="2" style="padding: 3px 10px 3px 10px;{if $smarty.section.rest.index!=$i-1} border-right: 1px solid #BBBBBB;{/if}">&nbsp;</td>
-								{/section}
-							</tr>
-							{/if}
-							</tbody>
-						</table>
-					</div>
-					<div class="card-footer text-end" style="padding: 3px 10px 3px 10px;"> {lng p="sum"}: {$stat.sum}</div>
+			<div class="card-body border-top">
+				<div class="bm-stat-days">
+					{foreach from=$stat.data item=values key=day}
+						<div class="bm-stat-day{if $values[$stat.key]===false} is-future{elseif $values[$stat.key]>0} is-hot{/if}">
+							<span class="bm-stat-day__n">{$day}</span>
+							<span class="bm-stat-day__v">{if $values[$stat.key]===false}–{else}{$values[$stat.key]}{/if}</span>
+						</div>
+					{/foreach}
 				</div>
 			</div>
 		</div>

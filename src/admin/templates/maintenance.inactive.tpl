@@ -67,7 +67,7 @@
 		</div>
 
 		<div class="text-end">
-			<input class="btn btn-warning" type="submit" value="{lng p="execute"}" />
+			<input class="btn btn-primary" type="submit" value="{lng p="execute"}" />
 		</div>
 	</form>
 </fieldset>

@@ -15,15 +15,15 @@
 					<thead>
 					<tr>
 						<th width="20">&nbsp;</th>
-						<th width="25" style="text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'payment[');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th class="text-center" style="width:3rem;"><a href="javascript:invertSelection(document.forms.f1,'payment[');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th><a href="javascript:updateSort('userid');">{lng p="user"}
-								{if $sortBy=='userid'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='userid'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th><a href="javascript:updateSort('orderid');">{lng p="orderno"}
-								{if $sortBy=='orderid'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='orderid'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th width="135"><a href="javascript:updateSort('amount');">{lng p="amount"}
-								{if $sortBy=='amount'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='amount'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th width="145"><a href="javascript:updateSort('created');">{lng p="date"}
-								{if $sortBy=='created'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='created'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th width="65">&nbsp;</th>
 					</tr>
 					</thead>
@@ -32,17 +32,19 @@
 						{cycle name=class values="td1,td2" assign=class}
 						<tr class="{$class}">
 							<td class="text-center">{if $payment.status==1}<i class="fa-regular fa-circle-check text-green"></i>{else}<i class="fa-regular fa-circle-xmark text-red"></i>{/if}</td>
-							<td align="center"><input type="checkbox" name="payment[{$payment.orderid}]" /></td>
+							<td class="text-center"><label class="form-check d-inline-block mb-0"><input class="form-check-input" type="checkbox" name="payment[{$payment.orderid}]" /></label></td>
 							<td><a href="{sessionurl file='users.php' params="do=edit&id={$payment.user.id}"}">{email value=$payment.user.email cut=25}</a><br />
 								<small>{text value=$payment.user.nachname cut=20}, {text value=$payment.user.vorname cut=20}</small></td>
 							<td>{text value=$payment.invoiceNo}<br /><small>{text value=$payment.customerNo}</small></td>
 							<td>
 								<div style="float:left;">
 									{$payment.amount}<br /><small>{$payment.method}</small>
+								{if $payment.paypalPaid}<br /><small class="text-green">{lng p="paypal_received"}</small>{/if}
+								{if $payment.stripePaid}<br /><small class="text-green">{lng p="stripe_received"}</small>{/if}
 								</div>
 								{if $payment.paymethod<0}
 									<div style="float:right;">
-										<a href="{sessionurl file='payments.php' params="do=details&orderid={$payment.orderid}"}" title="{lng p="details"}"><img src="{$tpldir}images/ico_prefs_payments.png" border="0" alt="{lng p="details"}" width="16" height="16" /></a>
+										<a href="{sessionurl file='payments.php' params="do=details&orderid={$payment.orderid}"}" title="{lng p="details"}">{acpicon file="ico_prefs_payments.png"}</a>
 									</div>
 								{/if}
 							</td>
@@ -59,11 +61,10 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+			<div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" id="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="download">{lng p="downloadinvoices"}</option>
@@ -71,8 +72,7 @@
 								<option value="delete">{lng p="delete"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 				<div class="text-end">{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"javascript:updatePage(.s);\">.t</a></span> "}&nbsp;</div>
 			</div>
@@ -108,7 +108,15 @@
 						</label>
 						<label class="form-check">
 							<input class="form-check-input" type="checkbox" name="paymentMethod[1]" id="paymentMethod_1" {if !empty($paymentMethod[1])} checked="checked"{/if}>
+							<span class="form-check-label">{lng p="paypal_classic"}</span>
+						</label>
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="paymentMethod[4]" id="paymentMethod_4" {if !empty($paymentMethod[4])} checked="checked"{/if}>
 							<span class="form-check-label">{lng p="paypal"}</span>
+						</label>
+						<label class="form-check">
+							<input class="form-check-input" type="checkbox" name="paymentMethod[5]" id="paymentMethod_5" {if !empty($paymentMethod[5])} checked="checked"{/if}>
+							<span class="form-check-label">{lng p="stripe"}</span>
 						</label>
 						<label class="form-check">
 							<input class="form-check-input" type="checkbox" name="paymentMethod[2]" id="paymentMethod_2" {if !empty($paymentMethod[2])} checked="checked"{/if}>

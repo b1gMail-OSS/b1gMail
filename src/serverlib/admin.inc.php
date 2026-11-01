@@ -146,8 +146,8 @@ $backupTables = [
     'stats' => ['stats'],
     'users' => ['users', 'aliase', 'autoresponder', 'filter', 'filter_actions', 'filter_conditions',
                             'folder_conditions', 'folders', 'pop3', 'signaturen', 'smsend', 'userprefs', ],
-    'organizer' => ['adressen', 'adressen_gruppen', 'adressen_gruppen_member', 'dates', 'dates_attendees',
-                            'dates_groups', 'notes', 'tasks', ],
+    'organizer' => ['adressen', 'adressen_gruppen', 'adressen_gruppen_member', 'addressbooks', 'dates', 'dates_attendees',
+                            'dates_groups', 'calendars', 'organizer_shares', 'notes', 'tasks', 'tasklists', ],
     'mails' => ['mails', 'certmails'],
     'webdisk' => ['diskfiles', 'diskfolders', 'diskprops'],
 ];
@@ -434,6 +434,10 @@ function DeleteUser($userID, $qAddAND = '')
     $db->Query('DELETE FROM {pre}adressen WHERE user=?',
         $userID);
 
+    // delete address books
+    $db->Query('DELETE FROM {pre}addressbooks WHERE user=?',
+        $userID);
+
     // delete aliases
     $db->Query('DELETE FROM {pre}aliase WHERE user=?',
         $userID);
@@ -459,6 +463,13 @@ function DeleteUser($userID, $qAddAND = '')
     // delete calendar groups
     $db->Query('DELETE FROM {pre}dates_groups WHERE user=?',
         $userID);
+
+    // delete calendars
+    $db->Query('DELETE FROM {pre}calendars WHERE user=?',
+        $userID);
+
+    include_once B1GMAIL_DIR.'serverlib/organizer.collections.inc.php';
+    bmOrganizerDeleteUserShares($userID);
 
     // delete disk props
     $db->Query('DELETE FROM {pre}diskprops WHERE user=?',
@@ -662,3 +673,154 @@ function AdminLoginJumpTarget($jump, $default = 'welcome.php')
 		return $default;
 	return $jump;
 }
+
+/**
+ * Tabler icon for a legacy ACP png from admin/templates/images.
+ *
+ * @param string $file
+ * @return string
+ */
+function AdminAcpIconHtml($file, $size = '')
+{
+	static $map = array(
+		'ico_license.png' => 'home',
+		'ico_users.png' => 'users',
+		'ico_prefs_misc.png' => 'settings',
+		'ico_prefs_common.png' => 'adjustments',
+		'ico_prefs_email.png' => 'mail',
+		'ico_email.png' => 'mail',
+		'rule32.png' => 'filter',
+		'filter.png' => 'filter',
+		'ico_disk.png' => 'folder',
+		'ico_data.png' => 'database',
+		'gateway32.png' => 'device-mobile-message',
+		'abuse.png' => 'shield-exclamation',
+		'abuse32.png' => 'shield-exclamation',
+		'coupon.png' => 'ticket',
+		'coupon32.png' => 'ticket',
+		'field32.png' => 'forms',
+		'lang32.png' => 'language',
+		'phrases32.png' => 'language',
+		'template.png' => 'template',
+		'template32.png' => 'template',
+		'ad32.png' => 'ad-2',
+		'faq32.png' => 'help',
+		'country.png' => 'world',
+		'country32.png' => 'world',
+		'wlayout_add.png' => 'layout-dashboard',
+		'wlayout_add32.png' => 'layout-grid-add',
+		'start32.png' => 'home',
+		'ico_prefs_payments.png' => 'credit-card',
+		'ico_pay_banktransfer.png' => 'building-bank',
+		'ico_prefs_invoices.png' => 'file-invoice',
+		'ico_accentries.png' => 'list-details',
+		'toolbox.png' => 'tool',
+		'toolbox32.png' => 'tool',
+		'user_action.png' => 'users',
+		'user_search.png' => 'user-search',
+		'user_active32.png' => 'user-check',
+		'user_inactive32.png' => 'user-off',
+		'ico_group.png' => 'users-group',
+		'group32.png' => 'users-group',
+		'group_add32.png' => 'users-plus',
+		'ico_workgroup.png' => 'building',
+		'workgroup32.png' => 'building',
+		'workgroup_mail32.png' => 'mail',
+		'activity.png' => 'activity',
+		'activity32.png' => 'activity',
+		'newsletter.png' => 'news',
+		'db_optimize.png' => 'database',
+		'orphans32.png' => 'trash',
+		'trash32.png' => 'trash',
+		'stats.png' => 'chart-bar',
+		'stats32.png' => 'chart-bar',
+		'logs.png' => 'file-text',
+		'archiving.png' => 'archive',
+		'plugin.png' => 'puzzle',
+		'plugin32.png' => 'puzzle',
+		'plugin_add.png' => 'plus',
+		'updates.png' => 'refresh',
+		'ico_prefs_receiving.png' => 'inbox',
+		'ico_prefs_sending.png' => 'send',
+		'antispam.png' => 'shield-check',
+		'antivirus.png' => 'virus',
+		'cert32.png' => 'certificate',
+		'lockedusername32.png' => 'lock',
+		'domain32.png' => 'world-www',
+		'cache.png' => 'bolt',
+		'captcha32.png' => 'shield',
+		'ico_prefs_signup.png' => 'user-plus',
+		'tab_order32.png' => 'list',
+		'search32.png' => 'search',
+		'fetch.png' => 'download',
+		'info32.png' => 'info-circle',
+		'type32.png' => 'category',
+		'filetype.png' => 'file',
+		'extension.png' => 'puzzle',
+		'tempfiles.png' => 'files',
+		'dot.png' => 'list-check',
+		'sort_asc.png' => 'arrow-narrow-up',
+		'sort_desc.png' => 'arrow-narrow-down',
+		'yes.png' => 'check text-success',
+		'no.png' => 'x text-danger',
+		'delete.png' => 'trash',
+		'edit.png' => 'pencil',
+		'alias.png' => 'at',
+		'file.png' => 'file',
+		'unlock.png' => 'lock-open',
+		'warning.png' => 'alert-triangle text-warning',
+		'warning32.png' => 'alert-triangle text-warning',
+		'error.png' => 'alert-circle text-danger',
+		'ok.png' => 'circle-check text-success',
+		'info.png' => 'info-circle text-azure',
+		'debug.png' => 'bug',
+		'help.png' => 'help',
+		'go.png' => 'arrow-right',
+		'indicator_yellow.png' => 'alert-triangle text-warning',
+		'indicator_red.png' => 'alert-circle text-danger',
+		'backup32.png' => 'database-export',
+		'certadd32.png' => 'certificate',
+		'contract.png' => 'chevron-down',
+		'expand.png' => 'chevron-right',
+		'ico_prefs_ssl.png' => 'lock',
+		'ico_sharedfolder.png' => 'folders',
+		'plugin_switch.png' => 'toggle-left',
+		'start.png' => 'home',
+		'email.png' => 'mail',
+		'sms.png' => 'device-mobile-message',
+		'webdisk.png' => 'folder',
+		'prefs.png' => 'settings',
+	);
+	$file = basename(str_replace('\\', '/', (string)$file));
+	$spec = isset($map[$file]) ? $map[$file] : 'point';
+	$parts = preg_split('/\s+/', trim($spec));
+	$icon = array_shift($parts);
+	if(!preg_match('/^[a-z0-9-]+$/', (string)$icon))
+		$icon = 'point';
+	$extra = '';
+	foreach($parts as $part)
+	{
+		if(preg_match('/^[a-z0-9-]+$/', $part))
+			$extra .= ' ' . $part;
+	}
+	$sizeClass = ($size === 'lg') ? ' acp-icon-lg' : (($size === 'sm') ? ' acp-icon-sm' : '');
+	return '<i class="ti ti-' . $icon . $extra . $sizeClass . '" aria-hidden="true"></i>';
+}
+
+/**
+ * Smarty: {acpicon file="ico_users.png"}
+ *
+ * @param array $params
+ * @param mixed $smarty
+ * @return string
+ */
+function AdminAcpIcon($params, $smarty)
+{
+	$file = isset($params['file']) ? $params['file'] : '';
+	$size = isset($params['size']) ? (string)$params['size'] : '';
+	if($size !== 'sm' && $size !== 'lg')
+		$size = '';
+	return AdminAcpIconHtml($file, $size);
+}
+
+$tpl->registerPlugin('function', 'acpicon', 'AdminAcpIcon');

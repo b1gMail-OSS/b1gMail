@@ -40,7 +40,7 @@
 				<td class="{$class}" nowrap="nowrap">
 					<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');"><i class="fa fa-eye" aria-hidden="true"></i></a>
 					{if $pkcs12Support}<a href="javascript:void(0);" onclick="exportPrivateCert('{$cert.hash}');"><i class="fa fa-download" aria-hidden="true"></i></a>{/if}
-					<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=2&hash={$cert.hash}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+					<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=2&hash={$cert.hash}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 				</td>
 			</tr>
 			{/foreach}
@@ -129,7 +129,7 @@
 				<td class="{if $sortColumn=='validto'}listTableTDActive{else}{$class}{/if}" width="100">&nbsp;{if $cert.validto<$now}<font color="red">{/if}{date timestamp=$cert.validto dayonly=true}{if $cert.validto<$now}</font>{/if}</td>
 				<td class="{$class}" nowrap="nowrap">
 					<a href="javascript:void(0);" onclick="showCertificate('{$cert.hash}');"><i class="fa fa-eye" aria-hidden="true"></i></a>
-					<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=1&hash={$cert.hash}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+					<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=keyring&do=delete&type=1&hash={$cert.hash}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 				</td>
 			</tr>
 			{/foreach}

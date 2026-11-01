@@ -15,15 +15,15 @@
 				<table class="table table-vcenter table-striped">
 					<thead>
 					<tr>
-						<th style="width: 25px; text-align: center;"><a href="javascript:invertSelection2(document.forms.f1,'transactions[', ']');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th style="width: 25px; text-align: center;"><a href="javascript:invertSelection2(document.forms.f1,'transactions[', ']');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th style="width: 64px;"><a href="javascript:updateSort('transactionid');">{lng p="id"}
-								{if $sortBy=='transactionid'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='transactionid'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th><a href="javascript:updateSort('description');">{lng p="description"}
-								{if $sortBy=='description'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='description'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th style="width: 100px; text-align: right;"><a href="javascript:updateSort('amount');">{lng p="credits"}
-								{if $sortBy=='amount'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='amount'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th style="width: 120px;"><a href="javascript:updateSort('date');">{lng p="date"}
-								{if $sortBy=='date'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='date'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th style="width: 64px;">&nbsp;</th>
 					</tr>
 					</thead>
@@ -47,11 +47,10 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+			<div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="delete">{lng p="delete"}</option>
@@ -59,8 +58,7 @@
 								<option value="uncancel">{lng p="uncancel"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 				<div class="text-end">
 					{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"javascript:updatePage(.s);\">.t</a></span> "}&nbsp;

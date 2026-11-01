@@ -8,7 +8,7 @@
 		<p>{lng p="orphans_desc"}</p>
 
 		<div class="text-end">
-			<input class="btn btn-sm btn-warning" type="submit" value="{lng p="execute"}" />
+			<input class="btn btn-primary" type="submit" value="{lng p="execute"}" />
 		</div>
 	</form>
 </fieldset>
@@ -23,7 +23,7 @@
 		<p>{lng p="diskorphans_desc"}</p>
 
 		<div class="text-end">
-			<input class="btn btn-sm btn-warning" type="submit" value="{lng p="execute"}" />
+			<input class="btn btn-primary" type="submit" value="{lng p="execute"}" />
 		</div>
 	</form>
 </fieldset>

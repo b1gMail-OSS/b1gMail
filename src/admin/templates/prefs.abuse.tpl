@@ -7,7 +7,7 @@
 			<label class="col-sm-2 col-form-label">{lng p="ap_medium_limit"}</label>
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
-					<span class="input-group-text"><img src="templates/images/indicator_yellow.png" border="0" alt="" align="absmiddle" /></span>
+					<span class="input-group-text">{acpicon file="indicator_yellow.png"}</span>
 					<input type="text" class="form-control" name="ap_medium_limit" value="{text allowEmpty=true value=$bm_prefs.ap_medium_limit}" placeholder="{lng p="ap_medium_limit"}">
 					<span class="input-group-text">{lng p="points"}</span>
 				</div>
@@ -17,7 +17,7 @@
 			<label class="col-sm-2 col-form-label">{lng p="ap_medium_limit"}</label>
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
-					<span class="input-group-text"><img src="templates/images/indicator_red.png" border="0" alt="" align="absmiddle" /></span>
+					<span class="input-group-text">{acpicon file="indicator_red.png"}</span>
 					<input type="text" class="form-control" name="ap_hard_limit" value="{text allowEmpty=true value=$bm_prefs.ap_hard_limit}" placeholder="{lng p="ap_medium_limit"}">
 					<span class="input-group-text">{lng p="points"}</span>
 				</div>

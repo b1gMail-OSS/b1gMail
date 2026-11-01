@@ -4,15 +4,11 @@
 			<i class="ti ti-home icon icon-sm" aria-hidden="true"></i>
 			{lng p="welcome"}!
 		</div>
+		{if $templatePrefs.showUserEmail}
 		<div class="right bm-dashboard-header-actions">
-			{if $templatePrefs.showUserEmail}
 			<span class="bm-dashboard-header-email text-secondary">{$_userEmail}</span>
-			{/if}
-			<a href="{sessionurl file='start.php' params='action=customize'}" class="btn btn-sm btn-outline-primary">
-				<i class="ti ti-layout-grid-add icon"></i>
-				{lng p="customize"}
-			</a>
 		</div>
+		{/if}
 	</div>
 
 	{hook id="start.page.tpl:head"}

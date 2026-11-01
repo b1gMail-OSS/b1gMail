@@ -38,6 +38,8 @@ class BMPayment
 
 		if($bm_prefs['enable_vk'] == 'yes'
 			   || $bm_prefs['enable_paypal'] == 'yes'
+			   || BMPayment::PayPalCheckoutEnabled()
+			   || BMPayment::StripeEnabled()
 			   || $bm_prefs['enable_su'] == 'yes'
 			   || $bm_prefs['enable_skrill'] == 'yes')
 		{
@@ -51,6 +53,49 @@ class BMPayment
 
 			return($count > 0);
 		}
+	}
+
+	/**
+	 * Built-in PayPal methods (classic WPS and Checkout)
+	 *
+	 * @param int $paymethod
+	 * @return bool
+	 */
+	static function IsPayPalMethod($paymethod)
+	{
+		return($paymethod == PAYMENT_METHOD_PAYPAL
+			|| $paymethod == PAYMENT_METHOD_PAYPAL_CHECKOUT);
+	}
+
+	/**
+	 * Human-readable payment method title
+	 *
+	 * @param int $paymethod
+	 * @param array $lang Language array (user or admin)
+	 * @return string
+	 */
+	static function MethodTitle($paymethod, $lang)
+	{
+		if($paymethod == PAYMENT_METHOD_BANKTRANSFER)
+			return isset($lang['banktransfer']) ? $lang['banktransfer'] : 'Bank';
+		if($paymethod == PAYMENT_METHOD_PAYPAL)
+			return isset($lang['paypal_classic']) ? $lang['paypal_classic'] : $lang['paypal'];
+		if($paymethod == PAYMENT_METHOD_PAYPAL_CHECKOUT)
+			return isset($lang['paypal']) ? $lang['paypal'] : 'PayPal';
+		if($paymethod == PAYMENT_METHOD_STRIPE)
+			return isset($lang['stripe']) ? $lang['stripe'] : 'Stripe';
+		if($paymethod == PAYMENT_METHOD_SOFORTUEBERWEISUNG)
+			return isset($lang['su']) ? $lang['su'] : 'sofortueberweisung.de';
+		if($paymethod == PAYMENT_METHOD_SKRILL)
+			return isset($lang['skrill']) ? $lang['skrill'] : 'Skrill';
+		if($paymethod < 0)
+		{
+			$payMethods = BMPayment::GetCustomPaymentMethods();
+			$payMethodID = abs($paymethod);
+			if(isset($payMethods[$payMethodID]))
+				return $payMethods[$payMethodID]['title'];
+		}
+		return isset($lang['unknown']) ? $lang['unknown'] : '?';
 	}
 
 	/**
@@ -95,6 +140,143 @@ class BMPayment
 	}
 
 	/**
+	 * Add PayPal Checkout / Stripe prefs columns on existing installs that have not run DB sync yet.
+	 *
+	 * @return void
+	 */
+	public static function EnsureGatewayColumns()
+	{
+		global $db, $bm_prefs;
+
+		static $done = false;
+		if($done || !isset($db) || !is_object($db))
+			return;
+		$done = true;
+
+		$cols = array(
+			'enable_paypal_checkout' => "enum('yes','no') NOT NULL DEFAULT 'no'",
+			'paypal_client_id' => "varchar(255) NOT NULL DEFAULT ''",
+			'paypal_client_secret' => "varchar(255) NOT NULL DEFAULT ''",
+			'paypal_sandbox' => "enum('yes','no') NOT NULL DEFAULT 'no'",
+			'paypal_auto_activate' => "enum('yes','no') NOT NULL DEFAULT 'yes'",
+			'paypal_webhook_id' => "varchar(64) NOT NULL DEFAULT ''",
+			'enable_stripe' => "enum('yes','no') NOT NULL DEFAULT 'no'",
+			'stripe_secret_key' => "varchar(255) NOT NULL DEFAULT ''",
+			'stripe_webhook_secret' => "varchar(255) NOT NULL DEFAULT ''",
+			'stripe_webhook_id' => "varchar(64) NOT NULL DEFAULT ''",
+			'stripe_auto_activate' => "enum('yes','no') NOT NULL DEFAULT 'yes'",
+			'stripe_enable_twint' => "enum('yes','no') NOT NULL DEFAULT 'yes'",
+			'paypal_surcharge' => "enum('yes','no') NOT NULL DEFAULT 'no'",
+			'paypal_surcharge_percent' => "varchar(16) NOT NULL DEFAULT '0'",
+			'paypal_surcharge_fixed' => "varchar(16) NOT NULL DEFAULT '0'",
+			'paypal_surcharge_cover' => "enum('yes','no') NOT NULL DEFAULT 'yes'",
+			'stripe_surcharge' => "enum('yes','no') NOT NULL DEFAULT 'no'",
+			'stripe_surcharge_percent' => "varchar(16) NOT NULL DEFAULT '0'",
+			'stripe_surcharge_fixed' => "varchar(16) NOT NULL DEFAULT '0'",
+			'stripe_surcharge_cover' => "enum('yes','no') NOT NULL DEFAULT 'yes'"
+		);
+		$added = false;
+		foreach($cols as $name => $def)
+		{
+			$res = $db->Query('SHOW COLUMNS FROM {pre}prefs LIKE ?', $name);
+			$exists = $res && $res->RowCount() > 0;
+			if($res)
+				$res->Free();
+			if(!$exists)
+			{
+				$db->Query('ALTER TABLE {pre}prefs ADD `'.$name.'` '.$def);
+				$added = true;
+			}
+		}
+		if($added)
+			ReadConfig();
+
+		$defaults = array(
+			'enable_paypal_checkout' => 'no',
+			'paypal_sandbox' => 'no',
+			'paypal_auto_activate' => 'yes',
+			'enable_stripe' => 'no',
+			'stripe_auto_activate' => 'yes',
+			'stripe_enable_twint' => 'yes',
+			'paypal_surcharge' => 'no',
+			'paypal_surcharge_percent' => '0',
+			'paypal_surcharge_fixed' => '0',
+			'paypal_surcharge_cover' => 'yes',
+			'stripe_surcharge' => 'no',
+			'stripe_surcharge_percent' => '0',
+			'stripe_surcharge_fixed' => '0',
+			'stripe_surcharge_cover' => 'yes'
+		);
+		foreach($defaults as $key => $val)
+		{
+			if(!isset($bm_prefs[$key]) || $bm_prefs[$key] === '' || $bm_prefs[$key] === null)
+				$bm_prefs[$key] = $val;
+		}
+	}
+
+	/**
+	 * @return void
+	 */
+	public static function EnsureStripeColumns()
+	{
+		self::EnsureGatewayColumns();
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return string
+	 */
+	public static function NormalizeSurchargePercent($value)
+	{
+		$n = (float)str_replace(',', '.', trim((string)$value));
+		if($n < 0)
+			$n = 0;
+		if($n > 50)
+			$n = 50;
+		return number_format($n, 4, '.', '');
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return string
+	 */
+	public static function NormalizeSurchargeFixed($value)
+	{
+		$n = (float)str_replace(',', '.', trim((string)$value));
+		if($n < 0)
+			$n = 0;
+		if($n > 1000)
+			$n = 1000;
+		return number_format($n, 2, '.', '');
+	}
+
+	/**
+	 * Whether PayPal Checkout is enabled in prefs
+	 *
+	 * @return bool
+	 */
+	public static function PayPalCheckoutEnabled()
+	{
+		global $bm_prefs;
+
+		self::EnsureGatewayColumns();
+		return isset($bm_prefs['enable_paypal_checkout']) && $bm_prefs['enable_paypal_checkout'] == 'yes';
+	}
+
+	/**
+	 * Whether Stripe checkout is enabled in prefs
+	 *
+	 * @return bool
+	 */
+	public static function StripeEnabled()
+	{
+		global $bm_prefs;
+
+		self::EnsureGatewayColumns();
+		return isset($bm_prefs['enable_stripe']) && $bm_prefs['enable_stripe'] == 'yes';
+	}
+
+	/**
 	 * Prepares payment form (payment.form.tpl)
 	 *
 	 * @param &$tpl Template object
@@ -104,6 +286,8 @@ class BMPayment
 	public static function PreparePaymentForm(&$tpl, $title, $amount, $userRow = false)
 	{
 		global $bm_prefs, $thisUser, $lang_user;
+
+		self::EnsureGatewayColumns();
 
 		if($userRow === false)
 			$userRow = $thisUser->_row;
@@ -116,6 +300,8 @@ class BMPayment
 		$pf['enable_su']		= $bm_prefs['enable_su'];
 		$pf['enable_vk']		= $bm_prefs['enable_vk'];
 		$pf['enable_paypal']	= $bm_prefs['enable_paypal'];
+		$pf['enable_paypal_checkout'] = self::PayPalCheckoutEnabled() ? 'yes' : 'no';
+		$pf['enable_stripe']	= self::StripeEnabled() ? 'yes' : 'no';
 		$pf['enable_skrill']	= $bm_prefs['enable_skrill'];
 		$pf['customMethods']	= BMPayment::GetCustomPaymentMethods();
 		$pf['mwst']				= $bm_prefs['mwst'];
@@ -134,8 +320,213 @@ class BMPayment
 		$pf['taxid']			= $userRow['taxid'];
 		$pf['f_company']		= $bm_prefs['f_company'];
 		$pf['f_taxid']			= $bm_prefs['f_taxid'];
+		$surchargeTpl = self::SurchargeTplData();
+		$pf['surchargePaypal']	= $surchargeTpl['paypal'];
+		$pf['surchargeStripe']	= $surchargeTpl['stripe'];
+		$pf['surchargeJs']		= $surchargeTpl['js'];
 
 		$tpl->assign('_pf', $pf);
+	}
+
+	/**
+	 * Whether a cart row is the gateway surcharge line
+	 *
+	 * @param array $cartItem
+	 * @return bool
+	 */
+	public static function IsSurchargeItem($cartItem)
+	{
+		return is_array($cartItem)
+			&& ((!empty($cartItem['surcharge']))
+				|| (isset($cartItem['key']) && $cartItem['key'] == 'b1gMail.surcharge'));
+	}
+
+	/**
+	 * Surcharge settings for a payment method
+	 *
+	 * @param int $paymethod
+	 * @return array{enabled:bool,percent:float,fixedCents:int,cover:bool}
+	 */
+	public static function GatewaySurchargeConfig($paymethod)
+	{
+		global $bm_prefs;
+
+		self::EnsureGatewayColumns();
+
+		$prefix = '';
+		if(self::IsPayPalMethod($paymethod))
+			$prefix = 'paypal';
+		else if($paymethod == PAYMENT_METHOD_STRIPE)
+			$prefix = 'stripe';
+		else
+			return array('enabled' => false, 'percent' => 0.0, 'fixedCents' => 0, 'cover' => true);
+
+		$percent = isset($bm_prefs[$prefix.'_surcharge_percent'])
+			? (float)str_replace(',', '.', (string)$bm_prefs[$prefix.'_surcharge_percent'])
+			: 0.0;
+		$fixed = isset($bm_prefs[$prefix.'_surcharge_fixed'])
+			? (float)str_replace(',', '.', (string)$bm_prefs[$prefix.'_surcharge_fixed'])
+			: 0.0;
+		$enabled = isset($bm_prefs[$prefix.'_surcharge']) && $bm_prefs[$prefix.'_surcharge'] == 'yes'
+			&& ($percent > 0 || $fixed > 0);
+		$cover = !isset($bm_prefs[$prefix.'_surcharge_cover']) || $bm_prefs[$prefix.'_surcharge_cover'] != 'no';
+
+		if($percent < 0)
+			$percent = 0;
+		if($percent > 50)
+			$percent = 50;
+		if($fixed < 0)
+			$fixed = 0;
+
+		return array(
+			'enabled' => $enabled,
+			'percent' => $percent,
+			'fixedCents' => (int)round($fixed * 100),
+			'cover' => $cover
+		);
+	}
+
+	/**
+	 * Surcharge values for templates / JS (always present)
+	 *
+	 * @return array{paypal:array,stripe:array,js:string}
+	 */
+	public static function SurchargeTplData()
+	{
+		$paypal = self::GatewaySurchargeConfig(PAYMENT_METHOD_PAYPAL_CHECKOUT);
+		$stripe = self::GatewaySurchargeConfig(PAYMENT_METHOD_STRIPE);
+
+		$fmt = function($cfg)
+		{
+			return array(
+				'enabled' => !empty($cfg['enabled']) ? 1 : 0,
+				'percent' => (float)$cfg['percent'],
+				'fixed' => round($cfg['fixedCents'] / 100, 2),
+				'cover' => !empty($cfg['cover']) ? 1 : 0
+			);
+		};
+
+		$paypalTpl = $fmt($paypal);
+		$stripeTpl = $fmt($stripe);
+
+		$jsEntry = function($row)
+		{
+			$percent = number_format((float)$row['percent'], 4, '.', '');
+			$percent = rtrim(rtrim($percent, '0'), '.');
+			if($percent === '')
+				$percent = '0';
+			return sprintf('{enabled:%s,percent:%s,fixed:%s,cover:%s}',
+				$row['enabled'] ? 'true' : 'false',
+				$percent,
+				number_format((float)$row['fixed'], 2, '.', ''),
+				$row['cover'] ? 'true' : 'false');
+		};
+
+		return array(
+			'paypal' => $paypalTpl,
+			'stripe' => $stripeTpl,
+			'js' => sprintf('1:%s,4:%s,5:%s',
+				$jsEntry($paypalTpl),
+				$jsEntry($paypalTpl),
+				$jsEntry($stripeTpl))
+		);
+	}
+
+	/**
+	 * Surcharge config for the checkout JS (method id => settings)
+	 *
+	 * @return object
+	 */
+	public static function SurchargeConfigForJs()
+	{
+		$data = self::SurchargeTplData();
+		$out = new stdClass();
+		$out->{'1'} = array(
+			'enabled' => (bool)$data['paypal']['enabled'],
+			'percent' => $data['paypal']['percent'],
+			'fixed' => $data['paypal']['fixed'],
+			'cover' => (bool)$data['paypal']['cover']
+		);
+		$out->{'4'} = $out->{'1'};
+		$out->{'5'} = array(
+			'enabled' => (bool)$data['stripe']['enabled'],
+			'percent' => $data['stripe']['percent'],
+			'fixed' => $data['stripe']['fixed'],
+			'cover' => (bool)$data['stripe']['cover']
+		);
+		return $out;
+	}
+
+	/**
+	 * Extra cents so the merchant still nets $baseCents after provider fees
+	 *
+	 * Cover: gross = (base + fixed) / (1 - percent/100)
+	 * Add:   extra = base * percent/100 + fixed
+	 *
+	 * @param int $baseCents Payable amount before surcharge
+	 * @param int $paymethod
+	 * @return int
+	 */
+	public static function CalcGatewaySurchargeCents($baseCents, $paymethod)
+	{
+		$cfg = self::GatewaySurchargeConfig($paymethod);
+		$baseCents = (int)$baseCents;
+		if(!$cfg['enabled'] || $baseCents <= 0)
+			return 0;
+
+		$percent = $cfg['percent'];
+		$fixedCents = $cfg['fixedCents'];
+
+		if($cfg['cover'])
+		{
+			$rate = $percent / 100.0;
+			if($rate >= 0.99)
+				$rate = 0.99;
+			$gross = (int)round(($baseCents + $fixedCents) / (1.0 - $rate));
+			return max(0, $gross - $baseCents);
+		}
+
+		return max(0, (int)round($baseCents * $percent / 100.0) + $fixedCents);
+	}
+
+	/**
+	 * Append a surcharge cart line for PayPal / Stripe
+	 *
+	 * @param array $cart
+	 * @param int $paymethod
+	 * @param float $vatRate
+	 * @return array
+	 */
+	public static function ApplyGatewaySurcharge(array $cart, $paymethod, $vatRate)
+	{
+		global $lang_user;
+
+		$clean = array();
+		foreach($cart as $item)
+		{
+			if(self::IsSurchargeItem($item))
+				continue;
+			$clean[] = $item;
+		}
+
+		$baseCents = (int)round(self::CalcTotal($clean, $vatRate) * 100);
+		$surchargeCents = self::CalcGatewaySurchargeCents($baseCents, $paymethod);
+		if($surchargeCents <= 0)
+			return $clean;
+
+		$text = isset($lang_user['payment_surcharge'])
+			? $lang_user['payment_surcharge']
+			: 'Transaktionskosten';
+
+		$clean[] = array(
+			'key'		=> 'b1gMail.surcharge',
+			'count'		=> 1,
+			'amount'	=> $surchargeCents,
+			'total'		=> $surchargeCents,
+			'text'		=> $text,
+			'surcharge'	=> true
+		);
+		return $clean;
 	}
 
 	/**
@@ -149,13 +540,20 @@ class BMPayment
 		global $bm_prefs;
 
 		$amount = 0;
+		$surcharge = 0;
 
 		foreach($cart as $cartItem)
-			$amount += $cartItem['total'];
+		{
+			if(self::IsSurchargeItem($cartItem))
+				$surcharge += $cartItem['total'];
+			else
+				$amount += $cartItem['total'];
+		}
 
 		if($bm_prefs['mwst'] == 'add')
 			$amount = round($amount * (1+$vatRate/100), 0);
 
+		$amount += $surcharge;
 		$amount = round($amount/100, 2);
 
 		return($amount);
@@ -250,6 +648,9 @@ class BMPayment
 
 		foreach($cart as $cartItemID=>$cartItem)
 		{
+			if(self::IsSurchargeItem($cartItem))
+				continue;
+
 			if(!isset($cartItem['key']) || !isset($cartItem['count'])
 			   || $cartItem['count'] <= 0)
 			{
@@ -293,7 +694,7 @@ class BMPayment
 		$generateInvoice = false;
 		if($bm_prefs['sendrg'] == 'yes' && $row['amount'] > 0)
 		{
-			if(in_array($row['paymethod'], array(PAYMENT_METHOD_PAYPAL, PAYMENT_METHOD_SKRILL, PAYMENT_METHOD_SOFORTUEBERWEISUNG)))
+			if(in_array($row['paymethod'], array(PAYMENT_METHOD_PAYPAL, PAYMENT_METHOD_PAYPAL_CHECKOUT, PAYMENT_METHOD_STRIPE, PAYMENT_METHOD_SKRILL, PAYMENT_METHOD_SOFORTUEBERWEISUNG)))
 			{
 				$generateInvoice = true;
 			}
@@ -323,18 +724,7 @@ class BMPayment
 		// payment notification?
 		if($bm_prefs['send_pay_notification'] == 'yes' && $row['amount'] > 0)
 		{
-			if($row['paymethod'] == PAYMENT_METHOD_BANKTRANSFER)
-				$payMethod = $lang_user['banktransfer'];
-			else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL)
-				$payMethod = $lang_user['paypal'];
-			else if($row['paymethod'] == PAYMENT_METHOD_SOFORTUEBERWEISUNG)
-				$payMethod = $lang_user['su'];
-			else if($row['paymethod'] == PAYMENT_METHOD_SKRILL)
-				$payMethod = $lang_user['skrill'];
-			else if($row['paymethod'] < 0)
-				$payMethod = $payMethods[$payMethodID]['title'];
-			else
-				$payMethod = '?';
+			$payMethod = BMPayment::MethodTitle($row['paymethod'], $lang_user);
 
 			SystemMail(sprintf('"%s" <%s>', $bm_prefs['pay_emailfrom'], $bm_prefs['pay_emailfromemail']),
 					   $bm_prefs['pay_notification_to'],
@@ -385,7 +775,7 @@ class BMPayment
 		if($userID == 0)
 			$userID = $thisUser->_row['id'];
 
-		$res = $db->Query('SELECT `paymethod`,`amount`,`status`,`cart`,`vkcode` FROM {pre}orders WHERE `userid`=? AND `orderid`=?',
+		$res = $db->Query('SELECT `userid`,`paymethod`,`amount`,`status`,`cart`,`vkcode`,`paymethod_params` FROM {pre}orders WHERE `userid`=? AND `orderid`=?',
 						  $userID,
 						  $orderID);
 		if($res->RowCount() != 1)
@@ -427,6 +817,96 @@ class BMPayment
 		{
 			$pf['payPalMail']		= $bm_prefs['paypal_mail'];
 			$pf['notifyURL']		= sprintf('%sinterface/ipn.php', $bm_prefs['selfurl']);
+		}
+
+		else if($row['paymethod'] == PAYMENT_METHOD_PAYPAL_CHECKOUT)
+		{
+			if(!class_exists('BMPayPal'))
+				include(B1GMAIL_DIR . 'serverlib/paypal.class.php');
+
+			$approveUrl = BMPayPal::StartCheckout($orderID, $row, $pf['returnURL']);
+			if(is_string($approveUrl) && $approveUrl != '')
+			{
+				header('Location: ' . $approveUrl);
+				exit;
+			}
+
+			$resPaid = $db->Query('SELECT `status`,`txnid` FROM {pre}orders WHERE `orderid`=?',
+				$orderID);
+			$paidRow = $resPaid->FetchArray(MYSQLI_ASSOC);
+			$resPaid->Free();
+			if($paidRow && $paidRow['status'] != ORDER_STATUS_CREATED)
+			{
+				$tpl->assign($pageVarName, 'li/msg.tpl');
+				$tpl->assign('title', $lang_user['error']);
+				$tpl->assign('msg', $lang_user['orderalreadypaid']);
+				if($pageVarName == 'pageContent')
+					BMPayment::UsePrefsPageLayout($tpl);
+				return(false);
+			}
+			if($paidRow && !empty($paidRow['txnid']))
+			{
+				$tpl->assign('title', $lang_user['thankyou']);
+				$tpl->assign('msg', $lang_user['paymentreturn_txt']);
+				$tpl->assign('msgTone', 'success');
+				$tpl->assign('backLink', SessionUrl('prefs.php?action=orders'));
+				$payReturnTpl = 'li/prefs.paymentreturn.tpl';
+				$tplName = isset($bm_prefs['template']) ? trim((string)$bm_prefs['template']) : '';
+				if($pageVarName != 'pageContent' || $tplName === '' || !is_file(B1GMAIL_DIR . 'templates/' . $tplName . '/' . $payReturnTpl))
+					$payReturnTpl = 'li/msg.tpl';
+				$tpl->assign($pageVarName, $payReturnTpl);
+				if($pageVarName == 'pageContent' && $payReturnTpl == 'li/msg.tpl')
+					BMPayment::UsePrefsPageLayout($tpl);
+				return(false);
+			}
+
+			$pf['paypalError'] = true;
+			$pf['paypalErrorMsg'] = $lang_user['paypal_error'];
+		}
+
+		else if($row['paymethod'] == PAYMENT_METHOD_STRIPE)
+		{
+			if(!class_exists('BMStripe'))
+				include(B1GMAIL_DIR . 'serverlib/stripe.class.php');
+
+			$checkoutUrl = BMStripe::StartCheckout($orderID, $row, $pf['returnURL']);
+			if(is_string($checkoutUrl) && $checkoutUrl != '')
+			{
+				header('Location: ' . $checkoutUrl);
+				exit;
+			}
+
+			$resPaid = $db->Query('SELECT `status`,`txnid` FROM {pre}orders WHERE `orderid`=?',
+				$orderID);
+			$paidRow = $resPaid->FetchArray(MYSQLI_ASSOC);
+			$resPaid->Free();
+			if($paidRow && $paidRow['status'] != ORDER_STATUS_CREATED)
+			{
+				$tpl->assign($pageVarName, 'li/msg.tpl');
+				$tpl->assign('title', $lang_user['error']);
+				$tpl->assign('msg', $lang_user['orderalreadypaid']);
+				if($pageVarName == 'pageContent')
+					BMPayment::UsePrefsPageLayout($tpl);
+				return(false);
+			}
+			if($paidRow && !empty($paidRow['txnid']))
+			{
+				$tpl->assign('title', $lang_user['thankyou']);
+				$tpl->assign('msg', $lang_user['paymentreturn_txt']);
+				$tpl->assign('msgTone', 'success');
+				$tpl->assign('backLink', SessionUrl('prefs.php?action=orders'));
+				$payReturnTpl = 'li/prefs.paymentreturn.tpl';
+				$tplName = isset($bm_prefs['template']) ? trim((string)$bm_prefs['template']) : '';
+				if($pageVarName != 'pageContent' || $tplName === '' || !is_file(B1GMAIL_DIR . 'templates/' . $tplName . '/' . $payReturnTpl))
+					$payReturnTpl = 'li/msg.tpl';
+				$tpl->assign($pageVarName, $payReturnTpl);
+				if($pageVarName == 'pageContent' && $payReturnTpl == 'li/msg.tpl')
+					BMPayment::UsePrefsPageLayout($tpl);
+				return(false);
+			}
+
+			$pf['stripeError'] = true;
+			$pf['stripeErrorMsg'] = $lang_user['stripe_error'];
 		}
 
 		else if($row['paymethod'] == PAYMENT_METHOD_SKRILL)
@@ -611,6 +1091,8 @@ class BMPayment
 		$payMethods = BMPayment::GetCustomPaymentMethods();
 		if(!(
 				($_POST['paymentMethod'] == PAYMENT_METHOD_PAYPAL && $bm_prefs['enable_paypal'] == 'yes')
+			||	($_POST['paymentMethod'] == PAYMENT_METHOD_PAYPAL_CHECKOUT && BMPayment::PayPalCheckoutEnabled())
+			||	($_POST['paymentMethod'] == PAYMENT_METHOD_STRIPE && BMPayment::StripeEnabled())
 			||	($_POST['paymentMethod'] == PAYMENT_METHOD_BANKTRANSFER && $bm_prefs['enable_vk'] == 'yes')
 			||	($_POST['paymentMethod'] == PAYMENT_METHOD_SOFORTUEBERWEISUNG && $bm_prefs['enable_su'] == 'yes')
 			||	($_POST['paymentMethod'] == PAYMENT_METHOD_SKRILL && $bm_prefs['enable_skrill'] == 'yes')
@@ -718,6 +1200,7 @@ class BMPayment
 			$countries = CountryList(true);
 			$vatRate = isset($countries[$countryID]) ? $countries[$countryID]['vat'] : 0;
 
+			$cart = BMPayment::ApplyGatewaySurcharge($cart, (int)$_POST['paymentMethod'], $vatRate);
 			$totalAmount = BMPayment::CalcTotal($cart, $vatRate);
 
 			if($_POST['paymentMethod'] == PAYMENT_METHOD_BANKTRANSFER)
@@ -825,24 +1308,53 @@ class BMPayment
 		$customerNo		= BMPayment::CustomerNo($orderRow['userid']);
 		$amount 		= $orderRow['amount'] / 100;
 		$taxRate		= $orderRow['tax'];
-		$netAmount		= round($amount / (1+$taxRate/100), 2);
-		$taxAmount		= $amount - $netAmount;
 		$rawCart		= @unserialize($orderRow['cart']);
 		if(!is_array($rawCart))
 			$rawCart = array();
 		$cart 			= array();
+		$surchargeCents	= 0;
+		$productCents	= 0;
 
 		// prepare cart
 		$pos = 0;
 		foreach($rawCart as $rawPos)
 		{
+			$isSurcharge = self::IsSurchargeItem($rawPos);
+			if($isSurcharge)
+				$surchargeCents += isset($rawPos['total']) ? $rawPos['total'] : 0;
+			else
+				$productCents += isset($rawPos['total']) ? $rawPos['total'] : 0;
+
+			$vatDivisor = (!$isSurcharge && $bm_prefs['mwst']=='enthalten' && $taxRate > 0)
+				? (1+$taxRate/100)
+				: 1;
 			$cart[] = array(
 				'pos'		=> ++$pos,
 				'count'		=> $rawPos['count'],
 				'text'		=> $rawPos['text'],
-				'amount'	=> sprintf('%.02f', ($rawPos['amount']/($bm_prefs['mwst']=='enthalten'?(1+$taxRate/100):1))/100),
-				'total'		=> sprintf('%.02f', ($rawPos['total']/($bm_prefs['mwst']=='enthalten'?(1+$taxRate/100):1))/100)
+				'amount'	=> sprintf('%.02f', ($rawPos['amount']/$vatDivisor)/100),
+				'total'		=> sprintf('%.02f', ($rawPos['total']/$vatDivisor)/100)
 			);
+		}
+
+		$surchargeAmount = $surchargeCents / 100;
+		$productGross = $amount - $surchargeAmount;
+		if($productGross < 0)
+			$productGross = 0;
+		if($bm_prefs['mwst'] == 'add' && $taxRate > 0)
+		{
+			$netAmount = round($productCents / 100, 2);
+			$taxAmount = round($productGross - $netAmount, 2);
+		}
+		else if($taxRate > 0)
+		{
+			$netAmount = round($productGross / (1+$taxRate/100), 2);
+			$taxAmount = round($productGross - $netAmount, 2);
+		}
+		else
+		{
+			$netAmount = $productGross;
+			$taxAmount = 0;
 		}
 
 		// payment note
@@ -851,9 +1363,13 @@ class BMPayment
 			$paymentNote = sprintf($lang_user['pn_banktransfer'], $amount, $bm_prefs['currency'],
 				$orderRow['vkcode']);
 		}
-		else if($orderRow['paymethod'] == PAYMENT_METHOD_PAYPAL)
+		else if(BMPayment::IsPayPalMethod($orderRow['paymethod']))
 		{
 			$paymentNote = sprintf($lang_user['pn_paypal'], $amount, $bm_prefs['currency']);
+		}
+		else if($orderRow['paymethod'] == PAYMENT_METHOD_STRIPE)
+		{
+			$paymentNote = sprintf($lang_user['pn_stripe'], $amount, $bm_prefs['currency']);
 		}
 		else if($orderRow['paymethod'] == PAYMENT_METHOD_SKRILL)
 		{
@@ -881,6 +1397,7 @@ class BMPayment
 		$rgTpl->assign('netto',		sprintf('%.02f', $netAmount));
 		$rgTpl->assign('brutto', 	sprintf('%.02f', $amount));
 		$rgTpl->assign('mwst', 		sprintf('%.02f', $taxAmount));
+		$rgTpl->assign('transaktionskosten', sprintf('%.02f', $surchargeAmount));
 		$rgTpl->assign('mwstsatz', 	sprintf('%.02f', $taxRate));
 		$rgTpl->assign('zahlungshinweis', $paymentNote);
 		$rgTpl->assign('cart', 		$cart);

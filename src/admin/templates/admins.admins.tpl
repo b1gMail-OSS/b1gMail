@@ -8,7 +8,7 @@
 				<table class="table table-vcenter table-striped">
 					<thead>
 					<tr>
-						<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'admin_');"><img src="{$tpldir}images/dot.png" alt="" width="16" /></a></th>
+						<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'admin_');">{acpicon file="dot.png"}</a></th>
 						<th>{lng p="name"}</th>
 						<th>{lng p="admin_email"}</th>
 						{if $mfaAdminEnabled}<th class="text-center" style="width: 2.5rem;" title="{lng p="mfa_col"}">{lng p="mfa_col"}</th>{/if}
@@ -57,17 +57,15 @@
 				</table>
 			</div>
 			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="delete">{lng p="delete"}</option>
 							</optgroup>
 						</select>
-						<input type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" />
-					</div>
+					<button type="submit" name="executeMassAction" class="btn btn-dark-lt" value="1">{lng p="execute"}</button>
 				</div>
 			</div>
 		</div>

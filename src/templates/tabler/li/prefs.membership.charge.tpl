@@ -7,46 +7,45 @@
 </div>
 
 <div class="scrollContainer bm-prefs-body"><div class="pad bm-prefs-form-pad">
+	<div class="row row-cards">
 
-<form action="{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}" method="post">
-	{csrffield}
-<table class="listTable">
-	<tr>
-		<th class="listTableHead" colspan="2"> {lng p="charge"}</th>
-	</tr>
-	<tr>
-		<td class="listTableLeft">&nbsp;</td>
-		<td class="listTableRight">
-			{lng p="charge_desc"}<br /><br />
-			{if $minAmount}{$minAmount}<br /><br />{/if}
-			{if $error}<div class="note">{$error}</div><br /><br />{/if}
-		</td>
-	</tr>
-	<tr>
-		<td class="listTableLeft">{lng p="charge2"}:</td>
-		<td class="listTableRight">
-			<input type="text" name="credits" value="{if $credits}{$credits}{else}{$minCredits}{/if}" size="8" />
-			{$priceText}
-		</td>
-	</tr>
-	<tr>
-		<td class="listTableLeft">&nbsp;</td>
-		<td class="listTableRight">
-			<input type="submit" class="btn btn-primary" value=" {lng p="ok"} &raquo; " />
-		</td>
-	</tr>
-</table>
-</form>
+		<div class="col-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">{lng p="charge"}</h3>
+				</div>
+				<form action="{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}" method="post">
+					{csrffield}
+					<div class="card-body">
+						<p class="text-secondary mb-3">{lng p="charge_desc"}</p>
+						{if $minAmount}<p class="text-secondary mb-3">{$minAmount}</p>{/if}
+						{if $error}<div class="alert alert-danger" role="alert">{$error}</div>{/if}
+						<div class="row">
+							<label class="col-md-3 col-form-label" for="credits">{lng p="charge2"}</label>
+							<div class="col-md-9 col-lg-5 d-flex flex-wrap align-items-center gap-2">
+								<input type="text" class="form-control" name="credits" id="credits" value="{if $credits}{$credits}{else}{$minCredits}{/if}" style="max-width:8rem;" />
+								<span class="text-secondary">{$priceText}</span>
+							</div>
+						</div>
+					</div>
+					<div class="card-footer">
+						<button type="submit" class="btn btn-primary">{lng p="ok"} &raquo;</button>
+					</div>
+				</form>
+			</div>
+		</div>
 
-{if $credits}
-<br />
-<form action="{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}" method="post">
-	{csrffield}
-<input type="hidden" name="credits" value="{$credits}" />
-<input type="hidden" name="submitOrder" value="true" />
-{include file="li/payment.form.tpl"}
-</form>
-{/if}
+		{if $credits}
+		<div class="col-12">
+			<form action="{sessionurl file='prefs.php' params='action=membership&do=chargeAccount'}" method="post">
+				{csrffield}
+				<input type="hidden" name="credits" value="{$credits}" />
+				<input type="hidden" name="submitOrder" value="true" />
+				{include file="li/payment.form.tpl"}
+			</form>
+		</div>
+		{/if}
 
+	</div>
 </div></div>
 </div>

@@ -399,6 +399,11 @@ class BMWebdiskDirectory extends BMWebdiskNode implements Sabre\DAV\ICollection,
 
 class BMWebdiskAuthBackend extends BMAuthBackend
 {
+	protected function davScope()
+	{
+		return BMAppPassword::SCOPE_WEBDAV;
+	}
+
 	function checkPermissions()
 	{
 		return($this->groupRow['webdav'] == 'yes');
@@ -512,7 +517,7 @@ $wds = new BMWebdiskState;
 $rootDirectory = new BMWebdiskDirectory('');
 
 $server = new DAV\Server($rootDirectory);
-$server->setBaseUri($_SERVER['SCRIPT_NAME']);
+$server->setBaseUri(bmDavDetermineBaseUri('webdav'));
 
 $authBackend = new BMWebdiskAuthBackend;
 $authBackend->setRealm($bm_prefs['titel'] . ' ' . $lang_user['webdisk']);

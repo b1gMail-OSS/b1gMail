@@ -76,10 +76,13 @@ if($_REQUEST['action'] == 'common'
 	}
 
 	// time?
-	if(!isset($_REQUEST['timeMonth']))
-		$time = mktime(0, 0, 0, date('m'), 1, date('Y'));
+	if(isset($_REQUEST['timeMonth']))
+		$time = mktime(0, 0, 0, (int)$_REQUEST['timeMonth'], 1, (int)$_REQUEST['timeYear']);
+	else if(isset($_REQUEST['statPeriod']) && preg_match('/^(\d{1,2})\.(\d{4})$/', trim($_REQUEST['statPeriod']), $statPeriod)
+		&& (int)$statPeriod[1] >= 1 && (int)$statPeriod[1] <= 12)
+		$time = mktime(0, 0, 0, (int)$statPeriod[1], 1, (int)$statPeriod[2]);
 	else
-		$time = mktime(0, 0, 0, $_REQUEST['timeMonth'], 1, $_REQUEST['timeYear']);
+		$time = mktime(0, 0, 0, date('m'), 1, date('Y'));
 
 	// common stats
 	if($_REQUEST['action'] == 'common')

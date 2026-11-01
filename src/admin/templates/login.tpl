@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+	{include file="theme-boot.tpl"}
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 	<meta http-equiv="X-UA-Compatible" content="ie=edge"/>

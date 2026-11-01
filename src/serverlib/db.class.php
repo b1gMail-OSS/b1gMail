@@ -151,6 +151,9 @@ class DB
                     if ($this->_current_charset) {
                         $this->SetCharset($this->_current_charset);
                     }
+                    if (function_exists('SyncMysqlTimeZone')) {
+                        SyncMysqlTimeZone();
+                    }
                     $ok = ($result = mysqli_query($handle, $query));
                 }
             }

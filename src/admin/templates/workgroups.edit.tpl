@@ -64,17 +64,15 @@
 
 	<div class="row">
 		<div class="col-md-6">
-			<div style="float: left;">{lng p="action"}:&nbsp;</div>
-			<div style="float: left;">
-				<div class="btn-group btn-group-sm">
-					<select name="groupAction" class="form-select form-select-sm">
+			<div class="input-group input-group-sm bm-mass-action">
+				<span class="input-group-text">{lng p="action"}</span>
+				<select name="groupAction" id="groupAction" class="form-select form-select-sm">
 						<optgroup label="{lng p="actions"}">
 							<option value="mailto:{email value=$group.email}">{lng p="sendmail"}</option>
 							<option value="workgroups.php?singleAction=delete&singleID={$group.id}{$sessionUrlSuffix}">{lng p="delete"}</option>
 						</optgroup>
 					</select>
-					<input type="button" name="executeMassAction" value="{lng p="ok"}" onclick="executeAction('groupAction');" class="btn btn-sm btn-dark-lt" />
-				</div>
+				<button type="button" name="executeMassAction" class="btn btn-dark-lt" onclick="executeAction('groupAction');">{lng p="ok"}</button>
 			</div>
 		</div>
 		<div class="col-md-6 text-end">

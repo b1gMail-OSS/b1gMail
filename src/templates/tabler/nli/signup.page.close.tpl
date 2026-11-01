@@ -2,8 +2,15 @@
 			</div>
 			<div class="card-footer bm-signup-card-footer">
 				<p id="signupFinishHint" class="text-secondary small d-none mb-2">{lng p="completesignup"}</p>
-				<div class="text-secondary small mb-3">
-					<i class="ti ti-info-circle me-1" aria-hidden="true"></i>
+				<div class="alert alert-info mb-3" role="alert">
+					<div class="alert-icon">
+						{* http://tabler.io/icons/icon/info-circle *}
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon alert-icon">
+							<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+							<path d="M12 9h.01"></path>
+							<path d="M11 12h1v4h1"></path>
+						</svg>
+					</div>
 					{lng p="iprecord"}
 				</div>
 				<div class="d-flex flex-wrap align-items-center justify-content-between gap-3">

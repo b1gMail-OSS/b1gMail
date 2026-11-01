@@ -26,29 +26,41 @@ RequestPrivileges(PRIVILEGES_ADMIN);
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'welcome';
 
-$tabs = array(
-	0 => array(
-		'title'		=> $lang_admin['welcome'],
-		'relIcon'	=> 'ico_license.png',
-		'link'		=> 'welcome.php?',
-		'active'	=> $_REQUEST['action'] == 'welcome'
-	),
-	1 => array(
-		'title'		=> $lang_admin['phpinfo'],
-		'relIcon'	=> 'phpinfo32.png',
-		'link'		=> 'welcome.php?action=phpinfo',
-		'active'	=> $_REQUEST['action'] == 'phpinfo'
-	),
-	2 => array(
-		'title'		=> $lang_admin['about'],
-		'relIcon'	=> 'ico_b1gmail.png',
-		'link'		=> 'welcome.php?action=about',
-		'active'	=> $_REQUEST['action'] == 'about'
-	)
-);
+if($_REQUEST['action'] == 'about')
+{
+	header('Location: ' . SessionUrl('welcome.php?open=about'));
+	exit;
+}
 
-if($adminRow['type'] != 0)
-	unset($tabs[1]);
+if($_REQUEST['action'] == 'phpinfo')
+{
+	if($adminRow['type'] != 0)
+	{
+		header('Location: ' . SessionUrl('welcome.php'));
+		exit;
+	}
+
+	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'phpinfo')
+	{
+		if(isset($_REQUEST['download']))
+		{
+			header('Content-Disposition: attachment; filename="PHPInfo.html"');
+			header('Pragma: public');
+			phpinfo();
+			exit();
+		}
+
+		$theme = (isset($_REQUEST['theme']) && $_REQUEST['theme'] === 'dark') ? 'dark' : 'light';
+		ob_start();
+		phpinfo();
+		$html = ob_get_clean();
+		echo AdminStylePhpinfo($html, $theme);
+		exit();
+	}
+
+	header('Location: ' . SessionUrl('welcome.php?open=phpinfo'));
+	exit;
+}
 
 if($_REQUEST['action'] == 'welcome')
 {
@@ -170,6 +182,80 @@ if($_REQUEST['action'] == 'welcome')
 	$tpl->assign('phpVersion', phpversion());
 	$tpl->assign('mysqlVersion', $db->GetServerVersion());
 	$tpl->assign('dbSize', $dbSize);
+
+	$mailReceiveSeries = array();
+	$mailSendSeries = array();
+	$mailDayIndex = array();
+	$mailHistoryDays = 180;
+	for($i = $mailHistoryDays - 1; $i >= 0; $i--)
+	{
+		$ts = mktime(0, 0, 0, (int)date('n'), (int)date('j') - $i, (int)date('Y'));
+		$key = date('Y-n-j', $ts);
+		$mailDayIndex[$key] = count($mailReceiveSeries);
+		$mailReceiveSeries[] = 0;
+		$mailSendSeries[] = 0;
+	}
+	$firstDay = mktime(0, 0, 0, (int)date('n'), (int)date('j') - ($mailHistoryDays - 1), (int)date('Y'));
+	$res = $db->Query('SELECT y,m,d,typ,SUM(anzahl) AS anzahlSum FROM {pre}stats WHERE typ IN (\'receive\',\'send\') AND ((y=? AND m=? AND d>=?) OR (y=? AND m>?) OR y>?) GROUP BY y,m,d,typ',
+		(int)date('Y', $firstDay),
+		(int)date('n', $firstDay),
+		(int)date('j', $firstDay),
+		(int)date('Y', $firstDay),
+		(int)date('n', $firstDay),
+		(int)date('Y', $firstDay));
+	while($row = $res->FetchArray(MYSQLI_ASSOC))
+	{
+		$key = (int)$row['y'] . '-' . (int)$row['m'] . '-' . (int)$row['d'];
+		if(!isset($mailDayIndex[$key]))
+			continue;
+		$idx = $mailDayIndex[$key];
+		if($row['typ'] == 'receive')
+			$mailReceiveSeries[$idx] = (int)$row['anzahlSum'];
+		else if($row['typ'] == 'send')
+			$mailSendSeries[$idx] = (int)$row['anzahlSum'];
+	}
+	$res->Free();
+
+	$logTodayStart = mktime(0, 0, 0, (int)date('n'), (int)date('j'), (int)date('Y'));
+	$logTodayEnd = mktime(23, 59, 59, (int)date('n'), (int)date('j'), (int)date('Y'));
+	$logToday = array(
+		PRIO_NOTE => 0,
+		PRIO_WARNING => 0,
+		PRIO_ERROR => 0
+	);
+	$res = $db->Query('SELECT prio, COUNT(*) AS c FROM {pre}logs WHERE zeitstempel>=? AND zeitstempel<=? AND prio IN (?,?,?) GROUP BY prio',
+		$logTodayStart,
+		$logTodayEnd,
+		PRIO_WARNING,
+		PRIO_NOTE,
+		PRIO_ERROR);
+	while($row = $res->FetchArray(MYSQLI_ASSOC))
+		$logToday[(int)$row['prio']] = (int)$row['c'];
+	$res->Free();
+	$logTodayTotal = $logToday[PRIO_NOTE] + $logToday[PRIO_WARNING] + $logToday[PRIO_ERROR];
+	$logBarBase = max(1, $logTodayTotal);
+
+	$mailReceiveRanges = bmWelcomeMailRanges($mailReceiveSeries);
+	$mailSendRanges = bmWelcomeMailRanges($mailSendSeries);
+	$tpl->assign('mailReceiveRanges', json_encode($mailReceiveRanges));
+	$tpl->assign('mailSendRanges', json_encode($mailSendRanges));
+	$tpl->assign('mailReceiveSum7', $mailReceiveRanges['7']['sum']);
+	$tpl->assign('mailSendSum7', $mailSendRanges['7']['sum']);
+	$tpl->assign('mailReceivePct7', $mailReceiveRanges['7']['pct']);
+	$tpl->assign('mailSendPct7', $mailSendRanges['7']['pct']);
+	$tpl->assign('mailReceiveValues7', implode(',', $mailReceiveRanges['7']['values']));
+	$tpl->assign('mailSendValues7', implode(',', $mailSendRanges['7']['values']));
+	$tpl->assign('logTodayInfo', $logToday[PRIO_NOTE]);
+	$tpl->assign('logTodayWarning', $logToday[PRIO_WARNING]);
+	$tpl->assign('logTodayError', $logToday[PRIO_ERROR]);
+	$tpl->assign('logTodayTotal', $logTodayTotal);
+	$tpl->assign('logInfoPct', $logTodayTotal > 0 ? round($logToday[PRIO_NOTE] / $logBarBase * 100, 2) : 0);
+	$tpl->assign('logWarningPct', $logTodayTotal > 0 ? round($logToday[PRIO_WARNING] / $logBarBase * 100, 2) : 0);
+	$tpl->assign('logErrorPct', $logTodayTotal > 0 ? round($logToday[PRIO_ERROR] / $logBarBase * 100, 2) : 0);
+	$tpl->assign('logTodayStart', $logTodayStart);
+	$tpl->assign('logTodayEnd', $logTodayEnd);
+	$tpl->assign('canViewLogs', AdminAllowed('logs'));
+	$tpl->assign('canViewStats', AdminAllowed('stats'));
 
 	//
 	// system notices
@@ -434,31 +520,126 @@ if($_REQUEST['action'] == 'welcome')
 	$tpl->assign('lang', $currentLanguage);
 	$tpl->assign('serial', $bm_prefs['serial']);
 	$tpl->assign('notes', $adminRow['notes']);
+	$tpl->assign('hasNotes', trim((string)$adminRow['notes']) !== '');
 	$tpl->assign('page', 'welcome.tpl');
 }
-else if($_REQUEST['action'] == 'about')
-{
-	$tpl->assign('version', B1GMAIL_VERSION);
-	$tpl->assign('page', 'about.tpl');
-}
-else if($_REQUEST['action'] == 'phpinfo' && $adminRow['type'] == 0)
-{
-	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'phpinfo')
-	{
-		if(isset($_REQUEST['download']))
-		{
-			header('Content-Disposition: attachment; filename="PHPInfo.html"');
-			header('Pragma: public');
-		}
 
-		phpinfo();
-		exit();
-	}
-
-	$tpl->assign('page', 'welcome.phpinfo.tpl');
-}
-
-$tpl->assign('tabs', $tabs);
 $tpl->assign('title', $lang_admin['welcome']);
 $tpl->display('page.tpl');
+
+function bmWelcomeMailRanges($series)
+{
+	$ranges = array();
+	foreach(array(7, 30, 90) as $days)
+	{
+		$n = count($series);
+		$current = array_slice($series, $n - $days);
+		$previous = array_slice($series, $n - (2 * $days), $days);
+		$sum = array_sum($current);
+		$previousSum = array_sum($previous);
+		$ranges[(string)$days] = array(
+			'values' => array_values(array_map('intval', $current)),
+			'sum' => (int)$sum,
+			'pct' => $previousSum > 0 ? (int)round((($sum - $previousSum) / $previousSum) * 100) : null
+		);
+	}
+
+	return $ranges;
+}
+
+/**
+ * Restyle phpinfo() so it follows the ACP instead of PHP's fixed purple layout.
+ *
+ * @param string $html
+ * @param string $theme light|dark
+ * @return string
+ */
+function AdminStylePhpinfo($html, $theme)
+{
+	$theme = ($theme === 'dark') ? 'dark' : 'light';
+	$css = <<<'CSS'
+:root {
+	color-scheme: light;
+	--pi-bg: #fff;
+	--pi-text: #1f2937;
+	--pi-muted: #667085;
+	--pi-border: #e6e7eb;
+	--pi-head: #f6f8fb;
+	--pi-label: #f8fafc;
+	--pi-link: #066fd1;
+}
+html[data-bs-theme="dark"] {
+	color-scheme: dark;
+	--pi-bg: #1a2234;
+	--pi-text: #e6edf5;
+	--pi-muted: #9aa4b2;
+	--pi-border: rgba(255, 255, 255, 0.08);
+	--pi-head: #243044;
+	--pi-label: #1e293b;
+	--pi-link: #7eb6ff;
+}
+html, body {
+	margin: 0;
+	background: var(--pi-bg);
+	color: var(--pi-text);
+	font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: 13px;
+	line-height: 1.45;
+}
+body { padding: 1rem 1.25rem 1.5rem; }
+pre { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
+a:link, a:visited { color: var(--pi-link); text-decoration: none; background: transparent; }
+a:hover { text-decoration: underline; }
+.center { text-align: initial; }
+.center table { margin: 0 0 1rem; text-align: left; }
+.center th { text-align: left !important; }
+table {
+	width: 100% !important;
+	max-width: 100%;
+	border-collapse: collapse;
+	border: 0;
+	box-shadow: none;
+	background: var(--pi-bg);
+}
+td, th {
+	border: 1px solid var(--pi-border);
+	font-size: 13px;
+	vertical-align: top;
+	padding: 0.4rem 0.7rem;
+}
+th { position: sticky; top: 0; background: var(--pi-head); }
+h1 { font-size: 1.15rem; font-weight: 600; margin: 0.15rem 0; }
+h2 { font-size: 0.95rem; font-weight: 600; margin: 1.15rem 0 0.4rem; text-align: left; }
+.p { text-align: left; }
+.h { background: var(--pi-head); font-weight: 600; }
+.e {
+	background: var(--pi-label);
+	width: 24%;
+	font-weight: 500;
+}
+.v {
+	background: var(--pi-bg);
+	max-width: none;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+.v i { color: var(--pi-muted); font-style: normal; }
+img { float: right; height: 36px; width: auto; border: 0; }
+hr {
+	width: 100%;
+	background: var(--pi-border);
+	border: 0;
+	height: 1px;
+	margin: 0.25rem 0 0.75rem;
+}
+CSS;
+
+	$style = '<style>' . $css . '</style>';
+	$replaced = preg_replace('#<style\b[^>]*>.*?</style>#s', $style, $html, 1, $count);
+	if($count === 1)
+		$html = $replaced;
+
+	$html = preg_replace('#<html\b#', '<html data-bs-theme="' . $theme . '"', $html, 1);
+	return $html;
+}
 ?>

@@ -51,6 +51,13 @@ $null = null;
  * page menu (folders)
  */
 list($folderList, $pageMenu) = $mailbox->GetPageFolderList();
+list($ownFolderList, $sharedFolderMenus) = $mailbox->SplitSidebarFolderMenus($pageMenu);
 $tpl->assign('folderList', $pageMenu);
+$tpl->assign('ownFolderList', $ownFolderList);
+$tpl->assign('sharedFolderMenus', $sharedFolderMenus);
+$tpl->assign('mailboxEmail', DecodeEMail($userRow['email']));
 $tpl->assign('pageMenuFile', 'li/email.sidebar.tpl');
 $tpl->assign('hasWebdisk', isset($groupRow['webdisk']) && (int)$groupRow['webdisk'] > 0);
+$tpl->assign('folderFavorites', $mailbox->GetFavoriteFolderList());
+$tpl->assign('folderFavoriteIDs', $mailbox->GetFolderFavoriteIDs());
+$tpl->assign('currentFolderID', isset($_REQUEST['folder']) ? (int)$_REQUEST['folder'] : false);

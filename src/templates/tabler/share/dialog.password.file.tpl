@@ -6,12 +6,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>{lng p="protectedfolder"}</title>
 
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
-	<link rel="icon" href="{$selfurl}favicon.ico" type="image/x-icon" />
+	{include file="nli/favicon.tpl"}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
 	<link rel="stylesheet" href="{$tpldir}style/share.css?{fileDateSig file="style/share.css"}" />
+	{include file="nli/theme-brand.tpl"}
 
 	<script src="{$selfurl}clientlang.php"></script>
 </head>

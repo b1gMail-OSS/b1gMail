@@ -29,9 +29,8 @@
 							<input class="form-check-input m-0" type="checkbox" id="from_unlim" name="von_unlim"{if $coupon.von==-1} checked="checked"{/if} />
                         </span>
 					<span class="input-group-text">{lng p="now"} {lng p="or"}</span>
-					{if $coupon.von!=-1}{html_select_date prefix="von" start_year="-5" field_order="DMY" field_separator="." time=$coupon.von},
-						{html_select_time prefix="von" display_seconds=false time=$coupon.von}{else}{html_select_date prefix="von" start_year="-5" field_order="DMY" field_separator="."},
-						{html_select_time prefix="von" display_seconds=false}{/if}
+					<input type="text" class="form-control" id="coupon-von" name="von" data-bs-toggle="datepicker" data-bs-position-element="#coupon-von" data-bm-datetime="1" data-bs-date-format="DD.MM.YYYY" data-bs-locale="de" autocomplete="off" value="{if $coupon.von!=-1}{date timestamp=$coupon.von format="d.m.Y H:i"}{else}{date timestamp=$smarty.now format="d.m.Y H:i"}{/if}" placeholder="TT.MM.JJJJ HH:MM">
+					<label class="input-group-text mb-0" for="coupon-von"><i class="icon ti ti-calendar-time"></i></label>
 				</div>
 			</div>
 		</div>
@@ -43,9 +42,8 @@
 							<input class="form-check-input m-0" type="checkbox" id="to_unlim" name="bis_unlim"{if $coupon.bis==-1} checked="checked"{/if} />
                         </span>
 					<span class="input-group-text">{lng p="now"} {lng p="or"}</span>
-					{if $coupon.bis!=-1}{html_select_date prefix="bis" end_year="+5" field_order="DMY" field_separator="." time=$coupon.bis},
-						{html_select_time prefix="bis" display_seconds=false time=$coupon.bis}{else}{html_select_date prefix="bis" end_year="+5" field_order="DMY" field_separator="."},
-						{html_select_time prefix="bis" display_seconds=false}{/if}
+					<input type="text" class="form-control" id="coupon-bis" name="bis" data-bs-toggle="datepicker" data-bs-position-element="#coupon-bis" data-bm-datetime="1" data-bs-date-format="DD.MM.YYYY" data-bs-locale="de" autocomplete="off" value="{if $coupon.bis!=-1}{date timestamp=$coupon.bis format="d.m.Y H:i"}{else}{date timestamp=$smarty.now format="d.m.Y H:i"}{/if}" placeholder="TT.MM.JJJJ HH:MM">
+					<label class="input-group-text mb-0" for="coupon-bis"><i class="icon ti ti-calendar-time"></i></label>
 				</div>
 			</div>
 		</div>

@@ -196,16 +196,86 @@ else if($_REQUEST['action'] == 'antispam')
  */
 else if($_REQUEST['action'] == 'antivirus')
 {
+	$defaultSocket = '/var/run/clamav/clamd.ctl';
+
 	if(isset($_REQUEST['save']))
 	{
+		$mode = isset($_REQUEST['clamd_mode']) ? trim((string)$_REQUEST['clamd_mode']) : 'off';
+		if(!in_array($mode, array('off', 'socket', 'tcp'), true))
+			$mode = 'off';
+
+		$host = isset($bm_prefs['clamd_host']) ? $bm_prefs['clamd_host'] : '127.0.0.1';
+		$port = isset($bm_prefs['clamd_port']) ? (int)$bm_prefs['clamd_port'] : 3310;
+		$use = 'no';
+
+		if($mode === 'socket')
+		{
+			$use = 'yes';
+			$host = isset($_REQUEST['clamd_socket']) ? trim((string)$_REQUEST['clamd_socket']) : '';
+			if($host === '')
+				$host = $defaultSocket;
+			$port = 0;
+		}
+		else if($mode === 'tcp')
+		{
+			$use = 'yes';
+			$host = isset($_REQUEST['clamd_host']) ? trim((string)$_REQUEST['clamd_host']) : '127.0.0.1';
+			if($host === '')
+				$host = '127.0.0.1';
+			$port = isset($_REQUEST['clamd_port']) ? (int)$_REQUEST['clamd_port'] : 3310;
+			if($port < 1 || $port > 65535)
+				$port = 3310;
+		}
+
 		$db->Query('UPDATE {pre}prefs SET use_clamd=?,clamd_host=?,clamd_port=?',
-			isset($_REQUEST['use_clamd']) ? 'yes' : 'no',
-			$_REQUEST['clamd_host'],
-			(int)$_REQUEST['clamd_port']);
+			$use,
+			$host,
+			$port);
 		ReadConfig();
 	}
 
-	// assign
+	$host = isset($bm_prefs['clamd_host']) ? trim((string)$bm_prefs['clamd_host']) : '';
+	$port = isset($bm_prefs['clamd_port']) ? (int)$bm_prefs['clamd_port'] : 3310;
+	$isSocketHost = ($host !== '' && ($host[0] === '/' || stripos($host, 'unix:') === 0));
+
+	$clamdMode = 'off';
+	if(isset($bm_prefs['use_clamd']) && $bm_prefs['use_clamd'] === 'yes')
+		$clamdMode = $isSocketHost ? 'socket' : 'tcp';
+
+	$clamdSocketPath = $isSocketHost ? $host : $defaultSocket;
+	if(stripos($clamdSocketPath, 'unix://') === 0)
+		$clamdSocketPath = substr($clamdSocketPath, 7);
+	else if(stripos($clamdSocketPath, 'unix:') === 0)
+		$clamdSocketPath = substr($clamdSocketPath, 5);
+
+	// Real reachability as the PHP/web user (file_exists often fails when
+	// /run/clamav is 750 clamav:clamav even though the socket itself is 666).
+	$clamdSocketAvailable = false;
+	$clamdSocketErr = '';
+	$testSock = @stream_socket_client('unix://' . $clamdSocketPath, $errNo, $errStr, 1);
+	if(is_resource($testSock))
+	{
+		@fwrite($testSock, "nPING\n");
+		$pong = trim((string)@fgets($testSock));
+		fclose($testSock);
+		$clamdSocketAvailable = ($pong === 'PONG');
+		if(!$clamdSocketAvailable)
+			$clamdSocketErr = $pong !== '' ? $pong : 'no PONG';
+	}
+	else
+	{
+		$clamdSocketErr = trim($errStr !== '' ? $errStr : ('errno ' . (int)$errNo));
+	}
+
+	$clamdTcpHost = $isSocketHost ? '127.0.0.1' : ($host !== '' ? $host : '127.0.0.1');
+	$clamdTcpPort = (!$isSocketHost && $port > 0) ? $port : 3310;
+
+	$tpl->assign('clamdMode', $clamdMode);
+	$tpl->assign('clamdSocketPath', $clamdSocketPath);
+	$tpl->assign('clamdSocketAvailable', $clamdSocketAvailable);
+	$tpl->assign('clamdSocketErr', $clamdSocketErr);
+	$tpl->assign('clamdTcpHost', $clamdTcpHost);
+	$tpl->assign('clamdTcpPort', $clamdTcpPort);
 	$tpl->assign('page', 'prefs.email.antivirus.tpl');
 }
 

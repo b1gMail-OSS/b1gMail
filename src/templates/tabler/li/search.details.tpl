@@ -1,119 +1,135 @@
-<div id="contentHeader">
-	<div class="left">
-		<i class="fa fa-search" aria-hidden="true"></i>
-		{lng p="search"}: {text value=$q}
+{if !isset($sortOrderInv)}{assign var=sortOrderInv value='asc'}{/if}
+{if !isset($sortColumn)}{assign var=sortColumn value=''}{/if}
+{if !isset($sortOrder)}{assign var=sortOrder value=''}{/if}
+
+<div class="bm-search-page">
+	<div id="contentHeader" class="contentHeader bm-organizer-header">
+		<div class="left">
+			<i class="ti ti-search icon icon-sm" aria-hidden="true"></i>
+			{lng p="search"}{if $q}: {text value=$q}{/if}
+		</div>
 	</div>
-</div>
 
-<form name="f1" method="post" action="search.php?q={text value=$encodedQ}{$sessionUrlSuffix}">
-	{csrffield}
-<input type="hidden" name="do" value="massAction" />
+	<form class="bm-search-form" name="f1" method="post" action="search.php?q={text value=$encodedQ|default:''}{$sessionUrlSuffix}">
+		{csrffield}
+		<input type="hidden" name="do" value="massAction" />
 
-<div class="scrollContainer withBottomBar">
-<table class="bigTable">
-	<colgroup>
-		<col style="width:24px;" />
-		<col style="width:24px;" />
-		<col style="" />
-		<col style="width:130px;" />
-		<col style="width:75px;" />
-		<col style="width:75px;" />
-	</colgroup>
+		<div class="scrollContainer withBottomBar bm-search-body">
+			<div class="table-responsive">
+				<table class="table table-vcenter table-hover card-table bm-search-table">
+					<thead>
+					<tr>
+						<th class="bm-search-col-check">&nbsp;</th>
+						<th class="bm-search-col-icon">&nbsp;</th>
+						<th>
+							<a class="bm-search-sort" href="#" onclick="changeSearchSort('title','{$sortOrderInv}');return false;">{lng p="title"}</a>
+							{if $sortColumn=='title'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
+						</th>
+						<th class="bm-search-col-date">
+							<a class="bm-search-sort" href="#" onclick="changeSearchSort('date','{$sortOrderInv}');return false;">{lng p="date"}</a>
+							{if $sortColumn=='date'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
+						</th>
+						<th class="bm-search-col-size">
+							<a class="bm-search-sort" href="#" onclick="changeSearchSort('size','{$sortOrderInv}');return false;">{lng p="size"}</a>
+							{if $sortColumn=='size'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
+						</th>
+						<th class="bm-search-col-score">
+							<a class="bm-search-sort" href="#" onclick="changeSearchSort('score','{$sortOrderInv}');return false;">{lng p="relevance"}</a>
+							{if $sortColumn=='score'}<i class="ti ti-arrow-{if $sortOrder=='fa-arrow-down'}down{else}up{/if} icon icon-sm ms-1 text-primary" aria-hidden="true"></i>{/if}
+						</th>
+					</tr>
+					</thead>
 
-	<tr>
-		<th colspan="2">&nbsp;</th>
-		<th><a href="#" onclick="changeSearchSort('title','{$sortOrderInv}');">{lng p="title"}</a>
-			{if isset($sortColumn) && $sortColumn=='title'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
-		<th><a href="#" onclick="changeSearchSort('date','{$sortOrderInv}');">{lng p="date"}</a>
-			{if isset($sortColumn) && $sortColumn=='date'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
-		<th><a href="#" onclick="changeSearchSort('size','{$sortOrderInv}');">{lng p="size"}</a>
-			{if isset($sortColumn) && $sortColumn=='size'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
-		<th><a href="#" onclick="changeSearchSort('score','{$sortOrderInv}');">{lng p="relevance"}</a>
-			{if isset($sortColumn) && $sortColumn=='score'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}</th>
-	</tr>
-	
-	{if isset($results)}
-	{foreach from=$results item=resultCat key=resultCatID}
-	<tr>
-		<td width="24" align="center" class="folderGroup">
-			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0"{if !isset($resultCat.massActions) || !$resultCat.massActions} disabled="disabled"{else} onclick="checkAll(this.checked, document.forms.f1, 'checkbox_{$resultCatID}_');toggleResultMassActions(document.forms.f1, {$resultCatID});"{/if} /></label>
-		</td>
-		<td colspan="5" class="folderGroup">
-			<a style="display:block;" href="javascript:toggleGroup({$resultCatID});">&nbsp;<img id="groupImage_{$resultCatID}" src="{$tpldir}images/contract.png" width="11" height="11" border="0" align="absmiddle" alt="" />
-			&nbsp;{text value=$resultCat.title}</a>
-		</td>
-	</tr>
-	<tbody id="group_{$resultCatID}" style="display:;">
-	{foreach from=$resultCat.results item=result key=resultID}
-	{cycle values="listTableTR,listTableTR2" assign="class"}
-	<tr class="{$class}">
-		<td width="24" align="center">
-			<label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" name="items[{$resultCat.name}][]" id="checkbox_{$resultCatID}_{$resultID}" value="{$result.id|default:''}"{if !isset($resultCat.massActions) || !$resultCat.massActions} disabled="disabled"{/if} onchange="toggleResultMassActions(document.forms.f1, {$resultCatID});" /></label>
-		</td>
-		<td width="24">
-			<i class="fa {if !empty($result.icon)}{$result.icon}{else}{$resultCat.icon}{/if}" aria-hidden="true"></i>
-		</td>
-		<td nowrap="nowrap" style="padding:4px;">
-			<a title="{text value=$result.title}" href="{if !empty($result.extLink)}{$result.extLink}{else}{$result.link}{/if}"{if !empty($result.extLink)} target="_blank"{/if}>
-				<div style="text-overflow:ellipsis;overflow:hidden;{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">
-					{text value=$result.title}
-				</div>
-				{if !empty($result.excerpt)}<div style="color:#777;text-overflow:ellipsis;overflow:hidden;">{$result.excerpt}</div>{/if}
-			</a>
-		</td>
-		<td width="130"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">{if isset($result.date)}{date timestamp=$result.date nice=true}{/if}</span></td>
-		<td width="75"><span style="{if !empty($result.bold)}font-weight:bold;{/if}{if !empty($result.strike)}text-decoration:line-through;{/if}">{if isset($result.size) && ($result.size||$result.size===0)}{size bytes=$result.size}{/if}</span></td>
-		<td style="text-align:center;">{if !empty($result.score)}{$result.score} %{else}-{/if}</td>
-	</tr>
-	{/foreach}
-	{if isset($resultCat.massActions) && $resultCat.massActions}
-	
-	<tr style="display:none;" id="massActions_{$resultCatID}">
-		<td colspan="6" class="listTableFoot" style="border-bottom:3px double #CCC;">
-			{if $resultCat.icon}<img src="{$tpldir}images/li/{$resultCat.icon}.png" border="0" alt="" width="16" height="16" align="absmiddle" />{/if}
-			
-			<select class="smallInput" name="massAction_{$resultCat.name}">
-				<option value="-">------ {lng p="selaction"} ------</option>
-				
-				{foreach from=$resultCat.massActions item=actionDescription key=actionName}
-				{if is_array($actionDescription)}
-				<optgroup label="{$actionName}">
-					{foreach from=$actionDescription item=realActionDescription key=realActionName}
-					<option value="{$realActionName}">{$realActionDescription}</option>
+					{if isset($results)}
+					{foreach from=$results item=resultCat key=resultCatID}
+					<tbody>
+					<tr class="bm-search-section-row">
+						<td class="bm-search-col-check">
+							<label class="form-check mb-0">
+								<input type="checkbox" class="form-check-input m-0"{if !isset($resultCat.massActions) || !$resultCat.massActions} disabled="disabled"{else} onclick="checkAll(this.checked, document.forms.f1, 'checkbox_{$resultCatID}_');toggleResultMassActions(document.forms.f1, {$resultCatID});"{/if} aria-label="{text value=$resultCat.title}" />
+							</label>
+						</td>
+						<td colspan="5">
+							<button type="button" class="bm-search-section-toggle" onclick="toggleGroup({$resultCatID});">
+								<i class="ti ti-chevron-down icon icon-sm" id="groupImage_{$resultCatID}" aria-hidden="true"></i>
+								{text value=$resultCat.title}
+							</button>
+						</td>
+					</tr>
+					</tbody>
+					<tbody id="group_{$resultCatID}">
+					{foreach from=$resultCat.results item=result key=resultID}
+					<tr>
+						<td class="bm-search-col-check">
+							<label class="form-check mb-0">
+								<input type="checkbox" class="form-check-input m-0" name="items[{$resultCat.name}][]" id="checkbox_{$resultCatID}_{$resultID}" value="{$result.id|default:''}"{if !isset($resultCat.massActions) || !$resultCat.massActions} disabled="disabled"{/if} onchange="toggleResultMassActions(document.forms.f1, {$resultCatID});" aria-label="{text value=$result.title}" />
+							</label>
+						</td>
+						<td class="bm-search-col-icon text-secondary">
+							{if !empty($result.icon)}
+							{include file="li/icon.tpl" faIcon=$result.icon iconClass="icon icon-sm"}
+							{else}
+							{include file="li/icon.tpl" faIcon=$resultCat.icon iconClass="icon icon-sm"}
+							{/if}
+						</td>
+						<td class="bm-search-title">
+							<a title="{text value=$result.title}" href="{if !empty($result.extLink)}{$result.extLink}{else}{$result.link}{/if}"{if !empty($result.extLink)} target="_blank" rel="noopener noreferrer"{/if}>
+								<span class="bm-search-title-text{if !empty($result.bold)} fw-bold{/if}{if !empty($result.strike)} text-decoration-line-through{/if}">{text value=$result.title}</span>
+								{if !empty($result.excerpt)}<span class="bm-search-excerpt">{$result.excerpt}</span>{/if}
+							</a>
+						</td>
+						<td class="bm-search-col-date{if !empty($result.bold)} fw-bold{/if}{if !empty($result.strike)} text-decoration-line-through{/if}">{if isset($result.date)}{date timestamp=$result.date nice=true}{/if}</td>
+						<td class="bm-search-col-size{if !empty($result.bold)} fw-bold{/if}{if !empty($result.strike)} text-decoration-line-through{/if}">{if isset($result.size) && ($result.size||$result.size===0)}{size bytes=$result.size}{/if}</td>
+						<td class="bm-search-col-score text-secondary">{if !empty($result.score)}{$result.score} %{else}&ndash;{/if}</td>
+					</tr>
 					{/foreach}
-				</optgroup>
-				{else}
-				<option value="{$actionName}">{$actionDescription}</option>
-				{/if}
-				{/foreach}
-			</select>
-			
-			<input class="smallInput" type="submit" name="submitMassAction_{$resultCat.name}" value="{lng p="ok"}" />
-		</td>
-	</tr>
-	{/if}
-	</tbody>
-	{/foreach}
-	{else}
-	<tr class="listTableTR">
-		<td colspan="5" align="center">
-			<i>({lng p="nothingfound"})</i>
-		</td>
-	</tr>
-	{/if}
-</table>
-</div>
+					{if isset($resultCat.massActions) && $resultCat.massActions}
+					<tr id="massActions_{$resultCatID}" style="display:none;">
+						<td colspan="6" class="bm-search-mass">
+							<div class="input-group input-group-sm bm-search-action-group">
+								<select class="form-select form-select-sm" name="massAction_{$resultCat.name}" aria-label="{lng p="selaction"}">
+									<option value="-">{lng p="selaction"}</option>
+									{foreach from=$resultCat.massActions item=actionDescription key=actionName}
+									{if is_array($actionDescription)}
+									<optgroup label="{$actionName}">
+										{foreach from=$actionDescription item=realActionDescription key=realActionName}
+										<option value="{$realActionName}">{$realActionDescription}</option>
+										{/foreach}
+									</optgroup>
+									{else}
+									<option value="{$actionName}">{$actionDescription}</option>
+									{/if}
+									{/foreach}
+								</select>
+								<button type="submit" class="btn btn-sm btn-primary" name="submitMassAction_{$resultCat.name}">{lng p="ok"}</button>
+							</div>
+						</td>
+					</tr>
+					{/if}
+					</tbody>
+					{/foreach}
+					{else}
+					<tbody>
+					<tr>
+						<td colspan="6" class="bm-search-empty">{lng p="nothingfound"}</td>
+					</tr>
+					</tbody>
+					{/if}
+				</table>
+			</div>
+		</div>
 
-<div id="contentFooter">
-	<div class="right">
-		{lng p="pages"}:
-		&nbsp;
-		<select class="smallInput" onchange="changeSearchPage(this.value)">
-			{section name=page start=0 loop=$pageCount step=1}
-				<option value="{$smarty.section.page.index+1}"{if $pageNo==$smarty.section.page.index+1} selected="selected"{/if}>{$smarty.section.page.index+1}</option>
-			{/section}
-		</select>
-	</div>
+		{if isset($pageCount)}
+		<div id="contentFooter" class="contentFooter bm-search-footer">
+			<div class="right">
+				<label class="bm-search-pages" for="searchPageNo">{lng p="pages"}</label>
+				<select id="searchPageNo" class="form-select form-select-sm" onchange="changeSearchPage(this.value)" aria-label="{lng p="pages"}">
+					{section name=page start=0 loop=$pageCount step=1}
+					<option value="{$smarty.section.page.index+1}"{if $pageNo==$smarty.section.page.index+1} selected="selected"{/if}>{$smarty.section.page.index+1}</option>
+					{/section}
+				</select>
+			</div>
+		</div>
+		{/if}
+	</form>
 </div>
-
-</form>

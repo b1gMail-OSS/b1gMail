@@ -27,7 +27,7 @@
 					<small class="form-hint d-block mt-1">{lng p="avatar_upload_hint"}</small>
 				</form>
 				{if $avatarHasCustom}
-				<form method="post" action="{sessionurl file='prefs.php' params='action=avatar&do=delete'}" class="d-inline">
+				<form method="post" action="{sessionurl file='prefs.php' params='action=avatar&do=delete&csrf_token={$csrfToken}'}" class="d-inline">
 					{csrffield}
 					<input type="hidden" name="action" value="avatar" />
 					<input type="hidden" name="do" value="delete" />

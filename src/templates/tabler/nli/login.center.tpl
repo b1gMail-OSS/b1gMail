@@ -27,7 +27,7 @@
 		{/if}
 
 		<div class="text-center text-secondary mt-3 small">
-			<div>&copy; {$year} {$service_title}</div>
+			<div>{include file="nli/copyright.tpl"}</div>
 			<div class="mt-1">
 				<a href="{$nliUrlFaq}" class="text-secondary">{lng p="faq"}</a>
 				<span class="mx-1">·</span>

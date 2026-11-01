@@ -36,6 +36,17 @@
 		<p class="text-secondary small mb-3">{text value=$ev.text cut=500}</p>
 		{/if}
 
+		{if $calendarCount>1}
+		<div class="mb-3">
+			<label class="form-label" for="bmMailRsvpCalendar">{lng p="calendar"}</label>
+			<select class="form-select" id="bmMailRsvpCalendar">
+			{foreach from=$calendars key=calID item=cal}
+				<option value="{$calID}"{if $calID==$defaultCalendarID} selected="selected"{/if}>{text value=$cal.title}</option>
+			{/foreach}
+			</select>
+		</div>
+		{/if}
+
 		{if !isset($calendarInviteCard.canReply) || $calendarInviteCard.canReply}
 		<div class="mb-3">
 			<label class="form-label" for="bmMailRsvpComment">{lng p="mail_att_rsvp_comment"}</label>

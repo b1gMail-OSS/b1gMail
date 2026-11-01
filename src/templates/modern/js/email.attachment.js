@@ -149,6 +149,10 @@ function mailCalendarRsvp(partstat, card)
 	if(comment)
 		url += '&comment=' + encodeURIComponent(comment);
 
+	var calEl = card.querySelector('#bmMailRsvpCalendar');
+	if(calEl && calEl.value)
+		url += '&calendar=' + encodeURIComponent(calEl.value);
+
 	xhr.open('GET', url, true);
 	xhr.onreadystatechange = function()
 	{

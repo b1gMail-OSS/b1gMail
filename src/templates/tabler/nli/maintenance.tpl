@@ -16,7 +16,7 @@
 		</div>
 
 		<div class="text-center text-secondary mt-4 small">
-			{if isset($year)}&copy; {$year} {/if}{$service_title}
+			{include file="nli/copyright.tpl"}
 		</div>
 	</div>
 </div>

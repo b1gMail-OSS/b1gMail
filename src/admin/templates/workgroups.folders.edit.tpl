@@ -5,7 +5,7 @@
 		
 		<table width="100%">
 			<tr>
-				<td width="40" valign="top" rowspan="2"><img src="{$tpldir}images/workgroup_mail32.png" border="0" alt="" width="32" height="32" /></td>
+				<td width="40" valign="top" rowspan="2">{acpicon file="workgroup_mail32.png" size="lg"}</td>
 				<td class="td1" width="130">{lng p="title"}:</td>
 				<td class="td2"><input type="text" name="titel" value="{if isset($folder.titel)}{text value=$folder.titel}{/if}" style="width:85%;" /></td>
 			</tr>
@@ -30,7 +30,7 @@
 			{foreach from=$groups item=group key=groupID}
 			{cycle name=class values="td1,td2" assign=class}
 			<tr class="{$class}">
-				<td><img src="{$tpldir}images/ico_workgroup.png" border="0" width="16" height="16" alt="" align="absmiddle" /> {text value=$group.title}</td>
+				<td>{acpicon file="ico_workgroup.png"} {text value=$group.title}</td>
 				<td style="text-align:center;"><input type="radio" name="groups[{$group.id}]" value="no" {if !$folder.groups.$groupID} checked="checked"{/if} /></td>
 				<td style="text-align:center;"><input type="radio" name="groups[{$group.id}]" value="ro" {if $folder.groups.$groupID=='ro'} checked="checked"{/if} /></td>
 				<td style="text-align:center;"><input type="radio" name="groups[{$group.id}]" value="rw" {if $folder.groups.$groupID=='rw'} checked="checked"{/if} /></td>

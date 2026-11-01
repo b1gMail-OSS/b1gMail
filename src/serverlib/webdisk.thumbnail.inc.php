@@ -708,7 +708,7 @@ function WebdiskProcessUploadedFileEntry($webdisk, $folderID, $entry, $maxUpload
 
 	$sourceFP = fopen($tempFileName, 'rb');
 	if(!$sourceFP
-		|| !BMBlobStorage::createDefaultWebdiskProvider($userRow['id'])->storeBlob(BMBLOB_TYPE_WEBDISK, $fileID, $sourceFP))
+		|| !BMBlobStorage::createDefaultWebdiskProvider($webdisk->_userID)->storeBlob(BMBLOB_TYPE_WEBDISK, $fileID, $sourceFP))
 	{
 		if($sourceFP)
 			fclose($sourceFP);

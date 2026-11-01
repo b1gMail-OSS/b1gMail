@@ -46,6 +46,47 @@ $templateInfo = array(
 			),
 			'default'	=> 'login_bg_3.png'
 		),
+		'customSplash'	=> array(
+			'title'		=> $lang_admin['customsplash'] . ':',
+			'type'		=> FIELD_IMAGE,
+			'default'	=> '',
+			'fallbackPrefix' => 'images/nli/',
+			'hint'		=> $lang_admin['customsplashhint']
+		),
+		'customLogo'	=> array(
+			'title'		=> $lang_admin['tpllogolight'] . ':',
+			'type'		=> FIELD_IMAGE,
+			'default'	=> '',
+			'fallback'	=> 'images/logo.png',
+			'hint'		=> $lang_admin['tpllogolighthint']
+		),
+		'customLogoDark'	=> array(
+			'title'		=> $lang_admin['tpllogodark'] . ':',
+			'type'		=> FIELD_IMAGE,
+			'default'	=> '',
+			'fallback'	=> 'images/logo.png',
+			'hint'		=> $lang_admin['tpllogodarkhint']
+		),
+		'customFavicon'	=> array(
+			'title'		=> $lang_admin['tplfavicon'] . ':',
+			'type'		=> FIELD_IMAGE,
+			'default'	=> '',
+			'hint'		=> $lang_admin['tplfaviconhint']
+		),
+		'copyright'		=> array(
+			'title'		=> $lang_admin['tplcopyright'] . ':',
+			'type'		=> FIELD_TEXT,
+			'default'	=> '',
+			'maxlength'	=> 180,
+			'hint'		=> $lang_admin['tplcopyrighthint']
+		),
+		'primaryColor'	=> array(
+			'title'		=> $lang_admin['tplprimary'] . ':',
+			'type'		=> FIELD_TEXT,
+			'input'		=> 'color',
+			'default'	=> '',
+			'hint'		=> $lang_admin['tplprimaryhint']
+		),
 		'hideSignup'	=> array(
 			'title'		=> $lang_admin['hidesignup'] . '?',
 			'type'		=> FIELD_CHECKBOX,

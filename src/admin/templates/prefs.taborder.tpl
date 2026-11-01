@@ -10,7 +10,7 @@
 					<thead>
 					<tr>
 						<th colspan="2">{lng p="title"}</th>
-						<th style="width: 80px;">{lng p="pos"}</th>
+						<th style="width: 6.5rem;">{lng p="pos"}</th>
 					</tr>
 					</thead>
 					<tbody>
@@ -20,7 +20,7 @@
 							<td style="width: 20px; text-align: center;">
 								<i class="fa {$tab.faIcon}" aria-hidden="true"></i></td>
 							<td>{if isset($tab.text)}{text value=$tab.text}{else}-{/if}</td>
-							<td><input type="text" name="order[{$tabKey}]" value="{$tab.order}" size="6" /></td>
+							<td><input type="number" class="form-control form-control-sm" name="order[{$tabKey}]" value="{$tab.order}" /></td>
 						</tr>
 					{/foreach}
 					</tbody>

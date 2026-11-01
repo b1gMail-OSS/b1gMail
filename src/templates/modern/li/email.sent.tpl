@@ -21,6 +21,16 @@
 			<br /><br />
 			<form action="{sessionurl file='organizer.addressbook.php' params='action=quickAdd'}" method="post" onsubmit="return ajaxFormSubmit(this);">
 				{csrffield}
+				{if $addressbookCount>1}
+				<p>
+					<label for="sentAddressbook">{lng p="addressbook"}:</label>
+					<select name="addressbook" id="sentAddressbook" onchange="filterSentAddressbookGroups();">
+					{foreach from=$addressbooks key=bookID item=abook}
+						<option value="{$bookID}"{if $bookID==$currentAddressbookID} selected="selected"{/if}>{text value=$abook.title}</option>
+					{/foreach}
+					</select>
+				</p>
+				{/if}
 				{*<table class="listTable">
 					<tr>
 						<th class="listTableHead" width="24">&nbsp;</th>
@@ -72,8 +82,10 @@
 						<td class="listTableLeft"><label>{lng p="groupmember"}:</label></td>
 						<td class="listTableRight">
 							{foreach from=$groups item=group key=groupID}
+								<span class="abGroupRow" data-addressbook="{$group.addressbook_id}">
 								<input type="checkbox" id="group_{$i}_{$groupID}" name="addr[{$i}][groups][]" value="{$groupID}" />
 								<label for="group_{$i}_{$groupID}">{text value=$group.title cut=18}</label><br />
+								</span>
 							{/foreach}
 						</td>
 					</tr>{/if}
@@ -86,3 +98,26 @@
 	</tr>
 	{/if}
 </table>
+<script>
+<!--
+function filterSentAddressbookGroups()
+{
+	var sel = document.getElementById('sentAddressbook'),
+		bid = sel ? String(sel.value) : '{$currentAddressbookID}',
+		rows = document.querySelectorAll('.abGroupRow'), i, inp;
+	for(i=0; i<rows.length; i++)
+	{
+		if(!bid || rows[i].getAttribute('data-addressbook') == bid)
+			rows[i].style.display = '';
+		else
+		{
+			rows[i].style.display = 'none';
+			inp = rows[i].querySelector('input[type=checkbox]');
+			if(inp)
+				inp.checked = false;
+		}
+	}
+}
+filterSentAddressbookGroups();
+//-->
+</script>

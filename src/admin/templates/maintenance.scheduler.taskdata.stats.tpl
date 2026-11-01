@@ -1,7 +1,7 @@
 <div class="mb-3 row">
-	<label class="col-sm-3 col-form-label" for="sched_stats_days">{lng p="sched.keep_last"}</label>
-	<div class="col-sm-9">
-		<div class="input-group" style="max-width:12rem;">
+	<label class="col-sm-2 col-form-label" for="sched_stats_days">{lng p="sched.keep_last"}</label>
+	<div class="col-sm-10">
+		<div class="input-group">
 			<input class="form-control" type="number" min="0" id="sched_stats_days" name="taskdata[days]" value="{if !isset($sched_data.taskdata.days)}0{else}{$sched_data.taskdata.days}{/if}" />
 			<span class="input-group-text">{lng p="days"}</span>
 		</div>

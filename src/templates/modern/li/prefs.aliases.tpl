@@ -36,7 +36,7 @@
 		<td class="{if $sortColumn=='type'}listTableTDActive{else}{$class}{/if}">&nbsp;{$alias.typeText}</td>
 		<td class="{$class}" nowrap="nowrap">
 			<a href="{sessionurl file='prefs.php' params="action=aliases&do=edit&id={$aliasID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=aliases&do=delete&id={$aliasID}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=aliases&do=delete&id={$aliasID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
 	{/foreach}

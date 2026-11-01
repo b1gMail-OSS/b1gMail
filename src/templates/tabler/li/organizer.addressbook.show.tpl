@@ -1,7 +1,11 @@
 <div class="bm-organizer-address-detail">
 	<div class="bm-organizer-address-detail-body">
 		<div class="d-flex align-items-start gap-3 mb-4">
-			<span class="avatar avatar-lg bm-organizer-address-avatar" style="background-image: url({if !$contact || $contact.picture==''}{$tpldir}images/li/no_picture.png{else}organizer.addressbook.php?action=addressbookPicture&id={$contact.id}{$sessionUrlSuffix}{/if});"></span>
+			{if !$contact || $contact.picture==''}
+			<span class="avatar avatar-lg bm-organizer-address-avatar bm-organizer-contact-avatar--empty"><i class="ti ti-user" aria-hidden="true"></i></span>
+			{else}
+			<span class="avatar avatar-lg bm-organizer-address-avatar" style="background-image: url('{sessionurl file='organizer.addressbook.php' params="action=addressbookPicture&id={$contact.id}"}');"></span>
+			{/if}
 			<div class="min-w-0">
 				<h3 class="mb-1">
 					{if !$contact.vorname&&!$contact.nachname&&$contact.firma}

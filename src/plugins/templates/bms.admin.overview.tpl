@@ -114,7 +114,7 @@
 		{foreach from=$notices item=notice}
 			<div class="list-group-item">
 				<div class="d-flex gap-3 align-items-start">
-					<img src="{$tpldir}images/{$notice.type}.png" width="16" height="16" alt="" class="flex-shrink-0 align-self-start object-fit-contain mt-1" />
+					{acpicon file="`$notice.type`.png"}
 					<div class="flex-grow-1">{$notice.text}</div>
 					{if $notice.link}
 					<a href="{sessionurl file=$notice.link}" class="btn btn-sm btn-ghost-secondary" title="{lng p="show"}"><i class="ti ti-arrow-right"></i></a>

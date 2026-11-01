@@ -29,6 +29,20 @@ function PwaIconFindSource()
         B1GMAIL_DIR.'res/favicon.png',
     ];
 
+    if(function_exists('GetTemplatePrefs'))
+    {
+        $prefs = GetTemplatePrefs($bm_prefs['template']);
+        if(is_array($prefs) && function_exists('TemplateAssetFilePath'))
+        {
+            if(!empty($prefs['customFavicon']))
+            {
+                $custom = TemplateAssetFilePath($bm_prefs['template'], 'customFavicon', $prefs['customFavicon']);
+                if($custom)
+                    array_unshift($candidates, $custom);
+            }
+        }
+    }
+
     foreach ($candidates as $path) {
         if (is_file($path) && is_readable($path)) {
             $info = @getimagesize($path);

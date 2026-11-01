@@ -11,7 +11,7 @@
 			<table class="table table-vcenter table-striped">
 				<thead>
 				<tr>
-					<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.getElementById('modsigMassForm'),'sigs[]');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+					<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.getElementById('modsigMassForm'),'sigs[]');">{acpicon file="dot.png" size="sm"}</a></th>
 					<th>{lng p="modsig_signature"}</th>
 					<th style="width: 80px;">{lng p="modsig_html"}?</th>
 					<th style="width: 75px;">{lng p="weight"}</th>
@@ -50,10 +50,9 @@
 			</table>
 		</div>
 		<div class="card-footer">
-			<div style="float: left;">{lng p="action"}:&nbsp;</div>
-			<div style="float: left;">
-				<div class="btn-group btn-group-sm">
-					<select name="massAction" class="form-select form-select-sm" form="modsigMassForm">
+			<div class="input-group input-group-sm bm-mass-action">
+				<span class="input-group-text">{lng p="action"}</span>
+				<select name="massAction" class="form-select form-select-sm" form="modsigMassForm">
 						<option value="-">------------</option>
 						<optgroup label="{lng p="actions"}">
 							<option value="pause">{lng p="pause"}</option>
@@ -61,8 +60,7 @@
 							<option value="delete">{lng p="delete"}</option>
 						</optgroup>
 					</select>
-					<button type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" form="modsigMassForm" onclick="spin(document.getElementById('modsigMassForm'));">{lng p="execute"}</button>
-				</div>
+				<button type="submit" name="executeMassAction" value="{lng p="execute"}" class="btn btn-sm btn-dark-lt" form="modsigMassForm" onclick="spin(document.getElementById('modsigMassForm'));">{lng p="execute"}</button>
 			</div>
 		</div>
 	</div>

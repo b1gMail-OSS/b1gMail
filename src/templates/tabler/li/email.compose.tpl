@@ -107,15 +107,15 @@
 
 		<div class="bm-compose-row bm-compose-row-attachments">
 			<span class="bm-compose-label">{lng p="attachments"}</span>
-			<div class="bm-compose-field d-flex align-items-start gap-2" id="bmComposeAttachments">
+			<div class="bm-compose-field" id="bmComposeAttachments">
 				<input type="hidden" name="attachments" value="{if isset($mail.attachments)}{text value=$mail.attachments allowEmpty=true}{/if}" id="attachments" />
-				<div class="flex-fill">
-					<div id="attachmentList"></div>
+				<div class="input-group input-group-sm">
+					<div id="attachmentList" class="form-control form-control-sm"></div>
+					<button type="button" class="btn btn-outline-secondary" onclick="addAttachment('{$sid}')">
+						<i class="ti ti-paperclip icon" aria-hidden="true"></i>
+						<span class="d-none d-md-inline">{lng p="add"}</span>
+					</button>
 				</div>
-				<button class="btn btn-sm btn-outline-secondary flex-shrink-0" onclick="javascript:addAttachment('{$sid}')" type="button">
-					<i class="ti ti-paperclip icon" aria-hidden="true"></i>
-					{lng p="add"}
-				</button>
 			</div>
 		</div>
 

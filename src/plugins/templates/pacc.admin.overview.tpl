@@ -52,6 +52,12 @@
 					<div class="form-control-plaintext">{$paypalPayments}</div>
 				</div>
 			</div>
+			<div class="row">
+				<label class="col-sm-4 col-form-label">{lng p="pacc_stripe"}</label>
+				<div class="col-sm-8">
+					<div class="form-control-plaintext">{$stripePayments}</div>
+				</div>
+			</div>
 		</div>
 	</div>
 	<p>&nbsp;</p>

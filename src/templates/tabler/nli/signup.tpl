@@ -372,8 +372,15 @@
 
 {if !$nliCompactLayout|default:false}
 		<div id="signupFinishArea" class="bm-signup-finish mt-4">
-			<div class="text-secondary small mb-3">
-				<i class="ti ti-info-circle me-1" aria-hidden="true"></i>
+			<div class="alert alert-info mb-3" role="alert">
+				<div class="alert-icon">
+					{* http://tabler.io/icons/icon/info-circle *}
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="icon alert-icon">
+						<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
+						<path d="M12 9h.01"></path>
+						<path d="M11 12h1v4h1"></path>
+					</svg>
+				</div>
 				{lng p="iprecord"}
 			</div>
 			<p id="signupFinishHint" class="text-secondary small d-none mb-3">{lng p="completesignup"}</p>
@@ -395,13 +402,13 @@
 {include file="nli/signup.page.close.tpl"}
 
 <div class="modal modal-blur fade" id="tosModal" tabindex="-1" role="dialog" aria-labelledby="tosLabel" aria-hidden="true">
-	<div class="modal-dialog">
+	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-bs-dismiss="modal"><span aria-hidden="true">&times;</span><span class="visually-hidden">{lng p="close"}</span></button>
-				<h4 class="modal-title" id="tosLabel">{lng p="tos"}</h4>
+				<h5 class="modal-title" id="tosLabel">{lng p="tos"}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lng p="close"}"></button>
 			</div>
-			<div class="modal-body" style="max-height:400px;overflow-y:auto;">
+			<div class="modal-body">
 				{$tos_html}
 			</div>
 			<div class="modal-footer">

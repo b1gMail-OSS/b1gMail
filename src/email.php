@@ -136,6 +136,11 @@ if($_REQUEST['action'] == 'folder')
 	else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'deleteMail'
 								&& (isset($_REQUEST['id']) || (isset($_REQUEST['ids']) && is_array($_REQUEST['ids']))))
 	{
+		// F2: mail deletion was GET-reachable (single- and bulk-form) —
+		// CSRF <img>/<a>/<script src> attacks could silently trash or
+		// bulk-delete arbitrary mails. Require a CSRF token so classic
+		// <a href> UI keeps working after templates are updated.
+		CsrfEnforceOnStateChange();
 		StartPageOutput();
 
 		if(isset($_REQUEST['id']))
@@ -444,6 +449,9 @@ if($_REQUEST['action'] == 'folder')
 	$tpl->assign('pageNo', $pageNo);
 	$tpl->assign('pageCount', $pageCount);
 	$tpl->assign('folderID', $folderID);
+	$tpl->assign('currentFolderID', $folderID);
+	$tpl->assign('folderIsFavorite', in_array($folderID, $mailbox->GetFolderFavoriteIDs(), true));
+	$tpl->assign('folderCanLeave', isset($folderList[$folderID]) && !empty($folderList[$folderID]['can_leave']));
 	$tpl->assign('folderString', sprintf('folder=%d&sort=%s&order=%s&page=%d',
 											$folderID, $sortColumn, $sortOrder, $pageNo));
 	$tpl->assign('mailList', $mailList);
@@ -474,15 +482,16 @@ if($_REQUEST['action'] == 'folder')
 		else
 			$html = $tpl->fetch('li/email.folder.contents.tpl');
 		header('Content-Type: application/json; charset="' . $currentCharset . '"');
-		echo '{ ' . "\n";
-		echo "\t\"id\": " . $folderID . ",\n";
-		echo "\t\"windowTitle\": \"" . addslashes(DecodeHTMLEntities($folderTitle) . ' - ' . $bm_prefs['titel']) . "\",\n";
-		echo "\t\"sortColumn\": \"$sortColumn\",\n";
-		echo "\t\"sortOrder\": \"$sortOrder\",\n";
-		echo "\t\"pageNo\": $pageNo,\n";
-		echo "\t\"pageCount\": $pageCount,\n";
-		echo "\t\"html\": \"" . str_replace(array("\r\n", "\r", "\n", "\t"), ' ', addslashes($html)) . "\"\n";
-		echo '}' . "\n";
+		// Proper JSON (not addslashes+eval): keeps {csrffield} / form action intact after AJAX folder switches.
+		echo json_encode(array(
+			'id'          => (int)$folderID,
+			'windowTitle' => DecodeHTMLEntities($folderTitle) . ' - ' . $bm_prefs['titel'],
+			'sortColumn'  => $sortColumn,
+			'sortOrder'   => $sortOrder,
+			'pageNo'      => (int)$pageNo,
+			'pageCount'   => (int)$pageCount,
+			'html'        => $html,
+		), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
 	}
 	else
 	{

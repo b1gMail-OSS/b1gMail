@@ -148,57 +148,57 @@
 					<tbody>
 					<tr>
 						<td>{lng p="salutation"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_anrede" value="p"{if $bm_prefs.f_anrede=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_anrede" value="v"{if $bm_prefs.f_anrede=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_anrede" value="n"{if $bm_prefs.f_anrede=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_anrede" value="p"{if $bm_prefs.f_anrede=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_anrede" value="v"{if $bm_prefs.f_anrede=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_anrede" value="n"{if $bm_prefs.f_anrede=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="company"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_company" value="p"{if $bm_prefs.f_company=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_company" value="v"{if $bm_prefs.f_company=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_company" value="n"{if $bm_prefs.f_company=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_company" value="p"{if $bm_prefs.f_company=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_company" value="v"{if $bm_prefs.f_company=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_company" value="n"{if $bm_prefs.f_company=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="taxid"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_taxid" value="p"{if $bm_prefs.f_taxid=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_taxid" value="v"{if $bm_prefs.f_taxid=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_taxid" value="n"{if $bm_prefs.f_taxid=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_taxid" value="p"{if $bm_prefs.f_taxid=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_taxid" value="v"{if $bm_prefs.f_taxid=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_taxid" value="n"{if $bm_prefs.f_taxid=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="address"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_strasse" value="p"{if $bm_prefs.f_strasse=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_strasse" value="v"{if $bm_prefs.f_strasse=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_strasse" value="n"{if $bm_prefs.f_strasse=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_strasse" value="p"{if $bm_prefs.f_strasse=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_strasse" value="v"{if $bm_prefs.f_strasse=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_strasse" value="n"{if $bm_prefs.f_strasse=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="tel"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_telefon" value="p"{if $bm_prefs.f_telefon=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_telefon" value="v"{if $bm_prefs.f_telefon=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_telefon" value="n"{if $bm_prefs.f_telefon=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_telefon" value="p"{if $bm_prefs.f_telefon=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_telefon" value="v"{if $bm_prefs.f_telefon=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_telefon" value="n"{if $bm_prefs.f_telefon=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="fax"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_fax" value="p"{if $bm_prefs.f_fax=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_fax" value="v"{if $bm_prefs.f_fax=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_fax" value="n"{if $bm_prefs.f_fax=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_fax" value="p"{if $bm_prefs.f_fax=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_fax" value="v"{if $bm_prefs.f_fax=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_fax" value="n"{if $bm_prefs.f_fax=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="altmail"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_alternativ" value="p"{if $bm_prefs.f_alternativ=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_alternativ" value="v"{if $bm_prefs.f_alternativ=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_alternativ" value="n"{if $bm_prefs.f_alternativ=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_alternativ" value="p"{if $bm_prefs.f_alternativ=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_alternativ" value="v"{if $bm_prefs.f_alternativ=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_alternativ" value="n"{if $bm_prefs.f_alternativ=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="cellphone"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_mail2sms_nummer" value="p"{if $bm_prefs.f_mail2sms_nummer=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_mail2sms_nummer" value="v"{if $bm_prefs.f_mail2sms_nummer=='v'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" name="f_mail2sms_nummer" value="n"{if $bm_prefs.f_mail2sms_nummer=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_mail2sms_nummer" value="p"{if $bm_prefs.f_mail2sms_nummer=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_mail2sms_nummer" value="v"{if $bm_prefs.f_mail2sms_nummer=='v'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_mail2sms_nummer" value="n"{if $bm_prefs.f_mail2sms_nummer=='n'} checked="checked"{/if} /></td>
 					</tr>
 					<tr>
 						<td>{lng p="safecode"}</td>
-						<td style="text-align:center;"><input type="radio" name="f_safecode" value="p"{if $bm_prefs.f_safecode=='p'} checked="checked"{/if} /></td>
-						<td style="text-align:center;"><input type="radio" disabled="disabled" /></td>
-						<td style="text-align:center;"><input type="radio" name="f_safecode" value="n"{if $bm_prefs.f_safecode=='n'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_safecode" value="p"{if $bm_prefs.f_safecode=='p'} checked="checked"{/if} /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" disabled="disabled" /></td>
+						<td class="text-center"><input class="form-check-input" type="radio" name="f_safecode" value="n"{if $bm_prefs.f_safecode=='n'} checked="checked"{/if} /></td>
 					</tr>
 					</tbody>
 				</table>

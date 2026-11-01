@@ -147,10 +147,7 @@
 	{/if}
 		initDnDUpload(EBID('mainContent'), bmAppendSession('webdisk.php?folder={$folderID}&action=dndUpload'), function() {literal}{{/literal} document.location.href=bmAppendSession('webdisk.php?folder={$folderID}'); {literal}}{/literal});
 		currentWebdiskFolderID = {$folderID};
-		var treeID = webdiskGetTreeIDbyFolderID({$folderID});
-		if(treeID > 0) {
-			webdisk_d.openTo(treeID);
-		}
+		webdiskOpenTreeToFolder({$folderID});
 		initWDSel();
 	</script>
 	{/if}

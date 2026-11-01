@@ -28,7 +28,7 @@ In order to install a development environment, proceed as follows:
 5. Follow the setup instructs
 
 ### System requirements
-PHP 7.2 is minimum requirement. MariaDB as Database is recommended. MySQL 8 and higher is not supported yet.
+PHP 8.1 is minimum requirement. MariaDB as Database is recommended, but MySQL 8 and higher is also supported now.
 
 ## Staying up to date
 When pulling new changes from the server, you will need to update your database
@@ -48,18 +48,6 @@ create a merge request to the main repository and we will review it.
   structure in the commit (you can export it using the `tools/db_struct.php` tool)
 * If your commit requires other DB changes (i.e. change values), include update code
   in the update script (it should be executed when updating to the next major version)
-
-## Migrating from the commercial to the GPL version
-Its important to make a backup of `serverlib/init.inc.php` first. Then upload the files from src to your b1gMail folder. After call `/setup/update.php`.
-Alternatively delete in serverlib the file `version.inc.php` and rename `version.default.inc.php` to `version.inc.php`, upload `tools/db_sync.php` and 
-call `db_sync.php` (maybe you have to change the require path before). In both cases the setup folder must be deleted afterwards.
-
-Open the `serverlib/init.inc.php`, which you backed up. Copy the this value `define('B1GMAIL_SIGNKEY', ''); //Here add signkey from serverlib/init.inc.php` 
-to your `serverlib/config.inc.php`. If you want still use the Toolbox from commercial version, copy these lines to `serverlib/config.inc.php`:
-
-`define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');`  
-`define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');`  
-`define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');`  
 
 ### Plugins from 7.4.0 and older
 A lot of plugins will work, but they are maybe not compatible with PHP 8 and higher. Before upgrade check the compatibility first. b1gMail 7.4.1 itself is compatible with PHP 8 and higher.

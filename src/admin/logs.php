@@ -41,6 +41,21 @@ $tabs = array(
 	)
 );
 
+function bmLogsRequestTime($field, $fallback, $addSeconds = 0)
+{
+	if(isset($_REQUEST[$field.'Day']))
+		return SmartyDateTime($field) + $addSeconds;
+
+	if(isset($_REQUEST[$field]) && is_string($_REQUEST[$field])
+		&& preg_match('/^\d{1,2}\.\d{1,2}\.\d{4}/', trim($_REQUEST[$field])))
+		return SmartyDateTime($field) + $addSeconds;
+
+	if(isset($_REQUEST[$field]) && is_numeric($_REQUEST[$field]))
+		return (int)$_REQUEST[$field];
+
+	return $fallback;
+}
+
 /**
  * logs
  */
@@ -53,12 +68,8 @@ if($_REQUEST['action'] == 'logs')
 		PRIO_WARNING	=> 'warning',
 		PRIO_PLUGIN		=> 'plugin'
 	);
-	$start = isset($_REQUEST['startDay']) ? SmartyDateTime('start')
-				: (isset($_REQUEST['start']) ? (int)$_REQUEST['start']
-					: mktime(0, 0, 0, date('m'), date('d'), date('Y')));
-	$end = isset($_REQUEST['endDay']) ? SmartyDateTime('end') + 59
-				: (isset($_REQUEST['end']) ? (int)$_REQUEST['end']
-					: time());
+	$start = bmLogsRequestTime('start', mktime(0, 0, 0, date('m'), date('d'), date('Y')));
+	$end = bmLogsRequestTime('end', time(), 59);
 	$addQ = isset($_REQUEST['q']) && trim($_REQUEST['q']) != ''
 		? ' AND eintrag LIKE \'%' . $db->Escape($_REQUEST['q']) . '%\''
 		: '';

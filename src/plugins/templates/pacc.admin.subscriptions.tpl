@@ -18,15 +18,15 @@
 				<table class="table table-vcenter table-striped">
 					<thead>
 					<tr>
-						<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'subscriber[');"><img src="{$tpldir}images/dot.png" border="0" alt="" width="10" height="8" /></a></th>
+						<th style="width: 25px; text-align:center;"><a href="javascript:invertSelection(document.forms.f1,'subscriber[');">{acpicon file="dot.png" size="sm"}</a></th>
 						<th><a href="javascript:updateSort('benutzer');">{lng p="user"}
-								{if $sortBy=='benutzer'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='benutzer'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th><a href="javascript:updateSort('paket');">{lng p="pacc_package"}
-								{if $sortBy=='paket'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='paket'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th style="width: 175px;"><a href="javascript:updateSort('letzte_zahlung');">{lng p="pacc_lastpayment"}
-								{if $sortBy=='letzte_zahlung'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='letzte_zahlung'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th style="width: 175px;"><a href="javascript:updateSort('ablauf');">{lng p="pacc_expiration"}
-								{if $sortBy=='ablauf'}<img src="{$tpldir}images/sort_{$sortOrder}.png" border="0" alt="" width="7" height="6" align="absmiddle" />{/if}</a></th>
+								{if $sortBy=='ablauf'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						<th style="width: 45px;">&nbsp;</th>
 					</tr>
 					</thead>
@@ -47,19 +47,17 @@
 					{/foreach}
 				</table>
 			</div>
-			<div class="card-footer">
-				<div style="float: left;">{lng p="action"}:&nbsp;</div>
-				<div style="float: left;">
-					<div class="btn-group btn-group-sm">
-						<select name="massAction" class="form-select form-select-sm">
+			<div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+				<div class="input-group input-group-sm bm-mass-action">
+					<span class="input-group-text">{lng p="action"}</span>
+					<select name="massAction" class="form-select form-select-sm">
 							<option value="-">------------</option>
 							<optgroup label="{lng p="actions"}">
 								<option value="cancel">{lng p="pacc_cancelsubscr"}</option>
 								<option value="extend">{lng p="pacc_extendsubscr"}</option>
 							</optgroup>
 						</select>
-						<button type="submit" name="executeMassAction" value="1" class="btn btn-sm btn-primary">{lng p="execute"}</button>
-					</div>
+					<button type="submit" name="executeMassAction" value="1" class="btn btn-sm btn-primary">{lng p="execute"}</button>
 				</div>
 				<div class="text-end">
 					{lng p="pages"}: {pageNav page=$pageNo pages=$pageCount on=" <span class=\"pageNav\"><b>[.t]</b></span> " off=" <span class=\"pageNav\"><a href=\"javascript:updatePage(.s);\">.t</a></span> "}&nbsp;

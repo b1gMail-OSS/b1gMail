@@ -20,7 +20,7 @@
 	<meta charset="{$charset}" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-	<link rel="shortcut icon" href="{$selfurl}favicon.ico" type="image/x-icon" />
+	{include file="nli/favicon.tpl"}
 	<link rel="stylesheet" href="{$tpldir}css/tabler.min.css?{fileDateSig file="css/tabler.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/tabler-icons.min.css?{fileDateSig file="css/tabler-icons.min.css"}" />
 	<link rel="stylesheet" href="{$tpldir}css/inter.css?{fileDateSig file="css/inter.css"}" />
@@ -39,6 +39,7 @@
 	<script src="{$tpldir}js/loggedin.js?{fileDateSig file="js/loggedin.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/dialog.js?{fileDateSig file="js/dialog.js"}" type="text/javascript"></script>
 	{foreach from=$_jsFiles.li item=_file}<script type="text/javascript" src="{$_file}"></script>{/foreach}
+	{include file="nli/theme-brand.tpl"}
 </head>
 
 <body class="bm-dialog-body{if isset($dialogBodyClass)} {$dialogBodyClass}{/if}"{if isset($dialogOnLoad)} onload="{$dialogOnLoad}"{/if}>

@@ -22,6 +22,13 @@ var clientTZ = (new Date()).getTimezoneOffset() * (-60);
 
 $(document).ready(function()
 {
+	if(window.tabler && tabler.OtpInput)
+	{
+		document.querySelectorAll('.bm-mfa-otp[data-bs-toggle="otp"]').forEach(function(el) {
+			tabler.OtpInput.getOrCreateInstance(el);
+		});
+	}
+
 	if(typeof bmCsrfToken !== 'undefined' && bmCsrfToken)
 	{
 		document.querySelectorAll('form').forEach(function(form)

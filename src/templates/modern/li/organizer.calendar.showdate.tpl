@@ -24,6 +24,9 @@
 		<td><h1><i class="fa fa-calendar-o" aria-hidden="true"></i>
 		{text value=$date.title cut=45}</h1></td>
 		<td align="right" valign="middle">
+			{if $calendarCount>1 && isset($date.calendar_id) && isset($calendars[$date.calendar_id])}
+			<small>{lng p="calendar"}:</small> {text value=$calendars[$date.calendar_id].title} &nbsp;
+			{/if}
 			<small>{lng p="group"}:</small> {text value=$groups[$date.group].title}
 		</td>
 	</tr>
@@ -100,8 +103,10 @@
 		{/if}
 		</div>
 		<div style="float:right">
-			<input type="submit" value=" {lng p="delete"} " onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=deleteDate&id={$date.id}"}';"/>
+			{if $dateWritable}
+			<input type="submit" value=" {lng p="delete"} " onclick="if(confirm('{lng p="realdel"}')) parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=deleteDate&id={$date.id}&csrf_token={$csrfToken}"}';"/>
 			<input type="submit" value=" {lng p="edit"} " onclick="parent.document.location.href='{sessionurl file='organizer.calendar.php' params="action=editDate&id={$date.id}{if $date.repeat_flags!=0}&jumpbackDate={$date.startdate}{/if}"|escape:'javascript'}';" />
+			{/if}
 			<input type="submit" value=" {lng p="close"} " onclick="parent.hideOverlay();" />
 		</div>
 	</div>

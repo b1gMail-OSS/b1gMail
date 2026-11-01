@@ -9,7 +9,7 @@
 	{if $certInfo}
 	<table width="90%">
 		<tr>
-			<td align="left" rowspan="2" valign="top" width="40"><img src="{$tpldir}images/cert32.png" border="0" alt="" width="32" height="32" /></td>
+			<td align="left" rowspan="2" valign="top" width="40">{acpicon file="cert32.png" size="lg"}</td>
 			<td class="td1" width="220">{lng p="bms_certuidcn"}:</td>
 			<td class="td2">{text value=$certInfo.subject.UID}<br />
 							{text value=$certInfo.subject.CN}</td>
@@ -32,7 +32,7 @@
 		
 	<table width="90%">
 		<tr>
-			<td align="left" valign="top" width="40"><img src="{$tpldir}images/certadd32.png" border="0" alt="" width="32" height="32" /></td>
+			<td align="left" valign="top" width="40">{acpicon file="certadd32.png" size="lg"}</td>
 			<td class="td1" width="220">{lng p="bms_certpk"}:</td>
 			<td class="td2">
 				<div style="float:left;">{lng p="bms_certificate"}:<br />

@@ -10,7 +10,7 @@
 	<fieldset>
 		<legend>{$group.title}</legend>
 		
-		<img src="{$tpldir}images/{if $group.icon}{$group.icon}{else}ico_prefs_common{/if}.png" border="0" alt="" width="32" height="32" style="float:left;" />
+		{if $group.icon}{acpicon file="`$group.icon`.png" size="lg"}{else}{acpicon file="ico_prefs_common.png" size="lg"}{/if}
 		<table style="float:left;margin-left:1em;width:80%;">
 		{foreach from=$group.options key=fieldKey item=fieldInfo}
 			<tr>

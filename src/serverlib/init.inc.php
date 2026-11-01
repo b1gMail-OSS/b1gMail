@@ -94,6 +94,9 @@ define('FOLDER_DRAFTS', -3);
 define('FOLDER_SPAM', -4);
 define('FOLDER_TRASH', -5);
 define('FOLDER_ROOT', -128);
+define('FOLDER_SHARE_OWNER_BASE', -1000000);	// virtual sidebar nodes: BASE - ownerId
+define('FOLDER_SHARE_SYS_BASE', -100000000);	// shared system folders: BASE - (ownerId * 8 + slot)
+define('WEBDISK_SHARE_ROOT_BASE', -2000000);	// shared webdisk roots: BASE - ownerId
 define('BMOP_EQUAL', 1);		// filter ops
 define('BMOP_NOTEQUAL', 2);
 define('BMOP_CONTAINS', 3);
@@ -168,6 +171,7 @@ define('CLNDR_WHOLE_DAY', 1);		// calendar flags
 define('CLNDR_REMIND_EMAIL', 2);
 define('CLNDR_REMIND_SMS', 4);
 define('CLNDR_REMIND_NOTIFY', 8);
+define('CLNDR_REMIND_PUSH', 16);
 define('CLNDR_REPEATING_UNTIL_ENDLESS', 1);		// calendar repeat flags
 define('CLNDR_REPEATING_UNTIL_COUNT', 2);
 define('CLNDR_REPEATING_UNTIL_DATE', 4);
@@ -224,6 +228,8 @@ define('PAYMENT_METHOD_BANKTRANSFER', 0);
 define('PAYMENT_METHOD_PAYPAL', 1);
 define('PAYMENT_METHOD_SOFORTUEBERWEISUNG', 2);
 define('PAYMENT_METHOD_SKRILL', 3);
+define('PAYMENT_METHOD_PAYPAL_CHECKOUT', 4);
+define('PAYMENT_METHOD_STRIPE', 5);
 define('ORDER_STATUS_CREATED', 0);
 define('ORDER_STATUS_ACTIVATED', 1);
 define('STORETIME_CRON_INTERVAL', TIME_ONE_HOUR);
@@ -422,6 +428,7 @@ include B1GMAIL_DIR.'serverlib/session.inc.php';
 include_once B1GMAIL_DIR.'serverlib/route.inc.php';
 include B1GMAIL_DIR.'serverlib/passwordhash.inc.php';
 include B1GMAIL_DIR.'serverlib/mfa.inc.php';
+include B1GMAIL_DIR.'serverlib/app_password.inc.php';
 include B1GMAIL_DIR.'serverlib/loginnotify.inc.php';
 include B1GMAIL_DIR.'serverlib/string.inc.php';
 include B1GMAIL_DIR.'serverlib/avatar.inc.php';

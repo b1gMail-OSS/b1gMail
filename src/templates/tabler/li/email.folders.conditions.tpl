@@ -9,7 +9,7 @@
 	<meta http-equiv="content-type" content="text/html; charset={$charset}" />
 	
 	<!-- links -->
-	<link rel="shortcut icon" type="image/png" href="{$selfurl}res/favicon.png" />
+	{include file="nli/favicon.tpl"}
 	<link href="{$tpldir}style/loggedin.css" rel="stylesheet" type="text/css" />
 	
 	<!-- client scripts -->

@@ -34,32 +34,26 @@
 		</tr>
 		{if $localMode}
 		<tr>
-			<td class="listTableLeft"><label for="bayes_border">{lng p="bayesborder"}:</label></td>
+			<td class="listTableLeft"><label id="bayesBorderLabel" for="bayes_border">{lng p="bayesborder"}:</label></td>
 			<td class="listTableRight">
-				<table class="bayesBorderTable">
-					<tr>
-						<td colspan="2">
-							<div class="bayesBorderSlider">
-								<table class="bayesBorderTable2">
-									<td><input type="radio" name="bayes_border" value="98"{if $bayes_border==98} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="96"{if $bayes_border==96} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="94"{if $bayes_border==94} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="92"{if $bayes_border==92} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="90"{if $bayes_border==90} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="88"{if $bayes_border==88} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="84"{if $bayes_border==84} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="80"{if $bayes_border==80} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="75"{if $bayes_border==75} checked="checked"{/if} /></td>
-									<td><input type="radio" name="bayes_border" value="70"{if $bayes_border==70} checked="checked"{/if} /></td>					
-								</table>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td class="bayesBorderLeftTD">{lng p="defensive"}</td>
-						<td class="bayesBorderRightTD">{lng p="aggressive"}</td>
-					</tr>
-				</table>
+				<div class="bm-bayes" role="radiogroup" aria-labelledby="bayesBorderLabel">
+					<div class="bm-bayes-track">
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" id="bayes_border" value="98"{if $bayes_border==98} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="96"{if $bayes_border==96} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="94"{if $bayes_border==94} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="92"{if $bayes_border==92} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="90"{if $bayes_border==90} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="88"{if $bayes_border==88} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="84"{if $bayes_border==84} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="80"{if $bayes_border==80} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="75"{if $bayes_border==75} checked="checked"{/if} /><span></span></label>
+						<label class="bm-bayes-step"><input type="radio" name="bayes_border" value="70"{if $bayes_border==70} checked="checked"{/if} /><span></span></label>
+					</div>
+					<div class="bm-bayes-ends">
+						<span>{lng p="defensive"}</span>
+						<span>{lng p="aggressive"}</span>
+					</div>
+				</div>
 			</td>
 		</tr>
 		{/if}

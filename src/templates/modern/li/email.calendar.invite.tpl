@@ -36,6 +36,17 @@
 		<p class="bm-mail-calendar-notes">{text value=$ev.text cut=500}</p>
 		{/if}
 
+		{if $calendarCount>1}
+		<p>
+			<label for="bmMailRsvpCalendar"><b>{lng p="calendar"}</b></label><br />
+			<select id="bmMailRsvpCalendar">
+			{foreach from=$calendars key=calID item=cal}
+				<option value="{$calID}"{if $calID==$defaultCalendarID} selected="selected"{/if}>{text value=$cal.title}</option>
+			{/foreach}
+			</select>
+		</p>
+		{/if}
+
 		{if !isset($calendarInviteCard.canReply) || $calendarInviteCard.canReply}
 		<p>
 			<label for="bmMailRsvpComment"><b>{lng p="mail_att_rsvp_comment"}</b></label><br />

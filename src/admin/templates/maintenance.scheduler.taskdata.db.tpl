@@ -9,7 +9,7 @@
 		{/foreach}
 	</div>
 	<div class="btn-list mt-2">
-		<button type="button" class="btn btn-sm btn-ghost-secondary" data-sched-toggle="all" data-sched-target="tables">{lng p="sched.select_all"}</button>
-		<button type="button" class="btn btn-sm btn-ghost-secondary" data-sched-toggle="none" data-sched-target="tables">{lng p="sched.select_none"}</button>
+		<button type="button" class="btn btn-sm" data-sched-toggle="all" data-sched-target="tables">{lng p="sched.select_all"}</button>
+		<button type="button" class="btn btn-sm" data-sched-toggle="none" data-sched-target="tables">{lng p="sched.select_none"}</button>
 	</div>
 </div>

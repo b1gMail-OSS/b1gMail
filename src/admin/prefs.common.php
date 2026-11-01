@@ -138,10 +138,23 @@ function PrefsCommonSaveSessionLoginPrefs()
 	$pwHashLiCost = PasswordHashNormalizeCost(isset($_POST['pw_hash_li_cost']) ? $_POST['pw_hash_li_cost'] : 12, $pwHashLiAlgo);
 	$pwHashAdminCost = PasswordHashNormalizeCost(isset($_POST['pw_hash_admin_cost']) ? $_POST['pw_hash_admin_cost'] : 12, $pwHashAdminAlgo);
 
+	$davMode = isset($_POST['app_password_dav_mode']) ? (string)$_POST['app_password_dav_mode'] : 'warn';
+	if(!in_array($davMode, array('off', 'warn', 'enforce', 'strict'), true))
+		$davMode = 'warn';
+
+	$mailMode = isset($_POST['app_password_mail_mode']) ? (string)$_POST['app_password_mail_mode'] : 'off';
+	if(!in_array($mailMode, array('off', 'warn', 'enforce', 'strict'), true))
+		$mailMode = 'off';
+
+	$appPwExpiryDays = isset($_POST['app_password_expiry_days']) ? max(0, (int)$_POST['app_password_expiry_days']) : 0;
+	$appPwMax = isset($_POST['app_password_max_per_user']) ? max(1, (int)$_POST['app_password_max_per_user']) : 20;
+
 	$db->Query('UPDATE {pre}prefs SET session_lifetime=?, session_idle_timeout=?, session_warn_before=?, session_cookie_mode=?, session_url_compat=?, admin_whitelist_ips=?, '
 		. 'pw_hash_li_algo=?, pw_hash_li_cost=?, pw_hash_admin_algo=?, pw_hash_admin_cost=?, '
 		. 'mfa_admin_enable=?, mfa_admin_user_setup=?, mfa_admin_default=?, mfa_admin_required=?, login_notify_admin=?, '
 		. 'mfa_li_enable=?, mfa_li_user_setup=?, mfa_li_default=?, login_notify_li=?, '
+		. 'app_password_enable=?, app_password_dav_mode=?, app_password_mail_enable=?, app_password_mail_mode=?, '
+		. 'app_password_expiry_days=?, app_password_max_per_user=?, dav_require_https=?, '
 		. 'ip_lock=?, cookie_lock=?, domain_combobox=?, logouturl=?, contact_history=?, '
 		. 'ssl_url=?, ssl_login_option=?, ssl_login_enable=?',
 		$sessionLifetime,
@@ -163,6 +176,13 @@ function PrefsCommonSaveSessionLoginPrefs()
 		isset($_POST['mfa_li_user_setup']) ? 'yes' : 'no',
 		$mfaLiDefault,
 		isset($_POST['login_notify_li']) ? 'yes' : 'no',
+		isset($_POST['app_password_enable']) ? 'yes' : 'no',
+		$davMode,
+		isset($_POST['app_password_mail_enable']) ? 'yes' : 'no',
+		$mailMode,
+		$appPwExpiryDays,
+		$appPwMax,
+		isset($_POST['dav_require_https']) ? 'yes' : 'no',
 		isset($_POST['ip_lock']) ? 'yes' : 'no',
 		isset($_POST['cookie_lock']) ? 'yes' : 'no',
 		isset($_POST['domain_combobox']) ? 'yes' : 'no',
@@ -620,19 +640,18 @@ else if($_REQUEST['action'] == 'taborder')
 			'text'		=> $lang_user['sms'],
 			'order'		=> 300
 		),
-		'organizer' => array(
-			'icon'		=> 'organizer',
-			'faIcon'	=> 'fa-calendar',
-			'text'		=> $lang_user['organizer'],
-			'order'		=> 400
-		),
+	);
+
+	$pageTabs = array_merge($pageTabs, RouteOrganizerNavTabs());
+
+	$pageTabs = array_merge($pageTabs, array(
 		'webdisk' => array(
 			'icon'		=> 'webdisk',
 			'faIcon'	=> 'fa-cloud',
 			'text'		=> $lang_user['webdisk'],
 			'order'		=> 500
 		)
-	);
+	));
 
 	if(!isset($groupRow) || !is_array($groupRow))
 		$groupRow = array('id' => $bm_prefs['std_gruppe']);
@@ -667,6 +686,7 @@ else if($_REQUEST['action'] == 'taborder')
 	foreach($tabOrder as $key=>$val)
 		if(isset($pageTabs[$key]))
 			$pageTabs[$key]['order'] = $val;
+	RouteApplyOrganizerTabOrder($pageTabs, $tabOrder);
 
 	// sort by order
 	ModuleFunction('BeforePageTabsAssign', array(&$pageTabs));

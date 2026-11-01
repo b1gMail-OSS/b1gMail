@@ -8,10 +8,8 @@
 		<a href="{sessionurl file='email.folders.php'}"><i class="fa fa-folder-open-o" aria-hidden="true"></i>
 										{lng p="folderadmin"}</a><br />
 	</fieldset>
-	<fieldset>
+	{if $pageTabs.calendar}<fieldset>
 		<legend>{lng p="organizer"}</legend>
-		<a href="{sessionurl file='organizer.php'}"><i class="fa fa-tachometer" aria-hidden="true"></i>
-										{lng p="overview"}</a><br />
 		<a href="{sessionurl file='organizer.calendar.php'}"><i class="fa fa-calendar" aria-hidden="true"></i>
 										{lng p="calendar"}</a><br />
 		<a href="{sessionurl file='organizer.todo.php'}"><i class="fa fa-tasks" aria-hidden="true"></i>
@@ -20,7 +18,7 @@
 										{lng p="addressbook"}</a><br />
 		<a href="{sessionurl file='organizer.notes.php'}"><i class="fa fa-sticky-note-o" aria-hidden="true"></i>
 										{lng p="notes"}</a><br />
-	</fieldset>
+	</fieldset>{/if}
 	{if $pageTabs.webdisk}<fieldset>
 		<legend>{lng p="webdisk"}</legend>
 		<a href="{sessionurl file='webdisk.php'}"><i class="fa fa-cloud" aria-hidden="true"></i>

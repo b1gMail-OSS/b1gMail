@@ -75,11 +75,52 @@ function __bmModalIframeHeight(h)
 	if(!h || h <= 0)
 		return Math.min(Math.max(minBodyH, 360), maxBodyH);
 
-	/* Kompakte Dialoge (z. B. Anlage hinzufügen, inkl. modal-footer) */
+	/* Kompakte Dialoge: angeforderte Höhe nutzen, nicht auf 280px aufblasen */
 	if(h < minBodyH)
-		return Math.min(Math.max(280, h), maxBodyH);
+		return Math.min(Math.max(h, 120), maxBodyH);
 
 	return Math.max(minBodyH, Math.min(h, maxBodyH));
+}
+
+function __bmModalFitIframe(iframe)
+{
+	if(!iframe)
+		return;
+	try
+	{
+		var doc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+		if(!doc || !doc.body)
+			return;
+		if(!doc.body.classList.contains('bm-dialog-organizer-collection'))
+			return;
+		var wrap = doc.querySelector('.bm-organizer-share-outer')
+				|| doc.querySelector('.bm-organizer-share-wrap'),
+			form = doc.querySelector('.bm-organizer-collection-form'),
+			html = doc.documentElement,
+			h = wrap
+				? Math.ceil(Math.max(wrap.scrollHeight || 0, wrap.getBoundingClientRect().height))
+				: (form
+					? Math.ceil(form.getBoundingClientRect().height)
+					: Math.ceil(Math.max(
+						doc.body.scrollHeight || 0,
+						doc.body.offsetHeight || 0,
+						html ? (html.scrollHeight || 0) : 0,
+						html ? (html.offsetHeight || 0) : 0
+					))),
+			windowH = (typeof getDocumentMetrics === 'function')
+				? getDocumentMetrics('windowH')
+				: (window.innerHeight || 600),
+			maxH = Math.floor(windowH * 0.85) - 56,
+			modalEl = iframe.closest('.bm-app-modal');
+		if(h < 80)
+			return;
+		h = Math.min(Math.max(h, 80), maxH);
+		iframe.style.minHeight = '0';
+		iframe.style.height = h + 'px';
+		if(modalEl)
+			modalEl.classList.add('bm-app-modal--compact');
+	}
+	catch(e) {}
 }
 
 function __bmModalCleanup(id)
@@ -160,8 +201,11 @@ function openOverlay(url, name, w, h, clean, noClickHide)
 		dialogMaxW = (w > 0 && typeof getDocumentMetrics === 'function')
 			? Math.min(w, getDocumentMetrics('windowW') - 24)
 			: 0,
-		dialogClass = 'modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down bm-app-modal-dialog' + (sizeClass ? ' ' + sizeClass : ''),
+		dialogClass = 'modal-dialog modal-dialog-centered modal-fullscreen-sm-down bm-app-modal-dialog' + (sizeClass ? ' ' + sizeClass : ''),
 		modalEl, dialogEl, contentEl, headerEl, titleEl, closeBtn, bodyEl, iframeEl, entry, bsModal;
+
+	if(!(h > 0 && h < 320))
+		dialogClass += ' modal-dialog-scrollable';
 
 	modalEl = document.createElement('div');
 	modalEl.className = 'modal modal-blur fade bm-app-modal';
@@ -213,7 +257,12 @@ function openOverlay(url, name, w, h, clean, noClickHide)
 	iframeEl.setAttribute('frameborder', '0');
 	iframeEl.setAttribute('scrolling', 'auto');
 	iframeEl.style.height = iframeH + 'px';
-	iframeEl.style.minHeight = Math.min(iframeH, 280) + 'px';
+	iframeEl.style.minHeight = '0';
+	iframeEl.addEventListener('load', function() {
+		__bmModalFitIframe(iframeEl);
+		window.setTimeout(function() { __bmModalFitIframe(iframeEl); }, 50);
+		window.setTimeout(function() { __bmModalFitIframe(iframeEl); }, 200);
+	});
 
 	bodyEl.appendChild(iframeEl);
 	contentEl.appendChild(headerEl);

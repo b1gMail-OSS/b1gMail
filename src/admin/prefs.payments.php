@@ -57,6 +57,10 @@ $tabs = array(
  */
 if($_REQUEST['action'] == 'common')
 {
+	if(!class_exists('BMPayment'))
+		include(B1GMAIL_DIR . 'serverlib/payment.class.php');
+	BMPayment::EnsureGatewayColumns();
+
 	// sofortueberweisung.de return
 	if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'suBack'
 		&& isset($_REQUEST['user_id'])
@@ -86,7 +90,28 @@ if($_REQUEST['action'] == 'common')
 	// save?
 	if(isset($_REQUEST['save']))
 	{
-		$db->Query('UPDATE {pre}prefs SET `currency`=?,`send_pay_notification`=?,`pay_notification_to`=?,`pay_emailfrom`=?,`pay_emailfromemail`=?,`mwst`=?,`enable_paypal`=?,`paypal_mail`=?,`enable_su`=?,`su_kdnr`=?,`su_prjnr`=?,`su_prjpass`=?,`su_notifypass`=?,`su_inputcheck`=?,`enable_vk`=?,`vk_kto_inh`=?,`vk_kto_nr`=?,`vk_kto_blz`=?,`vk_kto_inst`=?,`vk_kto_iban`=?,`vk_kto_bic`=?,`default_paymethod`=?,`enable_skrill`=?,`skrill_mail`=?,`skrill_secret`=?',
+		$paypalSecret = isset($_REQUEST['paypal_client_secret']) ? trim($_REQUEST['paypal_client_secret']) : '';
+		if($paypalSecret === '')
+			$paypalSecret = isset($bm_prefs['paypal_client_secret']) ? $bm_prefs['paypal_client_secret'] : '';
+
+		$paypalWebhookId = isset($_REQUEST['paypal_webhook_id']) ? trim($_REQUEST['paypal_webhook_id']) : '';
+
+		$stripeSecret = isset($_REQUEST['stripe_secret_key']) ? trim($_REQUEST['stripe_secret_key']) : '';
+		if($stripeSecret === '')
+			$stripeSecret = isset($bm_prefs['stripe_secret_key']) ? $bm_prefs['stripe_secret_key'] : '';
+
+		$stripeWebhookSecret = isset($_REQUEST['stripe_webhook_secret']) ? trim($_REQUEST['stripe_webhook_secret']) : '';
+		if($stripeWebhookSecret === '')
+			$stripeWebhookSecret = isset($bm_prefs['stripe_webhook_secret']) ? $bm_prefs['stripe_webhook_secret'] : '';
+
+		$stripeWebhookId = isset($_REQUEST['stripe_webhook_id']) ? trim($_REQUEST['stripe_webhook_id']) : '';
+
+		$paypalSurchargePercent = BMPayment::NormalizeSurchargePercent(isset($_REQUEST['paypal_surcharge_percent']) ? $_REQUEST['paypal_surcharge_percent'] : 0);
+		$paypalSurchargeFixed = BMPayment::NormalizeSurchargeFixed(isset($_REQUEST['paypal_surcharge_fixed']) ? $_REQUEST['paypal_surcharge_fixed'] : 0);
+		$stripeSurchargePercent = BMPayment::NormalizeSurchargePercent(isset($_REQUEST['stripe_surcharge_percent']) ? $_REQUEST['stripe_surcharge_percent'] : 0);
+		$stripeSurchargeFixed = BMPayment::NormalizeSurchargeFixed(isset($_REQUEST['stripe_surcharge_fixed']) ? $_REQUEST['stripe_surcharge_fixed'] : 0);
+
+		$db->Query('UPDATE {pre}prefs SET `currency`=?,`send_pay_notification`=?,`pay_notification_to`=?,`pay_emailfrom`=?,`pay_emailfromemail`=?,`mwst`=?,`enable_paypal`=?,`paypal_mail`=?,`enable_paypal_checkout`=?,`paypal_client_id`=?,`paypal_client_secret`=?,`paypal_sandbox`=?,`paypal_auto_activate`=?,`paypal_webhook_id`=?,`paypal_surcharge`=?,`paypal_surcharge_percent`=?,`paypal_surcharge_fixed`=?,`paypal_surcharge_cover`=?,`enable_stripe`=?,`stripe_secret_key`=?,`stripe_webhook_secret`=?,`stripe_webhook_id`=?,`stripe_auto_activate`=?,`stripe_enable_twint`=?,`stripe_surcharge`=?,`stripe_surcharge_percent`=?,`stripe_surcharge_fixed`=?,`stripe_surcharge_cover`=?,`enable_su`=?,`su_kdnr`=?,`su_prjnr`=?,`su_prjpass`=?,`su_notifypass`=?,`su_inputcheck`=?,`enable_vk`=?,`vk_kto_inh`=?,`vk_kto_nr`=?,`vk_kto_blz`=?,`vk_kto_inst`=?,`vk_kto_iban`=?,`vk_kto_bic`=?,`default_paymethod`=?,`enable_skrill`=?,`skrill_mail`=?,`skrill_secret`=?',
 			$_REQUEST['currency'],
 			isset($_REQUEST['send_pay_notification']) ? 'yes' : 'no',
 			$_REQUEST['pay_notification_to'],
@@ -95,6 +120,26 @@ if($_REQUEST['action'] == 'common')
 			$_REQUEST['mwst'],
 			isset($_REQUEST['enable_paypal']) ? 'yes' : 'no',
 			$_REQUEST['paypal_mail'],
+			isset($_REQUEST['enable_paypal_checkout']) ? 'yes' : 'no',
+			isset($_REQUEST['paypal_client_id']) ? trim($_REQUEST['paypal_client_id']) : '',
+			$paypalSecret,
+			isset($_REQUEST['paypal_sandbox']) ? 'yes' : 'no',
+			isset($_REQUEST['paypal_auto_activate']) ? 'yes' : 'no',
+			$paypalWebhookId,
+			isset($_REQUEST['paypal_surcharge']) ? 'yes' : 'no',
+			$paypalSurchargePercent,
+			$paypalSurchargeFixed,
+			isset($_REQUEST['paypal_surcharge_cover']) ? 'yes' : 'no',
+			isset($_REQUEST['enable_stripe']) ? 'yes' : 'no',
+			$stripeSecret,
+			$stripeWebhookSecret,
+			$stripeWebhookId,
+			isset($_REQUEST['stripe_auto_activate']) ? 'yes' : 'no',
+			isset($_REQUEST['stripe_enable_twint']) ? 'yes' : 'no',
+			isset($_REQUEST['stripe_surcharge']) ? 'yes' : 'no',
+			$stripeSurchargePercent,
+			$stripeSurchargeFixed,
+			isset($_REQUEST['stripe_surcharge_cover']) ? 'yes' : 'no',
 			isset($_REQUEST['enable_su']) ? 'yes' : 'no',
 			$_REQUEST['su_kdnr'],
 			$_REQUEST['su_prjnr'],
@@ -113,11 +158,84 @@ if($_REQUEST['action'] == 'common')
 			$_REQUEST['skrill_mail'],
 			$_REQUEST['skrill_secret']);
 		ReadConfig();
+
+		$paypalWebhookMsg = '';
+		$paypalWebhookOk = false;
+		if(isset($bm_prefs['enable_paypal_checkout']) && $bm_prefs['enable_paypal_checkout'] == 'yes'
+			&& trim((string)$bm_prefs['paypal_client_id']) != ''
+			&& trim((string)$bm_prefs['paypal_client_secret']) != '')
+		{
+			if(!class_exists('BMPayPal'))
+				include(B1GMAIL_DIR . 'serverlib/paypal.class.php');
+			$hookId = BMPayPal::EnsureWebhook();
+			if($hookId)
+			{
+				if($hookId != $bm_prefs['paypal_webhook_id'])
+				{
+					$db->Query('UPDATE {pre}prefs SET `paypal_webhook_id`=?',
+						$hookId);
+					ReadConfig();
+				}
+				$paypalWebhookOk = true;
+				$paypalWebhookMsg = $lang_admin['paypal_webhook_ok'];
+			}
+			else
+			{
+				$paypalWebhookMsg = $lang_admin['paypal_webhook_err'];
+			}
+		}
+		$tpl->assign('paypalWebhookOk', $paypalWebhookOk);
+		$tpl->assign('paypalWebhookMsg', $paypalWebhookMsg);
+
+		$stripeWebhookMsg = '';
+		$stripeWebhookOk = false;
+		if(isset($bm_prefs['enable_stripe']) && $bm_prefs['enable_stripe'] == 'yes'
+			&& trim((string)$bm_prefs['stripe_secret_key']) != '')
+		{
+			if(!class_exists('BMStripe'))
+				include(B1GMAIL_DIR . 'serverlib/stripe.class.php');
+			$hook = BMStripe::EnsureWebhook();
+			if(is_array($hook) && !empty($hook['id']))
+			{
+				$needUpdate = false;
+				if($hook['id'] != $bm_prefs['stripe_webhook_id'])
+					$needUpdate = true;
+				if(!empty($hook['secret']) && $hook['secret'] != $bm_prefs['stripe_webhook_secret'])
+					$needUpdate = true;
+				if($needUpdate)
+				{
+					$db->Query('UPDATE {pre}prefs SET `stripe_webhook_id`=?,`stripe_webhook_secret`=?',
+						$hook['id'],
+						!empty($hook['secret']) ? $hook['secret'] : $bm_prefs['stripe_webhook_secret']);
+					ReadConfig();
+				}
+				$stripeWebhookOk = true;
+				$stripeWebhookMsg = $lang_admin['stripe_webhook_ok'];
+			}
+			else
+			{
+				$stripeWebhookMsg = $lang_admin['stripe_webhook_err'];
+			}
+		}
+		$tpl->assign('stripeWebhookOk', $stripeWebhookOk);
+		$tpl->assign('stripeWebhookMsg', $stripeWebhookMsg);
 	}
 
 	// assign
 	$tpl->assign('prjPass', 	substr(GenerateRandomKey('sofortueberweisungProjectPassword'), 0, 20));
 	$tpl->assign('notifyPass', 	substr(GenerateRandomKey('sofortueberweisungNotifyPassword'), 0, 20));
+	$tpl->assign('paypalWebhookUrl', rtrim($bm_prefs['selfurl'], '/') . '/interface/paypal_webhook.php');
+	$tpl->assign('stripeWebhookUrl', rtrim($bm_prefs['selfurl'], '/') . '/interface/stripe_webhook.php');
+	if($tpl->getTemplateVars('paypalWebhookMsg') === null)
+	{
+		$tpl->assign('paypalWebhookMsg', '');
+		$tpl->assign('paypalWebhookOk', false);
+	}
+	if($tpl->getTemplateVars('stripeWebhookMsg') === null)
+	{
+		$tpl->assign('stripeWebhookMsg', '');
+		$tpl->assign('stripeWebhookOk', false);
+	}
 	$tpl->assign('page', 		'prefs.payments.common.tpl');
 	$tpl->assign('title', 		$lang_admin['payments'] . ' &raquo; ' . $lang_admin['common']);
 }
@@ -252,7 +370,23 @@ else if($_REQUEST['action'] == 'paymethods')
  */
 else if($_REQUEST['action'] == 'invoices')
 {
-	if(isset($_REQUEST['save']))
+	if(isset($_POST['resetTemplate']))
+	{
+		$defaultFile = B1GMAIL_DIR . 'setup/rgtemplate.tpl';
+		$defaultInvoice = is_readable($defaultFile) ? file_get_contents($defaultFile) : false;
+		if(!is_string($defaultInvoice) || $defaultInvoice === '')
+		{
+			$tpl->assign('rgTemplateResetError', true);
+		}
+		else
+		{
+			$db->Query('UPDATE {pre}prefs SET `rgtemplate`=?', $defaultInvoice);
+			ReadConfig();
+			header('Location: prefs.payments.php?action=invoices&reset=ok&sid=' . session_id());
+			exit();
+		}
+	}
+	else if(isset($_REQUEST['save']))
 	{
 		$db->Query('UPDATE {pre}prefs SET `sendrg`=?,`rgnrfmt`=?,`kdnrfmt`=?,`rgtemplate`=?',
 			isset($_REQUEST['sendrg']) ? 'yes' : 'no',
@@ -261,6 +395,8 @@ else if($_REQUEST['action'] == 'invoices')
 			$_REQUEST['rgtemplate']);
 		ReadConfig();
 	}
+
+	$tpl->assign('rgTemplateReset', isset($_REQUEST['reset']) && $_REQUEST['reset'] === 'ok');
 
 	// assign
 	$tpl->assign('usertpldir', 	B1GMAIL_REL . 'templates/' . $bm_prefs['template'] . '/');

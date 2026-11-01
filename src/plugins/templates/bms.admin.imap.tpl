@@ -110,7 +110,7 @@
 				<td class="td2">
 					<label class="form-check form-check-inline mb-0"><input class="form-check-input" type="checkbox" name="apns_enable"{if $bms_prefs.apns_enable==1} checked="checked"{/if} id="apns_enable"{if !$apnsSet} disabled="disabled"{/if} /><span class="form-check-label" for="apns_enable"><b>{lng p="enable"}</b></span></label>
 					{if !$apnsSet}
-						<img src="{$tpldir}images/warning.png" border="0" alt="" width="16" height="16" align="absmiddle" />
+						{acpicon file="warning.png"}
 						{lng p="bms_apnsnote"}
 					{/if}
 				</td>
@@ -128,7 +128,7 @@
 			<tr>
 				<td class="td1">{lng p="bms_pushcertificate"}:</td>
 				<td class="td2">
-					<img src="{$tpldir}images/{if !$apnsSet||!$apnsValid}delete{else}yes{/if}.png" border="0" alt="" width="16" height="16" align="absmiddle" />
+					{if !$apnsSet||!$apnsValid}{acpicon file="delete.png"}{else}{acpicon file="yes.png"}{/if}
 					{if $apnsSet}
 						{lng p="bms_setvaliduntil"}
 						{date timestamp=$apnsValidUntil dayonly=true}

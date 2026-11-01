@@ -29,7 +29,7 @@
 	<script src="{$selfurl}clientlib/autocomplete.js" type="text/javascript"></script>
 </head>
 
-<body onload="initCalendar()" style="background-color:#FFF;background-image:none;">
+<body onload="initCalendar();initCalendarRangeSelection();" style="background-color:#FFF;background-image:none;">
 	<div id="calendarDayBody">
 		<table class="calendarDayBody">
 		{section name=halfHours start=0 loop=48}
@@ -55,7 +55,8 @@
 	<!--
 		var calendarDayStart = {$dayStart},
 			calendarDayEnd = {$dayEnd},
-			calendarDates = [];
+			calendarDates = [],
+			calendarWeekDays = [{$dateStart}];
 		
 		{foreach from=$dates item=date}
 		{if ($date.flags&1)==0}
@@ -64,7 +65,7 @@
 			{$date.startdate},
 			{$date.enddate},
 			"{text escape=true noentities=true value=$date.title}",
-			{$groups[$date.group].color}
+			{$date.displayColor}
 		]);
 		{/if}
 		{/foreach}

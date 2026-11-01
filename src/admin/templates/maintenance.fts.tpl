@@ -6,9 +6,13 @@
 	<div id="buildForm">
 		<p>{lng p="buildindex_desc"}</p>
 
-		<div style="float: right;"><input class="btn btn-sm btn-warning" type="button" value="{lng p="execute"}" onclick="buildIndex()" /></div>
-		<div style="float: right;"><input type="text" class="form-control form-control-sm" id="buildPerPage" value="50" size="5" />&nbsp; </div>
-		<div style="float: right;">{lng p="opsperpage"}&nbsp; </div>
+		<div class="text-end">
+			<div class="input-group input-group-sm bm-ops-action">
+				<span class="input-group-text">{lng p="opsperpage"}</span>
+				<input type="text" class="form-control" id="buildPerPage" value="50">
+				<button type="button" class="btn btn-primary" onclick="buildIndex()">{lng p="execute"}</button>
+			</div>
+		</div>
 	</div>
 </fieldset>
 
@@ -20,8 +24,12 @@
 	<div id="optimizeForm">
 		<p>{lng p="optimizeindex_desc"}</p>
 
-		<div style="float: right;"><input class="btn btn-sm btn-warning" type="button" value="{lng p="execute"}" onclick="optimizeIndex()" /></div>
-		<div style="float: right;"><input type="text" class="form-control form-control-sm" id="optimizePerPage" value="5" size="5" />&nbsp; </div>
-		<div style="float: right;">{lng p="opsperpage"}&nbsp; </div>
+		<div class="text-end">
+			<div class="input-group input-group-sm bm-ops-action">
+				<span class="input-group-text">{lng p="opsperpage"}</span>
+				<input type="text" class="form-control" id="optimizePerPage" value="5">
+				<button type="button" class="btn btn-primary" onclick="optimizeIndex()">{lng p="execute"}</button>
+			</div>
+		</div>
 	</div>
 </fieldset>
