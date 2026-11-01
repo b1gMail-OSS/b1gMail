@@ -6464,6 +6464,30 @@
 				"",
 				"no",
 				""
+			],
+			[
+				"wd_share_pw_required",
+				"varchar(10)",
+				"NO",
+				"",
+				"no",
+				""
+			],
+			[
+				"wd_share_expiry_required",
+				"varchar(10)",
+				"NO",
+				"",
+				"no",
+				""
+			],
+			[
+				"wd_share_max_days",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
 			]
 		],
 		"indexes": {
