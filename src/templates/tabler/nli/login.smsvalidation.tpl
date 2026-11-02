@@ -39,7 +39,7 @@
 
 {include file="nli/page.close.tpl"}
 
-{if $smarty.post.sms_validation_code}
+{if ($smarty.post.sms_validation_code|default:'')}
 <script>
 <!--
 	markFieldAsInvalid('sms_validation_code');

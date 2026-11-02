@@ -121,7 +121,7 @@
 <script>
 <!--
 	parent.document.getElementById('condition_frame').style.height = max(30, getElementMetrics(EBID('table'), 'h')) + 'px';
-	{if $smarty.request.submitParent}parent.document.formSubmitOK = true;
+	{if ($smarty.request.submitParent|default:'')}parent.document.formSubmitOK = true;
 	parent.document.forms.f1.submit();{/if}
 //-->
 </script>

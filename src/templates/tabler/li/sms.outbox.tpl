@@ -38,8 +38,8 @@
 	<tr>
 		<td class="{$class} bm-sms-col-check"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="sms_{$sms.id}" name="sms_{$sms.id}" /></label></td>
 		<td class="{if $sortColumn=='from'}listTableTDActive{else}{$class}{/if} bm-sms-col-party">
-			<button type="button" class="btn btn-ghost-secondary btn-icon bm-sms-expand" onclick="toggleGroup({$sms.id});" aria-expanded="{if $smarty.request.show==$sms.id}true{else}false{/if}" aria-controls="group_{$sms.id}">
-				<i class="ti ti-chevron-{if $smarty.request.show==$sms.id}down{else}right{/if} icon" id="groupImage_{$sms.id}" aria-hidden="true"></i>
+			<button type="button" class="btn btn-ghost-secondary btn-icon bm-sms-expand" onclick="toggleGroup({$sms.id});" aria-expanded="{if ($smarty.request.show|default:'')==$sms.id}true{else}false{/if}" aria-controls="group_{$sms.id}">
+				<i class="ti ti-chevron-{if ($smarty.request.show|default:'')==$sms.id}down{else}right{/if} icon" id="groupImage_{$sms.id}" aria-hidden="true"></i>
 			</button>
 			<span class="bm-sms-party">{text value=$sms.from}</span>
 		</td>
@@ -51,7 +51,7 @@
 			</div>
 		</td>
 	</tr>
-	<tr id="group_{$sms.id}" style="display:{if $smarty.request.show!=$sms.id}none{/if}">
+	<tr id="group_{$sms.id}" style="display:{if ($smarty.request.show|default:'')!=$sms.id}none{/if}">
 		<td colspan="5" class="listTableTDText bm-sms-outbox-text">{text value=$sms.text}</td>
 	</tr>
 	{/foreach}

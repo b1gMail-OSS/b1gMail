@@ -25,7 +25,7 @@
 				<select class="form-select form-select-sm" id="abLetterFilter" style="width:auto;min-width:4rem;" onchange="document.location.href=bmAppendSession('organizer.addressbook.php?group={$currentGroup}&letter='+this.value);">
 					<option value="">{lng p="all"}</option>
 					{foreach from=$alpha key=key item=letter}
-					<option value="{$key}"{if $smarty.request.letter==$key} selected="selected"{/if}>{$letter}</option>
+					<option value="{$key}"{if ($smarty.request.letter|default:'')==$key} selected="selected"{/if}>{$letter}</option>
 					{/foreach}
 				</select>
 

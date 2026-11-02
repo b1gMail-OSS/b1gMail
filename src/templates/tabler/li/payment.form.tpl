@@ -78,16 +78,16 @@
 			{if $field.type==1}
 				<input type="text" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="{if isset($smarty.post.fields.$methodID.$fieldID)}{text value=$smarty.post.fields.$methodID.$fieldID allowEmpty=true}{/if}" size="40" />
 			{elseif $field.type==2}
-				<label class="form-check mb-0"><input type="checkbox" class="form-check-input" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="true"{if $smarty.post.fields.$methodID.$fieldID} checked="checked"{/if} /></label>
+				<label class="form-check mb-0"><input type="checkbox" class="form-check-input" name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}" value="true"{if ($smarty.post.fields.$methodID.$fieldID|default:'')} checked="checked"{/if} /></label>
 			{elseif $field.type==4}
 				<select name="fields[{$methodID}][{$fieldID}]" id="field_{$methodID}_{$fieldID}">
 					{foreach from=$field.options item=fieldOption}
-					<option value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} selected="selected"{/if}>{text value=$fieldOption}</option>
+					<option value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}"{if ($smarty.post.fields.$methodID.$fieldID|default:'')==$fieldOption} selected="selected"{/if}>{text value=$fieldOption}</option>
 					{/foreach}
 				</select>
 			{elseif $field.type==8}
 				{foreach from=$field.options key=fieldOptionID item=fieldOption}
-					<input type="radio" name="fields[{$methodID}][{$fieldID}]" value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}" id="field_{$methodID}_{$fieldID}_{$fieldOptionID}"{if $smarty.post.fields.$methodID.$fieldID==$fieldOption} checked="checked"{/if} />
+					<input type="radio" name="fields[{$methodID}][{$fieldID}]" value="{if isset($fieldOption)}{text value=$fieldOption allowEmpty=true}{/if}" id="field_{$methodID}_{$fieldID}_{$fieldOptionID}"{if ($smarty.post.fields.$methodID.$fieldID|default:'')==$fieldOption} checked="checked"{/if} />
 					<label for="field_{$methodID}_{$fieldID}_{$fieldOptionID}">{text value=$fieldOption}</label>
 				{/foreach}
 			{elseif $field.type==32}
