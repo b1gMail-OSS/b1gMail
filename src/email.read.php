@@ -357,8 +357,7 @@ if($_REQUEST['action'] == 'read'
 		}
 		else if(isset($_REQUEST['print']))
 		{
-			if($textMode == 'html')
-				if($textMode == 'html') {
+			if($textMode == 'html') {
 				// Remove a-tag for security reasons (prevent Session hijacking and hide internal b1gmail links)
 				$textnolink = formatEMailHTMLText(isset($textParts['html']) ? $textParts['html'] : '', $enableExternal || $mail->IsTrusted(), $attachments, (int)$_REQUEST['id']);
 				$textnolink = preg_replace('/<a.*>(.*)<\/a>/isU','$1',$textnolink);
