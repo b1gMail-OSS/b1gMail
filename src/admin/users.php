@@ -1107,7 +1107,8 @@ else if($_REQUEST['action'] == 'create')
 				'id'		=> $row['id'],
 				'title'		=> $row['feld'],
 				'type'		=> $row['typ'],
-				'extra'		=> explode(',', $row['extra'])
+				'extra'		=> explode(',', $row['extra']),
+				'value'		=> false
 			);
 		$res->Free();
 
