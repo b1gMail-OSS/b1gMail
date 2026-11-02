@@ -844,6 +844,9 @@ function checkAll(check, form, m)
 
 function openWindow(url, name, w, h, clean)
 {
+	if(typeof bmAppendSession === 'function')
+		url = bmAppendSession(url);
+
 	var wa = (screen.width-w)/2;
 	var l = 0;
 	var ha = (screen.height-h)/2 - 60;

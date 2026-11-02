@@ -3065,7 +3065,8 @@ INPUT.primary:disabled
 
 .bm-push-prompt--desktop
 {
-	margin-bottom: 1rem;
+	margin: 0;
+	flex-shrink: 0;
 }
 
 .bm-push-prompt-inner
@@ -3074,10 +3075,11 @@ INPUT.primary:disabled
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 0.75rem 1rem;
-	padding: 0.75rem 1rem;
+	padding: 0.65rem 1rem;
 	background-color: rgba(6, 111, 209, 0.06);
-	border: 1px solid rgba(6, 111, 209, 0.15);
-	border-radius: var(--tblr-border-radius, 4px);
+	border: 0;
+	border-bottom: 1px solid var(--tblr-border-color, #e6e7e9);
+	border-radius: 0;
 }
 
 .bm-push-prompt-icon

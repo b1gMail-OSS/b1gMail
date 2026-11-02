@@ -529,20 +529,37 @@ elseif ($step == STEP_UPDATE_STEP) {
     //
     elseif ($do == 'struct3') {
         $queries = [];
+        $dropColumns = [];
 
         if ($numVersion < 7401) {
-            $queries[] = 'ALTER TABLE '.$mysql['prefix'].'gruppen DROP httpmail';
-            $queries[] = 'ALTER TABLE '.$mysql['prefix'].'gruppen DROP send_limit';
-            $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP steuersatz';
-            $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP mail_send_code';
-            $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP sms_send_code';
-            $queries[] = 'ALTER TABLE '.$mysql['prefix'].'mails DROP body';
+            $dropColumns[] = [$mysql['prefix'].'gruppen', 'httpmail'];
+            $dropColumns[] = [$mysql['prefix'].'gruppen', 'send_limit'];
+            $dropColumns[] = [$mysql['prefix'].'prefs', 'steuersatz'];
+            $dropColumns[] = [$mysql['prefix'].'prefs', 'mail_send_code'];
+            $dropColumns[] = [$mysql['prefix'].'prefs', 'sms_send_code'];
+            $dropColumns[] = [$mysql['prefix'].'mails', 'body'];
         }
 
-        // Legacy mobile interface (/m) removed
-        $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP mobile_url';
-        $queries[] = 'ALTER TABLE '.$mysql['prefix'].'prefs DROP redirect_mobile';
-        $queries[] = 'ALTER TABLE '.$mysql['prefix'].'gruppen DROP wap';
+        // Legacy mobile interface (/m) removed. Columns may already be gone
+        // after a previous run; dropping a missing column is a PHP 8 mysqli exception.
+        $dropColumns[] = [$mysql['prefix'].'prefs', 'mobile_url'];
+        $dropColumns[] = [$mysql['prefix'].'prefs', 'redirect_mobile'];
+        $dropColumns[] = [$mysql['prefix'].'gruppen', 'wap'];
+
+        foreach ($dropColumns as $drop) {
+            try {
+                $res = mysqli_query($connection, 'SHOW COLUMNS FROM `'.$drop[0].'` LIKE \''.SQLEscape($drop[1], $connection).'\'');
+            } catch (Throwable $e) {
+                $res = false;
+            }
+            $exists = $res && mysqli_num_rows($res) > 0;
+            if ($res) {
+                mysqli_free_result($res);
+            }
+            if ($exists) {
+                $queries[] = 'ALTER TABLE `'.$drop[0].'` DROP `'.$drop[1].'`';
+            }
+        }
 
         $count = count($queries);
 
@@ -552,7 +569,11 @@ elseif ($step == STEP_UPDATE_STEP) {
         } else {
             $query = $queries[$pos++];
 
-            mysqli_query($connection, $query);
+            try {
+                mysqli_query($connection, $query);
+            } catch (Throwable $e) {
+                // Obsolete column is already gone or cannot be dropped; continue.
+            }
 
             if ($pos >= $count) {
                 echo 'OK:DONE';

@@ -460,6 +460,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		bootstrap.Modal.getOrCreateInstance(openEl).show();
 	}
 });
+window.addEventListener('load', function () {
+	if (typeof documentLoader === 'function')
+		documentLoader();
+});
 </script>
 </body>
 </html>
