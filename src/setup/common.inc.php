@@ -834,7 +834,7 @@ function pageHeader($update = false, $convert = false)
 	<link rel="stylesheet" href="../admin/templates/css/tabler.min.css" />
 	<link rel="stylesheet" href="../admin/templates/css/tabler-icons.min.css" />
 	<link rel="stylesheet" href="../admin/templates/css/inter.css" />
-	<link rel="stylesheet" href="res/setup.css" />
+	<link rel="stylesheet" href="res/setup.css?<?php echo (int)@filemtime(__DIR__.'/res/setup.css'); ?>" />
 	<link rel="icon" type="image/png" href="../admin/templates/images/favicon-256x256.png" />
 </head>
 <body id="setupBody">

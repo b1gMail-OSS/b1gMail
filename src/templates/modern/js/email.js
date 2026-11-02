@@ -1262,7 +1262,13 @@ function printMail(id, sid)
 	else if(parent.frames && parent.frames.textArea && parent.frames.textArea.location)
 		enableExternal = parent.frames.textArea.location.href.indexOf('enableExternal') != -1;
 
-	openWindow('email.read.php?id='+id+'&print=true'+(enableExternal?'&enableExternal=true':'')+'&sid='+sid, 'print'+id, 560, 680);
+	var url = 'email.read.php?id=' + encodeURIComponent(id) + '&print=true' + (enableExternal ? '&enableExternal=true' : '');
+	if(typeof bmAppendSession === 'function')
+		url = bmAppendSession(url);
+	else if(sid)
+		url += '&sid=' + encodeURIComponent(sid);
+
+	openWindow(url, 'print'+id, 560, 680);
 }
 
 /**************************************************************************
