@@ -47,7 +47,7 @@ class ProfileCheckPlugin extends BMPlugin
 	 */
 	function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 		{
 			$lang_admin['profilecheck_msg']		= 'Ihr Kontakt-Profil ist derzeit unvollst&auml;ndig.<br />Bitte pr&uuml;fen Sie die mit einem Sternchen (*) markierten Pflichtfelder und speichern Sie das Profil, um Ihren Account wieder nutzen zu k&ouml;nnen.';
 		}

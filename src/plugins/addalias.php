@@ -84,7 +84,7 @@ class addalias extends BMPlugin
         global $lang_user;
 
         $lang_admin['addalias_name'] = 'Add Alias';
-        if ($lang === 'deutsch') {
+        if (strpos($lang, 'deutsch') === 0) {
             $lang_admin['addalias_text'] = "Mit diesem Plugin können Sie einzelnen Benutzern einen Alias erstellen.";
             $lang_admin['faq_addalias_question'] = 'Wie erstelle ich einen Alias für einen Benutzer?';
             $lang_admin['faq_addalias_answer'] = 'Wählen Sie die Gruppe aus, in der Benutzer ist, dem Sie den Alias erstellen wollen.<br />

@@ -47,7 +47,7 @@ class AccountMirror extends BMPlugin
 
 	function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 		{
 			$lang_admin['am_notice1']			= 'Die Verwendung dieses Plugins ist nur unter strenger Einhaltung der entsprechenden Gesetze, insbesondere der Datenschutzbestimmungen, gestattet.';
 			$lang_admin['am_notice2']			= 'Es wird keinerlei Funktionsgarantie oder Garantie f&uuml;r die Eignung zu einem bestimmten Zweck &uuml;bernommen. Spiegelungen k&ouml;nnen unter Umst&auml;nden z.B. unvollst&auml;ndig oder fehlerhaft sein.';
