@@ -101,6 +101,14 @@ html:has(#setupBody) {
 	font-weight: 400;
 }
 
+/* Tabler setzt bei .card-table nur die td der letzten Zeile auf border-bottom: 0.
+   Die th behält die Linie, deshalb wirkt sie unter der letzten Zeile abgeschnitten. */
+.setup-wrap .card-table tbody tr:last-child > td {
+	border-bottom-width: var(--tblr-border-width) !important;
+	border-bottom-style: var(--tblr-border-style) !important;
+	border-bottom-color: var(--tblr-table-border-color) !important;
+}
+
 .setup-progress-row.is-active th {
 	font-weight: 600;
 }
