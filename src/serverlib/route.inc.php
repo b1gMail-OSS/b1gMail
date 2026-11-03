@@ -221,6 +221,7 @@ function RouteRestoreLegacyAction($action)
 		'paccpaymentreturn'        => 'paccPaymentReturn',
 		'paccorder'                => 'paccOrder',
 		'paccplaceorder'           => 'paccPlaceOrder',
+		'paccoupon'                => 'paccCoupon',
 		'paccpackagedetails'       => 'paccPackageDetails',
 		'paccpackages'             => 'paccPackages',
 	);
@@ -279,6 +280,7 @@ function RouteRestoreLegacyDo($do)
 		'getprivatecertificate'     => 'getPrivateCertificate',
 		'mfasave'                   => 'mfaSave',
 		'placeorder'                => 'placeOrder',
+		'couponquote'               => 'couponQuote',
 		'cancelaccountwarning'      => 'cancelAccountWarning',
 	);
 

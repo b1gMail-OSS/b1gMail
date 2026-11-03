@@ -21,7 +21,7 @@
 						{cycle name=class values="td1,td2" assign=class}
 						<tr class="{$class}">
 							<td class="text-center"><input type="checkbox" name="coupon_{$coupon.id}" /></td>
-							<td>{text value=$coupon.code}<br /><small>{if $coupon.ver.sms}{lng p="addcredits"}: {$coupon.ver.sms}{/if}{if $coupon.ver.gruppe}{if $coupon.ver.sms}, {/if}{lng p="movetogroup"}: {$groups[$coupon.ver.gruppe].title}{/if}</small></td>
+							<td>{text value=$coupon.code}<br /><small>{if $coupon.ver.sms}{lng p="addcredits"}: {$coupon.ver.sms}{/if}{if $coupon.ver.gruppe}{if $coupon.ver.sms}, {/if}{lng p="movetogroup"}: {$groups[$coupon.ver.gruppe].title}{/if}{if $coupon.paccLabel}{if $coupon.ver.sms||$coupon.ver.gruppe}, {/if}{text value=$coupon.paccLabel}{/if}</small></td>
 							<td>{lng p="to"} {if $coupon.bis==-1}({lng p="unlimited"}){else}{date timestamp=$coupon.bis}{/if}<br /><small>{lng p="from"} {if $coupon.von==-1}({lng p="unlimited"}){else}{date timestamp=$coupon.von}{/if}</small></td>
 							<td>
 								{if $coupon.valid_signup}{lng p="signup"}{if $coupon.valid_loggedin},{/if}{/if}
@@ -188,6 +188,18 @@
 					<span class="input-group-text">{lng p="addcredits"}</span>
 					<input class="form-control" type="text" name="ver_credits_count" value="5" />
 				</div>
+				<div class="input-group mb-2">
+					<span class="input-group-text">
+							<input class="form-check-input m-0" type="checkbox" name="ver_pacc" />
+                        </span>
+					<span class="input-group-text">{lng p="pacc_discount"}</span>
+					<select name="ver_pacc_type" class="form-select">
+						<option value="fixed">{lng p="pacc_discount_fixed"}</option>
+						<option value="percent">{lng p="pacc_discount_percent"}</option>
+					</select>
+					<input class="form-control" type="text" name="ver_pacc_value" value="10" />
+				</div>
+				<small class="text-secondary">{lng p="pacc_discount_hint"}</small>
 			</div>
 		</div>
 

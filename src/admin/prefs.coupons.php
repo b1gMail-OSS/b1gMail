@@ -23,6 +23,70 @@ include('../serverlib/admin.inc.php');
 RequestPrivileges(PRIVILEGES_ADMIN);
 AdminRequirePrivilege('prefs.coupons');
 
+/**
+ * Benefit payload stored in codes.ver.
+ *
+ * @return array
+ */
+function CouponBenefitsFromRequest()
+{
+	$benefits = array();
+	$benefits['sms'] = isset($_REQUEST['ver_credits']) ? (int)$_REQUEST['ver_credits_count'] : 0;
+	$benefits['gruppe'] = isset($_REQUEST['ver_gruppe']) ? (int)$_REQUEST['ver_gruppe_id'] : 0;
+	$benefits['pacc_type'] = '';
+	$benefits['pacc_value'] = 0;
+
+	if(isset($_REQUEST['ver_pacc']))
+	{
+		$type = (isset($_REQUEST['ver_pacc_type']) && $_REQUEST['ver_pacc_type'] === 'percent') ? 'percent' : 'fixed';
+		$raw = isset($_REQUEST['ver_pacc_value']) ? str_replace(',', '.', trim((string)$_REQUEST['ver_pacc_value'])) : '0';
+		$number = (float)$raw;
+
+		if($type === 'percent')
+		{
+			if($number < 0)
+				$number = 0;
+			if($number > 100)
+				$number = 100;
+			$benefits['pacc_type'] = 'percent';
+			$benefits['pacc_value'] = $number;
+		}
+		else
+		{
+			$cents = (int)round($number * 100);
+			if($cents < 0)
+				$cents = 0;
+			$benefits['pacc_type'] = 'fixed';
+			$benefits['pacc_value'] = $cents;
+		}
+	}
+
+	return($benefits);
+}
+
+/**
+ * Short label for the subscription discount of a coupon.
+ *
+ * @param array $benefit
+ * @return string
+ */
+function CouponPaccLabel($benefit)
+{
+	global $lang_admin, $bm_prefs;
+
+	if(empty($benefit['pacc_type']) || $benefit['pacc_value'] <= 0)
+		return('');
+
+	if($benefit['pacc_type'] === 'percent')
+	{
+		$percent = rtrim(rtrim(number_format((float)$benefit['pacc_value'], 2, '.', ''), '0'), '.');
+		return(sprintf('%s: %s%%', $lang_admin['pacc_discount'], $percent));
+	}
+
+	$currency = isset($bm_prefs['currency']) ? $bm_prefs['currency'] : '';
+	return(sprintf('%s: %.2f %s', $lang_admin['pacc_discount'], $benefit['pacc_value'] / 100, $currency));
+}
+
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'coupons';
 
@@ -57,9 +121,7 @@ if($_REQUEST['action'] == 'coupons')
 			$to = isset($_REQUEST['bis_unlim']) ? -1 : SmartyDateTime('bis');
 
 			// benefits
-			$benefits = array();
-			$benefits['sms'] = isset($_REQUEST['ver_credits']) ? (int)$_REQUEST['ver_credits_count'] : 0;
-			$benefits['gruppe'] = isset($_REQUEST['ver_gruppe']) ? (int)$_REQUEST['ver_gruppe_id'] : 0;
+			$benefits = CouponBenefitsFromRequest();
 
 			// add coupon codes
 			$codes = explode("\n", trim($_REQUEST['code']));
@@ -107,6 +169,9 @@ if($_REQUEST['action'] == 'coupons')
 		while($row = $res->FetchArray(MYSQLI_ASSOC))
 		{
 			$row['ver'] = unserialize($row['ver']);
+			if(!is_array($row['ver']))
+				$row['ver'] = array();
+			$row['paccLabel'] = CouponPaccLabel($row['ver']);
 			$row['valid_loggedin'] = $row['valid_loggedin'] == 'yes';
 			$row['valid_signup'] = $row['valid_signup'] == 'yes';
 			$coupons[$row['id']] = $row;
@@ -133,9 +198,7 @@ if($_REQUEST['action'] == 'coupons')
 			$to = isset($_REQUEST['bis_unlim']) ? -1 : SmartyDateTime('bis');
 
 			// benefits
-			$benefits = array();
-			$benefits['sms'] = isset($_REQUEST['ver_credits']) ? (int)$_REQUEST['ver_credits_count'] : 0;
-			$benefits['gruppe'] = isset($_REQUEST['ver_gruppe']) ? (int)$_REQUEST['ver_gruppe_id'] : 0;
+			$benefits = CouponBenefitsFromRequest();
 
 			// save
 			$db->Query('UPDATE {pre}codes SET code=?,von=?,bis=?,anzahl=?,ver=?,valid_loggedin=?,valid_signup=? WHERE id=?',
@@ -185,6 +248,16 @@ if($_REQUEST['action'] == 'coupons')
 
 		// assign
 		$coupon['ver'] = unserialize($coupon['ver']);
+		if(!is_array($coupon['ver']))
+			$coupon['ver'] = array();
+		$coupon['pacc_value_form'] = '';
+		if(!empty($coupon['ver']['pacc_type']))
+		{
+			if($coupon['ver']['pacc_type'] === 'percent')
+				$coupon['pacc_value_form'] = rtrim(rtrim(number_format((float)$coupon['ver']['pacc_value'], 2, '.', ''), '0'), '.');
+			else
+				$coupon['pacc_value_form'] = number_format($coupon['ver']['pacc_value'] / 100, 2, '.', '');
+		}
 		$tpl->assign('coupon', $coupon);
 		$tpl->assign('usedBy', $usedBy);
 		$tpl->assign('groups', BMGroup::GetSimpleGroupList());

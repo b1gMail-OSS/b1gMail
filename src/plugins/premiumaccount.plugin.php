@@ -250,6 +250,11 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_user['pacc_subscription']		= 'Abonnement';
 			$lang_user['pacc_otherpackwarning']	= 'Es besteht derzeit noch ein aktives Abonnement für ein anderes Paket. Wenn Sie die Bestellung durchführen und abschlie&szlig;en, erlischt Ihr aktuelles Abonnement.';
 			$lang_user['pacc_finalamount']			= 'End-Betrag';
+			$lang_user['pacc_coupon']				= 'Gutscheincode';
+			$lang_user['pacc_coupon_hint']			= 'Optional. Ein Abo-Rabatt wird vom Paketpreis abgezogen und auf der Rechnung ausgewiesen.';
+			$lang_user['pacc_coupon_invalid']		= 'Der Gutscheincode ist ungültig, abgelaufen, bereits eingelöst oder enthält keinen Abo-Rabatt.';
+			$lang_user['pacc_couponline']			= 'Gutschein (%s)';
+			$lang_user['pacc_couponnote']			= 'Gutschein −%1 %2';
 			$lang_user['pacc_unlimited']			= 'unbegrenzt';
 			$lang_user['pacc_runtimenote']			= 'Die Laufzeit muss ein ganzzahliges Vielfaches von %d sein (%d, %d, %d, ...).';
 			$lang_user['pacc_taxnote']				= 'inkl. %.02f%% MwSt.';
@@ -492,6 +497,11 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_user['pacc_subscription']		= 'Subscription';
 			$lang_user['pacc_otherpackwarning']	= 'You still have an active subscription for another package. Your old subscription will be cancelled, if you complete this order.';
 			$lang_user['pacc_finalamount']			= 'Final amount';
+			$lang_user['pacc_coupon']				= 'Voucher code';
+			$lang_user['pacc_coupon_hint']			= 'Optional. A subscription discount is deducted from the package price and shown on the invoice.';
+			$lang_user['pacc_coupon_invalid']		= 'The voucher code is invalid, expired, already redeemed or does not contain a subscription discount.';
+			$lang_user['pacc_couponline']			= 'Voucher (%s)';
+			$lang_user['pacc_couponnote']			= 'Voucher −%1 %2';
 			$lang_user['pacc_unlimited']			= 'unlimited';
 			$lang_user['pacc_runtimenote']			= 'The runtime must be a multiple of %d (%d, %d, %d, ...).';
 			$lang_user['pacc_taxnote']				= 'incl. %.02f%% VAT';
@@ -1655,6 +1665,12 @@ class PremiumAccountPlugin extends BMPlugin
 			$this->_paccPlaceOrder();
 			exit();
 		}
+		if($file=='index.php' && strtolower((string)$action) === 'paccoupon')
+		{
+			$this->_checkUserToken();
+			$this->_paccCouponQuote((int)$_REQUEST['userID'], 'signup');
+			exit();
+		}
 		if($file=='index.php' && $action=='paccPaymentReturn')
 		{
 			$tpl->assign('msg', 	$lang_user['pacc_paymentreturn2']);
@@ -1741,6 +1757,13 @@ class PremiumAccountPlugin extends BMPlugin
 			$tpl->assign('activeSubscription',	array_pop($subscriptions));
 			$tpl->assign('pageContent',			$this->_templatePath('pacc.user.cancelwarning.tpl'));
 			$tpl->display('li/index.tpl');
+		}
+
+		// coupon discount quote for the order form
+		else if(isset($_REQUEST['do']) && strtolower((string)$_REQUEST['do']) === 'couponquote')
+		{
+			$this->_paccCouponQuote((int)$userRow['id'], 'loggedin');
+			exit();
 		}
 
 		// order page
@@ -2265,6 +2288,13 @@ class PremiumAccountPlugin extends BMPlugin
 	 */
 	function ActivateOrderItem($orderID, $userID, $cartItem)
 	{
+		if(isset($cartItem['key']) && $cartItem['key'] === 'PAcc.discount')
+		{
+			if(!empty($cartItem['coupon']))
+				$this->_paccGrantCouponExtras($cartItem['coupon'], $userID);
+			return(true);
+		}
+
 		if(substr($cartItem['key'], 0, 10) != 'PAcc.order')
 			return(false);
 
@@ -2272,6 +2302,267 @@ class PremiumAccountPlugin extends BMPlugin
 		$count = $cartItem['count'];
 
 		return($this->_activateOrder($packageID, $count, $orderID, $userID));
+	}
+
+	/**
+	 * Template vars for the optional subscription voucher field.
+	 *
+	 * @param Template $tpl
+	 * @param int $userID
+	 * @param bool $nli
+	 * @param string|null $code
+	 */
+	function _paccAssignCouponForm(&$tpl, $userID, $nli, $code = null)
+	{
+		global $lang_user;
+
+		if($code === null)
+			$code = isset($_REQUEST['pacc_coupon']) ? $_REQUEST['pacc_coupon'] : '';
+		$tpl->assign('paccCoupon', trim((string)$code));
+
+		if($nli)
+		{
+			$token = isset($_REQUEST['userToken']) ? (string)$_REQUEST['userToken'] : '';
+			$url = 'index.php?action=paccCoupon&userID=' . (int)$userID . '&userToken=' . rawurlencode($token);
+		}
+		else
+			$url = SessionUrl('prefs.php?action=pacc_mod&do=couponQuote');
+
+		$tpl->assign('paccCouponUrlJson', json_encode($url));
+		$tpl->assign('paccCouponInvalidJson', json_encode(isset($lang_user['pacc_coupon_invalid']) ? $lang_user['pacc_coupon_invalid'] : ''));
+		$tpl->assign('paccCouponNoteJson', json_encode(isset($lang_user['pacc_couponnote']) ? $lang_user['pacc_couponnote'] : ''));
+	}
+
+	/**
+	 * JSON quote for a subscription voucher. Does not redeem the code.
+	 *
+	 * @param int $userID
+	 * @param string $where signup|loggedin
+	 */
+	function _paccCouponQuote($userID, $where)
+	{
+		$code = isset($_REQUEST['code']) ? trim((string)$_REQUEST['code']) : '';
+		$coupon = $this->_paccFindCoupon($code, $userID, $where);
+
+		header('Content-Type: application/json; charset=UTF-8');
+		header('Cache-Control: no-store');
+		if(!$coupon)
+		{
+			echo json_encode(array('ok' => false));
+			return;
+		}
+
+		$benefit = $coupon['benefit'];
+		echo json_encode(array(
+			'ok'	=> true,
+			'type'	=> $benefit['pacc_type'],
+			'value'	=> $benefit['pacc_type'] === 'percent'
+				? (float)$benefit['pacc_value']
+				: round($benefit['pacc_value'] / 100, 2)
+		));
+	}
+
+	/**
+	 * Load a usable subscription-discount coupon.
+	 *
+	 * @param string $code
+	 * @param int $userID
+	 * @param string $where signup|loggedin
+	 * @return array|null
+	 */
+	function _paccFindCoupon($code, $userID, $where)
+	{
+		global $db;
+
+		$code = trim((string)$code);
+		if($code === '' || strlen($code) > 128)
+			return(null);
+
+		$found = null;
+		$res = $db->Query('SELECT id,code,von,bis,usedby,anzahl,used,ver,valid_signup,valid_loggedin FROM {pre}codes WHERE code=?',
+			$code);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			if($row['code'] !== $code)
+				continue;
+
+			$active = ($row['von'] == -1 && $row['bis'] == -1)
+				|| ($row['von'] == -1 && $row['bis'] >= time())
+				|| ($row['von'] <= time() && $row['bis'] == -1)
+				|| ($row['von'] <= time() && $row['bis'] >= time());
+			if(!$active)
+				continue;
+			if($where === 'signup' && $row['valid_signup'] != 'yes')
+				continue;
+			if($where === 'loggedin' && $row['valid_loggedin'] != 'yes')
+				continue;
+
+			$usedBy = @unserialize($row['usedby']);
+			if(!is_array($usedBy))
+				$usedBy = array();
+			$usedIds = array_map('intval', $usedBy);
+			if(in_array((int)$userID, $usedIds, true))
+				continue;
+			if((int)$row['anzahl'] != -1 && (int)$row['anzahl'] <= (int)$row['used'])
+				continue;
+
+			$benefit = @unserialize($row['ver']);
+			if(!is_array($benefit))
+				continue;
+			$type = isset($benefit['pacc_type']) ? $benefit['pacc_type'] : '';
+			$value = isset($benefit['pacc_value']) ? $benefit['pacc_value'] : 0;
+			if(($type !== 'percent' && $type !== 'fixed') || $value <= 0)
+				continue;
+
+			$row['benefit'] = $benefit;
+			$row['usedBy'] = $usedBy;
+			$found = $row;
+			break;
+		}
+		$res->Free();
+
+		return($found);
+	}
+
+	/**
+	 * Discount in cents, capped at the package amount.
+	 *
+	 * @param int $amountCents
+	 * @param array $coupon
+	 * @return int
+	 */
+	function _paccDiscountCents($amountCents, $coupon)
+	{
+		$amountCents = (int)$amountCents;
+		if($amountCents <= 0 || !isset($coupon['benefit']) || !is_array($coupon['benefit']))
+			return(0);
+
+		$benefit = $coupon['benefit'];
+		if($benefit['pacc_type'] === 'percent')
+		{
+			$percent = (float)$benefit['pacc_value'];
+			if($percent > 100)
+				$percent = 100;
+			$discount = (int)round($amountCents * $percent / 100);
+		}
+		else
+			$discount = (int)$benefit['pacc_value'];
+
+		if($discount < 0)
+			$discount = 0;
+		if($discount > $amountCents)
+			$discount = $amountCents;
+
+		return($discount);
+	}
+
+	/**
+	 * Mark the coupon as used without granting credits or a group change.
+	 * Those extras are granted when the order is activated.
+	 *
+	 * @param array $coupon
+	 * @param int $userID
+	 * @return bool
+	 */
+	function _paccReserveCoupon($coupon, $userID)
+	{
+		global $db;
+
+		$usedBy = $coupon['usedBy'];
+		$usedBy[] = (int)$userID;
+		$rawUsed = isset($coupon['usedby']) ? (string)$coupon['usedby'] : '';
+		$newUsed = serialize($usedBy);
+		if($rawUsed === '')
+		{
+			$db->Query('UPDATE {pre}codes SET used=used+1,usedby=? WHERE id=? AND (usedby IS NULL OR usedby=?) AND (anzahl=-1 OR anzahl>used)',
+				$newUsed,
+				(int)$coupon['id'],
+				'');
+		}
+		else
+		{
+			$db->Query('UPDATE {pre}codes SET used=used+1,usedby=? WHERE id=? AND usedby=? AND (anzahl=-1 OR anzahl>used)',
+				$newUsed,
+				(int)$coupon['id'],
+				$rawUsed);
+		}
+
+		if($db->AffectedRows() < 1)
+			return(false);
+
+		PutLog(sprintf('User <%d> reserved subscription coupon <%s> (%d)',
+			(int)$userID,
+			$coupon['code'],
+			(int)$coupon['id']),
+			PRIO_NOTE,
+			__FILE__,
+			__LINE__);
+
+		return(true);
+	}
+
+	/**
+	 * Grant non-discount benefits of a coupon after the order is paid.
+	 *
+	 * @param string $code
+	 * @param int $userID
+	 */
+	function _paccGrantCouponExtras($code, $userID)
+	{
+		global $db, $lang_user;
+
+		$res = $db->Query('SELECT id,code,ver FROM {pre}codes WHERE code=?',
+			$code);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			if($row['code'] !== $code)
+				continue;
+
+			$benefit = @unserialize($row['ver']);
+			if(!is_array($benefit))
+				break;
+
+			$user = _new('BMUser', array((int)$userID));
+			if(!empty($benefit['sms']) && $benefit['sms'] > 0)
+				$user->Debit($benefit['sms'], sprintf($lang_user['tx_coupon'], $code));
+			if(!empty($benefit['gruppe']) && $benefit['gruppe'] > 0)
+			{
+				$db->Query('UPDATE {pre}users SET gruppe=? WHERE id=?',
+					(int)$benefit['gruppe'],
+					(int)$userID);
+			}
+			break;
+		}
+		$res->Free();
+	}
+
+	/**
+	 * Re-show the order form after a validation error.
+	 *
+	 * @param Template $tpl
+	 * @param array $package
+	 * @param array $invalidFields
+	 */
+	function _paccAssignFailedOrderForm(&$tpl, $package, $invalidFields)
+	{
+		global $lang_user, $bm_prefs;
+
+		if($package['laufzeiten'] != '*')
+			$package['laufzeiten'] = explode(',', $package['laufzeiten']);
+
+		$tpl->assign('invalidFields', 	$invalidFields);
+		$tpl->assign('runtimeNote',		sprintf($lang_user['pacc_runtimenote'], $package['abrechnung_t'], $package['abrechnung_t'], $package['abrechnung_t']*2, $package['abrechnung_t']*3));
+		$tpl->assign('taxNote',			sprintf($lang_user['pacc_taxnote'], $bm_prefs['steuersatz']));
+		$tpl->assign('package',			$package);
+		$tpl->assign('paymentMethod',	isset($_POST['paymentMethod']) ? $_POST['paymentMethod'] : 0);
+
+		if(isset($_POST['abrechnung_t']))
+			$tpl->assign('abrechnung_t',	$_POST['abrechnung_t']);
+		else
+			$tpl->assign('abrechnung_t',	$package['abrechnung_t']);
+
+		if($package['abrechnung'] != 'einmalig')
+			$tpl->assign('intervalStr',	$lang_user['pacc_'.$package['abrechnung'].'2']);
 	}
 
 	/**
@@ -2355,6 +2646,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$pf['surchargeStripe'] = $surchargeTpl['stripe'];
 		$pf['surchargeJs'] = $surchargeTpl['js'];
 		$tpl->assign('_pf', $pf);
+		$this->_paccAssignCouponForm($tpl, $userID, $nli);
 	}
 
 	/**
@@ -2386,6 +2678,8 @@ class PremiumAccountPlugin extends BMPlugin
 
 		$invalidFields = array();
 		$tpl->assign('pacc_prefs',		$this->prefs);
+		$paccCouponCode = isset($_POST['pacc_coupon']) ? trim((string)$_POST['pacc_coupon']) : '';
+		$this->_paccAssignCouponForm($tpl, $userID, $nli, $paccCouponCode);
 
 		// get package
 		$res = $db->Query('SELECT id,titel,beschreibung,abrechnung,abrechnung_t,preis_cent,laufzeiten,max_laufzeit,`alt_titles`,`alt_descriptions` FROM {pre}mod_premium_packages WHERE id=? AND geloescht=0',
@@ -2463,6 +2757,21 @@ class PremiumAccountPlugin extends BMPlugin
 			}
 		}
 
+		// subscription voucher (does not change the package line count)
+		$paccCoupon = null;
+		if($paccCouponCode !== '' && !$package['isFree'] && isset($amount))
+		{
+			$paccCoupon = $this->_paccFindCoupon($paccCouponCode, $userID, $nli ? 'signup' : 'loggedin');
+			if(!$paccCoupon)
+			{
+				$invalidFields[] = 'pacc_coupon';
+				$prev = $tpl->getTemplateVars('errorMsg');
+				if(!is_string($prev))
+					$prev = '';
+				$tpl->assign('errorMsg', trim($prev . ' ' . $lang_user['pacc_coupon_invalid']));
+			}
+		}
+
 		// prepare cart
 		$orderID = -1;
 		$cart = array();
@@ -2476,6 +2785,23 @@ class PremiumAccountPlugin extends BMPlugin
 							. $this->_intervalStr($package['abrechnung'], $package['abrechnung_t'], true)
 							. ')'
 		);
+		if($paccCoupon && isset($amount))
+		{
+			$discountCents = $this->_paccDiscountCents($amount, $paccCoupon);
+			if($discountCents > 0)
+			{
+				$cart[] = array(
+					'key'		=> 'PAcc.discount',
+					'count'		=> 1,
+					'amount'	=> -$discountCents,
+					'total'		=> -$discountCents,
+					'text'		=> sprintf($lang_user['pacc_couponline'], $paccCoupon['code']),
+					'coupon'	=> $paccCoupon['code']
+				);
+			}
+			else
+				$paccCoupon = null;
+		}
 
 		// error?
 		$orderID = -1;
@@ -2484,29 +2810,24 @@ class PremiumAccountPlugin extends BMPlugin
 			if($orderID == -1)
 				BMPayment::ProcessPaymentForm($tpl, $cart, true, $userID);
 
-			if($package['laufzeiten'] != '*')
-				$package['laufzeiten'] = explode(',', $package['laufzeiten']);
-
-			$tpl->assign('invalidFields', 	$invalidFields);
-			$tpl->assign('runtimeNote',		sprintf($lang_user['pacc_runtimenote'], $package['abrechnung_t'], $package['abrechnung_t'], $package['abrechnung_t']*2, $package['abrechnung_t']*3));
-			$tpl->assign('taxNote',			sprintf($lang_user['pacc_taxnote'], $bm_prefs['steuersatz']));
-			$tpl->assign('package',			$package);
-			$tpl->assign('paymentMethod',	$_POST['paymentMethod']);
-
-			if(isset($_POST['abrechnung_t']))
-				$tpl->assign('abrechnung_t',	$_POST['abrechnung_t']);
-			else
-				$tpl->assign('abrechnung_t',	$package['abrechnung_t']);
-
-			if($package['abrechnung'] != 'einmalig')
-				$tpl->assign('intervalStr',	$lang_user['pacc_'.$package['abrechnung'].'2']);
-
+			$this->_paccAssignFailedOrderForm($tpl, $package, $invalidFields);
 			return(false);
 		}
 
 		// ok => place order!
 		else if(isset($amount))
 		{
+			if($paccCoupon && $orderID > 0 && !$this->_paccReserveCoupon($paccCoupon, $userID))
+			{
+				$db->Query('DELETE FROM {pre}invoices WHERE orderid=?', $orderID);
+				$db->Query('DELETE FROM {pre}orders WHERE orderid=?', $orderID);
+				$invalidFields[] = 'pacc_coupon';
+				$tpl->assign('errorMsg', $lang_user['pacc_coupon_invalid']);
+				BMPayment::ProcessPaymentForm($tpl, $cart, true, $userID);
+				$this->_paccAssignFailedOrderForm($tpl, $package, $invalidFields);
+				return(false);
+			}
+
 			if($amount == 0 && $orderID == -1)
 			{
 				if($this->_activateOrder($package['id'], 1, -1, $userID))
@@ -2525,7 +2846,25 @@ class PremiumAccountPlugin extends BMPlugin
 			}
 			else
 			{
-				if($nli)
+				$orderAmount = 0;
+				$res = $db->Query('SELECT amount FROM {pre}orders WHERE orderid=?',
+					$orderID);
+				if($res->RowCount() == 1)
+					list($orderAmount) = $res->FetchArray(MYSQLI_NUM);
+				$res->Free();
+
+				if((int)$orderAmount <= 0)
+				{
+					if(!BMPayment::ActivateOrder($orderID, 0))
+						die('Failed to activate order');
+					if($bm_prefs['sendrg'] == 'yes')
+						BMPayment::GenerateInvoice($orderID);
+					if($nli)
+						$tpl->assign('paccActivated', true);
+					else
+						$this->_paccJustActivated = true;
+				}
+				else if($nli)
 					BMPayment::InitiatePayment($tpl, $orderID, $bm_prefs['selfurl'] . 'index.php?action=paccPaymentReturn', 'pageContent', $userID);
 				else
 					$this->_paccPaymentOrderID = (int)$orderID;
