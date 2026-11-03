@@ -565,12 +565,17 @@ $tpl = _new('Template');
 /**
  * maintenance mode => error
  */
+// the whitelist is empty (not a serialized array) until it was saved once in the ACP
+$maintenanceWhitelist = !empty($bm_prefs['wartung_whitelist_ips']) ? @unserialize($bm_prefs['wartung_whitelist_ips']) : false;
+if(!is_array($maintenanceWhitelist))
+        $maintenanceWhitelist = array();
+
 if(MAINTENANCE_MODE && INTERFACE_MODE)
 {
         echo('System down for maintenance. Please try again later.');
         exit(1);
 }
-else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], unserialize($bm_prefs['wartung_whitelist_ips'])))
+else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], $maintenanceWhitelist))
 {
         $tpl->assign('year', date('Y'));
         $tpl->assign('text', $lang_custom['maintenance']);
