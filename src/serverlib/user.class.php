@@ -1396,7 +1396,7 @@ class BMUser
 				list($aliaslogin) = $res->FetchArray(MYSQLI_NUM);
 				if($aliaslogin=='no') $userID=0; // Set userID to empty
 			}
-			$res = $db->Query('SELECT id,gesperrt,passwort,passwort_salt,email,last_login_attempt,sms_validation_code,ip,lastlogin,preferred_language,last_timezone FROM {pre}users WHERE id=? LIMIT 1',
+			$res = $db->Query('SELECT id,gesperrt,gruppe,passwort,passwort_salt,email,last_login_attempt,sms_validation_code,ip,lastlogin,preferred_language,last_timezone FROM {pre}users WHERE id=? LIMIT 1',
 				$userID);
 			$row = $res->FetchArray();
 			$res->Free();
@@ -1406,7 +1406,7 @@ class BMUser
 		else
 		{
 			// find user
-			$res = $db->Query('SELECT id,gesperrt,passwort,passwort_salt,email,last_login_attempt,sms_validation_code,ip,lastlogin,preferred_language,last_timezone FROM {pre}users WHERE uid=? LIMIT 1',
+			$res = $db->Query('SELECT id,gesperrt,gruppe,passwort,passwort_salt,email,last_login_attempt,sms_validation_code,ip,lastlogin,preferred_language,last_timezone FROM {pre}users WHERE uid=? LIMIT 1',
 				$pluginAuth['uid']);
 			if($res->RowCount() == 1)
 			{
