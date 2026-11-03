@@ -52,7 +52,7 @@ class NewsPlugin extends BMPlugin
 
     public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
     {
-        if ($lang == 'deutsch') {
+        if (strpos($lang, 'deutsch') === 0) {
             $lang_admin['news_news'] = 'News';
             $lang_admin['news_addnews'] = 'News hinzuf&uuml;gen';
 

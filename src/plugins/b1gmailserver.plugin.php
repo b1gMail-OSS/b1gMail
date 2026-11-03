@@ -764,7 +764,7 @@ class B1GMailServerAdmin extends BMPlugin
 	{
 		$_lang_custom = $_lang_user = $_lang_client = $_lang_admin = array();
 
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 		{
 			// german
 			$_lang_admin['bms_milters']				= 'Mail-Filter (Milter)';

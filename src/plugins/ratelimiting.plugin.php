@@ -174,7 +174,7 @@ class RateLimitingPlugin extends BMPlugin
 
     public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
     {
-        if ($lang === 'deutsch')
+        if (strpos($lang, 'deutsch') === 0)
         {
             $lang_admin['ratelimiting_event']      = 'Ereignis';
             $lang_admin['ratelimiting_max_events'] = 'Maximale Anzahl';

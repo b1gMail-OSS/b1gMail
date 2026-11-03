@@ -44,7 +44,7 @@ class PLZEditorPlugin extends BMPlugin
 
 	public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 		{
 			$lang_admin['plzeditor_title']			= 'PLZ-Editor';
 			$lang_admin['plzeditor_test']			= 'PLZ testen';

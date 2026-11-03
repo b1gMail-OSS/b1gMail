@@ -44,7 +44,7 @@ class MyBBAuthPlugin extends BMPlugin
 
 	public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 			$lang_admin['mybb_auth_saved'] = 'Einstellungen wurden gespeichert.';
 		else
 			$lang_admin['mybb_auth_saved'] = 'Settings have been saved.';

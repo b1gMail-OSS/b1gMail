@@ -423,7 +423,7 @@ class FaxPlugin extends BMPlugin
 		//
 		// german
 		//
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 		{
 			$lang_admin['modfax_prefixes']				= 'Vorwahlen';
 			$lang_admin['modfax_fpdferror']			= 'FPDF/FPDI ist nicht installiert, wird aber vom Fax-Plugin zwingend zum Versand von Faxen ben&ouml;tigt. Bitte lesen Sie die Fax-Plugin-Dokumentation, um zu erfahren, wie Sie FPDF/FPDI installieren.';

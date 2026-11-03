@@ -171,7 +171,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 */
 	function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
-		if($lang == 'deutsch')
+		if(strpos($lang, 'deutsch') === 0)
 		{
 			//
 			// german
