@@ -75,7 +75,7 @@ class BMMailThreader
         foreach ($refs as $i => $ref) {
             if (!isset($this->_messages[$ref])) {
                 $thisLevel = $i + ($level - $baseKey);
-                $this->_messages[$ref] = ['level' => $thisLevel];
+                $this->_messages[$ref] = ['id' => 0, 'level' => $thisLevel];
 
                 // find messages related to this message
                 $res = $db->Query('SELECT refs,msg_id FROM {pre}mails WHERE refs LIKE ? AND userid=?',
