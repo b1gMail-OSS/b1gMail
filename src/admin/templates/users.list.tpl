@@ -38,8 +38,12 @@
 						{/if}{/foreach}
 						<th><a href="javascript:updateSort('gesperrt');">{lng p="status"}
 								{if $sortBy=='gesperrt'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
+						<th><a href="javascript:updateSort('reg_date');">{lng p="regdate"}
+								{if $sortBy=='reg_date'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
+						<th><a href="javascript:updateSort('lastlogin');">{lng p="lastlogin"}
+								{if $sortBy=='lastlogin'}{acpicon file="sort_{$sortOrder}.png" size="sm"}{/if}</a></th>
 						{if $mfaLiEnabled}<th class="text-center" style="width: 2.5rem;" title="{lng p="mfa_col"}">{lng p="mfa_col"}</th>{/if}
-						<th width="95">&nbsp;</th>
+						<th width="95" class="text-end" style="padding-right: 1.125rem;">{lng p="actions"}</th>
 					</tr>
 					</thead>
 					<tbody>
@@ -71,6 +75,8 @@
 								</td>
 							{/if}{/foreach}
 							<td>{$user.status}<br /><small>{lng p="group"}: {text value=$user.groupName cut=25}</small></td>
+							<td class="text-nowrap{if !$user.reg_date} text-center{/if}">{date timestamp=$user.reg_date nice=true nozero=true}</td>
+							<td class="text-nowrap{if !$user.lastlogin} text-center{/if}">{date timestamp=$user.lastlogin nice=true nozero=true}</td>
 							{if $mfaLiEnabled}
 							<td class="text-center">
 								{if $user.mfaStatus == 'active'}
