@@ -83,7 +83,7 @@ class BMPayment
 		if($paymethod == PAYMENT_METHOD_PAYPAL_CHECKOUT)
 			return isset($lang['paypal']) ? $lang['paypal'] : 'PayPal';
 		if($paymethod == PAYMENT_METHOD_STRIPE)
-			return isset($lang['stripe']) ? $lang['stripe'] : 'Stripe';
+			return self::StripeTitle($lang);
 		if($paymethod == PAYMENT_METHOD_SOFORTUEBERWEISUNG)
 			return isset($lang['su']) ? $lang['su'] : 'sofortueberweisung.de';
 		if($paymethod == PAYMENT_METHOD_SKRILL)
@@ -96,6 +96,54 @@ class BMPayment
 				return $payMethods[$payMethodID]['title'];
 		}
 		return isset($lang['unknown']) ? $lang['unknown'] : '?';
+	}
+
+	/**
+	 * Customer-facing Stripe name. Empty preference falls back to the language string.
+	 *
+	 * @param array|null $lang
+	 * @return string
+	 */
+	public static function StripeTitle($lang = null)
+	{
+		global $bm_prefs, $lang_user;
+
+		self::EnsureGatewayColumns();
+
+		$title = isset($bm_prefs['stripe_title']) ? trim((string)$bm_prefs['stripe_title']) : '';
+		if($title !== '')
+			return $title;
+
+		if(!is_array($lang))
+			$lang = $lang_user;
+		if(is_array($lang) && isset($lang['stripe']) && $lang['stripe'] !== '')
+			return $lang['stripe'];
+		return 'Kreditkarte';
+	}
+
+	/**
+	 * Copy a configured Stripe name into the language arrays used by templates.
+	 *
+	 * @return void
+	 */
+	public static function ApplyStripePaymentTitle()
+	{
+		global $bm_prefs, $lang_user, $lang_admin;
+
+		$title = isset($bm_prefs['stripe_title']) ? trim((string)$bm_prefs['stripe_title']) : '';
+		if($title === '')
+			return;
+
+		if(isset($lang_user) && is_array($lang_user))
+		{
+			$lang_user['stripe'] = $title;
+			$lang_user['pacc_stripe'] = $title;
+		}
+		if(isset($lang_admin) && is_array($lang_admin))
+		{
+			$lang_admin['stripe'] = $title;
+			$lang_admin['pacc_stripe'] = $title;
+		}
 	}
 
 	/**
@@ -173,7 +221,8 @@ class BMPayment
 			'stripe_surcharge' => "enum('yes','no') NOT NULL DEFAULT 'no'",
 			'stripe_surcharge_percent' => "varchar(16) NOT NULL DEFAULT '0'",
 			'stripe_surcharge_fixed' => "varchar(16) NOT NULL DEFAULT '0'",
-			'stripe_surcharge_cover' => "enum('yes','no') NOT NULL DEFAULT 'yes'"
+			'stripe_surcharge_cover' => "enum('yes','no') NOT NULL DEFAULT 'yes'",
+			'stripe_title' => "varchar(80) NOT NULL DEFAULT ''"
 		);
 		$added = false;
 		foreach($cols as $name => $def)
@@ -205,7 +254,8 @@ class BMPayment
 			'stripe_surcharge' => 'no',
 			'stripe_surcharge_percent' => '0',
 			'stripe_surcharge_fixed' => '0',
-			'stripe_surcharge_cover' => 'yes'
+			'stripe_surcharge_cover' => 'yes',
+			'stripe_title' => ''
 		);
 		foreach($defaults as $key => $val)
 		{
@@ -1244,6 +1294,60 @@ class BMPayment
 	}
 
 	/**
+	 * CKEditor stores quotes inside Smarty tags as &quot;. Smarty 5 then aborts with Unexpected "&".
+	 *
+	 * @param string $template
+	 * @return string
+	 */
+	static function NormalizeInvoiceTemplate($template)
+	{
+		if(!is_string($template) || $template === '')
+			return $template;
+
+		if(strpos($template, '&') !== false)
+		{
+			$decoded = preg_replace_callback('/\{[^{}]*\}/', function($match) {
+				$tag = $match[0];
+				if(strpos($tag, '&') === false)
+					return $tag;
+
+				for($i = 0; $i < 3; $i++)
+				{
+					$next = html_entity_decode($tag, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+					if($next === $tag)
+						break;
+					$tag = $next;
+				}
+
+				return $tag;
+			}, $template);
+			if(is_string($decoded))
+				$template = $decoded;
+		}
+
+		return self::RepairInvoiceCartLoop($template);
+	}
+
+	/**
+	 * CKEditor moves the cart row behind {/foreach}. Smarty then prints only the last line.
+	 *
+	 * @param string $template
+	 * @return string
+	 */
+	static function RepairInvoiceCartLoop($template)
+	{
+		$replaced = preg_replace(
+			'/\{foreach\s+from=\$cart\s+item=pos\}((?:(?!\$pos\.).)*?)\{\/foreach\}(\s*(?:<\/p>\s*)*)(<tr\b[^>]*>.*?\$pos\..*?<\/tr>)/s',
+			"{foreach from=\$cart item=pos}\n$3\n{/foreach}",
+			$template,
+			1,
+			$count
+		);
+
+		return (is_string($replaced) && $count > 0) ? $replaced : $template;
+	}
+
+	/**
 	 * Generate invoice for order
 	 *
 	 * @param int $orderID Order ID
@@ -1369,7 +1473,7 @@ class BMPayment
 		}
 		else if($orderRow['paymethod'] == PAYMENT_METHOD_STRIPE)
 		{
-			$paymentNote = sprintf($lang_user['pn_stripe'], $amount, $bm_prefs['currency']);
+			$paymentNote = sprintf($lang_user['pn_stripe'], $amount, $bm_prefs['currency'], self::StripeTitle($lang_user));
 		}
 		else if($orderRow['paymethod'] == PAYMENT_METHOD_SKRILL)
 		{
@@ -1437,7 +1541,7 @@ class BMPayment
 					return;
 				}
 
-				$source = $bm_prefs[$name];
+				$source = BMPayment::NormalizeInvoiceTemplate($bm_prefs[$name]);
 				$mtime = time();
 			}
 		});

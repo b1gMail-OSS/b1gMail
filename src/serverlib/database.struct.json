@@ -5714,6 +5714,14 @@
 				""
 			],
 			[
+				"stripe_title",
+				"varchar(80)",
+				"NO",
+				"",
+				"",
+				""
+			],
+			[
 				"stripe_surcharge",
 				"enum('yes','no')",
 				"NO",
