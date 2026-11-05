@@ -47,6 +47,7 @@
 					var editor = new htmlEditor('rgtemplate');
 					editor.height = 500;
 					editor.disableIntro = true;
+					editor.ckEditorPrefs.protectedSource = [ /\{[\s\S]*?\}/g ];
 					editor.init();
 					registerLoadAction('editor.start()');
 					//-->

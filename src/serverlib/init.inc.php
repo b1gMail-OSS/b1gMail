@@ -519,6 +519,20 @@ if(function_exists('RouteInitPluginRoutes'))
 	RouteInitPluginRoutes();
 LoadPluginLanguages($currentLanguage);
 ReadCustomLanguage();
+$stripeTitle = isset($bm_prefs['stripe_title']) ? trim((string)$bm_prefs['stripe_title']) : '';
+if($stripeTitle !== '')
+{
+	if(isset($lang_user) && is_array($lang_user))
+	{
+		$lang_user['stripe'] = $stripeTitle;
+		$lang_user['pacc_stripe'] = $stripeTitle;
+	}
+	if(isset($lang_admin) && is_array($lang_admin))
+	{
+		$lang_admin['stripe'] = $stripeTitle;
+		$lang_admin['pacc_stripe'] = $stripeTitle;
+	}
+}
 
 /**
  * initialize template engine.

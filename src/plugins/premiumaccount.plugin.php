@@ -262,7 +262,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_user['payment_surcharge_opt']		= 'inkl. Transaktionskosten';
 			$lang_user['pacc_banktransfer']		= 'überweisung (Vorkasse)';
 			$lang_user['pacc_paypal']				= 'PayPal';
-			$lang_user['pacc_stripe']				= 'Kreditkarte / TWINT';
+			$lang_user['pacc_stripe']				= 'Kreditkarte';
 			$lang_user['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_user['pacc_placeorder']			= 'Bestellung zahlungspflichtig abschicken';
 			$lang_user['pacc_placeorderfree']		= 'Kostenlos bestellen';
@@ -367,7 +367,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_paymentmethods']		= 'Zahlungs-Methoden';
 			$lang_admin['pacc_banktransfer']		= 'überweisung (Vorkasse)';
 			$lang_admin['pacc_paypal']				= 'PayPal';
-			$lang_admin['pacc_stripe']				= 'Kreditkarte / TWINT';
+			$lang_admin['pacc_stripe']				= 'Kreditkarte';
 			$lang_admin['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_admin['pacc_kto_inh']			= 'Konto-Inhaber';
 			$lang_admin['pacc_kto_nr']				= 'Konto-Nummer';
@@ -509,7 +509,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_user['payment_surcharge_opt']		= 'incl. transaction fee';
 			$lang_user['pacc_banktransfer']		= 'Bank transfer (prepayment)';
 			$lang_user['pacc_paypal']				= 'PayPal';
-			$lang_user['pacc_stripe']				= 'Credit card / TWINT';
+			$lang_user['pacc_stripe']				= 'Credit card';
 			$lang_user['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_user['pacc_placeorder']			= 'Submit order';
 			$lang_user['pacc_placeorderfree']		= 'Submit order for free';
@@ -614,7 +614,7 @@ class PremiumAccountPlugin extends BMPlugin
 			$lang_admin['pacc_paymentmethods']		= 'Payment methods';
 			$lang_admin['pacc_banktransfer']		= 'Bank transfer (prepayment)';
 			$lang_admin['pacc_paypal']				= 'PayPal';
-			$lang_admin['pacc_stripe']				= 'Credit card / TWINT';
+			$lang_admin['pacc_stripe']				= 'Credit card';
 			$lang_admin['pacc_sofortueberweisung']	= 'sofortueberweisung.de';
 			$lang_admin['pacc_kto_inh']			= 'Account owner';
 			$lang_admin['pacc_kto_nr']				= 'Account no.';
