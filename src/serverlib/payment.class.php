@@ -687,6 +687,61 @@ class BMPayment
 	}
 
 	/**
+	 * CKEditor stores quotes inside Smarty tags as &quot;. Smarty 5 then aborts with Unexpected "&".
+	 *
+	 * @param string $template
+	 * @return string
+	 */
+	static function NormalizeInvoiceTemplate($template)
+	{
+		if(!is_string($template) || $template === '')
+			return $template;
+
+		if(strpos($template, '&') !== false)
+		{
+			$decoded = preg_replace_callback('/\{[^{}]*\}/', function($match) {
+				$tag = $match[0];
+				if(strpos($tag, '&') === false)
+					return $tag;
+
+				for($i = 0; $i < 3; $i++)
+				{
+					$next = html_entity_decode($tag, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+					if($next === $tag)
+						break;
+					$tag = $next;
+				}
+
+				return $tag;
+			}, $template);
+			if(is_string($decoded))
+				$template = $decoded;
+		}
+
+		return self::RepairInvoiceCartLoop($template);
+	}
+
+	/**
+	 * CKEditor moves the cart row behind {/foreach}. Smarty then prints only the last line.
+	 *
+	 * @param string $template
+	 * @return string
+	 */
+	static function RepairInvoiceCartLoop($template)
+	{
+		$replaced = preg_replace(
+			'/\{foreach\s+from=\$cart\s+item=pos\}((?:(?!\$pos\.).)*?)\{\/foreach\}(\s*(?:<\/p>\s*)*)(<tr\b[^>]*>.*?\$pos\..*?<\/tr>)/s',
+			"{foreach from=\$cart item=pos}\n$3\n{/foreach}",
+			$template,
+			1,
+			$count
+		);
+
+		return (is_string($replaced) && $count > 0) ? $replaced : $template;
+	}
+
+
+	/**
 	 * Generate invoice for order
 	 *
 	 * @param int $orderID Order ID
@@ -833,8 +888,23 @@ class BMPayment
 
 		// set input resource
 		$bmPayment = _new('BMPayment');
-		//FIXME:
-		//$rgTpl->registerPlugin('resource','prefsdb', array(&$bmPayment, '__tpl_getTemplate', '__tpl_getTimestamp', '__tpl_getSecure', '__tpl_getTrusted'));
+		// load invoice template from prefs (Smarty 5 resource plugin)
+		$rgTpl->registerResource('prefsdb', new class extends \Smarty\Resource\CustomPlugin {
+			protected function fetch($name, &$source, &$mtime)
+			{
+				global $bm_prefs;
+
+				if(!isset($bm_prefs[$name]))
+				{
+					$source = null;
+					$mtime = null;
+					return;
+				}
+
+				$source = BMPayment::NormalizeInvoiceTemplate($bm_prefs[$name]);
+				$mtime = time();
+			}
+		});
 
 		// generate invoice
 		$invoice = $rgTpl->fetch('prefsdb:rgtemplate');

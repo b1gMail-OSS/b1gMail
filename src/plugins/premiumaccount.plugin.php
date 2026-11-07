@@ -933,7 +933,7 @@ class PremiumAccountPlugin extends BMPlugin
 	{
 		global $lang_user;
 
-		if($loggedin || $this->prefs['nli_packages_page'] != 'yes' || !$this->_packagesAvailable())
+		if($loggedin || !is_array($this->prefs) || !isset($this->prefs['nli_packages_page']) || $this->prefs['nli_packages_page'] != 'yes' || !$this->_packagesAvailable())
 			return array();
 
 		return(array(
