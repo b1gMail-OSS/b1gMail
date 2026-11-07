@@ -111,7 +111,10 @@ if($_REQUEST['action'] == 'common')
 		$stripeSurchargePercent = BMPayment::NormalizeSurchargePercent(isset($_REQUEST['stripe_surcharge_percent']) ? $_REQUEST['stripe_surcharge_percent'] : 0);
 		$stripeSurchargeFixed = BMPayment::NormalizeSurchargeFixed(isset($_REQUEST['stripe_surcharge_fixed']) ? $_REQUEST['stripe_surcharge_fixed'] : 0);
 
-		$db->Query('UPDATE {pre}prefs SET `currency`=?,`send_pay_notification`=?,`pay_notification_to`=?,`pay_emailfrom`=?,`pay_emailfromemail`=?,`mwst`=?,`enable_paypal`=?,`paypal_mail`=?,`enable_paypal_checkout`=?,`paypal_client_id`=?,`paypal_client_secret`=?,`paypal_sandbox`=?,`paypal_auto_activate`=?,`paypal_webhook_id`=?,`paypal_surcharge`=?,`paypal_surcharge_percent`=?,`paypal_surcharge_fixed`=?,`paypal_surcharge_cover`=?,`enable_stripe`=?,`stripe_secret_key`=?,`stripe_webhook_secret`=?,`stripe_webhook_id`=?,`stripe_auto_activate`=?,`stripe_enable_twint`=?,`stripe_surcharge`=?,`stripe_surcharge_percent`=?,`stripe_surcharge_fixed`=?,`stripe_surcharge_cover`=?,`enable_su`=?,`su_kdnr`=?,`su_prjnr`=?,`su_prjpass`=?,`su_notifypass`=?,`su_inputcheck`=?,`enable_vk`=?,`vk_kto_inh`=?,`vk_kto_nr`=?,`vk_kto_blz`=?,`vk_kto_inst`=?,`vk_kto_iban`=?,`vk_kto_bic`=?,`default_paymethod`=?,`enable_skrill`=?,`skrill_mail`=?,`skrill_secret`=?',
+		$stripeTitle = isset($_REQUEST['stripe_title']) ? trim(strip_tags((string)$_REQUEST['stripe_title'])) : '';
+		$stripeTitle = function_exists('mb_substr') ? mb_substr($stripeTitle, 0, 80) : substr($stripeTitle, 0, 80);
+
+		$db->Query('UPDATE {pre}prefs SET `currency`=?,`send_pay_notification`=?,`pay_notification_to`=?,`pay_emailfrom`=?,`pay_emailfromemail`=?,`mwst`=?,`enable_paypal`=?,`paypal_mail`=?,`enable_paypal_checkout`=?,`paypal_client_id`=?,`paypal_client_secret`=?,`paypal_sandbox`=?,`paypal_auto_activate`=?,`paypal_webhook_id`=?,`paypal_surcharge`=?,`paypal_surcharge_percent`=?,`paypal_surcharge_fixed`=?,`paypal_surcharge_cover`=?,`enable_stripe`=?,`stripe_secret_key`=?,`stripe_webhook_secret`=?,`stripe_webhook_id`=?,`stripe_auto_activate`=?,`stripe_enable_twint`=?,`stripe_title`=?,`stripe_surcharge`=?,`stripe_surcharge_percent`=?,`stripe_surcharge_fixed`=?,`stripe_surcharge_cover`=?,`enable_su`=?,`su_kdnr`=?,`su_prjnr`=?,`su_prjpass`=?,`su_notifypass`=?,`su_inputcheck`=?,`enable_vk`=?,`vk_kto_inh`=?,`vk_kto_nr`=?,`vk_kto_blz`=?,`vk_kto_inst`=?,`vk_kto_iban`=?,`vk_kto_bic`=?,`default_paymethod`=?,`enable_skrill`=?,`skrill_mail`=?,`skrill_secret`=?',
 			$_REQUEST['currency'],
 			isset($_REQUEST['send_pay_notification']) ? 'yes' : 'no',
 			$_REQUEST['pay_notification_to'],
@@ -136,6 +139,7 @@ if($_REQUEST['action'] == 'common')
 			$stripeWebhookId,
 			isset($_REQUEST['stripe_auto_activate']) ? 'yes' : 'no',
 			isset($_REQUEST['stripe_enable_twint']) ? 'yes' : 'no',
+			$stripeTitle,
 			isset($_REQUEST['stripe_surcharge']) ? 'yes' : 'no',
 			$stripeSurchargePercent,
 			$stripeSurchargeFixed,
@@ -158,6 +162,7 @@ if($_REQUEST['action'] == 'common')
 			$_REQUEST['skrill_mail'],
 			$_REQUEST['skrill_secret']);
 		ReadConfig();
+		BMPayment::ApplyStripePaymentTitle();
 
 		$paypalWebhookMsg = '';
 		$paypalWebhookOk = false;
@@ -388,13 +393,20 @@ else if($_REQUEST['action'] == 'invoices')
 	}
 	else if(isset($_REQUEST['save']))
 	{
+		if(!class_exists('BMPayment'))
+			include(B1GMAIL_DIR . 'serverlib/payment.class.php');
+
 		$db->Query('UPDATE {pre}prefs SET `sendrg`=?,`rgnrfmt`=?,`kdnrfmt`=?,`rgtemplate`=?',
 			isset($_REQUEST['sendrg']) ? 'yes' : 'no',
 			$_REQUEST['rgnrfmt'],
 			$_REQUEST['kdnrfmt'],
-			$_REQUEST['rgtemplate']);
+			BMPayment::NormalizeInvoiceTemplate($_REQUEST['rgtemplate']));
 		ReadConfig();
 	}
+
+	if(!class_exists('BMPayment'))
+		include(B1GMAIL_DIR . 'serverlib/payment.class.php');
+	$bm_prefs['rgtemplate'] = BMPayment::NormalizeInvoiceTemplate($bm_prefs['rgtemplate']);
 
 	$tpl->assign('rgTemplateReset', isset($_REQUEST['reset']) && $_REQUEST['reset'] === 'ok');
 

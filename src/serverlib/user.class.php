@@ -1122,6 +1122,10 @@ class BMUser
 
 							if(is_array($benefit))
 							{
+								// Subscription discounts are applied on the order form.
+								if(!empty($benefit['pacc_type']) && $benefit['pacc_value'] > 0)
+									continue;
+
 								// activate benefits
 								if($benefit['sms'] > 0)
 									$this->Debit($benefit['sms'], sprintf($lang_user['tx_coupon'], $code));
@@ -1154,6 +1158,42 @@ class BMUser
 						}
 					}
 				}
+			}
+		}
+		$res->Free();
+
+		return($result);
+	}
+
+	/**
+	 * whether a coupon code carries a subscription discount
+	 *
+	 * @param string $code Coupon code
+	 * @return bool
+	 */
+	public static function CouponHasPaccDiscount($code)
+	{
+		global $db;
+
+		$code = trim((string)$code);
+		if($code === '')
+			return(false);
+
+		$result = false;
+		$res = $db->Query('SELECT code,ver FROM {pre}codes WHERE code=?',
+			$code);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			if($row['code'] != $code)
+				continue;
+
+			$benefit = @unserialize($row['ver']);
+			if(is_array($benefit)
+				&& !empty($benefit['pacc_type'])
+				&& $benefit['pacc_value'] > 0)
+			{
+				$result = true;
+				break;
 			}
 		}
 		$res->Free();

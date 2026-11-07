@@ -177,6 +177,18 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 	</tr>{/if}
 {/if}
 
+{if !$package.isFree}
+	<tr>
+		<td class="listTableLeft"><label for="pacc_coupon">{lng p="pacc_coupon"}:</label></td>
+		<td class="listTableRight">
+			<div class="bm-pacc-field-row bm-pacc-field-row-full">
+				<input class="form-control" type="text" name="pacc_coupon" id="pacc_coupon" value="{if isset($paccCoupon)}{text value=$paccCoupon allowEmpty=true}{/if}" autocomplete="off" onkeyup="paccCouponChanged();" onchange="paccCouponChanged();" />
+			</div>
+			<small class="text-secondary d-block mt-1">{lng p="pacc_coupon_hint"}</small>
+		</td>
+	</tr>
+{/if}
+
 	<tr>
 		<td class="listTableLeftDesc"><i class="ti ti-credit-card icon icon-sm" aria-hidden="true"></i></td>
 		<td class="listTableRightDesc">{lng p="pacc_paymentmethod"}</td>
@@ -250,6 +262,7 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 			<strong><span id="finalAmount">-</span></strong>
 			<div class="text-secondary small d-block mt-1">
 				<div id="taxNote">{$taxNote}</div>
+				<div id="couponNote"></div>
 				<div id="surchargeNote"></div>
 			</div>
 		</td>
@@ -272,7 +285,11 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		currency: '{$_pf.currency}',
 		baseAmount: {$package.preis_cent}/100,
 		surcharge: {ldelim}{if isset($_pf.surchargeJs)}{$_pf.surchargeJs}{else}1:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},4:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},5:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim}{/if}{rdelim},
-		surchargeNote: '{lng p="pacc_surchargenote"}'
+		surchargeNote: '{lng p="pacc_surchargenote"}',
+		couponUrl: {if $paccCouponUrlJson}{$paccCouponUrlJson}{else}''{/if},
+		couponInvalid: {if $paccCouponInvalidJson}{$paccCouponInvalidJson}{else}''{/if},
+		couponNote: {if $paccCouponNoteJson}{$paccCouponNoteJson}{else}''{/if},
+		coupon: null
 	{rdelim};
 
 {if $invalidFields}
@@ -431,11 +448,108 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		}
 	}
 
+	function paccDiscounted(amount)
+	{
+		amount = parseFloat(amount);
+		if(isNaN(amount) || amount < 0)
+			amount = 0;
+		var c = bmPayment.coupon;
+		if(!c || !c.ok)
+			return Math.round(amount * 100) / 100;
+		var d = 0;
+		if(c.type == 'percent')
+			d = amount * (parseFloat(c.value) / 100);
+		else
+			d = parseFloat(c.value);
+		if(isNaN(d) || d < 0)
+			d = 0;
+		if(d > amount)
+			d = amount;
+		return Math.round((amount - d) * 100) / 100;
+	}
+
+	function paccShowCouponNote(full, discounted)
+	{
+		var el = document.getElementById('couponNote');
+		if(!el || typeof bmPayment == 'undefined')
+			return;
+		if(bmPayment.couponError)
+		{
+			el.innerHTML = bmPayment.couponInvalid || '';
+			return;
+		}
+		var diff = Math.round((full - discounted) * 100) / 100;
+		if(diff <= 0 || !bmPayment.couponNote)
+		{
+			el.innerHTML = '';
+			return;
+		}
+		el.innerHTML = bmPayment.couponNote.replace('%1', formatNumber(diff, 2)).replace('%2', bmPayment.currency);
+	}
+
+	var paccCouponTimer = null;
+	function paccCouponChanged()
+	{
+		if(paccCouponTimer)
+			clearTimeout(paccCouponTimer);
+		paccCouponTimer = setTimeout(paccCouponLookup, 350);
+	}
+
+	function paccCouponLookup()
+	{
+		var input = document.getElementById('pacc_coupon');
+		var code = input ? input.value.replace(/^\s+|\s+$/g, '') : '';
+		var note = document.getElementById('couponNote');
+		if(!code)
+		{
+			bmPayment.coupon = null;
+			bmPayment.couponError = false;
+			if(note)
+				note.innerHTML = '';
+			paccCalc();
+			return;
+		}
+		if(!bmPayment.couponUrl)
+		{
+			paccCalc();
+			return;
+		}
+		var xhr = new XMLHttpRequest();
+		var url = bmPayment.couponUrl + (bmPayment.couponUrl.indexOf('?') >= 0 ? '&' : '?') + 'code=' + encodeURIComponent(code);
+		xhr.open('GET', url, true);
+		xhr.onreadystatechange = function()
+		{
+			if(xhr.readyState != 4)
+				return;
+			var current = document.getElementById('pacc_coupon');
+			if(current && current.value.replace(/^\s+|\s+$/g, '') !== code)
+				return;
+			var data = null;
+			try { data = JSON.parse(xhr.responseText); } catch(e) { data = null; }
+			if(data && data.ok)
+			{
+				bmPayment.coupon = data;
+				bmPayment.couponError = false;
+				if(note)
+					note.innerHTML = '';
+			}
+			else
+			{
+				bmPayment.coupon = null;
+				bmPayment.couponError = true;
+			}
+			paccCalc();
+		};
+		xhr.send();
+	}
+
 	function paccCalc()
 	{
 		var f = EBID('abrechnung_t'), i, multiplier = {/literal}{$package.abrechnung_t}{literal},
-			amount_base = {/literal}{$package.preis_cent}{literal}, note = EBID('runtimeNote'), amount,
+			amount_base = {/literal}{$package.preis_cent}{literal}, note = EBID('runtimeNote'), amount, full,
 			order_button = EBID('orderButton');
+
+		full = amount_base / 100;
 
 		{/literal}{if $package.abrechnung!='einmalig'}{literal}
 		if(isNaN(f.value) || f.value.indexOf('.')>=0 || (i=parseInt(f.value)) < 1
@@ -451,10 +565,13 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 			order_button.disabled = false;
 		}
 
-		amount = ((i/multiplier) * amount_base) / 100;
-		amount = Math.round(amount*100) / 100;
+		full = ((i/multiplier) * amount_base) / 100;
+		full = Math.round(full*100) / 100;
+		{/literal}{/if}{if $package.isFree}full = 0;{/if}{literal}
+
+		amount = paccDiscounted(full);
 		bmPayment.baseAmount = amount;
-		{/literal}{/if}{if $package.isFree}amount = 0;{/if}{literal}
+		paccShowCouponNote(full, amount);
 
 		if(EBID('paymentMethod'))
 			updatePaymentMethod(EBID('paymentMethod'));
@@ -475,7 +592,13 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 		}
 	}
 
-	registerLoadAction(paccCalc);
+	registerLoadAction(function() {
+		var input = document.getElementById('pacc_coupon');
+		if(input && input.value.replace(/^\s+|\s+$/g, '') !== '')
+			paccCouponLookup();
+		else
+			paccCalc();
+	});
 	{/literal}
 //-->
 </script>

@@ -107,6 +107,22 @@
 </div>
 {/if}
 
+{if !$package.isFree}
+<div class="card mb-3">
+	<div class="card-header">
+		<h3 class="card-title mb-0">
+			<i class="ti ti-ticket icon icon-sm text-secondary me-1" aria-hidden="true"></i>
+			{lng p="pacc_coupon"}
+		</h3>
+	</div>
+	<div class="card-body">
+		<label class="form-label" for="pacc_coupon">{lng p="pacc_coupon"}</label>
+		<input class="form-control" type="text" name="pacc_coupon" id="pacc_coupon" value="{if isset($paccCoupon)}{text value=$paccCoupon allowEmpty=true}{/if}" autocomplete="off" onkeyup="paccCouponChanged();" onchange="paccCouponChanged();" />
+		<small class="text-secondary d-block mt-1">{lng p="pacc_coupon_hint"}</small>
+	</div>
+</div>
+{/if}
+
 <div class="card mb-3">
 	<div class="card-header">
 		<h3 class="card-title mb-0">
@@ -182,6 +198,7 @@
 				<div class="form-control fw-bold"><span id="finalAmount">-</span></div>
 				<div class="text-secondary small mt-1">
 					<div id="taxNote"></div>
+					<div id="couponNote"></div>
 					<div id="surchargeNote"></div>
 				</div>
 			</div>
@@ -217,7 +234,11 @@
 		currency: '{$_pf.currency}',
 		baseAmount: {$package.preis_cent}/100,
 		surcharge: {ldelim}{if isset($_pf.surchargeJs)}{$_pf.surchargeJs}{else}1:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},4:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim},5:{ldelim}enabled:false,percent:0,fixed:0,cover:true{rdelim}{/if}{rdelim},
-		surchargeNote: '{lng p="pacc_surchargenote"}'
+		surchargeNote: '{lng p="pacc_surchargenote"}',
+		couponUrl: {if $paccCouponUrlJson}{$paccCouponUrlJson}{else}''{/if},
+		couponInvalid: {if $paccCouponInvalidJson}{$paccCouponInvalidJson}{else}''{/if},
+		couponNote: {if $paccCouponNoteJson}{$paccCouponNoteJson}{else}''{/if},
+		coupon: null
 	{rdelim};
 
 {if $invalidFields}
@@ -376,11 +397,108 @@
 		}
 	}
 
+	function paccDiscounted(amount)
+	{
+		amount = parseFloat(amount);
+		if(isNaN(amount) || amount < 0)
+			amount = 0;
+		var c = bmPayment.coupon;
+		if(!c || !c.ok)
+			return Math.round(amount * 100) / 100;
+		var d = 0;
+		if(c.type == 'percent')
+			d = amount * (parseFloat(c.value) / 100);
+		else
+			d = parseFloat(c.value);
+		if(isNaN(d) || d < 0)
+			d = 0;
+		if(d > amount)
+			d = amount;
+		return Math.round((amount - d) * 100) / 100;
+	}
+
+	function paccShowCouponNote(full, discounted)
+	{
+		var el = document.getElementById('couponNote');
+		if(!el || typeof bmPayment == 'undefined')
+			return;
+		if(bmPayment.couponError)
+		{
+			el.innerHTML = bmPayment.couponInvalid || '';
+			return;
+		}
+		var diff = Math.round((full - discounted) * 100) / 100;
+		if(diff <= 0 || !bmPayment.couponNote)
+		{
+			el.innerHTML = '';
+			return;
+		}
+		el.innerHTML = bmPayment.couponNote.replace('%1', formatNumber(diff, 2)).replace('%2', bmPayment.currency);
+	}
+
+	var paccCouponTimer = null;
+	function paccCouponChanged()
+	{
+		if(paccCouponTimer)
+			clearTimeout(paccCouponTimer);
+		paccCouponTimer = setTimeout(paccCouponLookup, 350);
+	}
+
+	function paccCouponLookup()
+	{
+		var input = document.getElementById('pacc_coupon');
+		var code = input ? input.value.replace(/^\s+|\s+$/g, '') : '';
+		var note = document.getElementById('couponNote');
+		if(!code)
+		{
+			bmPayment.coupon = null;
+			bmPayment.couponError = false;
+			if(note)
+				note.innerHTML = '';
+			paccCalc();
+			return;
+		}
+		if(!bmPayment.couponUrl)
+		{
+			paccCalc();
+			return;
+		}
+		var xhr = new XMLHttpRequest();
+		var url = bmPayment.couponUrl + (bmPayment.couponUrl.indexOf('?') >= 0 ? '&' : '?') + 'code=' + encodeURIComponent(code);
+		xhr.open('GET', url, true);
+		xhr.onreadystatechange = function()
+		{
+			if(xhr.readyState != 4)
+				return;
+			var current = document.getElementById('pacc_coupon');
+			if(current && current.value.replace(/^\s+|\s+$/g, '') !== code)
+				return;
+			var data = null;
+			try { data = JSON.parse(xhr.responseText); } catch(e) { data = null; }
+			if(data && data.ok)
+			{
+				bmPayment.coupon = data;
+				bmPayment.couponError = false;
+				if(note)
+					note.innerHTML = '';
+			}
+			else
+			{
+				bmPayment.coupon = null;
+				bmPayment.couponError = true;
+			}
+			paccCalc();
+		};
+		xhr.send();
+	}
+
 	function paccCalc()
 	{
 		var f = $('#abrechnung_t'), i, multiplier = {/literal}{$package.abrechnung_t}{literal},
-			amount_base = {/literal}{$package.preis_cent}{literal}, note = $('#runtimeNote'), amount,
+			amount_base = {/literal}{$package.preis_cent}{literal}, note = $('#runtimeNote'), amount, full,
 			order_button = $('#orderButton');
+
+		full = amount_base / 100;
 
 		{/literal}{if $package.abrechnung!='einmalig'}{literal}
 		if(isNaN(f.val()) || f.val().indexOf('.')>=0 || (i=parseInt(f.val())) < 1
@@ -398,10 +516,13 @@
 			order_button.prop('disabled', false);
 		}
 
-		amount = ((i/multiplier) * amount_base) / 100;
-		amount = Math.round(amount*100) / 100;
+		full = ((i/multiplier) * amount_base) / 100;
+		full = Math.round(full*100) / 100;
+		{/literal}{/if}{if $package.isFree}full = 0;{/if}{literal}
+
+		amount = paccDiscounted(full);
 		bmPayment.baseAmount = amount;
-		{/literal}{/if}{literal}
+		paccShowCouponNote(full, amount);
 
 		if(document.getElementById('paymentMethod'))
 			updatePaymentMethod(document.getElementById('paymentMethod'));
@@ -422,6 +543,12 @@
 		}
 	}
 
-	$(document).ready(paccCalc);
+	$(document).ready(function() {
+		var input = document.getElementById('pacc_coupon');
+		if(input && input.value.replace(/^\s+|\s+$/g, '') !== '')
+			paccCouponLookup();
+		else
+			paccCalc();
+	});
 //-->
 </script>{/literal}

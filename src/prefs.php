@@ -696,7 +696,11 @@ else if($_REQUEST['action'] == 'coupons'
 		else
 		{
 			// failed
-			$tpl->assign('msg', $lang_user['couponerror']);
+			$couponMsg = $lang_user['couponerror'];
+			if(BMUser::CouponHasPaccDiscount(trim((string)$_REQUEST['code']))
+				&& !empty($lang_user['pacc_coupon_at_order']))
+				$couponMsg = $lang_user['pacc_coupon_at_order'];
+			$tpl->assign('msg', $couponMsg);
 			$tpl->assign('pageContent', 'li/error.tpl');
 		}
 

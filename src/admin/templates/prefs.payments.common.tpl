@@ -108,6 +108,7 @@
 			<label class="col-sm-2 col-form-label">{lng p="paypal_webhookid"}</label>
 			<div class="col-sm-10">
 				<input type="text" class="form-control" name="paypal_webhook_id" value="{if isset($bm_prefs.paypal_webhook_id)}{text value=$bm_prefs.paypal_webhook_id allowEmpty=true}{/if}" autocomplete="off">
+				<small class="text-secondary">{lng p="paypal_webhook_events"}</small>
 			</div>
 		</div>
 		<div class="mb-3 row">
@@ -164,6 +165,13 @@
 			</div>
 		</div>
 		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-label">{lng p="paymethod_title"}</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control" name="stripe_title" value="{if isset($bm_prefs.stripe_title)}{text value=$bm_prefs.stripe_title allowEmpty=true}{/if}" placeholder="{lng p="stripe"}" maxlength="80">
+				<small class="text-secondary">{lng p="paymethod_title_empty"}</small>
+			</div>
+		</div>
+		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-check-label">{lng p="default"}</label>
 			<div class="col-sm-10">
 				<label class="form-check">
@@ -211,6 +219,7 @@
 			<label class="col-sm-2 col-form-label">{lng p="stripe_webhookid"}</label>
 			<div class="col-sm-10">
 				<input type="text" class="form-control" name="stripe_webhook_id" value="{if isset($bm_prefs.stripe_webhook_id)}{text value=$bm_prefs.stripe_webhook_id allowEmpty=true}{/if}" autocomplete="off">
+				<small class="text-secondary">{lng p="stripe_webhook_events"}</small>
 			</div>
 		</div>
 		<div class="mb-3 row">

@@ -81,6 +81,18 @@
 					<span class="input-group-text">{lng p="addcredits"}</span>
 					<input class="form-control" type="text" name="ver_credits_count" value="{if $coupon.ver.sms}{text value=$coupon.ver.sms}{else}5{/if}" />
 				</div>
+				<div class="input-group mb-2">
+					<span class="input-group-text">
+							<input class="form-check-input m-0" type="checkbox" name="ver_pacc"{if $coupon.ver.pacc_type} checked="checked"{/if} />
+                        </span>
+					<span class="input-group-text">{lng p="pacc_discount"}</span>
+					<select name="ver_pacc_type" class="form-select">
+						<option value="fixed"{if !$coupon.ver.pacc_type||$coupon.ver.pacc_type=='fixed'} selected="selected"{/if}>{lng p="pacc_discount_fixed"}</option>
+						<option value="percent"{if $coupon.ver.pacc_type=='percent'} selected="selected"{/if}>{lng p="pacc_discount_percent"}</option>
+					</select>
+					<input class="form-control" type="text" name="ver_pacc_value" value="{if $coupon.pacc_value_form}{text value=$coupon.pacc_value_form}{else}10{/if}" />
+				</div>
+				<small class="text-secondary">{lng p="pacc_discount_hint"}</small>
 			</div>
 		</div>
 
