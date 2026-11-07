@@ -25,7 +25,7 @@
 	<input type="hidden" name="actionToken" value="{$actionToken}" />
 	<input type="hidden" name="do" id="do" value="" />
 	<input type="hidden" name="reference" id="reference" value="{$reference}" />
-	<input type="hidden" name="baseDraftID" id="baseDraftID" value="{if array_key_exists('isAutoSavedDraft', $mail)}{$mail.baseDraftID}{/if}" />
+	<input type="hidden" name="baseDraftID" id="baseDraftID" value="{if !empty($mail.isAutoSavedDraft)}{$mail.baseDraftID}{/if}" />
 	
 	{if isset($latestDraft)}
 	<div class="draftNote" id="draftNote">
@@ -157,7 +157,7 @@
 {hook id="email.compose.tpl:foot"}
 
 {if isset($captchaInfo)}
-<div id="safecodeFooter"{if $captchaInfo.heightHint} style="height:{$captchaInfo.heightHint};"{/if}>
+<div id="safecodeFooter"{if !empty($captchaInfo.heightHint)} style="height:{$captchaInfo.heightHint};"{/if}>
 	<table cellpadding="0" style="margin-left:auto;margin-right:auto;">
 		<tr>
 			<td>

@@ -40,7 +40,7 @@
 			<div class="col-md-6">
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-check-label">{lng p="countries"}</label>
-					<div class="col-sm-8" style="background-color:#FFF;border:1px solid #CCC;overflow-y:scroll;min-height:3em;max-height:80px;">
+					<div class="col-sm-8" id="countrySelectBox" style="background-color:#FFF;border:1px solid #CCC;overflow-y:scroll;min-height:3em;max-height:80px;">
 						{foreach from=$countries item=country key=countryID}
 							<label class="form-check">
 								<input class="form-check-input" type="checkbox" name="countries[]" value="{$countryID}" id="country_{$countryID}" checked="checked" onchange="determineNewsletterRecipients()">
@@ -144,20 +144,24 @@
 		</div>
 	</fieldset>
 
-	<div class="row">
+	<div class="row align-items-center g-2">
 		<div class="col-md-6">
-			<div style="float: left;"><span id="recpCount">0</span> {lng p="recpdetermined"}&nbsp; </div>
-			<div style="float: left;"><input class="btn btn-sm" type="submit" value=" {lng p="export"} " id="exportButton" name="exportRecipients" disabled="disabled" onclick="newsletterMode='export';return true;" /></div>
+			<div class="input-group input-group-sm bm-ops-action">
+				<span class="input-group-text">{lng p="recpdetermined"}</span>
+				<input type="text" class="form-control" id="recpCount" value="0" readonly tabindex="-1" aria-label="{lng p="recpdetermined"}">
+				<button type="submit" class="btn" id="exportButton" name="exportRecipients" disabled="disabled" onclick="newsletterMode='export';return true;">{lng p="export"}</button>
+			</div>
 		</div>
-		<div class="col-md-6">
-			<div style="float: right;"><input class="btn btn-sm btn-primary" type="submit" value=" {lng p="sendletter"} " id="submitButton" disabled="disabled" onclick="newsletterMode='send';return true;" /></div>
-			<div style="float: right;"><input type="text" class="form-control form-control-sm" size="5" name="perpage" id="perpage" value="25" size="5" />&nbsp; </div>
-			<div style="float: right;">{lng p="opsperpage"}&nbsp; </div>
-		</div>
+		<div class="col-md-6 text-md-end">
+			<div class="input-group input-group-sm bm-ops-action">
+				<span class="input-group-text">{lng p="opsperpage"}</span>
+				<input type="text" class="form-control" name="perpage" id="perpage" value="25">
+				<button type="submit" class="btn btn-primary" id="submitButton" disabled="disabled" onclick="newsletterMode='send';return true;">{lng p="sendletter"}</button>
+			</div>
 	</div>
 </form>
 
 <script>
 	var newsletterMode = 'export';
-	registerLoadAction('determineNewsletterRecipients()');
+	determineNewsletterRecipients();
 </script>

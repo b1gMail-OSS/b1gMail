@@ -121,7 +121,12 @@ if(extension_loaded('zip')) {
             $this->_zip->close();
 
             // Write the ZIP file to the output stream
-            $zipData = file_get_contents($this->_tempZipFile);
+            // ZipArchive writes no file at all for an archive without entries (empty folder or
+            // empty selection), so fall back to the 22 byte end-of-central-directory record,
+            // which is a valid empty ZIP file
+            $zipData = is_file($this->_tempZipFile)
+                ? file_get_contents($this->_tempZipFile)
+                : "PK\x05\x06" . str_repeat("\0", 18);
             ReleaseTempFile(0, $this->_tempID);
             fwrite($this->_fp, $zipData);
             fseek($this->_fp, 0, SEEK_SET);

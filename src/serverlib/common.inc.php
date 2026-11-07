@@ -2060,8 +2060,8 @@ function getUploadedFiles($fieldName, $lifeTime = 28800)
 		return(array());
 
 	// get file vars
-	$localFile = $_FILES['localFile_' . $fieldName];
-	$webdiskFile = (int)$_REQUEST['webdiskFile_' . $fieldName . '_id'];
+	$localFile = isset($_FILES['localFile_' . $fieldName]) ? $_FILES['localFile_' . $fieldName] : null;
+	$webdiskFile = isset($_REQUEST['webdiskFile_' . $fieldName . '_id']) ? (int)$_REQUEST['webdiskFile_' . $fieldName . '_id'] : 0;
 
 	// file uploaded
 	if(isset($localFile) && is_array($localFile) && ((is_array($localFile['error']) && in_array(UPLOAD_ERR_OK, $localFile['error'])) || (!is_array($localFile['error']) && $localFile['error'] == UPLOAD_ERR_OK)))
@@ -2155,8 +2155,8 @@ function getUploadedFile($fieldName, $destinationFile)
 		return(false);
 
 	// get file vars
-	$localFile = $_FILES['localFile_' . $fieldName];
-	$webdiskFile = (int)$_REQUEST['webdiskFile_' . $fieldName . '_id'];
+	$localFile = isset($_FILES['localFile_' . $fieldName]) ? $_FILES['localFile_' . $fieldName] : null;
+	$webdiskFile = isset($_REQUEST['webdiskFile_' . $fieldName . '_id']) ? (int)$_REQUEST['webdiskFile_' . $fieldName . '_id'] : 0;
 
 	// file uploaded
 	if(isset($localFile) && is_array($localFile) && $localFile['error'] == UPLOAD_ERR_OK)

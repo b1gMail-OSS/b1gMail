@@ -82,37 +82,37 @@
 			<td class="listTableRight">
 				<div style="border: 1px solid #ccc; display: inline-block; min-height: 80px; max-height: 120px; overflow-y: scroll; padding: 5px; margin-bottom: 5px; padding-right: 20px; background-color: #FAFAFA;">
 					<div>
-						<input type="checkbox" name="pop3_folders[]" value="0" id="pop3_folders_0"{if $pop3Folders.0} checked="checked"{/if} style="vertical-align:middle;" />
+						<input type="checkbox" name="pop3_folders[]" value="0" id="pop3_folders_0"{if isset($pop3Folders.0) && $pop3Folders.0} checked="checked"{/if} style="vertical-align:middle;" />
 						<label for="pop3_folders_0">
 							<i class="fa fa-inbox" aria-hidden="true"></i>
 							{lng p="inbox"}
 						</label>
 					</div>
 					<div>
-						<input type="checkbox" name="pop3_folders[]" value="-4" id="pop3_folders_-4"{if $pop3Folders.m4} checked="checked"{/if} style="vertical-align:middle;" />
+						<input type="checkbox" name="pop3_folders[]" value="-4" id="pop3_folders_-4"{if isset($pop3Folders.m4) && $pop3Folders.m4} checked="checked"{/if} style="vertical-align:middle;" />
 						<label for="pop3_folders_-4">
 							<i class="fa fa-ban" aria-hidden="true"></i>
 							{lng p="spam"}
 						</label>
 					</div>
 					<div>
-						<input type="checkbox" name="pop3_folders[]" value="-5" id="pop3_folders_-5"{if $pop3Folders.m5} checked="checked"{/if} style="vertical-align:middle;" />
+						<input type="checkbox" name="pop3_folders[]" value="-5" id="pop3_folders_-5"{if isset($pop3Folders.m5) && $pop3Folders.m5} checked="checked"{/if} style="vertical-align:middle;" />
 						<label for="pop3_folders_-5">
 							<i class="fa fa-trash-o" aria-hidden="true"></i>
 							{lng p="trash"}
 						</label>
 					</div>
 					<div>
-						<input type="checkbox" name="pop3_folders[]" value="-128" id="pop3_folders_-128"{if $pop3Folders.m128} checked="checked"{/if} style="vertical-align:middle;" onchange="EBID('userFolders').style.display=this.checked?'none':'';" />
+						<input type="checkbox" name="pop3_folders[]" value="-128" id="pop3_folders_-128"{if isset($pop3Folders.m128) && $pop3Folders.m128} checked="checked"{/if} style="vertical-align:middle;" onchange="EBID('userFolders').style.display=this.checked?'none':'';" />
 						<label for="pop3_folders_-128">
 							<i class="fa fa-folder-open-o" aria-hidden="true"></i>
 							{lng p="bms_userfolders"}
 						</label>
 					</div>
-					<div style="display:{if $pop3Folders.m128}none{/if};" id="userFolders">
+					<div style="display:{if isset($pop3Folders.m128) && $pop3Folders.m128}none{/if};" id="userFolders">
 						{foreach from=$folderList key=folderID item=folderTitle}{if $folderID>0}
 							<div>
-								<input type="checkbox" name="pop3_folders[]" value="{$folderID}" id="pop3_folders_{$folderID}"{if $pop3Folders.$folderID} checked="checked"{/if} style="vertical-align:middle;" />
+								<input type="checkbox" name="pop3_folders[]" value="{$folderID}" id="pop3_folders_{$folderID}"{if isset($pop3Folders.$folderID) && $pop3Folders.$folderID} checked="checked"{/if} style="vertical-align:middle;" />
 								<label for="pop3_folders_{$folderID}" style="font-family:courier;">
 									<i class="fa fa-folder-open-o" aria-hidden="true"></i>
 									{$folderTitle}

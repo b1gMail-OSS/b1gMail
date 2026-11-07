@@ -222,6 +222,23 @@ function documentLoader()
             eval(loadActions[i]);
         else
             loadActions[i]();
+    var actions = loadActions;
+    loadActions = [];
+    for(var i=0; i<actions.length; i++)
+    {
+        try
+        {
+            if(typeof(actions[i]) == 'string')
+                eval(actions[i]);
+            else
+                actions[i]();
+        }
+        catch(e)
+        {
+            if(window.console && console.error)
+                console.error(e);
+        }
+    }
 }
 
 function EBID(f)
@@ -267,7 +284,7 @@ function showHelp()
 
     theFile = theFile.substring(0, theFile.lastIndexOf('.php'));
 
-    window.open('https://service.b1gmail.org/help/jump.php?file=' + escape(theFile)
+    window.open('http://help.b1gmail.com/jump.php?file=' + escape(theFile)
         + (thePlugin != '' ? '&plugin=' + escape(thePlugin) : '')
         + '&action=' + escape(theAction),
         'help',
@@ -1107,8 +1124,12 @@ function _determineNewsletterRecipients(e)
 {
     if(e.readyState == 4)
     {
-        var count = parseInt(e.responseText);
-        EBID('recpCount').innerHTML = count;
+        var count = parseInt(e.responseText),
+            countEl = EBID('recpCount');
+        if(countEl && countEl.tagName == 'INPUT')
+            countEl.value = count;
+        else if(countEl)
+            countEl.innerHTML = count;
         EBID('submitButton').disabled = count < 1;
         EBID('exportButton').disabled = count < 1;
     }
@@ -1138,7 +1159,9 @@ function determineNewsletterRecipients()
         status += '&statusNotActivated=true';
 
     // countries
-    var countries = '', countryInputs = EBID('countrySelectBox').getElementsByTagName('input');
+     var countries = '',
+        countryBox = EBID('countrySelectBox'),
+        countryInputs = countryBox ? countryBox.getElementsByTagName('input') : [];
     for(var i=0; i<countryInputs.length; i++)
         if(countryInputs[i].name == 'countries[]' && countryInputs[i].checked)
             countries += '&countries[]=' + countryInputs[i].value;

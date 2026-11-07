@@ -87,7 +87,8 @@ if($_REQUEST['action'] == 'recvrules')
 				{
 					// read file
 					$fp = fopen($tempFileName, 'rb');
-					$importData = fread($fp, filesize($tempFileName));
+					$importDataSize = filesize($tempFileName);
+					$importData		= $importDataSize > 0 ? fread($fp, $importDataSize) : false;
 					fclose($fp);
 
 					// try to unserialize

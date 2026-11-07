@@ -162,11 +162,13 @@ class BMCache_b1gMail extends BMCache
 
 			if($cacheFP)
 			{
-				$cacheData = fread($cacheFP, filesize($cacheFile));
+				// an empty file (e.g. caught while another request is writing it) must not reach fread(): PHP 8 throws a ValueError for length 0
+				$cacheSize = filesize($cacheFile);
+				$cacheData = $cacheSize > 0 ? fread($cacheFP, $cacheSize) : false;
 				fclose($cacheFP);
 
-				// unserialize
-				$cacheObject = @unserialize($cacheData);
+				// unserialize (empty or unreadable file = cache miss)
+				$cacheObject = is_string($cacheData) ? @unserialize($cacheData) : false;
 				unset($cacheData);
 				if($cacheObject !== false)
 				{

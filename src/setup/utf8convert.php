@@ -611,7 +611,8 @@ else if($step == STEP_CONVERT_STEP)
 			$fp = fopen($file, 'rb+');
 			if(!$fp || !is_resource($fp))
 				continue;
-			$contents = fread($fp, filesize($file));
+			$fp_filesize = filesize($file);
+			$contents = $fp_filesize > 0 ? fread($fp, $fp_filesize) : false;
 
 			// convert contents to utf-8
 			$contents = ConvertEncoding($contents, $charset, 'UTF-8');
