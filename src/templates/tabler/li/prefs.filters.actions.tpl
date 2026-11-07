@@ -101,7 +101,7 @@
 <script>
 <!--
 	parent.document.getElementById('action_frame').style.height = max(getElementMetrics(EBID('table'), 'h'), 30) + 'px';
-	{if $smarty.request.submitParent}parent.document.formSubmitOK = true;
+	{if ($smarty.request.submitParent|default:'')}parent.document.formSubmitOK = true;
 	parent.document.forms.f1.submit();{/if}
 //-->
 </script>

@@ -345,7 +345,7 @@
 				<label class="form-label">{lng p="flags"}</label>
 				<div class="bm-mail-flags-list">
 					<label class="form-check">
-						<input class="form-check-input" type="checkbox" name="flags[1]" id="flags1"{if $smarty.post.do=='saveMeta'&&($flags&1)} checked="checked"{/if} />
+						<input class="form-check-input" type="checkbox" name="flags[1]" id="flags1"{if ($smarty.post.do|default:'')=='saveMeta'&&($flags&1)} checked="checked"{/if} />
 						<span class="form-check-label"><i class="ti ti-mail icon" aria-hidden="true"></i> {lng p="unread"}</span>
 					</label>
 					<label class="form-check">
