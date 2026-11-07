@@ -48,7 +48,7 @@
 </div>
 
 {if isset($captchaInfo)}
-<div id="safecodeFooter" class="bm-compose-captcha"{if $captchaInfo.heightHint} style="min-height:{$captchaInfo.heightHint};"{/if}>
+<div id="safecodeFooter" class="bm-compose-captcha"{if !empty($captchaInfo.heightHint)} style="min-height:{$captchaInfo.heightHint};"{/if}>
 	<div class="d-flex flex-wrap align-items-center justify-content-center gap-3">
 		<label class="form-label mb-0" for="safecode">{lng p="safecode"}</label>
 		<div id="captchaContainer">{$captchaHTML}</div>
