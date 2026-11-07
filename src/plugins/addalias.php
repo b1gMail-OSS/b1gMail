@@ -1,7 +1,10 @@
 <?php
 /*
- * Plugin addalias
- * (c) 2025 b1gMail.eu
+ * Add Alias Plugin
+ * (c) Peter Michalk, b1gMail.eu
+ * 
+ * With this plugin you can create aliases for groups, individual users
+ * or directly for all users from the admin area.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,23 +23,39 @@
  */
 class addalias extends BMPlugin 
 {
+    /**
+	 * Plugin constants
+	 */
+	private const PLUGIN_NAME 			= 'Add Alias';
+	private const PLUGIN_VERSION 		= '1.2.0';
+	private const PLUGIN_DESIGNEDFOR 	= '7.4.2';
+	private const PLUGIN_AUTHOR 		= 'Peter Michalk, b1gMail.eu Project';
+
+    /**
+	 * Action constants for admin pages
+	 */
+	private const ADMIN_PAGE1 			= 'page1';
+	private const ADMIN_PAGE2 			= 'page2';
+
     /*
-    * Eigenschaften des Plugins
-    */
+     * Plugin constructor
+	 * 
+	 * Initializes all plugin properties and configurations.
+     */
     public function __construct()
 	{
-		$this->name					= "Add Alias";
-		$this->version				= '1.2.0';
-        $this->designedfor         	= '7.4.2';
+		$this->name					= self::PLUGIN_NAME;
+		$this->version				= self::PLUGIN_VERSION;
+		$this->designedfor			= self::PLUGIN_DESIGNEDFOR;
 		$this->type					= BMPLUGIN_DEFAULT;
-		
-		$this->author				= 'b1gMail.eu Project, dotaachen';
+
+		$this->author				= self::PLUGIN_AUTHOR;
 
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
 		$this->website				= 'https://www.b1gmail.eu';
 
 		$this->admin_pages			= true;
-		$this->admin_page_title		= "Add Alias";
+		$this->admin_page_title		= self::PLUGIN_NAME;
 		$this->admin_page_icon		= "addalias_icon.png";
 	}
 
@@ -47,8 +66,8 @@ class addalias extends BMPlugin
     {
         global $tpl, $lang_admin;
 
-        // Standardaktion setzen
-        $action = $_REQUEST['action'] ?? 'page1';
+        // Plugin call without action
+		$action = $_REQUEST['action'] ?? self::ADMIN_PAGE1;
 
         // Tabs im Adminbereich
         $tabs = [
@@ -105,21 +124,44 @@ class addalias extends BMPlugin
         $lang_admin['aliastype_2'] = $lang_user['aliastype_2'];
     }
 
-    /*
-    * Install
-    */
+    /**
+	 * Plugin installation
+	 * 
+	 * Performs all necessary steps for plugin installation.
+	 * Creates database tables, configures settings and logs
+	 * the installation process.
+	 * 
+	 * @return bool True on successful installation, false on errors
+	 */
     public function Install()
     {
-        PutLog('Plugin "' . $this->name . ' - ' . $this->version . '" installed successfully', PRIO_PLUGIN, __FILE__, __LINE__);
+        // log
+		PutLog(sprintf('%s v%s installed',
+			$this->name,
+			$this->version),
+			PRIO_PLUGIN,
+			__FILE__,
+			__LINE__);
         return true;
     }
 
-    /*
-    * Uninstall
-    */
+    /**
+	 * Plugin uninstallation
+	 * 
+	 * Performs all necessary steps for plugin uninstallation.
+	 * Removes database tables, cleans up configurations and logs
+	 * the uninstallation process.
+	 * 
+	 * @return bool True on successful uninstallation, false on errors
+	 */
     public function Uninstall()
     {
-        PutLog('Plugin "' . $this->name . ' - ' . $this->version . '" removed.', PRIO_PLUGIN, __FILE__, __LINE__);
+        PutLog(sprintf('%s v%s uninstalled',
+			$this->name,
+			$this->version),
+			PRIO_PLUGIN,
+			__FILE__,
+			__LINE__);
         return true;
     }
     /*
@@ -131,10 +173,14 @@ class addalias extends BMPlugin
 
         // Define vars
         $tpl_use = 0;
-        $gruppen = [];
-        $users = [];
+        // Initialize arrays for groups and users
+		$gruppen = [];
+		$users = [];
 
-        // Select all groups
+        /**
+		 * Load all available groups from database
+		 * Sorted by title for better user experience
+		 */
         $res = $db->Query('SELECT id, titel FROM {pre}gruppen ORDER BY titel ASC');
         while ($row = $res->FetchArray()) {
             $gruppen[$row['id']] = [
@@ -145,7 +191,11 @@ class addalias extends BMPlugin
         $res->Free();
 		unset($res);
 
-        // Wenn gruppe_hidden benutzt wird, Gruppe füllen
+        /**
+		 * Process group selection
+		 * If gruppe_hidden is set, use it as current group
+		 * (for form persistence)
+		 */
         if (!empty($_REQUEST['gruppe_hidden'])) {
             $_REQUEST['gruppe'] = $_REQUEST['gruppe_hidden'];
         }
@@ -157,7 +207,10 @@ class addalias extends BMPlugin
             $res = $db->Query('SELECT id, email FROM {pre}users WHERE gruppe=? ORDER BY email ASC', (int)$_REQUEST['gruppe']);
         }
 
-        // fill array
+        /**
+		 * Fill user array for template
+		 * Sorted by email address for better clarity
+		 */
         if (isset($res)) {
             while ($row = $res->FetchArray()) {
                 $users[$row['id']] = [
@@ -197,14 +250,14 @@ class addalias extends BMPlugin
             $emailAddress = !empty($_REQUEST['typ_1_email']) ? $_REQUEST['typ_1_email'] : $_REQUEST['email_local'] . '@' . $_REQUEST['email_domain'];
             $emailAddress = ExtractMailAddresses($emailAddress);
 
-            // Emailadresse besetzt durch Benutzer
+            // Check if email address is already taken by users
             $res = $db->Query('SELECT id FROM {pre}users WHERE email=?', $emailAddress);
             if ($res->RowCount() >= 1) {
                 $tpl_email_locked = true;
             }
             $res->Free();
 
-            // Emailadresse besetzt durch Aliase
+            // Check if email address is already taken by aliases
             $res = $db->Query('SELECT id FROM {pre}aliase WHERE email=?', $emailAddress);
             if ($res->RowCount() >= 1) {
                 $tpl_email_locked = true;
@@ -218,13 +271,16 @@ class addalias extends BMPlugin
             $_REQUEST['gruppe_hidden'] = "";
         }
 
-        // Template Variablen übergeben
-        $tpl->assign('gruppen', $gruppen);
-        $tpl->assign('users', $users);    
-        $tpl->assign('selected_gruppe', ($_REQUEST['gruppe_hidden'] ?? ''));
-        $tpl->assign('selected_user', ($_REQUEST['user_hidden'] ?? ''));
-        $tpl->assign('tpl_use', $tpl_use);
-        $tpl->assign('tpl_email_locked', $tpl_email_locked);
+        /**
+		 * Assign template variables for display
+		 * All data is passed to the template
+		 */
+		$tpl->assign('gruppen', 			$gruppen);                              // Available groups
+		$tpl->assign('users', 				$users);                            	// Available users
+		$tpl->assign('selected_gruppe',		$_REQUEST['gruppe_hidden'] ?? '');    	// Selected group
+		$tpl->assign('selected_user',		$_REQUEST['user_hidden'] ?? '');     	// Selected user
+		$tpl->assign('tpl_use',				$tpl_use);                              // Current template step
+        $tpl->assign('tpl_email_locked',	$tpl_email_locked ?? false);         	// Email address availability
     }
 }
 
