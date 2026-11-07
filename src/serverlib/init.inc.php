@@ -319,8 +319,6 @@ if (DEBUG) {
 ini_set('zend.assertions', DEBUG ? 1 : 0);
 ini_set('assert.exception', DEBUG ? 1 : 0);
 
-
-
 /**
  * required files.
  */
@@ -458,7 +456,7 @@ if(MAINTENANCE_MODE && INTERFACE_MODE)
         echo('System down for maintenance. Please try again later.');
         exit(1);
 }
-else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], unserialize($bm_prefs['wartung_whitelist_ips'])))
+else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], $maintenanceWhitelist))
 {
         $tpl->assign('text', $lang_custom['maintenance']);
         $tpl->display('nli/maintenance.tpl');
