@@ -166,7 +166,7 @@ if($_REQUEST['action'] == 'users')
 		// sort options
 		$sortBy = AdminSanitizeSortColumn(
 			isset($_REQUEST['sortBy']) ? $_REQUEST['sortBy'] : 'email',
-			array('id', 'email', 'nachname', 'gesperrt'),
+			array('id', 'email', 'nachname', 'gesperrt', 'reg_date', 'lastlogin'),
 			'email');
 		$sortOrder = AdminSanitizeSortOrder(
 			isset($_REQUEST['sortOrder']) ? $_REQUEST['sortOrder'] : 'asc',
@@ -297,7 +297,7 @@ if($_REQUEST['action'] == 'users')
 
 		// do the query!
 		$users = array();
-		$res = $db->Query('SELECT id,email,vorname,nachname,strasse,hnr,plz,ort,gruppe,gesperrt,lastlogin,profilfelder,absendername ' . $theQuery . ' '
+		$res = $db->Query('SELECT id,email,vorname,nachname,strasse,hnr,plz,ort,gruppe,gesperrt,lastlogin,reg_date,profilfelder,absendername ' . $theQuery . ' '
 					. 'ORDER BY ' . $sortBy . ' '
 					. $sortOrder . ' '
 					. 'LIMIT ' . $startPos . ',' . $perPage);
