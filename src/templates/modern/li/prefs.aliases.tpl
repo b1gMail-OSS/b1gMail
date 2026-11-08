@@ -8,7 +8,7 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=action'}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=action'}" data-alias-login-url="{sessionurl file='prefs.php' params='action=aliases&do=toggleLogin'}">
 	{csrffield}
 
 <div class="scrollContainer withBottomBar">
@@ -23,6 +23,10 @@
 			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=type&order={$sortOrderInv}"}">{lng p="type"}</a>
 			{if $sortColumn=='type'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
+		<th width="90" title="{lng p="login_with_alias"}">
+			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=login&order={$sortOrderInv}"}" title="{lng p="login_with_alias"}">{lng p="login"}</a>
+			{if $sortColumn=='login'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
+		</th>
 		<th width="55">&nbsp;</th>
 	</tr>
 	
@@ -34,6 +38,13 @@
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="alias_{$aliasID}" name="alias_{$aliasID}" /></td>
 		<td class="{if $sortColumn=='email'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">&nbsp;<i class="fa fa-user-o" aria-hidden="true"></i> {email value=$alias.email}</td>
 		<td class="{if $sortColumn=='type'}listTableTDActive{else}{$class}{/if}">&nbsp;{$alias.typeText}</td>
+		<td class="{if $sortColumn=='login'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap">
+			{if $alias.canLogin}
+			<input type="checkbox"{if $alias.login=='yes'} checked="checked"{/if} title="{lng p="login_with_alias"}" aria-label="{lng p="login_with_alias"}" onchange="bmToggleAliasLogin({$aliasID}, this.checked)" />
+			{else}
+			—
+			{/if}
+		</td>
 		<td class="{$class}" nowrap="nowrap">
 			<a href="{sessionurl file='prefs.php' params="action=aliases&do=edit&id={$aliasID}"}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
 			<a onclick="return confirm('{lng p="realdel"}');" href="{sessionurl file='prefs.php' params="action=aliases&do=delete&id={$aliasID}&csrf_token={$csrfToken}"}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
@@ -62,3 +73,24 @@
 </div>
 
 </form>
+<script>
+function bmToggleAliasLogin(id, enabled) {
+	var source = document.forms.f1;
+	var form = document.createElement('form');
+	form.method = 'post';
+	form.action = source.getAttribute('data-alias-login-url') || source.action;
+	function field(name, value) {
+		var input = document.createElement('input');
+		input.type = 'hidden';
+		input.name = name;
+		input.value = value;
+		form.appendChild(input);
+	}
+	if(source.csrf_token)
+		field('csrf_token', source.csrf_token.value);
+	field('id', String(id));
+	field('login', enabled ? 'yes' : 'no');
+	document.body.appendChild(form);
+	form.submit();
+}
+</script>

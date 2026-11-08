@@ -272,21 +272,19 @@
 {/if}
 
 {if $conversationView}
-<div class="contentBottomLayer" id="bottomLayer_conversation" style="display:{if empty($smarty.get.openConversationView)}none{/if};">
-	<div class="contentHeader">
-		<div class="left">
-			<i class="fa fa-comment"></i>
+<div class="contentBottomLayer bm-mail-bottom-layer" id="bottomLayer_conversation" style="display:{if empty($smarty.get.openConversationView)}none{else}flex{/if};">
+	<div class="bm-mail-bottom-layer-header">
+		<span class="bm-mail-bottom-layer-title">
+			<i class="ti ti-messages icon" aria-hidden="true"></i>
 			{lng p="conversation"}
-		</div>
-		<div class="right">
-			<button onclick="readMailHideBottomLayers()">
-				<i class="fa fa-close"></i>
-			</button>
-		</div>
+		</span>
+		<button type="button" class="btn btn-sm btn-ghost-secondary btn-icon" onclick="readMailHideBottomLayers()" aria-label="{lng p="close"}">
+			<i class="ti ti-x icon" aria-hidden="true"></i>
+		</button>
 	</div>
 
-	<div class="bigForm">
-		<iframe id="conversationIFrame" style="width:100%;height:100%;" src="{$selfurl}email.read.php?action=showThread&amp;id={$mailID}{$sessionUrlSuffix}" border="0" frameborder="0"></iframe>
+	<div class="bm-mail-conversation-body">
+		<iframe id="conversationIFrame" title="{lng p="conversation"}" src="{$selfurl}email.read.php?action=showThread&amp;id={$mailID}{$sessionUrlSuffix}"></iframe>
 	</div>
 </div>
 {/if}

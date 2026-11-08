@@ -59,7 +59,7 @@
 		</script>
 	{/if}
 {else}
-<div id="folderMailArea">
+<div id="folderMailArea" class="bm-mail-list-fullwidth">
 	{include file="li/email.folder.contents.tpl"}
 </div>
 <div id="folderLoading" style="display:none"><i class="fa fa-spinner fa-pulse fa-fw fa-3x"></i></div>

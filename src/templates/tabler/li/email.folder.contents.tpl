@@ -115,16 +115,20 @@
 		</a></span>&nbsp;</td>
 		{/if}
 		<td id="mail_{$mailID}_col3"{if $sortColumn=='betreff'&&$mail.color==0} class="listTableTDActive"{elseif $mail.color>0} class="mailColor_{$mail.color}"{/if} nowrap="nowrap">
-			<a draggable="false" href="{sessionurl file='email.read.php' params="id={$mailID}"}" onclick="return(false)">
-				&nbsp;
-				{if $mail.flags&8}<s>{/if}<i id="maildone_{$mailID}" class="{if $mail.flags&4096}fa fa-check{/if}"></i> {if !empty($mail.isCalendarInvite)}<i class="fa fa-calendar" aria-hidden="true"></i> {/if}{if $mail.flags&128}<i class="fa fa-bug" aria-hidden="true"></i> {/if}{if $mail.flags&256}<i class="fa fa-ban" aria-hidden="true"></i> {/if}<span style="background:transparent;" id="mail_{$mailID}_span2" class="{if $mail.flags&1}un{/if}readMail">{text value=$mail.subject}</span>
-				{if $mail.flags&8}</s>{/if}
-				{if ($templatePrefs.mailListPreviewLines|default:2) > 0 && $mail.preview}<div class="bm-mail-preview">{text value=$mail.preview}</div>{/if}
+			<a draggable="false" class="bm-mail-wide-subject-link{if $mail.flags&8} bm-mail-deleted{/if}" href="{sessionurl file='email.read.php' params="id={$mailID}"}" onclick="return(false)">
+				<span class="bm-mail-wide-subject">
+					<i id="maildone_{$mailID}" class="{if $mail.flags&4096}fa fa-check{/if}"></i>
+					{if !empty($mail.isCalendarInvite)}<i class="fa fa-calendar" aria-hidden="true"></i>{/if}
+					{if $mail.flags&128}<i class="fa fa-bug" aria-hidden="true"></i>{/if}
+					{if $mail.flags&256}<i class="fa fa-ban" aria-hidden="true"></i>{/if}
+					<span style="background:transparent;" id="mail_{$mailID}_span2" class="{if $mail.flags&1}un{/if}readMail">{text value=$mail.subject}</span>
+				</span>
+				{if ($templatePrefs.mailListPreviewLines|default:2) > 0 && $mail.preview}<span class="bm-mail-preview">{text value=$mail.preview}</span>{/if}
 			</a>
 		</td>
 		<td id="mail_{$mailID}_col4"{if $sortColumn=='fetched'&&$mail.color==0} class="listTableTDActive"{elseif $mail.color>0} class="mailColor_{$mail.color}"{/if} nowrap="nowrap">&nbsp;{if $mail.flags&8}<s>{/if}{date timestamp=$mail.timestamp nice=true}{if $mail.flags&8}</s>{/if}&nbsp;</td>
-		<td{if $sortColumn=='size'&&$mail.color==0} class="listTableTDActive"{/if} nowrap="nowrap">&nbsp;{if $mail.flags&8}<s>{/if}{size bytes=$mail.size}{if $mail.flags&8}</s>{/if}&nbsp;</td>
-		<td nowrap="nowrap">
+		<td class="bm-mail-col-size{if $sortColumn=='size'&&$mail.color==0} listTableTDActive{/if}" nowrap="nowrap">&nbsp;{if $mail.flags&8}<s>{/if}{size bytes=$mail.size}{if $mail.flags&8}</s>{/if}&nbsp;</td>
+		<td class="bm-mail-col-actions" nowrap="nowrap">
 			<a href="{sessionurl file='email.read.php' params="id={$mailID}"}"><i class="fa fa-envelope-open-o" aria-hidden="true"></i></a>
 			<a href="javascript:void(0);" onclick="currentSID='{$sid}';currentID={$mailID};currentSortColumn='{$sortColumn}';showMailMenu(event);"><i class="fa fa-bars" aria-hidden="true"></i></a>
 			<a href="email.php?do=deleteMail&id={$mailID}&{$folderString}{$sessionUrlSuffix}&csrf_token={$csrfToken}"{if $folderID==-5} onclick="return(confirm('{lng p="realdel"}'));"{/if}><i class="fa fa-trash-o" aria-hidden="true"></i></a>

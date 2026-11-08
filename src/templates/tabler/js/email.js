@@ -266,6 +266,13 @@ function initMailSel()
 
 		if(EBID('previewArea'))
 			togglePreviewPane(mailID, tplDir, currentSID);
+		else
+		{
+			if(currentFolderID == -3)
+				document.location.href = bmAppendSession('email.compose.php?redirect=' + mailID );
+			else
+				document.location.href = bmAppendSession('email.read.php?id=' + mailID );
+		}
 	}
 	sel.cbSelectionChanged = function()
 	{
