@@ -340,7 +340,7 @@ class Safecode
 				$id);
 			$row = $res->FetchArray();
 			$res->Free();
-			return($row['code']);
+			return($row ? $row['code'] : '');
 		}
 	}
 
