@@ -71,6 +71,48 @@ class BMBarChart
     public $_barWidth;
 
     /**
+     * left edge of the bars.
+     *
+     * @var int
+     */
+    public $_barX;
+
+    /**
+     * top edge of the bars.
+     *
+     * @var int
+     */
+    public $_barY;
+
+    /**
+     * bar area height.
+     *
+     * @var int
+     */
+    public $_barHeight;
+
+    /**
+     * white colour index.
+     *
+     * @var int
+     */
+    public $_white;
+
+    /**
+     * grey colour index.
+     *
+     * @var int
+     */
+    public $_grey;
+
+    /**
+     * black colour index.
+     *
+     * @var int
+     */
+    public $_black;
+
+    /**
      * constructor.
      *
      * @return BMBarChart
