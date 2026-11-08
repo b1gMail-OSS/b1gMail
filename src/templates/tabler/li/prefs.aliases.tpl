@@ -9,7 +9,7 @@
 	</div>
 </div>
 
-<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=action'}">
+<form name="f1" method="post" action="{sessionurl file='prefs.php' params='action=aliases&do=action'}" data-alias-login-url="{sessionurl file='prefs.php' params='action=aliases&do=toggleLogin'}">
 	{csrffield}
 
 <div class="scrollContainer withBottomBar bm-prefs-body bm-prefs-list-body">
@@ -26,6 +26,10 @@
 			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=type&order={$sortOrderInv}"}">{lng p="type"}</a>
 			{if $sortColumn=='type'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
 		</th>
+		<th class="bm-prefs-col-login" title="{lng p="login_with_alias"}">
+			<a href="{sessionurl file='prefs.php' params="action=aliases&sort=login&order={$sortOrderInv}"}" title="{lng p="login_with_alias"}">{lng p="login"}</a>
+			{if $sortColumn=='login'}<i class="fa {$sortOrder}" aria-hidden="true"></i>{/if}
+		</th>
 		<th class="bm-prefs-col-actions">&nbsp;</th>
 	</tr>
 	
@@ -37,6 +41,15 @@
 		<td class="{$class} bm-prefs-col-check" nowrap="nowrap"><label class="form-check mb-0"><input type="checkbox" class="form-check-input m-0" id="alias_{$aliasID}" name="alias_{$aliasID}" aria-label="{email value=$alias.email}" /></label></td>
 		<td class="{if $sortColumn=='email'}listTableTDActive{else}{$class}{/if}" nowrap="nowrap"><i class="ti ti-user icon icon-sm text-secondary me-1" aria-hidden="true"></i>{email value=$alias.email}</td>
 		<td class="{if $sortColumn=='type'}listTableTDActive{else}{$class}{/if}">{$alias.typeText}</td>
+		<td class="{if $sortColumn=='login'}listTableTDActive{else}{$class}{/if} bm-prefs-col-login" nowrap="nowrap">
+			{if $alias.canLogin}
+			<label class="form-check form-switch mb-0" title="{lng p="login_with_alias"}">
+				<input type="checkbox" class="form-check-input" role="switch"{if $alias.login=='yes'} checked="checked"{/if} aria-label="{lng p="login_with_alias"}" onchange="bmToggleAliasLogin({$aliasID}, this.checked)" />
+			</label>
+			{else}
+			<span class="text-secondary">—</span>
+			{/if}
+		</td>
 		<td class="{$class} bm-prefs-col-actions text-end" nowrap="nowrap">
 			<div class="btn-group btn-group-sm bm-prefs-row-actions" role="group" aria-label="{lng p="actions"}">
 				<a href="{sessionurl file='prefs.php' params="action=aliases&do=edit&id={$aliasID}"}" class="btn btn-outline-secondary btn-icon" title="{lng p="edit"}" aria-label="{lng p="edit"}"><i class="ti ti-pencil icon" aria-hidden="true"></i></a>
@@ -71,4 +84,25 @@
 </div>
 
 </form>
+<script>
+function bmToggleAliasLogin(id, enabled) {
+	var source = document.forms.f1;
+	var form = document.createElement('form');
+	form.method = 'post';
+	form.action = source.getAttribute('data-alias-login-url') || source.action;
+	function field(name, value) {
+		var input = document.createElement('input');
+		input.type = 'hidden';
+		input.name = name;
+		input.value = value;
+		form.appendChild(input);
+	}
+	if(source.csrf_token)
+		field('csrf_token', source.csrf_token.value);
+	field('id', String(id));
+	field('login', enabled ? 'yes' : 'no');
+	document.body.appendChild(form);
+	form.submit();
+}
+</script>
 </div>

@@ -4117,9 +4117,11 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id
 	text-align: right;
 }
 
-/* Größen-Spalte in der Card-Liste ausblenden (checkAllMails liegt in #contentHeader, nicht in #mailTable) */
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea:has(#checkAllMails) #mailTable tbody tr[id^="mail_"] > td:nth-child(6),
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #folderMailArea:not(:has(#checkAllMails)) #mailTable tbody tr[id^="mail_"] > td:nth-child(5) {
+/* Größen-Spalte nur in Split-/Narrow-Liste ausblenden; Vollbreite ohne Vorschau behält sie. */
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #hSep1 #folderMailArea:has(#checkAllMails) #mailTable tbody tr[id^="mail_"] > td:nth-child(6),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #hSep1 #folderMailArea:not(:has(#checkAllMails)) #mailTable tbody tr[id^="mail_"] > td:nth-child(5),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #vSep1 #folderMailArea:has(#checkAllMails) #mailTable tbody tr[id^="mail_"] > td:nth-child(6),
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #vSep1 #folderMailArea:not(:has(#checkAllMails)) #mailTable tbody tr[id^="mail_"] > td:nth-child(5) {
 	display: none !important;
 }
 
@@ -4456,6 +4458,213 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mailTable tbody tr[id^="mail_"] .bm-mail-card-cell .subject > i {
 	margin-right: 0.2rem;
 	flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* E-Mail: Vollbreiten-Liste ohne Vorschau – kompakt & horizontal     */
+/* ------------------------------------------------------------------ */
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable {
+	--bm-mail-card-gap: 0.25rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea .scrollContainer.withBottomBar {
+	padding: 0.2rem var(--bm-mail-card-gap, 0.25rem) 0.35rem !important;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] {
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.35rem 0.625rem 0.35rem var(--bm-mail-leading-inset, 0.5rem);
+	min-height: 2.35rem;
+	border-radius: 0.375rem;
+	margin-bottom: var(--bm-mail-card-gap, 0.25rem);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] > td:not([id]):not(.bm-mail-col-size):not(.bm-mail-col-actions) {
+	flex: 0 0 1.5rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.15rem;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col2"] {
+	flex: 0 0 14rem;
+	width: 14rem;
+	min-width: 14rem;
+	max-width: 14rem;
+	overflow: hidden;
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col2"] > span,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col2"] a {
+	display: block;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] {
+	flex: 1 1 auto;
+	min-width: 10rem;
+	color: inherit;
+	overflow: hidden;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-wide-subject-link,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] a {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 0.5rem;
+	width: 100%;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-wide-subject-link.bm-mail-deleted {
+	text-decoration: line-through;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-wide-subject {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 0.25rem;
+	flex: 0 1 auto;
+	min-width: 0;
+	max-width: min(36%, 26rem);
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] span[id$="_span2"] {
+	display: inline;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-preview {
+	display: block;
+	flex: 1 1 0%;
+	min-width: 0;
+	margin-top: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	-webkit-line-clamp: unset;
+	line-clamp: unset;
+	-webkit-box-orient: initial;
+	font-size: 0.75rem;
+	line-height: 1.35;
+	color: var(--tblr-secondary, #667382);
+	font-weight: 400;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-preview::before {
+	content: "–";
+	margin-right: 0.4rem;
+	opacity: 0.55;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col4"] {
+	flex: 0 0 8.75rem;
+	margin-left: 0;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] > td.bm-mail-col-size {
+	display: block !important;
+	flex: 0 0 4.25rem;
+	text-align: right;
+	font-size: 0.75rem;
+	color: var(--tblr-secondary, #667382);
+	font-variant-numeric: tabular-nums;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] > td.bm-mail-col-actions {
+	flex: 0 0 auto;
+	opacity: 0;
+	overflow: visible;
+	transition: opacity 0.12s ease;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"]:hover > td.bm-mail-col-actions,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"].selected > td.bm-mail-col-actions {
+	opacity: 1;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr:not([id^="mail_"]) td.folderGroup {
+	padding: 0.45rem var(--bm-mail-card-gap, 0.25rem) 0.25rem;
+}
+
+@media (max-width: 1199.98px) {
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col2"] {
+		flex: 0 0 11rem;
+		width: 11rem;
+		min-width: 11rem;
+		max-width: 11rem;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-wide-subject {
+		max-width: min(48%, 20rem);
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] > td.bm-mail-col-size {
+		display: none !important;
+	}
+}
+
+@media (max-width: 991.98px) {
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] {
+		align-items: flex-start;
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col2"] {
+		flex: 0 0 30%;
+		width: 30%;
+		min-width: 30%;
+		max-width: 30%;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-wide-subject-link,
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] a {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.15rem;
+		white-space: normal;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-wide-subject {
+		max-width: none;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-preview {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
+		white-space: normal;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col3"] .bm-mail-preview::before {
+		content: none;
+		margin: 0;
+	}
+
+	BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-email #mainContentArea > #folderMailArea #mailTable tbody tr[id^="mail_"] td[id$="_col4"] {
+		margin-left: auto;
+		flex-basis: auto;
+	}
 }
 
 /* ------------------------------------------------------------------ */
@@ -4940,12 +5149,33 @@ BODY.layout-fluid.bm-loggedin.bm-li-email #mainContentArea:has(#mailReadScrollCo
 	width: 100%;
 	height: auto !important;
 	max-height: min(48vh, 20rem);
+	display: none;
 	flex-shrink: 0;
 	flex-direction: column;
 	overflow: hidden;
 	border-top: 1px solid var(--tblr-border-color, #e6e7e9);
 	background: var(--tblr-bg-surface, #fff);
 	z-index: 3;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-li-email #mainContentArea:has(#mailReadScrollContainer) #bottomLayer_conversation.bm-mail-bottom-layer {
+	height: min(42vh, 18rem) !important;
+	max-height: min(52vh, 22rem);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-li-email #mainContentArea:has(#mailReadScrollContainer) .bm-mail-conversation-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--tblr-bg-surface, #fff);
+}
+
+BODY.layout-fluid.bm-loggedin.bm-li-email #mainContentArea:has(#mailReadScrollContainer) #conversationIFrame {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	background: var(--tblr-bg-surface, #fff);
 }
 
 BODY.layout-fluid.bm-loggedin.bm-li-email #mainContentArea:has(#mailReadScrollContainer) #mailReadScrollContainer.withBottomBarAndLayer {
@@ -11950,6 +12180,30 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table > tr:f
 	padding-right: 0.75rem !important;
 }
 
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-col-login,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table .bm-prefs-col-login {
+	width: 7.5rem;
+	min-width: 7.5rem;
+	white-space: nowrap;
+	text-align: center;
+	vertical-align: middle;
+	padding-left: 0.75rem !important;
+	padding-right: 0.75rem !important;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-col-login .form-switch {
+	display: inline-block;
+	min-height: 1.25rem;
+	margin: 0;
+	vertical-align: middle;
+	text-align: left;
+}
+
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table > tbody > tr:first-child > th.bm-prefs-col-login,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table > tr:first-child > th.bm-prefs-col-login {
+	text-align: center;
+}
+
 /* Bestellungen: feste Spaltenbreiten für Datum, Betrag, Rechnung, Abgeschlossen */
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-orders .bm-prefs-col-date,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-page-orders .bm-prefs-table .bm-prefs-col-date {
@@ -13321,8 +13575,10 @@ BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-body .bigTab
 /* Checkbox-/Aktionsspalte: kein „…“ durch legacy .bigTable TD { text-overflow: ellipsis } */
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-body .bigTable .bm-prefs-col-check,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-body .bigTable .bm-prefs-col-actions,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-body .bigTable .bm-prefs-col-login,
 BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table .bm-prefs-col-check,
-BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table .bm-prefs-col-actions {
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table .bm-prefs-col-actions,
+BODY.layout-fluid.bm-loggedin.bm-layout-combo.bm-li-prefs .bm-prefs-table .bm-prefs-col-login {
 	overflow: visible;
 	text-overflow: clip;
 }

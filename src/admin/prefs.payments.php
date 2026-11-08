@@ -298,8 +298,7 @@ else if($_REQUEST['action'] == 'paymethods')
 				$_POST['title'],
 				serialize(array()));
 			$id = $db->InsertId();
-			header('Location: prefs.payments.php?action=paymethods&do=edit&methodid='.$id.'&sid='.session_id());
-			exit();
+			SessionRedirect('prefs.payments.php?action=paymethods&do=edit&methodid='.$id);
 		}
 
 		$methods = array();
@@ -387,8 +386,7 @@ else if($_REQUEST['action'] == 'invoices')
 		{
 			$db->Query('UPDATE {pre}prefs SET `rgtemplate`=?', $defaultInvoice);
 			ReadConfig();
-			header('Location: prefs.payments.php?action=invoices&reset=ok&sid=' . session_id());
-			exit();
+			SessionRedirect('prefs.payments.php?action=invoices&reset=ok');
 		}
 	}
 	else if(isset($_REQUEST['save']))

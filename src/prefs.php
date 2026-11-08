@@ -1274,8 +1274,21 @@ else if($_REQUEST['action'] == 'aliases'
 	//
 	else
 	{
+		// login flag from the alias list
+		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'toggleLogin'
+			&& isset($_REQUEST['id'])
+			&& IsPOSTRequest())
+		{
+			CsrfEnforceOnStateChange();
+			$login = (isset($_REQUEST['login']) && $_REQUEST['login'] === 'yes') ? 'yes' : 'no';
+			$db->Query('UPDATE {pre}aliase SET `login`=? WHERE `id`=? AND `user`=? AND (`type`&'.(int)ALIAS_RECIPIENT.')!=0 AND (`type`&'.(int)ALIAS_PENDING.')=0',
+				$login,
+				(int)$_REQUEST['id'],
+				(int)$userRow['id']);
+			SessionRedirect('prefs.php?action=aliases');
+		}
 		// update?
-		if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'update'
+		else if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'update'
 			&& isset($_REQUEST['id']))
 		{
 			$db->Query('UPDATE {pre}aliase SET sendername=?,login=? WHERE id=? AND user=?',
@@ -1310,7 +1323,7 @@ else if($_REQUEST['action'] == 'aliases'
 				}
 		}
 
-		$sortColumns = array('email', 'type');
+		$sortColumns = array('email', 'type', 'login');
 
 		// get sort info
 		$sortColumn = (isset($_REQUEST['sort']) && in_array($_REQUEST['sort'], $sortColumns))

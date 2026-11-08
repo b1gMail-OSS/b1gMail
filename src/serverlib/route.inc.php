@@ -251,6 +251,7 @@ function RouteRestoreLegacyDo($do)
 		'action'                    => 'action',
 		'create'                    => 'create',
 		'update'                    => 'update',
+		'togglelogin'               => 'toggleLogin',
 		'download'                  => 'download',
 		'savefilter'                => 'saveFilter',
 		'editconditions'            => 'editConditions',

@@ -2223,6 +2223,8 @@ class BMUser
 			if($row['type'] & ALIAS_PENDING)
 				$typeTexts = array($lang_user['aliastype_4']);
 			$row['typeText'] = implode(', ', $typeTexts);
+			$row['canLogin'] = ((int)$row['type'] & ALIAS_RECIPIENT) !== 0
+				&& ((int)$row['type'] & ALIAS_PENDING) === 0;
 			$aliases[$row['id']] = $row;
 		}
 		$res->Free();
