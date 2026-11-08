@@ -47,6 +47,7 @@
 					</tr>
 					</thead>
 					<tbody>
+					{assign var=lastPos value=0}
 					{foreach from=$fields item=field key=fieldID}
 						{cycle name=class values="td1,td2" assign=class}
 						{assign var=lastPos value=$field.pos}
