@@ -66,7 +66,7 @@ if(extension_loaded('zip')) {
             if ($this->_zip->open($this->_tempZipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
                 //throw new Exception("Could not open or create temporary ZIP file: $tempZipFile");
                 PutLog(sprintf('Could not open or create ZIP file: %s',
-                                    $zipFile),
+                                    $this->_tempZipFile),
                                     PRIO_ERROR,
                                     __FILE__,
                                     __LINE__);
