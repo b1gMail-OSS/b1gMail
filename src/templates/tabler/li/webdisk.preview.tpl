@@ -37,7 +37,7 @@
 					<div class="btn-group btn-group-sm me-2" id="wdPreviewMarkdownModes" style="display:none;">
 						<button type="button" class="btn btn-outline-secondary" id="wdPreviewMdModeEdit">Editor</button>
 						<button type="button" class="btn btn-outline-secondary active" id="wdPreviewMdModeSplit">Split</button>
-						<button type="button" class="btn btn-outline-secondary" id="wdPreviewMdModePreview">Vorschau</button>
+						<button type="button" class="btn btn-outline-secondary" id="wdPreviewMdModePreview">{lng p="preview"}</button>
 					</div>
 					<button type="button" class="btn btn-sm btn-primary" id="wdPreviewSave">
 						<i class="ti ti-device-floppy icon icon-sm me-1" aria-hidden="true"></i>{lng p="save"}
