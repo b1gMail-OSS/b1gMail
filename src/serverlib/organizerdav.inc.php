@@ -126,6 +126,7 @@ class BMPrincipalBackend extends Sabre\DAVACL\PrincipalBackend\AbstractBackend
 
 	function searchPrincipals($prefixPath, array $searchProperties, $test = 'allof')
 	{
+		global $os;
 		$result = array();
 
 		if($prefixPath == 'principals')

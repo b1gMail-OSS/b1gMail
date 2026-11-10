@@ -10,11 +10,6 @@
 
 namespace setasign\Fpdi;
 
-use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
-use setasign\Fpdi\PdfParser\PdfParserException;
-use setasign\Fpdi\PdfParser\Type\PdfIndirectObject;
-use setasign\Fpdi\PdfParser\Type\PdfNull;
-
 /**
  * Class Fpdi
  *
@@ -30,5 +25,5 @@ class Fpdi extends FpdfTpl
      *
      * @string
      */
-    const VERSION = '2.6.8';
+    const VERSION = '2.6.9';
 }
