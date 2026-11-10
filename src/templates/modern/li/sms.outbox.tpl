@@ -34,14 +34,14 @@
 	{assign value=$task.akt_status var=status}
 	<tr>
 		<td class="{$class}" nowrap="nowrap"><input type="checkbox" id="sms_{$sms.id}" name="sms_{$sms.id}" /></td>
-		<td class="{if $sortColumn=='from'}listTableTDActive{else}{$class}{/if}">&nbsp;<a href="javascript:toggleGroup({$sms.id});"><img id="groupImage_{$sms.id}" src="{$tpldir}images/{if $smarty.request.show==$sms.id}contract{else}expand{/if}.png" width="11" height="11" border="0" alt="" align="absmiddle" /></a>&nbsp;{text value=$sms.from}</td>
+		<td class="{if $sortColumn=='from'}listTableTDActive{else}{$class}{/if}">&nbsp;<a href="javascript:toggleGroup({$sms.id});"><img id="groupImage_{$sms.id}" src="{$tpldir}images/{if ($smarty.request.show|default:'')==$sms.id}contract{else}expand{/if}.png" width="11" height="11" border="0" alt="" align="absmiddle" /></a>&nbsp;{text value=$sms.from}</td>
 		<td class="{if $sortColumn=='to'}listTableTDActive{else}{$class}{/if}">&nbsp;<a href="sms.php?to={text value=$sms.to}&sid={$sid}">{text value=$sms.to}</a></td>
 		<td class="{if $sortColumn=='date'}listTableTDActive{else}{$class}{/if}">&nbsp;{date timestamp=$sms.date nice=true}</td>
 		<td class="{$class}">
 			<a onclick="return confirm('{lng p="realdel"}');" href="sms.php?action=outbox&do=delete&id={$sms.id}&sid={$sid}"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
 		</td>
 	</tr>
-	<tbody id="group_{$sms.id}" style="display:{if $smarty.request.show!=$sms.id}none{/if}">
+	<tbody id="group_{$sms.id}" style="display:{if ($smarty.request.show|default:'')!=$sms.id}none{/if}">
 	<tr>
 		<td colspan="5" class="listTableTDText">{text value=$sms.text}</td>
 	</tr>
