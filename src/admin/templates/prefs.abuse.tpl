@@ -14,11 +14,11 @@
 			</div>
 		</div>
 		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-label">{lng p="ap_medium_limit"}</label>
+			<label class="col-sm-2 col-form-label">{lng p="ap_hard_limit"}</label>
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
 					<span class="input-group-text">{acpicon file="indicator_red.png"}</span>
-					<input type="text" class="form-control" name="ap_hard_limit" value="{text allowEmpty=true value=$bm_prefs.ap_hard_limit}" placeholder="{lng p="ap_medium_limit"}">
+					<input type="text" class="form-control" name="ap_hard_limit" value="{text allowEmpty=true value=$bm_prefs.ap_hard_limit}" placeholder="{lng p="ap_hard_limit"}">
 					<span class="input-group-text">{lng p="points"}</span>
 				</div>
 			</div>
@@ -27,7 +27,7 @@
 			<label class="col-sm-2 col-form-label">{lng p="ap_expire_time"}</label>
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
-					<input type="text" class="form-control" name="ap_hard_limit" value="{text allowEmpty=true value=$bm_prefs.ap_expire_time/3600}" placeholder="{lng p="ap_expire_time"}">
+					<input type="text" class="form-control" name="ap_expire_time" value="{text allowEmpty=true value=$bm_prefs.ap_expire_time/3600}" placeholder="{lng p="ap_expire_time"}">
 					<span class="input-group-text">{lng p="hours"}</span>
 				</div>
 			</div>
