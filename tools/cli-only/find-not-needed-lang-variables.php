@@ -7,7 +7,7 @@
   This script should be run from the CLI.
 */
 
-define('SRC_DIR', dirname(dirname(__FILE__)) . '/src/');
+define('SRC_DIR', dirname(dirname(dirname(__FILE__))) . '/src/');
 
 $ignoredPaths = [
     SRC_DIR . 'config/',
@@ -16,7 +16,7 @@ $ignoredPaths = [
     SRC_DIR . 'temp/',
 
     // This is very important - otherwise, our script does not detect any unused language.
-    SRC_DIR . 'serverlib/languages/',
+    SRC_DIR . 'languages/',
 ];
 
 $fileContents = [];
@@ -74,7 +74,7 @@ function isProbablyBinaryFile($fileContent): bool {
 
 findFilesRec(SRC_DIR);
 
-require_once SRC_DIR . 'serverlib/languages/deutsch.lang.php';
+require_once SRC_DIR . 'languages/deutsch.lang.php';
 
 // We ignore lang_custom, because that is e.g. used in the SystemMail function.
 echo "Ignoring lang_custom\n";

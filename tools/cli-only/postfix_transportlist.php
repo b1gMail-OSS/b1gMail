@@ -18,8 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
+define('SRC_DIR', dirname(dirname(dirname(__FILE__))) . '/src/');
 @ini_set('display_errors',0); // Don't display error messages on screen
-require '../src/serverlib/init.inc.php';
+require SRC_DIR.'serverlib/init.inc.php';
 $domains = GetDomainList();
 function getDomainAliasesFromQuery($res,$domains)
 {
