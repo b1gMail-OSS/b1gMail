@@ -87,8 +87,15 @@ if(extension_loaded('zip')) {
                 $zipFileName = basename($fileName);
             }
 
+            // ZipArchive::addFile() only reads the file when the archive is closed. Callers delete or
+            // overwrite their temporary file right after adding it, so read the contents now
+            $data = file_get_contents($fileName);
+            if ($data === false) {
+                return false;
+            }
+
             // Add file to the ZIP archive
-            return $this->_zip->addFile($fileName, $zipFileName);
+            return $this->_zip->addFromString($zipFileName, $data);
         }
 
         /**
