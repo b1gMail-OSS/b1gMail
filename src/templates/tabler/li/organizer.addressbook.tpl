@@ -9,7 +9,7 @@
 			<div class="alert-description">{lng p="addrmove_blocked_desc"}</div>
 		</div>
 	</div>
-	<a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+	<a class="btn-close" data-bs-dismiss="alert" aria-label="{lng p="close"}"></a>
 </div>
 {/if}
 

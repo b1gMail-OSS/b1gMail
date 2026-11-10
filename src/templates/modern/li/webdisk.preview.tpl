@@ -37,7 +37,7 @@
 					<span id="wdPreviewMarkdownModes" style="display:none;">
 						<button type="button" id="wdPreviewMdModeEdit">Editor</button>
 						<button type="button" class="primary" id="wdPreviewMdModeSplit">Split</button>
-						<button type="button" id="wdPreviewMdModePreview">Vorschau</button>
+						<button type="button" id="wdPreviewMdModePreview">{lng p="preview"}</button>
 					</span>
 					<button type="button" class="primary" id="wdPreviewSave">
 						<i class="fa fa-save" aria-hidden="true"></i> {lng p="save"}

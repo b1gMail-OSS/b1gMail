@@ -53,7 +53,7 @@
 	{if !$nliCompactLayout && $page!='nli/login.tpl'}
 	<header class="navbar navbar-expand-md navbar-dark bg-dark d-print-none sticky-top">
 		<div class="container-xl">
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nli-navbar-menu" aria-controls="nli-navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nli-navbar-menu" aria-controls="nli-navbar-menu" aria-expanded="false" aria-label="{lng p="navtoggle"}">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<a class="navbar-brand" href="{$nliUrlHome}">
