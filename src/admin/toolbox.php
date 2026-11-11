@@ -157,8 +157,8 @@ if($_REQUEST['action'] == 'overview')
 
 										if(imagesx($im) != $dimX || imagesy($im) != $dimY)
 											$imgOK = false;
-
-										imagedestroy($im);
+										if(PHPNumVersion() < 800) 
+											imagedestroy($im);
 									}
 									else
 										$imgOK = false;

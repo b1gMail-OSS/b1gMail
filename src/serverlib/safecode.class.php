@@ -155,7 +155,8 @@ class BMCaptchaGenerator
 					+ @mt_rand(($yArea/2)*-1, $yArea/2);
 
 			imagecopy($this->img, $letterImg, $x, $y, 0, 0, $w, $h);
-			imagedestroy($letterImg);
+			if(PHPNumVersion() < 800) 
+				imagedestroy($letterImg);
 		}
 	}
 
@@ -203,7 +204,8 @@ class BMCaptchaGenerator
 		if(function_exists('imagerotate'))
 		{
 			$newImg = imagerotate($img, $fontAngle, $white);
-			imagedestroy($img);
+			if(PHPNumVersion() < 800) 
+				imagedestroy($img);
 			return($newImg);
 		}
 		else
