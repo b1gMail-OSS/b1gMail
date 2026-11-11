@@ -3069,7 +3069,8 @@ class BMUser
 		if(!$cert)
 			return(false);
 		$certInfo = openssl_x509_parse($cert);
-		openssl_x509_free($cert);
+		if(PHPNumVersion() < 800) 
+			openssl_x509_free($cert);
 
 		// check purpose
 		$smimeSign = $smimeEncrypt = false;

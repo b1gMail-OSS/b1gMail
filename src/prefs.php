@@ -2177,8 +2177,10 @@ else if($_REQUEST['action'] == 'keyring'
 					}
 
 					// free
-					@openssl_x509_free($caCert);
-					@openssl_x509_free($cert);
+					if(PHPNumVersion() < 800) {
+						@openssl_x509_free($caCert);
+						@openssl_x509_free($cert);
+					}
 				}
 			}
 		}
@@ -2201,7 +2203,8 @@ else if($_REQUEST['action'] == 'keyring'
 			if($cert)
 			{
 				$certInfo = openssl_x509_parse($cert);
-				openssl_x509_free($cert);
+				if(PHPNumVersion() < 800) 
+					openssl_x509_free($cert);
 			}
 
 			$pkey = @openssl_pkey_get_public($certRow['pemdata']);
