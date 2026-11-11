@@ -2225,8 +2225,8 @@ else if($_REQUEST['action'] == 'keyring'
 					else
 						$publicKeyInfo['typeText'] = $lang_user['unknown'];
 				}
-
-				openssl_free_key($pkey);
+				if(PHPNumVersion() < 800) 
+					openssl_free_key($pkey);
 			}
 
 			$tpl->assign('isValid', $certInfo['validFrom_time_t'] <= time() && $certInfo['validTo_time_t'] >= time());
