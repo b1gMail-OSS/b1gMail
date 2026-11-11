@@ -1,0 +1,7 @@
+<h1><?php echo SetupH($lang_setup['db']); ?></h1>
+<p><?php echo $lang_setup['dbfresh_text']; ?></p>
+<div class="mb-3"><label class="form-label" for="mysql_host"><?php echo SetupH($lang_setup['mysql_host']); ?></label><input class="form-control" id="mysql_host" name="mysql_host" type="text" value="<?php echo SetupH(SetupInput('mysql_host', 'localhost')); ?>" required="required" /></div>
+<div class="mb-3"><label class="form-label" for="mysql_user"><?php echo SetupH($lang_setup['mysql_user']); ?></label><input class="form-control" id="mysql_user" name="mysql_user" type="text" value="<?php echo SetupH(SetupInput('mysql_user')); ?>" required="required" autocomplete="off" /></div>
+<div class="mb-3"><label class="form-label" for="mysql_pass"><?php echo SetupH($lang_setup['mysql_pass']); ?></label><?php echo SetupPasswordField('mysql_pass', 'mysql_pass', SetupInput('mysql_pass')); ?></div>
+<div class="mb-3"><label class="form-label" for="mysql_db"><?php echo SetupH($lang_setup['mysql_db']); ?></label><input class="form-control" id="mysql_db" name="mysql_db" type="text" value="<?php echo SetupH(SetupInput('mysql_db')); ?>" required="required" /></div>
+<div class="mb-3"><label class="form-label" for="mysql_prefix"><?php echo SetupH($lang_setup['mysql_prefix']); ?></label><input class="form-control" id="mysql_prefix" name="mysql_prefix" type="text" value="<?php echo SetupH(SetupInput('mysql_prefix', SETUP_DEFAULT_PREFIX)); ?>" /></div>
