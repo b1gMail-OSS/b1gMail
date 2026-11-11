@@ -1,10 +1,36 @@
-<?php 
+<?php
 /*
- * b1gMail7 server test
- * (c) 2002-2018 B1G Software
+ * b1gMail server test
+ * Copyright (c) 2021 Patrick Schlangen et al, 2026 b1gMail.eu
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  */
 
+$lang = 'en';
+if (isset($_GET['lang']) && in_array($_GET['lang'], array('en', 'de'), true)) {
+	$lang = $_GET['lang'];
+} elseif (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+	$accept = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+	if (strpos($accept, 'de') !== false) {
+		$lang = 'de';
+	}
+}
+
+if ($lang === 'de') 
+    ob_start();
 error_reporting(0);
 
 // returns numeric PHP version
@@ -76,7 +102,7 @@ if(isset($_REQUEST['file']) && isset($embeddedFiles[$_REQUEST['file']]))
 $testOK 	= true;
 $gdError 	= false;
 $smimeError	= false;
-$phpBelow54 = false;
+$phpBelow72 = false;
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -98,7 +124,7 @@ $phpBelow54 = false;
 				<div id="header">&nbsp;</div>
 				<div id="gradient"><i>Server Test</i>&nbsp;&nbsp;</div>
 
-				<div id="content">
+				<div id="content"><div style="text-align:right;padding:4px 12px;font-size:11px;"><a href="?lang=en">English</a> | <a href="?lang=de">Deutsch</a></div>
 
 					<h1>Server Test</h1>
 
@@ -138,9 +164,33 @@ $phpBelow54 = false;
 							<td><img src="servertest.php?file=<?php if(function_exists('openssl_pkcs7_verify')) echo 'ok'; else { echo 'warning'; $smimeError = true; } ?>.png" border="0" alt="" width="16" height="16" /></td>
 						</tr>
 						<tr>
+							<th>zip extension</th>
+							<td>Yes / No </td>
+							<td><?php echo(extension_loaded('zip') ? 'Yes' : 'No'); ?></td>
+							<td><img src="servertest.php?file=<?php if(extension_loaded('zip')) echo 'ok'; else { echo 'warning'; } ?>.png" border="0" alt="" width="16" height="16" /></td>
+						</tr>
+						<tr>
+							<th>bzip2 extension</th>
+							<td>Yes / No </td>
+							<td><?php echo(function_exists('bzopen') ? 'Yes' : 'No'); ?></td>
+							<td><img src="servertest.php?file=<?php if(function_exists('bzopen')) echo 'ok'; else { echo 'warning'; } ?>.png" border="0" alt="" width="16" height="16" /></td>
+						</tr>
+						<tr>
+							<th>iconv / mbstring extension</th>
+							<td>iconv / mbstring / No </td>
+							<td><?php echo (function_exists('iconv') ? 'iconv' : (function_exists('mb_convert_encoding') ? 'mbstring': 'No')); ?></td>
+							<td><img src="servertest.php?file=<?php if(function_exists('mb_convert_encoding') && function_exists('iconv')) echo 'ok'; else { echo 'warning'; } ?>.png" border="0" alt="" width="16" height="16" /></td>
+						</tr>
+						<tr>
+							<th>IDN Support</th>
+							<td>Yes / No </td>
+							<td><?php echo(function_exists('idn_to_ascii') && function_exists('idn_to_utf8') ? 'Yes' : 'No'); ?></td>
+							<td><img src="servertest.php?file=<?php if(function_exists('idn_to_ascii') && function_exists('idn_to_utf8')) echo 'ok'; else { echo 'warning'; } ?>.png" border="0" alt="" width="16" height="16" /></td>
+						</tr>
+						<tr>
 							<th>Server interface</th>
-							<td>Module / CGI</td>
-							<td><?php echo(function_exists('apache_get_version') ? 'Module' : 'CGI'); ?></td>
+							<td>Apache2 Module / CGI / FPM</td>
+							<td><?php echo(function_exists('apache_get_version') ? 'Apachd2 Module' : (function_exists('fpm_get_status') ? 'FPM' : 'CGI')); ?></td>
 							<td><img src="servertest.php?file=ok.png" border="0" alt="" width="16" height="16" /></td>
 						</tr>
 					</table>
@@ -158,8 +208,8 @@ $phpBelow54 = false;
 							<br /><br /></li>
 						<?php if($testOK) { ?><li>The optional features 
 							<a title="Interfaces to use the Webdisk from within the Explorer or Finder and to synchronize calendar and address book" class="glossary">WebDAV/CalDAV/CardDAV</a> are<br />
-							<strong><img src="servertest.php?file=<?php echo(function_exists('apache_get_version') && !$phpBelow54 ? 'ok' : 'warning'); ?>.png" border="0" alt="" width="16" height="16" align="absmiddle" />
-							<?php echo(function_exists('apache_get_version') && !$phpBelow54
+							<strong><img src="servertest.php?file=<?php echo(function_exists('apache_get_version') && !$phpBelow72 ? 'ok' : 'warning'); ?>.png" border="0" alt="" width="16" height="16" align="absmiddle" />
+							<?php echo(function_exists('apache_get_version') && !$phpBelow72
 									? 'available'
 									: 'not available'); ?></strong>
 							<br /><br /></li>
@@ -167,7 +217,7 @@ $phpBelow54 = false;
 							<strong><img src="servertest.php?file=<?php echo(!$smimeError ? 'ok' : 'warning'); ?>.png" border="0" alt="" width="16" height="16" align="absmiddle" />
 							<?php echo(!$smimeError
 									? 'available'
-									: 'not available (require PHP version 5.2.0 or greater with OpenSSL extension)'); ?></strong>
+									: 'not available'); ?></strong>
 							<br /></li><?php } ?>
 					</ul>
 					
@@ -176,7 +226,7 @@ $phpBelow54 = false;
 										if your provider supports catchall POP3 accounts and if you have a MySQL
 										database with enough space available. If you are in doubt, please ask
 										your web hoster if your webspace supports the official
-										<a href="https://www.b1gmail.com/en/faq/#faq-10" target="_blank">system requirements</a>.
+										<a href="https://www.b1gmail.eu/faq-question/1-what-are-the-system-requirements-for-b1gmail/" target="_blank">system requirements</a>.
 					</small>
 					
 				</div>
@@ -190,3 +240,54 @@ $phpBelow54 = false;
 </center>
 </body>
 </html>
+<?php
+// If german, simply replace the text
+if ($lang === 'de') {
+	$output = ob_get_clean();
+	$translations = array(
+		'<title>b1gMail Server Test</title>' => '<title>b1gMail Server-Test</title>',
+		'<i>Server Test</i>' => '<i>Server-Test</i>',
+		'<h1>Server Test</h1>' => '<h1>Server-Test</h1>',
+		'Your system has been checked for compatibility with b1gMail.' => 'Ihr System wurde auf Kompatibilit&auml;t mit b1gMail &uuml;berpr&uuml;ft.',
+		'You can find the test results below.' => 'Im Folgenden finden Sie das Ergebnis der &Uuml;berpr&uuml;fung.',
+		'Required' => 'Ben&ouml;tigt',
+		'Available' => 'Verf&uuml;gbar',
+		'PHP version' => 'PHP-Version',
+		' recommended' => ' empfohlen',
+		'MySQLi support' => 'MySQLi-Unterst&uuml;tzung',
+		'Yes' => 'Ja',
+		'No' => 'Nein',
+		'GD extension' => 'GD-Bibliothek',
+		'OpenSSL extension' => 'OpenSSL-Bibliothek',
+		'zip extension' => 'Zip-Bibliothek',
+		'bzip2 extension' => 'bzip2-Bibliothek',
+		'iconv / mbstring extension' => 'iconv / mbstring-Bibliothek',
+		'IDN Support' => 'IDN-Unterst&uuml;tzung',
+		'Server interface' => 'Server-Interface',
+		'Module' => 'Modul',
+		'<h1>Result</h1>' => '<h1>Ergebnis</h1>',
+		'b1gMail will<br />' => 'b1gMail ist auf diesem Server<br />',
+		'work on your server, but will not be able to display some statistics and captcha graphics' => 'mit Ausnahme der grafischen Statistiken und Sicherheits-Code-Grafiken funktionsf&auml;hig',
+		'work on your server without limitations' => 'voll funktionsf&auml;hig',
+		'will not work on your server properly' => 'nicht oder nur eingeschr&auml;nkt funktionsf&auml;hig',
+		'The optional features' => 'Die optionalen Funktionen',
+		'available' => 'stehen zur Verf&uuml;gung',
+		'not available' => 'stehen nicht zur Verf&uuml;gung',
+		'The optional ' => 'Die optionalen ',
+		'not available' => 'nicht zur Verf&uuml;gung',
+		'<b>Notice:</b>' => '<b>Hinweis:</b>',
+		'This Server Test script cannot check if you have enough space available,' => 'Dieses Server-Test-Script kann nicht &uuml;berpr&uuml;fen, ob Sie &uuml;ber gen&uuml;gend freien Webspace,',
+		'if your provider supports catchall POP3 accounts and if you have a MySQL' => 'ein POP3-CatchAll-Postfach und eine MySQL-Datenbank',
+		'database with enough space available. If you are in doubt, please ask' => 'mit gen&uuml;gend Speicherplatz verf&uuml;gen. Dies k&ouml;nnen Sie bei Ihrem Provider in Erfahrung bringen.',
+		'your web hoster if your webspace supports the official' => 'Beachten Sie bitte die offiziellen',
+		'system requirements' => 'System-Anforderungen',
+		'Email encryption/decryption and signing' => 'Zur Verschl&uuml;sselung/Entschl&uuml;sselung/Signierung von E-Mails',
+		'features are' => '-Funktionen',
+		'are<br />' => '<br />'
+	);
+
+	$output = strtr($output, $translations);
+	$output = preg_replace('/<html xmlns="http:\/\/www\.w3\.org\/1999\/xhtml">/', '<html xmlns="http://www.w3.org/1999/xhtml" lang="de">', $output, 1);
+	$output = preg_replace('/<title>b1gMail Server-Test<\/title>/', '<title>b1gMail Server-Test</title>', $output, 1);
+	echo $output;
+}
