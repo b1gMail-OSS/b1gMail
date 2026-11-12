@@ -192,12 +192,7 @@ else if($_REQUEST['action'] == 'caching')
 
 	// assign
 	$bm_prefs['memcache_servers'] = str_replace(';', "\n", $bm_prefs['memcache_servers']);
-	if((int)str_replace('.', '', phpversion()) >= 800) { // In PHP 8 we will disable memcached
-		$tpl->assign('memcache', false);
-	}
-	else {
-		$tpl->assign('memcache', class_exists('Memcache') || class_exists('Memcached'));
-	}
+	$tpl->assign('memcache', class_exists('Memcache') || class_exists('Memcached'));
 	$tpl->assign('page', 'prefs.caching.tpl');
 }
 
