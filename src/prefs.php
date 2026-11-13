@@ -2288,10 +2288,6 @@ else if($_REQUEST['action'] == 'keyring'
 						$tpl->assign('pageContent', 'li/msg.tpl');
 						$tpl->display('li/index.tpl');
 					}
-
-					// free
-					@openssl_x509_free($caCert);
-					@openssl_x509_free($cert);
 				}
 			}
 		}
@@ -2314,7 +2310,6 @@ else if($_REQUEST['action'] == 'keyring'
 			if($cert)
 			{
 				$certInfo = openssl_x509_parse($cert);
-				openssl_x509_free($cert);
 			}
 
 			$pkey = @openssl_pkey_get_public($certRow['pemdata']);
@@ -2335,8 +2330,6 @@ else if($_REQUEST['action'] == 'keyring'
 					else
 						$publicKeyInfo['typeText'] = $lang_user['unknown'];
 				}
-
-				openssl_free_key($pkey);
 			}
 
 			$tpl->assign('isValid', $certInfo['validFrom_time_t'] <= time() && $certInfo['validTo_time_t'] >= time());

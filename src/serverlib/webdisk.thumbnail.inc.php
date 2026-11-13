@@ -97,7 +97,6 @@ function WebdiskThumbnailResizeImage($im, $maxSize = 160)
 	$transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
 	imagefilledrectangle($dst, 0, 0, $newW, $newH, $transparent);
 	imagecopyresampled($dst, $im, 0, 0, 0, 0, $newW, $newH, $width, $height);
-	imagedestroy($im);
 
 	return($dst);
 }
@@ -153,7 +152,6 @@ function WebdiskEnsureThumbnail($fileInfo, $userID)
 
 	$im = WebdiskThumbnailResizeImage($im);
 	$ok = @imagejpeg($im, $cachePath, 82);
-	imagedestroy($im);
 
 	return($ok ? $cachePath : false);
 }

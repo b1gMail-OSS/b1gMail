@@ -157,8 +157,6 @@ if($_REQUEST['action'] == 'overview')
 
 										if(imagesx($im) != $dimX || imagesy($im) != $dimY)
 											$imgOK = false;
-
-										imagedestroy($im);
 									}
 									else
 										$imgOK = false;

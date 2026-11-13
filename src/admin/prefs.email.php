@@ -329,7 +329,6 @@ else if($_REQUEST['action'] == 'smime')
 						if($cp)
 						{
 							$certInfo = @openssl_x509_parse($cp, true);
-							openssl_x509_free($cp);
 
 							// exists?
 							$res = $db->Query('SELECT COUNT(*) FROM {pre}certificates WHERE `hash`=? AND `type`=? AND `userid`=?',
@@ -608,8 +607,6 @@ else if($_REQUEST['action'] == 'smime')
 						}
 						else
 							$error = 'pkcheck';
-
-						openssl_x509_free($cert);
 					}
 				}
 
@@ -631,7 +628,6 @@ else if($_REQUEST['action'] == 'smime')
 				if($cert)
 				{
 					$certInfo = openssl_x509_parse($cert);
-					openssl_x509_free($cert);
 				}
 
 				$tpl->assign('validCert', $certInfo && $certInfo['validFrom_time_t'] <= time() && $certInfo['validTo_time_t'] >= time());

@@ -2567,8 +2567,6 @@ class B1GMailServerAdmin extends BMPlugin
 						}
 						else
 							$error = 'pkcheck';
-
-						openssl_x509_free($cert);
 					}
 				}
 
