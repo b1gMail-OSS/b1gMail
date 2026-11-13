@@ -70,6 +70,10 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == 'mfaVerify')
 	exit();
 }
 
+// link from a notification mail (admin/?jump=...) while already logged in: go straight to the target
+if(!isset($_REQUEST['action']) && isset($_REQUEST['jump']) && SessionIsLoggedIn('admin'))
+	SessionRedirect(AdminLoginJumpTarget($_REQUEST['jump']));
+
 if(isset($_REQUEST['action']) && $_REQUEST['action']=='login')
 {
 	if(SessionIsLoggedIn('admin'))
