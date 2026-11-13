@@ -17,7 +17,7 @@
 			{/if}
 		</div>
 	</div>
-	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{lng p="close"}"></button>
 </div>
 {/if}
 {if isset($uploadSuccess) && $uploadSuccess|@count > 0}
@@ -39,7 +39,7 @@
 			{/if}
 		</div>
 	</div>
-	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{lng p="close"}"></button>
 </div>
 {/if}
 {if isset($fileShareNoticeURL) && $fileShareNoticeURL != ''}
@@ -51,6 +51,6 @@
 			<div><a href="{$fileShareNoticeURL|escape}" target="_blank">{$fileShareNoticeURL|escape}</a></div>
 		</div>
 	</div>
-	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{lng p="close"}"></button>
 </div>
 {/if}

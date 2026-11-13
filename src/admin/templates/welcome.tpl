@@ -268,7 +268,7 @@
 			{csrffield}
 			<div class="modal-header">
 				<h5 class="modal-title">{lng p="notes"}</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lng p="close"}"></button>
 			</div>
 			<div class="modal-body p-0">
 				<textarea class="form-control bm-notes-field" rows="8" name="notes" placeholder="{lng p="notes"}">{text value=$notes allowEmpty=true}</textarea>

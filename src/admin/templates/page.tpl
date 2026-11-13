@@ -127,7 +127,7 @@
 	<header class="navbar navbar-expand-md navbar-light d-print-none bg-dark text-white">
 		<div class="container-xl">
 			<!-- BEGIN NAVBAR TOGGLER -->
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="{lng p="navtoggle"}">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<!-- END NAVBAR TOGGLER -->
@@ -140,15 +140,15 @@
 			<!-- END NAVBAR LOGO -->
 			<div class="navbar-nav flex-row order-md-last">
 				<div class="nav-item d-flex">
-					<a href="#" class="nav-link px-2 hide-theme-dark" onclick="bmAcpSetTheme('dark'); return false;" title="Dunkelmodus" aria-label="Dunkelmodus aktivieren">
+					<a href="#" class="nav-link px-2 hide-theme-dark" onclick="bmAcpSetTheme('dark'); return false;" title="{lng p="darkmode"}" aria-label="{lng p="darkmode_on"}">
 						<i class="icon ti ti-moon"></i>
 					</a>
-					<a href="#" class="nav-link px-2 hide-theme-light" onclick="bmAcpSetTheme('light'); return false;" title="Hellmodus" aria-label="Hellmodus aktivieren">
+					<a href="#" class="nav-link px-2 hide-theme-light" onclick="bmAcpSetTheme('light'); return false;" title="{lng p="lightmode"}" aria-label="{lng p="lightmode_on"}">
 						<i class="icon ti ti-sun"></i>
 					</a>
 				</div>
 				<div class="nav-item dropdown">
-					<a href="#" class="nav-link dropdown-toggle d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
+					<a href="#" class="nav-link dropdown-toggle d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="{lng p="usermenu"}">
 						{include file="user-avatar.tpl" avatarSize="sm"}
 						<div class="d-none d-xl-block ps-2">
 							<div>{text value=$adminRow.firstname} {text value=$adminRow.lastname}</div>
@@ -404,7 +404,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title">{lng p="about"}</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lng p="close"}"></button>
 			</div>
 			<div class="modal-body">
 				{include file="about.tpl"}
@@ -424,7 +424,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title">{lng p="phpinfo"}</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{lng p="close"}"></button>
 			</div>
 			<div class="modal-body p-0">
 				<iframe id="bmPhpinfoFrame" title="{lng p="phpinfo"}" data-src="{sessionurl file='welcome.php' params='action=phpinfo&do=phpinfo'}" style="width:100%;height:70vh;border:0;background:var(--tblr-bg-surface);"></iframe>

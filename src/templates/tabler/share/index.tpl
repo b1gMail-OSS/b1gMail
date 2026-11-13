@@ -66,7 +66,7 @@
 			</div>
 		{else}
 			<div class="card bm-share-card shadow-sm" id="mainLayer">
-				<div id="locationBar" class="bm-share-breadcrumb border-bottom px-4 py-3" aria-label="Pfad"></div>
+				<div id="locationBar" class="bm-share-breadcrumb border-bottom px-4 py-3" aria-label="{lng p="path"}"></div>
 
 				<div id="contentLayer" class="table-responsive">
 					<table class="table table-lg table-vcenter table-hover table-striped mb-0" cellspacing="0" cellpadding="0" id="contentTable">
