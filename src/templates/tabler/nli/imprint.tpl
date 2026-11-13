@@ -82,7 +82,7 @@
 										{lng p="safecode"}
 										<span class="required">{lng p="required"}</span>
 									</label>
-									<div class="row">
+									<div class="row align-items-center">
 										<div class="col-md-6">
 											<input type="text" class="form-control" required="true" name="safecode" id="safecode" />
 										</div>
