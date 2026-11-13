@@ -158,8 +158,9 @@ else if($_REQUEST['action'] == 'imprint')
 
 			if($bm_prefs['contactform_subject'] == 'yes')
 			{
-				$subject = $_POST['subject'] . ' (' . $subject . ')';
-				if(trim($_POST['subject']) == '')
+				$postSubject = isset($_POST['subject']) ? $_POST['subject'] : '';
+				$subject     = $postSubject . ' (' . $subject . ')';
+				if(trim($postSubject) == '')
 					$invalidFields[] = 'subject';
 			}
 

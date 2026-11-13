@@ -50,7 +50,7 @@
 								{lng p="subject"}
 								<span class="required">{lng p="required"}</span>
 							</label>
-							<select class="form-control" id="subject" name="subject">
+							<select class="form-control" required="true" id="subject" name="subject">
 								<option value="">--- {lng p="pleasechose"} ---</option>
 								{foreach from=$contactform_subjects item=subject}
 								<option value="{text value=$subject}"{if isset($smarty.post.subject) && $smarty.post.subject==$subject} selected="selected"{/if}>{text value=$subject}</option>
