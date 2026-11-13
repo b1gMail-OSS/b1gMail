@@ -178,6 +178,7 @@ if($_REQUEST['action'] == 'overview')
 				$row['indicator'] = 'yellow';
 			else
 				$row['indicator'] = 'green';
+			$row['status'] 			= $statusTable[$row['gesperrt']];
 			$row['statusImg'] 		= $statusImgTable[$row['gesperrt']];
 			$users[$row['id']] 		= $row;
 		}
