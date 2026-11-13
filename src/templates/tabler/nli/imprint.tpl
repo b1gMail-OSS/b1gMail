@@ -42,7 +42,7 @@
 							</label>
 							<div class="input-group">
 								<span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-								<input type="text" class="form-control" required="true" name="email" id="email" value="{if isset($smarty.post.email)}{text value=$smarty.post.email allowEmpty=true}{/if}" />
+								<input type="email" class="form-control" required="true" name="email" id="email" value="{if isset($smarty.post.email)}{text value=$smarty.post.email allowEmpty=true}{/if}" />
 							</div>
 						</div>
 						{if $contactform_subject}<div class="form-group">
