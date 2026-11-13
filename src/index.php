@@ -149,7 +149,7 @@ else if($_REQUEST['action'] == 'imprint')
 
 			if($bm_prefs['contactform_name'] == 'yes')
 			{
-				$name = trim($_POST['name']);
+				$name = isset($_POST['name']) && is_string($_POST['name']) ? trim($_POST['name']) : '';
 				if(strlen($name) < 2)
 					$invalidFields[] = 'name';
 			}
@@ -158,17 +158,17 @@ else if($_REQUEST['action'] == 'imprint')
 
 			if($bm_prefs['contactform_subject'] == 'yes')
 			{
-				$postSubject = isset($_POST['subject']) ? $_POST['subject'] : '';
+				$postSubject = isset($_POST['subject']) && is_string($_POST['subject']) ? $_POST['subject'] : '';
 				$subject     = $postSubject . ' (' . $subject . ')';
 				if(trim($postSubject) == '')
 					$invalidFields[] = 'subject';
 			}
 
-			$email = ExtractMailAddress(trim($_POST['email']));
+			$email = ExtractMailAddress(isset($_POST['email']) && is_string($_POST['email']) ? trim($_POST['email']) : '');
 			if(strlen($email) < 5)
 				$invalidFields[] = 'email';
 
-			$text = trim($_POST['text']);
+			$text = isset($_POST['text']) && is_string($_POST['text']) ? trim($_POST['text']) : '';
 			if(strlen($text) < 5)
 				$invalidFields[] = 'text';
 
