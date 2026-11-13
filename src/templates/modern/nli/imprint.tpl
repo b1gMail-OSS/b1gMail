@@ -76,17 +76,21 @@
 								</div>
 							</div>
 							{else}
-							<div class="col-md-6">
+							<div class="col-md-12">
 								<div class="form-group">
 									<label class="control-label" for="safecode">
 										{lng p="safecode"}
 										<span class="required">{lng p="required"}</span>
 									</label>
-									<input type="text" class="form-control" required="true" name="safecode" id="safecode" />
+									<div class="row">
+										<div class="col-md-6">
+											<input type="text" class="form-control" required="true" name="safecode" id="safecode" />
+										</div>
+										<div class="col-md-6" id="captchaContainer">
+											{$captchaHTML}
+										</div>
+									</div>
 								</div>
-							</div>
-							<div class="col-md-6" id="captchaContainer">
-								{$captchaHTML}
 							</div>
 							{/if}
 						</div>
