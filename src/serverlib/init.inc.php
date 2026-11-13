@@ -462,6 +462,11 @@ else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], $maintenanceWhite
         $tpl->display('nli/maintenance.tpl');
         exit();
 }
+// If not UTF8, stop working
+if(empty($bm_prefs['db_is_utf8'])) {
+    echo('Latin charset detected. Please login to admin interface and convert your installation to utf8');
+    exit();
+}
 
 
 /*
