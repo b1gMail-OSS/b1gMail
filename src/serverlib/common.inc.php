@@ -3133,7 +3133,7 @@ function RequestPrivileges($privileges, $return = false)
 			$adminLoggedIn = isset($_SESSION['bm_adminLoggedIn']) && $_SESSION['bm_adminLoggedIn'];
 			if(($privileges & PRIVILEGES_ADMIN) != 0 && !$adminLoggedIn)
 			{
-				SessionRedirect('index.php?expired=1');
+				header('Location: ' . SessionLoginRedirectUrl(true));
 				exit();
 			}
 

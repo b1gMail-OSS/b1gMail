@@ -369,6 +369,13 @@ function SessionAssignLoginPageActive($context = 'user')
 	$homeUrl = ($context === 'admin') ? 'welcome.php' : 'start.php';
 	$logoutUrl = ($context === 'admin') ? 'index.php?action=logout' : 'start.php?action=logout';
 
+	if($context === 'admin' && isset($_REQUEST['jump']) && function_exists('AdminLoginJumpTarget'))
+	{
+		$jump = AdminLoginJumpTarget($_REQUEST['jump'], '');
+		if($jump !== '')
+			$homeUrl = $jump;
+	}
+
 	if(!SessionIsLoggedIn($context))
 	{
 		$tpl->assign('sessionActive', false);
@@ -1603,7 +1610,16 @@ function SessionLoginRedirectUrl($admin = false)
 	global $bm_prefs;
 
 	if($admin)
-		return SessionUrl('index.php?expired=1');
+	{
+		$url = 'index.php?expired=1';
+		if(function_exists('AdminSessionLoginJumpFromRequest'))
+		{
+			$jump = AdminSessionLoginJumpFromRequest();
+			if($jump !== '')
+				$url .= '&jump=' . rawurlencode($jump);
+		}
+		return SessionUrl($url);
+	}
 
 	return($bm_prefs['selfurl'] . 'index.php?action=login&expired=1');
 }
