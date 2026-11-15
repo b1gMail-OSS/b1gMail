@@ -675,6 +675,75 @@ function AdminLoginJumpTarget($jump, $default = 'welcome.php')
 }
 
 /**
+ * Derive a safe post-login jump target from the current admin request.
+ * Used when a session expires mid-request (e.g. phpinfo iframe).
+ *
+ * @return string Empty string when no useful jump should be preserved
+ */
+function AdminSessionLoginJumpFromRequest()
+{
+	if(isset($_REQUEST['jump']))
+		return AdminLoginJumpTarget($_REQUEST['jump'], '');
+
+	$script = '';
+	if(!empty($_SERVER['SCRIPT_NAME']))
+		$script = basename((string)$_SERVER['SCRIPT_NAME']);
+
+	// Pretty-URL front controller keeps SCRIPT_NAME as app.php
+	if(($script === 'app.php' || $script === '')
+		&& function_exists('RouteMatchAdminPath')
+		&& function_exists('RouteParseAdminPathFromRequest'))
+	{
+		$match = RouteMatchAdminPath(RouteParseAdminPathFromRequest());
+		if(is_array($match) && !empty($match['script']))
+			$script = basename((string)$match['script']);
+	}
+
+	if($script === '' || $script === 'index.php' || $script === 'app.php')
+		return '';
+	if(!preg_match('/^[a-zA-Z0-9_.-]+\.php$/', $script))
+		return '';
+
+	$action = isset($_REQUEST['action']) ? (string)$_REQUEST['action'] : '';
+	$skipActions = array(
+		'sessionStatus', 'sessionUnlock', 'sessionKeepAlive', 'sessionLock', 'sessionLockNow',
+		'login', 'logout', 'mfaVerify',
+	);
+	if($action !== '' && in_array($action, $skipActions, true))
+		return '';
+
+	// phpinfo is shown in a modal iframe — reopen the modal after login
+	if($script === 'welcome.php' && $action === 'phpinfo')
+		return 'welcome.php?open=phpinfo';
+
+	$params = array();
+	foreach($_GET as $key => $value)
+	{
+		if(!is_scalar($value))
+			continue;
+		$key = (string)$key;
+		if($key === 'sid' || $key === 'expired' || $key === 'jump'
+			|| $key === 'csrf_token' || $key === 'theme')
+			continue;
+		$params[$key] = (string)$value;
+	}
+	foreach(array('action', 'do', 'id', 'open') as $key)
+	{
+		if(!isset($_REQUEST[$key]) || isset($params[$key]) || !is_scalar($_REQUEST[$key]))
+			continue;
+		$params[$key] = (string)$_REQUEST[$key];
+	}
+
+	// Omit default welcome action from the jump URL
+	if($script === 'welcome.php' && isset($params['action']) && $params['action'] === 'welcome')
+		unset($params['action']);
+
+	$qs = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+	$jump = $script . ($qs !== '' ? '?' . $qs : '');
+	return AdminLoginJumpTarget($jump, '');
+}
+
+/**
  * Tabler icon for a legacy ACP png from admin/templates/images.
  *
  * @param string $file
