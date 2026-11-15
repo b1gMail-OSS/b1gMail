@@ -719,7 +719,7 @@ class BMScheduledTasks {
     }
 
     function _adminStart() {
-        global $tpl, $db, $currentLanguage;
+        global $tpl, $db, $currentLanguage, $bm_prefs;
 
         $this->_adminHandleStartOp();
 
@@ -728,6 +728,9 @@ class BMScheduledTasks {
         $tpl->assign('page', $this->template('start.tpl'));
         $tpl->assign('groups', BMGroup::GetSimpleGroupList());
         $tpl->assign('sched_tasks', $this->_getTasks());
+
+        // the page loads the cron image with the cron key (start.tpl)
+        $tpl->assign('bm_prefs', $bm_prefs);
     }
 
     function _getTasks() {
