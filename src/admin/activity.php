@@ -173,6 +173,7 @@ if($_REQUEST['action'] == 'activity')
 			$row['mailspace_max'] 	= $groups[$row['gruppe']]['storage'] + $row['mailspace_add'];
 			$row['diskspace_max'] 	= $groups[$row['gruppe']]['webdisk'] + $row['diskspace_add'];
 			$row['traffic_max'] 	= $groups[$row['gruppe']]['traffic'] + $row['traffic_add'];
+			$row['status'] 			= $statusTable[$row['gesperrt']];
 			$row['statusImg'] 		= $statusImgTable[$row['gesperrt']];
 
 			if($row['traffic_status'] != (int)date('m'))
