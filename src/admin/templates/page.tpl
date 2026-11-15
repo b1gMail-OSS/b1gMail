@@ -448,8 +448,16 @@ document.addEventListener('DOMContentLoaded', function () {
 			var base = frame.getAttribute('data-src') || '';
 			var theme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
 			var src = base + (base.indexOf('?') === -1 ? '?' : '&') + 'theme=' + theme;
-			if (frame.getAttribute('src') !== src) {
-				frame.src = src;
+			// Always reload: after session-expiry redirects the iframe can keep a
+			// stale document while the src attribute still looks like phpinfo.
+			frame.removeAttribute('src');
+			frame.src = src;
+		});
+		phpinfoModal.addEventListener('hidden.bs.modal', function () {
+			var frame = document.getElementById('bmPhpinfoFrame');
+			if (frame) {
+				frame.removeAttribute('src');
+				frame.src = 'about:blank';
 			}
 		});
 	}

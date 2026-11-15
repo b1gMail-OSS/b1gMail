@@ -26,6 +26,11 @@
 	<!-- END CUSTOM FONT -->
 </head>
 <body{if !$sessionActive} onload="EBID('username').focus();"{/if} class="d-flex flex-column" id="loginBody" style="background-color: #333333;">
+<script>
+if(window.top !== window.self){ldelim}
+	try{ldelim}window.top.location = window.location.href;{rdelim}catch(e){ldelim}{rdelim}
+{rdelim}
+</script>
 <div class="page page-center">
 	<div class="container container-tight py-4">
 		<div class="text-center mb-4">
@@ -44,6 +49,8 @@
 				{/if}
 				<form action="{sessionurl file='index.php' params='action=login'}" method="post" autocomplete="off">
 					{csrffield}
+					{if $jump|default:''!=''}<input type="hidden" name="jump" value="{text value=$jump allowEmpty=true}" />{/if}
+					<input type="hidden" name="timezone" value="{$timezone}" />
 					<div class="mb-3">
 						<label class="form-label">{lng p="username"}</label>
 						<input type="text" id="username" name="username" class="form-control" placeholder="{lng p="username"}" autocomplete="off">
