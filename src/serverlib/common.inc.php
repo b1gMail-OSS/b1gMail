@@ -462,7 +462,7 @@ function AddAbusePoint($userID, $type, $comment)
 		$apEnabled = $groupRow['abuseprotect'] == 'yes';
 	else
 	{
-		$group = _new('BMGroup', $userGroup);
+		$group = _new('BMGroup', array($userGroup));
 		$apEnabled = $group->_row['abuseprotect'] == 'yes';
 	}
 	if(!$apEnabled)
