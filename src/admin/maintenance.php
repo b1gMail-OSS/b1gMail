@@ -274,6 +274,7 @@ if($_REQUEST['action'] == 'inactive')
 			$tpl->assign('users', $users);
 			$tpl->assign('groups', $groups);
 			$tpl->assign('perPage', $perPage);
+			$tpl->assign('adminauth_button', $is_admin_auth_enabled);
 			$tpl->assign('page', 'maintenance.inactive.list.tpl');
 		}
 		else

@@ -544,7 +544,7 @@
 							{/if}
 							<option value="mailto:{email value=$user.email}">{lng p="sendmail"}</option>
 							{if $user.altmail!=''}<option value="mailto:{email value=$user.altmail}">{lng p="sendmail"} ({lng p="altmail"})</option>{/if}
-							<option value="popup;users.php?do=login&id={$user.id}&sid={$sid}">{lng p="login"}</option>
+							{if adminauth_button==1}<option value="popup;users.php?do=login&id={$user.id}&sid={$sid}">{lng p="login"}</option>{/if}
 							<option value="users.php?singleAction=emptyTrash&singleID={$user.id}&sid={$sid}">{lng p="emptytrash"}</option>
 							<option value="users.php?singleAction={if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}&singleID={$user.id}&sid={$sid}">{if $user.gesperrt=='no'}{lng p="lock"}{elseif $user.gesperrt=='yes'}{lng p="unlock"}{elseif $user.gesperrt=='locked'}{lng p="activate"}{elseif $user.gesperrt=='delete'}{lng p="restore"}{/if}</option>
 							<option value="users.php?singleAction=delete&singleID={$user.id}&sid={$sid}">{lng p="delete"}</option>

@@ -190,6 +190,7 @@ if($_REQUEST['action'] == 'activity')
 		$tpl->assign('sortBy', $sortBy);
 		$tpl->assign('sortOrder', $sortOrder);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
+		$tpl->assign('adminauth_button', $is_admin_auth_enabled);
 		$tpl->assign('page', 'activity.list.tpl');
 	}
 }

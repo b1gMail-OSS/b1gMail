@@ -1194,7 +1194,9 @@ class BMUser
 		if(isset($row) && $userID > 0)
 		{
 			$adminAuthOK = false;
-			if(isset($_REQUEST['adminAuth']))
+			if(isset($_REQUEST['adminAuth']) && 
+			defined('ENABLE_ADMIN_AUTH') && 
+			(ENABLE_ADMIN_AUTH == 1||ENABLE_ADMIN_AUTH === TRUE))
 			{
 				$adminAuth = @explode(',', @base64_decode($_REQUEST['adminAuth']));
 
@@ -1207,7 +1209,7 @@ class BMUser
 						if(!is_array($adminPrivs)) $adminPrivs = array();
 						if($arow['type'] != 0 && !in_array('users', $adminPrivs)) continue;
 
-						$correctToken = md5(sprintf('%d,%d', $userID, $adminAuth[1]).md5($arow['password'].$_SERVER['HTTP_USER_AGENT']));
+						$correctToken = hash('sha512',sprintf('%d,%d', $userID, $adminAuth[1]).hash('sha512',$arow['password'].$_SERVER['HTTP_USER_AGENT']));
 
 						if($correctToken === $adminAuth[2])
 							$adminAuthOK = true;

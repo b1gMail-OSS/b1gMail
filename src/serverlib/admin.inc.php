@@ -26,6 +26,14 @@ if (defined('TOOLBOX_SERVER')) {
 }
 else $toolbox_serverurl = '';
 
+if(defined('ENABLE_ADMIN_AUTH') && 
+(ENABLE_ADMIN_AUTH == 1||ENABLE_ADMIN_AUTH === TRUE)) {
+	$is_admin_auth_enabled = 1;
+}
+else {
+	$is_admin_auth_enabled = 0;
+}
+
 // tables
 $customTextsHTML = [
 //	'imprint'						=> true

@@ -334,6 +334,7 @@ if($_REQUEST['action'] == 'users')
 		$tpl->assign('queryString', isset($_REQUEST['query']) ? $_REQUEST['query'] : '');
 		$tpl->assign('groups', $groups);
 		$tpl->assign('perPage', $perPage);
+		$tpl->assign('adminauth_button', $is_admin_auth_enabled);
 		$tpl->assign('page', 'users.list.tpl');
 	}
 
@@ -650,6 +651,7 @@ if($_REQUEST['action'] == 'users')
 		$tpl->assign('profileFields', 	$profileFields);
 		$tpl->assign('diskFiles',		$diskFiles);
 		$tpl->assign('diskFolders', 	$diskFolders);
+		$tpl->assign('adminauth_button', $is_admin_auth_enabled);
 		$tpl->assign('page', 			'users.edit.tpl');
 	}
 
@@ -858,7 +860,9 @@ if($_REQUEST['action'] == 'users')
 			__FILE__,
 			__LINE__);
 		$adminAuth = sprintf('%d,%d', $userRow['id'], $adminRow['adminid']);
-		$adminAuth .= ',' . md5($adminAuth.$_SESSION['bm_adminAuth']);
+		//$adminAuth .= ',' . md5($adminAuth.$_SESSION['bm_adminAuth']);
+		$adminAuth .=  ',' .  hash('sha512', $adminAuth.$_SESSION['bm_adminAuth']);
+		//$_SESSION['bm_adminAuth'] = hash('sha512', $pw.$_SERVER['HTTP_USER_AGENT']);
 
 		// create new session
 		header(sprintf('Location: ../index.php?do=login&email_full=%s&adminAuth=%s',

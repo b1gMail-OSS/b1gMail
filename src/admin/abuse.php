@@ -190,6 +190,7 @@ if($_REQUEST['action'] == 'overview')
 		$tpl->assign('sortBy', $sortBy);
 		$tpl->assign('sortOrder', $sortOrder);
 		$tpl->assign('sortOrderInv', $sortOrder == 'asc' ? 'desc' : 'asc');
+		$tpl->assign('adminauth_button', $is_admin_auth_enabled);
 		$tpl->assign('page', 'abuse.list.tpl');
 	}
 
@@ -427,6 +428,7 @@ if($_REQUEST['action'] == 'overview')
 		$tpl->assign('pageNo', 			$pageNo);
 		$tpl->assign('pageCount', 		$pageCount);
 		$tpl->assign('points', 			$points);
+		$tpl->assign('adminauth_button', $is_admin_auth_enabled);
 		$tpl->assign('page', 'abuse.show.tpl');
 	}
 }
