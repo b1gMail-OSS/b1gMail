@@ -54,16 +54,31 @@ Its important to make a backup of `serverlib/init.inc.php` first. Then upload th
 Alternatively delete in serverlib the file `version.inc.php` and rename `version.default.inc.php` to `version.inc.php`, upload `tools/db_sync.php` and 
 call `db_sync.php` (maybe you have to change the require path before). In both cases the setup folder must be deleted afterwards.
 
-Open the `serverlib/init.inc.php`, which you backed up. Copy the this value `define('B1GMAIL_SIGNKEY', ''); //Here add signkey from serverlib/init.inc.php` 
-to your `serverlib/config.inc.php`. If you want still use the Toolbox from commercial version, copy these lines to `serverlib/config.inc.php`:
-
-`define('TOOLBOX_SERVER', 'http://service.b1gmail.com/toolbox/');`  
-`define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');`  
-`define('SIGNATURE_SERVER', 'http://service.b1gmail.com/signatures/');`  
+Open the `serverlib/init.inc.php`, which you backed up. Copy the this value `define('B1GMAIL_SIGNKEY', ''); //Here add signkey from serverlib/init.inc.php` to your `serverlib/config.inc.php`. 
 
 ### Plugins from 7.4.0 and older
 A lot of plugins will work, but they are maybe not compatible with PHP 8 and higher. Before upgrade check the compatibility first. b1gMail 7.4.1 itself is compatible with PHP 8 and higher.
 
 More information: https://www.b1gmail.eu/
 ## Installation
-look at b1gMail Wiki.
+look at https://docs.b1gmail.org.
+
+### Local development installation
+
+To run a local development version, you first need a local web server. The recommended way is to use our Docker setup. Simply perform the following steps to start your local, Docker-powered development instance:
+
+1. Clone the repository
+2. Go to `/dev/` and follow the instructions on how to run the Docker development server.
+3. Open `localhost:5000` in your web browser. The UI will guide you through the rest of the setup process.
+
+After the installation, if you want to see detailed debug information like php errors and similar, open `/src/serverlib/config.php` and add the following to it:
+
+```php
+define('DEBUG', true);
+```
+
+Often, when developing locally, you don't want to actually send emails (and even deal with properly configuring email sending). Simply add the following to your `config.php` to replace the actual email sending with a mock that won't actually send the email:
+
+```php
+define('DEV_MOCK_MAIL_SENDING', true);
+```

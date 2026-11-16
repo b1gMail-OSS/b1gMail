@@ -139,6 +139,10 @@ class BMSendMail
             return false;
         }
 
+        if (DEV_MOCK_MAIL_SENDING) {
+			return true;
+		}
+
         // send using mail()...
         if ($bm_prefs['send_method'] == 'php') {
             return $this->_sendUsingPHPMail();

@@ -309,6 +309,13 @@ if (!defined('DISABLE_WRITE_XMAILER')) {
 if (!defined('LEGACY_WEBDISCICONS')) {
     define('LEGACY_WEBDISCICONS', false);
 }
+if (!defined('FORCE_LEGACY_ENCODING')) {
+    define('FORCE_LEGACY_ENCODING', false);
+}
+if (!defined('DEV_MOCK_MAIL_SENDING')) {
+	// A setting used for development purposes that replaces actual email submission by a mock.
+	define('DEV_MOCK_MAIL_SENDING', false);
+}
 if (DEBUG) {
     error_reporting(E_ALL);
 } elseif (defined('INTERFACE_MODE') && INTERFACE_MODE) {
@@ -463,7 +470,7 @@ else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], $maintenanceWhite
         exit();
 }
 // If not UTF8, stop working
-if(empty($bm_prefs['db_is_utf8'])) {
+if(empty($bm_prefs['db_is_utf8']) && FORCE_LEGACY_ENCODING===FALSE) {
     echo('Latin charset detected. Please login to admin interface and convert your installation to utf8');
     exit();
 }
