@@ -150,7 +150,7 @@ class LDAPAuthPlugin extends BMPlugin
 		return($result);
 	}
 
-    function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
+    public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
         if($lang == 'deutsch') {
             $lang_admin['ou'] = 'Organisationseinheit(OU) der Benutzer';
