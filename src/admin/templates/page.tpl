@@ -438,6 +438,15 @@
 {/if}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+	// no browser autofill in the admin area: saved entries must not end up in the data
+	document.querySelectorAll('form:not([autocomplete])').forEach(function (form) {
+		form.setAttribute('autocomplete', 'off');
+	});
+	// the password manager fills the field in front of a password field with the saved login name
+	document.querySelectorAll('input[type="password"]:not([autocomplete])').forEach(function (input) {
+		input.setAttribute('autocomplete', 'new-password');
+	});
+
 	var phpinfoModal = document.getElementById('bmPhpinfoModal');
 	if (phpinfoModal) {
 		phpinfoModal.addEventListener('shown.bs.modal', function () {
