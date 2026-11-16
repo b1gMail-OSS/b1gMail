@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail PremiumAccount plugin
- * (c) 2021 Patrick Schlangen et al, 2022-2025 b1gMail.eu
+ * (c) 2021 Patrick Schlangen et al, 2022-2026 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -42,7 +42,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 *
 	 * @return PremiumAccountPlugin
 	 */
-	function __construct()
+	public function __construct()
 	{
 		global $thisUser;
 
@@ -50,7 +50,7 @@ class PremiumAccountPlugin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMail PremiumAccount PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '2.53';
+		$this->version				= '2.54';
 		$this->website				= 'https://www.b1gmail.org/';
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
 
@@ -64,7 +64,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * onload
 	 *
 	 */
-	function OnLoad()
+	public function OnLoad()
 	{
 		$this->prefs = $this->_getPrefs();
 	}
@@ -73,7 +73,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * initialize language-dependent phrases
 	 *
 	 */
-	function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
+	public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
 	{
 		if($lang == 'deutsch')
 		{
@@ -554,85 +554,75 @@ class PremiumAccountPlugin extends BMPlugin
 	 * installer
 	 *
 	 */
-	function Install()
+	public function Install()
 	{
 		global $db, $currentLanguage;
 
 		// db struct
-		$databaseStructure =                      // checksum: 4eab06ece647cda6068ee3a4f678eaff
-			  'YTo0OntzOjI1OiJibTYwX21vZF9wcmVtaXVtX3BhY2thZ2VzIjthOjI6e3M6NjoiZmllbGRzIjt'
-			. 'hOjE2OntpOjA7YTo2OntpOjA7czoyOiJpZCI7aToxO3M6NzoiaW50KDExKSI7aToyO3M6MjoiTk'
-			. '8iO2k6MztzOjM6IlBSSSI7aTo0O047aTo1O3M6MTQ6ImF1dG9faW5jcmVtZW50Ijt9aToxO2E6N'
-			. 'jp7aTowO3M6NjoiZ3J1cHBlIjtpOjE7czo3OiJpbnQoMTEpIjtpOjI7czoyOiJOTyI7aTozO3M6'
-			. 'MDoiIjtpOjQ7TjtpOjU7czowOiIiO31pOjI7YTo2OntpOjA7czoxMDoicHJlaXNfY2VudCI7aTo'
-			. 'xO3M6NzoiaW50KDExKSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O3M6MzoiMjk5IjtpOj'
-			. 'U7czowOiIiO31pOjM7YTo2OntpOjA7czoxMDoiYWJyZWNobnVuZyI7aToxO3M6NDI6ImVudW0oJ'
-			. '3dvY2hlbicsJ21vbmF0ZScsJ2phaHJlJywnZWlubWFsaWcnKSI7aToyO3M6MjoiTk8iO2k6Mztz'
-			. 'OjA6IiI7aTo0O3M6NjoibW9uYXRlIjtpOjU7czowOiIiO31pOjQ7YTo2OntpOjA7czoxMjoiYWJ'
-			. 'yZWNobnVuZ190IjtpOjE7czoxMDoidGlueWludCg0KSI7aToyO3M6MjoiTk8iO2k6MztzOjA6Ii'
-			. 'I7aTo0O047aTo1O3M6MDoiIjt9aTo1O2E6Njp7aTowO3M6MTA6ImxhdWZ6ZWl0ZW4iO2k6MTtzO'
-			. 'jEyOiJ2YXJjaGFyKDI1NSkiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjE6IioiO2k6'
-			. 'NTtzOjA6IiI7fWk6NjthOjY6e2k6MDtzOjEyOiJtYXhfbGF1ZnplaXQiO2k6MTtzOjc6ImludCg'
-			. 'xMSkiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjE6IjAiO2k6NTtzOjA6IiI7fWk6Nz'
-			. 'thOjY6e2k6MDtzOjEyOiJmYWxsYmFja19ncnAiO2k6MTtzOjc6ImludCgxMSkiO2k6MjtzOjI6I'
-			. 'k5PIjtpOjM7czowOiIiO2k6NDtzOjI6Ii0xIjtpOjU7czowOiIiO31pOjg7YTo2OntpOjA7czo1'
-			. 'OiJ0aXRlbCI7aToxO3M6MTI6InZhcmNoYXIoMjU1KSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI'
-			. '7aTo0O047aTo1O3M6MDoiIjt9aTo5O2E6Njp7aTowO3M6MTI6ImJlc2NocmVpYnVuZyI7aToxO3'
-			. 'M6NDoidGV4dCI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O047aTo1O3M6MDoiIjt9aToxM'
-			. 'DthOjY6e2k6MDtzOjk6ImdlbG9lc2NodCI7aToxO3M6MTA6InRpbnlpbnQoNCkiO2k6MjtzOjI6'
-			. 'Ik5PIjtpOjM7czowOiIiO2k6NDtzOjE6IjAiO2k6NTtzOjA6IiI7fWk6MTE7YTo2OntpOjA7czo'
-			. '4OiJ0ZW1wbGF0ZSI7aToxO3M6MTI6InZhcmNoYXIoMjU1KSI7aToyO3M6MjoiTk8iO2k6MztzOj'
-			. 'A6IiI7aTo0O047aTo1O3M6MDoiIjt9aToxMjthOjY6e2k6MDtzOjEyOiJhY2NlbnR1YXRpb24iO'
-			. '2k6MTtzOjEwOiJ0aW55aW50KDQpIjtpOjI7czoyOiJOTyI7aTozO3M6MDoiIjtpOjQ7czoxOiIw'
-			. 'IjtpOjU7czowOiIiO31pOjEzO2E6Njp7aTowO3M6NToib3JkZXIiO2k6MTtzOjc6ImludCgxMSk'
-			. 'iO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjE6IjAiO2k6NTtzOjA6IiI7fWk6MTQ7YT'
-			. 'o2OntpOjA7czoxMDoiYWx0X3RpdGxlcyI7aToxO3M6NDoidGV4dCI7aToyO3M6MjoiTk8iO2k6M'
-			. 'ztzOjA6IiI7aTo0O047aTo1O3M6MDoiIjt9aToxNTthOjY6e2k6MDtzOjE2OiJhbHRfZGVzY3Jp'
-			. 'cHRpb25zIjtpOjE7czo0OiJ0ZXh0IjtpOjI7czoyOiJOTyI7aTozO3M6MDoiIjtpOjQ7TjtpOjU'
-			. '7czowOiIiO319czo3OiJpbmRleGVzIjthOjE6e3M6NzoiUFJJTUFSWSI7YToxOntpOjA7czoyOi'
-			. 'JpZCI7fX19czoyMjoiYm02MF9tb2RfcHJlbWl1bV9wcmVmcyI7YToyOntzOjY6ImZpZWxkcyI7Y'
-			. 'ToxMTp7aTowO2E6Njp7aTowO3M6MjQ6InNlbmRfdXBkYXRlX25vdGlmaWNhdGlvbiI7aToxO3M6'
-			. 'MTY6ImVudW0oJ3llcycsJ25vJykiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjM6Inl'
-			. 'lcyI7aTo1O3M6MDoiIjt9aToxO2E6Njp7aTowO3M6MjQ6InVwZGF0ZV9ub3RpZmljYXRpb25fZG'
-			. 'F5cyI7aToxO3M6NzoiaW50KDExKSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O3M6MToiN'
-			. 'yI7aTo1O3M6MDoiIjt9aToyO2E6Njp7aTowO3M6Mjc6InVwZGF0ZV9ub3RpZmljYXRpb25fYWx0'
-			. 'bWFpbCI7aToxO3M6MTY6ImVudW0oJ3llcycsJ25vJykiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiI'
-			. 'iO2k6NDtzOjI6Im5vIjtpOjU7czowOiIiO31pOjM7YTo2OntpOjA7czo2OiJmaWVsZHMiO2k6MT'
-			. 'tzOjQ6InRleHQiO2k6MjtzOjI6Ik5PIjtpOjM7czowOiIiO2k6NDtOO2k6NTtzOjA6IiI7fWk6N'
-			. 'DthOjY6e2k6MDtzOjg6ImN1cnJlbmN5IjtpOjE7czoxMToidmFyY2hhcigzMikiO2k6MjtzOjI6'
-			. 'Ik5PIjtpOjM7czowOiIiO2k6NDtzOjM6IkVVUiI7aTo1O3M6MDoiIjt9aTo1O2E6Njp7aTowO3M'
-			. '6MTc6InNpZ251cF9vcmRlcl9wYWdlIjtpOjE7czoxNjoiZW51bSgneWVzJywnbm8nKSI7aToyO3'
-			. 'M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O3M6MzoieWVzIjtpOjU7czowOiIiO31pOjY7YTo2OntpO'
-			. 'jA7czoxODoic2lnbnVwX29yZGVyX2ZvcmNlIjtpOjE7czoxNjoiZW51bSgneWVzJywnbm8nKSI7'
-			. 'aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O3M6Mjoibm8iO2k6NTtzOjA6IiI7fWk6NzthOjY'
-			. '6e2k6MDtzOjE4OiJkZWxldGVfb3JkZXJfYWZ0ZXIiO2k6MTtzOjc6ImludCgxMSkiO2k6MjtzOj'
-			. 'I6Ik5PIjtpOjM7czowOiIiO2k6NDtzOjc6IjI2Nzg0MDAiO2k6NTtzOjA6IiI7fWk6ODthOjY6e'
-			. '2k6MDtzOjEyOiJkZWxldGVfb3JkZXIiO2k6MTtzOjE2OiJlbnVtKCd5ZXMnLCdubycpIjtpOjI7'
-			. 'czoyOiJOTyI7aTozO3M6MDoiIjtpOjQ7czozOiJ5ZXMiO2k6NTtzOjA6IiI7fWk6OTthOjY6e2k'
-			. '6MDtzOjEyOiJmaWVsZHNfb3JkZXIiO2k6MTtzOjQ6InRleHQiO2k6MjtzOjI6Ik5PIjtpOjM7cz'
-			. 'owOiIiO2k6NDtOO2k6NTtzOjA6IiI7fWk6MTA7YTo2OntpOjA7czoxNzoibmxpX3BhY2thZ2VzX'
-			. '3BhZ2UiO2k6MTtzOjI2OiJlbnVtKCd5ZXMnLCdubycsJ3JlcGxhY2UnKSI7aToyO3M6MjoiTk8i'
-			. 'O2k6MztzOjA6IiI7aTo0O3M6MzoieWVzIjtpOjU7czowOiIiO319czo3OiJpbmRleGVzIjthOjA'
-			. '6e319czoyODoiYm02MF9tb2RfcHJlbWl1bV9zdWJzY3JpYmVycyI7YToyOntzOjY6ImZpZWxkcy'
-			. 'I7YTo2OntpOjA7YTo2OntpOjA7czoyOiJpZCI7aToxO3M6NzoiaW50KDExKSI7aToyO3M6MjoiT'
-			. 'k8iO2k6MztzOjM6IlBSSSI7aTo0O047aTo1O3M6MTQ6ImF1dG9faW5jcmVtZW50Ijt9aToxO2E6'
-			. 'Njp7aTowO3M6ODoiYmVudXR6ZXIiO2k6MTtzOjc6ImludCgxMSkiO2k6MjtzOjI6Ik5PIjtpOjM'
-			. '7czowOiIiO2k6NDtOO2k6NTtzOjA6IiI7fWk6MjthOjY6e2k6MDtzOjU6InBha2V0IjtpOjE7cz'
-			. 'o3OiJpbnQoMTEpIjtpOjI7czoyOiJOTyI7aTozO3M6MDoiIjtpOjQ7TjtpOjU7czowOiIiO31pO'
-			. 'jM7YTo2OntpOjA7czoxNDoibGV0enRlX3phaGx1bmciO2k6MTtzOjc6ImludCgxMSkiO2k6Mjtz'
-			. 'OjI6Ik5PIjtpOjM7czowOiIiO2k6NDtOO2k6NTtzOjA6IiI7fWk6NDthOjY6e2k6MDtzOjY6ImF'
-			. 'ibGF1ZiI7aToxO3M6NzoiaW50KDExKSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O047aT'
-			. 'o1O3M6MDoiIjt9aTo1O2E6Njp7aTowO3M6MjQ6Imxhc3RfdXBkYXRlX25vdGlmaWNhdGlvbiI7a'
-			. 'ToxO3M6NzoiaW50KDExKSI7aToyO3M6MjoiTk8iO2k6MztzOjA6IiI7aTo0O047aTo1O3M6MDoi'
-			. 'Ijt9fXM6NzoiaW5kZXhlcyI7YToxOntzOjc6IlBSSU1BUlkiO2E6MTp7aTowO3M6MjoiaWQiO31'
-			. '9fXM6MjU6ImJtNjBfbW9kX3ByZW1pdW1fdXNlcmF1dGgiO2E6Mjp7czo2OiJmaWVsZHMiO2E6Mz'
-			. 'p7aTowO2E6Njp7aTowO3M6NjoidXNlcmlkIjtpOjE7czo3OiJpbnQoMTEpIjtpOjI7czoyOiJOT'
-			. 'yI7aTozO3M6MzoiUFJJIjtpOjQ7TjtpOjU7czowOiIiO31pOjE7YTo2OntpOjA7czo1OiJ0b2tl'
-			. 'biI7aToxO3M6MTE6InZhcmNoYXIoMzIpIjtpOjI7czoyOiJOTyI7aTozO3M6MDoiIjtpOjQ7Tjt'
-			. 'pOjU7czowOiIiO31pOjI7YTo2OntpOjA7czo0OiJkYXRlIjtpOjE7czo3OiJpbnQoMTEpIjtpOj'
-			. 'I7czoyOiJOTyI7aTozO3M6MDoiIjtpOjQ7TjtpOjU7czowOiIiO319czo3OiJpbmRleGVzIjthO'
-			. 'jE6e3M6NzoiUFJJTUFSWSI7YToxOntpOjA7czo2OiJ1c2VyaWQiO319fX0=';
-		$databaseStructure = unserialize(base64_decode($databaseStructure));
+		$databaseStructure = [
+			'{pre}mod_premium_packages' => [
+				'fields' => [
+					['id', 'int(11)', 'NO', 'PRI', NULL, 'auto_increment'],
+					['gruppe', 'int(11)', 'NO'],
+					['preis_cent', 'int(11)', 'NO', '', '299'],
+					['abrechnung', "enum('wochen','monate','jahre','einmalig')", 'NO', '', 'monate'],
+					['abrechnung_t', 'tinyint(4)', 'NO'],
+					['laufzeiten', 'varchar(255)', 'NO', '', '*'],
+					['max_laufzeit', 'int(11)', 'NO', '', '0'],
+					['fallback_grp', 'int(11)', 'NO', '', '-1'],
+					['titel', 'varchar(255)', 'NO'],
+					['beschreibung', 'text', 'NO'],
+					['geloescht', 'tinyint(4)', 'NO', '', '0'],
+					['template', 'varchar(255)', 'NO'],
+					['accentuation', 'tinyint(4)', 'NO', '', '0'],
+					['order', 'int(11)', 'NO', '', '0'],
+					['alt_titles', 'text', 'NO'],
+					['alt_descriptions', 'text', 'NO'],
+				],
+				'indexes' => [
+					'PRIMARY' => ['id'],
+				],
+			],
+			'{pre}mod_premium_prefs' => [
+				'fields' => [
+					['send_update_notification', "enum('yes','no')", 'NO', '', 'yes'],
+					['update_notification_days', 'int(11)', 'NO', '', '7'],
+					['update_notification_altmail', "enum('yes','no')", 'NO', '', 'no'],
+					['fields', 'text', 'NO'],
+					['currency', 'varchar(32)', 'NO', '', 'EUR'],
+					['signup_order_page', "enum('yes','no')", 'NO', '', 'yes'],
+					['signup_order_force', "enum('yes','no')", 'NO', '', 'no'],
+					['delete_order_after', 'int(11)', 'NO', '', '2678400'],
+					['delete_order', "enum('yes','no')", 'NO', '', 'yes'],
+					['fields_order', 'text', 'NO'],
+					['nli_packages_page', "enum('yes','no','replace')", 'NO', '', 'yes'],
+				],
+				'indexes' => [],
+			],
+			'{pre}mod_premium_subscribers' => [
+				'fields' => [
+					['id', 'int(11)', 'NO', 'PRI', NULL, 'auto_increment'],
+					['benutzer', 'int(11)', 'NO'],
+					['paket', 'int(11)', 'NO'],
+					['letzte_zahlung', 'int(11)', 'NO'],
+					['ablauf', 'int(11)', 'NO'],
+					['last_update_notification', 'int(11)', 'NO'],
+				],
+				'indexes' => [
+					'PRIMARY' => ['id'],
+				],
+			],
+			'{pre}mod_premium_userauth' => [
+				'fields' => [
+					['userid', 'int(11)', 'NO', 'PRI'],
+					['token', 'varchar(32)', 'NO'],
+					['date', 'int(11)', 'NO'],
+				],
+				'indexes' => [
+					'PRIMARY' => ['userid'],
+				],
+			],
+		];
 
 		// sync struct
 		SyncDBStruct($databaseStructure);
@@ -679,7 +669,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * admin handler
 	 *
 	 */
-	function AdminHandler()
+	public function AdminHandler()
 	{
 		global $tpl, $plugins, $lang_admin, $bm_prefs;
 
@@ -733,7 +723,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * cron tasks
 	 *
 	 */
-	function OnCron()
+	public function OnCron()
 	{
 		global $db, $lang_custom, $lang_admin, $bm_prefs;
 
@@ -898,7 +888,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 *
 	 * @param array $tabs Tabs (not needed here)
 	 */
-	function BeforePageTabsAssign(&$tabs)
+	public function BeforePageTabsAssign(&$tabs)
 	{
 		global $userRow, $tpl;
 
@@ -912,12 +902,55 @@ class PremiumAccountPlugin extends BMPlugin
 			if($activeSubscription['package']['template'] != '')
 			{
 				$template = $activeSubscription['package']['template'];
+
 				if(file_exists(B1GMAIL_DIR . 'templates/' . $template . '/'))
 				{
+					$oldTemplateDir = $tpl->tplDir;
+					$newTemplateDir = B1GMAIL_REL . 'templates/' . $template . '/';
+
 					$tpl->setTemplateDir(B1GMAIL_DIR . 'templates/' . $template . '/');
-            		$tpl->setCompileDir(B1GMAIL_DIR . 'templates/' . $template . '/cache/');
-					$tpl->assign('tpldir', 	B1GMAIL_REL . 'templates/' . $template . '/');
-					$tpl->assign('_tpldir',	'templates/' . $template . '/');
+					$tpl->setCompileDir(B1GMAIL_DIR . 'templates/' . $template . '/cache/');
+
+					$tpl->tplDir = $newTemplateDir;
+					$tpl->assign('tpldir', $newTemplateDir);
+					$tpl->assign('_tpldir', 'templates/' . $template . '/');
+
+					$this->_rebaseTemplateAssets($tpl, $oldTemplateDir, $newTemplateDir);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Rebase already registered JS/CSS asset paths after switching template dirs.
+	 *
+	 * @param Template $tpl
+	 * @param string $oldTemplateDir
+	 * @param string $newTemplateDir
+	 */
+	private function _rebaseTemplateAssets(&$tpl, $oldTemplateDir, $newTemplateDir)
+	{
+		foreach(array('nli', 'li', 'admin') as $area)
+		{
+			foreach(array('_jsFiles', '_cssFiles') as $assetKey)
+			{
+				if(!isset($tpl->$assetKey[$area]))
+					continue;
+
+				foreach($tpl->$assetKey[$area] as $idx => $file)
+				{
+					$path = preg_replace('/\?.*$/', '', $file);
+
+					if(strpos($path, $oldTemplateDir) === 0)
+					{
+						$relative = substr($path, strlen($oldTemplateDir));
+						$newFile = $newTemplateDir . $relative;
+
+						if(file_exists($newFile))
+							$newFile .= '?' . substr(md5(filemtime($newFile)), 0, 6);
+
+						$tpl->$assetKey[$area][$idx] = $newFile;
+					}
 				}
 			}
 		}
@@ -929,7 +962,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param bool $loggedin
 	 * @return array
 	 */
-	function getUserPages($loggedin)
+	public function getUserPages($loggedin)
 	{
 		global $lang_user;
 
@@ -951,7 +984,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * packages page for NLI area
 	 *
 	 */
-	function _paccNLIPackages($signupMode = false)
+	private function _paccNLIPackages($signupMode = false)
 	{
 		global $tpl, $bm_prefs, $lang_user;
 
@@ -982,7 +1015,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param $lang Language (if false, the current language is used)
 	 * @return string
 	 */
-	function _getTranslatedText($fallback, $alt, $lang = false)
+	private function _getTranslatedText($fallback, $alt, $lang = false)
 	{
 		global $currentLanguage;
 		if($lang === false) $lang = $currentLanguage;
@@ -1000,7 +1033,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $packageID
 	 * @return array
 	 */
-	function _getPackage($packageID)
+	private function _getPackage($packageID)
 	{
 		global $db, $bm_prefs;
 
@@ -1042,7 +1075,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param string $file
 	 * @param string $action
 	 */
-	function FileHandler($file, $action)
+	public function FileHandler($file, $action)
 	{
 		global $tpl, $userRow, $lang_user;
 
@@ -1129,7 +1162,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param string $action Action
 	 * @return bool
 	 */
-	function UserPrefsPageHandler($action)
+	public function UserPrefsPageHandler($action)
 	{
 		global $db, $tpl, $userRow, $lang_user, $bm_prefs;
 		if($action != 'pacc_mod')
@@ -1190,7 +1223,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $userID
 	 * @param string $userMail
 	 */
-	function AfterSuccessfulSignup($userID, $userMail)
+	public function AfterSuccessfulSignup($userID, $userMail)
 	{
 		global $db, $lang_admin;
 
@@ -1236,7 +1269,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param string $password
 	 * @param int $reason
 	 */
-	function OnLoginFailed($userMail, $password, $reason)
+	public function OnLoginFailed($userMail, $password, $reason)
 	{
 		if($this->prefs['signup_order_force'] == 'yes'
 			&& $this->prefs['signup_order_page'] == 'yes'
@@ -1256,7 +1289,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param string $name Field name
 	 * @return string
 	 */
-	function _fieldTitle($name)
+	private function _fieldTitle($name)
 	{
 		global $lang_admin, $plugins;
 
@@ -1308,7 +1341,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 *
 	 * @return array
 	 */
-	function _getPrefs()
+	private function _getPrefs()
 	{
 		global $db;
 
@@ -1325,7 +1358,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param string $in Input
 	 * @return int
 	 */
-	function _formCentPrice($in)
+	private function _formCentPrice($in)
 	{
 		$result = (float)str_replace(',', '.', $in);
 		$result = (int)((float)$result * 100.0);
@@ -1340,7 +1373,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param bool $withoutPrefix
 	 * @return string
 	 */
-	function _intervalStr($abrechnung, $abrechnung_t, $withoutPrefix = false)
+	private function _intervalStr($abrechnung, $abrechnung_t, $withoutPrefix = false)
 	{
 		global $lang_user;
 
@@ -1387,7 +1420,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 *
 	 * @return string
 	 */
-	function _taxStr($vatRate)
+	private function _taxStr($vatRate)
 	{
 		global $lang_user, $bm_prefs;
 
@@ -1405,7 +1438,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 *
 	 * @return double
 	 */
-	function _taxedPrice($price, $vatRate)
+	private function _taxedPrice($price, $vatRate)
 	{
 		global $lang_user, $bm_prefs;
 
@@ -1421,7 +1454,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $id Package ID or 0 for all packages
 	 * @return array
 	 */
-	function _packageMatrix($vatRate, $id=0)
+	private function _packageMatrix($vatRate, $id=0)
 	{
 		global $db, $lang_admin, $lang_user, $plugins, $bm_prefs;
 
@@ -1508,7 +1541,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 *
 	 * @param int $id Package ID
 	 */
-	function _showPackageDetails($id)
+	private function _showPackageDetails($id)
 	{
 		global $tpl, $db, $userRow, $bm_prefs;
 
@@ -1551,7 +1584,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $userID User ID
 	 * @return bool Success
 	 */
-	function _activateOrder($packageID, $count, $orderID, $userID)
+	private function _activateOrder($packageID, $count, $orderID, $userID)
 	{
 		global $db, $lang_admin;
 
@@ -1644,7 +1677,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param array $cartItem Cart item
 	 * @return bool Handled?
 	 */
-	function ActivateOrderItem($orderID, $userID, $cartItem)
+	public function ActivateOrderItem($orderID, $userID, $cartItem)
 	{
 		if(substr($cartItem['key'], 0, 10) != 'PAcc.order')
 			return(false);
@@ -1663,7 +1696,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param bool $nli Not logged in?
 	 * @param array $userRow User row
 	 */
-	function _prepareOrderPage($userID, $packageID, $userRow, $nli=false)
+	private function _prepareOrderPage($userID, $packageID, $userRow, $nli=false)
 	{
 		global $lang_user, $db, $tpl, $bm_prefs;
 
@@ -1737,7 +1770,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param bool $nli Not logged in?
 	 * @return bool
 	 */
-	function _initiateOrderPlacement($userID, $packageID, $userRow, $nli=false)
+	private function _initiateOrderPlacement($userID, $packageID, $userRow, $nli=false)
 	{
 		global $db, $tpl, $lang_user, $bm_prefs;
 
@@ -1898,7 +1931,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $abrechnungT Runtime (unit according to package settings)
 	 * @return int Price in cents
 	 */
-	function _calcOrderAmount($packageID, $abrechnungT = -1)
+	private function _calcOrderAmount($packageID, $abrechnungT = -1)
 	{
 		global $db, $bm_prefs;
 
@@ -1934,7 +1967,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * check if (undeleted) packages are available
 	 *
 	 */
-	function _packagesAvailable()
+	private function _packagesAvailable()
 	{
 		global $db;
 
@@ -1951,7 +1984,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $userID User ID
 	 * @return array
 	 */
-	function _getUserSubscriptions($userID)
+	private function _getUserSubscriptions($userID)
 	{
 		global $db;
 
@@ -1984,7 +2017,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * check user auth token
 	 *
 	 */
-	function _checkUserToken()
+	private function _checkUserToken()
 	{
 		global $db;
 
@@ -2011,7 +2044,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * place order
 	 *
 	 */
-	function _paccPlaceOrder()
+	private function _paccPlaceOrder()
 	{
 		global $db, $tpl;
 
@@ -2067,7 +2100,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $userID User ID
 	 * @param array $userRow User row
 	 */
-	function _abortNLIOrder($userID, $userRow)
+	private function _abortNLIOrder($userID, $userRow)
 	{
 		global $db, $lang_user, $tpl, $bm_prefs;
 
@@ -2109,7 +2142,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * show not logged in order page
 	 *
 	 */
-	function _paccOrder()
+	private function _paccOrder()
 	{
 		global $db, $tpl, $lang_user, $bm_prefs;
 
@@ -2152,7 +2185,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $userID User ID
 	 * @return double VAT rate
 	 */
-	function _vatRateForUser($userID)
+	private function _vatRateForUser($userID)
 	{
 		global $db;
 
@@ -2175,7 +2208,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * @param int $userID User ID
 	 * @param bool $signUp Called from signup?
 	 */
-	function _nliPackagesPage($userID, $signUp=false)
+	private function _nliPackagesPage($userID, $signUp=false)
 	{
 		global $tpl, $db, $lang_user;
 
@@ -2205,7 +2238,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * subscriptions
 	 *
 	 */
-	function _subscriptionsPage()
+	private function _subscriptionsPage()
 	{
 		global $db, $tpl, $lang_admin, $bm_prefs;
 
@@ -2409,7 +2442,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * prefs
 	 *
 	 */
-	function _prefsPage()
+	private function _prefsPage()
 	{
 		global $db, $tpl, $bm_prefs, $lang_admin, $plugins;
 
@@ -2519,7 +2552,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * packages page
 	 *
 	 */
-	function _packagesPage()
+	private function _packagesPage()
 	{
 		global $db, $tpl, $lang_admin, $bm_prefs;
 
@@ -2828,7 +2861,7 @@ class PremiumAccountPlugin extends BMPlugin
 	 * overview page
 	 *
 	 */
-	function _overviewPage()
+	private function _overviewPage()
 	{
 		global $db, $tpl, $lang_admin, $currentLanguage, $bm_prefs;
 
@@ -2899,7 +2932,7 @@ class PremiumAccountPlugin extends BMPlugin
 	// smarty callbacks
 	//
 	//
-	function _smartyPaccFormatField($params, &$smarty)
+	private function _smartyPaccFormatField($params, &$smarty)
 	{
 		global $lang_user, $bm_prefs, $plugins, $userRow;
 
