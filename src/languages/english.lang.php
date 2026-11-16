@@ -2162,6 +2162,7 @@ $lang_admin['no_encryption']	= 'No encryption';
 $lang_admin['secure_connection'] 	= 'Secure connection';
 $lang_admin['follow_mastodon']	= 'Follow us on Mastodon';
 $lang_admin['to_startpage']		= 'To Startpage';
+$lang_admin['newest_version']	= 'Newest Version';
 // Avoid duplicates
 $lang_admin['zip']				= $lang_user['zip'];
 $lang_admin['city']				= $lang_user['city'];

@@ -34,6 +34,7 @@
 	</script>
 
 	<script src="../clientlang.php?sid={$sid}" type="text/javascript"></script>
+	<script src="../clientlib/jquery/jquery-3.7.1.min.js?{fileDateSig file="../../clientlib/jquery/jquery-3.7.1.min.js"}"></script>
 	<script src="{$tpldir}js/tabler.min.js?{fileDateSig file="js/tabler.min.js"}"></script>
 	<script src="{$tpldir}js/tabler-custom.js?{fileDateSig file="js/tabler-custom.js"}"></script>
 	<script src="{$tpldir}js/common.js?{fileDateSig file="js/common.js"}"></script>

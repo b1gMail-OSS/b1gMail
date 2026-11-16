@@ -25,6 +25,31 @@ RequestPrivileges(PRIVILEGES_ADMIN);
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'welcome';
 
+if($_REQUEST['action'] == 'versionCheck') {
+	if (defined('DISABLE_UPDATE_CHECK') && (DISABLE_UPDATE_CHECK==1||DISABLE_UPDATE_CHECK===TRUE)) {
+		exit();
+	}
+	if (!class_exists('BMHTTP')) {
+            require_once B1GMAIL_DIR.'serverlib/http.class.php';
+        }
+
+        $http = _new('BMHTTP', ['https://service.b1gmail.org/versioncheck.php']);
+        $result = $http->DownloadToString();
+		$version = parseVersion($result);
+		if ($version === null) {
+    		echo '';
+		} else {
+			echo $version['major'] . '.'
+			. $version['minor'] . '.'
+			. $version['patch'];
+
+			if ($version['stage'] !== 'stable') {
+				echo '-' . strtoupper($version['stage']) . $version['prerelease'];
+			}
+		}
+	exit();
+}
+
 $tabs = array(
 	0 => array(
 		'title'		=> $lang_admin['welcome'],

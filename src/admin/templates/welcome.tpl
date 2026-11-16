@@ -1,3 +1,10 @@
+<script>
+$(document).ready(function(){
+  $.get('welcome.php?sid={$sid}&action=versionCheck', function (version) {
+    $('#versioncheck').text(version);
+}, 'text');
+}); 
+</script>
 <h1>{lng p="overview"}</h1>
 {if $adminRow.type==0||$adminRow.privileges.overview}
 <div class="row row-cards">
@@ -32,6 +39,10 @@
 						<tr>
 							<td style="width: 150px;">{lng p="version"}</td>
 							<td>{$version}</td>
+						</tr>
+						<tr>
+							<td style="width: 150px;">{lng p="newest_version"}</td>
+							<td id="versioncheck"></td>
 						</tr>
 						</tbody>
 					</table>
