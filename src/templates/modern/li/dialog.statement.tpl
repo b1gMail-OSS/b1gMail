@@ -79,7 +79,7 @@
 		</tr>
 		<tr>
 			<td align="left">
-				{html_select_date prefix="date_" time=$date display_days=false start_year="-10" field_order="MY" time=$timeFrom}
+				{html_select_date prefix="date_" time=$date display_days=false start_year="-10" field_order="MYD" time=$timeFrom}
 				<input type="submit" value=" {lng p="ok"} &raquo; " />
 			</td>
 			<td align="right">

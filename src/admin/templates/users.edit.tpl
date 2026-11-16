@@ -1,4 +1,4 @@
-<form method="post" action="users.php?do=edit&id={$user.id}&save=true&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="users.php?do=edit&id={$user.id}&save=true&sid={$sid}" onsubmit="spin(this)" autocomplete="off">
 
 	{if isset($msg)}
 		<div class="alert alert-info">{$msg}</div>

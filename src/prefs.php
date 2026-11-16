@@ -138,6 +138,7 @@ else if($_REQUEST['action'] == 'common')
 		$composeDefaults	= array();
 	if(!array_key_exists('savecopy', $composeDefaults)) $composeDefaults['savecopy']	= '';
 	if(!array_key_exists('priority', $composeDefaults)) $composeDefaults['priority']	= '';
+	if(!array_key_exists('signature', $composeDefaults)) $composeDefaults['signature']	= '';
 	// save?
 	if(isset($_REQUEST['do']) && $_REQUEST['do']=='save'
 		&& IsPOSTRequest())

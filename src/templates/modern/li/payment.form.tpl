@@ -124,7 +124,7 @@
 	{rdelim};
 	updatePaymentMethod(EBID('paymentMethod'));
 	updatePaymentCountry(EBID('land'));
-{if $_pf.invalidFields}
+{if isset($_pf.invalidFields)}
 {foreach from=$_pf.invalidFields item=field}
 	markFieldAsInvalid('{$field}');
 {/foreach}

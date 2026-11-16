@@ -415,7 +415,7 @@
 				</td>
 				<td width="150" class="listTableTDActive" style="padding:5px;padding-left:10px;">
 					<i class="fa fa-envelope"></i>
-					<input type="checkbox" name="flags[1]" id="flags1"{if $smarty.post.do=='saveMeta'&&($flags&1)} checked="checked"{/if} />
+					<input type="checkbox" name="flags[1]" id="flags1"{if ($smarty.post.do|default:'')=='saveMeta'&&($flags&1)} checked="checked"{/if} />
 					<label for="flags1">{lng p="unread"}</label><br />
 
 					<i class="fa fa-flag"></i>

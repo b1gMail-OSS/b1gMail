@@ -1,4 +1,4 @@
-<form method="post" action="users.php?action=create&create=true&sid={$sid}" onsubmit="spin(this)">
+<form method="post" action="users.php?action=create&create=true&sid={$sid}" onsubmit="spin(this)" autocomplete="off">
 	<div class="row">
 		<div class="col-md-6">
 			<fieldset>
