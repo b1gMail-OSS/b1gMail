@@ -1,4 +1,4 @@
-<form method="post" action="{sessionurl file='users.php' params="do=edit&id={$user.id}&save=true"}" onsubmit="spin(this)">
+<form method="post" action="{sessionurl file='users.php' params="do=edit&id={$user.id}&save=true"}" onsubmit="spin(this)" autocomplete="off">
 	{csrffield}
 
 	{if isset($msg)}
@@ -108,7 +108,7 @@
 						<label class="col-sm-4 col-form-label">{$profileField.title}</label>
 						<div class="col-sm-8">
 							{if $profileField.type==1}
-								<input type="text" class="form-control" name="field_{$profileField.id}" value="{if isset($profileField.value)}{text value=$profileField.value allowEmpty=true}{/if}" style="width:85%;" />
+								<input type="text" class="form-control" name="field_{$profileField.id}" value="{if isset($profileField.value)}{text value=$profileField.value allowEmpty=true}{/if}" />
 							{elseif $profileField.type==2}
 								<div class="form-check">
 									<input type="checkbox" class="form-check-input" name="field_{$profileField.id}"{if $profileField.value} checked="checked"{/if} />
@@ -306,7 +306,7 @@
 				<div class="mb-3 row">
 					<label class="col-sm-4 col-form-label">{lng p="newpassword"}</label>
 					<div class="col-sm-8">
-						<input type="password" class="form-control" name="passwort" value="" placeholder="{lng p="newpassword"}">
+						<input type="password" class="form-control" name="passwort" value="" placeholder="{lng p="newpassword"}" autocomplete="new-password">
 					</div>
 				</div>
 				{if $mfaLiEnabled}
