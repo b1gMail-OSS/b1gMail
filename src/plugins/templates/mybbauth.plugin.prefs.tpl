@@ -2,6 +2,7 @@
 	<legend>{lng p="prefs"}</legend>
 
 	<form action="{$pageURL}&sid={$sid}&do=save" method="post" onsubmit="spin(this)">
+	<div class="alert alert-warning">{lng p="mybb_mysql_notice"}</div>
 		<div class="mb-3 row">
 			<label class="col-sm-2 col-form-check-label">{lng p="enable"}</label>
 			<div class="col-sm-10">

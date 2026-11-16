@@ -1,7 +1,7 @@
 <?php
 /*
  * MyBB auth plugin
- * (c) 2022 b1gMail.eu
+ * (c) 2022-2026 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ class MyBBAuthPlugin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'MyBB Authentication PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.1';
+		$this->version				= '1.2';
 		$this->designedfor			= '7.4.2';
 
 		// admin pages
@@ -101,6 +101,16 @@ class MyBBAuthPlugin extends BMPlugin
 
 		return(true);
 	}
+
+	public function OnReadLang(&$lang_user, &$lang_client, &$lang_custom, &$lang_admin, $lang)
+	{
+        if($lang == 'deutsch') {
+            $lang_admin['mybb_mysql_notice'] = 'Hinweis: Dieses Plugin funktioniert nur, wenn MyBB auf eine MySQL / MariaDB-Datenbank installiert wurde.';
+        }
+        else {
+            $lang_admin['mybb_mysql_notice'] = 'Note: This plugin only works, when MyBB is installed in a MySQL / MariaDB database.';
+        }
+    }
 
 	/**
 	 * authentication handler
