@@ -329,17 +329,17 @@ ini_set('assert.exception', DEBUG ? 1 : 0);
 /**
  * required files.
  */
-include B1GMAIL_DIR.'serverlib/version.inc.php';
-include B1GMAIL_DIR.'serverlib/common.inc.php';
-include B1GMAIL_DIR.'serverlib/string.inc.php';
-include B1GMAIL_DIR.'serverlib/cache.class.php';
-include B1GMAIL_DIR.'serverlib/db.class.php';
-include B1GMAIL_DIR.'serverlib/blobstorage.class.php';
-include B1GMAIL_DIR.'serverlib/template.class.php';
-include B1GMAIL_DIR.'serverlib/user.class.php';
-include B1GMAIL_DIR.'serverlib/group.class.php';
-include B1GMAIL_DIR.'serverlib/workgroup.class.php';
-include B1GMAIL_DIR.'serverlib/plugin.class.php';
+require B1GMAIL_DIR.'serverlib/version.inc.php';
+require B1GMAIL_DIR.'serverlib/common.inc.php';
+require B1GMAIL_DIR.'serverlib/string.inc.php';
+require B1GMAIL_DIR.'serverlib/cache.class.php';
+require B1GMAIL_DIR.'serverlib/db.class.php';
+require B1GMAIL_DIR.'serverlib/blobstorage.class.php';
+require B1GMAIL_DIR.'serverlib/template.class.php';
+require B1GMAIL_DIR.'serverlib/user.class.php';
+require B1GMAIL_DIR.'serverlib/group.class.php';
+require B1GMAIL_DIR.'serverlib/workgroup.class.php';
+require B1GMAIL_DIR.'serverlib/plugin.class.php';
 if (!class_exists('SQLite3') && class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers())) {
     include B1GMAIL_DIR.'serverlib/sqlite3.class.php';
 }
