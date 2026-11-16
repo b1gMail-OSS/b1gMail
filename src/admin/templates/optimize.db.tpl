@@ -41,8 +41,6 @@
 	{elseif $executeStruct}
 		<form action="optimize.php?do=repairStruct&sid={$sid}" method="post" onsubmit="spin(this)">
 
-			{if $repair}<div class="alert alert-warning">{lng p="dbwarn"}</div>{/if}
-
 			<div class="card">
 				<div class="table-responsive">
 					<table class="table table-vcenter table-striped">
