@@ -174,6 +174,7 @@ else if($_REQUEST['action'] == 'common')
 		$composeDefaults	= array();
 	if(!array_key_exists('savecopy', $composeDefaults)) $composeDefaults['savecopy']	= '';
 	if(!array_key_exists('priority', $composeDefaults)) $composeDefaults['priority']	= '';
+	if(!array_key_exists('signature', $composeDefaults)) $composeDefaults['signature']	= '';
 	$loginNotifyAllowed = isset($bm_prefs['login_notify_li']) && $bm_prefs['login_notify_li'] == 'yes'
 		&& MfaGroupOption((int)$groupRow['id'], 'login_notify', 'no') == 'yes';
 	// save?

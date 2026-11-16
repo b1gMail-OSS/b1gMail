@@ -56,7 +56,7 @@
 
 		<div class="bm-dialog-actions bm-statement-actions">
 			<div class="bm-dialog-actions-left bm-statement-filter">
-				{html_select_date prefix="date_" time=$date display_days=false start_year="-10" field_order="MY" time=$timeFrom}
+				{html_select_date prefix="date_" time=$date display_days=false start_year="-10" field_order="MYD" time=$timeFrom}
 				<button type="submit" class="btn btn-primary">
 					<i class="ti ti-check icon" aria-hidden="true"></i>
 					{lng p="ok"}
