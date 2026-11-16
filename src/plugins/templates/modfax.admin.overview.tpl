@@ -1,5 +1,5 @@
 <fieldset>
-	<legend>{lng p="modfax_fax"}</legend>
+	<legend>{lng p="modfax_faxplugin"}</legend>
 
 	<table width="100%">
 		<tr>
