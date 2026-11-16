@@ -298,7 +298,7 @@ body:not(.layout-fluid) #mainContent .bm-prefs-page-pacc-order .listTableRight .
 {/foreach}
 {/if}
 
-{if $_pf.invalidFields}
+{if isset($_pf.invalidFields)}
 {foreach from=$_pf.invalidFields item=field}
 	markFieldAsInvalid('{$field}');
 {/foreach}

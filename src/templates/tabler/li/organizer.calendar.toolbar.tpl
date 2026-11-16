@@ -68,14 +68,14 @@
 					<option value="{$smarty.section.w.index}"{if isset($calWeekNo) && $smarty.section.w.index==$calWeekNo} selected="selected"{/if}>{lng p="cw"} {$smarty.section.w.index}</option>
 					{/section}
 				</select>
-				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date start_year="-5" end_year="+5" field_order="Y"}</span>
+				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date display_months=false display_days=false start_year="-5" end_year="+5" field_order="YMD"}</span>
 				<button type="submit" class="btn btn-sm btn-ghost-secondary bm-li-toolbar-btn" name="jumpToday">{lng p="today"}</button>
 				<button type="submit" class="btn btn-sm btn-ghost-primary bm-li-toolbar-btn">{lng p="ok"}</button>
 				<a href="organizer.calendar.php?date={$nextWeek}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>
 
 				{elseif $viewMode=='month'}
 				<a href="organizer.calendar.php?date={$prevMonth}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="back"}" aria-label="{lng p="back"}"><i class="ti ti-chevron-left icon" aria-hidden="true"></i></a>
-				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date display_days=false start_year="-5" end_year="+5" field_order="MY"}</span>
+				<span class="bm-organizer-date-select">{html_select_date prefix="date_" time=$date display_days=false start_year="-5" end_year="+5" field_order="MYD"}</span>
 				<button type="submit" class="btn btn-sm btn-ghost-secondary bm-li-toolbar-btn" name="jumpToday">{lng p="today"}</button>
 				<button type="submit" class="btn btn-sm btn-ghost-primary bm-li-toolbar-btn">{lng p="ok"}</button>
 				<a href="organizer.calendar.php?date={$nextMonth}{$sessionUrlSuffix}" class="btn btn-sm btn-ghost-secondary btn-icon bm-li-toolbar-btn" title="{lng p="forward"}" aria-label="{lng p="forward"}"><i class="ti ti-chevron-right icon" aria-hidden="true"></i></a>

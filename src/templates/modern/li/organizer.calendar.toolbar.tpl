@@ -59,7 +59,7 @@
 				<option value="{$smarty.section.w.index}"{if isset($calWeekNo) && $smarty.section.w.index==$calWeekNo} selected="selected"{/if}>{lng p="cw"} {$smarty.section.w.index}</option>
 				{/section}
 			</select>
-			{html_select_date prefix="date_" time=$date start_year="-5" end_year="+5" field_order="Y"}
+			{html_select_date prefix="date_" time=$date display_months=false display_days=false start_year="-5" end_year="+5" field_order="YMD"}
 		</td>
 		<td><input type="submit" class="smallInput" value=" {lng p="today"} " name="jumpToday" /></td>
 		<td><input type="submit" class="smallInput" value=" {lng p="ok"} " /></td>
@@ -67,7 +67,7 @@
 		
 		{elseif $viewMode=='month'}
 		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$prevMonth}"}"><i class="fa fa-backward"></i></a>&nbsp;</td>
-		<td>{html_select_date prefix="date_" time=$date display_days=false start_year="-5" end_year="+5" field_order="MY"}</td>
+		<td>{html_select_date prefix="date_" time=$date display_days=false start_year="-5" end_year="+5" field_order="MYD"}</td>
 		<td><input type="submit" class="smallInput" value=" {lng p="today"} " name="jumpToday" /></td>
 		<td><input type="submit" class="smallInput" value=" {lng p="ok"} " /></td>
 		<td>&nbsp;<a href="{sessionurl file='organizer.calendar.php' params="date={$nextMonth}"}"><i class="fa fa-forward"></i></a>&nbsp;</td>
