@@ -383,115 +383,24 @@ function CheckDateValidity($date, $ruleExpression)
 }
 
 /**
- * Get config for an abuse type
+ * Pick the singular or the plural form of a phrase and fill in the number
  *
- * @param int $type Abuse type ID
- * @return array Config
- */
-function GetAbuseTypePrefs($type)
-{
-	global $db;
-
-	$apTypes = GetAbuseTypes();
-	$result = array();
-
-	if(!isset($apTypes[$type]) || !isset($apTypes[$type]['prefs']))
-		return $result;
-
-	foreach($apTypes[$type]['prefs'] as $key=>$info)
-		$result[$key] = $info['default'];
-
-	$res = $db->Query('SELECT `prefs` FROM {pre}abuse_points_config WHERE `type`=?',
-		$type);
-	while($row = $res->FetchArray(MYSQLI_ASSOC))
-	{
-		$prefsItems = ExplodeOutsideOfQuotation($row['prefs'], ';');
-
-		foreach($prefsItems as $item)
-		{
-			$eqPos = strpos($item, '=');
-			if($eqPos === false)
-				continue;
-			$key = trim(substr($item, 0, $eqPos));
-			$value = trim(substr($item, $eqPos+1));
-
-			$result[$key] = $value;
-		}
-	}
-	$res->Free();
-
-	return $result;
-}
-
-/**
- * Get abuse protect point types
+ * The phrase holds both forms, separated by a pipe: 'One user locked.|%d users locked.'. The first form is
+ * used for 1, the second one for every other number. The form is filled with vsprintf(): the number is the
+ * first argument (%1$d), further arguments follow (%2$s, ...).
  *
- * @return array
+ * @param string $phrase Phrase with both forms
+ * @param int $count Number
+ * @param mixed ... Further arguments for the phrase
+ * @return string
  */
-function GetAbuseTypes()
+function pluralize($phrase, $count)
 {
-	global $apTypes, $lang_admin, $lang_user;
+	$args  = array_slice(func_get_args(), 1);
+	$forms = explode('|', $phrase, 2);
+	$form  = ($count == 1 || count($forms) == 1) ? $forms[0] : $forms[1];
 
-	if(!isset($apTypes))
-		include(B1GMAIL_DIR . 'serverlib/abuseprotect.config.php');
-
-	return($apTypes);
-}
-
-/**
- * Add abuse point
- *
- * @param int $userID User ID
- * @param int $type Abuse point type
- * @param string $comment Comment (reason)
- * @return int ID of added point
- */
-function AddAbusePoint($userID, $type, $comment)
-{
-	global $db, $apConfigCache, $thisUser, $groupRow;
-
-	// activated for group?
-	if(isset($thisUser) && is_object($thisUser) && $thisUser->_id == $userID)
-		$userGroup = $thisUser->_row['gruppe'];
-	else
-	{
-		$user = _new('BMUser', array($userID));
-		$userGroup = $user->_row['gruppe'];
-	}
-	if(isset($groupRow) && is_array($groupRow) && $groupRow['id'] == $userGroup)
-		$apEnabled = $groupRow['abuseprotect'] == 'yes';
-	else
-	{
-		$group = _new('BMGroup', array($userGroup));
-		$apEnabled = $group->_row['abuseprotect'] == 'yes';
-	}
-	if(!$apEnabled)
-		return(false);
-
-	// how many points?
-	if(!isset($apConfigCache))
-	{
-		$apConfigCache = array();
-		$res = $db->Query('SELECT `type`,`points` FROM {pre}abuse_points_config');
-		while($row = $res->FetchArray(MYSQLI_ASSOC))
-		{
-			$apConfigCache[$row['type']] = $row['points'];
-		}
-		$res->Free();
-	}
-	if(!isset($apConfigCache[$type]))
-		$points = 0;
-	else
-		$points = $apConfigCache[$type];
-
-	// add entry
-	$db->Query('INSERT INTO {pre}abuse_points(`userid`,`date`,`type`,`points`,`comment`) VALUES(?,?,?,?,?)',
-		$userID,
-		time(),
-		$type,
-		$points,
-		$comment);
-	return($db->InsertId());
+	return(vsprintf($form, $args));
 }
 
 /**

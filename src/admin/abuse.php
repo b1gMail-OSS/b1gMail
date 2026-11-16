@@ -94,6 +94,8 @@ if($_REQUEST['action'] == 'overview')
 		// mass action
 		if(isset($_REQUEST['executeMassAction']))
 		{
+			$massDone = array();
+
 			// get user IDs
 			$userIDs = array();
 			if(isset($_POST['users']) && count($_POST['users']) > 0)
@@ -114,12 +116,17 @@ if($_REQUEST['action'] == 'overview')
 
 					// mark users
 					if(count($markIDs) > 0)
+					{
 						$db->Query('UPDATE {pre}users SET gesperrt=? WHERE id IN(' . implode(',', $markIDs) . ')',
 							'delete');
+						$massDone[] = pluralize($lang_admin['ap_massdone_mark'], count($markIDs));
+					}
 
 					// delete users
 					foreach($deleteIDs as $userID)
 						DeleteUser($userID);
+					if(count($deleteIDs) > 0)
+						$massDone[] = pluralize($lang_admin['ap_massdone_delete'], count($deleteIDs));
 				}
 				else if($_REQUEST['massAction'] == 'restore'
 						|| $_REQUEST['massAction'] == 'unlock')
@@ -132,19 +139,51 @@ if($_REQUEST['action'] == 'overview')
 
 					$db->Query('UPDATE {pre}users SET gesperrt=? WHERE id IN(' . implode(',', $userIDs) . ')',
 						'no');
+					$massDone[] = pluralize($lang_admin[$_REQUEST['massAction'] == 'unlock' ? 'ap_massdone_unlock' : 'ap_massdone_restore'], count($userIDs));
 				}
 				else if($_REQUEST['massAction'] == 'lock')
 				{
 					$db->Query('UPDATE {pre}users SET gesperrt=? WHERE id IN(' . implode(',', $userIDs) . ')',
 						'yes');
+					$massDone[] = pluralize($lang_admin['ap_massdone_lock'], count($userIDs));
 				}
 				else if(substr($_REQUEST['massAction'], 0, 7) == 'moveto_')
 				{
-					$groupID = (int)substr($_REQUEST['massAction'], 7);
-					$db->Query('UPDATE {pre}users SET gruppe=? WHERE id IN(' . implode(',', $userIDs) . ')',
-						$groupID);
+					$groupID    = (int)substr($_REQUEST['massAction'], 7);
+					$movedCount = 0;
+					if($groupID > 0 && $groupID == BMAbuseProtect::moveGroup())
+					{
+						// the abuse group: same note and log entry as the move button of the user
+						foreach($userIDs as $moveUserID)
+							if(BMAbuseProtect::moveUser($moveUserID, $groupID, $adminRow['username']))
+								++$movedCount;
+					}
+					else
+					{
+						// out of the abuse group: the points expire, otherwise the abuse protection moves the user back
+						foreach($userIDs as $moveUserID)
+							BMAbuseProtect::releaseUser($moveUserID, $groupID, $adminRow['username']);
+
+						$res = $db->Query('SELECT COUNT(*) FROM {pre}users WHERE id IN(' . implode(',', $userIDs) . ') AND gruppe!=?', $groupID);
+						list($movedCount) = $res->FetchArray(MYSQLI_NUM);
+						$res->Free();
+
+						$db->Query('UPDATE {pre}users SET gruppe=? WHERE id IN(' . implode(',', $userIDs) . ')', $groupID);
+					}
+
+					if($movedCount > 0)
+						$massDone[] = pluralize($lang_admin['ap_massdone_move'], $movedCount, BMAbuseProtect::groupTitle($groupID) ?? '?');
+					else
+						$massDone[] = $lang_admin['ap_massdone_nochange'];
 				}
+				else if($_REQUEST['massAction'] == '-')
+					$massDone[] = $lang_admin['ap_massdone_noaction'];
 			}
+			else
+				$massDone[] = $lang_admin['ap_massdone_none'];
+
+			if(count($massDone) > 0)
+				$tpl->assign('msg', implode(' ', $massDone));
 		}
 
 		// sort options
@@ -186,6 +225,7 @@ if($_REQUEST['action'] == 'overview')
 
 		// assign
 		$tpl->assign('users', $users);
+		$tpl->assign('groups', BMGroup::GetSimpleGroupList());
 		$tpl->assign('pageNo', $pageNo);
 		$tpl->assign('pageCount', $pageCount);
 		$tpl->assign('sortBy', $sortBy);
@@ -241,12 +281,21 @@ if($_REQUEST['action'] == 'overview')
 	}
 
 	//
+	// the user does not exist
+	//
+	else if($_REQUEST['do']=='show' && isset($_REQUEST['userid']) && !BMAbuseProtect::userExists((int)$_REQUEST['userid']))
+	{
+		$tpl->assign('msg', $lang_admin['ap_usernotfound']);
+		$tpl->assign('page', 'abuse.notfound.tpl');
+	}
+
+	//
 	// show points
 	//
 	else if($_REQUEST['do']=='show' && isset($_REQUEST['userid']))
 	{
 		$userID = (int)$_REQUEST['userid'];
-		$types = GetAbuseTypes();
+		$types = BMAbuseProtect::getTypes();
 
 		// single action?
 		if(isset($_REQUEST['singleAction']) && AdminRequestIsPost())
@@ -256,6 +305,10 @@ if($_REQUEST['action'] == 'overview')
 				$db->Query('DELETE FROM {pre}abuse_points WHERE `userid`=? AND `entryid`=?',
 					$userID,
 					$_REQUEST['singleID']);
+			}
+			else if($_REQUEST['singleAction'] == 'moveUser' && BMAbuseProtect::moveGroup() > 0)
+			{
+				BMAbuseProtect::moveUser($userID, BMAbuseProtect::moveGroup(), $adminRow['username']);
 			}
 			else if($_REQUEST['singleAction'] == 'lockUser')
 			{
@@ -428,6 +481,17 @@ if($_REQUEST['action'] == 'overview')
 		$tpl->assign('pageNo', 			$pageNo);
 		$tpl->assign('pageCount', 		$pageCount);
 		$tpl->assign('points', 			$points);
+
+		// button: move the user to the abuse group, or the reason why there is none
+		$moveGroupID = BMAbuseProtect::moveGroup();
+		$moveGroups  = BMGroup::GetSimpleGroupList();
+		if($moveGroupID <= 0)
+			$tpl->assign('abuseMoveHint', $lang_admin['ap_movehint_none']);
+		else if(!isset($moveGroups[$moveGroupID]))
+			$tpl->assign('abuseMoveHint', sprintf($lang_admin['ap_movehint_missing'], $moveGroupID));
+		else if($user->_row['gruppe'] != $moveGroupID)
+			$tpl->assign('abuseMoveLabel', sprintf($lang_admin['ap_movebutton'], $moveGroups[$moveGroupID]['title']));
+
 		$tpl->assign('page', 'abuse.show.tpl');
 	}
 }

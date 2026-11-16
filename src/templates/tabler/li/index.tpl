@@ -206,6 +206,18 @@
 					{if $bmPushEnabled && !$bmPushPromptDismissed|default:false}
 					{include file="li/push-prompt.tpl" promptId="bmPushPromptDesktop" promptVariant="desktop"}
 					{/if}
+					{if $abuseWarningTitle|default:''}
+					<div class="alert alert-danger bm-abuse-warning" role="alert">
+						<div class="d-flex">
+							<div class="me-3"><i class="icon ti ti-alert-triangle fs-1" aria-hidden="true"></i></div>
+							<div>
+								<h3 class="alert-title">{text value=$abuseWarningTitle}</h3>
+								{if $abuseWarningText}<div>{text value=$abuseWarningText}</div>{/if}
+								<div class="mt-3"><a class="btn btn-danger" href="{sessionurl file='prefs.php' params='action=membership'}">{lng p="changepw"}</a></div>
+							</div>
+						</div>
+					</div>
+					{/if}
 					<div id="mainBanner" style="display:none;">{banner}</div>
 					<div id="mainContentArea">
 						{include file="$pageContent"}

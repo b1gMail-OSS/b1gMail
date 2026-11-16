@@ -421,6 +421,28 @@ class BMPlugin
     {
     }
 
+    /**
+     * Can this plugin remove the waiting outgoing mails of a user from a mail queue?
+     * Asked by the abuse protection to decide whether to offer the option.
+     *
+     * @return bool
+     */
+    public function OnAbuseQueueSupported()
+    {
+        return false;
+    }
+
+    /**
+     * Remove the waiting outgoing mails of a user from the mail queue (abuse protection).
+     *
+     * @param int $userID User ID
+     * @return array Removed queue entries, each with the keys to, subject and status
+     */
+    public function OnAbuseClearQueue($userID)
+    {
+        return [];
+    }
+
     public function AfterInit()
     {
     }

@@ -283,6 +283,18 @@ $lang_custom['ap_autolock_text']         = 'L\'utilisateur de %%email%% (#%%id%%
                                          . '%%points%%' . "\n"
                                          . '------------------------------------------------------------------------' . "\n\n"
                                          . 'Details: %%link%%';
+$lang_custom['ap_automove_sub']          = 'L\'utilisateur %%email%% a été déplacé vers un groupe en raison d\'une activité suspecte';
+$lang_custom['ap_automove_text']         = 'L\'utilisateur %%email%% (#%%id%%) a été déplacé automatiquement vers le groupe "%%group%%" car la limite de points de la protection anti-abus a été dépassée.' . "\n\n"
+                                         . 'E-mail: %%email%% (#%%id%%)' . "\n"
+                                         . 'Points: %%pointsum%%' . "\n"
+                                         . '%%queue%%' . "\n\n"
+                                         . 'Relevé des points:' . "\n"
+                                         . '------------------------------------------------------------------------' . "\n"
+                                         . '%%points%%' . "\n"
+                                         . '------------------------------------------------------------------------' . "\n\n"
+                                         . 'Détails: %%link%%';
+$lang_custom['ap_moved_warning']         = 'Attention: votre compte est utilisé abusivement par des spammeurs!' . "\n"
+                                         . 'Des e-mails qui ne viennent pas de vous ont été envoyés depuis votre compte. Des messages d\'erreur comme "Mail delivery failed" ou des réponses à des e-mails que vous n\'avez jamais écrits en sont des signes. Souvent, quelqu\'un connaît le mot de passe parce qu\'il a aussi été utilisé pour un autre service qui a été piraté. Changez maintenant votre mot de passe, ne l\'utilisez nulle part ailleurs et saisissez-le de nouveau dans vos programmes de messagerie et sur votre téléphone. Votre compte est restreint pour des raisons de sécurité.';
 $lang_custom['contact_subjects']         = 'Question sur l\'offre' . "\n"
                                          . 'Question sur la procedure d\'inscription' . "\n"
                                          . 'Question sur l\'ouverture de session' . "\n"
@@ -1149,6 +1161,8 @@ $lang_user['couponok']           = 'Le Coupon a été échangé avec succès.';
 $lang_user['virusfilter']        = 'Filtre de virus';
 $lang_user['virusaction']        = 'Action de virus';
 $lang_user['changepw']           = 'Changer mot de passe';
+$lang_user['ap_warning_title']   = 'Attention: votre compte est utilisé abusivement par des spammeurs!';
+$lang_user['ap_warning_text']    = 'Des e-mails qui ne viennent pas de vous ont été envoyés depuis votre compte. Des messages d\'erreur comme "Mail delivery failed" ou des réponses à des e-mails que vous n\'avez jamais écrits en sont des signes. Souvent, quelqu\'un connaît le mot de passe parce qu\'il a aussi été utilisé pour un autre service qui a été piraté. Changez maintenant votre mot de passe, ne l\'utilisez nulle part ailleurs et saisissez-le de nouveau dans vos programmes de messagerie et sur votre téléphone. Votre compte est restreint pour des raisons de sécurité.';
 $lang_user['addsignature']       = 'Ajouter signature';
 $lang_user['editsignature']      = 'Modifier signature';
 $lang_user['question']           = 'Question';
@@ -1554,10 +1568,49 @@ $lang_admin['ap_autolock']                   = 'Automatically lock accounts';
 $lang_admin['ap_athardlimit']                = 'When exceeding the lock limit';
 $lang_admin['hours']                         = 'Hour(s)';
 $lang_admin['pointtypes']                    = 'Point types';
-$lang_admin['ap_warn_medium']                = '<b>%d</b> active user(s) has/have exceeded the abuse protect warn limit.';
-$lang_admin['ap_warn_hard']                  = '<b>%d</b> active user(s) has/have exceeded the abuse protect lock limit.';
-$lang_admin['ap_autolock_log']               = "\n" . '[%s] User locked by abuse protection system after exceeding the lock limit (%d >= %d).';
-$lang_admin['ap_autolock_notify']            = 'Lock notification';
+$lang_admin['ap_warn_medium']                = '<b>%d</b> utilisateur actif a dépassé la limite d\'avertissement de la protection anti-abus.|<b>%d</b> utilisateurs actifs ont dépassé la limite d\'avertissement de la protection anti-abus.';
+$lang_admin['ap_warn_hard']                  = '<b>%d</b> utilisateur actif a dépassé la limite de verrouillage de la protection anti-abus.|<b>%d</b> utilisateurs actifs ont dépassé la limite de verrouillage de la protection anti-abus.';
+$lang_admin['ap_autolock_log']               = '[%s] Utilisateur verrouillé par la protection anti-abus après dépassement de la limite de points (%d >= %d).';
+$lang_admin['ap_autolock_notify']            = 'Notification';
+$lang_admin['ap_movegroup']                  = 'Groupe cible';
+$lang_admin['ap_movegroup_none']             = '- aucun -';
+$lang_admin['ap_reaction']                   = 'Réaction aux abus';
+$lang_admin['ap_atlimit']                    = 'À l\'atteinte de la limite de verrouillage';
+$lang_admin['ap_action_none']                = 'Ne rien faire';
+$lang_admin['ap_action_none_desc']           = 'les points sont seulement collectés';
+$lang_admin['ap_action_lock']                = 'Verrouiller le compte';
+$lang_admin['ap_action_lock_desc']           = 'l\'utilisateur ne peut plus se connecter';
+$lang_admin['ap_action_move']                = 'Déplacer le compte vers un groupe';
+$lang_admin['ap_action_move_desc']           = 'l\'utilisateur voit un avertissement après la connexion';
+$lang_admin['ap_clearqueue']                 = 'Supprimer les e-mails sortants de la file d\'attente';
+$lang_admin['ap_clearqueue_desc']            = 'e-mails de l\'utilisateur pas encore remis, les e-mails entrants sont conservés';
+$lang_admin['ap_queue_line_none']            = 'File d\'attente: non vidée';
+$lang_admin['ap_queue_line']                 = 'File d\'attente: 1 e-mail sortant supprimé|File d\'attente: %d e-mails sortants supprimés';
+$lang_admin['ap_queue_to']                   = 'À';
+$lang_admin['ap_queue_subject']              = 'Objet';
+$lang_admin['ap_queue_status']               = 'Dernier statut';
+$lang_admin['ap_queue_nostatus']             = 'pas encore essayé';
+$lang_admin['ap_queue_more']                 = '... et %d autres';
+$lang_admin['ap_notify_team']                = 'Informer l\'admin / l\'équipe support par e-mail';
+$lang_admin['ap_notify_address']             = 'Adresse e-mail';
+$lang_admin['ap_limit_hint']                 = 'La limite de verrouillage n\'est pas supérieure aux points d\'un seul type d\'infraction (valeur maximale: %d). Une seule infraction suffit alors pour verrouiller ou déplacer l\'utilisateur.';
+$lang_admin['ap_expire_hint']                = 'Avec 0 heure, les points sont marqués comme expirés à la prochaine exécution horaire et ne comptent plus pour la limite de verrouillage.';
+$lang_admin['ap_movebutton']                 = 'Déplacer vers le groupe "%s"';
+$lang_admin['ap_move_log_manual']            = '[%s] Déplacé par l\'admin "%s" vers le groupe "%s" (#%d) (avant: "%s", #%d). Points d\'abus: %d, limite de verrouillage: %d.';
+$lang_admin['ap_move_log_auto']              = '[%s] Déplacé automatiquement par la protection anti-abus vers le groupe "%s" (#%d) (avant: "%s", #%d). Points d\'abus: %d, limite de verrouillage: %d.';
+$lang_admin['ap_release_log']                = '[%s] Retiré du groupe d\'abus par l\'admin "%s". Points d\'abus (%d) remis à zéro, pour que le compte ne soit pas déplacé à nouveau.';
+$lang_admin['ap_massdone_lock']              = 'Un utilisateur verrouillé.|%d utilisateurs verrouillés.';
+$lang_admin['ap_massdone_unlock']            = 'Un utilisateur déverrouillé, les points d\'abus ont été remis à zéro.|%d utilisateurs déverrouillés, les points d\'abus ont été remis à zéro.';
+$lang_admin['ap_massdone_restore']           = 'Un utilisateur restauré.|%d utilisateurs restaurés.';
+$lang_admin['ap_massdone_mark']              = 'Un utilisateur marqué pour suppression.|%d utilisateurs marqués pour suppression.';
+$lang_admin['ap_massdone_delete']            = 'Un utilisateur supprimé.|%d utilisateurs supprimés.';
+$lang_admin['ap_massdone_move']              = 'Un utilisateur déplacé vers le groupe "%2$s".|%1$d utilisateurs déplacés vers le groupe "%2$s".';
+$lang_admin['ap_massdone_nochange']          = 'Rien n\'a été modifié.';
+$lang_admin['ap_massdone_none']              = 'Aucun utilisateur sélectionné.';
+$lang_admin['ap_massdone_noaction']          = 'Aucune action sélectionnée.';
+$lang_admin['ap_usernotfound']               = 'L\'utilisateur n\'existe pas.';
+$lang_admin['ap_movehint_none']              = 'Aucun groupe cible n\'est défini, il n\'y a donc pas de bouton pour déplacer l\'utilisateur ici. Vous choisissez le groupe cible sous';
+$lang_admin['ap_movehint_missing']           = 'Le groupe cible défini (ID %d) n\'existe plus, il n\'y a donc pas de bouton pour déplacer l\'utilisateur ici. Vous choisissez un nouveau groupe cible sous';
 $lang_admin['limit_amount_count']            = 'Max. amount';
 $lang_admin['limit_amount_mb']               = 'Max. traffic (MB)';
 $lang_admin['limit_interval_m']              = 'Period (minutes)';
@@ -1613,6 +1666,9 @@ $lang_admin['text_notify_orgshare_note']     = 'Notification de partage de note'
 $lang_admin['text_contact_subjects']         = 'Contact form subjects';
 $lang_admin['text_ap_autolock_sub']          = 'Abuse protect lock email subject';
 $lang_admin['text_ap_autolock_text']         = 'Abuse protect lock email text';
+$lang_admin['text_ap_automove_sub']          = 'Sujet de l\'e-mail de déplacement (protection anti-abus)';
+$lang_admin['text_ap_automove_text']         = 'Texte de l\'e-mail de déplacement (protection anti-abus)';
+$lang_admin['text_ap_moved_warning']         = 'Avertissement pour les utilisateurs du groupe cible';
 $lang_admin['ssl_signup_enable']             = 'Signup via SSL';
 $lang_admin['showcheckboxes']                = 'Multi-select using checkboxes';
 $lang_admin['domaindisplay']                 = 'Domain display';

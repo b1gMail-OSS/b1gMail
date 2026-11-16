@@ -120,9 +120,11 @@
 				<button class="btn btn-outline-secondary" type="submit" name="save"><i class="fa-regular fa-floppy-disk"></i>&nbsp; {lng p="save"}</button>
 				<button class="btn btn-outline-secondary" onclick="document.location.href='users.php?do=edit&id={$userID}{$sessionUrlSuffix}';return(false);"><i class="fa-regular fa-id-card"></i>&nbsp; {lng p="profile"}</button>
 				<button class="btn btn-outline-secondary" onclick="window.singleAction('{if $userRow.gesperrt=='no'}lock{elseif $userRow.gesperrt=='yes'}unlock{elseif $userRow.gesperrt=='locked'}activate{elseif $userRow.gesperrt=='delete'}recover{/if}User', '{$userRow.id}');return(false);">{if $userRow.gesperrt=='no'}<i class="fa-solid fa-lock"></i>{elseif $userRow.gesperrt=='yes'}<i class="fa-solid fa-lock-open"></i>{elseif $userRow.gesperrt=='locked'}<i class="fa-solid fa-lock-open"></i>{elseif $userRow.gesperrt=='delete'}<i class="fa-solid fa-hammer"></i>{/if}&nbsp; {if $userRow.gesperrt=='no'}{lng p="lock"}{elseif $userRow.gesperrt=='yes'}{lng p="unlock"}{elseif $userRow.gesperrt=='locked'}{lng p="activate"}{elseif $userRow.gesperrt=='delete'}&nbsp; {lng p="recover"}{/if}</button>
+				{if $abuseMoveLabel|default:''}<button class="btn btn-outline-secondary" onclick="window.singleAction('moveUser', '{$userRow.id}');return(false);"><i class="fa-solid fa-user-shield"></i>&nbsp; {text value=$abuseMoveLabel}</button>{/if}
 				<button class="btn btn-outline-secondary" onclick="window.singleAction('deleteUser', '{$userRow.id}');return(false);">{if $userRow.gesperrt=='delete'}<i class="fa-regular fa-trash-can text-danger"></i>{else}<i class="fa-regular fa-trash-can"></i>{/if}&nbsp; {lng p="delete"}</button>
 				<button class="btn btn-outline-secondary" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('users.php?do=login&id={$userID}{$sessionUrlSuffix}', true);return(false);"><i class="fa-solid fa-house-chimney-user"></i>&nbsp; {lng p="login"}</button>
 			</div>
+			{if $abuseMoveHint|default:''}<div class="form-text mt-2"><i class="fa-solid fa-circle-info"></i>&nbsp; {$abuseMoveHint|escape} <a href="{sessionurl file='prefs.abuse.php'}">{lng p="prefs"} &gt; {lng p="abuseprotect"}</a></div>{/if}
 		</div>
 		</form>
 </fieldset>

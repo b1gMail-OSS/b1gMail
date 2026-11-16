@@ -1,3 +1,6 @@
+{if isset($msg)}
+	<div class="alert alert-info">{$msg|escape}</div>
+{/if}
 <form action="{sessionurl file='abuse.php'}" method="post" onsubmit="spin(this)" name="f1">
 	{csrffield}
 	<input type="hidden" name="page" id="page" value="{$pageNo}" />
@@ -48,11 +51,12 @@
 							<td><i class="fa-regular fa-circle text-{$user.indicator}"></i>&nbsp; <a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}">{$user.pointsum}</a></td>
 							<td class="text-nowrap">
 								<div class="btn-group btn-group-sm">
-									<a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}" title="{lng p="show"}" class="btn btn-sm"><i class="fa-solid fa-magnifying-glass"></i></a>
-									<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
-									<a href="javascript:singleAction('{if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='no'}<i class="fa-solid fa-lock"></i>{elseif $user.gesperrt=='yes'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='locked'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='unlock'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='delete'}<i class="fa-solid fa-hammer"></i>{/if}</a>
-									<a href="javascript:singleAction('delete', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='delete'}<i class="fa-regular fa-trash-can text-danger"></i>{else}<i class="fa-regular fa-trash-can"></i>{/if}</a>
-									<a href="#" target="_blank" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('{sessionurl file='users.php' params="do=login&id={$user.id}"}', true); return false;" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
+									<a href="{sessionurl file='abuse.php' params="do=show&userid={$user.id}"}" title="{lng p="show"}" aria-label="{lng p="show"}" class="btn btn-sm"><i class="fa-solid fa-magnifying-glass"></i></a>
+									<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}" title="{lng p="edit"}" aria-label="{lng p="edit"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
+									{if $user.gesperrt=='no'}{capture assign=lockTitle}{lng p="lock"}{/capture}{elseif $user.gesperrt=='delete'}{capture assign=lockTitle}{lng p="recover"}{/capture}{elseif $user.gesperrt=='locked'}{capture assign=lockTitle}{lng p="activate"}{/capture}{else}{capture assign=lockTitle}{lng p="unlock"}{/capture}{/if}
+									<a href="javascript:singleAction('{if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}', '{$user.id}');" title="{$lockTitle|escape}" aria-label="{$lockTitle|escape}" class="btn btn-sm">{if $user.gesperrt=='no'}<i class="fa-solid fa-lock"></i>{elseif $user.gesperrt=='yes'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='locked'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='unlock'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='delete'}<i class="fa-solid fa-hammer"></i>{/if}</a>
+									<a href="javascript:singleAction('delete', '{$user.id}');" title="{lng p="delete"}" aria-label="{lng p="delete"}" class="btn btn-sm">{if $user.gesperrt=='delete'}<i class="fa-regular fa-trash-can text-danger"></i>{else}<i class="fa-regular fa-trash-can"></i>{/if}</a>
+									<a href="#" target="_blank" title="{lng p="login"}" aria-label="{lng p="login"}" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('{sessionurl file='users.php' params="do=login&id={$user.id}"}', true); return false;" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
 								</div>
 							</td>
 						</tr>

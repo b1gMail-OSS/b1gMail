@@ -460,11 +460,11 @@ if($_REQUEST['action'] == 'welcome')
 	$res->Free();
 	if($apHardCount > 0)
 		$notices[] = array('type' 	=> 'warning',
-							'text'	=> sprintf($lang_admin['ap_warn_hard'], $apHardCount),
+							'text'	=> pluralize($lang_admin['ap_warn_hard'], $apHardCount),
 							'link'	=> 'abuse.php?');
 	if($apMediumCount > 0)
 		$notices[] = array('type' 	=> 'info',
-							'text'	=> sprintf($lang_admin['ap_warn_medium'], $apMediumCount),
+							'text'	=> pluralize($lang_admin['ap_warn_medium'], $apMediumCount),
 							'link'	=> 'abuse.php?');
 
 	// users waiting for activation

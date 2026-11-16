@@ -298,6 +298,7 @@ class Template extends Smarty\Smarty {
             $lang_user,
             $plugins,
             $bm_prefs,
+            $lang_custom,
             $adminRow,
             $currentLanguage;
 
@@ -353,6 +354,24 @@ class Template extends Smarty\Smarty {
                 include B1GMAIL_DIR.'serverlib/push.class.php';
             }
             $this->assign('bmPushEnabled', BMPush::isEnabled());
+        }
+
+        // abuse protection: users in the abuse group get a warning on every page
+        $abuseGroup = isset($bm_prefs['ap_automove_group']) ? (int) $bm_prefs['ap_automove_group'] : 0;
+        if ($abuseGroup > 0 && isset($userRow['gruppe']) && $userRow['gruppe'] == $abuseGroup) {
+            // the customizable text (first line is the headline); if it is empty or missing, the default phrases
+            // of the language are used, so the warning cannot disappear
+            $abuseWarning = isset($lang_custom['ap_moved_warning']) ? trim(str_replace("\r", '', $lang_custom['ap_moved_warning'])) : '';
+            if ($abuseWarning === '') {
+                $abuseTitle = $lang_user['ap_warning_title'];
+                $abuseText  = $lang_user['ap_warning_text'];
+            } else {
+                $abuseLines = explode("\n", $abuseWarning, 2);
+                $abuseTitle = $abuseLines[0];
+                $abuseText  = isset($abuseLines[1]) ? trim($abuseLines[1]) : '';
+            }
+            $this->assign('abuseWarningTitle', $abuseTitle);
+            $this->assign('abuseWarningText', $abuseText);
         }
 
         // tabs

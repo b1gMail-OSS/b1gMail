@@ -3882,3 +3882,38 @@ body.bm-mfa-setup-active .bm-session-lock-overlay
 {
 	display: none !important;
 }
+
+/* abuse protection: warning for users in the abuse group */
+.bm-abuse-warning
+{
+	margin: 10px;
+	padding: 15px;
+	border: 2px solid #B52A2A;
+	background-color: #F8D7DA;
+	color: #58151C;
+}
+
+.bm-abuse-warning h3
+{
+	margin: 0 0 8px 0;
+}
+
+.bm-abuse-warning p
+{
+	margin: 0 0 10px 0;
+}
+
+.bm-abuse-warning a.bm-abuse-warning-button
+{
+	display: inline-block;
+	padding: 6px 12px;
+	border-radius: 3px;
+	background-color: #B52A2A;
+	color: #FFF;
+	text-decoration: none;
+}
+
+.bm-abuse-warning a.bm-abuse-warning-button:hover
+{
+	background-color: #8F2020;
+}

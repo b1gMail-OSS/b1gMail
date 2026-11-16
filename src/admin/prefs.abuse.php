@@ -40,16 +40,49 @@ $tabs = array(
  */
 if($_REQUEST['action'] == 'prefs')
 {
+	$groups = BMGroup::GetSimpleGroupList();
+
 	if(isset($_REQUEST['save']) && isset($_POST['types']) && is_array($_POST['types']))
 	{
-		$db->Query('UPDATE {pre}prefs SET `ap_medium_limit`=?,`ap_hard_limit`=?,`ap_expire_time`=?,`ap_expire_mode`=?,`ap_autolock`=?,`ap_autolock_notify`=?,`ap_autolock_notify_to`=?',
+		// reaction to abuse: nothing, lock or move to the target group, never more than one of them.
+		// A disabled field is not posted, then the saved value stays.
+		$action    = isset($_POST['ap_action']) ? $_POST['ap_action'] : 'none';
+		$moveGroup = isset($_POST['ap_automove_group'])
+						? (int)$_POST['ap_automove_group']
+						: (isset($bm_prefs['ap_automove_group']) ? (int)$bm_prefs['ap_automove_group'] : 0);
+		if(!isset($groups[$moveGroup]))
+			$moveGroup = 0;
+		$autoMove = $action == 'move' && $moveGroup > 0;
+		$autoLock = $action == 'lock';
+		$notifyTo = isset($_POST['ap_autolock_notify_to']) ? $_POST['ap_autolock_notify_to'] : $bm_prefs['ap_autolock_notify_to'];
+
+		// the option is only offered if a plugin can clear a mail queue, and it is only active for "move".
+		// Otherwise the checkbox is disabled and not posted, then the saved value stays.
+		$clearQueue = isset($bm_prefs['ap_clearqueue']) ? $bm_prefs['ap_clearqueue'] : 'no';
+		if(BMAbuseProtect::queueSupported() && $action == 'move')
+			$clearQueue = isset($_POST['ap_clearqueue']) ? 'yes' : 'no';
+
+		$db->Query('UPDATE {pre}prefs SET '
+				. '`ap_medium_limit`=?,'
+				. '`ap_hard_limit`=?,'
+				. '`ap_expire_time`=?,'
+				. '`ap_expire_mode`=?,'
+				. '`ap_autolock`=?,'
+				. '`ap_automove`=?,'
+				. '`ap_automove_group`=?,'
+				. '`ap_clearqueue`=?,'
+				. '`ap_autolock_notify`=?,'
+				. '`ap_autolock_notify_to`=?',
 			max(1, $_POST['ap_medium_limit']),
 			max(1, $_POST['ap_hard_limit']),
 			$_POST['ap_expire_time'] * TIME_ONE_HOUR,
 			$_POST['ap_expire_mode'],
-			isset($_POST['ap_autolock']) ? 'yes' : 'no',
+			$autoLock ? 'yes' : 'no',
+			$autoMove ? 'yes' : 'no',
+			$moveGroup,
+			$clearQueue,
 			isset($_POST['ap_autolock_notify']) ? 'yes' : 'no',
-			EncodeEMail($_POST['ap_autolock_notify_to']));
+			EncodeEMail($notifyTo));
 		ReadConfig();
 
 		foreach($_POST['types'] as $type=>$details)
@@ -72,11 +105,11 @@ if($_REQUEST['action'] == 'prefs')
 		}
 	}
 
-	$types = GetAbuseTypes();
+	$types = BMAbuseProtect::getTypes();
 
 	foreach($types as $type=>$info)
 	{
-		$prefs = GetAbuseTypePrefs($type);
+		$prefs = BMAbuseProtect::getTypePrefs($type);
 		foreach($prefs as $key=>$val)
 			if(isset($types[$type]['prefs'][$key]))
 				$types[$type]['prefs'][$key]['value'] = $val;
@@ -93,7 +126,26 @@ if($_REQUEST['action'] == 'prefs')
 	}
 	$res->Free();
 
+	// hint: a single violation must not reach the lock limit
+	$maxPoints = 0;
+	foreach($types as $info)
+		$maxPoints = max($maxPoints, (int)$info['points']);
+	if($bm_prefs['ap_hard_limit'] <= $maxPoints)
+		$tpl->assign('apLimitHint', sprintf($lang_admin['ap_limit_hint'], $maxPoints));
+
+	// the saved reaction, for the radio buttons
+	if(isset($bm_prefs['ap_automove']) && $bm_prefs['ap_automove'] == 'yes' && BMAbuseProtect::moveGroup() > 0)
+		$tpl->assign('apAction', 'move');
+	else if($bm_prefs['ap_autolock'] == 'yes')
+		$tpl->assign('apAction', 'lock');
+	else
+		$tpl->assign('apAction', 'none');
+
+	// offered only if a plugin (the mail server) can clear its queue
+	$tpl->assign('apQueueSupported', BMAbuseProtect::queueSupported());
+
 	$tpl->assign('apTypes', $types);
+	$tpl->assign('apGroups', $groups);
 	$tpl->assign('page', 'prefs.abuse.tpl');
 }
 

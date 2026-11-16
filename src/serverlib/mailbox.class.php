@@ -4141,24 +4141,24 @@ class BMMailbox
 			// check abuse protect limits
 			if($groupRow['abuseprotect'] == 'yes' && !$isUserPOP3)
 			{
-				$sendFreqPrefs = GetAbuseTypePrefs(BMAP_RECV_FREQ_LIMIT);
+				$sendFreqPrefs = BMAbuseProtect::getTypePrefs(BMAP_RECV_FREQ_LIMIT);
 				if(isset($sendFreqPrefs['amount']) && isset($sendFreqPrefs['interval']))
 				{
 					$receivedMailsCount = $this->_userObject->GetReceivedMailsCount(time() - TIME_ONE_MINUTE * $sendFreqPrefs['interval']);
 					if($receivedMailsCount > $sendFreqPrefs['amount'])
 					{
-						AddAbusePoint($this->_userID, BMAP_RECV_FREQ_LIMIT,
+						BMAbuseProtect::addPoint($this->_userID, BMAP_RECV_FREQ_LIMIT,
 							sprintf($lang_admin['ap_comment_21'], $receivedMailsCount, $sendFreqPrefs['interval']));
 					}
 				}
 
-				$sendTrafficPrefs = GetAbuseTypePrefs(BMAP_RECV_TRAFFIC_LIMIT);
+				$sendTrafficPrefs = BMAbuseProtect::getTypePrefs(BMAP_RECV_TRAFFIC_LIMIT);
 				if(isset($sendTrafficPrefs['amount']) && isset($sendTrafficPrefs['interval']))
 				{
 					$receivedMailsSize = $this->_userObject->GetReceivedMailsSize(time() - TIME_ONE_MINUTE * $sendTrafficPrefs['interval']);
 					if($receivedMailsSize > $sendTrafficPrefs['amount']*1024*1024)
 					{
-						AddAbusePoint($this->_userID, BMAP_RECV_TRAFFIC_LIMIT,
+						BMAbuseProtect::addPoint($this->_userID, BMAP_RECV_TRAFFIC_LIMIT,
 							sprintf($lang_admin['ap_comment_22'], $receivedMailsSize/1024/1024, $sendTrafficPrefs['interval']));
 					}
 				}

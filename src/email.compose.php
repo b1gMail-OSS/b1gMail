@@ -708,7 +708,7 @@ else if($_REQUEST['action'] == 'sendMail'
 			// too many recipients?
 			if($_REQUEST['do'] != 'saveDraft' && count($recipients) > $groupRow['max_recps'])
 			{
-				AddAbusePoint($userRow['id'], BMAP_SEND_RECP_LIMIT,
+				BMAbuseProtect::addPoint($userRow['id'], BMAP_SEND_RECP_LIMIT,
 					sprintf($lang_admin['ap_comment_1'], count($recipients)));
 				$tpl->assign('msg', sprintf($lang_user['toomanyrecipients'], $groupRow['max_recps'], count($recipients)));
 				$tpl->assign('pageContent', 'li/error.tpl');
@@ -717,7 +717,7 @@ else if($_REQUEST['action'] == 'sendMail'
 			// blocked recipients?
 			else if($_REQUEST['do'] != 'saveDraft' && count($blockedRecipients) > 0)
 			{
-				AddAbusePoint($userRow['id'], BMAP_SEND_RECP_BLOCKED,
+				BMAbuseProtect::addPoint($userRow['id'], BMAP_SEND_RECP_BLOCKED,
 					sprintf($lang_admin['ap_comment_3'], implode(', ', $blockedRecipients)));
 				$tpl->assign('msg', sprintf($lang_user['blockedrecipients'], HTMLFormat(implode(', ', $blockedRecipients))));
 				$tpl->assign('pageContent', 'li/error.tpl');
@@ -726,7 +726,7 @@ else if($_REQUEST['action'] == 'sendMail'
 			// over send limit?
 			else if($_REQUEST['do'] != 'saveDraft' && !$thisUser->MaySendMail(count($recipients)))
 			{
-				AddAbusePoint($userRow['id'], BMAP_SEND_FREQ_LIMIT,
+				BMAbuseProtect::addPoint($userRow['id'], BMAP_SEND_FREQ_LIMIT,
 					sprintf($lang_admin['ap_comment_1'], count($recipients)));
 				$tpl->assign('msg', sprintf($lang_user['exceededsendlimit'], $groupRow['send_limit_count'], $groupRow['send_limit_time']));
 				$tpl->assign('pageContent', 'li/error.tpl');
@@ -954,11 +954,11 @@ else if($_REQUEST['action'] == 'sendMail'
 
 					if(CheckActionToken($userRow['id'], ATACTION_SENDMAIL, $_POST['actionToken'], true))
 					{
-						$sendFastPrefs = GetAbuseTypePrefs(BMAP_SEND_FAST);
+						$sendFastPrefs = BMAbuseProtect::getTypePrefs(BMAP_SEND_FAST);
 						if(isset($sendFastPrefs['interval']) && $actionTokenAge !== false
 							&& $actionTokenAge < $sendFastPrefs['interval'])
 						{
-							AddAbusePoint($userRow['id'], BMAP_SEND_FAST,
+							BMAbuseProtect::addPoint($userRow['id'], BMAP_SEND_FAST,
 								sprintf($lang_admin['ap_comment_7'], $actionTokenAge));
 						}
 
