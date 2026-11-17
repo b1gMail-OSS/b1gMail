@@ -19,12 +19,37 @@
  *
  */
 
-include('../serverlib/admin.inc.php');
+require('../serverlib/admin.inc.php');
 
 RequestPrivileges(PRIVILEGES_ADMIN);
 
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'welcome';
+
+if($_REQUEST['action'] == 'versionCheck') {
+	if (defined('DISABLE_UPDATE_CHECK') && (DISABLE_UPDATE_CHECK==1||DISABLE_UPDATE_CHECK===TRUE)) {
+		exit();
+	}
+	if (!class_exists('BMHTTP')) {
+            require_once B1GMAIL_DIR.'serverlib/http.class.php';
+        }
+
+        $http = _new('BMHTTP', [UPDATE_SERVER.'/versioncheck.php?fromVersion='.B1GMAIL_VERSION]);
+        $result = $http->DownloadToString();
+		$version = parseVersion($result);
+		if ($version === null) {
+    		echo '';
+		} else {
+			echo $version['major'] . '.'
+			. $version['minor'] . '.'
+			. $version['patch'];
+
+			if ($version['stage'] !== 'stable') {
+				echo '-' . strtoupper($version['stage']) . $version['prerelease'];
+			}
+		}
+	exit();
+}
 
 if($_REQUEST['action'] == 'about')
 {

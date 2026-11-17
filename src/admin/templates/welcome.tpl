@@ -201,6 +201,17 @@
 						<div class="bm-welcome-meta-value">{text value=$version}</div>
 					</div>
 					<div class="bm-welcome-meta-item">
+						<div class="subheader">{lng p="newest_version"}</div>
+						<div class="bm-welcome-meta-value" id="versioncheck"></div>
+					</div>
+					<script>
+					$(document).ready(function(){
+					$.get('welcome.php?sid={$sid}&action=versionCheck', function (version) {
+						$('#versioncheck').text(version);
+					}, 'text');
+					}); 
+					</script>
+					<div class="bm-welcome-meta-item">
 						<div class="subheader">{lng p="phpversion"}</div>
 						<div class="bm-welcome-meta-value">{text value=$phpVersion}</div>
 					</div>

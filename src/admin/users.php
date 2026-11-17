@@ -917,7 +917,9 @@ if($_REQUEST['action'] == 'users')
 	//
 	// login
 	//
-	else if($_REQUEST['do'] == 'login')
+	else if($_REQUEST['do'] == 'login' &&
+			defined('ENABLE_ADMIN_AUTH') && 
+			(ENABLE_ADMIN_AUTH == 1||ENABLE_ADMIN_AUTH === TRUE))
 	{
 		if(!AdminRequestIsPost())
 		{

@@ -377,8 +377,7 @@ if (!defined('TOOLBOX_SERVER')) {
 
 }
 if (!defined('UPDATE_SERVER')) {
-    #define('UPDATE_SERVER', '');
-    define('UPDATE_SERVER', 'http://service.b1gmail.com/patches/');
+    define('UPDATE_SERVER', 'https://service.b1gmail.org');
 }
 if (!defined('SIGNATURE_SERVER')) {
     #define('SIGNATURE_SERVER', '');
@@ -399,6 +398,13 @@ if (!defined('DISABLE_WRITE_XMAILER')) {
 }
 if (!defined('LEGACY_WEBDISCICONS')) {
     define('LEGACY_WEBDISCICONS', false);
+}
+if (!defined('FORCE_LEGACY_ENCODING')) {
+    define('FORCE_LEGACY_ENCODING', false);
+}
+if (!defined('DEV_MOCK_MAIL_SENDING')) {
+	// A setting used for development purposes that replaces actual email submission by a mock.
+	define('DEV_MOCK_MAIL_SENDING', false);
 }
 if (DEBUG) {
     error_reporting(E_ALL);
@@ -422,25 +428,25 @@ if (DEBUG) {
 /**
  * required files.
  */
-include B1GMAIL_DIR.'serverlib/version.inc.php';
-include B1GMAIL_DIR.'serverlib/common.inc.php';
-include B1GMAIL_DIR.'serverlib/session.inc.php';
-include_once B1GMAIL_DIR.'serverlib/route.inc.php';
-include B1GMAIL_DIR.'serverlib/passwordhash.inc.php';
-include B1GMAIL_DIR.'serverlib/mfa.inc.php';
-include B1GMAIL_DIR.'serverlib/app_password.inc.php';
-include B1GMAIL_DIR.'serverlib/loginnotify.inc.php';
-include B1GMAIL_DIR.'serverlib/string.inc.php';
-include B1GMAIL_DIR.'serverlib/avatar.inc.php';
-include B1GMAIL_DIR.'serverlib/cache.class.php';
-include B1GMAIL_DIR.'serverlib/db.class.php';
-include B1GMAIL_DIR.'serverlib/blobstorage.class.php';
-include B1GMAIL_DIR.'serverlib/template.class.php';
-include B1GMAIL_DIR.'serverlib/user.class.php';
-include B1GMAIL_DIR.'serverlib/group.class.php';
-include B1GMAIL_DIR.'serverlib/abuseprotect.class.php';
-include B1GMAIL_DIR.'serverlib/workgroup.class.php';
-include B1GMAIL_DIR.'serverlib/plugin.class.php';
+require B1GMAIL_DIR.'serverlib/version.inc.php';
+require B1GMAIL_DIR.'serverlib/common.inc.php';
+require B1GMAIL_DIR.'serverlib/session.inc.php';
+require_once B1GMAIL_DIR.'serverlib/route.inc.php';
+require B1GMAIL_DIR.'serverlib/passwordhash.inc.php';
+require B1GMAIL_DIR.'serverlib/mfa.inc.php';
+require B1GMAIL_DIR.'serverlib/app_password.inc.php';
+require B1GMAIL_DIR.'serverlib/loginnotify.inc.php';
+require B1GMAIL_DIR.'serverlib/string.inc.php';
+require B1GMAIL_DIR.'serverlib/avatar.inc.php';
+require B1GMAIL_DIR.'serverlib/cache.class.php';
+require B1GMAIL_DIR.'serverlib/db.class.php';
+require B1GMAIL_DIR.'serverlib/blobstorage.class.php';
+require B1GMAIL_DIR.'serverlib/template.class.php';
+require B1GMAIL_DIR.'serverlib/user.class.php';
+require B1GMAIL_DIR.'serverlib/group.class.php';
+require B1GMAIL_DIR.'serverlib/abuseprotect.class.php';
+require B1GMAIL_DIR.'serverlib/workgroup.class.php';
+require B1GMAIL_DIR.'serverlib/plugin.class.php';
 if (!class_exists('SQLite3') && class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers())) {
     include B1GMAIL_DIR.'serverlib/sqlite3.class.php';
 }
@@ -596,6 +602,13 @@ else if(MAINTENANCE_MODE && !in_array($_SERVER['REMOTE_ADDR'], $maintenanceWhite
         $tpl->assign('text', $lang_custom['maintenance']);
         $tpl->display('nli/maintenance.tpl');
         exit();
+}
+// If not UTF8, stop working
+if(empty($bm_prefs['db_is_utf8']) && FORCE_LEGACY_ENCODING===FALSE) {
+    $tpl->assign('year', date('Y'));
+        $tpl->assign('text', $lang_user['legacy_charset_detected']);
+        $tpl->display('nli/maintenance.tpl');
+    exit();
 }
 
 

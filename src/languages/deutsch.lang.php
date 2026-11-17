@@ -1541,6 +1541,7 @@ $lang_user['dsDerefThreatPhishing']   = $lang_user['deref_threat_phishing'];
 $lang_user['dsDerefThreatUnwanted']   = $lang_user['deref_threat_unwanted'];
 $lang_user['login_with_alias']        = 'Login mit Alias erlauben';
 $lang_user['editalias']               = 'Alias bearbeiten';
+$lang_user['legacy_charset_detected'] = 'Es wurde ein veralteter Zeichensatz erkannt. Bitte melden Sie sich bei der Admin-Oberfläche an und stellen Sie Ihre Installation auf UTF-8 um.';
 /**
  * Admin phrases
  */
@@ -2994,6 +2995,7 @@ $lang_admin['no_encryption']                 = 'Keine Verschlüsselung';
 $lang_admin['secure_connection']             = 'Verbindungssicherheit';
 $lang_admin['follow_mastodon']               = 'Folge uns auf Mastodon';
 $lang_admin['to_startpage']                  = 'Zur Seite';
+$lang_admin['newest_version']	             = 'Neueste Version';
 // Avoid duplicates
 $lang_admin['zip']    = $lang_user['zip'];
 $lang_admin['city']   = $lang_user['city'];

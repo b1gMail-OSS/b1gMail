@@ -1,7 +1,7 @@
 <?php
 /*
  * b1gMail
- * Copyright (c) 2021 Patrick Schlangen et al
+ * Copyright (c) 2021 Patrick Schlangen et al, 2022-2026 b1gMail.eu
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -233,10 +233,10 @@ function _strlen($str)
 {
 	global $currentCharset;
 
-	if(function_exists('mb_strlen'))
-		return(mb_strlen($str, $currentCharset));
 	if(function_exists('iconv_strlen'))
 		return(iconv_strlen($str, $currentCharset));
+	if(function_exists('mb_strlen'))
+		return(mb_strlen($str, $currentCharset));
 
 	return(strlen($str));
 }
@@ -256,10 +256,11 @@ function _substr($str, $start, $length = false)
 	if($length === false)
 		$length = _strlen($str) - $start;
 
-	if(function_exists('mb_substr'))
-		return(mb_substr($str, $start, $length, $currentCharset));
 	if(function_exists('iconv_substr'))
 		return(iconv_substr($str, $start, $length, $currentCharset));
+
+	if(function_exists('mb_substr'))
+		return(mb_substr($str, $start, $length, $currentCharset));
 
 	return(substr($str, $start, $length));
 }
@@ -484,6 +485,27 @@ function CharsetDecode($text, $charset = false, $destCharset = false)
 		if($newText = @mb_convert_encoding($text, $_myCharset, $_charset))
 			$text = $newText;
 		else if($newText = @mb_convert_encoding($text, $myCharset, $charset))
+		$_mb_convert = function($from, $to) use ($text) {
+			try {
+				return @mb_convert_encoding($text, $to, $from);
+			}
+			catch(\ValueError $e) {
+				PutLog(sprintf('Invalid charset %s / %s ) - Error %s',
+				$_charset,
+				$mycharset,
+				$e->getMessage()),
+				PRIO_WARNING,
+				__FILE__,
+				__LINE__);
+				return false;
+			}
+		};
+
+		$newText = $_mb_convert($_charset, $_myCharset);
+		if($newText === false)
+			$newText = $_mb_convert($charset, $myCharset);
+
+		if($newText !== false)
 			$text = $newText;
 	}
 	else if(function_exists('utf8_encode'))

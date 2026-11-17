@@ -125,7 +125,7 @@ class BMSendMail
     {
         $this->_fp = $fp;
     }
-
+    
     /**
      * send the mail.
      *
@@ -138,6 +138,10 @@ class BMSendMail
         if (count($this->_recipients) == 0) {
             return false;
         }
+
+        if (DEV_MOCK_MAIL_SENDING) {
+			return true;
+		}
 
         // send using mail()...
         if ($bm_prefs['send_method'] == 'php') {

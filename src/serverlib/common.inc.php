@@ -2131,6 +2131,36 @@ function PHPNumVersion()
 	return((int)str_replace('.', '', $ver));
 }
 
+
+/**
+ * parse Version Number from String
+ */
+
+function parseVersion(string $text): ?array
+{
+    $text = trim($text);
+
+    if (!preg_match(
+        '/\A(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(beta|rc)(0|[1-9]\d*))?\z/i',
+        $text,
+        $m
+    )) {
+        return null;
+    }
+
+    return [
+        'major'      => (int) $m[1],
+        'minor'      => (int) $m[2],
+        'patch'      => (int) $m[3],
+        'stage'      => isset($m[4]) && $m[4] !== ''
+            ? strtolower($m[4])
+            : 'stable',
+        'prerelease' => isset($m[5]) && $m[5] !== ''
+            ? (int) $m[5]
+            : null,
+    ];
+}
+
 /**
  * get full file contents
  *

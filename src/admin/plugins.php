@@ -186,7 +186,13 @@ elseif ($_REQUEST['action'] == 'updates') {
 elseif ($_REQUEST['action'] == 'updateCheck'
     && isset($_REQUEST['plugin'])) {
     $latestVersion = '';
-    $resultCode = $plugins->callFunction('CheckForUpdates', $_REQUEST['plugin'], false, [&$latestVersion]);
+    
+    if (defined('DISABLE_UPDATE_CHECK') && (DISABLE_UPDATE_CHECK==1||DISABLE_UPDATE_CHECK===TRUE)) {
+        // Do nothing
+    }
+    else {
+        $resultCode = $plugins->callFunction('CheckForUpdates', $_REQUEST['plugin'], false, [&$latestVersion]);
+    }
 
     printf('%s;%d;%s;%s',
         $_REQUEST['plugin'],

@@ -1545,6 +1545,7 @@ $lang_user['dsDerefThreatPhishing']   = $lang_user['deref_threat_phishing'];
 $lang_user['dsDerefThreatUnwanted']   = $lang_user['deref_threat_unwanted'];
 $lang_user['login_with_alias']        = 'Allow Login with Alias';
 $lang_user['editalias']               = 'Edit alias';
+$lang_user['legacy_charset_detected'] = 'Latin charset detected. Please login to admin interface and convert your installation to utf8';
 /**
  * Admin phrases
  */
@@ -2999,6 +3000,7 @@ $lang_admin['no_encryption']                = 'No encryption';
 $lang_admin['secure_connection']            = 'Secure connection';
 $lang_admin['follow_mastodon']              = 'Follow us on Mastodon';
 $lang_admin['to_startpage']                 = 'To Startpage';
+$lang_admin['newest_version']	            = 'Newest Version';
 // Avoid duplicates
 $lang_admin['zip']    = $lang_user['zip'];
 $lang_admin['city']   = $lang_user['city'];

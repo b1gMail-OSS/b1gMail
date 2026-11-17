@@ -1449,6 +1449,7 @@ $lang_user['dsDerefThreatPhishing']   = $lang_user['deref_threat_phishing'];
 $lang_user['dsDerefThreatUnwanted']   = $lang_user['deref_threat_unwanted'];
 $lang_user['login_with_alias']        = 'Autoriser la connexion avec un alias';
 $lang_user['editalias']               = 'Editer alias';
+$lang_user['legacy_charset_detected'] = "Un jeu de caractères latin a été détecté. Veuillez vous connecter à l'interface d'administration et convertir votre installation au format UTF-8.";
 
 $lang_custom['cs_subject'] = 'Accusé de réception';
 $lang_custom['deref']      = 'La page sur laquelle vous étiez essaie de vous envoyer sur<br /><br /> %s. <br /><br /> Si vous ne souhaitez pas visiter cette page, vous pouvez fermer cette fenêtre.';
@@ -2749,6 +2750,7 @@ $lang_admin['no_encryption']                 = 'No encryption';
 $lang_admin['secure_connection']             = 'Secure connection';
 $lang_admin['follow_mastodon']               = 'Follow us on Mastodon';
 $lang_admin['to_startpage']                  = 'To Startpage';
+$lang_admin['newest_version']	             = 'Newest Version';
 // Avoid duplicates
 $lang_admin['zip']    = $lang_user['zip'];
 $lang_admin['city']   = $lang_user['city'];

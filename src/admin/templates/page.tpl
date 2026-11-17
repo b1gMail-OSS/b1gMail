@@ -67,6 +67,7 @@
 	<script src="{$selfurl}clientlib/bm-errors.js?{fileDateSig file="../../clientlib/bm-errors.js"}" type="text/javascript"></script>
 	<script src="{$tpldir}js/avatar.js?{fileDateSig file="js/avatar.js"}"></script>
 	<script src="{$tpldir}js/session-monitor.js?{fileDateSig file="js/session-monitor.js"}"></script>
+	<script src="{$selfurl}/clientlib/jquery/jquery-3.7.1.min.js"></script>
 	{if $bmPushEnabled}
 	<script type="text/javascript">
 	<!--
