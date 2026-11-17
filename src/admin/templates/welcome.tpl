@@ -206,7 +206,7 @@
 					</div>
 					<script>
 					$(document).ready(function(){
-					$.get('welcome.php?sid={$sid}&action=versionCheck', function (version) {
+					$.get('{sessionurl file='welcome.php' params="action=versionCheck"}', function (version) {
 						$('#versioncheck').text(version);
 					}, 'text');
 					}); 

@@ -26,7 +26,7 @@ RequestPrivileges(PRIVILEGES_ADMIN);
 if(!isset($_REQUEST['action']))
 	$_REQUEST['action'] = 'welcome';
 
-if($_REQUEST['action'] == 'versionCheck') {
+if($_REQUEST['action'] == 'versioncheck') {
 	if (defined('DISABLE_UPDATE_CHECK') && (DISABLE_UPDATE_CHECK==1||DISABLE_UPDATE_CHECK===TRUE)) {
 		exit();
 	}
