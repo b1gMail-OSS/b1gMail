@@ -746,10 +746,15 @@ function AdminSessionLoginJumpFromRequest()
 /**
  * Tabler icon for a legacy ACP png from admin/templates/images.
  *
+ * $file can also be the name of a Tabler icon with the prefix "ti-", for example "ti-shield-lock". A plugin
+ * can use that as admin_page_icon. A file that is not known here is shown as a picture if $imgBase is set.
+ *
  * @param string $file
+ * @param string $size sm, lg or empty
+ * @param string $imgBase URL of the folder with pictures of plugins, empty: unknown files get a dot
  * @return string
  */
-function AdminAcpIconHtml($file, $size = '')
+function AdminAcpIconHtml($file, $size = '', $imgBase = '')
 {
 	static $map = array(
 		'ico_license.png' => 'home',
@@ -859,9 +864,27 @@ function AdminAcpIconHtml($file, $size = '')
 		'sms.png' => 'device-mobile-message',
 		'webdisk.png' => 'folder',
 		'prefs.png' => 'settings',
+
+		// pictures of the bundled plugins (admin_page_icon), they used to be coloured
+		'accountmirror_logo.png'	=> 'user-share',
+		'addalias_icon.png'			=> 'at',
+		'bms_logo.png'				=> 'server',
+		'modfax_logo.png'			=> 'printer',
+		'modsig_sig32.png'			=> 'signature',
+		'mybb32.png'				=> 'messages',
+		'news_icon.png'				=> 'news',
+		'openfire_icon.png'			=> 'message-2',
+		'pacc_logo16.png'			=> 'crown',
 	);
 	$file = basename(str_replace('\\', '/', (string)$file));
-	$spec = isset($map[$file]) ? $map[$file] : 'point';
+	if(preg_match('/^ti-([a-z0-9-]+)$/', $file, $match))
+		$spec = $match[1];
+	else if(isset($map[$file]))
+		$spec = $map[$file];
+	else if($imgBase !== '' && $file !== '')
+		return '<img src="' . htmlspecialchars($imgBase . rawurlencode($file), ENT_QUOTES) . '" height="16" alt="" />';
+	else
+		$spec = 'point';
 	$parts = preg_split('/\s+/', trim($spec));
 	$icon = array_shift($parts);
 	if(!preg_match('/^[a-z0-9-]+$/', (string)$icon))
@@ -877,7 +900,7 @@ function AdminAcpIconHtml($file, $size = '')
 }
 
 /**
- * Smarty: {acpicon file="ico_users.png"}
+ * Smarty: {acpicon file="ico_users.png"}, optional: size="sm|lg", imgbase="URL of the folder with plugin pictures"
  *
  * @param array $params
  * @param mixed $smarty
@@ -889,7 +912,8 @@ function AdminAcpIcon($params, $smarty)
 	$size = isset($params['size']) ? (string)$params['size'] : '';
 	if($size !== 'sm' && $size !== 'lg')
 		$size = '';
-	return AdminAcpIconHtml($file, $size);
+	$imgBase = isset($params['imgbase']) ? (string)$params['imgbase'] : '';
+	return AdminAcpIconHtml($file, $size, $imgBase);
 }
 
 $tpl->registerPlugin('function', 'acpicon', 'AdminAcpIcon');
