@@ -6162,6 +6162,30 @@
 				""
 			],
 			[
+				"ap_automove",
+				"enum('yes','no')",
+				"NO",
+				"",
+				"no",
+				""
+			],
+			[
+				"ap_automove_group",
+				"int(11)",
+				"NO",
+				"",
+				"0",
+				""
+			],
+			[
+				"ap_clearqueue",
+				"enum('yes','no')",
+				"NO",
+				"",
+				"no",
+				""
+			],
+			[
 				"safecode_provider",
 				"enum('builtin','recaptcha')",
 				"NO",

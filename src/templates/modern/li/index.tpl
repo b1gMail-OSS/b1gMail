@@ -169,6 +169,14 @@
 			{/if}
 		</div>
 
+		{if $abuseWarningTitle|default:''}
+		<div class="bm-abuse-warning" role="alert">
+			<h3>{text value=$abuseWarningTitle}</h3>
+			{if $abuseWarningText}<p>{text value=$abuseWarningText}</p>{/if}
+			<a class="bm-abuse-warning-button" href="{sessionurl file='prefs.php' params='action=membership'}">{lng p="changepw"}</a>
+		</div>
+		{/if}
+
 		<div id="mainBanner" style="display:none;">
 			{banner}
 		</div>

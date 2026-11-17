@@ -120,6 +120,18 @@ $lang_custom['ap_autolock_text']         = 'Der Benutzer %%email%% (#%%id%%) wur
                                          . '%%points%%' . "\n"
                                          . '------------------------------------------------------------------------' . "\n\n"
                                          . 'Details: %%link%%';
+$lang_custom['ap_automove_sub']          = 'Benutzer %%email%% wegen Missbrauchs-Verdacht in Gruppe verschoben';
+$lang_custom['ap_automove_text']         = 'Der Benutzer %%email%% (#%%id%%) wurde soeben wegen Überschreitung des Missbrauchs-Schutz-Punktelimits automatisch in die Gruppe "%%group%%" verschoben.' . "\n\n"
+                                         . 'E-Mail: %%email%% (#%%id%%)' . "\n"
+                                         . 'Punkte: %%pointsum%%' . "\n"
+                                         . '%%queue%%' . "\n\n"
+                                         . 'Punkte-Konto:' . "\n"
+                                         . '------------------------------------------------------------------------' . "\n"
+                                         . '%%points%%' . "\n"
+                                         . '------------------------------------------------------------------------' . "\n\n"
+                                         . 'Details: %%link%%';
+$lang_custom['ap_moved_warning']         = 'Achtung: Ihr Account wird von Spammern missbraucht!' . "\n"
+                                         . 'Über Ihren Account wurden E-Mails verschickt, die nicht von Ihnen stammen. Zeichen dafür sind Fehlermeldungen wie "Mail delivery failed" oder Antworten auf Mails, die Sie nie geschrieben haben. Oft kennt jemand das Passwort, weil es auch bei einem anderen Dienst verwendet wurde, der gehackt wurde. Ändern Sie jetzt Ihr Passwort, verwenden Sie es nirgends sonst und tragen Sie es auch in Ihren Mail-Programmen und auf dem Handy neu ein. Ihr Account ist aus Sicherheitsgründen eingeschränkt.';
 $lang_custom['welcome_sub']              = 'Vielen Dank für Ihre Anmeldung!';
 $lang_custom['welcome_text']             = 'Sehr geehrte(r) %%vorname%% %%nachname%%,' . "\n\n"
                                          . 'wir danken Ihnen für Ihre Anmeldung bei unserem Dienst.' . "\n"
@@ -1227,6 +1239,8 @@ $lang_user['couponok']                                   = 'Der Gutschein wurde 
 $lang_user['virusfilter']                                = 'Virus-Filter';
 $lang_user['virusaction']                                = 'Viren-Behandlung';
 $lang_user['changepw']                                   = 'Passwort ändern';
+$lang_user['ap_warning_title']                           = 'Achtung: Ihr Account wird von Spammern missbraucht!';
+$lang_user['ap_warning_text']                            = 'Über Ihren Account wurden E-Mails verschickt, die nicht von Ihnen stammen. Zeichen dafür sind Fehlermeldungen wie "Mail delivery failed" oder Antworten auf Mails, die Sie nie geschrieben haben. Oft kennt jemand das Passwort, weil es auch bei einem anderen Dienst verwendet wurde, der gehackt wurde. Ändern Sie jetzt Ihr Passwort, verwenden Sie es nirgends sonst und tragen Sie es auch in Ihren Mail-Programmen und auf dem Handy neu ein. Ihr Account ist aus Sicherheitsgründen eingeschränkt.';
 $lang_user['addsignature']                               = 'Signatur hinzufügen';
 $lang_user['editsignature']                              = 'Signatur bearbeiten';
 $lang_user['question']                                   = 'Frage';
@@ -1653,10 +1667,49 @@ $lang_admin['ap_autolock']                   = 'Accounts automatisch sperren';
 $lang_admin['ap_athardlimit']                = 'Bei Überschreitung des Sperr-Limits';
 $lang_admin['hours']                         = 'Stunde(n)';
 $lang_admin['pointtypes']                    = 'Versto&szlig;-Arten';
-$lang_admin['ap_warn_medium']                = '<b>%d</b> aktive(r) Benutzer hat/haben das Warn-Limit für Missbrauchs-Schutz-Punkte überschritten.';
-$lang_admin['ap_warn_hard']                  = '<b>%d</b> aktive(r) Benutzer hat/haben das Sperr-Limit für Missbrauchs-Schutz-Punkte überschritten.';
-$lang_admin['ap_autolock_log']               = "\n[%s] Benutzer vom Missbrauchs-Schutz-System gesperrt wegen Ueberschreitung des Punkte-Limits (%d >= %d).";
-$lang_admin['ap_autolock_notify']            = 'Sperr-Benachrichtigung';
+$lang_admin['ap_warn_medium']                = '<b>%d</b> aktiver Benutzer hat das Warn-Limit für Missbrauchs-Schutz-Punkte überschritten.|<b>%d</b> aktive Benutzer haben das Warn-Limit für Missbrauchs-Schutz-Punkte überschritten.';
+$lang_admin['ap_warn_hard']                  = '<b>%d</b> aktiver Benutzer hat das Sperr-Limit für Missbrauchs-Schutz-Punkte überschritten.|<b>%d</b> aktive Benutzer haben das Sperr-Limit für Missbrauchs-Schutz-Punkte überschritten.';
+$lang_admin['ap_autolock_log']               = '[%s] Benutzer vom Missbrauchs-Schutz-System gesperrt wegen Überschreitung des Punkte-Limits (%d >= %d).';
+$lang_admin['ap_autolock_notify']            = 'Benachrichtigung';
+$lang_admin['ap_movegroup']                  = 'Zielgruppe';
+$lang_admin['ap_movegroup_none']             = '- keine -';
+$lang_admin['ap_reaction']                   = 'Reaktion auf Missbrauch';
+$lang_admin['ap_atlimit']                    = 'Bei Erreichen des Sperr-Limits';
+$lang_admin['ap_action_none']                = 'Nichts tun';
+$lang_admin['ap_action_none_desc']           = 'die Punkte werden nur gesammelt';
+$lang_admin['ap_action_lock']                = 'Account sperren';
+$lang_admin['ap_action_lock_desc']           = 'der Benutzer kann sich nicht mehr anmelden';
+$lang_admin['ap_action_move']                = 'Account in eine Gruppe verschieben';
+$lang_admin['ap_action_move_desc']           = 'der Benutzer sieht nach der Anmeldung eine Warnung';
+$lang_admin['ap_clearqueue']                 = 'Ausgehende E-Mails aus der Warteschlange löschen';
+$lang_admin['ap_clearqueue_desc']            = 'noch nicht zugestellte E-Mails des Benutzers, eingehende E-Mails bleiben erhalten';
+$lang_admin['ap_queue_line_none']            = 'Mail-Warteschlange: nicht geleert';
+$lang_admin['ap_queue_line']                 = 'Mail-Warteschlange: 1 ausgehende E-Mail gelöscht|Mail-Warteschlange: %d ausgehende E-Mails gelöscht';
+$lang_admin['ap_queue_to']                   = 'An';
+$lang_admin['ap_queue_subject']              = 'Betreff';
+$lang_admin['ap_queue_status']               = 'Letzter Status';
+$lang_admin['ap_queue_nostatus']             = 'noch nicht versucht';
+$lang_admin['ap_queue_more']                 = '... und %d weitere';
+$lang_admin['ap_notify_team']                = 'Admin / Support Team per E-Mail informieren';
+$lang_admin['ap_notify_address']             = 'E-Mail-Adresse';
+$lang_admin['ap_limit_hint']                 = 'Das Sperr-Limit ist nicht höher als die Punkte einer einzelnen Verstoß-Art (höchster Wert: %d). Ein einziger Verstoß reicht dann zum Sperren oder Verschieben.';
+$lang_admin['ap_expire_hint']                = 'Bei 0 Stunden werden die Punkte beim nächsten stündlichen Lauf als abgelaufen markiert und zählen nicht mehr für das Sperr-Limit.';
+$lang_admin['ap_movebutton']                 = 'In Gruppe "%s" verschieben';
+$lang_admin['ap_move_log_manual']            = '[%s] Vom Admin "%s" in die Gruppe "%s" (#%d) verschoben (vorher: "%s", #%d). Missbrauchs-Punkte: %d, Sperr-Limit: %d.';
+$lang_admin['ap_move_log_auto']              = '[%s] Automatisch vom Missbrauchs-Schutz in die Gruppe "%s" (#%d) verschoben (vorher: "%s", #%d). Missbrauchs-Punkte: %d, Sperr-Limit: %d.';
+$lang_admin['ap_release_log']                = '[%s] Vom Admin "%s" aus der Missbrauchs-Gruppe genommen. Missbrauchs-Punkte (%d) zurückgesetzt, damit der Account nicht wieder verschoben wird.';
+$lang_admin['ap_massdone_lock']              = 'Ein Benutzer wurde gesperrt.|%d Benutzer wurden gesperrt.';
+$lang_admin['ap_massdone_unlock']            = 'Ein Benutzer wurde entsperrt, die Missbrauchs-Punkte sind zurückgesetzt.|%d Benutzer wurden entsperrt, die Missbrauchs-Punkte sind zurückgesetzt.';
+$lang_admin['ap_massdone_restore']           = 'Ein Benutzer wurde wiederhergestellt.|%d Benutzer wurden wiederhergestellt.';
+$lang_admin['ap_massdone_mark']              = 'Ein Benutzer wurde zum Löschen markiert.|%d Benutzer wurden zum Löschen markiert.';
+$lang_admin['ap_massdone_delete']            = 'Ein Benutzer wurde gelöscht.|%d Benutzer wurden gelöscht.';
+$lang_admin['ap_massdone_move']              = 'Ein Benutzer wurde in die Gruppe "%2$s" verschoben.|%1$d Benutzer wurden in die Gruppe "%2$s" verschoben.';
+$lang_admin['ap_massdone_nochange']          = 'Es wurde nichts geändert.';
+$lang_admin['ap_massdone_none']              = 'Es wurde kein Benutzer ausgewählt.';
+$lang_admin['ap_massdone_noaction']          = 'Es wurde keine Aktion ausgewählt.';
+$lang_admin['ap_usernotfound']               = 'Der Benutzer existiert nicht.';
+$lang_admin['ap_movehint_none']              = 'Es ist keine Zielgruppe eingestellt, darum gibt es hier keinen Button zum Verschieben. Die Zielgruppe wählen Sie unter';
+$lang_admin['ap_movehint_missing']           = 'Die eingestellte Zielgruppe (ID %d) existiert nicht mehr, darum gibt es hier keinen Button zum Verschieben. Eine neue Zielgruppe wählen Sie unter';
 $lang_admin['limit_amount_count']            = 'Max. Anzahl';
 $lang_admin['limit_amount_mb']               = 'Max. Traffic (MB)';
 $lang_admin['limit_interval_m']              = 'Zeitraum (Minuten)';
@@ -2463,6 +2516,9 @@ $lang_admin['text_notify_orgshare_note']     = 'Notiz-Freigabe-Benachrichtigung'
 $lang_admin['text_contact_subjects']         = 'Kontakt-Formular-Betreff-Auswahl';
 $lang_admin['text_ap_autolock_sub']          = 'Missbrauchs-Sperrungs-Benachrichtigung-Betreff';
 $lang_admin['text_ap_autolock_text']         = 'Missbrauchs-Sperrungs-Benachrichtigung-Text';
+$lang_admin['text_ap_automove_sub']          = 'Missbrauchs-Verschiebungs-Benachrichtigung-Betreff';
+$lang_admin['text_ap_automove_text']         = 'Missbrauchs-Verschiebungs-Benachrichtigung-Text';
+$lang_admin['text_ap_moved_warning']         = 'Missbrauchs-Warnung für Benutzer in der Zielgruppe';
 $lang_admin['text_maintenance']              = 'Wartungsmodus-Hinweis';
 $lang_admin['text_welcome_sub']              = 'Willkommens-Mail-Betreff';
 $lang_admin['text_welcome_text']             = 'Willkommens-Mail-Text';

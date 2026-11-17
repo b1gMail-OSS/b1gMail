@@ -249,8 +249,32 @@ function AbuseCron()
 			time());
 	}
 
-	// step 2: find and lock users who exceeded hard point limit
-	if($bm_prefs['ap_autolock'] == 'yes' && $bm_prefs['ap_hard_limit'] > 0)
+	// step 2a: move users who exceeded the hard point limit to the abuse group (instead of locking them)
+	$moveGroup = isset($bm_prefs['ap_automove']) && $bm_prefs['ap_automove'] == 'yes' ? BMAbuseProtect::moveGroup() : 0;
+	if($moveGroup > 0 && $bm_prefs['ap_hard_limit'] > 0)
+	{
+		$res = $db->Query('SELECT {pre}users.`id` AS `id`,`email`,SUM(`points`) AS `pointsum` FROM {pre}users '
+				. 'INNER JOIN {pre}abuse_points ON {pre}abuse_points.`userid`={pre}users.`id` '
+				. 'INNER JOIN {pre}gruppen ON {pre}gruppen.`id`={pre}users.`gruppe` '
+				. 'WHERE {pre}abuse_points.`expired`=0 AND {pre}users.`gesperrt`=? AND {pre}users.`gruppe`!=? AND {pre}gruppen.`abuseprotect`=? '
+				. 'GROUP BY {pre}users.`id` '
+				. 'HAVING SUM(`points`)>=?',
+			'no',
+			$moveGroup,
+			'yes',
+			$bm_prefs['ap_hard_limit']);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			if(BMAbuseProtect::moveUser($row['id'], $moveGroup, '', $removed))
+				BMAbuseProtect::notify($row, 'ap_automove_sub', 'ap_automove_text', array(
+					'group'	=> BMAbuseProtect::groupTitle($moveGroup),
+					'queue'	=> BMAbuseProtect::queueText($removed)));
+		}
+		$res->Free();
+	}
+
+	// step 2b: find and lock users who exceeded hard point limit
+	else if($bm_prefs['ap_autolock'] == 'yes' && $bm_prefs['ap_hard_limit'] > 0)
 	{
 		$res = $db->Query('SELECT {pre}users.`id` AS `id`,`email`,SUM(`points`) AS `pointsum` FROM {pre}users '
 			. 'INNER JOIN {pre}abuse_points ON {pre}abuse_points.`userid`={pre}users.`id` '
@@ -265,7 +289,7 @@ function AbuseCron()
 		{
 			$db->Query('UPDATE {pre}users SET `gesperrt`=?,`notes`=CONCAT(`notes`,?) WHERE `id`=?',
 				'yes',
-				sprintf($lang_admin['ap_autolock_log'], date('r'), $row['pointsum'], $bm_prefs['ap_hard_limit']),
+				"\n" . sprintf($lang_admin['ap_autolock_log'], date('r'), $row['pointsum'], $bm_prefs['ap_hard_limit']),
 				$row['id']);
 			PutLog(sprintf('User <%s> (#%d) exceeded abuse points hard limit (%d >= %d) and has been locked',
 					$row['email'], $row['id'], $row['pointsum'], $bm_prefs['ap_hard_limit']),
@@ -274,38 +298,7 @@ function AbuseCron()
 				__LINE__);
 
 			// send mail notification?
-			if($bm_prefs['ap_autolock_notify'] == 'yes' && ($notifyTo = ExtractMailAddress($bm_prefs['ap_autolock_notify_to'])) != '')
-			{
-				if(!isset($types))
-					$types = GetAbuseTypes();
-
-				$points = array();
-				$res2 = $db->Query('SELECT `points`,`type` FROM {pre}abuse_points WHERE `userid`=? AND `expired`=0 ORDER BY `entryid` DESC',
-					$row['id']);
-				while($pointRow = $res2->FetchArray(MYSQLI_ASSOC))
-				{
-					$points[] = sprintf('%5d    %s',
-						$pointRow['points'],
-						$types[$pointRow['type']]['title']);
-				}
-				$res2->Free();
-
-				$vars = array(
-					'datum'		=> FormatDate(),
-					'id'		=> $row['id'],
-					'email'		=> DecodeEMail($row['email']),
-					'pointsum'	=> $row['pointsum'],
-					'points'	=> implode("\n", $points),
-					'link'		=> sprintf('%sadmin/?jump=%s',
-						$bm_prefs['selfurl'],
-						urlencode(sprintf('abuse.php?do=show&userid=%d&', $row['id'])))
-				);
-				SystemMail($bm_prefs['passmail_abs'],
-					$notifyTo,
-					$lang_custom['ap_autolock_sub'],
-					'ap_autolock_text',
-					$vars);
-			}
+			BMAbuseProtect::notify($row, 'ap_autolock_sub', 'ap_autolock_text');
 		}
 		$res->Free();
 	}

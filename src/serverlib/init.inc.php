@@ -438,6 +438,7 @@ include B1GMAIL_DIR.'serverlib/blobstorage.class.php';
 include B1GMAIL_DIR.'serverlib/template.class.php';
 include B1GMAIL_DIR.'serverlib/user.class.php';
 include B1GMAIL_DIR.'serverlib/group.class.php';
+include B1GMAIL_DIR.'serverlib/abuseprotect.class.php';
 include B1GMAIL_DIR.'serverlib/workgroup.class.php';
 include B1GMAIL_DIR.'serverlib/plugin.class.php';
 if (!class_exists('SQLite3') && class_exists('PDO') && in_array('sqlite', PDO::getAvailableDrivers())) {

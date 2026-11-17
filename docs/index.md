@@ -6,6 +6,7 @@ Das b1gMail-Wiki dient als Hilfe-System für b1gMail. / The b1gMail wiki serves 
 
 ### b1gMail
 * [Installation](Deutsch/Installation/Installation.md)
+* [Missbrauchs-Schutz](Deutsch/Missbrauchsschutz.md)
 * Administration
 * Benutzer
 * [FAQ](Deutsch/FAQ.md)
@@ -31,6 +32,7 @@ Das b1gMail-Wiki dient als Hilfe-System für b1gMail. / The b1gMail wiki serves 
 
 ### b1gMail
 * [Installation](English/Installation.md)
+* [Abuse protection](English/Abuse-protection.md)
 * Administration
 * User
 * [FAQ](English/FAQ.md)

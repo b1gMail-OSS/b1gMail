@@ -21,6 +21,7 @@
 					<input type="text" class="form-control" name="ap_hard_limit" value="{text allowEmpty=true value=$bm_prefs.ap_hard_limit}" placeholder="{lng p="ap_hard_limit"}">
 					<span class="input-group-text">{lng p="points"}</span>
 				</div>
+				{if $apLimitHint|default:''}<div class="form-text text-warning">{$apLimitHint}</div>{/if}
 			</div>
 		</div>
 		<div class="mb-3 row">
@@ -30,6 +31,7 @@
 					<input type="text" class="form-control" name="ap_expire_time" value="{text allowEmpty=true value=$bm_prefs.ap_expire_time/3600}" placeholder="{lng p="ap_expire_time"}">
 					<span class="input-group-text">{lng p="hours"}</span>
 				</div>
+				{if $bm_prefs.ap_expire_time == 0}<div class="form-text text-warning">{lng p="ap_expire_hint"}</div>{/if}
 			</div>
 		</div>
 		<div class="mb-3 row">
@@ -45,24 +47,57 @@
 				</label>
 			</div>
 		</div>
+	</fieldset>
+
+	<fieldset>
+		<legend>{lng p="ap_reaction"}</legend>
+
 		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-check-label">{lng p="ap_autolock"}</label>
+			<label class="col-sm-2 col-form-check-label">{lng p="ap_atlimit"}</label>
 			<div class="col-sm-10">
 				<label class="form-check">
-					<input class="form-check-input" type="checkbox" name="ap_autolock"{if $bm_prefs.ap_autolock=='yes'} checked="checked"{/if}>
-					<span class="form-check-label">{lng p="ap_athardlimit"}</span>
+					<input class="form-check-input" type="radio" name="ap_action" value="none" id="ap_action_none"{if $apAction=='none'} checked="checked"{/if} onclick="apSync();">
+					<span class="form-check-label">{lng p="ap_action_none"} <span class="text-secondary">({lng p="ap_action_none_desc"})</span></span>
+				</label>
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="ap_action" value="lock" id="ap_action_lock"{if $apAction=='lock'} checked="checked"{/if} onclick="apSync();">
+					<span class="form-check-label">{lng p="ap_action_lock"} <span class="text-secondary">({lng p="ap_action_lock_desc"})</span></span>
+				</label>
+				<label class="form-check">
+					<input class="form-check-input" type="radio" name="ap_action" value="move" id="ap_action_move"{if $apAction=='move'} checked="checked"{/if} onclick="apSync();">
+					<span class="form-check-label">{lng p="ap_action_move"} <span class="text-secondary">({lng p="ap_action_move_desc"})</span></span>
+				</label>
+				<div class="input-group mt-2 mb-2">
+					<span class="input-group-text">{lng p="ap_movegroup"}</span>
+					<select class="form-select" name="ap_automove_group" id="ap_automove_group">
+						<option value="0">{lng p="ap_movegroup_none"}</option>
+						{foreach from=$apGroups item=group key=groupID}
+						<option value="{$groupID}"{if ($bm_prefs.ap_automove_group|default:0) == $groupID} selected="selected"{/if}>{text value=$group.title}</option>
+						{/foreach}
+					</select>
+				</div>
+				{if $apQueueSupported}
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="ap_clearqueue" id="ap_clearqueue"{if ($bm_prefs.ap_clearqueue|default:'no')=='yes'} checked="checked"{/if}>
+					<span class="form-check-label">{lng p="ap_clearqueue"} <span class="text-secondary">({lng p="ap_clearqueue_desc"})</span></span>
+				</label>
+				{/if}
+			</div>
+		</div>
+		<div class="mb-3 row">
+			<label class="col-sm-2 col-form-check-label">{lng p="ap_autolock_notify"}</label>
+			<div class="col-sm-10">
+				<label class="form-check">
+					<input class="form-check-input" type="checkbox" name="ap_autolock_notify" id="ap_autolock_notify"{if $bm_prefs.ap_autolock_notify=='yes'} checked="checked"{/if} onclick="apSync();">
+					<span class="form-check-label">{lng p="ap_notify_team"}</span>
 				</label>
 			</div>
 		</div>
 		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-label">{lng p="ap_autolock_notify"}</label>
+			<label class="col-sm-2 col-form-label fw-normal">{lng p="ap_notify_address"}</label>
 			<div class="col-sm-10">
 				<div class="input-group mb-2">
-                        <span class="input-group-text">
-                        	<input class="form-check-input m-0" type="checkbox" name="ap_autolock_notify"{if $bm_prefs.ap_autolock_notify=='yes'} checked="checked"{/if}>
-                        </span>
-					<span class="input-group-text">{lng p="to2"}:</span>
-					<input type="text" class="form-control" name="ap_autolock_notify_to" value="{email value=$bm_prefs.ap_autolock_notify_to}" placeholder="{lng p="ap_autolock_notify"}">
+					<input type="text" class="form-control" name="ap_autolock_notify_to" id="ap_autolock_notify_to" value="{email value=$bm_prefs.ap_autolock_notify_to}" placeholder="{lng p="ap_notify_address"}">
 				</div>
 			</div>
 		</div>
@@ -90,11 +125,16 @@
 									<div>
 										<table>
 											{foreach from=$apType.prefs key=prefKey item=prefDetails}
+												{* a title like "Period (minutes):" is shown as "Period:" with the unit right of the box *}
+												{assign var=prefUnit value=$prefDetails.title|regex_replace:'/^.*\(([^)]*)\)\s*:?\s*$/s':'$1'}
 												<tr>
-													<td style="width: 150px;">{$prefDetails.title}</td>
+													<td style="width: 190px; white-space: nowrap;">{if $prefUnit != $prefDetails.title}{$prefDetails.title|regex_replace:'/\s*\([^)]*\)\s*:?\s*$/':':'}{else}{$prefDetails.title}{/if}</td>
 													<td>
 														{if $prefDetails.type==1}
-															<input type="text" name="types[{$apTypeID}][prefs][{$prefKey}]" value="{if isset($prefDetails.value)}{text value=$prefDetails.value}{/if}" style="width:100px;" class="smallInput" />
+															<div class="input-group input-group-sm" style="width: 12rem;">
+																<input type="text" class="form-control" name="types[{$apTypeID}][prefs][{$prefKey}]" value="{if isset($prefDetails.value)}{text value=$prefDetails.value}{/if}" />
+																{if $prefUnit != $prefDetails.title}<span class="input-group-text">{$prefUnit}</span>{/if}
+															</div>
 														{/if}
 													</td>
 												</tr>
@@ -116,3 +156,16 @@
 		<input class="btn btn-primary" type="submit" value="{lng p="save"}" />
 	</div>
 </form>
+
+{literal}<script>
+<!--
+	function apSync()
+	{
+		document.getElementById('ap_automove_group').disabled = !document.getElementById('ap_action_move').checked;
+		if(document.getElementById('ap_clearqueue'))
+			document.getElementById('ap_clearqueue').disabled = !document.getElementById('ap_action_move').checked;
+		document.getElementById('ap_autolock_notify_to').disabled = !document.getElementById('ap_autolock_notify').checked;
+	}
+	apSync();
+//-->
+</script>{/literal}

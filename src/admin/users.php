@@ -157,6 +157,11 @@ if($_REQUEST['action'] == 'users')
 				else if(substr($_REQUEST['massAction'], 0, 7) == 'moveto_')
 				{
 					$groupID = (int)substr($_REQUEST['massAction'], 7);
+
+					// out of the abuse group: the points expire, otherwise the abuse protection moves the user back
+					foreach($userIDs as $moveUserID)
+						BMAbuseProtect::releaseUser($moveUserID, $groupID, $adminRow['username']);
+
 					$db->Query('UPDATE {pre}users SET gruppe=? WHERE id IN(' . implode(',', $userIDs) . ')',
 						$groupID);
 				}
@@ -434,6 +439,9 @@ if($_REQUEST['action'] == 'users')
 			$res->Free();
 
 			// update common stuff
+			// out of the abuse group: the points expire, otherwise the abuse protection moves the user back
+			BMAbuseProtect::releaseUser((int)$_REQUEST['id'], (int)$_REQUEST['gruppe'], $adminRow['username']);
+
 			$db->Query('UPDATE {pre}users SET profilfelder=?, email=?, vorname=?, nachname=?, company=?, strasse=?, hnr=?, plz=?, ort=?, land=?, tel=?, fax=?, taxid=?, mail2sms_nummer=?, altmail=?, gruppe=?, gesperrt=?, notes=?, re=?, fwd=?, mail2sms=?, forward=?, forward_to=?, `newsletter_optin`=?, datumsformat=?, absendername=?, anrede=?, saliase=?, mailspace_add=?, diskspace_add=?, traffic_add=? WHERE id=?',
 				serialize($profileData),
 				EncodeEMail($_REQUEST['email']),
@@ -478,6 +486,7 @@ if($_REQUEST['action'] == 'users')
 		// move?
 		if(isset($_REQUEST['moveToGroup']))
 		{
+			BMAbuseProtect::releaseUser((int)$_REQUEST['id'], (int)$_REQUEST['moveToGroup'], $adminRow['username']);
 			$db->Query('UPDATE {pre}users SET gruppe=? WHERE id=?',
 				(int)$_REQUEST['moveToGroup'],
 				(int)$_REQUEST['id']);

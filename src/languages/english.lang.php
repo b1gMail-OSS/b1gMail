@@ -265,6 +265,18 @@ $lang_custom['ap_autolock_text']         = 'The user %%email%% (#%%id%%) has bee
                                          . '%%points%%' . "\n"
                                          . '------------------------------------------------------------------------' . "\n\n"
                                          . 'Details: %%link%%';
+$lang_custom['ap_automove_sub']          = 'User %%email%% moved to a group because of suspicious activity';
+$lang_custom['ap_automove_text']         = 'The user %%email%% (#%%id%%) has been moved automatically to the group "%%group%%" because the abuse protect point limit has been exceeded.' . "\n\n"
+                                         . 'Email: %%email%% (#%%id%%)' . "\n"
+                                         . 'Points: %%pointsum%%' . "\n"
+                                         . '%%queue%%' . "\n\n"
+                                         . 'Point statement:' . "\n"
+                                         . '------------------------------------------------------------------------' . "\n"
+                                         . '%%points%%' . "\n"
+                                         . '------------------------------------------------------------------------' . "\n\n"
+                                         . 'Details: %%link%%';
+$lang_custom['ap_moved_warning']         = 'Warning: Your account is being abused by spammers!' . "\n"
+                                         . 'Emails have been sent from your account that did not come from you. Signs are error messages such as "Mail delivery failed" or replies to emails you never wrote. Often someone knows the password because it was also used for another service that was hacked. Change your password now, do not use it anywhere else, and enter it again in your mail programs and on your phone. Your account is restricted for security reasons.';
 $lang_custom['contact_subjects']         = 'Question about the offer' . "\n"
                                          . 'Question about the signup process' . "\n"
                                          . 'Question about logging in' . "\n"
@@ -1253,6 +1265,8 @@ $lang_user['couponok']              = 'The voucher was redeemed successfully.';
 $lang_user['virusfilter']           = 'Virus filter';
 $lang_user['virusaction']           = 'Virus action';
 $lang_user['changepw']              = 'Change password';
+$lang_user['ap_warning_title']      = 'Warning: Your account is being abused by spammers!';
+$lang_user['ap_warning_text']       = 'Emails have been sent from your account that did not come from you. Signs are error messages such as "Mail delivery failed" or replies to emails you never wrote. Often someone knows the password because it was also used for another service that was hacked. Change your password now, do not use it anywhere else, and enter it again in your mail programs and on your phone. Your account is restricted for security reasons.';
 $lang_user['addsignature']          = 'Add signature';
 $lang_user['editsignature']         = 'Edit signature';
 $lang_user['question']              = 'Question';
@@ -1657,10 +1671,49 @@ $lang_admin['ap_autolock']                   = 'Automatically lock accounts';
 $lang_admin['ap_athardlimit']                = 'When exceeding the lock limit';
 $lang_admin['hours']                         = 'Hour(s)';
 $lang_admin['pointtypes']                    = 'Point types';
-$lang_admin['ap_warn_medium']                = '<b>%d</b> active user(s) has/have exceeded the abuse protect warn limit.';
-$lang_admin['ap_warn_hard']                  = '<b>%d</b> active user(s) has/have exceeded the abuse protect lock limit.';
-$lang_admin['ap_autolock_log']               = "\n" . '[%s] User locked by abuse protection system after exceeding the lock limit (%d >= %d).';
-$lang_admin['ap_autolock_notify']            = 'Lock notification';
+$lang_admin['ap_warn_medium']                = '<b>%d</b> active user has exceeded the abuse protect warn limit.|<b>%d</b> active users have exceeded the abuse protect warn limit.';
+$lang_admin['ap_warn_hard']                  = '<b>%d</b> active user has exceeded the abuse protect lock limit.|<b>%d</b> active users have exceeded the abuse protect lock limit.';
+$lang_admin['ap_autolock_log']               = '[%s] User locked by abuse protection system after exceeding the lock limit (%d >= %d).';
+$lang_admin['ap_autolock_notify']            = 'Notification';
+$lang_admin['ap_movegroup']                  = 'Target group';
+$lang_admin['ap_movegroup_none']             = '- none -';
+$lang_admin['ap_reaction']                   = 'Reaction to abuse';
+$lang_admin['ap_atlimit']                    = 'When the lock limit is reached';
+$lang_admin['ap_action_none']                = 'Do nothing';
+$lang_admin['ap_action_none_desc']           = 'the points are only collected';
+$lang_admin['ap_action_lock']                = 'Lock account';
+$lang_admin['ap_action_lock_desc']           = 'the user can no longer log in';
+$lang_admin['ap_action_move']                = 'Move account to a group';
+$lang_admin['ap_action_move_desc']           = 'the user sees a warning after logging in';
+$lang_admin['ap_clearqueue']                 = 'Delete outgoing emails from the mail queue';
+$lang_admin['ap_clearqueue_desc']            = 'emails of the user that are not delivered yet, incoming emails are kept';
+$lang_admin['ap_queue_line_none']            = 'Mail queue: not cleared';
+$lang_admin['ap_queue_line']                 = 'Mail queue: 1 outgoing email deleted|Mail queue: %d outgoing emails deleted';
+$lang_admin['ap_queue_to']                   = 'To';
+$lang_admin['ap_queue_subject']              = 'Subject';
+$lang_admin['ap_queue_status']               = 'Last status';
+$lang_admin['ap_queue_nostatus']             = 'not tried yet';
+$lang_admin['ap_queue_more']                 = '... and %d more';
+$lang_admin['ap_notify_team']                = 'Notify admin / support team by email';
+$lang_admin['ap_notify_address']             = 'Email address';
+$lang_admin['ap_limit_hint']                 = 'The lock limit is not higher than the points of a single violation type (highest value: %d). A single violation is then enough to lock or move the user.';
+$lang_admin['ap_expire_hint']                = 'With 0 hours the points are marked as expired at the next hourly run and no longer count towards the lock limit.';
+$lang_admin['ap_movebutton']                 = 'Move to group "%s"';
+$lang_admin['ap_move_log_manual']            = '[%s] Moved by admin "%s" to group "%s" (#%d) (before: "%s", #%d). Abuse points: %d, lock limit: %d.';
+$lang_admin['ap_move_log_auto']              = '[%s] Moved automatically by the abuse protection to group "%s" (#%d) (before: "%s", #%d). Abuse points: %d, lock limit: %d.';
+$lang_admin['ap_release_log']                = '[%s] Taken out of the abuse group by admin "%s". Abuse points (%d) reset, so that the account is not moved again.';
+$lang_admin['ap_massdone_lock']              = 'One user locked.|%d users locked.';
+$lang_admin['ap_massdone_unlock']            = 'One user unlocked, the abuse points have been reset.|%d users unlocked, the abuse points have been reset.';
+$lang_admin['ap_massdone_restore']           = 'One user restored.|%d users restored.';
+$lang_admin['ap_massdone_mark']              = 'One user marked for deletion.|%d users marked for deletion.';
+$lang_admin['ap_massdone_delete']            = 'One user deleted.|%d users deleted.';
+$lang_admin['ap_massdone_move']              = 'One user moved to group "%2$s".|%1$d users moved to group "%2$s".';
+$lang_admin['ap_massdone_nochange']          = 'Nothing was changed.';
+$lang_admin['ap_massdone_none']              = 'No user selected.';
+$lang_admin['ap_massdone_noaction']          = 'No action selected.';
+$lang_admin['ap_usernotfound']               = 'The user does not exist.';
+$lang_admin['ap_movehint_none']              = 'No target group is set, so there is no button to move the user here. You choose the target group under';
+$lang_admin['ap_movehint_missing']           = 'The target group that is set (ID %d) does not exist any more, so there is no button to move the user here. You choose a new target group under';
 $lang_admin['limit_amount_count']            = 'Max. amount';
 $lang_admin['limit_amount_mb']               = 'Max. traffic (MB)';
 $lang_admin['limit_interval_m']              = 'Period (minutes)';
@@ -1706,6 +1759,9 @@ $lang_admin['text_notify_orgshare_note']     = 'Note share notification';
 $lang_admin['text_contact_subjects']         = 'Contact form subjects';
 $lang_admin['text_ap_autolock_sub']          = 'Abuse protect lock email subject';
 $lang_admin['text_ap_autolock_text']         = 'Abuse protect lock email text';
+$lang_admin['text_ap_automove_sub']          = 'Abuse protect move email subject';
+$lang_admin['text_ap_automove_text']         = 'Abuse protect move email text';
+$lang_admin['text_ap_moved_warning']         = 'Abuse warning for users in the target group';
 $lang_admin['ssl_signup_enable']             = 'Signup via SSL';
 $lang_admin['showcheckboxes']                = 'Multi-select using checkboxes';
 $lang_admin['domaindisplay']                 = 'Domain display';

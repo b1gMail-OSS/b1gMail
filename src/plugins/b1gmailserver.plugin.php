@@ -1370,6 +1370,146 @@ class B1GMailServerAdmin extends BMPlugin
 	}
 
 	/**
+	 * the abuse protection may ask us to remove the waiting outgoing mails of a user
+	 *
+	 * @return bool
+	 */
+	function OnAbuseQueueSupported()
+	{
+		return(true);
+	}
+
+	/**
+	 * remove the waiting outgoing mails of a user from the queue (abuse protection); incoming mails stay
+	 *
+	 * @param int $userID User ID
+	 * @return array Removed queue entries, each with the keys to, subject and status (the subject is only read for the first BMAbuseProtect::QUEUE_LIST_MAX entries)
+	 */
+	function OnAbuseClearQueue($userID)
+	{
+		global $db;
+
+		$userID = (int)$userID;
+		if($userID <= 0)
+			return(array());
+
+		$items = array();
+		$res = $db->Query('SELECT `id`,`to`,`last_attempt`,`last_status_code`,`last_status_info`,`last_diagnostic_code` '
+				. 'FROM {pre}bms_queue '
+				. 'WHERE `type`=1 AND `deleted`=0 AND (`b1gmail_user`=? OR `smtp_user`=?) '
+				. 'ORDER BY `id` ASC',
+			$userID,
+			$userID);
+		while($row = $res->FetchArray(MYSQLI_ASSOC))
+		{
+			$items[(int)$row['id']] = array(
+				'to'		=> (string)$row['to'],
+				'subject'	=> '',
+				'status'	=> $this->queueStatusText($row));
+		}
+		$res->Free();
+
+		if(count($items) == 0)
+			return(array());
+
+		// the mail server removes the entries, the table is only changed if it cannot be reached
+		if($fp = $this->_openControlChannel())
+		{
+			$read   = 0;
+			$synced = true;
+			foreach($items as $id => $item)
+			{
+				if($synced && $read++ < BMAbuseProtect::QUEUE_LIST_MAX)
+					$items[$id]['subject'] = $this->queueItemSubject($fp, $id, $synced);
+				$this->_queueControlCommand($fp, sprintf('DELETE_QUEUEITEM %d', $id));
+			}
+			$this->_closeControlChannel($fp);
+		}
+		else
+			$db->Query('UPDATE {pre}bms_queue SET `deleted`=1 WHERE `id` IN ?', array_keys($items));
+
+		return(array_values($items));
+	}
+
+	/**
+	 * last known delivery status of a queue entry as text
+	 *
+	 * @param array $row Queue row
+	 * @return string Empty if no delivery has been tried yet
+	 */
+	private function queueStatusText($row)
+	{
+		if($row['last_attempt'] == 0)
+			return('');
+
+		$code   = trim($row['last_status_code']);
+		$info   = trim($row['last_status_info']);
+		$status = $code != '' && $info != '' ? $code . ' - ' . $info : $code . $info;
+		if($row['last_diagnostic_code'] != '' && strpos($status, $row['last_diagnostic_code']) === false)
+			$status .= ' (' . trim($row['last_diagnostic_code']) . ')';
+
+		return($status);
+	}
+
+	/**
+	 * read the subject of a queue item from the mail server
+	 *
+	 * @param resource $fp Control channel
+	 * @param int $id Queue item ID
+	 * @param bool $synced Set to false if the answer could not be read completely, then the channel must not be asked again
+	 * @return string Subject, empty if it cannot be read
+	 */
+	private function queueItemSubject(&$fp, $id, &$synced)
+	{
+		global $currentCharset;
+
+		$response = $this->_queueControlCommand($fp, sprintf('GET_QUEUEITEM %d', $id));
+		if(!is_string($response) || trim($response) != '+OK')
+			return('');
+
+		// read the whole answer up to the final dot, but keep only the header
+		$headers       = '';
+		$passedHeaders = false;
+		$complete      = false;
+		while(!feof($fp))
+		{
+			$line = fgets2($fp);
+			if($line === false)
+				break;
+			$line = rtrim($line, "\r\n");
+			if($line == '.')
+			{
+				$complete = true;
+				break;
+			}
+			if(!$passedHeaders)
+			{
+				if($line == '')
+					$passedHeaders = true;
+				else
+					$headers .= $line . "\n";
+			}
+		}
+		if(!$complete)
+			$synced = false;
+
+		$headers = preg_replace("/\n[ \t]+/", ' ', $headers);
+		if(!preg_match('/^Subject:[ \t]*(.*)$/mi', $headers, $match))
+			return('');
+
+		$subject = trim($match[1]);
+		if(function_exists('iconv_mime_decode'))
+		{
+			$decoded = @iconv_mime_decode($subject, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, isset($currentCharset) ? $currentCharset : 'UTF-8');
+			if($decoded !== false)
+				$subject = $decoded;
+		}
+		$subject = preg_replace('/[\x00-\x1f\x7f]+/', ' ', $subject);
+
+		return(function_exists('mb_strcut') ? mb_strcut($subject, 0, 200, 'UTF-8') : substr($subject, 0, 200));
+	}
+
+	/**
 	 * cron tasks
 	 *
 	 */
