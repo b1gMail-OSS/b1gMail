@@ -19,7 +19,7 @@
  *
  */
 
-include('../serverlib/admin.inc.php');
+require('../serverlib/admin.inc.php');
 RequestPrivileges(PRIVILEGES_ADMIN);
 
 if(!isset($_REQUEST['action']))
@@ -33,7 +33,7 @@ if($_REQUEST['action'] == 'versionCheck') {
             require_once B1GMAIL_DIR.'serverlib/http.class.php';
         }
 
-        $http = _new('BMHTTP', ['https://service.b1gmail.org/versioncheck.php']);
+        $http = _new('BMHTTP', [UPDATE_SERVER.'/versioncheck.php?fromVersion='.B1GMAIL_VERSION]);
         $result = $http->DownloadToString();
 		$version = parseVersion($result);
 		if ($version === null) {

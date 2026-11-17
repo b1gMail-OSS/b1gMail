@@ -288,7 +288,7 @@ if (!defined('TOOLBOX_SERVER')) {
     define('TOOLBOX_SERVER', '');
 }
 if (!defined('UPDATE_SERVER')) {
-    define('UPDATE_SERVER', '');
+    define('UPDATE_SERVER', 'https://service.b1gmail.org');
 }
 if (!defined('SIGNATURE_SERVER')) {
     define('SIGNATURE_SERVER', '');
