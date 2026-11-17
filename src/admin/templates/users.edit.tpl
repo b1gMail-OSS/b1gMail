@@ -533,7 +533,7 @@
 			<div style="float: left;">{lng p="action"}:&nbsp;</div>
 			<div style="float: left;">
 				<div class="btn-group btn-group-sm">
-					<select name="massAction" class="form-select form-select-sm">
+					<select name="massAction" id="userAction" class="form-select form-select-sm">
 						<optgroup label="{lng p="actions"}">
 							{if $user.sms_validation_code!=''&&$user.gesperrt=='locked'}
 								{if $regValidation=='email'&&$user.altmail!=''}

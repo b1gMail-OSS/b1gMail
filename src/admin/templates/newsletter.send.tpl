@@ -6,9 +6,11 @@
 
 <script type="text/javascript">
 <!--
+$(document).ready(function(){
 	rc_perpage = {$perPage};
 	rc_id = '{$id}';
 	rc_all = {$recpCount};
-	registerLoadAction('sendNewsletter()');
+	sendNewsletter();
+}); 
 //-->
 </script>
