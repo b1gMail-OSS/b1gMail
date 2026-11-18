@@ -72,9 +72,6 @@ class phpBB3AuthPlugin extends BMPlugin
 	{
 		global $db, $bm_prefs;
 
-		// drop prefs table
-		$db->Query('DROP TABLE IF EXISTS {pre}phpbb3_plugin_prefs');
-
 		// create prefs table
 		$databaseStructure = [
 			'{pre}phpbb3_plugin_prefs' => [

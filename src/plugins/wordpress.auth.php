@@ -148,7 +148,7 @@ class WordPressAuthPlugin extends BMPlugin
 	{
 		global $db;
 		$DatabaseStructure = [
-			'bm60_wordpress_plugin_prefs' => [
+			'{pre}wordpress_plugin_prefs' => [
 				'fields' => [
 					['enableAuth', 'tinyint(4)', 'NO'],
 					['mysqlHost', 'varchar(128)', 'NO'],
@@ -191,7 +191,7 @@ class WordPressAuthPlugin extends BMPlugin
 		global $db;
 
 		// Drop the retained preferences table.
-		$db->Query('DROP TABLE {pre}wordpress_plugin_prefs');
+		$db->Query('DROP TABLE IF EXISTS {pre}wordpress_plugin_prefs');
 
 		return true;
 	}

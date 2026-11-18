@@ -57,7 +57,7 @@ class MyBBAuthPlugin extends BMPlugin
 		global $db, $bm_prefs;
 
 		$DatabaseStructure = [
-            'bm60_mybb_plugin_prefs' => [
+            '{pre}mybb_plugin_prefs' => [
                 'fields' => [
                     ['enableAuth', 'tinyint(4)', 'NO'],
                     ['mysqlHost', 'varchar(128)', 'NO'],
@@ -97,7 +97,7 @@ class MyBBAuthPlugin extends BMPlugin
 		global $db;
 
 		// drop prefs table
-		$db->Query('DROP TABLE {pre}mybb_plugin_prefs');
+		$db->Query('DROP TABLE IF EXISTS {pre}mybb_plugin_prefs');
 
 		return(true);
 	}

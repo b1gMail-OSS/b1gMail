@@ -75,9 +75,10 @@ class B1GMailServerAdmin extends BMPlugin
 		$this->type					= BMPLUGIN_DEFAULT;
 		$this->name					= 'b1gMailServer Administration PlugIn';
 		$this->author				= 'b1gMail Project';
-		$this->version				= '1.152';
+		$this->version				= '1.153';
 		$this->website				= 'https://www.b1gmail.org/';
 		$this->update_url			= 'https://service.b1gmail.org/plugin_updates/';
+		$this->designedfor			= '7.4.2';
 
 		// admin pages
 		$this->admin_pages			= true;
@@ -140,7 +141,7 @@ class B1GMailServerAdmin extends BMPlugin
 		$res = $db->Query('SHOW TABLES');
 		while($row = $res->FetchArray(MYSQLI_NUM))
 		{
-			if($row[0] == 'bm60_bms_greylist')
+			if($row[0] == $db->GetPrefix().'bms_greylist')
 			{
 				$haveGreylistTable = true;
 				break;
@@ -153,7 +154,7 @@ class B1GMailServerAdmin extends BMPlugin
 		{
 			$greylistTableOldFormat = true;
 
-			$res = $db->Query('SHOW FIELDS FROM bm60_bms_greylist');
+			$res = $db->Query('SHOW FIELDS FROM {pre}bms_greylist');
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 			{
 				if($row['Field'] == 'id')
@@ -165,7 +166,7 @@ class B1GMailServerAdmin extends BMPlugin
 			$res->Free();
 
 			if($greylistTableOldFormat)
-				$db->Query('ALTER TABLE bm60_bms_greylist DROP PRIMARY KEY, ADD COLUMN `id` int(11) NOT NULL auto_increment FIRST, ADD PRIMARY KEY (`id`)');
+				$db->Query('ALTER TABLE {pre}bms_greylist DROP PRIMARY KEY, ADD COLUMN `id` int(11) NOT NULL auto_increment FIRST, ADD PRIMARY KEY (`id`)');
 		}
 
 		// db struct
@@ -727,16 +728,16 @@ class B1GMailServerAdmin extends BMPlugin
 					. 'FOR EACH ROW '
 					. 'BEGIN '
 					. '    IF NEW.`folder` <> OLD.`folder` THEN '
-					. '        DELETE FROM `bm60_bms_imapuid` WHERE `bm60_bms_imapuid`.`mailid`=OLD.`id`; '
-					. '        INSERT INTO `bm60_bms_imapuid`(`mailid`) VALUES(OLD.`id`); '
+					. '        DELETE FROM `{pre}bms_imapuid` WHERE `{pre}bms_imapuid`.`mailid`=OLD.`id`; '
+					. '        INSERT INTO `{pre}bms_imapuid`(`mailid`) VALUES(OLD.`id`); '
 					. '    END IF; '
 					. 'END');
-		$db->Query('CREATE TRIGGER `bms_imapuid_insert` AFTER INSERT ON `bm60_mails` '
+		$db->Query('CREATE TRIGGER `bms_imapuid_insert` AFTER INSERT ON `{pre}mails` '
 					. 'FOR EACH ROW '
-					. '    INSERT INTO `bm60_bms_imapuid`(`mailid`) VALUES(NEW.`id`)');
-		$db->Query('CREATE TRIGGER `bms_imapuid_delete` AFTER DELETE ON `bm60_mails` '
+					. '    INSERT INTO `{pre}bms_imapuid`(`mailid`) VALUES(NEW.`id`)');
+		$db->Query('CREATE TRIGGER `bms_imapuid_delete` AFTER DELETE ON `{pre}mails` '
 					. 'FOR EACH ROW '
-					. '    DELETE FROM `bm60_bms_imapuid` WHERE `bm60_bms_imapuid`.`mailid`=OLD.`id`');
+					. '    DELETE FROM `{pre}bms_imapuid` WHERE `{pre}bms_imapuid`.`mailid`=OLD.`id`');
 
 		// log
 		PutLog(sprintf('%s v%s installed',
@@ -2224,15 +2225,15 @@ class B1GMailServerAdmin extends BMPlugin
 		{
 			// activate?
 			if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'activatePlugin')
-				$db->Query('UPDATE bm60_bms_mods SET `active`=1 WHERE `filename`=?',
+				$db->Query('UPDATE {pre}bms_mods SET `active`=1 WHERE `filename`=?',
 					$_REQUEST['filename']);
 			if(isset($_REQUEST['do']) && $_REQUEST['do'] == 'deactivatePlugin')
-				$db->Query('UPDATE bm60_bms_mods SET `active`=0 WHERE `filename`=?',
+				$db->Query('UPDATE {pre}bms_mods SET `active`=0 WHERE `filename`=?',
 					$_REQUEST['filename']);
 
 			// fetch
 			$plugins = array();
-			$res = $db->Query('SELECT `filename`,`name`,`title`,`version`,`author`,`author_website`,`update_url`,`active` FROM bm60_bms_mods ORDER BY `active` DESC, `title` ASC');
+			$res = $db->Query('SELECT `filename`,`name`,`title`,`version`,`author`,`author_website`,`update_url`,`active` FROM {pre}bms_mods ORDER BY `active` DESC, `title` ASC');
 			while($row = $res->FetchArray(MYSQLI_ASSOC))
 				$plugins[$row['filename']] = $row;
 			$res->Free();
@@ -2246,7 +2247,7 @@ class B1GMailServerAdmin extends BMPlugin
 
 		else if($_REQUEST['do'] == 'updateCheck')
 		{
-			$res = $db->Query('SELECT `version`,`update_url`,`author_website`,`name` FROM bm60_bms_mods WHERE `filename`=?',
+			$res = $db->Query('SELECT `version`,`update_url`,`author_website`,`name` FROM {pre}bms_mods WHERE `filename`=?',
 				$_REQUEST['filename']);
 			$res->RowCount() == 1 || die('Invalid plugin');
 			$row = $res->FetchArray(MYSQLI_ASSOC);

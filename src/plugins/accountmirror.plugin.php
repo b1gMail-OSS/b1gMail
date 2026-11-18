@@ -96,7 +96,7 @@ class AccountMirror extends BMPlugin
 
 		// db struct
 		$databaseStructure = [
-			'bm60_mod_accountmirror' => [
+			'{pre}mod_accountmirror' => [
 			  'fields' => [
 			  ['mirrorid', 'int(11)','NO','PRI',NULL,'auto_increment'],
 			  ['userid','int(11)','NO','MUL',0],
