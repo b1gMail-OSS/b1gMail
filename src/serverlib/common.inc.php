@@ -1219,6 +1219,9 @@ function SyncDBStruct($databaseStructure)
 	{
 		$tableFields = $tableInfo['fields'];
 		$tableIndexes = $tableInfo['indexes'];
+		// replace {pre} with prefix
+    	if(!empty($tableName)) 
+			$tableName = str_replace('{pre}', $db->GetPrefix(), $tableName);
 
 		//
 		// table exists => compare fields and indexes

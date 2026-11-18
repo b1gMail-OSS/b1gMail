@@ -67,6 +67,16 @@ class DB
     }
 
     /**
+     * get database prefix.
+     *
+     * @return string
+     */
+    public function GetPrefix()
+    {   global $mysql;
+        return $mysql['prefix'];
+    }
+
+    /**
      * escape a string for use in SQL query.
      *
      * @param string $str String
