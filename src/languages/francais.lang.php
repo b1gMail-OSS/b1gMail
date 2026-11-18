@@ -481,6 +481,7 @@ $lang_user['sess_expired']      = 'Session a expiré';
 $lang_user['sess_expired_desc'] = 'Votre session a été fermée pour raison d\'inactivité pour des raisons de sécurité. Veuillez vous reconnecter.';
 $lang_user['doublealtmail']     = 'Il ya un compte qui utilise déjà cette adresse e-mail alternative!';
 $lang_user['doublecellphone']   = 'Il ya un compte qui utilise déjà ce numéro de téléphone cellulaire!';
+$lang_user['invalidcellphone']  = 'Le numéro de téléphone portable n\'est pas valide. Veuillez le saisir avec l\'indicatif du pays, mais sans le zéro après l\'indicatif (par exemple +49 170 1234567).';
 $lang_user['realdel_order']     = 'Voulez-vous vraiment annuler la commande?  Si vous avez déjà payé, nous ne pourrons pas vous attribuer votre paiement. Annueler si vous n\'avez pas encore payé!\n\nSi vous souhaitez annuler une commande que vous avez déjà payée, veuillez contacter notre équipe de support.\n\nCliquez sur OK si vous voulez vraiment annuler la commande ou Annuler pour conserver la commande..';
 
 

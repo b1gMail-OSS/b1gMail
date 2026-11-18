@@ -2423,6 +2423,55 @@ function PrepareInputVars()
 }
 
 /**
+ * join the country prefix of the select box and the number typed behind it
+ *
+ * The typed part is meant without the country code, but it is often typed with the national zero
+ * (0174...), which would end up as 00490174... and can not be delivered, or with the country code
+ * (+49 174... or 0049 174...), which is taken as it is.
+ *
+ * @param string $pre Prefix of the select box, for example 0049
+ * @param string $typed Number typed by the user
+ * @return string
+ */
+function CellphoneNoJoin($pre, $typed)
+{
+	$typed = str_replace('+', '00', preg_replace('/\(0\)/', '', $typed));
+	$typed = preg_replace('/[^0-9]/', '', $typed);
+
+	if(substr($typed, 0, 2) == '00')
+		return($typed);
+
+	return($pre . ltrim($typed, '0'));
+}
+
+/**
+ * check if a cellphone number (0049...) can be a real one: international form, no zero behind the
+ * country code, and for Germany, Austria, Switzerland and Liechtenstein a length of the national part
+ * (without the zero) that exists for mobile numbers (data of libphonenumber)
+ *
+ * @param string $no Number as returned by SmartyCellphoneNo()
+ * @return bool
+ */
+function CellphoneNoPlausible($no)
+{
+	if(!preg_match('/^00([1-9][0-9]{7,14})$/', $no, $m))
+		return(false);
+
+	$lengths = array('49' => array(10, 11), '43' => range(7, 13), '41' => array(9), '423' => array(7, 9));
+	foreach($lengths as $code => $allowed)
+	{
+		if(strncmp($m[1], $code, strlen($code)) == 0)
+		{
+			$national = substr($m[1], strlen($code));
+			return($national != '' && $national[0] != '0'
+				&& in_array(strlen($national), $allowed));
+		}
+	}
+
+	return(true);
+}
+
+/**
  * get cellphone number from smarty cellphone number control
  *
  * @param string $field Field name (prefix)
@@ -2435,8 +2484,7 @@ function SmartyCellphoneNo($field)
 		if(trim($_REQUEST[$field.'_no']) == '')
 			$no = '';
 		else
-			$no = trim($_REQUEST[$field.'_pre'])
-					. trim($_REQUEST[$field.'_no']);
+			$no = CellphoneNoJoin(trim($_REQUEST[$field.'_pre']), trim($_REQUEST[$field.'_no']));
 	}
 	else
 	{
