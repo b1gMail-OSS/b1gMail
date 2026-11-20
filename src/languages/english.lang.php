@@ -482,6 +482,7 @@ $lang_user['session_lock_now']                           = 'Lock session';
 $lang_user['session_keepalive']                          = 'Still here';
 $lang_user['doublealtmail']                              = 'There is already an account using this alternative email address!';
 $lang_user['doublecellphone']                            = 'There is already an account using this cellphone number!';
+$lang_user['invalidcellphone']                           = 'The cellphone number is not valid. Please enter it with the country code, but without the zero behind the country code (for example +49 170 1234567).';
 $lang_user['realdel_order']                              = 'Do you really want to delete the order? If you have already paid for the order, we will not be able to assign your payment to you. Please delete orders only if you have not paid yet!\n\nIf you like to cancel an order you already paid for, please contact our support team.\n\nClick OK if you really want to cancel the order or Cancel to keep the order.';
 $lang_user['hiddenelements']                             = 'Hidden elements';
 $lang_user['hide']                                       = 'Hide';

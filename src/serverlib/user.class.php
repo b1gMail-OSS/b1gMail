@@ -3395,11 +3395,13 @@ class BMUser
 					}
 				}
 
-				// mobile no changed?
+				// mobile no changed? (a password change saves the contact data as well, but must not send a code)
 				if($userID == 0
+					&& !$noHistory
 					&&
 						((trim($userRow['mail2sms_nummer']) != trim($this->_row['mail2sms_nummer']) || ($this->_row['sms_validation'] == 0 && $this->_row['sms_validation_time']  == 0))
-						&& trim($userRow['mail2sms_nummer']) != ''))
+						&& trim($userRow['mail2sms_nummer']) != ''
+						&& CellphoneNoPlausible(trim($userRow['mail2sms_nummer']))))
 				{
 					$userGroupRow = $this->GetGroup();
 
