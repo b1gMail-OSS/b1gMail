@@ -482,6 +482,22 @@ else if($_REQUEST['action'] == 'contact')
 							$invalidFields[] = 'mail2sms_nummer_no';
 						}
 					}
+					// a number that was just typed must be one that can exist (unchanged old numbers are left alone)
+					if($userRow['mail2sms_nummer'] != ''
+						&& trim($userRow['mail2sms_nummer']) != trim($oldNo)
+						&& !CellphoneNoPlausible($userRow['mail2sms_nummer']))
+					{
+						if(trim($groupRow['sms_pre']) != '')
+						{
+							$invalidFields[] = 'mail2sms_nummer_pre';
+							$invalidFields[] = 'mail2sms_nummer_no';
+						}
+						else
+						{
+							$invalidFields[] = 'mail2sms_nummer';
+						}
+						$errorInfo .= ' ' . $lang_user['invalidcellphone'];
+					}
 				}
 			}
 

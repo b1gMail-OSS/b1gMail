@@ -345,6 +345,7 @@ $lang_user['regdisabled']		= 'Zur Zeit werden leider keine neuen Anmeldungen ang
 $lang_user['signupcouponerror']	= 'Der Gutschein-Code ist inkorrekt oder der Gutschein ist abgelaufen. Bitte korrigieren Sie die Gutscheincode-Eingabe oder lassen Sie das Feld frei.';
 $lang_user['doublealtmail']     = 'Es existiert bereits ein Account mit dieser Alternativ-E-Mail-Adresse!';
 $lang_user['doublecellphone']   = 'Es existiert bereits ein Account mit dieser Handy-Nummer!';
+$lang_user['invalidcellphone']  = 'Die Handy-Nummer ist ungültig. Bitte mit Landesvorwahl eingeben, aber ohne die Null nach der Landesvorwahl (zum Beispiel +49 170 1234567).';
 $lang_user['altmaillocked']     = 'Die angegebene E-Mail-Adresse ist nicht für die Anmeldung zugelassen. Bitte verwenden Sie eine andere E-Mail-Adresse.';
 
 // address book completion
