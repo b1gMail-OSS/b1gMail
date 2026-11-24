@@ -145,6 +145,28 @@ class BMAbuseProtect
 	}
 
 	/**
+	 * Has the user already got a point of this type within the last minutes?
+	 *
+	 * @param int $userID User ID
+	 * @param int $type Abuse point type
+	 * @param int $minutes Length of the time window in minutes
+	 * @return bool
+	 */
+	public static function hasPointInWindow($userID, $type, $minutes)
+	{
+		global $db;
+
+		$res = $db->Query('SELECT COUNT(*) FROM {pre}abuse_points WHERE `userid`=? AND `type`=? AND `date`>?',
+			$userID,
+			$type,
+			time() - TIME_ONE_MINUTE * max(1, (int)$minutes));
+		list($count) = $res->FetchArray(MYSQLI_NUM);
+		$res->Free();
+
+		return($count > 0);
+	}
+
+	/**
 	 * ID of the group abused accounts are moved to (0 = not configured)
 	 *
 	 * @return int
