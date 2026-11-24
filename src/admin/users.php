@@ -917,11 +917,9 @@ if($_REQUEST['action'] == 'users')
 	//
 	// login
 	//
-	else if($_REQUEST['do'] == 'login' &&
-			defined('ENABLE_ADMIN_AUTH') && 
-			(ENABLE_ADMIN_AUTH == 1||ENABLE_ADMIN_AUTH === TRUE))
+	else if($_REQUEST['do'] == 'login')
 	{
-		if(!AdminRequestIsPost())
+		if(!$is_admin_auth_enabled || !AdminRequestIsPost())
 		{
 			header('Location: users.php?');
 			exit();

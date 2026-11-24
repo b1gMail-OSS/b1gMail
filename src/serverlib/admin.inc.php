@@ -52,6 +52,10 @@ if (defined('TOOLBOX_SERVER')) {
 }
 else $toolbox_serverurl = '';
 
+// login as user is off by default (see ENABLE_ADMIN_AUTH in config.inc.php): the buttons only show when it is on
+$is_admin_auth_enabled = defined('ENABLE_ADMIN_AUTH') && (ENABLE_ADMIN_AUTH == 1 || ENABLE_ADMIN_AUTH === TRUE) ? 1 : 0;
+$tpl->assign('adminauth_button', $is_admin_auth_enabled);
+
 // tables
 $customTextsHTML = [
 //	'imprint'						=> true

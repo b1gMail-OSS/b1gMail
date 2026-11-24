@@ -88,7 +88,7 @@
 									<a href="{sessionurl file='users.php' params="do=edit&id={$user.id}"}" class="btn btn-sm"><i class="fa-regular fa-pen-to-square"></i></a>
 									<a href="javascript:singleAction('{if $user.gesperrt=='no'}lock{elseif $user.gesperrt=='yes'}unlock{elseif $user.gesperrt=='locked'}activate{elseif $user.gesperrt=='delete'}recover{/if}', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='no'}<i class="fa-solid fa-lock"></i>{elseif $user.gesperrt=='yes'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='locked'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='unlock'}<i class="fa-solid fa-lock-open"></i>{elseif $user.gesperrt=='delete'}<i class="fa-solid fa-hammer"></i>{/if}</a>
 									<a href="javascript:singleAction('delete', '{$user.id}');" class="btn btn-sm">{if $user.gesperrt=='delete'}<i class="fa-regular fa-trash-can text-danger"></i>{else}<i class="fa-regular fa-trash-can"></i>{/if}</a>
-									<a href="#" target="_blank" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('{sessionurl file='users.php' params="do=login&id={$user.id}"}', true); return false;" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>
+									{if $adminauth_button}<a href="#" target="_blank" onclick="if(confirm('{lng p="loginwarning"}')) adminPostNavigate('{sessionurl file='users.php' params="do=login&id={$user.id}"}', true); return false;" class="btn btn-sm"><i class="fa-solid fa-house-chimney-user"></i></a>{/if}
 								</div>
 							</td>
 						</tr>
