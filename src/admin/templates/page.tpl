@@ -300,7 +300,7 @@
 														{* Plugin-Link selbst *}
 														<a class="dropdown-item{if isset($smarty.get.plugin) && $smarty.get.plugin == $plugin && (!isset($smarty.get.do) || $smarty.get.do != "activatePlugin")} active{/if}" href="{sessionurl file='plugin.page.php' params="plugin={$plugin|escape:url}"}">
 															<span class="nav-link-icon d-md-none d-lg-inline-block">
-																	{if isset($pluginInfo.icon) && $pluginInfo.icon}<img src="{$selfurl|escape:'html'}plugins/templates/images/{$pluginInfo.icon|escape:'url'}" height="16" alt="" />{else}{acpicon file="wlayout_add.png"}{/if}
+																	{if isset($pluginInfo.icon) && $pluginInfo.icon}{acpicon file=$pluginInfo.icon imgbase="`$selfurl`plugins/templates/images/"}{else}{acpicon file="wlayout_add.png"}{/if}
 															</span>
 															<span class="nav-link-title">{text value=$pluginInfo.title cut=20}</span>
 														</a>
